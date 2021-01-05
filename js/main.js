@@ -12,28 +12,27 @@ CREDITS/LICENSE INFORMATION: This software is  licensed under the GNU General Pu
 // Update how to read button
 
 // Update var/let
-// GUI for paths and speakers
-// Drawing of floor plan and scale factors
+// Figure out floor plan scaling
+// then also update select region to be always if over map
 // what if speakerList is 0?? e.g., how does getSpeakerObject work?
-// update totalTimeInSeconds seconds time to correspond to timeline/rest of program better
-//  --does video time set time in seconds for full program?
+// basic error handling
 
 // ******* INPUT VARIABLES *******
 let movementFiles = ['Teacher.csv', 'Student.csv']; // holds list of movement files, first letter of file is used to associate with speaker 
 let conversationFile = "conversation.csv"; // 1 single conversation file
 let mvmentColumnHeaders = ['time', 'x', 'y'];
 let convoColumnHeaders = ['time', 'speaker', 'talk'];
-// READ from last row in movement file???
-let totalTimeInSeconds = 3353; // video duration in seconds REMOVE/add a get from video function?
+let totalTimeInSeconds = 3353; // total time of all data including video
+let floorplanPixelWidth = 1440// width and height of floor plan image to scale data to floor plan correctly
+let floorplanPixelHeight = 900;
 
 // For videoPlatform 'Kaltura', videoParams expects 3 items, the wid, uiconf_id, and entry_id
 // For videoPlatform 'Youtube', videoParams expects 1 item, the videoId
-var videoPlatform = 'Youtube'; // what platform the video is being hosted on, specifies what videoPlayer should be instantiated during setupMovie
-videoParams = {
+let videoPlatform = 'Youtube'; // what platform the video is being hosted on, specifies what videoPlayer should be instantiated during setupMovie
+let videoParams = {
     videoId: 'Iu0rxb-xkMk'
 };
-var xScaleFactor = 1440,
-    yScaleFactor = 900; // scale factors to scale floor plan/data correctly
+
 
 //******* DATA *******
 let dataTables = []; // holds # of files for data processing
@@ -69,7 +68,7 @@ var animation = true,
     howToRead = false;
 // 5 Buttons correspond to modes
 var button_1 = "Animate",
-    button_2 = "Talk Time Series",
+    button_2 = "Align Talk",
     button_3 = "All Talk on Path",
     button_4 = "Video",
     button_5 = "How to Read";

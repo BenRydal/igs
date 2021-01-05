@@ -14,8 +14,8 @@ function setGUI() {
 function setBaseValues() {
     timelineStart = width * 0.4638; // scale factors
     timelineEnd = width * 0.9638;
-    timelineHeight = height * .81;
     timelineLength = timelineEnd - timelineStart;
+    timelineHeight = height * .81;
     currPixelTimeMin = timelineStart; // adjustable timeline values
     currPixelTimeMax = timelineEnd;
     yPosTimeScaleTop = timelineHeight - tickHeight;
@@ -98,8 +98,8 @@ function loadMovementDataTable(dataMovement, dataMovementShortName, dataConversa
     // increment by sampling rate to reduce data
     for (let i = 0; i < rowCountMovement; i += dataSamplingRate) {
         let m = new Point_Movement();
-        m.xPos = dataMovement.getNum(i, mvmentColumnHeaders[1]) * width / xScaleFactor; // scale factors to fit screen correctly
-        m.yPos = dataMovement.getNum(i, mvmentColumnHeaders[2]) * height / yScaleFactor;
+        m.xPos = dataMovement.getNum(i, mvmentColumnHeaders[1]) * width / floorplanPixelWidth; // scale factors to fit screen correctly
+        m.yPos = dataMovement.getNum(i, mvmentColumnHeaders[2]) * height / floorplanPixelHeight;
         //m.time = data.getNum(i, "time"); FIX LATER--USE THIS LINE/Update code as this allows precise rescaling
         m.time = map(dataMovement.getNum(i, mvmentColumnHeaders[0]), 0, totalTimeInSeconds, timelineStart, timelineEnd);
         movement.push(m); // always add to movement and only sometimes add to conversationPoints
@@ -112,6 +112,7 @@ function loadMovementDataTable(dataMovement, dataMovementShortName, dataConversa
                 c.xPos = m.xPos; // set to x/y pos in movement file case
                 c.yPos = m.yPos;
                 // UPDATE c.time SAME AS MOVEMENT!!!!
+                // c.time = dataConversation.getNum(convoRowCounter, convoColumnHeaders[0]);
                 c.time = map(dataConversation.getNum(convoRowCounter, convoColumnHeaders[0]), 0, totalTimeInSeconds, timelineStart, timelineEnd);
                 c.speaker = dataConversation.getString(convoRowCounter, convoColumnHeaders[1]);
                 c.talkTurn = dataConversation.getString(convoRowCounter, convoColumnHeaders[2]);

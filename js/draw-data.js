@@ -1,5 +1,3 @@
-// if (selectorSliceEnabled && (pos.x < mouseX - selectorSliceWidth || pos.x > mouseX + selectorSliceWidth) && (xPosTimeline < mouseX - selectorSliceWidth || xPosTimeline > mouseX + selectorSliceWidth)) return false;
-
 // Super class with 2 sub-classes drawDataMovement and drawDataConversation
 class DrawData {
 
