@@ -15,26 +15,32 @@ CREDITS/LICENSE INFORMATION: This software is  licensed under the GNU General Pu
 // GUI for paths and speakers
 // Drawing of floor plan and scale factors
 // what if speakerList is 0?? e.g., how does getSpeakerObject work?
+// update totalTimeInSeconds seconds time to correspond to timeline/rest of program better
+//  --does video time set time in seconds for full program?
 
 // ******* INPUT VARIABLES *******
-let fileNames = ['Teacher.csv', 'Student.csv']; // holds list of filenames, first letter of file is used to associate with speaker 
+let movementFiles = ['Teacher.csv', 'Student.csv']; // holds list of movement files, first letter of file is used to associate with speaker 
 let conversationFile = "conversation.csv"; // 1 single conversation file
 let mvmentColumnHeaders = ['time', 'x', 'y'];
 let convoColumnHeaders = ['time', 'speaker', 'talk'];
+// READ from last row in movement file???
+let totalTimeInSeconds = 3353; // video duration in seconds REMOVE/add a get from video function?
+
 // For videoPlatform 'Kaltura', videoParams expects 3 items, the wid, uiconf_id, and entry_id
 // For videoPlatform 'Youtube', videoParams expects 1 item, the videoId
 var videoPlatform = 'Youtube'; // what platform the video is being hosted on, specifies what videoPlayer should be instantiated during setupMovie
 videoParams = {
     videoId: 'Iu0rxb-xkMk'
 };
-var videoDuration = 3353; // video duration in seconds REMOVE/add a get from video function?
 var xScaleFactor = 1440,
     yScaleFactor = 900; // scale factors to scale floor plan/data correctly
-var dataSamplingRate = 10; // rate data is sampled, increase to speed up program
 
 //******* DATA *******
-var dataTables = []; // holds # of files for data processing
+let dataTables = []; // holds # of files for data processing
+let dataSamplingRate = 10; // rate movement data is sampled, increase to speed up program
 let conversationTable; // holds conversation file
+let conversationTableRowCount;
+let turnCountPerSecond; // set in loadData based on conversation file
 let speakerList = []; // Arraylist of speaker objects loaded from conversation file
 let speakerColorList = ['#ff7f00', '#1f78b4', '#cab2d6', '#33a02c', '#fb9a99', '#e31a1c', '#fdbf6f', '#a6cee3', '#b2df8a', '#6a3d9a', '#ffff99', '#b15928']; // 11 colors
 var paths = []; // holder for each person
@@ -48,21 +54,23 @@ var bugTimePosForVideo; // to draw slicer line when video is playing
 var animationCounter = 0; // controls animation
 var bugPrecision, bugSize;
 var pathWeight = 3;
+let basePathColor = 100; // for paths that don't have associated speaker in speakerList
 
 //******* GUI *******
+let movementKeyTitle = true;
+let conversationPositionTop = false; // controls positioning of conversation turns on path or top of screen
+let allConversation = false; // controls showing all or matching speaker conversation turns on path
 var intro = true; // sets intro message to start program
 var font_PlayfairReg, font_PlayfairItalic, font_PlayfairBold, font_Lato;
 var buttonSpacing, buttonWidth, speakerKeysHeight, buttonsHeight;
 // 5 Modes
 var animation = true,
-    conversationView_1 = false,
-    conversationView_2 = false,
     videoMode = false,
     howToRead = false;
 // 5 Buttons correspond to modes
 var button_1 = "Animate",
-    button_2 = "Conversation 1",
-    button_3 = "Conversation 2",
+    button_2 = "Talk Time Series",
+    button_3 = "All Talk on Path",
     button_4 = "Video",
     button_5 = "How to Read";
 var keyTextSize, titleTextSize, infoTextSize;
@@ -100,7 +108,7 @@ var conversation_2_MSG = "Press this button to view and read all conversation al
 var videoMSG = "Press this button to watch video from this classroom discussion. Click anywhere on the timeline to play and pause video.";
 // Title
 var titleMsg = "Classroom Interaction Geography";
-var infoMsg = "Revisiting a classroom science lesson from the Third International Mathematics and Science Study (TIMSS) by Ben Rydal Shapiro. Original data collected by TIMSS researchers and teachers, see: https://www.timssvideo.com";
+var infoMsg = "Interaction Geography Slicer (IGS) description....";
 
 
 // Relationship between speaker and path can be 1:1 but does not have to be as this allows variation in different types of data inputs (e.g., less or more movement files than speakers or vice versa)
@@ -145,13 +153,12 @@ class Point_Conversation {
     }
 }
 
-
 // Loads fonts, floor plan, and CSV file into p5.Table objects so that they can manipulated later
 function preload() {
     conversationTable = loadTable('data/' + conversationFile, "header"); // load conversation file first
-    for (var i = 0; i < fileNames.length; i++) { // loop through all files in directory
-        var fileName = 'data/' + fileNames[i];
-        var dataTable = loadTable(fileName, "header");
+    for (let i = 0; i < movementFiles.length; i++) { // loop through all files in directory
+        let fileName = 'data/' + movementFiles[i];
+        let dataTable = loadTable(fileName, "header");
         dataTables.push(dataTable);
     }
     font_PlayfairReg = loadFont("data/fonts/PlayfairDisplay-Regular.ttf");

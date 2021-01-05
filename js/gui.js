@@ -7,11 +7,13 @@ function mousePressed() {
     // Controls video when clicking on timeline
     if (videoMode && !animation && overRect(timelineStart, 0, timelineEnd, timelineHeight - tickHeight)) {
         var initialValue = map(mouseX, timelineStart, timelineEnd, currPixelTimeMin, currPixelTimeMax); // first map mouse to selected time values in GUI
-        videoCurrTime = map(initialValue, timelineStart, timelineEnd, 0, videoDuration);
+        videoCurrTime = map(initialValue, timelineStart, timelineEnd, 0, totalTimeInSeconds);
         playPauseMovie();
     }
     textSize(keyTextSize);
-    overSpeakerKeys();
+    overMovementKeyTitle();
+    if (movementKeyTitle) overPathKeys();
+    else overSpeakerKeys();
     overButtons();
     if (!animation && overRect(timelineStart, yPosTimeScaleTop, timelineLength, yPosTimeScaleSize)) handleTimeline();
 }
@@ -29,28 +31,38 @@ function mouseReleased() {
     lockedRight = false;
 }
 
+function overMovementKeyTitle() {
+    let currXPos = timelineStart;
+    if (overRect(currXPos, speakerKeysHeight, buttonWidth + textWidth("Movement"), buttonWidth)) movementKeyTitle = true;
+    else if (overRect(currXPos + textWidth("Movement | "), speakerKeysHeight, buttonWidth + textWidth("Conversation"), buttonWidth)) movementKeyTitle = false;
+}
 
+// Loop through speakerList and test if over any of speaker keys and update speaker accordingly
 function overSpeakerKeys() {
-    // var currXPos = timelineStart;
-    // for (var i = 0; i < speakerCodes.length; i++) {
-    //     var nameWidth = textWidth(speakerCodes[i][0]); // set nameWidth to pixel width of speaker code
-    //     // update speakerCode boolean if over
-    //     if (overRect(currXPos, speakerKeysHeight, buttonWidth + nameWidth, buttonWidth)) speakerCodes[i][1] = !speakerCodes[i][1];
-    //     currXPos += (buttonWidth + nameWidth + buttonSpacing);
-    // }
+    let currXPos = timelineStart + textWidth("Movement | Conversation") + buttonWidth;
+    for (let i = 0; i < speakerList.length; i++) {
+        let nameWidth = textWidth(speakerList[i].name); // set nameWidth to pixel width of speaker code
+        if (overRect(currXPos, speakerKeysHeight, buttonWidth + nameWidth, buttonWidth)) speakerList[i].show = !speakerList[i].show;
+        currXPos += buttonWidth + nameWidth + buttonSpacing;
+    }
+}
+
+function overPathKeys() {
+    let currXPos = timelineStart + textWidth("Movement | Conversation") + buttonWidth;
+    for (let i = 0; i < paths.length; i++) {
+        let nameWidth = textWidth(paths[i].name); // set nameWidth to pixel width of path name
+        if (overRect(currXPos, speakerKeysHeight, buttonWidth + nameWidth, buttonWidth)) paths[i].show = !paths[i].show;
+        currXPos += buttonWidth + nameWidth + buttonSpacing;
+    }
 }
 
 // Loop through all button/test if mouse clicked and update accordingly
 function overButtons() {
     var currXPos = timelineStart + buttonSpacing / 2;
     if (overRect(currXPos, buttonsHeight, textWidth(button_1), buttonWidth)) overAnimateButton();
-    else if (overRect(currXPos + textWidth(button_1) + 2 * buttonSpacing, buttonsHeight, textWidth(button_2) + buttonSpacing, buttonWidth)) {
-        conversationView_1 = !conversationView_1;
-        conversationView_2 = false;
-    } else if (overRect(currXPos + textWidth(button_1 + button_2) + 4 * buttonSpacing, buttonsHeight, textWidth(button_3) + buttonSpacing, buttonWidth)) {
-        conversationView_2 = !conversationView_2;
-        conversationView_1 = false;
-    } else if (overRect(currXPos + textWidth(button_1 + button_2 + button_3) + 6 * buttonSpacing, buttonsHeight, textWidth(button_4) + buttonSpacing, buttonWidth)) {
+    else if (overRect(currXPos + textWidth(button_1) + 2 * buttonSpacing, buttonsHeight, textWidth(button_2) + buttonSpacing, buttonWidth)) conversationPositionTop = !conversationPositionTop;
+    else if (overRect(currXPos + textWidth(button_1 + button_2) + 4 * buttonSpacing, buttonsHeight, textWidth(button_3) + buttonSpacing, buttonWidth)) allConversation = !allConversation;
+    else if (overRect(currXPos + textWidth(button_1 + button_2 + button_3) + 6 * buttonSpacing, buttonsHeight, textWidth(button_4) + buttonSpacing, buttonWidth)) {
         videoMode = !videoMode;
         var video = select('#moviePlayer');
         video.style('display', (videoMode ? 'block' : 'none'));
@@ -151,8 +163,8 @@ function overHowToReadButton() {
             if (path.speaker != 'T') path.show = false;
             else path.show = true; // ensure teacher path is showed
         }
-        conversationView_1 = false; // hide conversation if showing
-        conversationView_2 = false;
+        conversationPositionTop = false; // hide conversation if showing
+        allConversation = false;
     }
     howToRead = !howToRead;
 }

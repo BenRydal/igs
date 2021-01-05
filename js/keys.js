@@ -2,8 +2,9 @@ class Keys {
 
     drawKeys() {
         textFont(font_PlayfairReg, keyTextSize);
-        this.drawSpeakerKeys();
-        textFont(font_PlayfairReg, keyTextSize);
+        this.drawPathSpeakerTitle();
+        if (movementKeyTitle) this.drawPathSpeakerKeys(paths);
+        else this.drawPathSpeakerKeys(speakerList);
         this.drawbuttons();
         this.drawTitles();
         textFont(font_PlayfairReg, infoTextSize);
@@ -11,24 +12,37 @@ class Keys {
         if (selectRegion && mouseX < timelineStart && mouseY < timelineHeight) this.drawRegion();
     }
 
-    drawSpeakerKeys() {
-        // var currXPos = timelineStart;
-        // strokeWeight(5);
-        // var rectWidth = buttonWidth;
-        // for (var i = 0; i < speakerCodes.length; i++) {
-        //     var code = speakerCodes[i][0];
-        //     stroke(speakerCodes[i][2]);
-        //     noFill();
-        //     rect(currXPos, speakerKeysHeight, rectWidth, rectWidth);
-        //     if (speakerCodes[i][1]) {
-        //         fill(speakerCodes[i][2]);
-        //         rect(currXPos, speakerKeysHeight, rectWidth, rectWidth);
-        //     }
-        //     fill(0);
-        //     noStroke();
-        //     text(code, currXPos + 1.3 * buttonWidth, speakerKeysHeight - buttonWidth / 5);
-        //     currXPos += (buttonWidth + textWidth(code) + buttonSpacing);
-        // }
+    drawPathSpeakerTitle() {
+        let currXPos = timelineStart;
+        let yPos = speakerKeysHeight - buttonWidth / 5;
+        noStroke();
+        fill(movementKeyTitle ? 0 : 150);
+        text("Movement", currXPos, yPos);
+        fill(0);
+        text(" | ", currXPos + textWidth("Movement"), yPos);
+        fill(!movementKeyTitle ? 0 : 150);
+        text("Conversation", currXPos + textWidth("Movement | "), yPos);
+    }
+
+    // Loop through speakers and set fill/stroke in keys for all if showing/not showing
+    drawPathSpeakerKeys(list) {
+        let currXPos = timelineStart + textWidth("Movement | Conversation") + buttonWidth;
+        let yPos = speakerKeysHeight - buttonWidth / 5;
+        strokeWeight(5);
+        for (let i = 0; i < list.length; i++) {
+            let curObject = list[i];
+            stroke(curObject.color);
+            noFill();
+            rect(currXPos, speakerKeysHeight, buttonWidth, buttonWidth);
+            if (curObject.show) {
+                fill(curObject.color);
+                rect(currXPos, speakerKeysHeight, buttonWidth, buttonWidth);
+            }
+            fill(0);
+            noStroke();
+            text(curObject.name, currXPos + 1.3 * buttonWidth, yPos);
+            currXPos += buttonWidth + textWidth(curObject.name) + buttonSpacing;
+        }
     }
 
     drawbuttons() {
@@ -43,19 +57,19 @@ class Keys {
         noStroke();
         currXPos += textWidth(button_1) + buttonSpacing * 2;
         // Button 2
-        fill(conversationView_1 ? 0 : 150);
+        fill(conversationPositionTop ? 0 : 150);
         text(button_2, currXPos, buttonsHeight);
         noFill();
-        stroke(conversationView_1 ? 0 : 150);
+        stroke(conversationPositionTop ? 0 : 150);
         strokeWeight(1);
         rect(currXPos - buttonSpacing / 2, buttonsHeight, textWidth(button_2) + buttonSpacing, buttonSpacing * 1.5);
         noStroke();
         currXPos += textWidth(button_2) + buttonSpacing * 2;
         // Button 3
-        fill(conversationView_2 ? 0 : 150);
+        fill(allConversation ? 0 : 150);
         text(button_3, currXPos, buttonsHeight);
         noFill();
-        stroke(conversationView_2 ? 0 : 150);
+        stroke(allConversation ? 0 : 150);
         strokeWeight(1);
         rect(currXPos - buttonSpacing / 2, buttonsHeight, textWidth(button_3) + buttonSpacing, buttonSpacing * 1.5);
         noStroke();
@@ -83,8 +97,8 @@ class Keys {
     drawTitles() {
         fill(0);
         textFont(font_Playfairbold, titleTextSize);
-        text(titleMsg, buttonWidth, speakerKeysHeight - buttonWidth);
-        textFont(font_PlayfairItalic, infoTextSize);
+        // text(titleMsg, buttonWidth, speakerKeysHeight - buttonWidth);
+        textFont(font_PlayfairReg, infoTextSize);
         text(infoMsg, buttonWidth, buttonsHeight - buttonWidth, timelineStart - 6 * buttonSpacing, height);
     }
 
@@ -106,13 +120,13 @@ class Keys {
         // Text for minutes at start/end of timeline
         noStroke();
         fill(0);
-        var startValue = floor(map(currPixelTimeMin, timelineStart, timelineEnd, 0, videoDuration));
-        var endValue = ceil(map(currPixelTimeMax, timelineStart, timelineEnd, 0, videoDuration));
+        var startValue = floor(map(currPixelTimeMin, timelineStart, timelineEnd, 0, totalTimeInSeconds));
+        var endValue = ceil(map(currPixelTimeMax, timelineStart, timelineEnd, 0, totalTimeInSeconds));
         text(floor(startValue / 60), timelineStart + tickHeight / 2, timelineHeight);
         text(ceil(endValue / 60), timelineEnd - tickHeight, timelineHeight);
         // Text for timeline label
         var mapMouseX = map(mouseX, timelineStart, timelineEnd, currPixelTimeMin, currPixelTimeMax);
-        var videoTimeInSeconds = map(mapMouseX, timelineStart, timelineEnd, 0, videoDuration); // remap to get seconds in video from remapped mouse position   
+        var videoTimeInSeconds = map(mapMouseX, timelineStart, timelineEnd, 0, totalTimeInSeconds); // remap to get seconds in video from remapped mouse position   
         var videoTimeInMinutes = videoTimeInSeconds / 60; // float value of minutes and seconds
         var minutesValue = floor(videoTimeInMinutes); // floor to get minutes
         var decimalSeconds = videoTimeInMinutes - minutesValue; //  Subtract minutes to get decimal seconds---e.g., 14.28571429 - 14... returns (.28571429)

@@ -9,7 +9,7 @@ class DrawData {
     }
 
     setDrawData(path) {
-        if (conversationView_1 || conversationView_2) this.drawConversation.setData(path);
+        this.drawConversation.setData(path);
         this.drawMovement.setData(path);
     }
 
@@ -61,7 +61,7 @@ class DrawDataMovement {
                     curveVertex(scaledTime, point.yPos);
                     if (videoIsPlaying) {
                         // convert video time value in seconds to pixel position                   
-                        var videoX = map(getMovieCurrentTime(), 0, videoDuration, timelineStart, timelineEnd);
+                        var videoX = map(getMovieCurrentTime(), 0, totalTimeInSeconds, timelineStart, timelineEnd);
                         if (videoX >= scaledTime - bugPrecision && videoX <= scaledTime + bugPrecision) {
                             this.recordBug(point.xPos, point.yPos, scaledTime);
                         }
@@ -160,7 +160,7 @@ class DrawDataConversation {
     }
 
     setData(path) {
-        if (path.conversation.length > 0) this.drawRects(path.conversation, path.name); // if path has conversation
+        if (path.conversation.length > 0) this.setRects(path.conversation, path.name); // if path has conversation
     }
 
     setConversationBubble() {
@@ -176,43 +176,44 @@ class DrawDataConversation {
         return numOfPaths;
     }
 
-    // Draws rect if speaker is selected UPDATE???
-    drawRects(points, speaker) {
-        var conversationAnimationRatio = float(animationCounter) / float(animationMaxValue); // for animation of conversation at same speed as movement
-        var rectSize = 1; // controls vertical height of rectangle (length of conversation turn)
-        var minConversationRectLength = 5;
-        // TEMP!
-        var conversationRectWidth = 18 - (map(currPixelTimeMax - currPixelTimeMin, 0, timelineEnd - timelineStart, 3, 16));
-
-        for (var i = 0; i < floor(points.length * conversationAnimationRatio); i++) {
-            var point = points[i];
+    // Test if point is showing and send to draw Rect depending on conversation mode
+    setRects(points, pathName) {
+        let conversationAnimationRatio = float(animationCounter) / float(animationMaxValue); // for animation of conversation at same speed as movement
+        for (let i = 0; i < floor(points.length * conversationAnimationRatio); i++) {
+            let point = points[i];
             if (point.time >= currPixelTimeMin && point.time <= currPixelTimeMax) {
-                var scaledTime = map(point.time, currPixelTimeMin, currPixelTimeMax, timelineStart, timelineEnd);
                 let curSpeaker = this.getSpeakerObject(points[i].speaker); // get speaker object equivalent to character
-
-                if (curSpeaker.show) { // If speaker code is showing/true/selected in GUI
-                    noStroke(); // reset if setDrawText is called previously in loop
-                    textSize(rectSize); // controls length/size of rect drawn
-                    var conversationLength = textWidth(point.talkTurn);
-                    if (conversationLength < minConversationRectLength) conversationLength = minConversationRectLength; // set small strings to minimum
-                    if (conversationView_2) {
-                        var xPos = point.xPos;
-                        var yPos = 0;
-                    } else {
-                        var xPos = point.xPos;
-                        var yPos = point.yPos - conversationLength;
+                if (curSpeaker.show) {
+                    if (allConversation) this.drawRects(point, curSpeaker.color); // draws all rects
+                    else {
+                        if (curSpeaker.name === pathName) this.drawRects(point, curSpeaker.color); // draws rects only for speaker matching path
                     }
-                    // setText sets stroke/strokeWeight to highlight rect if selected
-                    if (overRect(xPos, yPos, conversationRectWidth, conversationLength)) this.setText(points[i], PLAN); // if over plan
-                    else if (overRect(scaledTime, yPos, conversationRectWidth, conversationLength)) this.setText(points[i], SPACETIME); // if over spacetime
-                    
-                    fill(curSpeaker.color); // Set color
-                    rect(xPos, yPos, conversationRectWidth, conversationLength); // Plan
-                    rect(scaledTime, yPos, conversationRectWidth, conversationLength); // Spacetime
-
                 }
             }
         }
+    }
+
+    drawRects(point, curColor) {
+        noStroke(); // reset if setDrawText is called previously in loop
+        textSize(1); // determines how many pixels a string is which corresponds to vertical height of rectangle
+        let scaledTime = map(point.time, currPixelTimeMin, currPixelTimeMax, timelineStart, timelineEnd);
+        let minRectHeight = 3; // for really short conversation turns set a minimum
+        let rectWidthMin = ceil(turnCountPerSecond);
+        let rectWidthMax = 15 + rectWidthMin; // add rectMin in case rare conversation file with more turns than length in seconds
+        let value = map(currPixelTimeMax - currPixelTimeMin, 0, timelineLength, rectWidthMin, rectWidthMax);
+        let rectWidth = (rectWidthMax + 2) - value;
+        let rectLength = textWidth(point.talkTurn);
+        if (rectLength < minRectHeight) rectLength = minRectHeight; // set small strings to minimum
+        let xPos = point.xPos;
+        let yPos;
+        if (conversationPositionTop) yPos = 0; // if conversation turn positioning is at top of screen
+        else yPos = point.yPos - rectLength;
+        // setText sets stroke/strokeWeight to highlight rect if selected
+        if (overRect(xPos, yPos, rectWidth, rectLength)) this.setText(point, PLAN); // if over plan
+        else if (overRect(scaledTime, yPos, rectWidth, rectLength)) this.setText(point, SPACETIME); // if over spacetime
+        fill(curColor); // Set color
+        rect(xPos, yPos, rectWidth, rectLength); // Plan
+        rect(scaledTime, yPos, rectWidth, rectLength); // Spacetime
     }
 
     // Returns speaker object based on string/character
@@ -234,19 +235,19 @@ class DrawDataConversation {
     drawTextBox() {
         textFont(font_Lato, keyTextSize);
         textLeading(textSpacing);
-        var point = this.conversationToDraw;
-        var scaledTime = map(point.time, currPixelTimeMin, currPixelTimeMax, timelineStart, timelineEnd);
-        var textBoxHeight = textSpacing * (ceil(textWidth(point.talkTurn) / textBoxWidth)); // lines of talk in a text box rounded up
-        // set xPos, constrain prevents drawing off screen
-        if (this.view == PLAN) var xPos = constrain(point.xPos - textBoxWidth / 2, boxSpacing, width - textBoxWidth - boxSpacing);
-        else if (this.view == SPACETIME) var xPos = constrain(scaledTime - textBoxWidth / 2, 0, width - textBoxWidth - boxSpacing);
-        // set yPos
+        let point = this.conversationToDraw;
+        let scaledTime = map(point.time, currPixelTimeMin, currPixelTimeMax, timelineStart, timelineEnd);
+        let textBoxHeight = textSpacing * (ceil(textWidth(point.talkTurn) / textBoxWidth)); // lines of talk in a text box rounded up
+        let xPos; // set xPos, constrain prevents drawing off screen
+        if (this.view == PLAN) xPos = constrain(point.xPos - textBoxWidth / 2, boxSpacing, width - textBoxWidth - boxSpacing);
+        else xPos = constrain(scaledTime - textBoxWidth / 2, 0, width - textBoxWidth - boxSpacing);
+        let yPos, yDif;
         if (mouseY < height / 2) { //if top half of screen, text box below rectangle
-            var yPos = mouseY + boxDistFromRect;
-            var differential = -boxSpacing;
+            yPos = mouseY + boxDistFromRect;
+            yDif = -boxSpacing;
         } else { //if bottom half of screen, text box above rectangle
-            var yPos = mouseY - boxDistFromRect - textBoxHeight;
-            var differential = textBoxHeight + boxSpacing;
+            yPos = mouseY - boxDistFromRect - textBoxHeight;
+            yDif = textBoxHeight + boxSpacing;
         }
         // textbox
         stroke(0); //set color to black
@@ -258,10 +259,10 @@ class DrawDataConversation {
         // conversation bubble
         stroke(255);
         strokeWeight(2);
-        line(mouseX - boxDistFromRect, yPos + differential, mouseX - boxDistFromRect / 2, yPos + differential);
+        line(mouseX - boxDistFromRect, yPos + yDif, mouseX - boxDistFromRect / 2, yPos + yDif);
         stroke(0);
         strokeWeight(1);
-        line(mouseX, mouseY, mouseX - boxDistFromRect, yPos + differential);
-        line(mouseX, mouseY, mouseX - boxDistFromRect / 2, yPos + differential);
+        line(mouseX, mouseY, mouseX - boxDistFromRect, yPos + yDif);
+        line(mouseX, mouseY, mouseX - boxDistFromRect / 2, yPos + yDif);
     }
 }

@@ -69,12 +69,14 @@ function setupMovie(movieDiv, platform, params) {
 function processData() {
     loadConversationDataTable(conversationTable);
     // load all movement files and pass first character of filename
-    for (let i = 0; i < dataTables.length; i++) loadMovementDataTable(dataTables[i], fileNames[i].charAt(0), conversationTable);
+    for (let i = 0; i < dataTables.length; i++) loadMovementDataTable(dataTables[i], movementFiles[i].charAt(0), conversationTable);
 }
 
 // Test all rows in conversation file to populate global speakerList with speaker objects based on first character
 function loadConversationDataTable(dataConversation) {
-    for (let i = 0; i < dataConversation.getRowCount(); i++) {
+    conversationTableRowCount = dataConversation.getRowCount();
+    turnCountPerSecond = conversationTableRowCount/totalTimeInSeconds;
+    for (let i = 0; i < conversationTableRowCount; i++) {
         let tempSpeakerList = []; // create/populate temp list to store strings to test from global speakerList
         for (let j = 0; j < speakerList.length; j++) tempSpeakerList.push(speakerList[j].name);  
         let speaker = dataConversation.getString(i, convoColumnHeaders[1]); // get speaker
@@ -99,7 +101,7 @@ function loadMovementDataTable(dataMovement, dataMovementShortName, dataConversa
         m.xPos = dataMovement.getNum(i, mvmentColumnHeaders[1]) * width / xScaleFactor; // scale factors to fit screen correctly
         m.yPos = dataMovement.getNum(i, mvmentColumnHeaders[2]) * height / yScaleFactor;
         //m.time = data.getNum(i, "time"); FIX LATER--USE THIS LINE/Update code as this allows precise rescaling
-        m.time = map(dataMovement.getNum(i, mvmentColumnHeaders[0]), 0, videoDuration, timelineStart, timelineEnd);
+        m.time = map(dataMovement.getNum(i, mvmentColumnHeaders[0]), 0, totalTimeInSeconds, timelineStart, timelineEnd);
         movement.push(m); // always add to movement and only sometimes add to conversationPoints
 
         // Get conversation turn if movement case is first case >= to conversation case, increment counter if so
@@ -110,7 +112,7 @@ function loadMovementDataTable(dataMovement, dataMovementShortName, dataConversa
                 c.xPos = m.xPos; // set to x/y pos in movement file case
                 c.yPos = m.yPos;
                 // UPDATE c.time SAME AS MOVEMENT!!!!
-                c.time = map(dataConversation.getNum(convoRowCounter, convoColumnHeaders[0]), 0, videoDuration, timelineStart, timelineEnd);
+                c.time = map(dataConversation.getNum(convoRowCounter, convoColumnHeaders[0]), 0, totalTimeInSeconds, timelineStart, timelineEnd);
                 c.speaker = dataConversation.getString(convoRowCounter, convoColumnHeaders[1]);
                 c.talkTurn = dataConversation.getString(convoRowCounter, convoColumnHeaders[2]);
                 conversation.push(c);
@@ -119,7 +121,7 @@ function loadMovementDataTable(dataMovement, dataMovementShortName, dataConversa
             }
         }
     }
-    let p = new Path(dataMovementShortName, 0); // initialize with name and grey/black color
+    let p = new Path(dataMovementShortName, basePathColor); // initialize with name and grey/black color
     p.movement = movement;
     p.conversation = conversation;
     // If any speakerObjects have same name as path filename, make path same color

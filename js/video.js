@@ -1,13 +1,13 @@
 // Updates time selected in video for animation or when mouse is clicked
 function updateVideoScrubbing() {
     if (animation) {
-        var startValue = map(currPixelTimeMin, timelineStart, timelineEnd, 0, videoDuration); // remap starting point to seek for video
-        var endValue = map(currPixelTimeMax, timelineStart, timelineEnd, 0, videoDuration); // remap starting point to seek for video
+        var startValue = map(currPixelTimeMin, timelineStart, timelineEnd, 0, totalTimeInSeconds); // remap starting point to seek for video
+        var endValue = map(currPixelTimeMax, timelineStart, timelineEnd, 0, totalTimeInSeconds); // remap starting point to seek for video
         videoPlayer.seekTo(map(bugTimePosForVideo, timelineStart, timelineEnd, startValue, endValue));
 
     } else if (!videoIsPlaying && overRect(timelineStart, 0, timelineEnd, timelineHeight)) {
         var initialValue = map(mouseX, timelineStart, timelineEnd, currPixelTimeMin, currPixelTimeMax); // first map mouse to selected time values in GUI
-        videoPlayer.seekTo(map(initialValue, timelineStart, timelineEnd, 0, videoDuration));
+        videoPlayer.seekTo(map(initialValue, timelineStart, timelineEnd, 0, totalTimeInSeconds));
     }
 }
 
