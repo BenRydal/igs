@@ -87,6 +87,7 @@ function loadConversationDataTable(dataConversation) {
     }
 }
 
+//
 function loadMovementDataTable(dataMovement, dataMovementShortName, dataConversation) {
     let movement = []; // holds location data for each path
     let conversation = []; // holds conversaton data and location data for conversation for each path
@@ -94,31 +95,26 @@ function loadMovementDataTable(dataMovement, dataMovementShortName, dataConversa
     let rowCountConversation = dataConversation.getRowCount();
     rowCounts.push(rowCountMovement / dataSamplingRate); // add number of data points to rowCounts list to set animation
     let convoRowCounter = 0;
-
     // increment by sampling rate to reduce data
     for (let i = 0; i < rowCountMovement; i += dataSamplingRate) {
         let m = new Point_Movement();
         m.xPos = dataMovement.getNum(i, mvmentColumnHeaders[1]) * width / floorplanPixelWidth; // scale factors to fit screen correctly
         m.yPos = dataMovement.getNum(i, mvmentColumnHeaders[2]) * height / floorplanPixelHeight;
-        //m.time = data.getNum(i, "time"); FIX LATER--USE THIS LINE/Update code as this allows precise rescaling
-        m.time = map(dataMovement.getNum(i, mvmentColumnHeaders[0]), 0, totalTimeInSeconds, timelineStart, timelineEnd);
-        movement.push(m); // always add to movement and only sometimes add to conversationPoints
-
+        m.time = map(dataMovement.getNum(i, mvmentColumnHeaders[0]), 0, totalTimeInSeconds, timelineStart, timelineEnd); // map time to timeline pixel values for use later in program
+        movement.push(m); // always add to movement
+        
         // Get conversation turn if movement case is first case >= to conversation case, increment counter if so
         if (dataMovement.getNum(i, mvmentColumnHeaders[0]) < dataConversation.getNum(convoRowCounter, convoColumnHeaders[0])) continue;
         else {
-            if (convoRowCounter < rowCountConversation - 1) { // ADD ADDITIONAL TESTS????
+            if (convoRowCounter < rowCountConversation - 1) { // ADD ADDITIONAL TESTS??
                 let c = new Point_Conversation();
                 c.xPos = m.xPos; // set to x/y pos in movement file case
                 c.yPos = m.yPos;
-                // UPDATE c.time SAME AS MOVEMENT!!!!
-                // c.time = dataConversation.getNum(convoRowCounter, convoColumnHeaders[0]);
                 c.time = map(dataConversation.getNum(convoRowCounter, convoColumnHeaders[0]), 0, totalTimeInSeconds, timelineStart, timelineEnd);
                 c.speaker = dataConversation.getString(convoRowCounter, convoColumnHeaders[1]);
                 c.talkTurn = dataConversation.getString(convoRowCounter, convoColumnHeaders[2]);
                 conversation.push(c);
                 convoRowCounter++; // increment counter for next comparison
-                
             }
         }
     }

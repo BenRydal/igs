@@ -5,17 +5,13 @@ CREDITS/LICENSE INFORMATION: This software is  licensed under the GNU General Pu
 */
 
 // TO DO:
-// check animationMaxValue and video duration--how does program use/compare both
-// test/fix use of initialValue for animation work
-// refine auto rectsizing in conversation
-// update load time data on load and draw data scaledTime to draw better curves/don't lose data
-// Update how to read button
-
 // Update var/let
 // Figure out floor plan scaling
 // then also update select region to be always if over map
 // what if speakerList is 0?? e.g., how does getSpeakerObject work?
 // basic error handling
+// check animationMaxValue and video duration--how does program use/compare both
+// test/fix use of initialValue for animation work
 
 // ******* INPUT VARIABLES *******
 let movementFiles = ['Teacher.csv', 'Student.csv']; // holds list of movement files, first letter of file is used to associate with speaker 
@@ -23,7 +19,7 @@ let conversationFile = "conversation.csv"; // 1 single conversation file
 let mvmentColumnHeaders = ['time', 'x', 'y'];
 let convoColumnHeaders = ['time', 'speaker', 'talk'];
 let totalTimeInSeconds = 3353; // total time of all data including video
-let floorplanPixelWidth = 1440// width and height of floor plan image to scale data to floor plan correctly
+let floorplanPixelWidth = 1440 // width and height of floor plan image to scale data to floor plan correctly
 let floorplanPixelHeight = 900;
 
 // For videoPlatform 'Kaltura', videoParams expects 3 items, the wid, uiconf_id, and entry_id
@@ -36,7 +32,7 @@ let videoParams = {
 
 //******* DATA *******
 let dataTables = []; // holds # of files for data processing
-let dataSamplingRate = 10; // rate movement data is sampled, increase to speed up program
+let dataSamplingRate = 20; // rate movement data is sampled, increase to speed up program
 let conversationTable; // holds conversation file
 let conversationTableRowCount;
 let turnCountPerSecond; // set in loadData based on conversation file
@@ -110,7 +106,11 @@ var titleMsg = "Classroom Interaction Geography";
 var infoMsg = "Interaction Geography Slicer (IGS) description....";
 
 
-// Relationship between speaker and path can be 1:1 but does not have to be as this allows variation in different types of data inputs (e.g., less or more movement files than speakers or vice versa)
+/*
+Relationship between speaker and path objects can be 1:1 but does not have to be
+this allows variation in different types of data inputs 
+(e.g., less or more movement files than speakers or vice versa)
+*/
 
 // Speaker holds data for each individual speaker marked in conversation file
 class Speaker {
@@ -121,7 +121,7 @@ class Speaker {
     }
 }
 
-// Path holds individual's movement marked in movement file and associated data
+// Holds individual's movement marked in movement file and associated data
 class Path {
     constructor(pathName, pathColor) {
         this.movement = []; // Point_Movement objects

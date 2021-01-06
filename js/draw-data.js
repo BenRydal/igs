@@ -197,7 +197,7 @@ class DrawDataConversation {
         let scaledTime = map(point.time, currPixelTimeMin, currPixelTimeMax, timelineStart, timelineEnd);
         let minRectHeight = 3; // for really short conversation turns set a minimum
         let rectWidthMin = ceil(turnCountPerSecond);
-        let rectWidthMax = 15 + rectWidthMin; // add rectMin in case rare conversation file with more turns than length in seconds
+        let rectWidthMax = 20 + rectWidthMin; // add rectMin in case rare conversation file with more turns than length in seconds
         let value = map(currPixelTimeMax - currPixelTimeMin, 0, timelineLength, rectWidthMin, rectWidthMax);
         let rectWidth = (rectWidthMax + 2) - value;
         let rectLength = textWidth(point.talkTurn);
