@@ -1,7 +1,3 @@
-function keyPressed() {
-    if (key === 'r' || key === 'R') selectRegion = !selectRegion;
-}
-
 function mousePressed() {
     if (intro) intro = false;
     // Controls video when clicking on timeline

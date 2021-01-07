@@ -12,10 +12,12 @@ function setGUI() {
 }
 
 function setBaseValues() {
-    timelineStart = width * 0.4638; // scale factors
+    timelineStart = width * 0.4638;
     timelineEnd = width * 0.9638;
     timelineLength = timelineEnd - timelineStart;
     timelineHeight = height * .81;
+    displayFloorPlanWidth = timelineStart - (width - timelineEnd);
+    displayFloorPlanHeight = timelineHeight;
     currPixelTimeMin = timelineStart; // adjustable timeline values
     currPixelTimeMax = timelineEnd;
     yPosTimeScaleTop = timelineHeight - tickHeight;
@@ -75,10 +77,10 @@ function processData() {
 // Test all rows in conversation file to populate global speakerList with speaker objects based on first character
 function loadConversationDataTable(dataConversation) {
     conversationTableRowCount = dataConversation.getRowCount();
-    turnCountPerSecond = conversationTableRowCount/totalTimeInSeconds;
+    turnCountPerSecond = conversationTableRowCount / totalTimeInSeconds;
     for (let i = 0; i < conversationTableRowCount; i++) {
         let tempSpeakerList = []; // create/populate temp list to store strings to test from global speakerList
-        for (let j = 0; j < speakerList.length; j++) tempSpeakerList.push(speakerList[j].name);  
+        for (let j = 0; j < speakerList.length; j++) tempSpeakerList.push(speakerList[j].name);
         let speaker = dataConversation.getString(i, convoColumnHeaders[1]); // get speaker
         if (!tempSpeakerList.includes(speaker)) { // if not in list, add new Speaker Object to global speakerList
             let s = new Speaker(speaker, speakerColorList[speakerList.length % speakerColorList.length]);
@@ -98,11 +100,11 @@ function loadMovementDataTable(dataMovement, dataMovementShortName, dataConversa
     // increment by sampling rate to reduce data
     for (let i = 0; i < rowCountMovement; i += dataSamplingRate) {
         let m = new Point_Movement();
-        m.xPos = dataMovement.getNum(i, mvmentColumnHeaders[1]) * width / floorplanPixelWidth; // scale factors to fit screen correctly
-        m.yPos = dataMovement.getNum(i, mvmentColumnHeaders[2]) * height / floorplanPixelHeight;
+        m.xPos = dataMovement.getNum(i, mvmentColumnHeaders[1]) * displayFloorPlanWidth / inputFloorPlanPixelWidth; // scale factors to fit screen correctly
+        m.yPos = dataMovement.getNum(i, mvmentColumnHeaders[2]) * displayFloorPlanHeight / inputFloorPlanPixelHeight;
         m.time = map(dataMovement.getNum(i, mvmentColumnHeaders[0]), 0, totalTimeInSeconds, timelineStart, timelineEnd); // map time to timeline pixel values for use later in program
         movement.push(m); // always add to movement
-        
+
         // Get conversation turn if movement case is first case >= to conversation case, increment counter if so
         if (dataMovement.getNum(i, mvmentColumnHeaders[0]) < dataConversation.getNum(convoRowCounter, convoColumnHeaders[0])) continue;
         else {

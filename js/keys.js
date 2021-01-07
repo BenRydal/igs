@@ -9,7 +9,7 @@ class Keys {
         this.drawTitles();
         textFont(font_PlayfairReg, infoTextSize);
         this.drawTimeline();
-        if (selectRegion && mouseX < timelineStart && mouseY < timelineHeight) this.drawRegion();
+        if (overRect(0, 0, displayFloorPlanWidth, displayFloorPlanHeight)) this.drawFloorPlanSelector();
     }
 
     drawPathSpeakerTitle() {
@@ -140,10 +140,10 @@ class Keys {
 
     }
 
-    drawRegion() {
+    drawFloorPlanSelector() {
         noFill();
         strokeWeight(3);
         stroke(0);
-        circle(mouseX, mouseY, selectRegionCircleSize, selectRegionCircleSize);
+        circle(mouseX, mouseY, floorPlanSelectorSize);
     }
 }

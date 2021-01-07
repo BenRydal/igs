@@ -5,9 +5,7 @@ CREDITS/LICENSE INFORMATION: This software is  licensed under the GNU General Pu
 */
 
 // TO DO:
-// Update var/let
-// Figure out floor plan scaling
-// then also update select region to be always if over map
+// Update var/let and CONST
 // what if speakerList is 0?? e.g., how does getSpeakerObject work?
 // basic error handling
 // check animationMaxValue and video duration--how does program use/compare both
@@ -16,11 +14,10 @@ CREDITS/LICENSE INFORMATION: This software is  licensed under the GNU General Pu
 // ******* INPUT VARIABLES *******
 let movementFiles = ['Teacher.csv', 'Student.csv']; // holds list of movement files, first letter of file is used to associate with speaker 
 let conversationFile = "conversation.csv"; // 1 single conversation file
+let floorPlanFile = "floorplan.png";
 let mvmentColumnHeaders = ['time', 'x', 'y'];
 let convoColumnHeaders = ['time', 'speaker', 'talk'];
 let totalTimeInSeconds = 3353; // total time of all data including video
-let floorplanPixelWidth = 1440 // width and height of floor plan image to scale data to floor plan correctly
-let floorplanPixelHeight = 900;
 
 // For videoPlatform 'Kaltura', videoParams expects 3 items, the wid, uiconf_id, and entry_id
 // For videoPlatform 'Youtube', videoParams expects 1 item, the videoId
@@ -28,7 +25,6 @@ let videoPlatform = 'Youtube'; // what platform the video is being hosted on, sp
 let videoParams = {
     videoId: 'Iu0rxb-xkMk'
 };
-
 
 //******* DATA *******
 let dataTables = []; // holds # of files for data processing
@@ -38,6 +34,7 @@ let conversationTableRowCount;
 let turnCountPerSecond; // set in loadData based on conversation file
 let speakerList = []; // Arraylist of speaker objects loaded from conversation file
 let speakerColorList = ['#ff7f00', '#1f78b4', '#cab2d6', '#33a02c', '#fb9a99', '#e31a1c', '#fdbf6f', '#a6cee3', '#b2df8a', '#6a3d9a', '#ffff99', '#b15928']; // 11 colors
+let colorGray = 150;
 var paths = []; // holder for each person
 var rowCounts = []; // list to sort max/min number of movement points in each path
 var animationMaxValue;
@@ -70,6 +67,13 @@ var button_1 = "Animate",
     button_5 = "How to Read";
 var keyTextSize, titleTextSize, infoTextSize;
 var textBoxWidth, textSpacing, boxSpacing, boxDistFromRect;
+
+// Floor Plan
+let inputFloorPlanPixelWidth;
+let inputFloorPlanPixelHeight;
+let displayFloorPlanWidth;
+let displayFloorPlanHeight;
+
 // Timeline
 var lockedLeft = false,
     lockedRight = false;
@@ -81,8 +85,7 @@ var yPosTimeScaleTop;
 var yPosTimeScaleBottom;
 var yPosTimeScaleSize;
 var timelineLength;
-var selectRegion = false; // for region selection on floor plan
-var selectRegionCircleSize = 50;
+let floorPlanSelectorSize = 50;
 
 //******* VIDEO *******
 var videoIsPlaying = false; // indicates if video is playing/stopped
@@ -154,6 +157,12 @@ class Point_Conversation {
 
 // Loads fonts, floor plan, and CSV file into p5.Table objects so that they can manipulated later
 function preload() {
+    // callback function sets floor plan width/height to scale movement data loaded later
+    loadImage('data/' + floorPlanFile, img => {
+        floorPlan = img;
+        inputFloorPlanPixelWidth = floorPlan.width / 2; // why divide by 2?
+        inputFloorPlanPixelHeight = floorPlan.height / 2;
+    });
     conversationTable = loadTable('data/' + conversationFile, "header"); // load conversation file first
     for (let i = 0; i < movementFiles.length; i++) { // loop through all files in directory
         let fileName = 'data/' + movementFiles[i];
@@ -164,7 +173,7 @@ function preload() {
     font_PlayfairItalic = loadFont("data/fonts/PlayfairDisplay-Italic.ttf");
     font_Playfairbold = loadFont("data/fonts/PlayfairDisplay-Bold.ttf");
     font_Lato = loadFont("data/fonts/Lato-Light.ttf");
-    floorPlan = loadImage("data/floorplan.png");
+
     // Set up the video element
     var movie = createDiv(); // create the div that will hold the video
     movie.id('moviePlayer');
@@ -182,7 +191,8 @@ function setup() {
 
 function draw() {
     setUpAnimation();
-    image(floorPlan, 0, 0, width, height);
+    background(255);
+    image(floorPlan, 0, 0, displayFloorPlanWidth, displayFloorPlanHeight);
     var keys = new Keys();
     keys.drawKeys();
     var drawData = new DrawData();

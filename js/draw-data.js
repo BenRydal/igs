@@ -27,14 +27,12 @@ class DrawDataMovement {
 
     setData(path) {
         this.resetBug(); // always reset bug values
-        // if selectRegion then program draws 1 shape for each movement path in space and space-time and also many shapes for region that is selected
-
-        if (selectRegion) {
-            this.draw(PLAN, path.movement, 150);
-            this.draw(SPACETIME, path.movement, 150);
-            this.drawRegion(PLAN, path.movement, path.color);
-            this.drawRegion(SPACETIME, path.movement, path.color);
-
+        // if overMap draw selection of movement and gray scale the rest
+        if (overRect(0, 0, displayFloorPlanWidth, displayFloorPlanHeight)) {
+            this.draw(PLAN, path.movement, colorGray);
+            this.draw(SPACETIME, path.movement, colorGray);
+            this.drawHighlight(PLAN, path.movement, path.color);
+            this.drawHighlight(SPACETIME, path.movement, path.color);
         } else {
             this.draw(PLAN, path.movement, path.color);
             this.draw(SPACETIME, path.movement, path.color);
@@ -74,8 +72,8 @@ class DrawDataMovement {
         endShape();
     }
 
-    // Draws only shapes for selected regions
-    drawRegion(view, points, shade) {
+    // Draws only shapes for points over mouse selection
+    drawHighlight(view, points, shade) {
         strokeWeight(pathWeight * 2);
         stroke(shade);
         noFill(); // important for curve drawing
@@ -83,14 +81,14 @@ class DrawDataMovement {
         for (var i = 0; i < animationCounter; i++) {
             var drawEndpoint = false; // boolean to draw additional endpoints for each shape to make sure all points included
             var point = points[i];
-            // Tests if overTimeline/Region and adjusts begin/end shape and boolean drawVertex to draw only that shape
-            if (this.overTimeline(point.time) && this.overRegion(point.xPos, point.yPos)) {
+            // Tests if overTimeline and mouse selection and adjusts begin/end shape and boolean drawVertex to draw only that shape
+            if (this.overTimeline(point.time) && this.overCursor(point.xPos, point.yPos)) {
                 if (!drawVertex) { // beginShape if no shape yet and set drawVertex to true
                     beginShape();
                     drawEndpoint = true;
                     drawVertex = true;
                 }
-            } else { // if not overtimeline and overRegion endShape and set drawVertex to false
+            } else { // if not overtimeline and over mouse selection endShape and set drawVertex to false
                 if (drawVertex) {
                     drawEndpoint = true;
                     endShape();
@@ -116,7 +114,7 @@ class DrawDataMovement {
         else return false;
     }
 
-    overRegion(xPos, yPos) {
+    overCursor(xPos, yPos) {
         if (overCircle(xPos, yPos, 50)) return true;
         else return false;
     }
