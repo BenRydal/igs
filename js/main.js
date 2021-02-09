@@ -10,14 +10,16 @@ CREDITS/LICENSE INFORMATION: This software is  licensed under the GNU General Pu
 // basic error handling
 // check animationMaxValue and video duration--how does program use/compare both
 // test/fix use of initialValue for animation work
+// total time in seconds move to data loading to set automatically
+// fix bug to always show last value if over to prevent blinking
 
 // ******* INPUT VARIABLES *******
-let movementFiles = ['Teacher.csv', 'Student.csv']; // holds list of movement files, first letter of file is used to associate with speaker 
+let movementFiles = ['Teacher.csv']; // holds list of movement files, first letter of file is used to associate with speaker 
 let conversationFile = "conversation.csv"; // 1 single conversation file
 let floorPlanFile = "floorplan.png";
 let mvmentColumnHeaders = ['time', 'x', 'y'];
 let convoColumnHeaders = ['time', 'speaker', 'talk'];
-let totalTimeInSeconds = 3353; // total time of all data including video
+
 
 // For videoPlatform 'Kaltura', videoParams expects 3 items, the wid, uiconf_id, and entry_id
 // For videoPlatform 'Youtube', videoParams expects 1 item, the videoId
@@ -26,9 +28,11 @@ let videoParams = {
     videoId: 'Iu0rxb-xkMk'
 };
 
+let totalTimeInSeconds = 3353; // total time of all data including video
+
 //******* DATA *******
 let dataTables = []; // holds # of files for data processing
-let dataSamplingRate = 20; // rate movement data is sampled, increase to speed up program
+let dataSamplingRate = 1; // rate movement data is sampled, increase to speed up program
 let conversationTable; // holds conversation file
 let conversationTableRowCount;
 let turnCountPerSecond; // set in loadData based on conversation file
@@ -38,7 +42,7 @@ let colorGray = 150;
 var paths = []; // holder for each person
 var rowCounts = []; // list to sort max/min number of movement points in each path
 var animationMaxValue;
-var floorPlan, floorPlanWithKey; // floor plans
+var floorPlan; // floor plan image holder
 var PLAN = 0,
     SPACETIME = 1; // constants to indicate plan or space-time views
 var timelineStart, timelineEnd, timelineHeight;
@@ -160,8 +164,8 @@ function preload() {
     // callback function sets floor plan width/height to scale movement data loaded later
     loadImage('data/' + floorPlanFile, img => {
         floorPlan = img;
-        inputFloorPlanPixelWidth = floorPlan.width / 2; // why divide by 2?
-        inputFloorPlanPixelHeight = floorPlan.height / 2;
+        inputFloorPlanPixelWidth = floorPlan.width;
+        inputFloorPlanPixelHeight = floorPlan.height;
     });
     conversationTable = loadTable('data/' + conversationFile, "header"); // load conversation file first
     for (let i = 0; i < movementFiles.length; i++) { // loop through all files in directory
