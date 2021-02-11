@@ -46,7 +46,7 @@ class Keys {
     }
 
     drawbuttons() {
-        var currXPos = timelineStart + buttonSpacing / 2;
+        let currXPos = timelineStart + buttonSpacing / 2;
         fill(animation ? 0 : 150);
         // Button 1
         text(button_1, currXPos, buttonsHeight);
@@ -120,19 +120,19 @@ class Keys {
         // Text for minutes at start/end of timeline
         noStroke();
         fill(0);
-        var startValue = floor(map(currPixelTimeMin, timelineStart, timelineEnd, 0, totalTimeInSeconds));
-        var endValue = ceil(map(currPixelTimeMax, timelineStart, timelineEnd, 0, totalTimeInSeconds));
+        let startValue = floor(map(currPixelTimeMin, timelineStart, timelineEnd, 0, totalTimeInSeconds));
+        let endValue = ceil(map(currPixelTimeMax, timelineStart, timelineEnd, 0, totalTimeInSeconds));
         text(floor(startValue / 60), timelineStart + tickHeight / 2, timelineHeight);
         text(ceil(endValue / 60), timelineEnd - tickHeight, timelineHeight);
         // Text for timeline label
-        var mapMouseX = map(mouseX, timelineStart, timelineEnd, currPixelTimeMin, currPixelTimeMax);
-        var videoTimeInSeconds = map(mapMouseX, timelineStart, timelineEnd, 0, totalTimeInSeconds); // remap to get seconds in video from remapped mouse position   
-        var videoTimeInMinutes = videoTimeInSeconds / 60; // float value of minutes and seconds
-        var minutesValue = floor(videoTimeInMinutes); // floor to get minutes
-        var decimalSeconds = videoTimeInMinutes - minutesValue; //  Subtract minutes to get decimal seconds---e.g., 14.28571429 - 14... returns (.28571429)
-        var secondsValue = floor(decimalSeconds.toFixed(2) * 60); // Converts number into a String and keeps only the specified number of decimals
-        var label_1 = minutesValue + " Minutes  " + secondsValue + " Seconds";
-        var label_2 = "MINUTES & SECONDS";
+        let mapMouseX = map(mouseX, timelineStart, timelineEnd, currPixelTimeMin, currPixelTimeMax);
+        let videoTimeInSeconds = map(mapMouseX, timelineStart, timelineEnd, 0, totalTimeInSeconds); // remap to get seconds in video from remapped mouse position   
+        let videoTimeInMinutes = videoTimeInSeconds / 60; // float value of minutes and seconds
+        let minutesValue = floor(videoTimeInMinutes); // floor to get minutes
+        let decimalSeconds = videoTimeInMinutes - minutesValue; //  Subtract minutes to get decimal seconds---e.g., 14.28571429 - 14... returns (.28571429)
+        let secondsValue = floor(decimalSeconds.toFixed(2) * 60); // Converts number into a String and keeps only the specified number of decimals
+        let label_1 = minutesValue + " Minutes  " + secondsValue + " Seconds";
+        let label_2 = "MINUTES & SECONDS";
         textAlign(CENTER);
         if (overRect(timelineStart, 0, timelineLength, timelineHeight)) text(label_1, timelineStart + timelineLength / 2, timelineHeight);
         else text(label_2, timelineStart + timelineLength / 2, timelineHeight);

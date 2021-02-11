@@ -45,7 +45,7 @@ function setConversationValues() {
 }
 
 function setVideoValues() {
-    var video = select('#moviePlayer').position(timelineStart, 0); // position video in upper left corner on timeline
+    let video = select('#moviePlayer').position(timelineStart, 0); // position video in upper left corner on timeline
     videoWidthOnPause = width / 5;
     videoHeightOnPause = width / 6;
     videoWidthOnPlay = width - timelineStart;

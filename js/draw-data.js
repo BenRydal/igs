@@ -48,16 +48,16 @@ class DrawDataMovement {
         stroke(shade);
         noFill(); // important for curve drawing
         beginShape();
-        for (var i = 0; i < animationCounter; i++) {
-            var point = points[i];
+        for (let i = 0; i < animationCounter; i++) {
+            let point = points[i];
             if (this.overTimeline(point.time)) {
-                var scaledTime = map(point.time, currPixelTimeMin, currPixelTimeMax, timelineStart, timelineEnd);
+                let scaledTime = map(point.time, currPixelTimeMin, currPixelTimeMax, timelineStart, timelineEnd);
                 if (view == PLAN) curveVertex(point.xPos, point.yPos);
                 else if (view == SPACETIME) { // text/get bug values
                     curveVertex(scaledTime, point.yPos);
                     if (videoIsPlaying) {
                         // convert video time value in seconds to pixel position                   
-                        var videoX = map(getMovieCurrentTime(), 0, totalTimeInSeconds, timelineStart, timelineEnd);
+                        let videoX = map(getMovieCurrentTime(), 0, totalTimeInSeconds, timelineStart, timelineEnd);
                         if (videoX >= scaledTime - bugPrecision && videoX <= scaledTime + bugPrecision) {
                             this.recordBug(point.xPos, point.yPos, scaledTime);
                         }
@@ -77,10 +77,10 @@ class DrawDataMovement {
         strokeWeight(pathWeight * 2);
         stroke(shade);
         noFill(); // important for curve drawing
-        var drawVertex = false; // set false to start
-        for (var i = 0; i < animationCounter; i++) {
-            var drawEndpoint = false; // boolean to draw additional endpoints for each shape to make sure all points included
-            var point = points[i];
+        let drawVertex = false; // set false to start
+        for (let i = 0; i < animationCounter; i++) {
+            let drawEndpoint = false; // boolean to draw additional endpoints for each shape to make sure all points included
+            let point = points[i];
             // Tests if overTimeline and mouse selection and adjusts begin/end shape and boolean drawVertex to draw only that shape
             if (this.overTimeline(point.time) && this.overCursor(point.xPos, point.yPos)) {
                 if (!drawVertex) { // beginShape if no shape yet and set drawVertex to true
@@ -97,7 +97,7 @@ class DrawDataMovement {
             }
             // Draw vertex if true in space and space-time
             if (drawVertex || drawEndpoint) {
-                var scaledTime = map(point.time, currPixelTimeMin, currPixelTimeMax, timelineStart, timelineEnd);
+                let scaledTime = map(point.time, currPixelTimeMin, currPixelTimeMax, timelineStart, timelineEnd);
                 if (view == PLAN) curveVertex(point.xPos, point.yPos);
                 else if (view == SPACETIME) curveVertex(scaledTime, point.yPos);
                 if (drawEndpoint) {
@@ -164,9 +164,9 @@ class DrawDataConversation {
     }
 
     numOfPaths() {
-        var numOfPaths = 0; // determine how many paths are being drawn
-        for (var i = 0; i < paths.length; i++) {
-            var path = paths[i];
+        let numOfPaths = 0; // determine how many paths are being drawn
+        for (let i = 0; i < paths.length; i++) {
+            let path = paths[i];
             if (path.show == true) numOfPaths++;
         }
         return numOfPaths;

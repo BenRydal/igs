@@ -5,13 +5,15 @@ CREDITS/LICENSE INFORMATION: This software is  licensed under the GNU General Pu
 */
 
 // TO DO:
-// Update var/let and CONST
-// what if speakerList is 0?? e.g., how does getSpeakerObject work?
+// Conversation table error handling what if speakerList is 0?? e.g., how does getSpeakerObject work?
 // basic error handling
 // check animationMaxValue and video duration--how does program use/compare both
 // test/fix use of initialValue for animation work
 // total time in seconds move to data loading to set automatically
 // fix bug to always show last value if over to prevent blinking
+// add video loading from file input
+// add floor plan loading and movement/convo file loading
+// Remove some fonts
 
 // ******* INPUT VARIABLES *******
 let movementFiles = ['Teacher.csv']; // holds list of movement files, first letter of file is used to associate with speaker 
@@ -39,38 +41,38 @@ let turnCountPerSecond; // set in loadData based on conversation file
 let speakerList = []; // Arraylist of speaker objects loaded from conversation file
 let speakerColorList = ['#ff7f00', '#1f78b4', '#cab2d6', '#33a02c', '#fb9a99', '#e31a1c', '#fdbf6f', '#a6cee3', '#b2df8a', '#6a3d9a', '#ffff99', '#b15928']; // 11 colors
 let colorGray = 150;
-var paths = []; // holder for each person
-var rowCounts = []; // list to sort max/min number of movement points in each path
-var animationMaxValue;
-var floorPlan; // floor plan image holder
-var PLAN = 0,
+let paths = []; // holder for each person
+let rowCounts = []; // list to sort max/min number of movement points in each path
+let animationMaxValue;
+let floorPlan; // floor plan image holder
+let PLAN = 0,
     SPACETIME = 1; // constants to indicate plan or space-time views
-var timelineStart, timelineEnd, timelineHeight;
-var bugTimePosForVideo; // to draw slicer line when video is playing
-var animationCounter = 0; // controls animation
-var bugPrecision, bugSize;
-var pathWeight = 3;
+let timelineStart, timelineEnd, timelineHeight;
+let bugTimePosForVideo; // to draw slicer line when video is playing
+let animationCounter = 0; // controls animation
+let bugPrecision, bugSize;
+let pathWeight = 3;
 let basePathColor = 100; // for paths that don't have associated speaker in speakerList
 
 //******* GUI *******
 let movementKeyTitle = true;
 let conversationPositionTop = false; // controls positioning of conversation turns on path or top of screen
 let allConversation = false; // controls showing all or matching speaker conversation turns on path
-var intro = true; // sets intro message to start program
-var font_PlayfairReg, font_PlayfairItalic, font_PlayfairBold, font_Lato;
-var buttonSpacing, buttonWidth, speakerKeysHeight, buttonsHeight;
+let intro = true; // sets intro message to start program
+let font_PlayfairReg, font_PlayfairItalic, font_PlayfairBold, font_Lato;
+let buttonSpacing, buttonWidth, speakerKeysHeight, buttonsHeight;
 // 5 Modes
-var animation = true,
+let animation = true,
     videoMode = false,
     howToRead = false;
 // 5 Buttons correspond to modes
-var button_1 = "Animate",
+let button_1 = "Animate",
     button_2 = "Align Talk",
     button_3 = "All Talk on Path",
     button_4 = "Video",
     button_5 = "How to Read";
-var keyTextSize, titleTextSize, infoTextSize;
-var textBoxWidth, textSpacing, boxSpacing, boxDistFromRect;
+let keyTextSize, titleTextSize, infoTextSize;
+let textBoxWidth, textSpacing, boxSpacing, boxDistFromRect;
 
 // Floor Plan
 let inputFloorPlanPixelWidth;
@@ -79,38 +81,37 @@ let displayFloorPlanWidth;
 let displayFloorPlanHeight;
 
 // Timeline
-var lockedLeft = false,
-    lockedRight = false;
-var selSpacing = 20;
-var tickHeight = 20;
-var currPixelTimeMin;
-var currPixelTimeMax;
-var yPosTimeScaleTop;
-var yPosTimeScaleBottom;
-var yPosTimeScaleSize;
-var timelineLength;
+let lockedLeft = false, lockedRight = false;
+let selSpacing = 20;
+let tickHeight = 20;
+let currPixelTimeMin;
+let currPixelTimeMax;
+let yPosTimeScaleTop;
+let yPosTimeScaleBottom;
+let yPosTimeScaleSize;
+let timelineLength;
 let floorPlanSelectorSize = 50;
 
 //******* VIDEO *******
-var videoIsPlaying = false; // indicates if video is playing/stopped
-var videoCurrTime = 0; // video current time in seconds
-var videoWidthOnPause, videoHeightOnPause, videoWidthOnPlay, videoHeightOnPlay; // permanent video width/heights
-var videoWidthPlayCounter, videoHeightPlayCounter; // allows for transition between video width/heights
-var videoTransitionCounter = 40; // speed of video size transitions
-var videoPlayer; // instantiated in setupMovie method, used to manipulate video (play, pause, seek, etc.)
+let videoIsPlaying = false; // indicates if video is playing/stopped
+let videoCurrTime = 0; // video current time in seconds
+let videoWidthOnPause, videoHeightOnPause, videoWidthOnPlay, videoHeightOnPlay; // permanent video width/heights
+let videoWidthPlayCounter, videoHeightPlayCounter; // allows for transition between video width/heights
+let videoTransitionCounter = 40; // speed of video size transitions
+let videoPlayer; // instantiated in setupMovie method, used to manipulate video (play, pause, seek, etc.)
 
 //******* MESSAGES *******
 // Buttons
-var introMSG = "Press this button to learn how to read and interact with this visualization";
-var howToReadMSG_1 = "The left view shows the teachers movement over a floor plan of an eigth grade classroom. The right view shows the teachers movement over a timeline where the vertical axis corresponds with the vertical dimension of the floor plan.";
-var howToReadMSG_2 = "Hover over buttons to learn how to interact with this visualization. Use the timeline to select and rescale data.";
-var animateMSG = "Press this button to animate movement and conversation over space and time";
-var conversation_1_MSG = "Press this button and the colored speaker buttons above to view different conversation turns along the teacher's movement path. Hover over each conversation turn to read each turn. Turns are coded in the following manner: Teacher, Student (a single student), Student New (a new student whose identity differs from the last student to speak), Many Students, the Whole Class, and non-members of the class (e.g., PA system).";
-var conversation_2_MSG = "Press this button to view and read all conversation aligned horizontally.";
-var videoMSG = "Press this button to watch video from this classroom discussion. Click anywhere on the timeline to play and pause video.";
+let introMSG = "Press this button to learn how to read and interact with this visualization";
+let howToReadMSG_1 = "The left view shows the teachers movement over a floor plan of an eigth grade classroom. The right view shows the teachers movement over a timeline where the vertical axis corresponds with the vertical dimension of the floor plan.";
+let howToReadMSG_2 = "Hover over buttons to learn how to interact with this visualization. Use the timeline to select and rescale data.";
+let animateMSG = "Press this button to animate movement and conversation over space and time";
+let conversation_1_MSG = "Press this button and the colored speaker buttons above to view different conversation turns along the teacher's movement path. Hover over each conversation turn to read each turn. Turns are coded in the following manner: Teacher, Student (a single student), Student New (a new student whose identity differs from the last student to speak), Many Students, the Whole Class, and non-members of the class (e.g., PA system).";
+let conversation_2_MSG = "Press this button to view and read all conversation aligned horizontally.";
+let videoMSG = "Press this button to watch video from this classroom discussion. Click anywhere on the timeline to play and pause video.";
 // Title
-var titleMsg = "Classroom Interaction Geography";
-var infoMsg = "Interaction Geography Slicer (IGS) description....";
+let titleMsg = "Classroom Interaction Geography";
+let infoMsg = "Interaction Geography Slicer (IGS) description....";
 
 
 /*
@@ -179,7 +180,7 @@ function preload() {
     font_Lato = loadFont("data/fonts/Lato-Light.ttf");
 
     // Set up the video element
-    var movie = createDiv(); // create the div that will hold the video
+    let movie = createDiv(); // create the div that will hold the video
     movie.id('moviePlayer');
     movie.style('display', 'none');
     setupMovie('moviePlayer', videoPlatform, videoParams); // set up the video player
@@ -197,11 +198,11 @@ function draw() {
     setUpAnimation();
     background(255);
     image(floorPlan, 0, 0, displayFloorPlanWidth, displayFloorPlanHeight);
-    var keys = new Keys();
+    let keys = new Keys();
     keys.drawKeys();
-    var drawData = new DrawData();
-    for (var i = 0; i < paths.length; i++) {
-        var path = paths[i];
+    let drawData = new DrawData();
+    for (let i = 0; i < paths.length; i++) {
+        let path = paths[i];
         if (path.show) drawData.setDrawData(path);
     }
     drawData.setConversationBubble();
@@ -215,7 +216,7 @@ function draw() {
 }
 
 function setUpAnimation() {
-    var initialValue = map(currPixelTimeMax, timelineStart, timelineEnd, 0, animationMaxValue);
+    let initialValue = map(currPixelTimeMax, timelineStart, timelineEnd, 0, animationMaxValue);
     if (animationCounter < initialValue) animationCounter++; // updates animation
     else animation = false;
 }

@@ -2,7 +2,7 @@ function mousePressed() {
     if (intro) intro = false;
     // Controls video when clicking on timeline
     if (videoMode && !animation && overRect(timelineStart, 0, timelineEnd, timelineHeight - tickHeight)) {
-        var initialValue = map(mouseX, timelineStart, timelineEnd, currPixelTimeMin, currPixelTimeMax); // first map mouse to selected time values in GUI
+        let initialValue = map(mouseX, timelineStart, timelineEnd, currPixelTimeMin, currPixelTimeMax); // first map mouse to selected time values in GUI
         videoCurrTime = map(initialValue, timelineStart, timelineEnd, 0, totalTimeInSeconds);
         playPauseMovie();
     }
@@ -54,13 +54,13 @@ function overPathKeys() {
 
 // Loop through all button/test if mouse clicked and update accordingly
 function overButtons() {
-    var currXPos = timelineStart + buttonSpacing / 2;
+    let currXPos = timelineStart + buttonSpacing / 2;
     if (overRect(currXPos, buttonsHeight, textWidth(button_1), buttonWidth)) overAnimateButton();
     else if (overRect(currXPos + textWidth(button_1) + 2 * buttonSpacing, buttonsHeight, textWidth(button_2) + buttonSpacing, buttonWidth)) conversationPositionTop = !conversationPositionTop;
     else if (overRect(currXPos + textWidth(button_1 + button_2) + 4 * buttonSpacing, buttonsHeight, textWidth(button_3) + buttonSpacing, buttonWidth)) allConversation = !allConversation;
     else if (overRect(currXPos + textWidth(button_1 + button_2 + button_3) + 6 * buttonSpacing, buttonsHeight, textWidth(button_4) + buttonSpacing, buttonWidth)) {
         videoMode = !videoMode;
-        var video = select('#moviePlayer');
+        let video = select('#moviePlayer');
         video.style('display', (videoMode ? 'block' : 'none'));
         if (videoMode) {
             video.style('width', videoWidthOnPause + ''); // reset width/height
@@ -78,7 +78,7 @@ function overButtonsMSGS() {
     textSize(keyTextSize);
     textFont(font_PlayfairReg);
     noStroke();
-    var currXPos = timelineStart + buttonSpacing / 2;
+    let currXPos = timelineStart + buttonSpacing / 2;
     if (overRect(currXPos, buttonsHeight, textWidth(button_1), buttonWidth)) drawKeyMSG(animateMSG);
     else if (overRect(currXPos + textWidth(button_1) + 2 * buttonSpacing, buttonsHeight, textWidth(button_2) + buttonSpacing, buttonWidth)) drawKeyMSG(conversation_1_MSG);
     else if (overRect(currXPos + textWidth(button_1 + button_2) + 4 * buttonSpacing, buttonsHeight, textWidth(button_3) + buttonSpacing, buttonWidth)) drawKeyMSG(conversation_2_MSG);
@@ -88,13 +88,13 @@ function overButtonsMSGS() {
 
 // Draw text for button message/information
 function drawKeyMSG(msg) {
-    var textBoxHeight = textSpacing * (ceil(textWidth(msg) / textBoxWidth)); // lines of talk in a text box rounded
-    var textBoxStart = speakerKeysHeight - (textBoxHeight + 2 * boxSpacing);
-    var yPosBubble = textBoxStart + textBoxHeight + 2 * boxSpacing;
+    let textBoxHeight = textSpacing * (ceil(textWidth(msg) / textBoxWidth)); // lines of talk in a text box rounded
+    let textBoxStart = speakerKeysHeight - (textBoxHeight + 2 * boxSpacing);
+    let yPosBubble = textBoxStart + textBoxHeight + 2 * boxSpacing;
     stroke(0);
     strokeWeight(1);
     fill(255, 225); // transparency for textbox
-    var xPos = 0;
+    let xPos = 0;
     if (width - mouseX < textBoxWidth / 2) xPos = width - textBoxWidth / 2 - 2 * boxSpacing;
     else xPos = mouseX;
     rect(xPos - boxSpacing - textBoxWidth / 2, textBoxStart, textBoxWidth + 2 * boxSpacing, textBoxHeight + 2 * boxSpacing);
@@ -112,9 +112,9 @@ function drawKeyMSG(msg) {
 }
 
 function drawHowToReadMSG() {
-    var textBoxHeight = textSpacing * (ceil(textWidth(howToReadMSG_1) / textBoxWidth)); // lines of talk in a text box rounded
-    var textBoxStart = height / 5;
-    var xPos = width / 2.1;
+    let textBoxHeight = textSpacing * (ceil(textWidth(howToReadMSG_1) / textBoxWidth)); // lines of talk in a text box rounded
+    let textBoxStart = height / 5;
+    let xPos = width / 2.1;
     stroke(0); //set color to black
     strokeWeight(1);
     fill(255, 225); // transparency for textbox
@@ -129,18 +129,18 @@ function drawHowToReadMSG() {
 function drawIntroMSG(msg) {
     textSize(keyTextSize);
     textFont(font_PlayfairReg);
-    var textBoxHeight = textSpacing * (ceil(textWidth(msg) / textBoxWidth)); // lines of talk in a text box rounded
-    var textBoxStart = speakerKeysHeight - (textBoxHeight + 2 * boxSpacing);
-    var yPosBubble = textBoxStart + textBoxHeight + 2 * boxSpacing;
+    let textBoxHeight = textSpacing * (ceil(textWidth(msg) / textBoxWidth)); // lines of talk in a text box rounded
+    let textBoxStart = speakerKeysHeight - (textBoxHeight + 2 * boxSpacing);
+    let yPosBubble = textBoxStart + textBoxHeight + 2 * boxSpacing;
     stroke(0);
     strokeWeight(1);
     fill(255, 225); // transparency for textbox
-    var xPos = width - textBoxWidth / 2 - 2 * boxSpacing;
+    let xPos = width - textBoxWidth / 2 - 2 * boxSpacing;
     rect(xPos - boxSpacing - textBoxWidth / 2, textBoxStart, textBoxWidth + 2 * boxSpacing, textBoxHeight + 2 * boxSpacing);
     fill(0);
     noStroke();
     text(msg, xPos - textBoxWidth / 2, textBoxStart + boxSpacing, textBoxWidth, textBoxWidth);
-    var xPosBubble = width - textBoxWidth / 3;
+    let xPosBubble = width - textBoxWidth / 3;
     // lines for cartoon bubble
     stroke(255);
     strokeWeight(2);
@@ -154,8 +154,8 @@ function drawIntroMSG(msg) {
 
 function overHowToReadButton() {
     if (!howToRead) {
-        for (var i = 0; i < paths.length; i++) {
-            var path = paths[i];
+        for (let i = 0; i < paths.length; i++) {
+            let path = paths[i];
             if (path.speaker != 'T') path.show = false;
             else path.show = true; // ensure teacher path is showed
         }
@@ -168,18 +168,18 @@ function overHowToReadButton() {
 function overAnimateButton() {
     if (animation) {
         animation = false;
-        var initialValue = map(currPixelTimeMax, timelineStart, timelineEnd, 0, animationMaxValue);
+        let initialValue = map(currPixelTimeMax, timelineStart, timelineEnd, 0, animationMaxValue);
         animationCounter = animationMaxValue;
     } else {
         animation = true;
-        var initialValue = map(currPixelTimeMin, timelineStart, timelineEnd, 0, animationMaxValue);
+        let initialValue = map(currPixelTimeMin, timelineStart, timelineEnd, 0, animationMaxValue);
         animationCounter = initialValue; // reset animation if playing/already played
     }
 }
 
 function handleTimeline() {
-    var xPosLeftSelector = currPixelTimeMin;
-    var xPosRightSelector = currPixelTimeMax;
+    let xPosLeftSelector = currPixelTimeMin;
+    let xPosRightSelector = currPixelTimeMax;
 
     // 3 types of selection that work together
     if (lockedLeft || (!lockedRight && overRect(xPosLeftSelector - selSpacing, yPosTimeScaleTop, 2 * selSpacing, yPosTimeScaleSize))) {
@@ -195,8 +195,8 @@ function handleTimeline() {
 
 // Tests if over circle with x, y and diameter
 function overCircle(x, y, diameter) {
-    var disX = x - mouseX;
-    var disY = y - mouseY;
+    let disX = x - mouseX;
+    let disY = y - mouseY;
     if (sqrt(sq(disX) + sq(disY)) < diameter / 2) {
         return true;
     } else {
