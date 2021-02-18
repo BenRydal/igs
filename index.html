@@ -3,9 +3,13 @@
 <head>
     <script src="https://cdn.jsdelivr.net/npm/p5@0.10.2/lib/p5.js"></script>
     <script type="text/javascript" src="https://www.youtube.com/iframe_api"></script>
+    <script src="js/papaparse.min.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/setData.js"></script>
     <script src="js/main.js"></script>
     <script src="js/load-data.js"></script>
     <script src="js/gui.js"></script>
+    <script src="js/input.js"></script>
     <script src="js/keys.js"></script>
     <script src="js/draw-data.js"></script>
     <script src="js/video.js"></script>
@@ -13,6 +17,13 @@
 </head>
 
 <body>
+    <input type="file" onchange="readMovementFiles(this)" multiple>
+    <input type="file" onchange="readInputConversationFile(this)">
+    <input type="file" onchange="readImageFile(this)">
+    <input type="file" onchange="readVideoFile(this)">
+
+    <!-- <input type="file" name="file" id="file" class="inputfile" />
+    <label for="file">Choose a file</label> -->
 </body>
 
 </html>

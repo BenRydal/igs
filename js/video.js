@@ -45,19 +45,8 @@ function playPauseMovie() {
         videoPlayer.pause();
         videoIsPlaying = false;
     } else {
-        videoPlayer.seekTo(videoCurrTime, true);
         videoPlayer.play();
+        videoPlayer.seekTo(videoCurrTime);
         videoIsPlaying = true;
     }
-}
-
-// Pauses video, assumes boolean videoIsPlaying is set
-function pauseMovie() {
-    videoPlayer.pause();
-    videoIsPlaying = false;
-}
-
-// Returns the current time of the video
-function getMovieCurrentTime() {
-    return videoPlayer.getCurrentTime();
 }

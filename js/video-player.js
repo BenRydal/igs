@@ -5,13 +5,33 @@ the scenes, achieve the functionality in different ways (by relying on platform-
 
 But because JS is dynamically typed, we don't actually need to declare a VideoPlayer interface.
 Any additional implementation of VideoPlayer should have the following methods:
-    seekTo(time), play(), pause(), mute(), unMute(), getCurrentTime()
+    seekTo(time), play(), pause(), mute(), unMute(), getCurrentTime(), getVideoDuration()
 
 Note the params variable passed into the constructors, this is designed to be a dictionary
 containing any relevant settings that are used to initailize the player to the correct video.
 This params variable is declared in main.js and is called 'videoParams'; note that in setupMovie,
 the 'targetId' is added to the params to specify the div holding the player
 **********************************************************************************************/
+
+// ******* INPUT VIDEO PLATFORMS *******
+// 3 platforms, 'File', 'YouTube', 'Kaltura' see video-player.js for more details
+// For videoPlatform 'File', videoparams expects 1 item, the fileName, videoParams = { fileName: 'your_fileName_here' };
+// let videoPlatform = 'File'; // what platform the video is being hosted on, specifies what videoPlayer should be instantiated during setupMovie
+// let videoParams = { fileName: 'data/video.mp4' };
+
+// For videoPlatform 'Youtube', videoParams expects 1 item, the videoId, videoParams = { videoId: 'your_videoId_here' };
+// let videoPlatform = 'Youtube'; 
+// let videoParams = {
+//     videoId: 'Iu0rxb-xkMk'
+// };
+
+// For videoPlatform 'Kaltura', videoParams expects 3 items, the wid, uiconf_id, and entry_id, videoParams = { wid: 'your_wid_here', uiconf_id: 'your_uiconf_id_here', entry_id: 'your_entry_id_here' };
+// var videoPlatform = 'Kaltura';
+// var videoParams = {
+//     wid: '_1038472',
+//     uiconf_id: '33084471',
+//     entry_id: '1_9tp4soob'
+// };
 
 
 // This is the VideoPlayer implementation that utilizes the Kaltura Player Javascript API
@@ -72,8 +92,57 @@ class KalturaPlayer {
     getCurrentTime() {
         return this.player.evaluate('{video.player.currentTime}');
     }
+
+    getVideoDuration() {
+        return this.player.duration();
+    }
 }
 
+
+class FilePlayer {
+    
+    // For a FilePlayer, Main.js should have:
+    // videoPlatform = 'File';
+    // videoParams = { fileName: 'your_fileName_here' };
+
+    constructor(params) {
+        this.targetId = params['targetId'];
+        this.fileName = params['fileName'];
+        this.initialize();
+    }
+
+    initialize() {
+        movie.hideControls(); // hide default browser controls
+    }
+
+    seekTo(time) {
+        movie.time(time); // jumps to time parameter
+    }
+
+    play() {
+        movie.play();
+    }
+
+    pause() {
+        movie.pause();
+    }
+
+    mute() {
+        movie.volume(0);
+    }
+
+    unMute() {
+        movie.volume(1);
+    }
+
+    getCurrentTime() {
+        return movie.time();
+    }
+
+    getVideoDuration() {
+      return movie.duration();
+    }
+}
 
 // This is the VideoPlayer implementation that utilizes the Youtube Player API
 // Note to use a Youtube Player, the Youtube iFrame Player API must be loaded of the format:
@@ -122,5 +191,9 @@ class YoutubePlayer {
 
     getCurrentTime() {
         return this.player.getCurrentTime();
+    }
+
+    getVideoDuration() {
+        return this.player.getDuration();
     }
 }

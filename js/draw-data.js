@@ -57,7 +57,7 @@ class DrawDataMovement {
                     curveVertex(scaledTime, point.yPos);
                     if (videoIsPlaying) {
                         // convert video time value in seconds to pixel position                   
-                        let videoX = map(getMovieCurrentTime(), 0, totalTimeInSeconds, timelineStart, timelineEnd);
+                        let videoX = map(videoPlayer.getCurrentTime(), 0, totalTimeInSeconds, timelineStart, timelineEnd);
                         if (videoX >= scaledTime - bugPrecision && videoX <= scaledTime + bugPrecision) {
                             this.recordBug(point.xPos, point.yPos, scaledTime);
                         }
@@ -194,7 +194,7 @@ class DrawDataConversation {
         textSize(1); // determines how many pixels a string is which corresponds to vertical height of rectangle
         let scaledTime = map(point.time, currPixelTimeMin, currPixelTimeMax, timelineStart, timelineEnd);
         let minRectHeight = 3; // for really short conversation turns set a minimum
-        let rectWidthMin = ceil(turnCountPerSecond);
+        let rectWidthMin = ceil(conversationTable.getRowCount() / totalTimeInSeconds); // ceil average turn count per second
         let rectWidthMax = 20 + rectWidthMin; // add rectMin in case rare conversation file with more turns than length in seconds
         let value = map(currPixelTimeMax - currPixelTimeMin, 0, timelineLength, rectWidthMin, rectWidthMax);
         let rectWidth = (rectWidthMax + 2) - value;

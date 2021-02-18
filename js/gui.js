@@ -67,7 +67,7 @@ function overButtons() {
             video.style('height', videoHeightOnPause + '');
         } else {
             videoCurrTime = 0; // reset time to 0
-            pauseMovie();
+            playPauseMovie();
         }
     } else if (overRect(currXPos + textWidth(button_1 + button_2 + button_3 + button_4) + 8 * buttonSpacing, buttonsHeight, textWidth(button_5) + buttonSpacing, buttonWidth)) overHowToReadButton();
 
