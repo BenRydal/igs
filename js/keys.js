@@ -106,7 +106,7 @@ class Keys {
         // timeline selection rectangle
         fill(150, 150);
         noStroke();
-        if (animation) rect(currPixelTimeMin, timelineHeight - tickHeight, map(animationCounter, 0, animationMaxValue, timelineStart, timelineEnd) - currPixelTimeMin, 2 * (tickHeight));
+        if (animation) rect(currPixelTimeMin, timelineHeight - tickHeight, map(animationCounter, 0, totalTimeInSeconds, timelineStart, timelineEnd) - currPixelTimeMin, 2 * (tickHeight));
         else rect(currPixelTimeMin, timelineHeight - tickHeight, currPixelTimeMax - currPixelTimeMin, 2 * (tickHeight));
         // timeline
         stroke(0);

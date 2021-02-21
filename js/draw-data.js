@@ -48,24 +48,21 @@ class DrawDataMovement {
         stroke(shade);
         noFill(); // important for curve drawing
         beginShape();
-        for (let i = 0; i < animationCounter; i++) {
+        for (let i = 0; i < points.length; i++) {
             let point = points[i];
-            if (this.overTimeline(point.time)) {
+            if (this.overTimeline(point.time) && this.testAnimation(point.time)) {
                 let scaledTime = map(point.time, currPixelTimeMin, currPixelTimeMax, timelineStart, timelineEnd);
                 if (view == PLAN) curveVertex(point.xPos, point.yPos);
                 else if (view == SPACETIME) { // text/get bug values
                     curveVertex(scaledTime, point.yPos);
-                    if (videoIsPlaying) {
+                    if (animation) this.recordBug(point.xPos, point.yPos, scaledTime);
+                    else if (videoIsPlaying) {
                         // convert video time value in seconds to pixel position                   
                         let videoX = map(videoPlayer.getCurrentTime(), 0, totalTimeInSeconds, timelineStart, timelineEnd);
                         if (videoX >= scaledTime - bugPrecision && videoX <= scaledTime + bugPrecision) {
                             this.recordBug(point.xPos, point.yPos, scaledTime);
                         }
-                    } else if (mouseY < timelineHeight && mouseX >= scaledTime - bugPrecision && mouseX <= scaledTime + bugPrecision) {
-                        this.recordBug(point.xPos, point.yPos, scaledTime);
-                    } else if (animation && i <= animationCounter - 1) {
-                        this.recordBug(point.xPos, point.yPos, scaledTime);
-                    }
+                    } else if (mouseY < timelineHeight && mouseX >= scaledTime - bugPrecision && mouseX <= scaledTime + bugPrecision) this.recordBug(point.xPos, point.yPos, scaledTime);
                 }
             }
         }
@@ -78,11 +75,11 @@ class DrawDataMovement {
         stroke(shade);
         noFill(); // important for curve drawing
         let drawVertex = false; // set false to start
-        for (let i = 0; i < animationCounter; i++) {
+        for (let i = 0; i < points.length; i++) {
             let drawEndpoint = false; // boolean to draw additional endpoints for each shape to make sure all points included
             let point = points[i];
             // Tests if overTimeline and mouse selection and adjusts begin/end shape and boolean drawVertex to draw only that shape
-            if (this.overTimeline(point.time) && this.overCursor(point.xPos, point.yPos)) {
+            if (this.overTimeline(point.time) && this.overCursor(point.xPos, point.yPos) && this.testAnimation(point.time)) {
                 if (!drawVertex) { // beginShape if no shape yet and set drawVertex to true
                     beginShape();
                     drawEndpoint = true;
@@ -110,15 +107,23 @@ class DrawDataMovement {
     }
 
     overTimeline(timeValue) {
-        if (timeValue >= currPixelTimeMin && timeValue <= currPixelTimeMax) return true;
-        else return false;
+        return timeValue >= currPixelTimeMin && timeValue <= currPixelTimeMax;
     }
 
     overCursor(xPos, yPos) {
-        if (overCircle(xPos, yPos, 50)) return true;
-        else return false;
+        return overCircle(xPos, yPos, 50);
     }
 
+    // If animation on, returns true if time is less than counter. Returns true if animation is off.
+    testAnimation(timeValue) {
+        if (animation) {
+            let reMapTime = map(timeValue, timelineStart, timelineEnd, 0, totalTimeInSeconds);
+            return animationCounter > reMapTime && currPixelTimeMax > reMapTime;
+        } else return true;
+    }
+    //return timeValue <= map(animationCounter, 0, totalTimeInSeconds, timelineStart, timelineEnd) - currPixelTimeMin;
+    // return timeValue <= map(animationCounter, 0, totalTimeInSeconds, currPixelTimeMin, currPixelTimeMax);
+    //return timeValue <= map(animationCounter, 0, totalTimeInSeconds, currPixelTimeMin, currPixelTimeMax);
     resetBug() {
         this.bugXPos = -1;
         this.bugYPos = -1;
@@ -174,8 +179,7 @@ class DrawDataConversation {
 
     // Test if point is showing and send to draw Rect depending on conversation mode
     setRects(points, pathName) {
-        let conversationAnimationRatio = float(animationCounter) / float(animationMaxValue); // for animation of conversation at same speed as movement
-        for (let i = 0; i < floor(points.length * conversationAnimationRatio); i++) {
+        for (let i = 0; i < points.length; i++) {
             let point = points[i];
             if (point.time >= currPixelTimeMin && point.time <= currPixelTimeMax) {
                 let curSpeaker = this.getSpeakerObject(points[i].speaker); // get speaker object equivalent to character
@@ -194,7 +198,7 @@ class DrawDataConversation {
         textSize(1); // determines how many pixels a string is which corresponds to vertical height of rectangle
         let scaledTime = map(point.time, currPixelTimeMin, currPixelTimeMax, timelineStart, timelineEnd);
         let minRectHeight = 3; // for really short conversation turns set a minimum
-        let rectWidthMin = ceil(conversationTable.getRowCount() / totalTimeInSeconds); // ceil average turn count per second
+        let rectWidthMin = ceil(conversationFileResults.length / totalTimeInSeconds); // ceil average turn count per second
         let rectWidthMax = 20 + rectWidthMin; // add rectMin in case rare conversation file with more turns than length in seconds
         let value = map(currPixelTimeMax - currPixelTimeMin, 0, timelineLength, rectWidthMin, rectWidthMax);
         let rectWidth = (rectWidthMax + 2) - value;

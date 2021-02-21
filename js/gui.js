@@ -168,12 +168,10 @@ function overHowToReadButton() {
 function overAnimateButton() {
     if (animation) {
         animation = false;
-        let initialValue = map(currPixelTimeMax, timelineStart, timelineEnd, 0, animationMaxValue);
-        animationCounter = animationMaxValue;
+        animationCounter = map(currPixelTimeMax, timelineStart, timelineEnd, 0, totalTimeInSeconds); // set to currPixelTimeMax mapped value
     } else {
         animation = true;
-        let initialValue = map(currPixelTimeMin, timelineStart, timelineEnd, 0, animationMaxValue);
-        animationCounter = initialValue; // reset animation if playing/already played
+        animationCounter = map(currPixelTimeMin, timelineStart, timelineEnd, 0, totalTimeInSeconds); // set to currPixelTimeMin mapped value
     }
 }
 

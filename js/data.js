@@ -1,26 +1,23 @@
-// ******* INPUT VARIABLES *******
-let movementDataTables = []; // holds # of movement files for data processing
-let movementFileFirstLetters = ['Teacher.csv']; // holds list of movement files, first letter of file is used to associate with speaker
-let conversationTable; // holds conversation file
-let floorPlan; // holder for floor plan image
-let speakerList = []; // holds speaker objects loaded from conversation file
-let paths = []; // holder for each person
-
-
-let rowCounts = []; // list to sort max/min number of movement points in each path
-
-
-let movementHeaders = ['time', 'x', 'y']; // multiple movement files formatted in this way
-let conversationHeaders = ['time', 'speaker', 'talk']; // need 1 conversation file formatted in this way
 let totalTimeInSeconds = 3353; // total time of all data including video
 
+// ******* INPUT VARIABLES *******
+let floorPlan; // holds floor plan image for display
+let conversationFileResults; // holds parsed conversation file, globally important for file loading
+let speakerList = []; // holds speaker objects parsed from conversation file
+let paths = []; // holds path objects for each unique set of movement and conversation points
 
-//******* DATA CONTROLS*******
-const dataSamplingRate = 1; // rate movement data is sampled, increase to speed up program
-let animationMaxValue, animationCounter = 0; // controls animation
+// ******* EXAMPLE DATA *******
+const example_1 = ['data/example-1/', 'floorplan.png', 'conversation.csv', ['Teacher.csv', 'Student.csv'], 'Youtube', {
+    videoId: 'Iu0rxb-xkMk'
+}];
+
+// ******* FILE HEADERS *******
+const movementHeaders = ['time', 'x', 'y']; // multiple movement files formatted in this way
+const conversationHeaders = ['time', 'speaker', 'talk']; // need 1 conversation file formatted in this way
+
+// ******* GUI *******
+const dataSamplingRate = 30; // rate movement data is sampled, increase to speed up program
 const PLAN = 0, SPACETIME = 1; // constants to indicate plan or space-time views
-
-//******* GUI *******
 let movementKeyTitle = true;
 let conversationPositionTop = false; // controls positioning of conversation turns on path or top of screen
 let allConversation = false; // controls showing all or matching speaker conversation turns on path
@@ -35,10 +32,10 @@ const colorGray = 150;
 const pathWeight = 3;
 const basePathColor = 100; // for paths that don't have associated speaker in speakerList
 
-// 5 Modes
-let animation = true,
-    videoMode = false,
-    howToRead = false;
+let animationCounter = 0; // controls animation
+let animation = true;
+let videoMode = false;
+let howToRead = false;
 // 5 Buttons correspond to modes
 let button_1 = "Animate",
     button_2 = "Align Talk",
@@ -52,8 +49,10 @@ let textBoxWidth, textSpacing, boxSpacing, boxDistFromRect;
 let inputFloorPlanPixelWidth, inputFloorPlanPixelHeight, displayFloorPlanWidth, displayFloorPlanHeight;
 
 // Timeline
-let lockedLeft = false, lockedRight = false;
-let selSpacing = 20, tickHeight = 20;
+let lockedLeft = false,
+    lockedRight = false;
+let selSpacing = 20,
+    tickHeight = 20;
 let currPixelTimeMin, currPixelTimeMax;
 let yPosTimeScaleTop, yPosTimeScaleBottom, yPosTimeScaleSize;
 let timelineStart, timelineEnd, timelineHeight, timelineLength;
@@ -102,7 +101,7 @@ class Path {
         this.conversation = []; // Point_Conversation objects
         this.show = true;
         this.name = pathName;
-        this.color = pathColor
+        this.color = pathColor;
     }
 }
 

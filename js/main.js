@@ -5,20 +5,15 @@ CREDITS/LICENSE INFORMATION: This software is  licensed under the GNU General Pu
 */
 
 // TO DO:
-// update CONST!
 // Conversation table error handling what if speakerList is 0?? e.g., how does getSpeakerObject work?
 // basic error handling
-// check animationMaxValue and video duration--how does program use/compare both, maybe can remove rowCounts []
-// test/fix use of initialValue for animation work
 // total time in seconds move to data loading to set automatically
 // fix bug to always show last value if over to prevent blinking
 // Remove some fonts
 // check if removing "pause video" function screwed up bug line/shows at 0???
-
 // MOVIE TO DOS
 // Add get movieLength Function to all filePlayers...print(videoPlayer.getVideoDuration());
 // if too difficult, try loading from movement file?
-
 
 // Loads fonts, floor plan, and CSV file into p5.Table objects so that they can manipulated later
 function preload() {
@@ -26,7 +21,7 @@ function preload() {
     font_PlayfairItalic = loadFont("data/fonts/PlayfairDisplay-Italic.ttf");
     font_Playfairbold = loadFont("data/fonts/PlayfairDisplay-Bold.ttf");
     font_Lato = loadFont("data/fonts/Lato-Light.ttf");
-    loadTIMMSExample();
+    loadExample(example_1);
 }
 
 function setup() {
@@ -35,7 +30,6 @@ function setup() {
     textFont(font_Lato, 14);
     textAlign(LEFT, TOP);
     setGUI();
-    processData();
 }
 
 function draw() {
@@ -60,7 +54,8 @@ function draw() {
 }
 
 function setUpAnimation() {
-    let initialValue = map(currPixelTimeMax, timelineStart, timelineEnd, 0, animationMaxValue);
-    if (animationCounter < initialValue) animationCounter++; // updates animation
-    else animation = false;
+    if (animation) {
+        if (animationCounter < map(currPixelTimeMax, timelineStart, timelineEnd, 0, totalTimeInSeconds)) animationCounter++; // updates animation
+        else animation = false;
+    }
 }
