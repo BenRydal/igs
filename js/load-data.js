@@ -95,10 +95,9 @@ function processMovementFile(results, file) {
     m.xPos = results.data[i][movementHeaders[1]];
     m.yPos = results.data[i][movementHeaders[2]];
     movement.push(m); // always add to movement
-    // load conversation turn if first time vlaue of row >= to time of conversation turn and increment counter
-    if (m.time <= conversationFileResults[conversationCounter][conversationHeaders[0]]) continue;
-    else {
-      if (conversationCounter < conversationFileResults.length) {
+    // load conversation turn and increment counter if movement time is larger than time in conversationFile results at curCounter
+    if (conversationCounter < conversationFileResults.length) {
+      if (m.time >= conversationFileResults[conversationCounter][conversationHeaders[0]]) {
         conversation.push(processConversation(conversationCounter, m.xPos, m.yPos));
         conversationCounter++; // increment counter for next comparison
       }
