@@ -1,13 +1,19 @@
+// PUt in movement and remove map totaltimeinseconds from parse movement file?
 let totalTimeInSeconds = 3353; // total time of all data including video
 
 // ******* INPUT VARIABLES *******
 let floorPlan; // holds floor plan image for display
+let movementFiles = [];
 let conversationFileResults; // holds parsed conversation file, globally important for file loading
 let speakerList = []; // holds speaker objects parsed from conversation file
 let paths = []; // holds path objects for each unique set of movement and conversation points
 
 // ******* EXAMPLE DATA *******
 const example_1 = ['data/example-1/', 'floorplan.png', 'conversation.csv', ['Teacher.csv', 'Student.csv'], 'Youtube', {
+    videoId: 'Iu0rxb-xkMk'
+}];
+
+const example_2 = ['data/example-2/', 'floorplan.png', 'conversation.csv', ['Teacher.csv', 'Student.csv'], 'Youtube', {
     videoId: 'Iu0rxb-xkMk'
 }];
 
