@@ -1,7 +1,4 @@
-// PUt in movement and remove map totaltimeinseconds from parse movement file?
-let totalTimeInSeconds = 3353; // total time of all data including video
-
-// ******* INPUT VARIABLES *******
+// ******* FILE & DATA VARIABLES *******
 let floorPlan; // holds floor plan image for display
 let movementFiles = [];
 let conversationFileResults; // holds parsed conversation file, globally important for file loading
@@ -9,10 +6,10 @@ let speakerList = []; // holds speaker objects parsed from conversation file
 let paths = []; // holds path objects for each unique set of movement and conversation points
 
 // ******* EXAMPLE DATA *******
-const example_1 = ['data/example-1/', 'floorplan.png', 'conversation.csv', ['Teacher.csv', 'Student.csv'], 'Youtube', {
+// folder, floorplan, conversationFile, movementFile[], video platform, video params (see Video Player Interface)
+const example_1 = ['data/example-1/', 'floorplan.png', 'conversation.csv', ['Teacher.csv'], 'Youtube', {
     videoId: 'Iu0rxb-xkMk'
 }];
-
 const example_2 = ['data/example-2/', 'floorplan.png', 'conversation.csv', ['Teacher.csv', 'Student.csv'], 'Youtube', {
     videoId: 'Iu0rxb-xkMk'
 }];
@@ -23,6 +20,7 @@ const conversationHeaders = ['time', 'speaker', 'talk']; // need 1 conversation 
 
 // ******* GUI *******
 const dataSamplingRate = 30; // rate movement data is sampled, increase to speed up program
+let totalTimeInSeconds = 0; // global time value that all data corresponds to, dynamically set and updated in processMovementFiles
 const PLAN = 0, SPACETIME = 1; // constants to indicate plan or space-time views
 let movementKeyTitle = true;
 let conversationPositionTop = false; // controls positioning of conversation turns on path or top of screen

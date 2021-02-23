@@ -32,7 +32,7 @@ function loadExample(params) {
           movementFiles.push(file);
           parseExampleMovementFile(file);
         }).catch(function (error) {
-          // print("Error loading example movement file");
+          print("Error loading example movement file");
         });
         resolve();
       })));
@@ -91,12 +91,12 @@ function processMovementFile(results, file) {
   let conversationCounter = 0;
   for (let i = 0; i < results.data.length; i += dataSamplingRate) { // sampling rate reduces data size
     let m = new Point_Movement();
-    m.time = map(results.data[i][movementHeaders[0]], 0, totalTimeInSeconds, timelineStart, timelineEnd); // map to timeline pixel values
-    m.xPos = results.data[i][movementHeaders[1]] * displayFloorPlanWidth / inputFloorPlanPixelWidth; // scale to floor plan image file
-    m.yPos = results.data[i][movementHeaders[2]] * displayFloorPlanHeight / inputFloorPlanPixelHeight;
+    m.time = results.data[i][movementHeaders[0]];
+    m.xPos = results.data[i][movementHeaders[1]];
+    m.yPos = results.data[i][movementHeaders[2]];
     movement.push(m); // always add to movement
     // load conversation turn if first time vlaue of row >= to time of conversation turn and increment counter
-    if (results.data[i][movementHeaders[0]] <= conversationFileResults[conversationCounter][conversationHeaders[0]]) continue;
+    if (m.time <= conversationFileResults[conversationCounter][conversationHeaders[0]]) continue;
     else {
       if (conversationCounter < conversationFileResults.length) {
         conversation.push(processConversation(conversationCounter, m.xPos, m.yPos));
@@ -107,6 +107,8 @@ function processMovementFile(results, file) {
   let p = new Path(file.name.charAt(0), basePathColor); // initialize with name and grey/black color
   p.movement = movement;
   p.conversation = conversation;
+  // Update global total time, make sure to cast/floor values as integers
+  if (totalTimeInSeconds < Math.floor(movement[movement.length-1].time)) totalTimeInSeconds = Math.floor(movement[movement.length-1].time);
   // If any speakerObjects have same name as path filename, make path same color
   for (let i = 0; i < speakerList.length; i++) {
     if (speakerList[i].name === file.name.charAt(0)) p.color = speakerList[i].color;
@@ -114,11 +116,20 @@ function processMovementFile(results, file) {
   paths.push(p);
 }
 
+
+// if (m.time <= conversationFileResults[conversationCounter][conversationHeaders[0]]) continue;
+// else {
+//   if (conversationCounter < conversationFileResults.length) {
+//     conversation.push(processConversation(conversationCounter, m.xPos, m.yPos));
+//     conversationCounter++; // increment counter for next comparison
+//   }
+
+
 function processConversation(index, xPos, yPos) {
   let c = new Point_Conversation();
   c.xPos = xPos; // set to x/y pos in movement file case
   c.yPos = yPos;
-  c.time = map(conversationFileResults[index][conversationHeaders[0]], 0, totalTimeInSeconds, timelineStart, timelineEnd);
+  c.time = conversationFileResults[index][conversationHeaders[0]];
   c.speaker = conversationFileResults[index][conversationHeaders[1]];
   c.talkTurn = conversationFileResults[index][conversationHeaders[2]];
   return c;

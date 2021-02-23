@@ -50,19 +50,22 @@ class DrawDataMovement {
         beginShape();
         for (let i = 0; i < points.length; i++) {
             let point = points[i];
-            if (this.overTimeline(point.time) && this.testAnimation(point.time)) {
-                let scaledTime = map(point.time, currPixelTimeMin, currPixelTimeMax, timelineStart, timelineEnd);
-                if (view == PLAN) curveVertex(point.xPos, point.yPos);
+            let pixelTime = map(point.time, 0, totalTimeInSeconds, timelineStart, timelineEnd);
+            if (this.overTimeline(pixelTime) && this.testAnimation(pixelTime)) {
+                let scaledTime = map(pixelTime, currPixelTimeMin, currPixelTimeMax, timelineStart, timelineEnd);
+                let scaledXPos = point.xPos * displayFloorPlanWidth / inputFloorPlanPixelWidth; // scale to floor plan image file
+                let scaledYPos = point.yPos * displayFloorPlanHeight / inputFloorPlanPixelHeight; // scale to floor plan image file
+                if (view == PLAN) curveVertex(scaledXPos, scaledYPos);
                 else if (view == SPACETIME) { // text/get bug values
-                    curveVertex(scaledTime, point.yPos);
-                    if (animation) this.recordBug(point.xPos, point.yPos, scaledTime);
+                    curveVertex(scaledTime, scaledYPos);
+                    if (animation) this.recordBug(scaledXPos, scaledYPos, scaledTime);
                     else if (videoIsPlaying) {
                         // convert video time value in seconds to pixel position                   
                         let videoX = map(videoPlayer.getCurrentTime(), 0, totalTimeInSeconds, timelineStart, timelineEnd);
                         if (videoX >= scaledTime - bugPrecision && videoX <= scaledTime + bugPrecision) {
-                            this.recordBug(point.xPos, point.yPos, scaledTime);
+                            this.recordBug(scaledXPos, scaledYPos, scaledTime);
                         }
-                    } else if (mouseY < timelineHeight && mouseX >= scaledTime - bugPrecision && mouseX <= scaledTime + bugPrecision) this.recordBug(point.xPos, point.yPos, scaledTime);
+                    } else if (mouseY < timelineHeight && mouseX >= scaledTime - bugPrecision && mouseX <= scaledTime + bugPrecision) this.recordBug(scaledXPos, scaledYPos, scaledTime);
                 }
             }
         }
@@ -78,8 +81,11 @@ class DrawDataMovement {
         for (let i = 0; i < points.length; i++) {
             let drawEndpoint = false; // boolean to draw additional endpoints for each shape to make sure all points included
             let point = points[i];
+            let pixelTime = map(point.time, 0, totalTimeInSeconds, timelineStart, timelineEnd);
+            let scaledXPos = point.xPos * displayFloorPlanWidth / inputFloorPlanPixelWidth; // scale to floor plan image file
+            let scaledYPos = point.yPos * displayFloorPlanHeight / inputFloorPlanPixelHeight; // scale to floor plan image file
             // Tests if overTimeline and mouse selection and adjusts begin/end shape and boolean drawVertex to draw only that shape
-            if (this.overTimeline(point.time) && this.overCursor(point.xPos, point.yPos) && this.testAnimation(point.time)) {
+            if (this.overTimeline(pixelTime) && this.overCursor(scaledXPos, scaledYPos) && this.testAnimation(pixelTime)) {
                 if (!drawVertex) { // beginShape if no shape yet and set drawVertex to true
                     beginShape();
                     drawEndpoint = true;
@@ -94,12 +100,12 @@ class DrawDataMovement {
             }
             // Draw vertex if true in space and space-time
             if (drawVertex || drawEndpoint) {
-                let scaledTime = map(point.time, currPixelTimeMin, currPixelTimeMax, timelineStart, timelineEnd);
-                if (view == PLAN) curveVertex(point.xPos, point.yPos);
-                else if (view == SPACETIME) curveVertex(scaledTime, point.yPos);
+                let scaledTime = map(pixelTime, currPixelTimeMin, currPixelTimeMax, timelineStart, timelineEnd);
+                if (view == PLAN) curveVertex(scaledXPos, scaledYPos);
+                else if (view == SPACETIME) curveVertex(scaledTime, scaledYPos);
                 if (drawEndpoint) {
-                    if (view == PLAN) curveVertex(point.xPos, point.yPos);
-                    else if (view == SPACETIME) curveVertex(scaledTime, point.yPos);
+                    if (view == PLAN) curveVertex(scaledXPos, scaledYPos);
+                    else if (view == SPACETIME) curveVertex(scaledTime, scaledYPos);
                 }
             }
         }
@@ -181,7 +187,8 @@ class DrawDataConversation {
     setRects(points, pathName) {
         for (let i = 0; i < points.length; i++) {
             let point = points[i];
-            if (point.time >= currPixelTimeMin && point.time <= currPixelTimeMax) {
+            let pixelTime = map(point.time, 0, totalTimeInSeconds, timelineStart, timelineEnd);
+            if (pixelTime >= currPixelTimeMin && pixelTime <= currPixelTimeMax) {
                 let curSpeaker = this.getSpeakerObject(points[i].speaker); // get speaker object equivalent to character
                 if (curSpeaker.show) {
                     if (allConversation) this.drawRects(point, curSpeaker.color); // draws all rects
@@ -196,7 +203,8 @@ class DrawDataConversation {
     drawRects(point, curColor) {
         noStroke(); // reset if setDrawText is called previously in loop
         textSize(1); // determines how many pixels a string is which corresponds to vertical height of rectangle
-        let scaledTime = map(point.time, currPixelTimeMin, currPixelTimeMax, timelineStart, timelineEnd);
+        let pixelTime = map(point.time, 0, totalTimeInSeconds, timelineStart, timelineEnd);
+        let scaledTime = map(pixelTime, currPixelTimeMin, currPixelTimeMax, timelineStart, timelineEnd);
         let minRectHeight = 3; // for really short conversation turns set a minimum
         let rectWidthMin = ceil(conversationFileResults.length / totalTimeInSeconds); // ceil average turn count per second
         let rectWidthMax = 20 + rectWidthMin; // add rectMin in case rare conversation file with more turns than length in seconds
@@ -204,10 +212,10 @@ class DrawDataConversation {
         let rectWidth = (rectWidthMax + 2) - value;
         let rectLength = textWidth(point.talkTurn);
         if (rectLength < minRectHeight) rectLength = minRectHeight; // set small strings to minimum
-        let xPos = point.xPos;
+        let xPos = point.xPos * displayFloorPlanWidth / inputFloorPlanPixelWidth; // scale to floor plan image file
         let yPos;
         if (conversationPositionTop) yPos = 0; // if conversation turn positioning is at top of screen
-        else yPos = point.yPos - rectLength;
+        else yPos = point.yPos * displayFloorPlanHeight / inputFloorPlanPixelHeight - rectLength;
         // setText sets stroke/strokeWeight to highlight rect if selected
         if (overRect(xPos, yPos, rectWidth, rectLength)) this.setText(point, PLAN); // if over plan
         else if (overRect(scaledTime, yPos, rectWidth, rectLength)) this.setText(point, SPACETIME); // if over spacetime
@@ -236,10 +244,11 @@ class DrawDataConversation {
         textFont(font_Lato, keyTextSize);
         textLeading(textSpacing);
         let point = this.conversationToDraw;
-        let scaledTime = map(point.time, currPixelTimeMin, currPixelTimeMax, timelineStart, timelineEnd);
+        let pixelTime = map(point.time, 0, totalTimeInSeconds, timelineStart, timelineEnd);
+        let scaledTime = map(pixelTime, currPixelTimeMin, currPixelTimeMax, timelineStart, timelineEnd);
         let textBoxHeight = textSpacing * (ceil(textWidth(point.talkTurn) / textBoxWidth)); // lines of talk in a text box rounded up
         let xPos; // set xPos, constrain prevents drawing off screen
-        if (this.view == PLAN) xPos = constrain(point.xPos - textBoxWidth / 2, boxSpacing, width - textBoxWidth - boxSpacing);
+        if (this.view == PLAN) xPos = constrain((point.xPos * displayFloorPlanWidth / inputFloorPlanPixelWidth) - textBoxWidth / 2, boxSpacing, width - textBoxWidth - boxSpacing);
         else xPos = constrain(scaledTime - textBoxWidth / 2, 0, width - textBoxWidth - boxSpacing);
         let yPos, yDif;
         if (mouseY < height / 2) { //if top half of screen, text box below rectangle

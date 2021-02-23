@@ -195,19 +195,10 @@ function handleTimeline() {
 function overCircle(x, y, diameter) {
     let disX = x - mouseX;
     let disY = y - mouseY;
-    if (sqrt(sq(disX) + sq(disY)) < diameter / 2) {
-        return true;
-    } else {
-        return false;
-    }
+    return sqrt(sq(disX) + sq(disY)) < diameter / 2;
 }
 
 // Tests if over rectangle with x, y, and width/height
 function overRect(x, y, boxWidth, boxHeight) {
-    if (mouseX >= x && mouseX <= x + boxWidth &&
-        mouseY >= y && mouseY <= y + boxHeight) {
-        return true;
-    } else {
-        return false;
-    }
+    return mouseX >= x && mouseX <= x + boxWidth && mouseY >= y && mouseY <= y + boxHeight;
 }
