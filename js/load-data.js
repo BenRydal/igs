@@ -170,6 +170,7 @@ function updateSpeakerList() {
 function parseInputVideoFile(input) {
   let file = input.files[0];
   let fileLocation = URL.createObjectURL(file);
+  videoPlayer.destroy(); // destroy exisiting player
   movie.remove(); // remove exisiting movie element
   processVideo('File', {
     fileName: fileLocation
@@ -193,7 +194,7 @@ function processVideo(videoPlatform, videoParams) {
   movie.id('moviePlayer');
   movie.style('display', 'none');
   setupMovie('moviePlayer', videoPlatform, videoParams); // set up the video player
-  // NEED? let video = select('#moviePlayer').position(timelineStart, 0); // position video in upper left corner on timeline
+  let video = select('#moviePlayer').position(timelineStart, 0); // position video in upper left corner on timeline
 }
 
 function testMovementHeaders(data, meta) {

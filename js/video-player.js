@@ -5,7 +5,7 @@ the scenes, achieve the functionality in different ways (by relying on platform-
 
 But because JS is dynamically typed, we don't actually need to declare a VideoPlayer interface.
 Any additional implementation of VideoPlayer should have the following methods:
-    seekTo(time), play(), pause(), mute(), unMute(), getCurrentTime(), getVideoDuration()
+    seekTo(time), play(), pause(), mute(), unMute(), getCurrentTime(), getVideoDuration(), destroy()
 
 Note the params variable passed into the constructors, this is designed to be a dictionary
 containing any relevant settings that are used to initailize the player to the correct video.
@@ -96,6 +96,9 @@ class KalturaPlayer {
     getVideoDuration() {
         return this.player.duration();
     }
+
+    destroy() {
+    }
 }
 
 
@@ -142,6 +145,9 @@ class FilePlayer {
     getVideoDuration() {
       return movie.duration();
     }
+
+    destroy() {
+      }
 }
 
 // This is the VideoPlayer implementation that utilizes the Youtube Player API
@@ -195,5 +201,9 @@ class YoutubePlayer {
 
     getVideoDuration() {
         return this.player.getDuration();
+    }
+
+    destroy() {
+        this.player.destroy();
     }
 }
