@@ -1,7 +1,7 @@
 // ******* FILE & DATA VARIABLES *******
 let floorPlan; // holds floor plan image for display
 let movementFiles = [];
-let conversationFileResults; // holds parsed conversation file, globally important for file loading
+let conversationFileResults = []; // holds parsed conversation file, globally important for file loading
 let speakerList = []; // holds speaker objects parsed from conversation file
 let paths = []; // holds path objects for each unique set of movement and conversation points
 
@@ -19,6 +19,7 @@ const movementHeaders = ['time', 'x', 'y']; // multiple movement files formatted
 const conversationHeaders = ['time', 'speaker', 'talk']; // need 1 conversation file formatted in this way
 
 // ******* GUI *******
+let updateData = false; // controls accepting first input file to trigger update data processing
 const dataSamplingRate = 30; // rate movement data is sampled, increase to speed up program
 let totalTimeInSeconds = 0; // global time value that all data corresponds to, dynamically set and updated in processMovementFiles
 const PLAN = 0, SPACETIME = 1; // constants to indicate plan or space-time views

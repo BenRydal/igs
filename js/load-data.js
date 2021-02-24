@@ -29,7 +29,6 @@ function loadExample(params) {
             type: "text/csv",
           })
         }).then(function (file) {
-          movementFiles.push(file);
           parseExampleMovementFile(file);
         }).catch(function (error) {
           print("Error loading example movement file");
@@ -43,10 +42,12 @@ function loadExample(params) {
 function parseInputFloorPlanFile(input) {
   let file = input.files[0];
   let fileLocation = URL.createObjectURL(file);
-  processFloorPlan(loadImage(fileLocation));
-  // img.onload = function() {
-  //   URL.revokeObjectURL(this.src);
-  // }
+  loadImage(fileLocation, img => {
+    processFloorPlan(img);
+    img.onload = function () {
+      URL.revokeObjectURL(this.src);
+    }
+  });
 }
 
 // From image file, sets floor plan width/height to display and scale movement data
@@ -66,6 +67,7 @@ function parseExampleMovementFile(input) {
 
 // Parses all input selected movement files
 function parseInputMovementFile(input) {
+  updateData = true; // trigger update data
   for (let i = 0; i < input.files.length; i++) {
     let file = input.files[i];
     Papa.parse(file, {
@@ -78,10 +80,10 @@ function parseInputMovementFile(input) {
 // Tests movement file formatting
 function testMovementFile(results, file) {
   console.log("Parsing complete:", results, file);
-  //if (testMovementHeaders(results.data, results.meta.fields)) processMovementFile(results);
+  //if (testMovementHeaders(results.data, results.meta.fields))
+  if (updateData) clearDataMovementFileInput(); // clear data if first accepted file
+  movementFiles.push([results, file]);
   processMovementFile(results, file);
-  // if first file, clearData(); // clear exisiting data
-  // if last file, processData();
 }
 
 // Processes array of movement data
@@ -107,22 +109,13 @@ function processMovementFile(results, file) {
   p.movement = movement;
   p.conversation = conversation;
   // Update global total time, make sure to cast/floor values as integers
-  if (totalTimeInSeconds < Math.floor(movement[movement.length-1].time)) totalTimeInSeconds = Math.floor(movement[movement.length-1].time);
+  if (totalTimeInSeconds < Math.floor(movement[movement.length - 1].time)) totalTimeInSeconds = Math.floor(movement[movement.length - 1].time);
   // If any speakerObjects have same name as path filename, make path same color
   for (let i = 0; i < speakerList.length; i++) {
     if (speakerList[i].name === file.name.charAt(0)) p.color = speakerList[i].color;
   }
   paths.push(p);
 }
-
-
-// if (m.time <= conversationFileResults[conversationCounter][conversationHeaders[0]]) continue;
-// else {
-//   if (conversationCounter < conversationFileResults.length) {
-//     conversation.push(processConversation(conversationCounter, m.xPos, m.yPos));
-//     conversationCounter++; // increment counter for next comparison
-//   }
-
 
 function processConversation(index, xPos, yPos) {
   let c = new Point_Conversation();
@@ -154,12 +147,10 @@ function parseInputConversationFile(input) {
 function testConversationFile(results, file) {
   console.log("Parsing complete:", results, file);
   //if (testConversationHeaders(results.data, results.meta.fields)) {
-  // if no errors
-  //clear exisiting
+  clearDataConversationFileInput();
   conversationFileResults = results.data; // set to new array of keyed values
   updateSpeakerList();
-  // updateData = true;
-  //}
+  for (let i = 0; i < movementFiles.length; i++) processMovementFile(movementFiles[i][0], movementFiles[i][1]);
 }
 
 // Test all rows in conversation file to populate global speakerList with speaker objects based on first character
@@ -177,23 +168,23 @@ function updateSpeakerList() {
 
 // parses inputted video files from user computer
 function parseInputVideoFile(input) {
+  let file = input.files[0];
+  let fileLocation = URL.createObjectURL(file);
   movie.remove(); // remove exisiting movie element
-  //ReRun data??
-  let fileLocation = URL.createObjectURL(input);
   processVideo('File', {
     fileName: fileLocation
   });
 }
 
-// parses inputted video files from Youtube
-function parseInputYoutubeVideo(input) {
-  movie.remove(); // remove exisiting movie element
-  //ReRun data??
-  let fileLocation = URL.createObjectURL(input);
-  processVideo('Youtube', {
-    videoId: input
-  }); // process as video file
-}
+// // parses inputted video files from Youtube
+// function parseInputYoutubeVideo(input) {
+//   movie.remove(); // remove exisiting movie element
+//   //ReRun data??
+//   let fileLocation = URL.createObjectURL(input);
+//   processVideo('Youtube', {
+//     videoId: input
+//   }); // process as video file
+// }
 
 // Creates movie element specific to videoPlatform and params
 function processVideo(videoPlatform, videoParams) {
@@ -202,8 +193,7 @@ function processVideo(videoPlatform, videoParams) {
   movie.id('moviePlayer');
   movie.style('display', 'none');
   setupMovie('moviePlayer', videoPlatform, videoParams); // set up the video player
-  // DO YOU NEED THIS, set in setup once? let video = select('#moviePlayer').position(timelineStart, 0); // position video in upper left corner on timeline
-  // ReRunData?
+  // NEED? let video = select('#moviePlayer').position(timelineStart, 0); // position video in upper left corner on timeline
 }
 
 function testMovementHeaders(data, meta) {
@@ -214,7 +204,14 @@ function testConversationHeaders(data, meta) {
   return data > 0 && meta.includes(conversationHeaders[0]) && meta.includes(conversationHeaders[1]) && meta.includes(conversationHeaders[2]);
 }
 
-function clearData() {
-  paths = [];
+function clearDataConversationFileInput() {
   speakerList = [];
+  paths = [];
+  updateData = false;
+}
+
+function clearDataMovementFileInput() {
+  movementFiles = [];
+  paths = [];
+  updateData = false;
 }

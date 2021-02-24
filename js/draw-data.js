@@ -127,9 +127,7 @@ class DrawDataMovement {
             return animationCounter > reMapTime && currPixelTimeMax > reMapTime;
         } else return true;
     }
-    //return timeValue <= map(animationCounter, 0, totalTimeInSeconds, timelineStart, timelineEnd) - currPixelTimeMin;
-    // return timeValue <= map(animationCounter, 0, totalTimeInSeconds, currPixelTimeMin, currPixelTimeMax);
-    //return timeValue <= map(animationCounter, 0, totalTimeInSeconds, currPixelTimeMin, currPixelTimeMax);
+
     resetBug() {
         this.bugXPos = -1;
         this.bugYPos = -1;
@@ -188,7 +186,7 @@ class DrawDataConversation {
         for (let i = 0; i < points.length; i++) {
             let point = points[i];
             let pixelTime = map(point.time, 0, totalTimeInSeconds, timelineStart, timelineEnd);
-            if (pixelTime >= currPixelTimeMin && pixelTime <= currPixelTimeMax) {
+            if (pixelTime >= currPixelTimeMin && pixelTime <= currPixelTimeMax && this.testAnimation(pixelTime)) {
                 let curSpeaker = this.getSpeakerObject(points[i].speaker); // get speaker object equivalent to character
                 if (curSpeaker.show) {
                     if (allConversation) this.drawRects(point, curSpeaker.color); // draws all rects
@@ -273,5 +271,12 @@ class DrawDataConversation {
         strokeWeight(1);
         line(mouseX, mouseY, mouseX - boxDistFromRect, yPos + yDif);
         line(mouseX, mouseY, mouseX - boxDistFromRect / 2, yPos + yDif);
+    }
+    // If animation on, returns true if time is less than counter. Returns true if animation is off.
+    testAnimation(timeValue) {
+        if (animation) {
+            let reMapTime = map(timeValue, timelineStart, timelineEnd, 0, totalTimeInSeconds);
+            return animationCounter > reMapTime && currPixelTimeMax > reMapTime;
+        } else return true;
     }
 }

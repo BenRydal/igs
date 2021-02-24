@@ -10,6 +10,7 @@ CREDITS/LICENSE INFORMATION: This software is  licensed under the GNU General Pu
 // fix bug to always show last value if over to prevent blinking
 // Remove some fonts
 // check if removing "pause video" function screwed up bug line/shows at 0???
+// revoke URLs
 
 // Loads fonts, floor plan, and CSV file into p5.Table objects so that they can manipulated later
 function preload() {
@@ -29,7 +30,6 @@ function setup() {
 }
 
 function draw() {
-    setUpAnimation();
     background(255);
     image(floorPlan, 0, 0, displayFloorPlanWidth, displayFloorPlanHeight);
     let keys = new Keys();
@@ -47,13 +47,12 @@ function draw() {
         else decreaseVideoSize();
     }
     if (intro) drawIntroMSG(introMSG); // draw intro message on program start up until mouse is pressed
+    if (animation) setUpAnimation();
 }
 
 function setUpAnimation() {
-    if (animation) {
-        if (animationCounter < map(currPixelTimeMax, timelineStart, timelineEnd, 0, totalTimeInSeconds)) animationCounter++; // updates animation
-        else animation = false;
-    }
+    if (animationCounter < map(currPixelTimeMax, timelineStart, timelineEnd, 0, totalTimeInSeconds)) animationCounter++; // updates animation
+    else animation = false;
 }
 
 function setGUI() {
