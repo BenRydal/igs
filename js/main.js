@@ -11,7 +11,7 @@ CREDITS/LICENSE INFORMATION: This software is  licensed under the GNU General Pu
 // Remove some fonts
 // check if removing "pause video" function screwed up bug line/shows at 0???
 // revoke URLs
-// check if Kaltura needs destroy method
+// dynamic sampling rate and line/turn thickness
 
 // Loads fonts, floor plan, and CSV file into p5.Table objects so that they can manipulated later
 function preload() {

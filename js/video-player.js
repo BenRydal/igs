@@ -98,6 +98,7 @@ class KalturaPlayer {
     }
 
     destroy() {
+        kWidget.destroy('moviePlayer');
     }
 }
 

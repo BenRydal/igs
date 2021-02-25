@@ -10,9 +10,11 @@ let paths = []; // holds path objects for each unique set of movement and conver
 const example_1 = ['data/example-1/', 'floorplan.png', 'conversation.csv', ['Teacher.csv'], 'Youtube', {
     videoId: 'Iu0rxb-xkMk'
 }];
-const example_2 = ['data/example-2/', 'floorplan.png', 'conversation.csv', ['Teacher.csv', 'Student.csv'], 'Youtube', {
-    videoId: 'Iu0rxb-xkMk'
-}];
+const example_2 = ['data/example-2/', 'floorplan.png', 'conversation.csv', ['Teacher.csv', 'Sean.csv', 'Mei.csv', 'Cassandra.csv', 'Nathan.csv'], 'Kaltura', {
+        wid: '_1038472',
+        uiconf_id: '33084471',
+        entry_id: '1_9tp4soob'
+    }];
 
 // ******* FILE HEADERS *******
 const movementHeaders = ['time', 'x', 'y']; // multiple movement files formatted in this way
@@ -20,7 +22,7 @@ const conversationHeaders = ['time', 'speaker', 'talk']; // need 1 conversation 
 
 // ******* GUI *******
 let updateData = false; // controls accepting first input file to trigger update data processing
-const dataSamplingRate = 30; // rate movement data is sampled, increase to speed up program
+const dataSamplingRate = 1; // rate movement data is sampled, increase to speed up program
 let totalTimeInSeconds = 0; // global time value that all data corresponds to, dynamically set and updated in processMovementFiles
 const PLAN = 0, SPACETIME = 1; // constants to indicate plan or space-time views
 let movementKeyTitle = true;

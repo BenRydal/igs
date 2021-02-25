@@ -1,4 +1,5 @@
 function loadExample(params) {
+  updateData = true; // trigger update data
   processVideo(params[4], params[5]);
 
   loadImage(params[0] + params[1], img => {
@@ -180,7 +181,7 @@ function parseInputVideoFile(input) {
 // // parses inputted video files from Youtube
 // function parseInputYoutubeVideo(input) {
 //   movie.remove(); // remove exisiting movie element
-//   //ReRun data??
+//   movie = createDiv(); // create the div that will hold the video
 //   let fileLocation = URL.createObjectURL(input);
 //   processVideo('Youtube', {
 //     videoId: input
