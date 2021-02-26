@@ -1,3 +1,10 @@
+function loadFonts() {
+  font_PlayfairReg = loadFont("data/fonts/PlayfairDisplay-Regular.ttf");
+  font_PlayfairItalic = loadFont("data/fonts/PlayfairDisplay-Italic.ttf");
+  font_Playfairbold = loadFont("data/fonts/PlayfairDisplay-Bold.ttf");
+  font_Lato = loadFont("data/fonts/Lato-Light.ttf");
+}
+
 function loadExample(params) {
   updateData = true; // trigger update data
   processVideo(params[4], params[5]);
@@ -215,5 +222,6 @@ function clearDataConversationFileInput() {
 function clearDataMovementFileInput() {
   movementFiles = [];
   paths = [];
+  totalTimeInSeconds = 0; // reset total time
   updateData = false;
 }
