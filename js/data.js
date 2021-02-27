@@ -22,7 +22,6 @@ const conversationHeaders = ['time', 'speaker', 'talk']; // need 1 conversation 
 
 // ******* GUI *******
 let updateData = false; // controls accepting first input file to trigger update data processing
-const dataSamplingRate = 1; // rate movement data is sampled, increase to speed up program
 let totalTimeInSeconds = 0; // global time value that all data corresponds to, dynamically set and updated in processMovementFiles
 const PLAN = 0, SPACETIME = 1; // constants to indicate plan or space-time views
 let movementKeyTitle = true;

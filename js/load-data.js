@@ -94,24 +94,27 @@ function testMovementFile(results, file) {
   processMovementFile(results, file);
 }
 
-// Processes array of movement data
+// Processes movement file, adds to path object
 function processMovementFile(results, file) {
   let movement = []; // holds movement points (location data)
   let conversation = []; // holds conversaton points (text and location data for conversation)
   let conversationCounter = 0;
-  for (let i = 0; i < results.data.length; i += dataSamplingRate) { // sampling rate reduces data size
-    let m = new Point_Movement();
-    m.time = results.data[i][movementHeaders[0]];
-    m.xPos = results.data[i][movementHeaders[1]];
-    m.yPos = results.data[i][movementHeaders[2]];
-    movement.push(m); // always add to movement
-    // load conversation turn and increment counter if movement time is larger than time in conversationFile results at curCounter
-    if (conversationCounter < conversationFileResults.length) {
-      if (m.time >= conversationFileResults[conversationCounter][conversationHeaders[0]]) {
-        conversation.push(processConversation(conversationCounter, m.xPos, m.yPos));
-        conversationCounter++; // increment counter for next comparison
+  for (let i = 1; i < results.data.length; i++) { // start at second row
+      // only process point if has larger time value than previous time value
+      if (results.data[i][movementHeaders[0]] > results.data[i - 1][movementHeaders[0]]) {
+          let m = new Point_Movement();
+          m.time = results.data[i][movementHeaders[0]];
+          m.xPos = results.data[i][movementHeaders[1]];
+          m.yPos = results.data[i][movementHeaders[2]];
+          movement.push(m); // always add to movement
+          // load conversation turn and increment counter if movement time is larger than time in conversationFile results at curCounter
+          if (conversationCounter < conversationFileResults.length) {
+              if (m.time >= conversationFileResults[conversationCounter][conversationHeaders[0]]) {
+                  conversation.push(processConversation(conversationCounter, m.xPos, m.yPos));
+                  conversationCounter++; // increment counter for next comparison
+              }
+          }
       }
-    }
   }
   let p = new Path(file.name.charAt(0), basePathColor); // initialize with name and grey/black color
   p.movement = movement;
@@ -120,7 +123,7 @@ function processMovementFile(results, file) {
   if (totalTimeInSeconds < Math.floor(movement[movement.length - 1].time)) totalTimeInSeconds = Math.floor(movement[movement.length - 1].time);
   // If any speakerObjects have same name as path filename, make path same color
   for (let i = 0; i < speakerList.length; i++) {
-    if (speakerList[i].name === file.name.charAt(0)) p.color = speakerList[i].color;
+      if (speakerList[i].name === file.name.charAt(0)) p.color = speakerList[i].color;
   }
   paths.push(p);
 }
