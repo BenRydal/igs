@@ -88,10 +88,11 @@ function parseInputMovementFile(input) {
 // Tests movement file formatting
 function testMovementFile(results, file) {
   console.log("Parsing complete:", results, file);
-  //if (testMovementHeaders(results.data, results.meta.fields))
-  if (updateData) clearDataMovementFileInput(); // clear data if first accepted file
-  movementFiles.push([results, file]);
-  processMovementFile(results, file);
+  if (testMovementFileData(results.data, results.meta.fields)) {
+    if (updateData) clearDataMovementFileInput(); // clear data if first accepted file
+    movementFiles.push([results, file]);
+    processMovementFile(results, file);
+  }
 }
 
 // Processes movement file, adds to path object
@@ -100,21 +101,21 @@ function processMovementFile(results, file) {
   let conversation = []; // holds conversaton points (text and location data for conversation)
   let conversationCounter = 0;
   for (let i = 1; i < results.data.length; i++) { // start at second row
-      // only process point if has larger time value than previous time value
-      if (results.data[i][movementHeaders[0]] > results.data[i - 1][movementHeaders[0]]) {
-          let m = new Point_Movement();
-          m.time = results.data[i][movementHeaders[0]];
-          m.xPos = results.data[i][movementHeaders[1]];
-          m.yPos = results.data[i][movementHeaders[2]];
-          movement.push(m); // always add to movement
-          // load conversation turn and increment counter if movement time is larger than time in conversationFile results at curCounter
-          if (conversationCounter < conversationFileResults.length) {
-              if (m.time >= conversationFileResults[conversationCounter][conversationHeaders[0]]) {
-                  conversation.push(processConversation(conversationCounter, m.xPos, m.yPos));
-                  conversationCounter++; // increment counter for next comparison
-              }
-          }
+    // only process point if has larger time value than previous time value
+    if (results.data[i][movementHeaders[0]] > results.data[i - 1][movementHeaders[0]]) {
+      let m = new Point_Movement();
+      m.time = results.data[i][movementHeaders[0]];
+      m.xPos = results.data[i][movementHeaders[1]];
+      m.yPos = results.data[i][movementHeaders[2]];
+      movement.push(m); // always add to movement
+      // load conversation turn and increment counter if movement time is larger than time in conversationFile results at curCounter
+      if (conversationCounter < conversationFileResults.length) {
+        if (m.time >= conversationFileResults[conversationCounter][conversationHeaders[0]]) {
+          conversation.push(processConversation(conversationCounter, m.xPos, m.yPos));
+          conversationCounter++; // increment counter for next comparison
+        }
       }
+    }
   }
   let p = new Path(file.name.charAt(0), basePathColor); // initialize with name and grey/black color
   p.movement = movement;
@@ -123,7 +124,7 @@ function processMovementFile(results, file) {
   if (totalTimeInSeconds < Math.floor(movement[movement.length - 1].time)) totalTimeInSeconds = Math.floor(movement[movement.length - 1].time);
   // If any speakerObjects have same name as path filename, make path same color
   for (let i = 0; i < speakerList.length; i++) {
-      if (speakerList[i].name === file.name.charAt(0)) p.color = speakerList[i].color;
+    if (speakerList[i].name === file.name.charAt(0)) p.color = speakerList[i].color;
   }
   paths.push(p);
 }
@@ -157,11 +158,13 @@ function parseInputConversationFile(input) {
 
 function testConversationFile(results, file) {
   console.log("Parsing complete:", results, file);
-  //if (testConversationHeaders(results.data, results.meta.fields)) {
-  clearDataConversationFileInput();
-  conversationFileResults = results.data; // set to new array of keyed values
-  updateSpeakerList();
-  for (let i = 0; i < movementFiles.length; i++) processMovementFile(movementFiles[i][0], movementFiles[i][1]);
+  if (testConversationHeaders(results.data, results.meta.fields)) {
+    clearDataConversationFileInput();
+    conversationFileResults = results.data; // set to new array of keyed values
+    updateSpeakerList();
+    // Must reprocess movement files
+    for (let i = 0; i < movementFiles.length; i++) processMovementFile(movementFiles[i][0], movementFiles[i][1]);
+  }
 }
 
 // Test all rows in conversation file to populate global speakerList with speaker objects based on first character
@@ -208,12 +211,12 @@ function processVideo(videoPlatform, videoParams) {
   let video = select('#moviePlayer').position(timelineStart, 0); // position video in upper left corner on timeline
 }
 
-function testMovementHeaders(data, meta) {
-  return data > 0 && meta.includes(movementHeaders[0]) && meta.includes(movementHeaders[1]) && meta.includes(movementHeaders[2]);
+function testMovementFileData(data, meta) {
+  return data.length > 0 && meta.includes(movementHeaders[0]) && meta.includes(movementHeaders[1]) && meta.includes(movementHeaders[2]);
 }
 
 function testConversationHeaders(data, meta) {
-  return data > 0 && meta.includes(conversationHeaders[0]) && meta.includes(conversationHeaders[1]) && meta.includes(conversationHeaders[2]);
+  return data.length > 0 && meta.includes(conversationHeaders[0]) && meta.includes(conversationHeaders[1]) && meta.includes(conversationHeaders[2]);
 }
 
 function clearDataConversationFileInput() {

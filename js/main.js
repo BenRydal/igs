@@ -4,19 +4,20 @@ CREDITS/LICENSE INFORMATION: This software is  licensed under the GNU General Pu
 
 // TO DO:
 // Conversation table error handling what if speakerList is 0?? e.g., how does getSpeakerObject work?
-// basic error handling
+// Add additional type error handling for processing csv files
 // fix bug to always show last value if over to prevent blinking
 // Remove some fonts
 // check if removing "pause video" function screwed up bug line/shows at 0???
 // revoke URLs
-// dynamic sampling rate and line/turn thickness
+// dynamic line/turn thickness
 // kaltura player destroy issue
 // load youtube and kaltura player buttons?
+// intro screen/clean up old messages
 
 // Loads fonts, floor plan, and CSV file into p5.Table objects so that they can manipulated later
 function preload() {
     loadFonts();
-    loadExample(example_1);
+    loadExample(example_2);
 }
 
 function setup() {

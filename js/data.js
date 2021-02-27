@@ -1,9 +1,11 @@
-// FILE & DATA VARIABLES
-let floorPlan; // holds floor plan image for display
+// INPUT FILE & DATA VARIABLES
+let floorPlan; // holds floor plan image
 let movementFiles = []; // holds movement files, globally important for dynamic file loading
 let conversationFileResults = []; // holds parsed conversation file, globally important for dynamic file loading
 let speakerList = []; // holds speaker objects parsed from conversation file
 let paths = []; // holds path objects for each unique set of movement and conversation points
+const movementHeaders = ['time', 'x', 'y']; // movement file headers
+const conversationHeaders = ['time', 'speaker', 'talk']; // conversation file headers
 
 // SAMPLE DATA { directory, floorplan image, conversation File, movement File[], video platform, video params (see Video Player Interface) }
 const example_1 = ['data/example-1/', 'floorplan.png', 'conversation.csv', ['Teacher.csv'], 'Youtube', {
@@ -15,21 +17,8 @@ const example_2 = ['data/example-2/', 'floorplan.png', 'conversation.csv', ['Tea
     entry_id: '1_9tp4soob'
 }];
 
-// MOVEMENT AND CONVERSATION CSV FILE HEADERS
-const movementHeaders = ['time', 'x', 'y'];
-const conversationHeaders = ['time', 'speaker', 'talk'];
-
 // FLOOR PLAN IMAGE
 let inputFloorPlanPixelWidth, inputFloorPlanPixelHeight, displayFloorPlanWidth, displayFloorPlanHeight;
-
-// TIMELINE
-let lockedLeft = false,
-    lockedRight = false;
-let selSpacing = 20,
-    tickHeight = 20;
-let currPixelTimeMin, currPixelTimeMax;
-let yPosTimeScaleTop, yPosTimeScaleBottom, yPosTimeScaleSize;
-let timelineStart, timelineEnd, timelineHeight, timelineLength;
 
 // VIDEO
 let movie; // global holder for movie element--youtube, Kaltura and File Player coordinate around this
@@ -62,7 +51,15 @@ let animationCounter = 0; // controls animation
 let animation = true,
     videoMode = false,
     howToRead = false;
-// 5 Buttons correspond to modes
+// TIMELINE
+let lockedLeft = false,
+    lockedRight = false;
+let selSpacing = 20,
+    tickHeight = 20;
+let currPixelTimeMin, currPixelTimeMax;
+let yPosTimeScaleTop, yPosTimeScaleBottom, yPosTimeScaleSize;
+let timelineStart, timelineEnd, timelineHeight, timelineLength;
+// BUTTONS
 let button_1 = "Animate",
     button_2 = "Align Talk",
     button_3 = "All Talk on Path",
@@ -72,7 +69,6 @@ let keyTextSize, titleTextSize, infoTextSize;
 let textBoxWidth, textSpacing, boxSpacing, boxDistFromRect;
 
 // MESSAGES
-// Buttons
 let introMSG = "Press this button to learn how to read and interact with this visualization";
 let howToReadMSG_1 = "The left view shows the teachers movement over a floor plan of an eigth grade classroom. The right view shows the teachers movement over a timeline where the vertical axis corresponds with the vertical dimension of the floor plan.";
 let howToReadMSG_2 = "Hover over buttons to learn how to interact with this visualization. Use the timeline to select and rescale data.";
@@ -80,10 +76,9 @@ let animateMSG = "Press this button to animate movement and conversation over sp
 let conversation_1_MSG = "Press this button and the colored speaker buttons above to view different conversation turns along the teacher's movement path. Hover over each conversation turn to read each turn. Turns are coded in the following manner: Teacher, Student (a single student), Student New (a new student whose identity differs from the last student to speak), Many Students, the Whole Class, and non-members of the class (e.g., PA system).";
 let conversation_2_MSG = "Press this button to view and read all conversation aligned horizontally.";
 let videoMSG = "Press this button to watch video from this classroom discussion. Click anywhere on the timeline to play and pause video.";
-// Title
+// TITLE
 let titleMsg = "Classroom Interaction Geography";
 let infoMsg = "Interaction Geography Slicer (IGS) description....";
-
 
 /*
 Relationship between speaker and path objects can be 1:1 but does not have to be this allows variation 
