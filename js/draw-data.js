@@ -56,16 +56,9 @@ class DrawDataMovement {
                 let scaledXPos = point.xPos * displayFloorPlanWidth / inputFloorPlanPixelWidth; // scale to floor plan image file
                 let scaledYPos = point.yPos * displayFloorPlanHeight / inputFloorPlanPixelHeight; // scale to floor plan image file
                 if (view == PLAN) curveVertex(scaledXPos, scaledYPos);
-                else if (view == SPACETIME) { // text/get bug values
+                else if (view == SPACETIME) {
                     curveVertex(scaledTime, scaledYPos);
-                    if (animation) this.recordBug(scaledXPos, scaledYPos, scaledTime);
-                    else if (videoIsPlaying) {
-                        // convert video time value in seconds to pixel position                   
-                        let videoX = map(videoPlayer.getCurrentTime(), 0, totalTimeInSeconds, timelineStart, timelineEnd);
-                        if (videoX >= scaledTime - bugPrecision && videoX <= scaledTime + bugPrecision) {
-                            this.recordBug(scaledXPos, scaledYPos, scaledTime);
-                        }
-                    } else if (mouseY < timelineHeight && mouseX >= scaledTime - bugPrecision && mouseX <= scaledTime + bugPrecision) this.recordBug(scaledXPos, scaledYPos, scaledTime);
+                    if (this.testBugRecording(scaledTime)) this.recordBug(scaledXPos, scaledYPos, scaledTime);
                 }
             }
         }
@@ -117,7 +110,7 @@ class DrawDataMovement {
     }
 
     overCursor(xPos, yPos) {
-        return overCircle(xPos, yPos, 50);
+        return overCircle(xPos, yPos, floorPlanSelectorSize);
     }
 
     // If animation on, returns true if time is less than counter. Returns true if animation is off.
@@ -126,6 +119,15 @@ class DrawDataMovement {
             let reMapTime = map(timeValue, timelineStart, timelineEnd, 0, totalTimeInSeconds);
             return animationCounter > reMapTime && currPixelTimeMax > reMapTime;
         } else return true;
+    }
+
+    testBugRecording(timeValue) {
+        if (animation) return true;
+        else if (videoIsPlaying) {
+            let videoX = map(videoPlayer.getCurrentTime(), 0, totalTimeInSeconds, timelineStart, timelineEnd); // convert video time value in seconds to pixel position  
+            if (videoX >= timeValue - bugPrecision && videoX <= timeValue + bugPrecision) return true;
+        } else if (mouseY < timelineHeight && mouseX >= timeValue - bugPrecision && mouseX <= timeValue + bugPrecision) return true;
+        else return false;
     }
 
     resetBug() {
