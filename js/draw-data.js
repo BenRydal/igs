@@ -205,11 +205,11 @@ class DrawDataConversation {
         textSize(1); // determines how many pixels a string is which corresponds to vertical height of rectangle
         let pixelTime = map(point.time, 0, totalTimeInSeconds, timelineStart, timelineEnd);
         let scaledTime = map(pixelTime, currPixelTimeMin, currPixelTimeMax, timelineStart, timelineEnd);
-        let minRectHeight = 3; // for really short conversation turns set a minimum
-        let rectWidthMin = ceil(conversationFileResults.length / totalTimeInSeconds); // ceil average turn count per second
-        let rectWidthMax = 20 + rectWidthMin; // add rectMin in case rare conversation file with more turns than length in seconds
-        let value = map(currPixelTimeMax - currPixelTimeMin, 0, timelineLength, rectWidthMin, rectWidthMax);
-        let rectWidth = (rectWidthMax + 2) - value;
+        let minRectHeight = 3; // for really short conversation turns set a minimum        
+        let rectWidthMin = map(totalTimeInSeconds, 0, 3600, 10, 1, true); // map to inverse, values constrained between 10 and 1 (pixels)
+        let rectWidthMax = 25;
+        // map to inverse of min/max to set rectWidth based on amount of pixel time selected
+        let rectWidth = map(currPixelTimeMax - currPixelTimeMin, 0, timelineLength, rectWidthMax, rectWidthMin);
         let rectLength = textWidth(point.talkTurn);
         if (rectLength < minRectHeight) rectLength = minRectHeight; // set small strings to minimum
         let xPos = point.xPos * displayFloorPlanWidth / inputFloorPlanPixelWidth; // scale to floor plan image file
