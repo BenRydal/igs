@@ -96,8 +96,6 @@ class Keys {
 
     drawTitles() {
         fill(0);
-        textFont(font_Playfairbold, titleTextSize);
-        // text(titleMsg, buttonWidth, speakerKeysHeight - buttonWidth);
         textFont(font_PlayfairReg, infoTextSize);
         text(infoMsg, buttonWidth, buttonsHeight - buttonWidth, timelineStart - 6 * buttonSpacing, height);
     }

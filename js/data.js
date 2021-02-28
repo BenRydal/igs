@@ -77,8 +77,7 @@ let conversation_1_MSG = "Press this button and the colored speaker buttons abov
 let conversation_2_MSG = "Press this button to view and read all conversation aligned horizontally.";
 let videoMSG = "Press this button to watch video from this classroom discussion. Click anywhere on the timeline to play and pause video.";
 // TITLE
-let titleMsg = "Classroom Interaction Geography";
-let infoMsg = "PLACE FILE INPUT BUTTONS HERE";
+let infoMsg = "[INSERT INFO]";
 
 /*
 Relationship between speaker and path objects can be 1:1 but does not have to be this allows variation 

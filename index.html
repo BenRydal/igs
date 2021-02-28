@@ -19,6 +19,12 @@
 
 <body>
     <form action="/action_page.php">
+        <label for="examples">Sample Data:</label>
+        <select id="examples" name="examples" onchange="loadExampleDataSet()">
+            <option value="Select">Select</option>
+            <option value="Example 1">Example 1</option>
+            <option value="Example 2">Example 2</option>
+        </select>
         <label for="img">Floor Plan:</label>
         <input type="file" id="img" name="img" accept="image/*" onchange="parseInputFloorPlanFile(this)">
         <label for="img">Movement:</label>
@@ -27,14 +33,6 @@
         <input type="file" id="img" name="img" accept=".csv" onchange="parseInputConversationFile(this)">
         <label for="img">Video:</label>
         <input type="file" id="img" name="img" accept="video/*" onchange="parseInputVideoFile(this)">
-    </form>
-    <form action="/action_page.php">
-        <label for="examples">Sample Data:</label>
-        <select id="examples" name="examples" onchange="loadExampleDataSet()">
-            <option value="Select">Select</option>
-            <option value="Example 1">Example 1</option>
-            <option value="Example 2">Example 2</option>
-        </select>
     </form>
 </body>
 
