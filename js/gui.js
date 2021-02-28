@@ -3,7 +3,7 @@ function mousePressed() {
     // Controls video when clicking on timeline
     if (videoMode && !animation && overRect(timelineStart, 0, timelineEnd, timelineHeight - tickHeight)) {
         let initialValue = map(mouseX, timelineStart, timelineEnd, currPixelTimeMin, currPixelTimeMax); // first map mouse to selected time values in GUI
-        videoCurrTime = map(initialValue, timelineStart, timelineEnd, 0, totalTimeInSeconds);
+        videoCurrTime = map(initialValue, timelineStart, timelineEnd, 0, videoPlayer.getVideoDuration());
         playPauseMovie();
     }
     textSize(keyTextSize);
