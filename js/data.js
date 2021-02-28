@@ -43,7 +43,8 @@ let buttonSpacing, buttonWidth, speakerKeysHeight, buttonsHeight;
 let floorPlanSelectorSize = 50;
 let bugPrecision, bugSize;
 let bugTimePosForVideo; // to draw slicer line when video is playing
-const speakerColorList = ['#ff7f00', '#1f78b4', '#cab2d6', '#33a02c', '#fb9a99', '#e31a1c', '#fdbf6f', '#a6cee3', '#b2df8a', '#6a3d9a', '#ffff99', '#b15928']; // 11 colors
+// purple, orange, green, blue, red, yellow, brown, lPurple, lOrange, lGreen, lBlue, lRed
+const speakerColorList = ['#6a3d9a', '#ff7f00', '#33a02c', '#1f78b4', '#e31a1c', '#ffff99', '#b15928', '#cab2d6', '#fdbf6f', '#b2df8a', '#a6cee3', '#fb9a99']; // 11 colors
 const colorGray = 150,
     pathWeight = 3,
     basePathColor = 100; // for paths that don't have associated speaker in speakerList
