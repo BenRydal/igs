@@ -5,8 +5,14 @@ function loadFonts() {
   font_Lato = loadFont("data/fonts/Lato-Light.ttf");
 }
 
+function loadExampleDataSet() {
+  updateMovementData = true; // trigger update data
+  let exampleSet = document.getElementById("examples").value;
+  if (exampleSet === "Example 1") loadExample(example_1);
+  else if (exampleSet === "Example 2") loadExample(example_2);
+}
+
 function loadExample(params) {
-  updateData = true; // trigger update data
   processVideo(params[4], params[5]);
 
   loadImage(params[0] + params[1], img => {
@@ -75,7 +81,7 @@ function parseExampleMovementFile(input) {
 
 // Parses all input selected movement files
 function parseInputMovementFile(input) {
-  updateData = true; // trigger update data
+  updateMovementData = true; // trigger update data
   for (let i = 0; i < input.files.length; i++) {
     let file = input.files[i];
     Papa.parse(file, {
@@ -89,7 +95,7 @@ function parseInputMovementFile(input) {
 function testMovementFile(results, file) {
   console.log("Parsing complete:", results, file);
   if (testMovementFileData(results.data, results.meta.fields)) {
-    if (updateData) clearDataMovementFileInput(); // clear data if first accepted file
+    if (updateMovementData) clearDataMovementFileInput(); // clear data if first accepted file
     movementFiles.push([results, file]);
     processMovementFile(results, file);
   }
@@ -212,22 +218,21 @@ function processVideo(videoPlatform, videoParams) {
 }
 
 function testMovementFileData(data, meta) {
-  return data.length > 0 && meta.includes(movementHeaders[0]) && meta.includes(movementHeaders[1]) && meta.includes(movementHeaders[2]);
+  return data.length > 1 && meta.includes(movementHeaders[0]) && meta.includes(movementHeaders[1]) && meta.includes(movementHeaders[2]);
 }
 
 function testConversationHeaders(data, meta) {
-  return data.length > 0 && meta.includes(conversationHeaders[0]) && meta.includes(conversationHeaders[1]) && meta.includes(conversationHeaders[2]);
+  return data.length > 1 && meta.includes(conversationHeaders[0]) && meta.includes(conversationHeaders[1]) && meta.includes(conversationHeaders[2]);
 }
 
 function clearDataConversationFileInput() {
   speakerList = [];
   paths = [];
-  updateData = false;
 }
 
 function clearDataMovementFileInput() {
   movementFiles = [];
   paths = [];
   totalTimeInSeconds = 0; // reset total time
-  updateData = false;
+  updateMovementData = false;
 }

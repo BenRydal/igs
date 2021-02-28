@@ -30,7 +30,7 @@ let videoWidthPlayCounter, videoHeightPlayCounter; // allows for transition betw
 let videoTransitionCounter = 40; // speed of video size transitions
 
 // GUI
-let updateData = false; // controls accepting first input file to trigger update data processing
+let updateMovementData = false; // controls accepting first input file to trigger update data processing
 let totalTimeInSeconds = 0; // global time value that all data corresponds to, dynamically set and updated in processMovementFiles
 const PLAN = 0,
     SPACETIME = 1; // constants to indicate plan or space-time views
@@ -78,7 +78,7 @@ let conversation_2_MSG = "Press this button to view and read all conversation al
 let videoMSG = "Press this button to watch video from this classroom discussion. Click anywhere on the timeline to play and pause video.";
 // TITLE
 let titleMsg = "Classroom Interaction Geography";
-let infoMsg = "Interaction Geography Slicer (IGS) description....";
+let infoMsg = "PLACE FILE INPUT BUTTONS HERE";
 
 /*
 Relationship between speaker and path objects can be 1:1 but does not have to be this allows variation 

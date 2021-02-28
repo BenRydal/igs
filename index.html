@@ -3,7 +3,8 @@
 <head>
     <script src="https://cdn.jsdelivr.net/npm/p5@0.10.2/lib/p5.js"></script>
     <script type="text/javascript" src="https://www.youtube.com/iframe_api"></script>
-    <script src="https://cdnapi.kaltura.com/p/1038472/sp/103847200/embedIframeJs/uiconf_id/33084471/partner_id/1038472"></script>
+    <script src="https://cdnapi.kaltura.com/p/1038472/sp/103847200/embedIframeJs/uiconf_id/33084471/partner_id/1038472">
+    </script>
     <script src="libs/papaparse.min.js"></script>
     <script src="js/data.js"></script>
     <script src="js/main.js"></script>
@@ -13,16 +14,28 @@
     <script src="js/draw-data.js"></script>
     <script src="js/video.js"></script>
     <script src="js/video-player.js"></script>
+    <!-- <link rel="stylesheet" type="text/css" href="css/input.css" /> -->
 </head>
 
 <body>
-    <input type="file" onchange="parseInputMovementFile(this)" multiple>
-    <input type="file" onchange="parseInputConversationFile(this)">
-    <input type="file" onchange="parseInputFloorPlanFile(this)">
-    <input type="file" onchange="parseInputVideoFile(this)">
-
-    <!-- <input type="file" name="file" id="file" class="inputfile" />
-    <label for="file">Choose a file</label> -->
+    <form action="/action_page.php">
+        <label for="img">Floor Plan:</label>
+        <input type="file" id="img" name="img" accept="image/*" onchange="parseInputFloorPlanFile(this)">
+        <label for="img">Movement:</label>
+        <input type="file" id="img" name="img" accept=".csv" onchange="parseInputMovementFile(this)">
+        <label for="img">Conversation:</label>
+        <input type="file" id="img" name="img" accept=".csv" onchange="parseInputConversationFile(this)">
+        <label for="img">Video:</label>
+        <input type="file" id="img" name="img" accept="video/*" onchange="parseInputVideoFile(this)">
+    </form>
+    <form action="/action_page.php">
+        <label for="examples">Sample Data:</label>
+        <select id="examples" name="examples" onchange="loadExampleDataSet()">
+            <option value="Select">Select</option>
+            <option value="Example 1">Example 1</option>
+            <option value="Example 2">Example 2</option>
+        </select>
+    </form>
 </body>
 
 </html>

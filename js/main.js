@@ -17,7 +17,7 @@ CREDITS/LICENSE INFORMATION: This software is  licensed under the GNU General Pu
 // Loads fonts, floor plan, and CSV file into p5.Table objects so that they can manipulated later
 function preload() {
     loadFonts();
-    loadExample(example_2);
+    loadExample(example_1);
 }
 
 function setup() {
