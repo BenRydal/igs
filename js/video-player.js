@@ -94,7 +94,7 @@ class KalturaPlayer {
     }
 
     getVideoDuration() {
-        return this.player.duration();
+        return this.player.duration;
     }
 
     destroy() {

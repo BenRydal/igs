@@ -1,7 +1,7 @@
 function loadFonts() {
   font_PlayfairReg = loadFont("data/fonts/PlayfairDisplay-Regular.ttf");
   font_PlayfairItalic = loadFont("data/fonts/PlayfairDisplay-Italic.ttf");
-  font_Playfairbold = loadFont("data/fonts/PlayfairDisplay-Bold.ttf");
+  font_PlayfairBold = loadFont("data/fonts/PlayfairDisplay-Bold.ttf");
   font_Lato = loadFont("data/fonts/Lato-Light.ttf");
 }
 
@@ -196,16 +196,6 @@ function parseInputVideoFile(input) {
     fileName: fileLocation
   });
 }
-
-// // parses inputted video files from Youtube
-// function parseInputYoutubeVideo(input) {
-//   movie.remove(); // remove exisiting movie element
-//   movie = createDiv(); // create the div that will hold the video
-//   let fileLocation = URL.createObjectURL(input);
-//   processVideo('Youtube', {
-//     videoId: input
-//   }); // process as video file
-// }
 
 // Creates movie element specific to videoPlatform and params
 function processVideo(videoPlatform, videoParams) {
