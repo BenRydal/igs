@@ -14,21 +14,20 @@ function loadExampleDataSet() {
 
 function loadExample(params) {
   processVideo(params[4], params[5]);
-
   loadImage(params[0] + params[1], img => {
     processFloorPlan(img);
   });
 
-  fetch(new Request(params[0] + params[2])).then(function (response) {
-    return response.arrayBuffer();
-  }).then(function (buffer) {
-    conversationFileResults = new File([buffer], params[2], {
-      type: "text/csv",
+  fetch(new Request(params[0] + params[2]))
+    .then(response => response.arrayBuffer())
+    .then(buffer => {
+      conversationFileResults = new File([buffer], params[2], {
+        type: "text/csv",
+      });
+      parseExampleConversationFile(conversationFileResults);
+    }).catch(e => {
+      print("Error loading example conversation file");
     });
-    parseExampleConversationFile(conversationFileResults);
-  }).catch(function (error) {
-    print("Error loading example conversation file");
-  });
 
   // create an initial immediately resolving promise, and then chain new promises as the previous ones resolve:
   // see https://stackoverflow.com/questions/40328932/javascript-es6-promise-for-loop
@@ -36,17 +35,16 @@ function loadExample(params) {
     p = p.then(_ => new Promise(resolve =>
       setTimeout(function () {
         let myRequest = new Request(params[0] + params[3][i]);
-        fetch(myRequest).then(function (response) {
-          return response.arrayBuffer();
-        }).then(function (buffer) {
-          return new File([buffer], params[3][i], {
+        fetch(myRequest)
+          .then(response => response.arrayBuffer())
+          .then(buffer => new File([buffer], params[3][i], {
             type: "text/csv",
-          })
-        }).then(function (file) {
-          parseExampleMovementFile(file);
-        }).catch(function (error) {
-          print("Error loading example movement file");
-        });
+          }))
+          .then(file => {
+            parseExampleMovementFile(file);
+          }).catch(e => {
+            print("Error loading example movement file");
+          });
         resolve();
       })));
   }
