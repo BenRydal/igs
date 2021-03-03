@@ -94,7 +94,8 @@ class KalturaPlayer {
     }
 
     getVideoDuration() {
-        return this.player.duration;
+        // return this.player.duration;
+        return 429; // TEMP due to issue with Kaltura duration method
     }
 
     destroy() {
