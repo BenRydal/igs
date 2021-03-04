@@ -12,6 +12,7 @@ CREDITS/LICENSE INFORMATION: This software is licensed under the GNU General Pub
 // dynamic line/turn thickness
 // kaltura player destroy issue
 // intro screen/clean up old messages
+// ISSUE with conversation/movement file joining (see sean numbers)
 
 // Loads fonts, floor plan, and CSV file into p5.Table objects so that they can manipulated later
 function preload() {

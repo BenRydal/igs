@@ -15,6 +15,7 @@
     <script src="js/video.js"></script>
     <script src="js/video-player.js"></script>
     <link rel="stylesheet" type="text/css" href="css/input.css" />
+    <title>Interaction Geography Slicer (IGS) Indoor: Visualizing Interaction over Space and Time</title>
 </head>
 
 <body>
@@ -22,24 +23,24 @@
         <form action="/action_page.php">
             <select id="examples" name="examples" onchange="loadExampleDataSet()">
                 <option value="Select">LOAD EXAMPLE DATA SETS</option>
-                <option value="Example 1">EXAMPLE 1: TIMSS 1999 Video Study</option>
-                <option value="Example 2">Example 2: Sean Numbers</option>
-                <option value="Example 3">Ex. 3: Museum Visit</option>
-                <option value="Example 4">Example 2: Michael Jordan's Last Shot</option>
+                <option value="Example 1">EXAMPLE 1: Classroom Science Lesson</option>
+                <option value="Example 2">EXAMPLE 2: Classroom Discussion</option>
+                <option value="Example 3">EXAMPLE 3: Museum Gallery Visit</option>
+                <option value="Example 4">EXAMPLE 4: Michael Jordan's Last Shot</option>
             </select>
 
             <input type="file" name="file" id="inputFloorPlan" name="file" class="inputfile" accept="image/*"
                 onchange="parseInputFloorPlanFile(this)">
-            <label for="inputFloorPlan">Upload Floor Plan</label>
+            <label for="inputFloorPlan">Upload Floor Plan Image</label>
             <input type="file" name="file" id="inputMovement" name="file" class="inputfile" multiple accept=".csv"
                 onchange="parseInputMovementFile(this)">
-            <label for="inputMovement">Choose Movement Files</label>
+            <label for="inputMovement">Upload Movement .CSV Files</label>
             <input type="file" name="file" id="inputConversation" class="inputfile" accept=".csv"
                 onchange="parseInputConversationFile(this)">
-            <label for="inputConversation">Choose Conversation File</label>
+            <label for="inputConversation">Upload Conversation .CSV File</label>
             <input type="file" name="file" id="inputVideo" class="inputfile" accept="video/*"
                 onchange="parseInputVideoFile(this)">
-            <label for="inputVideo">Select Video File</label>
+            <label for="inputVideo">Upload Video File</label>
         </form>
     </div>
 </body>
