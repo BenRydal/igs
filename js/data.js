@@ -63,22 +63,20 @@ let timelineStart, timelineEnd, timelineHeight, timelineLength;
 // BUTTONS
 let button_1 = "Animate",
     button_2 = "Align Talk",
-    button_3 = "All Talk on Path",
+    button_3 = "All Talk",
     button_4 = "Video",
-    button_5 = "How to Read";
+    button_5 = "How to Use";
 let keyTextSize, titleTextSize, infoTextSize;
 let textBoxWidth, textSpacing, boxSpacing, boxDistFromRect;
 
 // MESSAGES
-let introMSG = "Press this button to learn how to read and interact with this visualization";
-let howToReadMSG_1 = "The left view shows the teachers movement over a floor plan of an eigth grade classroom. The right view shows the teachers movement over a timeline where the vertical axis corresponds with the vertical dimension of the floor plan.";
-let howToReadMSG_2 = "Hover over buttons to learn how to interact with this visualization. Use the timeline to select and rescale data.";
+let introMSG = "Press this button to learn how to use this tool. Visit this link to learn how to format your data for use in this tool [insert]";
+let howToMSG = "Hi There! This is a beta version of the Interaction Geography Slicer. You can use this tool to visualize movement, conversation, and video data over space and time. Use the top menu to visualize different sample datasets and upload your data. Hover over buttons on the left to learn about interactive features of this tool.";
 let animateMSG = "Press this button to animate movement and conversation over space and time";
-let conversation_1_MSG = "Press this button and the colored speaker buttons above to view different conversation turns along the teacher's movement path. Hover over each conversation turn to read each turn. Turns are coded in the following manner: Teacher, Student (a single student), Student New (a new student whose identity differs from the last student to speak), Many Students, the Whole Class, and non-members of the class (e.g., PA system).";
-let conversation_2_MSG = "Press this button to view and read all conversation aligned horizontally.";
-let videoMSG = "Press this button to watch video from this classroom discussion. Click anywhere on the timeline to play and pause video.";
-// TITLE
-let infoMsg = "Interaction Geography Slicer (IGS-Indoor)\nby Ben Rydal Shapiro & contributers";
+let alignTalkMSG = "Press this button to view conversation turns aligned horizontally. Hover over each conversation turn to read each turn.";
+let talkOnPathMSG = "Press this button to view all conversation turns along a single movement path. Hover over each conversation turn to read each turn.";
+let videoMSG = "Press this button to watch video synced to visualizations. Click anywhere on the timeline to play and pause video.";
+let infoMsg = "INTERACTION GEOGRAPHY SLICER (IGS-Indoor)\nby Ben Rydal Shapiro & contributers\nbuilt with p5.js";
 
 /*
 Relationship between speaker and path objects can be 1:1 but does not have to be this allows variation 

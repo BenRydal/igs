@@ -1,3 +1,8 @@
+.introBar {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
 .inputfile {
     width: 0.1px;
     height: 0.1px;

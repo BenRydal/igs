@@ -13,6 +13,7 @@ CREDITS/LICENSE INFORMATION: This software is licensed under the GNU General Pub
 // kaltura player destroy issue
 // intro screen/clean up old messages
 // ISSUE with conversation/movement file joining (see sean numbers)
+// Asynchronous loading of examples to prevent video errors
 
 // Loads fonts, floor plan, and CSV file into p5.Table objects so that they can manipulated later
 function preload() {

@@ -80,10 +80,10 @@ function overButtonsMSGS() {
     noStroke();
     let currXPos = timelineStart + buttonSpacing / 2;
     if (overRect(currXPos, buttonsHeight, textWidth(button_1), buttonWidth)) drawKeyMSG(animateMSG);
-    else if (overRect(currXPos + textWidth(button_1) + 2 * buttonSpacing, buttonsHeight, textWidth(button_2) + buttonSpacing, buttonWidth)) drawKeyMSG(conversation_1_MSG);
-    else if (overRect(currXPos + textWidth(button_1 + button_2) + 4 * buttonSpacing, buttonsHeight, textWidth(button_3) + buttonSpacing, buttonWidth)) drawKeyMSG(conversation_2_MSG);
+    else if (overRect(currXPos + textWidth(button_1) + 2 * buttonSpacing, buttonsHeight, textWidth(button_2) + buttonSpacing, buttonWidth)) drawKeyMSG(alignTalkMSG);
+    else if (overRect(currXPos + textWidth(button_1 + button_2) + 4 * buttonSpacing, buttonsHeight, textWidth(button_3) + buttonSpacing, buttonWidth)) drawKeyMSG(talkOnPathMSG);
     else if (overRect(currXPos + textWidth(button_1 + button_2 + button_3) + 6 * buttonSpacing, buttonsHeight, textWidth(button_4) + buttonSpacing, buttonWidth)) drawKeyMSG(videoMSG);
-    else if (overRect(currXPos + textWidth(button_1 + button_2 + button_3 + button_4) + 8 * buttonSpacing, buttonsHeight, textWidth(button_5) + buttonSpacing, buttonWidth)) drawHowToReadMSG(); // draw how to read message differently
+    else if (overRect(currXPos + textWidth(button_1 + button_2 + button_3 + button_4) + 8 * buttonSpacing, buttonsHeight, textWidth(button_5) + buttonSpacing, buttonWidth)) drawKeyMSG(howToMSG); // draw how to read message differently
 }
 
 // Draw text for button message/information
@@ -111,44 +111,29 @@ function drawKeyMSG(msg) {
     line(mouseX, buttonsHeight, mouseX - buttonSpacing, yPosBubble);
 }
 
-function drawHowToReadMSG() {
-    let textBoxHeight = textSpacing * (ceil(textWidth(howToReadMSG_1) / textBoxWidth)); // lines of talk in a text box rounded
-    let textBoxStart = height / 5;
-    let xPos = width / 2.1;
-    stroke(0); //set color to black
-    strokeWeight(1);
-    fill(255, 225); // transparency for textbox
-    rect(xPos - boxSpacing, textBoxStart, textBoxWidth + 2 * boxSpacing, textBoxHeight + 2 * boxSpacing);
-    fill(0);
-    noStroke();
-    text(howToReadMSG_1, xPos, textBoxStart + boxSpacing, textBoxWidth, textBoxWidth); // draw message in space-tiem view
-    drawKeyMSG(howToReadMSG_2); // draw message above how to read button
-}
-
 // Draw text for intro message
 function drawIntroMSG(msg) {
     textSize(keyTextSize);
     textFont(font_PlayfairReg);
     let textBoxHeight = textSpacing * (ceil(textWidth(msg) / textBoxWidth)); // lines of talk in a text box rounded
     let textBoxStart = speakerKeysHeight - (textBoxHeight + 2 * boxSpacing);
+    let xPos = timelineStart + textWidth(button_1 + button_2 + button_3 + button_4 + (buttonSpacing * 5));
     let yPosBubble = textBoxStart + textBoxHeight + 2 * boxSpacing;
     stroke(0);
     strokeWeight(1);
     fill(255, 225); // transparency for textbox
-    let xPos = width - textBoxWidth / 2 - 2 * boxSpacing;
     rect(xPos - boxSpacing - textBoxWidth / 2, textBoxStart, textBoxWidth + 2 * boxSpacing, textBoxHeight + 2 * boxSpacing);
     fill(0);
     noStroke();
     text(msg, xPos - textBoxWidth / 2, textBoxStart + boxSpacing, textBoxWidth, textBoxWidth);
-    let xPosBubble = width - textBoxWidth / 3;
     // lines for cartoon bubble
     stroke(255);
     strokeWeight(2);
-    line(xPosBubble - (3 * buttonSpacing), yPosBubble, xPosBubble - buttonSpacing, yPosBubble);
+    line(xPos - (3 * buttonSpacing), yPosBubble, xPos - buttonSpacing, yPosBubble);
     stroke(0);
     strokeWeight(1);
-    line(xPosBubble, buttonsHeight, xPosBubble - (3 * buttonSpacing), yPosBubble);
-    line(xPosBubble, buttonsHeight, xPosBubble - buttonSpacing, yPosBubble);
+    line(xPos, buttonsHeight, xPos - (3 * buttonSpacing), yPosBubble);
+    line(xPos, buttonsHeight, xPos - buttonSpacing, yPosBubble);
 }
 
 
