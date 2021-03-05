@@ -69,7 +69,7 @@ function overButtons() {
             videoCurrTime = 0; // reset time to 0
             playPauseMovie();
         }
-    } else if (overRect(currXPos + textWidth(button_1 + button_2 + button_3 + button_4) + 8 * buttonSpacing, buttonsHeight, textWidth(button_5) + buttonSpacing, buttonWidth)) overHowToReadButton();
+    } else if (overRect(currXPos + textWidth(button_1 + button_2 + button_3 + button_4) + 8 * buttonSpacing, buttonsHeight, textWidth(button_5) + buttonSpacing, buttonWidth)) howToRead = !howToRead;
 
 }
 
@@ -134,20 +134,6 @@ function drawIntroMSG(msg) {
     strokeWeight(1);
     line(xPos, buttonsHeight, xPos - (3 * buttonSpacing), yPosBubble);
     line(xPos, buttonsHeight, xPos - buttonSpacing, yPosBubble);
-}
-
-
-function overHowToReadButton() {
-    if (!howToRead) {
-        for (let i = 0; i < paths.length; i++) {
-            let path = paths[i];
-            if (path.speaker != 'T') path.show = false;
-            else path.show = true; // ensure teacher path is showed
-        }
-        conversationPositionTop = false; // hide conversation if showing
-        allConversation = false;
-    }
-    howToRead = !howToRead;
 }
 
 function overAnimateButton() {

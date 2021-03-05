@@ -89,7 +89,7 @@ function setTextSizes() {
 }
 
 function setConversationValues() {
-    textBoxWidth = width / 3.5; // width of text and textbox drawn
+    textBoxWidth = width / 3; // width of text and textbox drawn
     textSpacing = width / 57; // textbox leading
     boxSpacing = width / 141; // general textBox spacing variable
     boxDistFromRect = width / 28.2; // distance from text rectangle of textbox

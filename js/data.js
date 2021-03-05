@@ -71,7 +71,7 @@ let textBoxWidth, textSpacing, boxSpacing, boxDistFromRect;
 
 // MESSAGES
 let introMSG = "Press this button to learn how to use this tool. Visit this link to learn how to format your data for use in this tool [insert]";
-let howToMSG = "Hi There! This is a beta version of the Interaction Geography Slicer. You can use this tool to visualize movement, conversation, and video data over space and time. Use the top menu to visualize different sample datasets and upload your data. Hover over buttons on the left to learn about interactive features of this tool.";
+let howToMSG = "Hi There! This is a beta version of the Interaction Geography Slicer. You can use this tool to visualize movement, conversation, and video data over space and time. Use the top menu to visualize different sample datasets and upload your data. Movement and conversation are shown over a floor plan view (left) and a space-time view (right), where the vertical axis corresponds to the vertical dimension of the floor plan. Hover over buttons on the left to learn about interactive features of this tool.";
 let animateMSG = "Press this button to animate movement and conversation over space and time";
 let alignTalkMSG = "Press this button to view conversation turns aligned horizontally. Hover over each conversation turn to read each turn.";
 let talkOnPathMSG = "Press this button to view all conversation turns along a single movement path. Hover over each conversation turn to read each turn.";
