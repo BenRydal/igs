@@ -97,7 +97,7 @@ class Keys {
     drawTitles() {
         fill(0);
         textFont(font_PlayfairItalic, infoTextSize);
-        text(infoMsg, buttonWidth, buttonsHeight - buttonWidth, timelineStart - 6 * buttonSpacing, height);
+        text(infoMsg, 0, buttonsHeight);
     }
 
     drawTimeline() {
