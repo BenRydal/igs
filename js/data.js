@@ -23,11 +23,9 @@ let inputFloorPlanPixelWidth, inputFloorPlanPixelHeight, displayFloorPlanWidth, 
 // VIDEO
 let movie; // global holder for movie element--youtube, Kaltura and File Player coordinate around this
 let videoPlayer; // instantiated in setupMovie method, used to manipulate video (play, pause, seek, etc.)
-let videoIsPlaying = false; // indicates if video is playing/stopped
-let videoCurrTime = 0; // video current time in seconds
-let videoWidthOnPause, videoHeightOnPause, videoWidthOnPlay, videoHeightOnPlay; // permanent video width/heights
-let videoWidthPlayCounter, videoHeightPlayCounter; // allows for transition between video width/heights
-let videoTransitionCounter = 40; // speed of video size transitions
+let videoIsPlaying = false; // boolean for video playing or stopped
+let videoIsShowing = false; // boolean for showing/hiding video
+let vidWidthSmall, vidHeightSmall, vidWidthLarge, vidHeightLarge; // controls 2 different video sizes
 
 // GUI
 let updateMovementData = false; // controls accepting first input file to trigger update data processing
@@ -49,9 +47,7 @@ const colorGray = 150,
     pathWeight = 3,
     basePathColor = 100; // for paths that don't have associated speaker in speakerList
 let animationCounter = 0; // controls animation
-let animation = true,
-    videoMode = false,
-    howToRead = false;
+let animation = true, howToRead = false;
 // TIMELINE
 let lockedLeft = false,
     lockedRight = false;
@@ -71,7 +67,7 @@ let textBoxWidth, textSpacing, boxSpacing, boxDistFromRect;
 
 // MESSAGES
 let introMSG = "Press this button to learn how to use this tool. Visit this link to learn how to format your data for use in this tool [insert]";
-let howToMSG = "Hi There! This is a beta version of the Interaction Geography Slicer. You can use this tool to visualize movement, conversation, and video data over space and time. Use the top menu to visualize different sample datasets and upload your data. Movement and conversation are shown over a floor plan view (left) and a space-time view (right), where the vertical axis corresponds to the vertical dimension of the floor plan. Hover over buttons on the left to learn about interactive features of this tool.";
+let howToMSG = "Hi There! This is a beta version of the Interaction Geography Slicer. You can use this tool to visualize movement, conversation, and video data over space and time. Data are displayed over a floor plan view (left) and a space-time view (right), where the vertical axis corresponds to the vertical dimension of the floor plan. Use the top menu to visualize different sample datasets or upload your data. Hover over buttons on the left to learn about interactive features of this tool.";
 let animateMSG = "Press this button to animate movement and conversation over space and time";
 let alignTalkMSG = "Press this button to view conversation turns aligned horizontally. Hover over each conversation turn to read each turn.";
 let talkOnPathMSG = "Press this button to view all conversation turns along a single movement path. Hover over each conversation turn to read each turn.";

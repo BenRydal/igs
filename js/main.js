@@ -41,11 +41,7 @@ function draw() {
     }
     drawData.setConversationBubble();
     if (howToRead) overButtonsMSGS();
-    if (videoMode) {
-        updateVideoScrubbing();
-        if (videoIsPlaying) increaseVideoSize();
-        else decreaseVideoSize();
-    }
+    // if (videoIsShowing) updateVideoScrubbing();
     if (intro) drawIntroMSG(introMSG); // draw intro message on program start up until mouse is pressed
     if (animation) setUpAnimation();
 }
@@ -97,10 +93,8 @@ function setConversationValues() {
 
 function setVideoValues() {
     let video = select('#moviePlayer').position(timelineStart, 0); // position video in upper left corner on timeline
-    videoWidthOnPause = width / 5;
-    videoHeightOnPause = width / 6;
-    videoWidthOnPlay = width - timelineStart;
-    videoHeightOnPlay = height * .74;
-    videoWidthPlayCounter = videoWidthOnPause;
-    videoHeightPlayCounter = videoHeightOnPause;
+    vidWidthSmall = width / 5;
+    vidHeightSmall = width / 6;
+    vidWidthLarge = timelineLength;
+    vidHeightLarge = yPosTimeScaleTop;
 }

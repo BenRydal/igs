@@ -75,10 +75,10 @@ class Keys {
         noStroke();
         currXPos += textWidth(button_3) + buttonSpacing * 2;
         // Button 4
-        fill(videoMode ? 0 : 150);
+        fill(videoIsShowing ? 0 : 150);
         text(button_4, currXPos, buttonsHeight);
         noFill();
-        stroke(videoMode ? 0 : 150);
+        stroke(videoIsShowing ? 0 : 150);
         strokeWeight(1);
         rect(currXPos - buttonSpacing / 2, buttonsHeight, textWidth(button_4) + buttonSpacing, buttonSpacing * 1.5);
         noStroke();

@@ -200,7 +200,7 @@ function processVideo(videoPlatform, videoParams) {
   if (videoPlatform === 'File') movie = createVideo(videoParams['fileName']);
   else movie = createDiv(); // create the div that will hold the video
   movie.id('moviePlayer');
-  movie.style('display', 'none');
+  movie.hide();
   setupMovie('moviePlayer', videoPlatform, videoParams); // set up the video player
   let video = select('#moviePlayer').position(timelineStart, 0); // position video in upper left corner on timeline
 }

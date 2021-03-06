@@ -1,11 +1,7 @@
 function mousePressed() {
     if (intro) intro = false;
     // Controls video when clicking on timeline
-    if (videoMode && !animation && overRect(timelineStart, 0, timelineEnd, timelineHeight - tickHeight)) {
-        let initialValue = map(mouseX, timelineStart, timelineEnd, currPixelTimeMin, currPixelTimeMax); // first map mouse to selected time values in GUI
-        videoCurrTime = map(initialValue, timelineStart, timelineEnd, 0, videoPlayer.getVideoDuration());
-        playPauseMovie();
-    }
+    if (videoIsShowing && !animation && overRect(timelineStart, 0, timelineEnd, timelineHeight - tickHeight)) playPauseMovie();
     textSize(keyTextSize);
     overMovementKeyTitle();
     if (movementKeyTitle) overPathKeys();
@@ -59,18 +55,20 @@ function overButtons() {
     else if (overRect(currXPos + textWidth(button_1) + 2 * buttonSpacing, buttonsHeight, textWidth(button_2) + buttonSpacing, buttonWidth)) conversationPositionTop = !conversationPositionTop;
     else if (overRect(currXPos + textWidth(button_1 + button_2) + 4 * buttonSpacing, buttonsHeight, textWidth(button_3) + buttonSpacing, buttonWidth)) allConversation = !allConversation;
     else if (overRect(currXPos + textWidth(button_1 + button_2 + button_3) + 6 * buttonSpacing, buttonsHeight, textWidth(button_4) + buttonSpacing, buttonWidth)) {
-        videoMode = !videoMode;
-        let video = select('#moviePlayer');
-        video.style('display', (videoMode ? 'block' : 'none'));
-        if (videoMode) {
-            video.style('width', videoWidthOnPause + ''); // reset width/height
-            video.style('height', videoHeightOnPause + '');
+        if (videoIsShowing) {
+            videoPlayer.pause();
+            setVideoSizeSmall();
+            movie.hide();
+            let video = select('#moviePlayer');
+            video.style('display', 'none'); // hide video
         } else {
             videoCurrTime = 0; // reset time to 0
-            playPauseMovie();
+            setVideoSizeSmall();
+            let video = select('#moviePlayer');
+            video.style('display', 'block'); // show video
         }
+        videoIsShowing = !videoIsShowing;
     } else if (overRect(currXPos + textWidth(button_1 + button_2 + button_3 + button_4) + 8 * buttonSpacing, buttonsHeight, textWidth(button_5) + buttonSpacing, buttonWidth)) howToRead = !howToRead;
-
 }
 
 // Test if over buttons and send to drawKeyMessages with respective String/message
