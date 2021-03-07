@@ -3,13 +3,12 @@ function mousePressed() {
     // Controls video when clicking on timeline
     if (videoIsShowing && !animation && overRect(timelineStart, 0, timelineEnd, timelineHeight - tickHeight)) playPauseMovie();
     textSize(keyTextSize);
-    overMovementKeyTitle();
+    overMovementConversationKeys();
     if (movementKeyTitle) overPathKeys();
     else overSpeakerKeys();
-    overButtons();
+    overInteractionButtons();
     if (!animation && overRect(timelineStart, yPosTimeScaleTop, timelineLength, yPosTimeScaleSize)) handleTimeline();
 }
-
 
 function mouseDragged() {
     if (!animation) {
@@ -23,7 +22,7 @@ function mouseReleased() {
     lockedRight = false;
 }
 
-function overMovementKeyTitle() {
+function overMovementConversationKeys() {
     let currXPos = timelineStart;
     if (overRect(currXPos, speakerKeysHeight, buttonWidth + textWidth("Movement"), buttonWidth)) movementKeyTitle = true;
     else if (overRect(currXPos + textWidth("Movement | "), speakerKeysHeight, buttonWidth + textWidth("Conversation"), buttonWidth)) movementKeyTitle = false;
@@ -49,26 +48,13 @@ function overPathKeys() {
 }
 
 // Loop through all button/test if mouse clicked and update accordingly
-function overButtons() {
+function overInteractionButtons() {
     let currXPos = timelineStart + buttonSpacing / 2;
     if (overRect(currXPos, buttonsHeight, textWidth(button_1), buttonWidth)) overAnimateButton();
     else if (overRect(currXPos + textWidth(button_1) + 2 * buttonSpacing, buttonsHeight, textWidth(button_2) + buttonSpacing, buttonWidth)) conversationPositionTop = !conversationPositionTop;
     else if (overRect(currXPos + textWidth(button_1 + button_2) + 4 * buttonSpacing, buttonsHeight, textWidth(button_3) + buttonSpacing, buttonWidth)) allConversation = !allConversation;
-    else if (overRect(currXPos + textWidth(button_1 + button_2 + button_3) + 6 * buttonSpacing, buttonsHeight, textWidth(button_4) + buttonSpacing, buttonWidth)) {
-        if (videoIsShowing) {
-            videoPlayer.pause();
-            videoIsPlaying = false; // important to set this
-            setVideoSizeSmall();
-            movie.hide();
-            let video = select('#moviePlayer');
-            video.style('display', 'none'); // hide video
-        } else {
-            setVideoSizeSmall();
-            let video = select('#moviePlayer');
-            video.style('display', 'block'); // show video
-        }
-        videoIsShowing = !videoIsShowing;
-    } else if (overRect(currXPos + textWidth(button_1 + button_2 + button_3 + button_4) + 8 * buttonSpacing, buttonsHeight, textWidth(button_5) + buttonSpacing, buttonWidth)) howToRead = !howToRead;
+    else if (overRect(currXPos + textWidth(button_1 + button_2 + button_3) + 6 * buttonSpacing, buttonsHeight, textWidth(button_4) + buttonSpacing, buttonWidth)) overVideoButton();
+    else if (overRect(currXPos + textWidth(button_1 + button_2 + button_3 + button_4) + 8 * buttonSpacing, buttonsHeight, textWidth(button_5) + buttonSpacing, buttonWidth)) howToRead = !howToRead;
 }
 
 // Test if over buttons and send to drawKeyMessages with respective String/message
@@ -144,6 +130,22 @@ function overAnimateButton() {
     }
 }
 
+function overVideoButton() {
+    if (videoIsShowing) {
+        videoPlayer.pause();
+        videoIsPlaying = false; // important to set this
+        setVideoSizeSmall();
+        movie.hide();
+        let video = select('#moviePlayer');
+        video.style('display', 'none'); // hide video
+    } else {
+        setVideoSizeSmall();
+        let video = select('#moviePlayer');
+        video.style('display', 'block'); // show video
+    }
+    videoIsShowing = !videoIsShowing;
+}
+
 function handleTimeline() {
     let xPosLeftSelector = currPixelTimeMin;
     let xPosRightSelector = currPixelTimeMax;
@@ -170,4 +172,49 @@ function overCircle(x, y, diameter) {
 // Tests if over rectangle with x, y, and width/height
 function overRect(x, y, boxWidth, boxHeight) {
     return mouseX >= x && mouseX <= x + boxWidth && mouseY >= y && mouseY <= y + boxHeight;
+}
+
+function setVideoSizeSmall() {
+    let iFrameID = document.getElementById('moviePlayer');
+    iFrameID.width = vidWidthSmall;
+    iFrameID.height = vidHeightSmall;
+}
+
+function setVideoSizeLarge() {
+    let iFrameID = document.getElementById('moviePlayer');
+    iFrameID.width = vidWidthLarge;
+    iFrameID.height = vidHeightLarge;
+}
+
+// Plays/pauses video and toggles videoIsPlaying
+function playPauseMovie() {
+    if (videoIsPlaying) {
+        videoPlayer.pause();
+        setVideoSizeSmall();
+        videoIsPlaying = false;
+    } else {
+        let mPos = map(mouseX, timelineStart, timelineEnd, currPixelTimeMin, currPixelTimeMax); // first map mouse to selected time values in GUI
+        // must floor vPos to prevent double finite error
+        let vPos = Math.floor(map(mPos, timelineStart, timelineEnd, 0, Math.floor(videoPlayer.getVideoDuration())));
+        print(vPos);
+        videoPlayer.play();
+        videoPlayer.seekTo(vPos);
+        setVideoSizeLarge();
+        videoIsPlaying = true;
+    }
+}
+
+// Updates time selected in video depending on mouse position or animation over timeline
+function updateVideoScrubbing() {
+    if (animation) {
+        let startValue = map(currPixelTimeMin, timelineStart, timelineEnd, 0, Math.floor(videoPlayer.getVideoDuration())); // remap starting point to seek for video
+        let endValue = map(currPixelTimeMax, timelineStart, timelineEnd, 0, Math.floor(videoPlayer.getVideoDuration())); // remap starting point to seek for video
+        let vPos = Math.floor(map(bugTimePosForVideo, timelineStart, timelineEnd, startValue, endValue));
+        videoPlayer.seekTo(vPos);
+    } else if (overRect(timelineStart, 0, timelineEnd, timelineHeight)) {
+        let mPos = map(mouseX, timelineStart, timelineEnd, currPixelTimeMin, currPixelTimeMax); // first map mouse to selected time values in GUI
+        // must floor vPos to prevent double finite error
+        let vPos = Math.floor(map(mPos, timelineStart, timelineEnd, 0, Math.floor(videoPlayer.getVideoDuration())));
+        videoPlayer.seekTo(vPos);
+    }
 }

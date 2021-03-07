@@ -186,6 +186,7 @@ function updateSpeakerList() {
 
 // parses inputted video files from user computer
 function parseInputVideoFile(input) {
+  if (videoIsShowing) overVideoButton(); // Turn off video that if showing
   let file = input.files[0];
   let fileLocation = URL.createObjectURL(file);
   processVideo('File', {
@@ -195,13 +196,17 @@ function parseInputVideoFile(input) {
 
 // Creates movie element specific to videoPlatform and params
 function processVideo(videoPlatform, videoParams) {
-  noLoop();
+  noLoop(); // stop program while loading video, reloops after video loaded
   if (videoPlayer !== undefined) { // if first time player loaded at program start it will be undefined
     videoPlayer.destroy(); // destroy exisiting player
     movie.remove(); // remove exisiting movie element
   }
-  if (videoPlatform === 'File') movie = createVideo(videoParams['fileName'], loop()); // create video element if File
-  else movie = createDiv(); // create the div that will hold the video if other player
+  if (videoPlatform === 'File') {
+    movie = createVideo(videoParams['fileName'], loop()); // create video element if File
+    movie.onload = function () {
+      URL.revokeObjectURL(this.src);
+    }
+  } else movie = createDiv(); // create the div that will hold the video if other player
   movie.id('moviePlayer');
   movie.hide();
   setupMovie('moviePlayer', videoPlatform, videoParams); // set up the video player

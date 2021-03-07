@@ -7,13 +7,8 @@ CREDITS/LICENSE INFORMATION: This software is licensed under the GNU General Pub
 // Add additional type error handling for processing csv files
 // fix bug to always show last value if over to prevent blinking
 // Remove some fonts
-// check if removing "pause video" function screwed up bug line/shows at 0???
-// revoke URLs
 // dynamic line/turn thickness
-// kaltura player destroy issue
-// intro screen/clean up old messages
 // ISSUE with conversation/movement file joining (see sean numbers)
-// Asynchronous loading of examples to prevent video errors
 
 // Loads fonts, floor plan, and CSV file into p5.Table objects so that they can manipulated later
 function preload() {
@@ -43,7 +38,7 @@ function draw() {
     if (howToRead) overButtonsMSGS();
     if (intro) drawIntroMSG(introMSG); // draw intro message on program start up until mouse is pressed
     if (animation) setUpAnimation();
-    // if (videoIsShowing) updateVideoScrubbing();
+    if (videoIsShowing && !videoIsPlaying) updateVideoScrubbing();
 }
 
 function setUpAnimation() {

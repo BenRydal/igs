@@ -105,7 +105,7 @@ class KalturaPlayer {
     }
 
     destroy() {
-        kWidget.destroy('moviePlayer');
+        kWidget.destroy(this.targetId);
     }
 }
 
@@ -185,8 +185,8 @@ class FilePlayer {
         print("loaded");
     }
 
-    seekTo(time) {
-        movie.time(time); // jumps to time parameter
+    seekTo(t) {
+        movie.time(t); // jumps to time parameter
     }
 
     play() {
