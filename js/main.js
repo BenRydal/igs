@@ -36,14 +36,13 @@ function draw() {
     keys.drawKeys();
     let drawData = new DrawData();
     for (let i = 0; i < paths.length; i++) {
-        let path = paths[i];
-        if (path.show) drawData.setDrawData(path);
+        if (paths[i].show) drawData.setDrawData(paths[i]);
     }
     drawData.setConversationBubble();
     if (howToRead) overButtonsMSGS();
-    // if (videoIsShowing) updateVideoScrubbing();
     if (intro) drawIntroMSG(introMSG); // draw intro message on program start up until mouse is pressed
     if (animation) setUpAnimation();
+    // if (videoIsShowing) updateVideoScrubbing();
 }
 
 function setUpAnimation() {

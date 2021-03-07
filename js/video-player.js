@@ -62,6 +62,11 @@ class KalturaPlayer {
                 'largePlayBtn.plugin': false,
                 'autoPlay': false
             },
+
+            // Ready callback is issued for this player:
+            'readyCallback': function (playerId) {
+                console.log("kWidget player ready: " + playerId);
+            },
             'params': { // params allows you to set flash embed params such as wmode, allowFullScreen etc
                 'wmode': 'transparent'
             }
@@ -105,16 +110,21 @@ class KalturaPlayer {
 
 
 class FilePlayer {
-    
+
     // For a FilePlayer, Main.js should have:
     // videoPlatform = 'File';
     // videoParams = { fileName: 'your_fileName_here' };
 
-    constructor(params) {
-        this.targetId = params['targetId'];
-        this.fileName = params['fileName'];
+    // constructor(params) {
+    //     this.targetId = params['targetId'];
+    //     this.fileName = params['fileName'];
+    //     this.initialize();
+    // }
+
+    constructor() {
         this.initialize();
     }
+
 
     initialize() {
         movie.hideControls(); // hide default browser controls
@@ -145,11 +155,10 @@ class FilePlayer {
     }
 
     getVideoDuration() {
-      return movie.duration();
+        return movie.duration();
     }
 
-    destroy() {
-      }
+    destroy() {}
 }
 
 // This is the VideoPlayer implementation that utilizes the Youtube Player API
@@ -173,8 +182,17 @@ class YoutubePlayer {
             playerVars: {
                 controls: 0, // hides controls on the video
                 disablekb: 1, // disables keyboard controls on the video
+            },
+            events: {
+                'onReady': this.onPlayerReady,
             }
         });
+    }
+
+    // The API will call this function when the video player is ready.
+    onPlayerReady(event) {
+        // event.target.playVideo();
+        print("hi");
     }
 
     seekTo(time) {
