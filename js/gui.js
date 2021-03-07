@@ -57,12 +57,12 @@ function overButtons() {
     else if (overRect(currXPos + textWidth(button_1 + button_2 + button_3) + 6 * buttonSpacing, buttonsHeight, textWidth(button_4) + buttonSpacing, buttonWidth)) {
         if (videoIsShowing) {
             videoPlayer.pause();
+            videoIsPlaying = false; // important to set this
             setVideoSizeSmall();
             movie.hide();
             let video = select('#moviePlayer');
             video.style('display', 'none'); // hide video
         } else {
-            videoCurrTime = 0; // reset time to 0
             setVideoSizeSmall();
             let video = select('#moviePlayer');
             video.style('display', 'block'); // show video

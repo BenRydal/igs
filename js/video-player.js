@@ -65,6 +65,7 @@ class KalturaPlayer {
 
             // Ready callback is issued for this player:
             'readyCallback': function (playerId) {
+                loop(); // restart p5 draw loop once loaded
                 console.log("kWidget player ready: " + playerId);
             },
             'params': { // params allows you to set flash embed params such as wmode, allowFullScreen etc
@@ -108,59 +109,6 @@ class KalturaPlayer {
     }
 }
 
-
-class FilePlayer {
-
-    // For a FilePlayer, Main.js should have:
-    // videoPlatform = 'File';
-    // videoParams = { fileName: 'your_fileName_here' };
-
-    // constructor(params) {
-    //     this.targetId = params['targetId'];
-    //     this.fileName = params['fileName'];
-    //     this.initialize();
-    // }
-
-    constructor() {
-        this.initialize();
-    }
-
-
-    initialize() {
-        movie.hideControls(); // hide default browser controls
-    }
-
-    seekTo(time) {
-        movie.time(time); // jumps to time parameter
-    }
-
-    play() {
-        movie.play();
-    }
-
-    pause() {
-        movie.pause();
-    }
-
-    mute() {
-        movie.volume(0);
-    }
-
-    unMute() {
-        movie.volume(1);
-    }
-
-    getCurrentTime() {
-        return movie.time();
-    }
-
-    getVideoDuration() {
-        return movie.duration();
-    }
-
-    destroy() {}
-}
-
 // This is the VideoPlayer implementation that utilizes the Youtube Player API
 // Note to use a Youtube Player, the Youtube iFrame Player API must be loaded of the format:
 // <script type="text/javascript" src="https://www.youtube.com/iframe_api"></script>
@@ -192,7 +140,8 @@ class YoutubePlayer {
     // The API will call this function when the video player is ready.
     onPlayerReady(event) {
         // event.target.playVideo();
-        print("hi");
+        loop(); // restart p5 draw loop once loaded
+        console.log("YT player ready: ");
     }
 
     seekTo(time) {
@@ -226,4 +175,43 @@ class YoutubePlayer {
     destroy() {
         this.player.destroy();
     }
+}
+
+class FilePlayer {
+
+    constructor(params) {
+        this.targetId = params['targetId'];
+        this.fileName = params['fileName'];
+        print("loaded");
+    }
+
+    seekTo(time) {
+        movie.time(time); // jumps to time parameter
+    }
+
+    play() {
+        movie.play();
+    }
+
+    pause() {
+        movie.pause();
+    }
+
+    mute() {
+        movie.volume(0);
+    }
+
+    unMute() {
+        movie.volume(1);
+    }
+
+    getCurrentTime() {
+        return movie.time();
+    }
+
+    getVideoDuration() {
+        return movie.duration();
+    }
+
+    destroy() {} // because file player is already attached to movie div directly there is no player to destroy
 }

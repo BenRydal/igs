@@ -23,6 +23,7 @@ function preload() {
 
 function setup() {
     canvas = createCanvas(window.innerWidth, window.innerHeight, P2D);
+    frameRate(30);
     pixelDensity(displayDensity());
     textFont(font_Lato, 14);
     textAlign(LEFT, TOP);

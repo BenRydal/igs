@@ -188,8 +188,6 @@ function updateSpeakerList() {
 function parseInputVideoFile(input) {
   let file = input.files[0];
   let fileLocation = URL.createObjectURL(file);
-  videoPlayer.destroy(); // destroy exisiting player
-  movie.remove(); // remove exisiting movie element
   processVideo('File', {
     fileName: fileLocation
   });
@@ -197,12 +195,35 @@ function parseInputVideoFile(input) {
 
 // Creates movie element specific to videoPlatform and params
 function processVideo(videoPlatform, videoParams) {
-  if (videoPlatform === 'File') movie = createVideo(videoParams['fileName']);
-  else movie = createDiv(); // create the div that will hold the video
+  noLoop();
+  if (videoPlayer !== undefined) { // if first time player loaded at program start it will be undefined
+    videoPlayer.destroy(); // destroy exisiting player
+    movie.remove(); // remove exisiting movie element
+  }
+  if (videoPlatform === 'File') movie = createVideo(videoParams['fileName'], loop()); // create video element if File
+  else movie = createDiv(); // create the div that will hold the video if other player
   movie.id('moviePlayer');
   movie.hide();
   setupMovie('moviePlayer', videoPlatform, videoParams); // set up the video player
   let video = select('#moviePlayer').position(timelineStart, 0); // position video in upper left corner on timeline
+}
+
+// Initialization for the video player
+function setupMovie(movieDiv, platform, params) {
+  params['targetId'] = movieDiv; // regardless of platform, the videoPlayer needs a target div
+  // Based on the specified platform, chose the appropriate type of videoPlayer to use
+  // ADD TRY/CATCH HERE?
+  switch (platform) {
+    case "Kaltura":
+      videoPlayer = new KalturaPlayer(params);
+      break;
+    case "Youtube":
+      videoPlayer = new YoutubePlayer(params);
+      break;
+    case "File":
+      videoPlayer = new FilePlayer(params);
+      break;
+  }
 }
 
 function testMovementFileData(data, meta) {
