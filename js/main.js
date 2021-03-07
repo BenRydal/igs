@@ -9,6 +9,7 @@ CREDITS/LICENSE INFORMATION: This software is licensed under the GNU General Pub
 // Remove some fonts
 // dynamic line/turn thickness
 // ISSUE with conversation/movement file joining (see sean numbers)
+// Organize mouse functions/main draw loop
 
 // Loads fonts, floor plan, and CSV file into p5.Table objects so that they can manipulated later
 function preload() {
@@ -38,7 +39,7 @@ function draw() {
     if (howToRead) overButtonsMSGS();
     if (intro) drawIntroMSG(introMSG); // draw intro message on program start up until mouse is pressed
     if (animation) setUpAnimation();
-    if (videoIsShowing && !videoIsPlaying) updateVideoScrubbing();
+    // if (videoIsShowing && !videoIsPlaying) updateVideoScrubbing();
 }
 
 function setUpAnimation() {
