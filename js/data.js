@@ -39,7 +39,7 @@ const PLAN = 0,
     SPACETIME = 1; // constants to indicate plan or space-time views
 let movementKeyTitle = true;
 let conversationPositionTop = false; // controls positioning of conversation turns on path or top of screen
-let allConversation = false; // controls showing all or matching speaker conversation turns on path
+let allConversation = true; // shows all speaker turns on path, set to true for example 1 currently
 let intro = true; // sets intro message to start program
 let font_PlayfairReg, font_PlayfairItalic, font_PlayfairBold, font_Lato;
 let buttonSpacing, buttonWidth, speakerKeysHeight, buttonsHeight;

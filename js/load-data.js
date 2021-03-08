@@ -5,11 +5,29 @@ function loadFonts() {
   font_Lato = loadFont("data/fonts/Lato-Light.ttf");
 }
 
+// function loadExampleDataSet() {
+//   updateMovementData = true; // trigger update data
+//   let exampleSet = document.getElementById("examples").value;
+//   if (exampleSet === "Example 1") {
+//     loadExample(example_1);
+//   } else if (exampleSet === "Example 2") {
+//     loadExample(example_2);
+//   }
+// }
+
 function loadExampleDataSet() {
   updateMovementData = true; // trigger update data
   let exampleSet = document.getElementById("examples").value;
-  if (exampleSet === "Example 1") loadExample(example_1);
-  else if (exampleSet === "Example 2") loadExample(example_2);
+  switch (exampleSet) {
+    case "Example 1":
+      loadExample(example_1);
+      allConversation = true; // not necessary, but fits example nicely
+      break;
+    case "Example 2":
+      loadExample(example_2);
+      allConversation = false; // not necessary, but fits example nicely
+      break;
+  }
 }
 
 function loadExample(params) {
