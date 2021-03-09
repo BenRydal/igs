@@ -10,6 +10,7 @@ CREDITS/LICENSE INFORMATION: This software is licensed under the GNU General Pub
 // dynamic line/turn thickness
 // ISSUE with conversation/movement file joining (see sean numbers)
 // Organize mouse functions/main draw loop
+// correctly organize draw data file into parent class and 2 sub classes
 
 // Loads fonts, floor plan, and CSV file into p5.Table objects so that they can manipulated later
 function preload() {

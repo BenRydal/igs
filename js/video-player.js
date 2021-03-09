@@ -182,7 +182,7 @@ class FilePlayer {
     constructor(params) {
         this.targetId = params['targetId'];
         this.fileName = params['fileName'];
-        print("loaded");
+        console.log("File Player Ready:");
     }
 
     seekTo(t) {
