@@ -5,23 +5,12 @@ function loadFonts() {
   font_Lato = loadFont("data/fonts/Lato-Light.ttf");
 }
 
-// function loadExampleDataSet() {
-//   updateMovementData = true; // trigger update data
-//   let exampleSet = document.getElementById("examples").value;
-//   if (exampleSet === "Example 1") {
-//     loadExample(example_1);
-//   } else if (exampleSet === "Example 2") {
-//     loadExample(example_2);
-//   }
-// }
-
 function loadExampleDataSet() {
   updateMovementData = true; // trigger update data
   let exampleSet = document.getElementById("examples").value;
   switch (exampleSet) {
     case "Example 1":
       loadExample(example_1);
-      allConversation = true; // not necessary, but fits example nicely
       break;
     case "Example 2":
       loadExample(example_2);
@@ -215,12 +204,15 @@ function parseInputVideoFile(input) {
 // Creates movie element specific to videoPlatform and params
 function processVideo(videoPlatform, videoParams) {
   noLoop(); // stop program loop while loading video, restarted upon video loaded in videoPlayer or in processVideoFile if loading from file
-  if (videoPlayer !== undefined) { // if first time player loaded at program start it will be undefined
-    videoPlayer.destroy(); // destroy exisiting player
-    movie.remove(); // remove exisiting movie element
-  }
+  if (videoPlayer !== undefined) destroyMovieAndPlayer(); // if first time player loaded at program start it will be undefined, don't destroy it
   if (videoPlatform === 'File') processVideoFromFile(videoPlatform, videoParams);
   else processVideoFromWeb(videoPlatform, videoParams);
+}
+
+// Destroy exisiting player and remove exisiting movie element
+function destroyMovieAndPlayer() {
+  videoPlayer.destroy();
+  movie.remove();
 }
 
 // Creates movie element from file, use callback to make sure video loaded before setting player and starting loop again
