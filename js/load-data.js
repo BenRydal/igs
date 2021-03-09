@@ -84,6 +84,7 @@ function parseExampleMovementFile(input) {
   Papa.parse(input, {
     complete: testMovementFile,
     header: true,
+    dynamicTyping: true,
   });
 }
 
@@ -95,6 +96,7 @@ function parseInputMovementFile(input) {
     Papa.parse(file, {
       complete: testMovementFile,
       header: true,
+      dynamicTyping: true,
     });
   }
 }
@@ -116,7 +118,7 @@ function processMovementFile(results, file) {
   let conversationCounter = 0;
   for (let i = 1; i < results.data.length; i++) { // start at second row
     // only process point if has larger time value than previous time value
-    //if (results.data[i][movementHeaders[0]] > results.data[i - 1][movementHeaders[0]]) {
+    if (results.data[i][movementHeaders[0]] > results.data[i - 1][movementHeaders[0]]) {
       let m = new Point_Movement();
       m.time = results.data[i][movementHeaders[0]];
       m.xPos = results.data[i][movementHeaders[1]];
@@ -131,7 +133,7 @@ function processMovementFile(results, file) {
         }
       }
     }
-  //}
+  }
   let p = new Path(file.name.charAt(0), basePathColor); // initialize with name and grey/black color
   p.movement = movement;
   p.conversation = conversation;
@@ -159,6 +161,7 @@ function parseExampleConversationFile(file) {
   Papa.parse(file, {
     complete: testConversationFile,
     header: true,
+    dynamicTyping: true,
   });
 }
 
@@ -168,6 +171,7 @@ function parseInputConversationFile(input) {
   Papa.parse(file, {
     complete: testConversationFile,
     header: true,
+    dynamicTyping: true,
   });
 }
 
