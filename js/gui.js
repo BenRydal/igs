@@ -63,46 +63,26 @@ function overButtonsMSGS() {
     textFont(font_PlayfairReg);
     noStroke();
     let currXPos = timelineStart + buttonSpacing / 2;
-    if (overRect(currXPos, buttonsHeight, textWidth(button_1), buttonWidth)) drawKeyMSG(animateMSG);
-    else if (overRect(currXPos + textWidth(button_1) + 2 * buttonSpacing, buttonsHeight, textWidth(button_2) + buttonSpacing, buttonWidth)) drawKeyMSG(alignTalkMSG);
-    else if (overRect(currXPos + textWidth(button_1 + button_2) + 4 * buttonSpacing, buttonsHeight, textWidth(button_3) + buttonSpacing, buttonWidth)) drawKeyMSG(talkOnPathMSG);
-    else if (overRect(currXPos + textWidth(button_1 + button_2 + button_3) + 6 * buttonSpacing, buttonsHeight, textWidth(button_4) + buttonSpacing, buttonWidth)) drawKeyMSG(videoMSG);
-    else if (overRect(currXPos + textWidth(button_1 + button_2 + button_3 + button_4) + 8 * buttonSpacing, buttonsHeight, textWidth(button_5) + buttonSpacing, buttonWidth)) drawKeyMSG(howToMSG); // draw how to read message differently
+    if (overRect(currXPos, buttonsHeight, textWidth(button_1), buttonWidth)) drawKeyMSG(animateMSG, false);
+    else if (overRect(currXPos + textWidth(button_1) + 2 * buttonSpacing, buttonsHeight, textWidth(button_2) + buttonSpacing, buttonWidth)) drawKeyMSG(alignTalkMSG, false);
+    else if (overRect(currXPos + textWidth(button_1 + button_2) + 4 * buttonSpacing, buttonsHeight, textWidth(button_3) + buttonSpacing, buttonWidth)) drawKeyMSG(talkOnPathMSG, false);
+    else if (overRect(currXPos + textWidth(button_1 + button_2 + button_3) + 6 * buttonSpacing, buttonsHeight, textWidth(button_4) + buttonSpacing, buttonWidth)) drawKeyMSG(videoMSG, false);
+    else if (overRect(currXPos + textWidth(button_1 + button_2 + button_3 + button_4) + 8 * buttonSpacing, buttonsHeight, textWidth(button_5) + buttonSpacing, buttonWidth)) drawKeyMSG(howToMSG, false);
 }
 
-// Draw text for button message/information
-function drawKeyMSG(msg) {
-    let textBoxHeight = textSpacing * (ceil(textWidth(msg) / textBoxWidth)); // lines of talk in a text box rounded
-    let textBoxStart = speakerKeysHeight - (textBoxHeight + 2 * boxSpacing);
-    let yPosBubble = textBoxStart + textBoxHeight + 2 * boxSpacing;
-    stroke(0);
-    strokeWeight(1);
-    fill(255, 225); // transparency for textbox
-    let xPos = 0;
-    if (width - mouseX < textBoxWidth / 2) xPos = width - textBoxWidth / 2 - 2 * boxSpacing;
-    else xPos = mouseX;
-    rect(xPos - boxSpacing - textBoxWidth / 2, textBoxStart, textBoxWidth + 2 * boxSpacing, textBoxHeight + 2 * boxSpacing);
-    fill(0);
-    noStroke();
-    text(msg, xPos - textBoxWidth / 2, textBoxStart + boxSpacing, textBoxWidth, textBoxWidth);
-    // lines for cartoon bubble
-    stroke(255);
-    strokeWeight(2);
-    line(mouseX - (3 * buttonSpacing), yPosBubble, mouseX - buttonSpacing, yPosBubble);
-    stroke(0);
-    strokeWeight(1);
-    line(mouseX, buttonsHeight, mouseX - (3 * buttonSpacing), yPosBubble);
-    line(mouseX, buttonsHeight, mouseX - buttonSpacing, yPosBubble);
-}
-
-// Draw text for intro message
-function drawIntroMSG(msg) {
+// Draws text for messages. If fixed is true, xPos is position of button, if not it responds to mouseX
+function drawKeyMSG(msg, fixed) {
     textSize(keyTextSize);
     textFont(font_PlayfairReg);
-    let textBoxHeight = textSpacing * (ceil(textWidth(msg) / textBoxWidth)); // lines of talk in a text box rounded
+    let textBoxHeight = textSpacing * (ceil((textWidth(msg) + textBoxWidth) / textBoxWidth)); // lines of talk in a text box rounded
     let textBoxStart = speakerKeysHeight - (textBoxHeight + 2 * boxSpacing);
-    let xPos = timelineStart + textWidth(button_1 + button_2 + button_3 + button_4 + (buttonSpacing * 5));
     let yPosBubble = textBoxStart + textBoxHeight + 2 * boxSpacing;
+    let xPos = 0;
+    if (fixed) xPos = timelineStart + textWidth(button_1 + button_2 + button_3 + button_4 + button_5/2 + buttonSpacing * 5);
+    else {
+        if (width - mouseX < textBoxWidth / 2) xPos = width - textBoxWidth / 2 - 2 * boxSpacing;
+        else xPos = mouseX;
+    }
     stroke(0);
     strokeWeight(1);
     fill(255, 225); // transparency for textbox

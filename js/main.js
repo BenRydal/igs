@@ -38,7 +38,7 @@ function draw() {
     }
     drawData.setConversationBubble();
     if (howToRead) overButtonsMSGS();
-    if (intro) drawIntroMSG(introMSG); // draw intro message on program start up until mouse is pressed
+    if (intro) drawKeyMSG(introMSG, true); // draw intro message on program start up until mouse is pressed
     if (animation) setUpAnimation();
     if (videoIsShowing && !videoIsPlaying) updateVideoScrubbing();
 }
