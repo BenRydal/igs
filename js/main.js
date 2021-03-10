@@ -8,7 +8,6 @@ CREDITS/LICENSE INFORMATION: This software is licensed under the GNU General Pub
 // fix bug to always show last value if over to prevent blinking
 // Remove some fonts
 // dynamic line/turn thickness
-// ISSUE with conversation/movement file joining (see sean numbers)
 // Organize mouse functions/main draw loop
 // correctly organize draw data file into parent class and 2 sub classes
 
@@ -59,7 +58,7 @@ let movementKeyTitle = true;
 let conversationPositionTop = false; // controls positioning of conversation turns on path or top of screen
 let allConversation = true; // shows all speaker turns on path, set to true for example 1 currently
 let intro = true; // sets intro message to start program
-let font_PlayfairReg, font_PlayfairItalic, font_PlayfairBold, font_Lato;
+let font_PlayfairReg, font_PlayfairItalic, font_Lato;
 let buttonSpacing, buttonWidth, speakerKeysHeight, buttonsHeight;
 let floorPlanSelectorSize = 50;
 let bugPrecision, bugSize;
