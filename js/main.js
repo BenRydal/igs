@@ -2,25 +2,18 @@
 CREDITS/LICENSE INFORMATION: This software is licensed under the GNU General Public License Version 2.0. See the GNU General Public License included with this software for more details. This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. IGS software originally developed by Ben Rydal Shapiro at Vanderbilt University as part of his dissertation titled Interaction Geography & the Learning Sciences. Copyright (C) 2018 Ben Rydal Shapiro, and contributers. To reference or read more about this work please see: https://etd.library.vanderbilt.edu/available/etd-03212018-140140/unrestricted/Shapiro_Dissertation.pdf
 */
 
-// TO DO:
-// Conversation table error handling what if speakerList is 0?? e.g., how does getSpeakerObject work?
-// Add additional type error handling for processing csv files
-// fix bug to always show last value if over to prevent blinking
-// Remove some fonts
-// dynamic line/turn thickness
-// Organize mouse functions/main draw loop
-// correctly organize draw data file into parent class and 2 sub classes
-
 // INPUT FILE & DATA VARIABLES
 let floorPlan; // holds floor plan image
 let movementFiles = []; // holds movement files, globally important for dynamic file loading
 let conversationFileResults = []; // holds parsed conversation file, globally important for dynamic file loading
 let speakerList = []; // holds speaker objects parsed from conversation file
 let paths = []; // holds path objects for each unique set of movement and conversation points
+
+// COLUMN HEADERS FOR FILES
 const movementHeaders = ['time', 'x', 'y']; // movement file headers
 const conversationHeaders = ['time', 'speaker', 'talk']; // conversation file headers
 
-// SAMPLE DATA { directory, floorplan image, conversation File, movement File[], video platform, video params (see Video Player Interface) }
+// SAMPLE DATA formatted as: { directory, floorplan image, conversation File, movement File[], video platform, video params (see Video Player Interface) }
 const example_1 = ['data/example-1/', 'floorplan.png', 'conversation.csv', ['Teacher.csv'], 'Youtube', {
     videoId: 'Iu0rxb-xkMk'
 }];
@@ -60,7 +53,7 @@ let allConversation = true; // shows all speaker turns on path, set to true for 
 let intro = true; // sets intro message to start program
 let font_PlayfairReg, font_PlayfairItalic, font_Lato;
 let buttonSpacing, buttonWidth, speakerKeysHeight, buttonsHeight;
-let floorPlanSelectorSize = 50;
+const floorPlanSelectorSize = 50;
 let bugPrecision, bugSize;
 let bugTimePosForVideo; // to draw slicer line when video is playing
 // purple, orange, green, blue, red, yellow, brown, lPurple, lOrange, lGreen, lBlue, lRed
@@ -74,13 +67,13 @@ let animation = true,
 // TIMELINE
 let lockedLeft = false,
     lockedRight = false;
-let selSpacing = 20,
+const selSpacing = 20,
     tickHeight = 20;
 let currPixelTimeMin, currPixelTimeMax;
 let yPosTimeScaleTop, yPosTimeScaleBottom, yPosTimeScaleSize;
 let timelineStart, timelineEnd, timelineHeight, timelineLength;
 // BUTTONS
-let button_1 = "Animate",
+const button_1 = "Animate",
     button_2 = "Align Talk",
     button_3 = "All Talk",
     button_4 = "Video",
@@ -89,13 +82,13 @@ let keyTextSize, titleTextSize, infoTextSize;
 let textBoxWidth, textSpacing, boxSpacing, boxDistFromRect;
 
 // MESSAGES
-let introMSG = "Press this button to learn how to use this tool. Visit this link to learn how to format your data for use in this tool [insert]";
-let howToMSG = "Hi There! This is a beta version of the Interaction Geography Slicer. You can use this tool to visualize movement, conversation, and video data over space and time. Data are displayed over a floor plan view (left) and a space-time view (right), where the vertical axis corresponds to the vertical dimension of the floor plan. Use the top menu to visualize different sample datasets or upload your data. Hover over buttons on the left to learn about interactive features of this tool.";
-let animateMSG = "Press this button to animate movement and conversation over space and time";
-let alignTalkMSG = "Press this button to view conversation turns aligned horizontally. Hover over each conversation turn to read each turn.";
-let talkOnPathMSG = "Press this button to view all conversation turns along a single movement path. Hover over each conversation turn to read each turn.";
-let videoMSG = "Press this button to watch video synced to visualizations. Click anywhere on the timeline to play and pause video.";
-let infoMsg = "INTERACTION GEOGRAPHY SLICER (IGS-Indoor)\nby Ben Rydal Shapiro & contributers\nbuilt with p5.js";
+const introMSG = "Press this button to learn how to use this tool. Visit this link to learn how to format your data for use in this tool [insert]";
+const howToMSG = "Hi There! This is a beta version of the Interaction Geography Slicer. You can use this tool to visualize movement, conversation, and video data over space and time. Data are displayed over a floor plan view (left) and a space-time view (right), where the vertical axis corresponds to the vertical dimension of the floor plan. Use the top menu to visualize different sample datasets or upload your data. Hover over buttons on the left to learn about interactive features of this tool.";
+const animateMSG = "Press this button to animate movement and conversation over space and time";
+const alignTalkMSG = "Press this button to view conversation turns aligned horizontally. Hover over each conversation turn to read each turn.";
+const talkOnPathMSG = "Press this button to view all conversation turns along a single movement path. Hover over each conversation turn to read each turn.";
+const videoMSG = "Press this button to watch video synced to visualizations. Click anywhere on the timeline to play and pause video.";
+const infoMsg = "INTERACTION GEOGRAPHY SLICER (IGS-Indoor)\nby Ben Rydal Shapiro & contributers\nbuilt with p5.js";
 
 /*
 Relationship between speaker and path objects can be 1:1 but does not have to be this allows variation 
@@ -142,7 +135,7 @@ class Point_Conversation {
     }
 }
 
-// Loads fonts, floor plan, and CSV file into p5.Table objects so that they can manipulated later
+// Loads fonts and starting example
 function preload() {
     loadFonts();
     loadExample(example_1);
