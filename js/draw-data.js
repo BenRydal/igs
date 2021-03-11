@@ -207,7 +207,7 @@ class DrawDataConversation {
         let scaledTime = map(pixelTime, currPixelTimeMin, currPixelTimeMax, timelineStart, timelineEnd);
         let minRectHeight = 3; // for really short conversation turns set a minimum        
         let rectWidthMin = map(totalTimeInSeconds, 0, 3600, 10, 1, true); // map to inverse, values constrained between 10 and 1 (pixels)
-        let rectWidthMax = 25;
+        let rectWidthMax = 10;
         // map to inverse of min/max to set rectWidth based on amount of pixel time selected
         let rectWidth = map(currPixelTimeMax - currPixelTimeMin, 0, timelineLength, rectWidthMax, rectWidthMin);
         let rectLength = textWidth(point.talkTurn);
