@@ -116,8 +116,8 @@ function processMovementFile(results, file) {
   let conversation = []; // holds conversaton points (text and location data for conversation)
   let conversationCounter = 0;
   for (let i = 1; i < results.data.length; i++) { // start at second row
-    // only process point if has larger time value than previous time value
-    if (results.data[i][movementHeaders[0]] > results.data[i - 1][movementHeaders[0]]) {
+    // tests how to sample file based on num of data cases and time values currently (can add more tests here)
+    if (testSampleRate(results.data.length, results.data[i][movementHeaders[0]], results.data[i - 1][movementHeaders[0]])) {
       let m = new Point_Movement();
       m.time = results.data[i][movementHeaders[0]];
       m.xPos = results.data[i][movementHeaders[1]];
@@ -143,6 +143,14 @@ function processMovementFile(results, file) {
     if (speakerList[i].name === file.name.charAt(0)) p.color = speakerList[i].color;
   }
   paths.push(p);
+}
+
+// Determines how to sample data depending on number of data cases or rows vs. pixel length of timeline
+// Reduces data size to provide optimal interaction with visualization and good curve drawing
+function testSampleRate(NumOfDataCases, curTimeValue, priorTimeValue) {
+  const sampleRateDivisor = 2;
+  if (NumOfDataCases / sampleRateDivisor < timelineLength) return curTimeValue > priorTimeValue;
+  else return Math.floor(curTimeValue) > Math.floor(priorTimeValue); // if there are more data cases than pixels on timeline, sample based on integer floored values/every second
 }
 
 function processConversation(index, xPos, yPos) {
