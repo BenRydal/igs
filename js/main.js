@@ -53,7 +53,7 @@ let allConversation = true; // shows all speaker turns on path, set to true for 
 let intro = true; // sets intro message to start program
 let font_PlayfairReg, font_PlayfairItalic, font_Lato;
 let buttonSpacing, buttonWidth, speakerKeysHeight, buttonsHeight;
-const floorPlanSelectorSize = 50;
+const floorPlanSelectorSize = 100;
 let bugPrecision, bugSize;
 let bugTimePosForVideo; // to draw slicer line when video is playing
 // purple, orange, green, blue, red, yellow, brown, lPurple, lOrange, lGreen, lBlue, lRed
