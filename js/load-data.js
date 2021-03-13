@@ -148,7 +148,7 @@ function processMovementFile(results, file) {
 // Determines how to sample data depending on number of data cases or rows vs. pixel length of timeline
 // Reduces data size to provide optimal interaction with visualization and good curve drawing
 function testSampleRate(NumOfDataCases, curTimeValue, priorTimeValue) {
-  const sampleRateDivisor = 2;
+  const sampleRateDivisor = 4; // temporary but 4 as rate seems to work best on most devices
   if (NumOfDataCases / sampleRateDivisor < timelineLength) return curTimeValue > priorTimeValue;
   else return Math.floor(curTimeValue) > Math.floor(priorTimeValue); // if there are more data cases than pixels on timeline, sample based on integer floored values/every second
 }
