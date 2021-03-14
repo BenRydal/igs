@@ -18,6 +18,9 @@ function loadExampleDataSet() {
     case "Example 3":
       loadExample(example_3);
       break;
+    case "Example 4":
+      loadExample(example_4);
+      break;
   }
 }
 

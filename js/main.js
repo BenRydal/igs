@@ -26,6 +26,10 @@ const example_3 = ['data/example-3/', 'floorplan.png', 'conversation.csv', ['Jor
     videoId: 'iiMjfVOj8po'
 }];
 
+const example_4 = ['data/example-4/', 'floorplan.png', 'conversation.csv', ['Lily.csv', 'Jeans.csv', 'Adhir.csv', 'Mae.csv', 'Blake.csv'], 'Youtube', {
+    videoId: 'Iu0rxb-xkMk'
+}];
+
 // const example_2 = ['data/example-2/', 'floorplan.png', 'conversation.csv', ['Teacher.csv', 'Sean.csv', 'Mei.csv', 'Cassandra.csv', 'Nathan.csv'], 'Kaltura', {
 //     wid: '_1038472',
 //     uiconf_id: '33084471',
