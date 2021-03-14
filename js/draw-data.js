@@ -188,7 +188,9 @@ class DrawDataConversation {
         for (let i = 0; i < points.length; i++) {
             let point = points[i];
             let pixelTime = map(point.time, 0, totalTimeInSeconds, timelineStart, timelineEnd);
-            if (this.overTimeline(pixelTime) && this.testAnimation(pixelTime)) {
+            let scaledXPos = point.xPos * displayFloorPlanWidth / inputFloorPlanPixelWidth; // scale to floor plan image file
+            let scaledYPos = point.yPos * displayFloorPlanHeight / inputFloorPlanPixelHeight; // scale to floor plan image file
+            if (this.overTimeline(pixelTime) && this.testAnimation(pixelTime) && this.testOverCursor(scaledXPos, scaledYPos)) {
                 let curSpeaker = this.getSpeakerObject(points[i].speaker); // get speaker object equivalent to character
                 if (curSpeaker.show) {
                     if (allConversation) this.drawRects(point, curSpeaker.color); // draws all rects
@@ -285,5 +287,11 @@ class DrawDataConversation {
             let reMapTime = map(timeValue, timelineStart, timelineEnd, 0, totalTimeInSeconds);
             return animationCounter > reMapTime;
         } else return true;
+    }
+
+    // Return true if not over floor plan, if over floor plan test if over cursor
+    testOverCursor(xPos, yPos) {
+        if (overRect(0, 0, displayFloorPlanWidth, displayFloorPlanHeight)) return overCircle(xPos, yPos, floorPlanSelectorSize);
+        else return true;
     }
 }

@@ -62,7 +62,7 @@ let bugPrecision, bugSize;
 let bugTimePosForVideo; // to draw slicer line when video is playing
 // purple, orange, green, blue, red, yellow, brown, lPurple, lOrange, lGreen, lBlue, lRed
 const speakerColorList = ['#6a3d9a', '#ff7f00', '#33a02c', '#1f78b4', '#e31a1c', '#ffff99', '#b15928', '#cab2d6', '#fdbf6f', '#b2df8a', '#a6cee3', '#fb9a99'];
-const colorGray = 150,
+const colorGray = (150, 220),
     pathWeight = 3,
     basePathColor = 100; // for paths that don't have associated speaker in speakerList
 let animationCounter = 0; // controls animation
