@@ -81,9 +81,9 @@ let textBoxWidth, textSpacing, boxSpacing, boxDistFromRect;
 
 // MESSAGES
 const howToMSG = "Hi There! This is the Interaction Geography Slicer, a tool to visualize movement, conversation, and video data over space and time. Data are displayed over a floor plan view (left) and a space-time view (right), where the vertical axis corresponds to the vertical dimension of the floor plan. Use the top menu to visualize different sample datasets or upload your own data. Hover over buttons on the left to learn about interactive features of this tool. Visit this link to learn how to format your data to use in this tool: [INSERT]";
-const animateMSG = "Press this button to animate movement and conversation over space and time";
-const alignTalkMSG = "Press this button to view conversation turns aligned horizontally. Hover over each conversation turn to read each turn.";
-const talkOnPathMSG = "Press this button to view all conversation turns along a single movement path. Hover over each conversation turn to read each turn.";
+const animateMSG = "Press this button to animate movement and conversation over space and time.";
+const alignTalkMSG = "Press this button to view conversation aligned horizontally. Hover over each conversation turn to read each turn. Use the conversation menu above to toggle individual speakers.";
+const talkOnPathMSG = "Press this button to view conversation from all speakers along each movement path. Hover over each conversation turn to read each turn. Use the conversation menu above to toggle individual speakers.";
 const videoMSG = "Press this button to watch video synced to visualizations. Click anywhere on the timeline to play and pause video.";
 const infoMsg = "INTERACTION GEOGRAPHY SLICER (IGS-Indoor)\nby Ben Rydal Shapiro & contributers\nbuilt with p5.js";
 
