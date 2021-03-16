@@ -17,9 +17,11 @@ function loadExampleDataSet() {
       break;
     case "Example 3":
       loadExample(example_3);
+      allConversation = false; // not necessary, but fits example nicely
       break;
     case "Example 4":
       loadExample(example_4);
+      allConversation = false; // not necessary, but fits example nicely
       break;
   }
 }
