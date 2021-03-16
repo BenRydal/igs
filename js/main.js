@@ -60,7 +60,7 @@ const colorGray = (150, 220),
     pathWeight = 3,
     basePathColor = 100; // for paths that don't have associated speaker in speakerList
 let animationCounter = 0; // controls animation
-let animation = true,
+let animation = false,
     howToRead = false;
 // TIMELINE
 let lockedLeft = false,
