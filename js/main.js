@@ -10,8 +10,8 @@ let speakerList = []; // holds speaker objects parsed from conversation file
 let paths = []; // holds path objects for each unique set of movement and conversation points
 
 // COLUMN HEADERS FOR FILES
-const movementHeaders = ['time', 'x', 'y']; // movement file headers
-const conversationHeaders = ['time', 'speaker', 'talk']; // conversation file headers
+const movementHeaders = ['time', 'x', 'y']; // movement file headers, file should be of tyep number for each column
+const conversationHeaders = ['time', 'speaker', 'talk']; // conversation file headers, file should be of type number, string and talk can be anything
 
 // SAMPLE DATA formatted as: { directory, floorplan image, conversation File, movement File[], video platform, video params (see Video Player Interface) }
 const example_1 = ['data/example-1/', 'floorplan.png', 'conversation.csv', ['Teacher.csv'], 'Youtube', {

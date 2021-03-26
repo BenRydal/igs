@@ -97,6 +97,7 @@ function parseInputMovementFile(input) {
   updateMovementData = true; // trigger update data
   for (let i = 0; i < input.files.length; i++) {
     let file = input.files[i];
+    //input.value = ''; // reset input value so you can load same file again in browser
     Papa.parse(file, {
       complete: testMovementFile,
       header: true,
@@ -111,6 +112,8 @@ function testMovementFile(results, file) {
   if (testMovementFileData(results.data, results.meta.fields)) {
     if (updateMovementData) clearDataMovementFileInput(); // clear data if first accepted file
     movementFiles.push([results, file]);
+    //print(movementFiles[0][1].name.charAt(0));
+    //movementFiles.sort((a, b) => (a[1].name > b[1].name) ? 1 : -1); // sort list so it appears nicely in GUI
     processMovementFile(results, file);
   }
 }
@@ -202,6 +205,7 @@ function updateSpeakerList() {
       speakerList.push(s);
     }
   }
+  speakerList.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI
 }
 
 // parses inputted video files from user computer
@@ -304,7 +308,7 @@ function testMovementFileHeaders(meta) {
   return meta.includes(movementHeaders[0]) && meta.includes(movementHeaders[1]) && meta.includes(movementHeaders[2]);
 }
 
-// Loop through data and return true on first row that has properly typed data or false if no rows are properly typed
+// Loop through data and return true on first row that has all data typed as numbers or false if no rows are properly typed
 function testMovementFileForGoodRow(data) {
   for (let i = 0; i < data.length; i++) {
     if (typeof data[i][movementHeaders[0]] === 'number' && typeof data[i][movementHeaders[1]] === 'number' && typeof data[i][movementHeaders[2]] === 'number') return true;
@@ -313,12 +317,12 @@ function testMovementFileForGoodRow(data) {
 }
 
 // ***** CONVERSATION FILE TESTS *****
-// Tests if current conversation row is less than total rows in table and if row has good data
+// Tests if current conversation row is less than total rows in table and if time is number and speaker is string
 function testConversationDataRow(curRow) {
-  return curRow < conversationFileResults.length && typeof conversationFileResults[curRow][conversationHeaders[0]] === 'number' && typeof conversationFileResults[curRow][conversationHeaders[1]] === 'string' && typeof conversationFileResults[curRow][conversationHeaders[2]] === 'string';
+  return curRow < conversationFileResults.length && typeof conversationFileResults[curRow][conversationHeaders[0]] === 'number' && typeof conversationFileResults[curRow][conversationHeaders[1]] === 'string';
 }
 
-// Tests if there is data in file, if it has correct conversation file headers, and if first row of values is of correct type for conversation files
+// Tests if there is data in file, if it has correct conversation file headers, and if at least 1 row has good data
 function testConversationFileData(data, meta) {
   return data.length > 1 && testConversationFileHeaders(meta) && testConversationFileForGoodRow(data);
 }
@@ -328,10 +332,10 @@ function testConversationFileHeaders(meta) {
   return meta.includes(conversationHeaders[0]) && meta.includes(conversationHeaders[1]) && meta.includes(conversationHeaders[2]);
 }
 
-// Loop through data and return true on first row that has properly typed data or false if no rows are properly typed
+// Loop through data and return true on first row with time is number and speaker is string
 function testConversationFileForGoodRow(data) {
   for (let i = 0; i < data.length; i++) {
-    if (typeof data[i][conversationHeaders[0]] === 'number' && typeof data[i][conversationHeaders[1]] === 'string' && typeof data[i][conversationHeaders[2]] === 'string') return true;
+    if (typeof data[i][conversationHeaders[0]] === 'number' && typeof data[i][conversationHeaders[1]] === 'string') return true;
   }
   return false;
 }
