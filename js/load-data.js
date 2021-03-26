@@ -120,20 +120,20 @@ function processMovementFile(results, file) {
   let movement = []; // holds movement points (location data)
   let conversation = []; // holds conversaton points (text and location data for conversation)
   let conversationCounter = 0;
-  for (let i = 1; i < results.data.length; i++) { // start at second row
-    // tests how to sample file based on num of data cases and time values currently (can add more tests here)
-    if (testSampleRate(results.data.length, results.data[i][movementHeaders[0]], results.data[i - 1][movementHeaders[0]])) {
+  for (let i = 0; i < results.data.length; i++) {
+    // sample data and test to make sure row is good data
+    if (testSampleMovementData(results.data, i) && testMovementDataRow(results.data[i][movementHeaders[0]], results.data[i][movementHeaders[1]], results.data[i][movementHeaders[2]])) {
       let m = new Point_Movement();
       m.time = results.data[i][movementHeaders[0]];
       m.xPos = results.data[i][movementHeaders[1]];
       m.yPos = results.data[i][movementHeaders[2]];
       movement.push(m); // always add to movement
-      // load conversation turn and increment counter if movement time is larger than time in conversationFile results at curCounter
-      if (conversationCounter < conversationFileResults.length) {
+      // Test to make sure good data
+      if (testConversationDataRow(conversationCounter)) {
+        // load conversation turn and increment counter if movement time is larger than time in conversationFile results at curCounter
         if (m.time >= conversationFileResults[conversationCounter][conversationHeaders[0]]) {
           conversation.push(processConversation(conversationCounter, m.xPos, m.yPos));
           conversationCounter++; // increment counter for next comparison
-          // print(conversationCounter);
         }
       }
     }
@@ -148,14 +148,6 @@ function processMovementFile(results, file) {
     if (speakerList[i].name === file.name.charAt(0)) p.color = speakerList[i].color;
   }
   paths.push(p);
-}
-
-// Determines how to sample data depending on number of data cases or rows vs. pixel length of timeline
-// Reduces data size to provide optimal interaction with visualization and good curve drawing
-function testSampleRate(NumOfDataCases, curTimeValue, priorTimeValue) {
-  const sampleRateDivisor = 4; // temporary but 4 as rate seems to work best on most devices
-  if (NumOfDataCases / sampleRateDivisor < timelineLength) return curTimeValue > priorTimeValue;
-  else return Math.floor(curTimeValue) > Math.floor(priorTimeValue); // if there are more data cases than pixels on timeline, sample based on integer floored values/every second
 }
 
 function processConversation(index, xPos, yPos) {
@@ -189,7 +181,7 @@ function parseInputConversationFile(input) {
 
 function testConversationFile(results, file) {
   console.log("Parsing complete:", results, file);
-  if (testConversationHeaders(results.data, results.meta.fields)) {
+  if (testConversationFileData(results.data, results.meta.fields)) {
     clearDataConversationFileInput();
     conversationFileResults = results.data; // set to new array of keyed values
     updateSpeakerList();
@@ -204,7 +196,8 @@ function updateSpeakerList() {
     let tempSpeakerList = []; // create/populate temp list to store strings to test from global speakerList
     for (let j = 0; j < speakerList.length; j++) tempSpeakerList.push(speakerList[j].name);
     let speaker = conversationFileResults[i][conversationHeaders[1]]; // get speaker
-    if (!tempSpeakerList.includes(speaker)) { // if not in list, add new Speaker Object to global speakerList
+    // if good data and not in list, add new Speaker Object to global speakerList
+    if (typeof speaker === 'string' && !tempSpeakerList.includes(speaker)) {
       let s = new Speaker(speaker, speakerColorList[speakerList.length % speakerColorList.length]);
       speakerList.push(s);
     }
@@ -275,14 +268,6 @@ function setupMovie(movieDiv, platform, params) {
   }
 }
 
-function testMovementFileData(data, meta) {
-  return data.length > 1 && meta.includes(movementHeaders[0]) && meta.includes(movementHeaders[1]) && meta.includes(movementHeaders[2]);
-}
-
-function testConversationHeaders(data, meta) {
-  return data.length > 1 && meta.includes(conversationHeaders[0]) && meta.includes(conversationHeaders[1]) && meta.includes(conversationHeaders[2]);
-}
-
 function clearDataConversationFileInput() {
   speakerList = [];
   paths = [];
@@ -293,4 +278,60 @@ function clearDataMovementFileInput() {
   paths = [];
   totalTimeInSeconds = 0; // reset total time
   updateMovementData = false;
+}
+
+// ***** MOVEMENT FILE TESTS *****
+// Determines how to sample data depending on number of data cases or rows vs. pixel length of timeline
+// Reduces data size to provide optimal interaction with visualization and good curve drawing
+function testSampleMovementData(data, curRow) {
+  if (curRow === 0) return true; // always return true for first row
+  const sampleRateDivisor = 4; // temporary but 4 as rate seems to work best on most devices
+  if (data.length / sampleRateDivisor < timelineLength) return data[curRow][movementHeaders[0]] > data[curRow - 1][movementHeaders[0]];
+  else return Math.floor(data[curRow][movementHeaders[0]]) > Math.floor(data[curRow - 1][movementHeaders[0]]); // if there are more data cases than pixels on timeline, sample based on integer floored values/every second
+}
+
+function testMovementDataRow(time, x, y) {
+  return typeof time === 'number' && typeof x === 'number' && typeof y === 'number';
+}
+
+// Test if there is data in file, if it has correct movement file headers, and if first row of values is of correct type for each movement file
+function testMovementFileData(data, meta) {
+  return data.length > 1 && testMovementFileHeaders(meta) && testMovementFileForGoodRow(data);
+}
+
+// Tests if correct movement file headers
+function testMovementFileHeaders(meta) {
+  return meta.includes(movementHeaders[0]) && meta.includes(movementHeaders[1]) && meta.includes(movementHeaders[2]);
+}
+
+// Loop through data and return true on first row that has properly typed data or false if no rows are properly typed
+function testMovementFileForGoodRow(data) {
+  for (let i = 0; i < data.length; i++) {
+    if (typeof data[i][movementHeaders[0]] === 'number' && typeof data[i][movementHeaders[1]] === 'number' && typeof data[i][movementHeaders[2]] === 'number') return true;
+  }
+  return false;
+}
+
+// ***** CONVERSATION FILE TESTS *****
+// Tests if current conversation row is less than total rows in table and if row has good data
+function testConversationDataRow(curRow) {
+  return curRow < conversationFileResults.length && typeof conversationFileResults[curRow][conversationHeaders[0]] === 'number' && typeof conversationFileResults[curRow][conversationHeaders[1]] === 'string' && typeof conversationFileResults[curRow][conversationHeaders[2]] === 'string';
+}
+
+// Tests if there is data in file, if it has correct conversation file headers, and if first row of values is of correct type for conversation files
+function testConversationFileData(data, meta) {
+  return data.length > 1 && testConversationFileHeaders(meta) && testConversationFileForGoodRow(data);
+}
+
+// Tests if correct file headers for conversation
+function testConversationFileHeaders(meta) {
+  return meta.includes(conversationHeaders[0]) && meta.includes(conversationHeaders[1]) && meta.includes(conversationHeaders[2]);
+}
+
+// Loop through data and return true on first row that has properly typed data or false if no rows are properly typed
+function testConversationFileForGoodRow(data) {
+  for (let i = 0; i < data.length; i++) {
+    if (typeof data[i][conversationHeaders[0]] === 'number' && typeof data[i][conversationHeaders[1]] === 'string' && typeof data[i][conversationHeaders[2]] === 'string') return true;
+  }
+  return false;
 }
