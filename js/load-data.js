@@ -64,7 +64,7 @@ function loadExample(params) {
   }
 }
 
-// if image: replace floor plan and rerun movement?????
+// Uploads floor plan image file and sends to update global floor plan image vars
 function parseInputFloorPlanFile(input) {
   let file = input.files[0];
   let fileLocation = URL.createObjectURL(file);
@@ -83,7 +83,7 @@ function processFloorPlan(img) {
   inputFloorPlanPixelHeight = floorPlan.height;
 }
 
-// Parses all input selected movement files
+// Parses example movement files
 function parseExampleMovementFile(input) {
   Papa.parse(input, {
     complete: testMovementFile,
@@ -115,7 +115,7 @@ function testMovementFile(results, file) {
   }
 }
 
-// Processes movement file, adds to path object
+// Processes movement file in relation to conversation file data and adds both to path object
 function processMovementFile(results, file) {
   let movement = []; // holds movement points (location data)
   let conversation = []; // holds conversaton points (text and location data for conversation)
