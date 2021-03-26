@@ -221,15 +221,13 @@ function parseInputVideoFile(input) {
 // Creates movie element specific to videoPlatform and params
 function processVideo(videoPlatform, videoParams) {
   noLoop(); // stop program loop while loading video, restarted upon video loaded in videoPlayer or in processVideoFile if loading from file
-  if (videoPlayer !== undefined) destroyMovieAndPlayer(); // if first time player loaded at program start it will be undefined, don't destroy it
+  // if first time player loaded at program start it will be undefined, don't destroy exisiting player and remove exisiting movie element
+  if (videoPlayer !== undefined) {
+    videoPlayer.destroy();
+    movie.remove();
+  }
   if (videoPlatform === 'File') processVideoFromFile(videoPlatform, videoParams);
   else processVideoFromWeb(videoPlatform, videoParams);
-}
-
-// Destroy exisiting player and remove exisiting movie element
-function destroyMovieAndPlayer() {
-  videoPlayer.destroy();
-  movie.remove();
 }
 
 // Creates movie element from file, use callback to make sure video loaded before setting player and starting loop again
