@@ -199,8 +199,8 @@ function updateSpeakerList() {
     let tempSpeakerList = []; // create/populate temp list to store strings to test from global speakerList
     for (let j = 0; j < speakerList.length; j++) tempSpeakerList.push(speakerList[j].name);
     let speaker = conversationFileResults[i][conversationHeaders[1]]; // get speaker
-    // if good data and not in list, add new Speaker Object to global speakerList
-    if (typeof speaker === 'string' && !tempSpeakerList.includes(speaker)) {
+    // if row has all good data and speaker is not in list yet, add new Speaker Object to global speakerList
+    if (testConversationDataRow(i) && !tempSpeakerList.includes(speaker)) {
       let s = new Speaker(speaker, speakerColorList[speakerList.length % speakerColorList.length]);
       speakerList.push(s);
     }
@@ -317,9 +317,9 @@ function testMovementFileForGoodRow(data) {
 }
 
 // ***** CONVERSATION FILE TESTS *****
-// Tests if current conversation row is less than total rows in table and if time is number and speaker is string
+// Tests if current conversation row is less than total rows in table and if time is number and speaker is string and talk turn is not null or undefined
 function testConversationDataRow(curRow) {
-  return curRow < conversationFileResults.length && typeof conversationFileResults[curRow][conversationHeaders[0]] === 'number' && typeof conversationFileResults[curRow][conversationHeaders[1]] === 'string';
+  return curRow < conversationFileResults.length && typeof conversationFileResults[curRow][conversationHeaders[0]] === 'number' && typeof conversationFileResults[curRow][conversationHeaders[1]] === 'string' && conversationFileResults[curRow][conversationHeaders[2]] !== null && conversationFileResults[curRow][conversationHeaders[2]] !== undefined;
 }
 
 // Tests if there is data in file, if it has correct conversation file headers, and if at least 1 row has good data
@@ -332,10 +332,10 @@ function testConversationFileHeaders(meta) {
   return meta.includes(conversationHeaders[0]) && meta.includes(conversationHeaders[1]) && meta.includes(conversationHeaders[2]);
 }
 
-// Loop through data and return true on first row with time is number and speaker is string
+// Loop through data and return true on first row with time is number and speaker is string and talk turn is not null or undefined
 function testConversationFileForGoodRow(data) {
   for (let i = 0; i < data.length; i++) {
-    if (typeof data[i][conversationHeaders[0]] === 'number' && typeof data[i][conversationHeaders[1]] === 'string') return true;
+    if (typeof data[i][conversationHeaders[0]] === 'number' && typeof data[i][conversationHeaders[1]] === 'string' && data[i][conversationHeaders[2]] !== null && data[i][conversationHeaders[2]] !== undefined) return true;
   }
   return false;
 }
