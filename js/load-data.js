@@ -67,6 +67,7 @@ function loadExample(params) {
 // Uploads floor plan image file and sends to update global floor plan image vars
 function parseInputFloorPlanFile(input) {
   let file = input.files[0];
+  input.value = ''; // reset input value so you can load same file again in browser
   let fileLocation = URL.createObjectURL(file);
   loadImage(fileLocation, img => {
     processFloorPlan(img);
@@ -97,7 +98,7 @@ function parseInputMovementFile(input) {
   updateMovementData = true; // trigger update data
   for (let i = 0; i < input.files.length; i++) {
     let file = input.files[i];
-    //input.value = ''; // reset input value so you can load same file again in browser
+    input.value = ''; // reset input value so you can load same file again in browser
     Papa.parse(file, {
       complete: testMovementFile,
       header: true,
@@ -175,6 +176,7 @@ function parseExampleConversationFile(file) {
 // Parses conversation file loaded by user input
 function parseInputConversationFile(input) {
   let file = input.files[0];
+  input.value = ''; // reset input value so you can load same file again in browser
   Papa.parse(file, {
     complete: testConversationFile,
     header: true,
@@ -212,6 +214,7 @@ function updateSpeakerList() {
 function parseInputVideoFile(input) {
   if (videoIsShowing) overVideoButton(); // Turn off video that if showing
   let file = input.files[0];
+  input.value = ''; // reset input value so you can load same file again in browser
   let fileLocation = URL.createObjectURL(file);
   processVideo('File', {
     fileName: fileLocation
