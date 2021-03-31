@@ -130,7 +130,7 @@ class Keys {
         let decimalSeconds = videoTimeInMinutes - minutesValue; //  Subtract minutes to get decimal seconds---e.g., 14.28571429 - 14... returns (.28571429)
         let secondsValue = floor(decimalSeconds.toFixed(2) * 60); // Converts number into a String and keeps only the specified number of decimals
         let label_1 = minutesValue + " Minutes  " + secondsValue + " Seconds";
-        let label_2 = "MINUTES & SECONDS";
+        let label_2 = "MINUTES";
         textAlign(CENTER);
         if (overRect(timelineStart, 0, timelineLength, timelineHeight)) text(label_1, timelineStart + timelineLength / 2, timelineHeight);
         else text(label_2, timelineStart + timelineLength / 2, timelineHeight);
