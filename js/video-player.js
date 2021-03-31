@@ -20,6 +20,7 @@ let videoPlatform = 'File'; // what platform the video is being hosted on, speci
 let videoParams = { fileName: '[your_directory_fileLocation]' };
 
 // ******* YouTube Vars *******
+Include following script in head of the format: <script type="text/javascript" src="https://www.youtube.com/iframe_api"></script>
 VideoParams expects 1 item, the videoId, videoParams = { videoId: 'your_videoId_here' };
 let videoPlatform = 'Youtube'; 
 let videoParams = { videoId: 'Iu0rxb-xkMk'};
@@ -32,13 +33,8 @@ var videoParams = { wid: '_1038472', uiconf_id: '33084471', entry_id: '1_9tp4soo
 **********************************************************************************************/
 
 // This is the VideoPlayer implementation that utilizes the Youtube Player API
-// Note to use a Youtube Player, the Youtube iFrame Player API must be loaded of the format:
-// <script type="text/javascript" src="https://www.youtube.com/iframe_api"></script>
-
 class YoutubePlayer {
 
-    // videoPlatform = 'Youtube';
-    // videoParams = { videoId: 'your_videoId_here' };
     constructor(params) {
         this.targetId = params['targetId'];
         this.videoId = params['videoId'];
@@ -100,8 +96,6 @@ class YoutubePlayer {
 
 class FilePlayer {
 
-    // videoPlatform = 'File';
-    // videoParams = { fileName: '[your_directory_fileLocation]' };
     constructor(params) {
         this.targetId = params['targetId'];
         this.fileName = params['fileName'];
@@ -141,8 +135,6 @@ class FilePlayer {
 
 class KalturaPlayer {
 
-    // videoPlatform = 'Kaltura';
-    // videoParams = { wid: 'your_wid_here', uiconf_id: 'your_uiconf_id_here', entry_id: 'your_entry_id_here' };
     constructor(params) {
         this.targetId = params['targetId'];
         this.wid = params['wid'];
