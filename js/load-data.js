@@ -289,7 +289,7 @@ function clearDataMovementFileInput() {
 // Determines how to sample data depending on number of data cases or rows vs. pixel length of timeline
 // Reduces data size to provide optimal interaction with visualization and good curve drawing
 function testSampleMovementData(data, curRow) {
-  if (curRow === 0) return true; // always return true for first row
+  if (curRow === 0 || curRow === 1) return true; // always return true for first row
   const sampleRateDivisor = 4; // temporary but 4 as rate seems to work best on most devices
   if (data.length / sampleRateDivisor < timelineLength) return data[curRow][movementHeaders[0]] > data[curRow - 1][movementHeaders[0]];
   else return Math.floor(data[curRow][movementHeaders[0]]) > Math.floor(data[curRow - 1][movementHeaders[0]]); // if there are more data cases than pixels on timeline, sample based on integer floored values/every second
