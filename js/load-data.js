@@ -98,13 +98,13 @@ function parseInputMovementFile(input) {
   updateMovementData = true; // trigger update data
   for (let i = 0; i < input.files.length; i++) {
     let file = input.files[i];
-    input.value = ''; // reset input value so you can load same file again in browser
     Papa.parse(file, {
       complete: testMovementFile,
       header: true,
       dynamicTyping: true,
     });
   }
+  input.value = ''; // reset input value so you can load same file(s) again in browser
 }
 
 // Tests movement file formatting
