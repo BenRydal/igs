@@ -51,10 +51,10 @@ class DrawDataMovement {
         for (let i = 0; i < points.length; i++) {
             let point = points[i];
             let pixelTime = map(point.time, 0, totalTimeInSeconds, timelineStart, timelineEnd);
-            if (this.overTimeline(pixelTime) && this.testAnimation(pixelTime)) {
-                let scaledTime = map(pixelTime, currPixelTimeMin, currPixelTimeMax, timelineStart, timelineEnd);
-                let scaledXPos = point.xPos * displayFloorPlanWidth / inputFloorPlanPixelWidth; // scale to floor plan image file
-                let scaledYPos = point.yPos * displayFloorPlanHeight / inputFloorPlanPixelHeight; // scale to floor plan image file
+            let scaledTime = map(pixelTime, currPixelTimeMin, currPixelTimeMax, timelineStart, timelineEnd);
+            let scaledXPos = point.xPos * displayFloorPlanWidth / inputFloorPlanPixelWidth; // scale to floor plan image file
+            let scaledYPos = point.yPos * displayFloorPlanHeight / inputFloorPlanPixelHeight; // scale to floor plan image file
+            if (this.overTimeline(pixelTime) && this.overFloorPlan(scaledXPos, scaledYPos) && this.testAnimation(pixelTime)) {
                 if (view == PLAN) curveVertex(scaledXPos, scaledYPos);
                 else if (view == SPACETIME) {
                     curveVertex(scaledTime, scaledYPos);
@@ -78,7 +78,7 @@ class DrawDataMovement {
             let scaledXPos = point.xPos * displayFloorPlanWidth / inputFloorPlanPixelWidth; // scale to floor plan image file
             let scaledYPos = point.yPos * displayFloorPlanHeight / inputFloorPlanPixelHeight; // scale to floor plan image file
             // Tests if overTimeline and mouse selection and adjusts begin/end shape and boolean drawVertex to draw only that shape
-            if (this.overTimeline(pixelTime) && this.overCursor(scaledXPos, scaledYPos) && this.testAnimation(pixelTime)) {
+            if (this.overTimeline(pixelTime) && this.overFloorPlan(scaledXPos, scaledYPos) && this.overCursor(scaledXPos, scaledYPos) && this.testAnimation(pixelTime)) {
                 if (!drawVertex) { // beginShape if no shape yet and set drawVertex to true
                     beginShape();
                     drawEndpoint = true;
@@ -107,6 +107,11 @@ class DrawDataMovement {
 
     overTimeline(timeValue) {
         return timeValue >= currPixelTimeMin && timeValue <= currPixelTimeMax;
+    }
+
+    // Test if data is showing on floor plan
+    overFloorPlan(xPos, yPos) {
+        return (xPos >= 0 && xPos <= displayFloorPlanWidth) && (yPos >= 0 && yPos <= displayFloorPlanHeight);
     }
 
     overCursor(xPos, yPos) {
@@ -190,7 +195,7 @@ class DrawDataConversation {
             let pixelTime = map(point.time, 0, totalTimeInSeconds, timelineStart, timelineEnd);
             let scaledXPos = point.xPos * displayFloorPlanWidth / inputFloorPlanPixelWidth; // scale to floor plan image file
             let scaledYPos = point.yPos * displayFloorPlanHeight / inputFloorPlanPixelHeight; // scale to floor plan image file
-            if (this.overTimeline(pixelTime) && this.testAnimation(pixelTime) && this.testOverCursor(scaledXPos, scaledYPos)) {
+            if (this.overTimeline(pixelTime) && this.overFloorPlan(scaledXPos, scaledYPos) && this.testAnimation(pixelTime) && this.testOverCursor(scaledXPos, scaledYPos)) {
                 let curSpeaker = this.getSpeakerObject(points[i].speaker); // get speaker object equivalent to character
                 if (curSpeaker.show) {
                     if (allConversation) this.drawRects(point, curSpeaker.color); // draws all rects
@@ -279,6 +284,11 @@ class DrawDataConversation {
 
     overTimeline(timeValue) {
         return timeValue >= currPixelTimeMin && timeValue <= currPixelTimeMax;
+    }
+
+    // Test if data is showing on floor plan
+    overFloorPlan(xPos, yPos) {
+        return (xPos >= 0 && xPos <= displayFloorPlanWidth) && (yPos >= 0 && yPos <= displayFloorPlanHeight);
     }
 
     // If animation on, returns true if time is less than counter. Returns true if animation is off.
