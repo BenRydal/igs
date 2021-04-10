@@ -141,7 +141,6 @@ function preload() {
 function setup() {
     canvas = createCanvas(window.innerWidth, window.innerHeight, P2D);
     frameRate(30);
-    pixelDensity(displayDensity());
     textFont(font_Lato, 14);
     textAlign(LEFT, TOP);
     setGUI();
@@ -152,11 +151,15 @@ function draw() {
     image(floorPlan, 0, 0, displayFloorPlanWidth, displayFloorPlanHeight);
     let keys = new Keys();
     keys.drawKeys();
-    let drawData = new DrawData();
+    let drawConversationData = new DrawDataConversation();
+    let drawMovementData = new DrawDataMovement();
     for (let i = 0; i < paths.length; i++) {
-        if (paths[i].show) drawData.setDrawData(paths[i]);
+        if (paths[i].show) {
+            drawConversationData.setData(paths[i]);
+            drawMovementData.setData(paths[i]); // draw after conversation so bug displays on top
+        }
     }
-    drawData.setConversationBubble();
+    drawConversationData.setConversationBubble(); // draw conversation text last so it displays on top
     if (howToRead) overButtonsMSGS();
     if (intro) drawKeyMSG(howToMSG, true); // draw intro message on program start up until mouse is pressed
     if (animation) setUpAnimation();
