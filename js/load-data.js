@@ -5,7 +5,7 @@ function loadFonts() {
 }
 
 function loadExampleDataSet() {
-  updateMovementData = true; // trigger update data
+  updateMovementData = true; // trigger movement to reprocess, reset later
   let exampleSet = document.getElementById("examples").value;
   switch (exampleSet) {
     case "Example 1":
@@ -95,7 +95,7 @@ function parseExampleMovementFile(input) {
 
 // Parses all input selected movement files
 function parseInputMovementFile(input) {
-  updateMovementData = true; // trigger update data
+  updateMovementData = true; // trigger movement to reprocess, reset later
   for (let i = 0; i < input.files.length; i++) {
     let file = input.files[i];
     Papa.parse(file, {
@@ -282,7 +282,7 @@ function clearDataMovementFileInput() {
   movementFiles = [];
   paths = [];
   totalTimeInSeconds = 0; // reset total time
-  updateMovementData = false;
+  updateMovementData = false; // reset
 }
 
 // ***** MOVEMENT FILE TESTS *****
