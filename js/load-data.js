@@ -126,7 +126,7 @@ function processMovementFile(results, file) {
   let conversationCounter = 0;
   for (let i = 0; i < results.data.length; i++) {
     // sample data and test to make sure row is good data
-    if (testSampleMovementData(results.data, i) && testMovementDataRow(results.data[i][movementHeaders[0]], results.data[i][movementHeaders[1]], results.data[i][movementHeaders[2]])) {
+    if (testSampleMovementData(results.data, i) && testMovementDataRowForType(results.data[i][movementHeaders[0]], results.data[i][movementHeaders[1]], results.data[i][movementHeaders[2]])) {
       let m = new Point_Movement();
       m.time = results.data[i][movementHeaders[0]];
       m.xPos = results.data[i][movementHeaders[1]];
@@ -286,22 +286,9 @@ function clearDataMovementFileInput() {
 }
 
 // ***** MOVEMENT FILE TESTS *****
-// Determines how to sample data depending on number of data cases or rows vs. pixel length of timeline
-// Reduces data size to provide optimal interaction with visualization and good curve drawing
-function testSampleMovementData(data, curRow) {
-  if (curRow === 0 || curRow === 1) return true; // always return true for first row
-  const sampleRateDivisor = 4; // temporary but 4 as rate seems to work best on most devices
-  if (data.length / sampleRateDivisor < timelineLength) return data[curRow][movementHeaders[0]] > data[curRow - 1][movementHeaders[0]];
-  else return Math.floor(data[curRow][movementHeaders[0]]) > Math.floor(data[curRow - 1][movementHeaders[0]]); // if there are more data cases than pixels on timeline, sample based on integer floored values/every second
-}
-
-function testMovementDataRow(time, x, y) {
-  return typeof time === 'number' && typeof x === 'number' && typeof y === 'number';
-}
-
-// Test if there is data in file, if it has correct movement file headers, and if first row of values is of correct type for each movement file
+// Test if there is data in file, if it has correct movement file headers, and if at leasat one row of values is of correct type for each movement file
 function testMovementFileData(data, meta) {
-  return data.length > 1 && testMovementFileHeaders(meta) && testMovementFileForGoodRow(data);
+  return data.length > 1 && testMovementFileHeaders(meta) && testMovementFileRowsForType(data);
 }
 
 // Tests if correct movement file headers
@@ -310,22 +297,36 @@ function testMovementFileHeaders(meta) {
 }
 
 // Loop through data and return true on first row that has all data typed as numbers or false if no rows are properly typed
-function testMovementFileForGoodRow(data) {
+function testMovementFileRowsForType(data) {
   for (let i = 0; i < data.length; i++) {
     if (typeof data[i][movementHeaders[0]] === 'number' && typeof data[i][movementHeaders[1]] === 'number' && typeof data[i][movementHeaders[2]] === 'number') return true;
   }
   return false;
 }
 
+// Returns true if all values are number type
+function testMovementDataRowForType(time, x, y) {
+  return typeof time === 'number' && typeof x === 'number' && typeof y === 'number';
+}
+
+// Determines how to sample data depending on number of data cases or rows vs. pixel length of timeline
+// Reduces data size to provide optimal interaction with visualization and good curve drawing
+function testSampleMovementData(data, curRow) {
+  if (curRow === 0 || curRow === 1) return true; // always return true for first two rows
+  const sampleRateDivisor = 4; // temporary but 4 as rate seems to work best on most devices
+  if (data.length / sampleRateDivisor < timelineLength) return data[curRow][movementHeaders[0]] > data[curRow - 1][movementHeaders[0]];
+  else return Math.floor(data[curRow][movementHeaders[0]]) > Math.floor(data[curRow - 1][movementHeaders[0]]); // if there are more data cases than pixels on timeline, sample based on integer floored values/every second
+}
+
 // ***** CONVERSATION FILE TESTS *****
+// Tests if there is data in file, if it has correct conversation file headers, and if at least 1 row has good data
+function testConversationFileData(data, meta) {
+  return data.length > 1 && testConversationFileHeaders(meta) && testConversationFileRowsForType(data);
+}
+
 // Tests if current conversation row is less than total rows in table and if time is number and speaker is string and talk turn is not null or undefined
 function testConversationDataRow(curRow) {
   return curRow < conversationFileResults.length && typeof conversationFileResults[curRow][conversationHeaders[0]] === 'number' && typeof conversationFileResults[curRow][conversationHeaders[1]] === 'string' && conversationFileResults[curRow][conversationHeaders[2]] !== null && conversationFileResults[curRow][conversationHeaders[2]] !== undefined;
-}
-
-// Tests if there is data in file, if it has correct conversation file headers, and if at least 1 row has good data
-function testConversationFileData(data, meta) {
-  return data.length > 1 && testConversationFileHeaders(meta) && testConversationFileForGoodRow(data);
 }
 
 // Tests if correct file headers for conversation
@@ -334,7 +335,7 @@ function testConversationFileHeaders(meta) {
 }
 
 // Loop through data and return true on first row with time is number and speaker is string and talk turn is not null or undefined
-function testConversationFileForGoodRow(data) {
+function testConversationFileRowsForType(data) {
   for (let i = 0; i < data.length; i++) {
     if (typeof data[i][conversationHeaders[0]] === 'number' && typeof data[i][conversationHeaders[1]] === 'string' && data[i][conversationHeaders[2]] !== null && data[i][conversationHeaders[2]] !== undefined) return true;
   }
