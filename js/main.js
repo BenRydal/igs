@@ -220,6 +220,6 @@ function setVideoValues() {
     let video = select('#moviePlayer').position(timelineStart, 0); // position video in upper left corner on timeline
     vidWidthSmall = width / 5;
     vidHeightSmall = width / 6;
-    vidWidthLarge = timelineLength;
-    vidHeightLarge = yPosTimeScaleTop;
+    vidWidthLarge = vidWidthSmall;
+    vidHeightLarge = vidHeightSmall;
 }
