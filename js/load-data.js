@@ -113,8 +113,6 @@ function testMovementFile(results, file) {
   if (testMovementFileData(results.data, results.meta.fields)) {
     if (updateMovementData) clearDataMovementFileInput(); // clear data if first accepted file
     movementFiles.push([results, file]);
-    //print(movementFiles[0][1].name.charAt(0));
-    //movementFiles.sort((a, b) => (a[1].name > b[1].name) ? 1 : -1); // sort list so it appears nicely in GUI
     processMovementFile(results, file);
   }
 }
@@ -152,6 +150,8 @@ function processMovementFile(results, file) {
     if (speakerList[i].name === file.name.charAt(0)) p.color = speakerList[i].color;
   }
   paths.push(p);
+  // sort after every file loaded
+  paths.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching speakerlist array
 }
 
 function processConversation(index, xPos, yPos) {
@@ -207,7 +207,7 @@ function updateSpeakerList() {
       speakerList.push(s);
     }
   }
-  speakerList.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI
+  speakerList.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching paths array
 }
 
 // parses inputted video files from user computer
