@@ -204,6 +204,7 @@ class DrawDataConversation extends DrawData {
 
     drawRects(point, curColor) {
         noStroke(); // reset if setDrawText is called previously in loop
+        textFont(font_Lato, keyTextSize);
         textSize(1); // determines how many pixels a string is which corresponds to vertical height of rectangle
         let pixelTime = map(point.time, 0, totalTimeInSeconds, timelineStart, timelineEnd);
         let scaledTime = map(pixelTime, currPixelTimeMin, currPixelTimeMax, timelineStart, timelineEnd);
