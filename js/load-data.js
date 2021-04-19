@@ -5,7 +5,6 @@ function loadFonts() {
 }
 
 function loadExampleDataSet() {
-  updateMovementData = true; // trigger movement to reprocess, reset later
   let exampleSet = document.getElementById("examples").value;
   switch (exampleSet) {
     case "Example 1":
@@ -31,37 +30,36 @@ function loadExample(params) {
   loadImage(params[0] + params[1], img => {
     processFloorPlan(img);
   });
+  // Async loading and processing of conversation file
+  getExampleConversationFile(params[0], params[2]).then(parseConversationFile).catch(alert);
+  // Async loading and processing of movement files
+  getExampleMovementFiles(params[0], params[3]).then(parseMovementFiles).catch(alert);
+}
 
-  fetch(new Request(params[0] + params[2]))
-    .then(response => response.arrayBuffer())
-    .then(buffer => {
-      conversationFileResults = new File([buffer], params[2], {
-        type: "text/csv",
-      });
-      parseExampleConversationFile(conversationFileResults);
-    }).catch(e => {
-      print("Error loading example conversation file");
-    });
+/**
+ * Handles async loading of conversation file
+ * NOTE: folder and filename are separated for convenience later in program
+ * @param  {} folder
+ * @param  {} fileName
+ */
+async function getExampleConversationFile(folder, fileName) {
+  let response = await fetch(new Request(folder + fileName));
+  let buffer = await response.arrayBuffer();
+  return new File([buffer], fileName, {
+    type: "text/csv",
+  });
+}
 
-  // create an initial immediately resolving promise, and then chain new promises as the previous ones resolve:
-  // see https://stackoverflow.com/questions/40328932/javascript-es6-promise-for-loop
-  for (let i = 0, p = Promise.resolve(); i < params[3].length; i++) {
-    p = p.then(_ => new Promise(resolve =>
-      setTimeout(function () {
-        let myRequest = new Request(params[0] + params[3][i]);
-        fetch(myRequest)
-          .then(response => response.arrayBuffer())
-          .then(buffer => new File([buffer], params[3][i], {
-            type: "text/csv",
-          }))
-          .then(file => {
-            parseExampleMovementFile(file);
-          }).catch(e => {
-            print("Error loading example movement file");
-          });
-        resolve();
-      })));
+async function getExampleMovementFiles(folder, fileNames) {
+  let fileList = [];
+  for (let i = 0; i < fileNames.length; i++) {
+    let response = await fetch(new Request(folder + fileNames[i]));
+    let buffer = await response.arrayBuffer();
+    fileList.push(new File([buffer], fileNames[i], {
+      type: "text/csv",
+    }));
   }
+  return fileList;
 }
 
 // Uploads floor plan image file and sends to update global floor plan image vars
@@ -84,27 +82,30 @@ function processFloorPlan(img) {
   inputFloorPlanPixelHeight = floorPlan.height;
 }
 
-// Parses example movement files
-function parseExampleMovementFile(input) {
-  Papa.parse(input, {
-    complete: testMovementFile,
-    header: true,
-    dynamicTyping: true,
-  });
+/**
+ * Converts and sends user inputted movement files into fileList for processing
+ * @param  {} input
+ */
+function parseInputMovementFiles(input) {
+  let fileList = [];
+  for (let i = 0; i < input.files.length; i++) fileList.push(input.files[i]);
+  parseMovementFiles(fileList);
+  input.value = ''; // reset input value so you can load same file(s) again in browser
 }
-
-// Parses all input selected movement files
-function parseInputMovementFile(input) {
+/**
+ * Parses each movement file and sends for additional testing and processing
+ * NOTE: boolean updateMovementData sets true to trigger clearing of current movement file data
+ * @param  {} fileList
+ */
+function parseMovementFiles(fileList) {
   updateMovementData = true; // trigger movement to reprocess, reset later
-  for (let i = 0; i < input.files.length; i++) {
-    let file = input.files[i];
-    Papa.parse(file, {
+  for (let i = 0; i < fileList.length; i++) {
+    Papa.parse(fileList[i], {
       complete: testMovementFile,
       header: true,
       dynamicTyping: true,
     });
   }
-  input.value = ''; // reset input value so you can load same file(s) again in browser
 }
 
 // Tests movement file formatting
@@ -164,19 +165,21 @@ function processConversation(index, xPos, yPos) {
   return c;
 }
 
-// Parses conversation file loaded by example data
-function parseExampleConversationFile(file) {
-  Papa.parse(file, {
-    complete: testConversationFile,
-    header: true,
-    dynamicTyping: true,
-  });
+/**
+ * Gets single file format from input and sends for conversation parsing
+ * @param  {} input
+ */
+function parseInputConversationFile(input) {
+  parseConversationFile(input.files[0]); // parse converted file
+  input.value = ''; // reset input value so you can load same file again in browser
 }
 
-// Parses conversation file loaded by user input
-function parseInputConversationFile(input) {
-  let file = input.files[0];
-  input.value = ''; // reset input value so you can load same file again in browser
+/**
+ * Parses single conversation file using Papa.parse library
+ * NOTE: testConversationFile is called when parsing is complete
+ * @param  {} file
+ */
+function parseConversationFile(file) {
   Papa.parse(file, {
     complete: testConversationFile,
     header: true,
