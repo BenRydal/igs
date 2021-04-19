@@ -134,7 +134,9 @@ class Point_Conversation {
 
 // Loads fonts and starting example
 function preload() {
-    loadFonts();
+    font_PlayfairReg = loadFont("data/fonts/PlayfairDisplay-Regular.ttf");
+    font_PlayfairItalic = loadFont("data/fonts/PlayfairDisplay-Italic.ttf");
+    font_Lato = loadFont("data/fonts/Lato-Light.ttf");
     loadExample(example_1);
 }
 
