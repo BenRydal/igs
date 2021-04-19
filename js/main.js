@@ -48,7 +48,7 @@ const PLAN = 0,
 let movementKeyTitle = true;
 let conversationPositionTop = false; // controls positioning of conversation turns on path or top of screen
 let allConversation = true; // shows all speaker turns on path, set to true for example 1 currently
-let intro = true; // sets intro message to start program
+let showIntroMsg = true; // sets intro message to start program
 let font_PlayfairReg, font_PlayfairItalic, font_Lato;
 let buttonSpacing, buttonWidth, speakerKeysHeight, buttonsHeight;
 const floorPlanSelectorSize = 100;
@@ -60,12 +60,12 @@ const colorGray = (150, 220),
     pathWeight = 3,
     basePathColor = 100; // for paths that don't have associated speaker in speakerList
 let animationCounter = 0; // controls animation
-let animation = false,
-    howToRead = false;
+let animation = false;
 // TIMELINE
 let lockedLeft = false,
     lockedRight = false;
 const selSpacing = 20,
+    spacing = 50,
     tickHeight = 20;
 let currPixelTimeMin, currPixelTimeMax;
 let yPosTimeScaleTop, yPosTimeScaleBottom, yPosTimeScaleSize;
@@ -80,13 +80,7 @@ let keyTextSize, titleTextSize, infoTextSize;
 let textBoxWidth, textSpacing, boxSpacing, boxDistFromRect;
 
 // MESSAGES
-const howToMSG = "Hi There! This is a tool to visualize movement, conversation, and video data over space and time. Data are displayed over a floor plan view (left) and a space-time view (right), where the vertical axis corresponds to the vertical dimension of the floor plan. Use the top menu to visualize different sample datasets or upload your own data. Hover over buttons on the left to learn about interactive features of this tool. Visit this link to learn how to format your data to use in this tool: benrydal.com/software/igs-indoor";
-const animateMSG = "Press this button to animate movement and conversation over space and time.";
-const alignTalkMSG = "Press this button to view conversation aligned horizontally. Hover over each conversation turn to read each turn. Use the conversation menu above to toggle individual speakers.";
-const talkOnPathMSG = "Press this button to view conversation from all speakers along each movement path. Hover over each conversation turn to read each turn. Use the conversation menu above to toggle individual speakers.";
-const videoMSG = "Press this button to watch video synced to visualizations. Click anywhere on the timeline to play and pause video.";
-const infoMsg = "INTERACTION GEOGRAPHY SLICER (IGS-Indoor)\nby Ben Rydal Shapiro & contributers\nbuilt with p5.js";
-
+const introMSG = "INTERACTION GEOGRAPHY SLICER (IGS) INDOOR\n\nby Ben Rydal Shapiro & contributers\nbuilt with p5.js & JavaScript\n\nHi There! This is a tool to visualize movement, conversation, and video data over space and time. Data are displayed over a floor plan view (left) and a space-time view (right), where the vertical axis corresponds to the vertical dimension of the floor plan. Use the top menu to visualize different sample datasets or upload your own data. Hover over the floor plan and use the timeline to selectively study displayed data. Use the bottom buttons to animate data, visualize conversation in different ways, and interact with video data by clicking the timeline to play & pause video.\n\nTo format your data for use in this tool visit: benrydal.com/software/igs-indoor";
 /*
 Relationship between speaker and path objects can be 1:1 but does not have to be this allows variation 
 in different types of data inputs (e.g., less or more movement files than speakers or vice versa)
@@ -151,8 +145,6 @@ function setup() {
 function draw() {
     background(255);
     image(floorPlan, 0, 0, displayFloorPlanWidth, displayFloorPlanHeight);
-    let keys = new Keys();
-    keys.drawKeys();
     let drawConversationData = new DrawDataConversation();
     let drawMovementData = new DrawDataMovement();
     for (let i = 0; i < paths.length; i++) {
@@ -162,10 +154,10 @@ function draw() {
         }
     }
     drawConversationData.setConversationBubble(); // draw conversation text last so it displays on top
-    if (howToRead) overButtonsMSGS();
-    if (intro) drawKeyMSG(howToMSG, true); // draw intro message on program start up until mouse is pressed
     if (animation) setUpAnimation();
     if (videoIsShowing && !videoIsPlaying) updateVideoScrubbing();
+    let keys = new Keys();
+    keys.drawKeys();
 }
 
 function setUpAnimation() {

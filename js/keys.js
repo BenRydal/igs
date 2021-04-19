@@ -6,10 +6,10 @@ class Keys {
         if (movementKeyTitle) this.drawPathSpeakerKeys(paths);
         else this.drawPathSpeakerKeys(speakerList);
         this.drawbuttons();
-        this.drawTitles();
         textFont(font_PlayfairReg, infoTextSize);
         this.drawTimeline();
         if (overRect(0, 0, displayFloorPlanWidth, displayFloorPlanHeight)) this.drawFloorPlanSelector();
+        if (showIntroMsg) this.drawIntroMsg(); // draw intro message on program start up until mouse is pressed
     }
 
     drawPathSpeakerTitle() {
@@ -85,19 +85,13 @@ class Keys {
         currXPos += textWidth(button_4) + buttonSpacing * 2;
         // Button 5
         textFont(font_PlayfairItalic);
-        fill(howToRead ? 0 : 150);
+        fill(showIntroMsg ? 0 : 150);
         text(button_5, currXPos, buttonsHeight);
         noFill();
-        stroke(howToRead ? 0 : 150);
+        stroke(showIntroMsg ? 0 : 150);
         strokeWeight(1);
         rect(currXPos - buttonSpacing / 2, buttonsHeight, textWidth(button_5) + buttonSpacing, buttonSpacing * 1.5);
         noStroke();
-    }
-
-    drawTitles() {
-        fill(0);
-        textFont(font_PlayfairItalic, infoTextSize);
-        text(infoMsg, 0, buttonsHeight);
     }
 
     drawTimeline() {
@@ -143,5 +137,17 @@ class Keys {
         strokeWeight(3);
         stroke(0);
         circle(mouseX, mouseY, floorPlanSelectorSize);
+    }
+
+    drawIntroMsg() {
+        rectMode(CENTER);
+        stroke(0);
+        strokeWeight(1);
+        fill(255, 240);
+        rect(width / 2, height / 2, width / 1.75 + spacing, height / 1.75 + spacing);
+        fill(0);
+        textFont(font_Lato, keyTextSize);
+        text(introMSG, width / 2, height / 2, width / 1.75, height / 1.75);
+        rectMode(CORNER);
     }
 }
