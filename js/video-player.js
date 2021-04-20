@@ -36,12 +36,22 @@ var videoParams = { wid: '_1038472', uiconf_id: '33084471', entry_id: '1_9tp4soo
 class YoutubePlayer {
 
     constructor(params) {
-        this.targetId = params['targetId'];
+        this.targetId = 'moviePlayer';
         this.videoId = params['videoId'];
-        this.initialize();
+        this.initializeDiv();
+        this.initializePlayer();
     }
 
-    initialize() {
+    initializeDiv() {
+        movie = createDiv(); // create the div that will hold the video if other player
+        movie.id(this.targetId);
+        movie.size(videoWidth, videoHeight);
+        movie.hide();
+        movie.position(timelineStart, 0);
+    }
+
+
+    initializePlayer() {
         this.player = new YT.Player(this.targetId, {
             videoId: this.videoId,
             playerVars: {
@@ -55,10 +65,21 @@ class YoutubePlayer {
     }
 
     // The API will call this function when the video player is ready.
-    onPlayerReady(event) {
+    onPlayerReady() {
         // event.target.playVideo();
         loop(); // restart p5 draw loop once loaded
         console.log("YT player ready: ");
+    }
+
+    // TODO: TEMP
+    show() {
+        let video = select('#moviePlayer');
+        video.style('display', 'block'); // show video
+    }
+
+    hide() {
+        let video = select('#moviePlayer');
+        video.style('display', 'none'); // hide video
     }
 
     seekTo(time) {
@@ -90,16 +111,36 @@ class YoutubePlayer {
     }
 
     destroy() {
-        this.player.destroy();
+        this.player.destroy(); // destroy the player object
+        movie.remove(); // remove the div element
     }
 }
 
 class FilePlayer {
 
     constructor(params) {
-        this.targetId = params['targetId'];
-        this.fileName = params['fileName'];
-        console.log("File Player Ready:");
+        movie = createVideo(params['fileName'], function () {
+            movie.id('moviePlayer');
+            movie.size(videoWidth, videoHeight);
+            movie.hide();
+            movie.position(timelineStart, 0);
+            movie.onload = function () {
+                URL.revokeObjectURL(this.src);
+            }
+            console.log("File Player Ready:");
+            loop();
+        });
+    }
+
+    // TODO: TEMP
+    show() {
+        let video = select('#moviePlayer');
+        video.style('display', 'block'); // show video
+    }
+
+    hide() {
+        let video = select('#moviePlayer');
+        video.style('display', 'none'); // hide video
     }
 
     seekTo(t) {
@@ -130,74 +171,7 @@ class FilePlayer {
         return movie.duration();
     }
 
-    destroy() {} // because file player is already attached to movie div directly there is no player to destroy
-}
-
-class KalturaPlayer {
-
-    constructor(params) {
-        this.targetId = params['targetId'];
-        this.wid = params['wid'];
-        this.uiconf_id = params['uiconf_id'];
-        this.entry_id = params['entry_id'];
-        this.initialize();
-    }
-
-    initialize() {
-        kWidget.embed({
-            'targetId': this.targetId,
-            'wid': this.wid,
-            'uiconf_id': this.uiconf_id,
-            'entry_id': this.entry_id,
-            'flashvars': { // flashvars allows you to set runtime uiVar configuration overrides.
-                'controlBarContainer.plugin': false, // hides controls on the video
-                'disableOnScreenClick': true,
-                'largePlayBtn.plugin': false,
-                'autoPlay': false
-            },
-
-            // Ready callback is issued for this player:
-            'readyCallback': function (playerId) {
-                loop(); // restart p5 draw loop once loaded
-                console.log("kWidget player ready: " + playerId);
-            },
-            'params': { // params allows you to set flash embed params such as wmode, allowFullScreen etc
-                'wmode': 'transparent'
-            }
-        });
-        this.player = document.getElementById(this.targetId);
-    }
-
-    seekTo(time) {
-        this.player.sendNotification('doSeek', time);
-    }
-
-    play() {
-        this.player.sendNotification('doPlay');
-    }
-
-    pause() {
-        this.player.sendNotification('doPause');
-    }
-
-    mute() {
-        this.player.sendNotification('changeVolume', 0);
-    }
-
-    unMute() {
-        this.player.sendNotification('changeVolume', 1);
-    }
-
-    getCurrentTime() {
-        return this.player.evaluate('{video.player.currentTime}');
-    }
-
-    getVideoDuration() {
-        // return this.player.duration;
-        return 429; // TEMP due to issue with Kaltura duration method
-    }
-
     destroy() {
-        kWidget.destroy(this.targetId);
+        movie.remove(); // remove the div element
     }
 }

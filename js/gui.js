@@ -67,22 +67,6 @@ function overAnimateButton() {
     }
 }
 
-function overVideoButton() {
-    if (videoIsShowing) {
-        videoPlayer.pause();
-        videoIsPlaying = false; // important to set this
-        setVideoSizeSmall();
-        movie.hide();
-        let video = select('#moviePlayer');
-        video.style('display', 'none'); // hide video
-    } else {
-        setVideoSizeSmall();
-        let video = select('#moviePlayer');
-        video.style('display', 'block'); // show video
-    }
-    videoIsShowing = !videoIsShowing;
-}
-
 function handleTimeline() {
     let xPosLeftSelector = currPixelTimeMin;
     let xPosRightSelector = currPixelTimeMax;
@@ -99,44 +83,29 @@ function handleTimeline() {
     }
 }
 
-// Tests if over circle with x, y and diameter
-function overCircle(x, y, diameter) {
-    let disX = x - mouseX;
-    let disY = y - mouseY;
-    return sqrt(sq(disX) + sq(disY)) < diameter / 2;
-}
-
-// Tests if over rectangle with x, y, and width/height
-function overRect(x, y, boxWidth, boxHeight) {
-    return mouseX >= x && mouseX <= x + boxWidth && mouseY >= y && mouseY <= y + boxHeight;
-}
-
-function setVideoSizeSmall() {
-    let iFrameID = document.getElementById('moviePlayer');
-    iFrameID.width = vidWidthSmall;
-    iFrameID.height = vidHeightSmall;
-}
-
-function setVideoSizeLarge() {
-    let iFrameID = document.getElementById('moviePlayer');
-    iFrameID.width = vidWidthLarge;
-    iFrameID.height = vidHeightLarge;
+// VIDEO
+function overVideoButton() {
+    if (videoIsShowing) {
+        videoPlayer.pause();
+        videoPlayer.hide();
+        videoIsPlaying = false; // important to set this
+    } else {
+        videoPlayer.show();
+    }
+    videoIsShowing = !videoIsShowing;
 }
 
 // Plays/pauses video and toggles videoIsPlaying
 function playPauseMovie() {
     if (videoIsPlaying) {
         videoPlayer.pause();
-        setVideoSizeSmall();
         videoIsPlaying = false;
     } else {
         let mPos = map(mouseX, timelineStart, timelineEnd, currPixelTimeMin, currPixelTimeMax); // first map mouse to selected time values in GUI
         // must floor vPos to prevent double finite error
         let vPos = Math.floor(map(mPos, timelineStart, timelineEnd, 0, Math.floor(videoPlayer.getVideoDuration())));
-        print(vPos);
         videoPlayer.play();
         videoPlayer.seekTo(vPos);
-        setVideoSizeLarge();
         videoIsPlaying = true;
     }
 }
@@ -154,4 +123,16 @@ function updateVideoScrubbing() {
         let vPos = Math.floor(map(mPos, timelineStart, timelineEnd, 0, Math.floor(videoPlayer.getVideoDuration())));
         videoPlayer.seekTo(vPos);
     }
+}
+
+// Tests if over circle with x, y and diameter
+function overCircle(x, y, diameter) {
+    let disX = x - mouseX;
+    let disY = y - mouseY;
+    return sqrt(sq(disX) + sq(disY)) < diameter / 2;
+}
+
+// Tests if over rectangle with x, y, and width/height
+function overRect(x, y, boxWidth, boxHeight) {
+    return mouseX >= x && mouseX <= x + boxWidth && mouseY >= y && mouseY <= y + boxHeight;
 }

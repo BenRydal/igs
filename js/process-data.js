@@ -72,49 +72,12 @@ function updateSpeakerList() {
     speakerList.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching paths array
 }
 
-// Creates movie element specific to videoPlatform and params
-function processVideo(videoPlatform, videoParams) {
-    noLoop(); // stop program loop while loading video, restarted upon video loaded in videoPlayer or in processVideoFile if loading from file
-    // if first time player loaded at program start it will be undefined, don't destroy exisiting player and remove exisiting movie element
-    if (videoPlayer !== undefined) {
-        videoPlayer.destroy();
-        movie.remove();
-    }
-    if (videoPlatform === 'File') processVideoFromFile(videoPlatform, videoParams);
-    else processVideoFromWeb(videoPlatform, videoParams);
-}
-
-// Creates movie element from file, use callback to make sure video loaded before setting player and starting loop again
-function processVideoFromFile(videoPlatform, videoParams) {
-    movie = createVideo(videoParams['fileName'], function () {
-        movie.id('moviePlayer');
-        movie.hide();
-        setupMovie('moviePlayer', videoPlatform, videoParams); // set up the video player
-        let video = select('#moviePlayer').position(timelineStart, 0); // position video in upper left corner on timeline
-        movie.onload = function () {
-            URL.revokeObjectURL(this.src);
-        }
-        loop(); // restart program loop (for other video platforms this is done in videoPlayer)
-    });
-}
-
-function processVideoFromWeb(videoPlatform, videoParams) {
-    movie = createDiv(); // create the div that will hold the video if other player
-    movie.id('moviePlayer');
-    movie.hide();
-    setupMovie('moviePlayer', videoPlatform, videoParams); // set up the video player
-    let video = select('#moviePlayer').position(timelineStart, 0); // position video in upper left corner on timeline
-}
-
 // Initialization for the video player
-function setupMovie(movieDiv, platform, params) {
-    params['targetId'] = movieDiv; // regardless of platform, the videoPlayer needs a target div
+function processVideo(platform, params) {
+    noLoop(); // currently loop continued in videoPlayer API
+    if (videoPlayer !== undefined) videoPlayer.destroy();
     // Based on the specified platform, chose the appropriate type of videoPlayer to use
-    // ADD TRY/CATCH HERE?
     switch (platform) {
-        case "Kaltura":
-            videoPlayer = new KalturaPlayer(params);
-            break;
         case "Youtube":
             videoPlayer = new YoutubePlayer(params);
             break;

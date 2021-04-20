@@ -38,7 +38,7 @@ let movie; // global holder for movie element--youtube, Kaltura and File Player 
 let videoPlayer; // instantiated in setupMovie method, used to manipulate video (play, pause, seek, etc.)
 let videoIsPlaying = false; // boolean for video playing or stopped
 let videoIsShowing = false; // boolean for showing/hiding video
-let vidWidthSmall, vidHeightSmall, vidWidthLarge, vidHeightLarge; // controls 2 different video sizes
+let videoWidth, videoHeight; // width and height of video
 
 // GUI
 let updateMovementData = false; // controls accepting first input file to trigger update data processing
@@ -158,62 +158,4 @@ function draw() {
     if (videoIsShowing && !videoIsPlaying) updateVideoScrubbing();
     let keys = new Keys();
     keys.drawKeys();
-}
-
-function setUpAnimation() {
-    let animationIncrementRateDivisor = 1000; // this seems to work best
-    // Get amount of time in seconds currently displayed
-    let curTimeIntervalInSeconds = map(currPixelTimeMax, timelineStart, timelineEnd, 0, totalTimeInSeconds) - map(currPixelTimeMin, timelineStart, timelineEnd, 0, totalTimeInSeconds);
-    // set increment value based on that value/divisor to keep constant animation speed regardless of time interval selected
-    let animationIncrementValue = curTimeIntervalInSeconds / animationIncrementRateDivisor;
-    if (animationCounter < map(currPixelTimeMax, timelineStart, timelineEnd, 0, totalTimeInSeconds)) animationCounter += animationIncrementValue; // updates animation
-    else animation = false;
-}
-
-function setGUI() {
-    setBaseValues();
-    setTextSizes();
-    setConversationValues();
-    setVideoValues();
-}
-
-function setBaseValues() {
-    timelineStart = width * 0.4638;
-    timelineEnd = width * 0.9638;
-    timelineLength = timelineEnd - timelineStart;
-    timelineHeight = height * .81;
-    displayFloorPlanWidth = timelineStart - (width - timelineEnd);
-    displayFloorPlanHeight = timelineHeight;
-    currPixelTimeMin = timelineStart; // adjustable timeline values
-    currPixelTimeMax = timelineEnd;
-    yPosTimeScaleTop = timelineHeight - tickHeight;
-    yPosTimeScaleBottom = timelineHeight + tickHeight;
-    yPosTimeScaleSize = 2 * tickHeight;
-    buttonSpacing = width / 71;
-    buttonWidth = buttonSpacing;
-    speakerKeysHeight = timelineHeight + (height - timelineHeight) / 4;
-    buttonsHeight = timelineHeight + (height - timelineHeight) / 1.8;
-    bugPrecision = 3;
-    bugSize = width / 56;
-}
-
-function setTextSizes() {
-    keyTextSize = width / 70;
-    titleTextSize = width / 55;
-    infoTextSize = width / 100;
-}
-
-function setConversationValues() {
-    textBoxWidth = width / 3; // width of text and textbox drawn
-    textSpacing = width / 57; // textbox leading
-    boxSpacing = width / 141; // general textBox spacing variable
-    boxDistFromRect = width / 28.2; // distance from text rectangle of textbox
-}
-
-function setVideoValues() {
-    let video = select('#moviePlayer').position(timelineStart, 0); // position video in upper left corner on timeline
-    vidWidthSmall = width / 5;
-    vidHeightSmall = width / 6;
-    vidWidthLarge = vidWidthSmall;
-    vidHeightLarge = vidHeightSmall;
 }
