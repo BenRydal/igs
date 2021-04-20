@@ -82,7 +82,7 @@ function processVideo(platform, params) {
             videoPlayer = new YoutubePlayer(params);
             break;
         case "File":
-            videoPlayer = new FilePlayer(params);
+            videoPlayer = new P5FilePlayer(params);
             break;
     }
 }
