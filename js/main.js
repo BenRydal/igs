@@ -48,7 +48,7 @@ const PLAN = 0,
 let movementKeyTitle = true;
 let conversationPositionTop = false; // controls positioning of conversation turns on path or top of screen
 let allConversation = true; // shows all speaker turns on path, set to true for example 1 currently
-let showIntroMsg = true; // sets intro message to start program
+let showIntroMsg; // sets intro message to start program
 let font_PlayfairReg, font_PlayfairItalic, font_Lato;
 let buttonSpacing, buttonWidth, speakerKeysHeight, buttonsHeight;
 const floorPlanSelectorSize = 100;
@@ -139,6 +139,7 @@ function setup() {
     frameRate(30);
     textFont(font_Lato, 14);
     textAlign(LEFT, TOP);
+    showIntroMsg = true;
     setGUI();
 }
 

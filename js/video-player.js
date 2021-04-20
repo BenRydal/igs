@@ -116,7 +116,7 @@ class YoutubePlayer {
     }
 }
 
-class FilePlayer {
+class P5FilePlayer {
 
     constructor(params) {
         movie = createVideo(params['fileName'], function () {
