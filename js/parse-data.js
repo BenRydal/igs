@@ -35,7 +35,7 @@ function testMovementFile(results, file) {
     console.log("Parsing complete:", results, file);
     if (testMovementFileData(results.data, results.meta.fields)) {
         if (updateMovementData) clearDataMovementFileInput(); // clear data if first accepted file
-        movementFiles.push([results, file]);
+        movementFileResults.push([results, file]);
         processMovementFile(results, file);
     }
 }
@@ -69,7 +69,7 @@ function testConversationFile(results, file) {
         conversationFileResults = results.data; // set to new array of keyed values
         updateSpeakerList();
         // Must reprocess movement files
-        for (let i = 0; i < movementFiles.length; i++) processMovementFile(movementFiles[i][0], movementFiles[i][1]);
+        for (let i = 0; i < movementFileResults.length; i++) processMovementFile(movementFileResults[i][0], movementFileResults[i][1]);
     }
 }
 
@@ -90,7 +90,7 @@ function clearDataConversationFileInput() {
 }
 
 function clearDataMovementFileInput() {
-    movementFiles = [];
+    movementFileResults = [];
     paths = [];
     totalTimeInSeconds = 0; // reset total time
     updateMovementData = false; // reset
