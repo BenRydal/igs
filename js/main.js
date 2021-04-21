@@ -9,10 +9,15 @@ CREDITS/LICENSE INFORMATION: This software is licensed under the GNU General Pub
 let movementFileResults = []; // List that holds a results array and file data from a parsed movement .CSV file
 let conversationFileResults = []; // List that holds a results array and file data from a parsed conversation .CSV file
 let speakerList = []; // List that holds Speaker objects parsed from conversation file
-let paths = []; // holds path objects for each unique set of movement and conversation points
+let paths = []; // List that holds path objects for each unique set of movement and conversation points constructed from parsed conversation and movement .CSV files
 let floorPlan; // PNG or JPG floorplan image
 const movementHeaders = ['time', 'x', 'y']; // String array indicating movement movement file headers, data in each column should be of type number or it won't process
 const conversationHeaders = ['time', 'speaker', 'talk']; // String array indicating conversation file headers, data in time column shout be of type number, speaker column should be of type String, talk column should be not null or undefined
+let totalTimeInSeconds = 0; // Number indicating time value in seconds that all displayed data is set to, set dynamically in processMovement methods
+const PLAN = 0,
+    SPACETIME = 1; // Number constants indicating floorplan or space-time drawing modes
+// TODO: REMOVE below
+let updateMovementData = false; // controls accepting first input file to trigger update data processing
 
 /**
  * NOTE: Each speaker and path object can match/correspond to the same person but they don't have to match
@@ -106,24 +111,16 @@ let videoIsShowing = false; // boolean indicating video is showing in GUI
 let videoWidth, videoHeight; // Number pixel width and height of video set in setup
 
 //*************** GUI ***************
-let updateMovementData = false; // controls accepting first input file to trigger update data processing
-let totalTimeInSeconds = 0; // global time value that all data corresponds to, dynamically set and updated in processMovementFiles
-const PLAN = 0,
-    SPACETIME = 1; // constants to indicate plan or space-time views
 let movementKeyTitle = true;
 let conversationPositionTop = false; // controls positioning of conversation turns on path or top of screen
 let allConversation = true; // shows all speaker turns on path, set to true for example 1 currently
-let showIntroMsg; // sets intro message to start program
+let showIntroMsg = true; // sets intro message to start program
 let font_PlayfairReg, font_PlayfairItalic, font_Lato;
+let currPixelTimeMin, currPixelTimeMax;
+let yPosTimeScaleTop, yPosTimeScaleBottom, yPosTimeScaleSize;
+let timelineStart, timelineEnd, timelineHeight, timelineLength;
 let buttonSpacing, buttonWidth, speakerKeysHeight, buttonsHeight;
-const floorPlanSelectorSize = 100;
-let bugPrecision, bugSize;
-let bugTimePosForVideo; // to draw slicer line when video is playing
-// purple, orange, green, blue, red, yellow, brown, lPurple, lOrange, lGreen, lBlue, lRed
 const speakerColorList = ['#6a3d9a', '#ff7f00', '#33a02c', '#1f78b4', '#e31a1c', '#ffff99', '#b15928', '#cab2d6', '#fdbf6f', '#b2df8a', '#a6cee3', '#fb9a99'];
-const colorGray = (150, 220),
-    pathWeight = 3,
-    basePathColor = 100; // for paths that don't have associated speaker in speakerList
 let animationCounter = 0; // controls animation
 let animation = false;
 // TIMELINE
@@ -132,9 +129,6 @@ let lockedLeft = false,
 const selSpacing = 20,
     spacing = 50,
     tickHeight = 25;
-let currPixelTimeMin, currPixelTimeMax;
-let yPosTimeScaleTop, yPosTimeScaleBottom, yPosTimeScaleSize;
-let timelineStart, timelineEnd, timelineHeight, timelineLength;
 // BUTTONS
 const button_1 = "Animate",
     button_2 = "Align Talk",
@@ -142,9 +136,18 @@ const button_1 = "Animate",
     button_4 = "Video",
     button_5 = "How to Use";
 let keyTextSize;
-
-// MESSAGES
 const introMSG = "INTERACTION GEOGRAPHY SLICER (IGS) INDOOR\n\nby Ben Rydal Shapiro & contributers\nbuilt with p5.js & JavaScript\n\nHi There! This is a tool to visualize movement, conversation, and video data over space and time. Data are displayed over a floor plan view (left) and a space-time view (right), where the vertical axis corresponds to the vertical dimension of the floor plan. Use the top menu to visualize different sample datasets or upload your own data. Hover over the floor plan and use the timeline to selectively study displayed data. Use the bottom buttons to animate data, visualize conversation in different ways, and interact with video data by clicking the timeline to play & pause video.\n\nTo format your data for use in this tool visit: benrydal.com/software/igs-indoor";
+
+
+const floorPlanSelectorSize = 100;
+let bugPrecision, bugSize;
+let bugTimePosForVideo; // to draw slicer line when video is playing
+// purple, orange, green, blue, red, yellow, brown, lPurple, lOrange, lGreen, lBlue, lRed
+const colorGray = (150, 220),
+    pathWeight = 3,
+    basePathColor = 100; // for paths that don't have associated speaker in speakerList
+
+
 
 // Loads fonts and starting example
 function preload() {
@@ -159,7 +162,6 @@ function setup() {
     frameRate(30);
     textFont(font_Lato, 14);
     textAlign(LEFT, TOP);
-    showIntroMsg = true;
     setGUI();
 }
 

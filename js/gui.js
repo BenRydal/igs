@@ -1,5 +1,4 @@
 function mousePressed() {
-    if (showIntroMsg) showIntroMsg = false;
     // Controls video when clicking on timeline
     if (videoIsShowing && !animation && overRect(timelineStart, 0, timelineEnd, timelineHeight - tickHeight)) playPauseMovie();
     textSize(keyTextSize);
@@ -54,7 +53,10 @@ function overInteractionButtons() {
     else if (overRect(currXPos + textWidth(button_1) + 2 * buttonSpacing, buttonsHeight, textWidth(button_2) + buttonSpacing, buttonWidth)) conversationPositionTop = !conversationPositionTop;
     else if (overRect(currXPos + textWidth(button_1 + button_2) + 4 * buttonSpacing, buttonsHeight, textWidth(button_3) + buttonSpacing, buttonWidth)) allConversation = !allConversation;
     else if (overRect(currXPos + textWidth(button_1 + button_2 + button_3) + 6 * buttonSpacing, buttonsHeight, textWidth(button_4) + buttonSpacing, buttonWidth)) overVideoButton();
-    else if (overRect(currXPos + textWidth(button_1 + button_2 + button_3 + button_4) + 8 * buttonSpacing, buttonsHeight, textWidth(button_5) + buttonSpacing, buttonWidth)) showIntroMsg = !showIntroMsg;
+    else {
+        if (showIntroMsg) showIntroMsg = false;
+        else if (overRect(currXPos + textWidth(button_1 + button_2 + button_3 + button_4) + 8 * buttonSpacing, buttonsHeight, textWidth(button_5) + buttonSpacing, buttonWidth)) showIntroMsg = !showIntroMsg;
+    }
 }
 
 function overAnimateButton() {
