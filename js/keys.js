@@ -5,9 +5,8 @@ class Keys {
         this.drawPathSpeakerTitle();
         if (movementKeyTitle) this.drawPathSpeakerKeys(paths);
         else this.drawPathSpeakerKeys(speakerList);
-        this.drawbuttons();
-        textFont(font_PlayfairReg, infoTextSize);
         this.drawTimeline();
+        this.drawbuttons();
         if (overRect(0, 0, displayFloorPlanWidth, displayFloorPlanHeight)) this.drawFloorPlanSelector();
         if (showIntroMsg) this.drawIntroMsg(); // draw intro message on program start up until mouse is pressed
     }

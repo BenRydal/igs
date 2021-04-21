@@ -244,6 +244,12 @@ class DrawDataConversation extends DrawData {
     }
 
     drawTextBox() {
+        
+        let textBoxWidth = width / 3; // width of text and textbox drawn
+        let textSpacing = width / 57; // textbox leading
+        let boxSpacing = width / 141; // general textBox spacing variable
+        let boxDistFromRect = width / 28.2; // distance from text rectangle of textbox
+        
         textFont(font_Lato, keyTextSize);
         textLeading(textSpacing);
         let point = this.conversationToDraw;

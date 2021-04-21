@@ -66,7 +66,7 @@ let lockedLeft = false,
     lockedRight = false;
 const selSpacing = 20,
     spacing = 50,
-    tickHeight = 20;
+    tickHeight = 25;
 let currPixelTimeMin, currPixelTimeMax;
 let yPosTimeScaleTop, yPosTimeScaleBottom, yPosTimeScaleSize;
 let timelineStart, timelineEnd, timelineHeight, timelineLength;
@@ -76,8 +76,7 @@ const button_1 = "Animate",
     button_3 = "All Talk",
     button_4 = "Video",
     button_5 = "How to Use";
-let keyTextSize, titleTextSize, infoTextSize;
-let textBoxWidth, textSpacing, boxSpacing, boxDistFromRect;
+let keyTextSize;
 
 // MESSAGES
 const introMSG = "INTERACTION GEOGRAPHY SLICER (IGS) INDOOR\n\nby Ben Rydal Shapiro & contributers\nbuilt with p5.js & JavaScript\n\nHi There! This is a tool to visualize movement, conversation, and video data over space and time. Data are displayed over a floor plan view (left) and a space-time view (right), where the vertical axis corresponds to the vertical dimension of the floor plan. Use the top menu to visualize different sample datasets or upload your own data. Hover over the floor plan and use the timeline to selectively study displayed data. Use the bottom buttons to animate data, visualize conversation in different ways, and interact with video data by clicking the timeline to play & pause video.\n\nTo format your data for use in this tool visit: benrydal.com/software/igs-indoor";
