@@ -30,8 +30,4 @@ function setGUI() {
     // VIDEO
     videoWidth = width / 5;
     videoHeight = width / 6;
-    let video = select('#moviePlayer').position(timelineStart, 0); // position video in upper left corner on timeline
-    let iFrameID = document.getElementById('moviePlayer');
-    iFrameID.width = videoWidth;
-    iFrameID.height = videoHeight;
 }

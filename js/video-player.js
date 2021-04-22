@@ -71,15 +71,14 @@ class YoutubePlayer {
         console.log("YT player ready: ");
     }
 
-    // TODO: TEMP
     show() {
-        let video = select('#moviePlayer');
-        video.style('display', 'block'); // show video
+        let element = document.querySelector('#moviePlayer');
+        element.style.display = 'block';
     }
 
     hide() {
-        let video = select('#moviePlayer');
-        video.style('display', 'none'); // hide video
+        let element = document.querySelector('#moviePlayer');
+        element.style.display = 'none';
     }
 
     seekTo(time) {
@@ -132,15 +131,14 @@ class P5FilePlayer {
         });
     }
 
-    // TODO: TEMP
     show() {
-        let video = select('#moviePlayer');
-        video.style('display', 'block'); // show video
+        let element = document.querySelector('#moviePlayer');
+        element.style.display = 'block';
     }
 
     hide() {
-        let video = select('#moviePlayer');
-        video.style('display', 'none'); // hide video
+        let element = document.querySelector('#moviePlayer');
+        element.style.display = 'none';
     }
 
     seekTo(t) {

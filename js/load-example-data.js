@@ -1,7 +1,12 @@
-function loadExampleDataSet() {
+function selectDataLoadOption() {
   if (videoIsShowing) overVideoButton(); // Turn off video that if showing
-  let exampleSet = document.getElementById("examples").value;
-  switch (exampleSet) {
+  if (showIntroMsg) showIntroMsg = false; // Hide intro msg if showing
+  let option = document.getElementById("examples").value;
+  switch (option) {
+    case "Load Data":
+      clearAllData();
+      showInputBar();
+      break;
     case "Example 1":
       loadExample(example_1);
       break;
@@ -20,7 +25,18 @@ function loadExampleDataSet() {
   }
 }
 
+function showInputBar() {
+  let element = document.querySelector('.inputBar');
+  element.style.display = 'block';
+}
+
+function hideInputBar() {
+  let element = document.querySelector('.inputBar');
+  element.style.display = 'none';
+}
+
 function loadExample(params) {
+  hideInputBar();
   processVideo(params[4], params[5]);
   processFloorPlan(params[0] + params[1]);
   // Async loading and processing of conversation file

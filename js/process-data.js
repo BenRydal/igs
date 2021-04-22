@@ -33,18 +33,42 @@ function processMovementFile(results, file) {
             }
         }
     }
-    let p = new Path(file.name.charAt(0), basePathColor); // initialize with name and grey/black color
+    let p = new Path(file.name.charAt(0)); // initialize with name and grey/black color
     p.movement = movement;
     p.conversation = conversation;
     // Update global total time, make sure to cast/floor values as integers
     if (totalTimeInSeconds < Math.floor(movement[movement.length - 1].time)) totalTimeInSeconds = Math.floor(movement[movement.length - 1].time);
-    // If any speakerObjects have same name as path filename, make path same color
-    for (let i = 0; i < speakerList.length; i++) {
-        if (speakerList[i].name === file.name.charAt(0)) p.color = speakerList[i].color;
-    }
+    // if no speakers, make path color match color list
+    if (speakerList === undefined) p.color = speakerColorList[paths.length % speakerColorList.length];
+    else p.color = setPathColorBySpeaker(p.name);
     paths.push(p);
     // sort after every file loaded
     paths.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching speakerlist array
+
+}
+/**
+ * Returns color based on whether pathName has corresponding speaker
+ * If path has corresponding speaker, color returned matches speaker
+ * If it does not, color returned selects from global colorList based on num of speakers + numOfPaths that do not have corresponding speaker
+ * 
+ * @param  {} pathName
+ */
+function setPathColorBySpeaker(pathName) {
+    if (speakerList.some(e => e.name === pathName)) {
+        const hasSameName = (element) => element.name === pathName; // condition to satisfy/does it have pathName
+        return speakerList[speakerList.findIndex(hasSameName)].color; // returns first index that satisfies condition/index of speaker that matches pathName
+    } else return speakerColorList[speakerList.length + getNumPathsWithNoSpeaker() % speakerColorList.length]; // assign color to path
+}
+
+/**
+ * Returns number of movement paths that do not have corresponding speaker
+ */
+function getNumPathsWithNoSpeaker() {
+    let count = 0;
+    for (let i = 0; i < paths.length; i++) {
+        if (!speakerList.some(e => e.name === paths[i].name)) count++;
+    }
+    return count;
 }
 
 function processConversation(index, xPos, yPos) {
@@ -65,11 +89,10 @@ function updateSpeakerList() {
         let speaker = conversationFileResults[i][conversationHeaders[1]]; // get speaker
         // if row has all good data and speaker is not in list yet, add new Speaker Object to global speakerList
         if (testConversationDataRow(i) && !tempSpeakerList.includes(speaker)) {
-            let s = new Speaker(speaker, speakerColorList[speakerList.length % speakerColorList.length]);
+            let s = new Speaker(speaker, speakerColorList[speakerList.length % speakerColorList.length]); // instantiate new speaker with name and color
             speakerList.push(s);
         }
     }
-    speakerList.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching paths array
 }
 
 // Initialization for the video player

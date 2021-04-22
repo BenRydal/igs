@@ -28,25 +28,32 @@
 <body>
     <div class="introBar">
         <form action="/action_page.php">
-            <select id="examples" name="examples" onchange="loadExampleDataSet()">
-                <option value="Example 1" selected>EXAMPLE 1: CLASSROOM SCIENCE LESSON</option>
+            <select id="examples" name="examples" onchange="selectDataLoadOption()">
+                <option disabled selected value> -- Select an Option -- </option>
+                <option value="Load Data">LOAD DATA</option>
+                <option value="Example 1">EXAMPLE 1: CLASSROOM SCIENCE LESSON</option>
                 <option value="Example 2">EXAMPLE 2: CLASSROOM DISCUSSION</option>
                 <option value="Example 3">EXAMPLE 3: MICHAEL JORDAN'S LAST SHOT</option>
                 <option value="Example 4">EXAMPLE 4: FAMILY MUSEUM GALLERY VISIT</option>
             </select>
-
+        </form>
+    </div>
+    <div class="inputBar">
+        <form action="/action_page.php">
             <input type="file" name="file" id="inputFloorPlan" name="file" class="inputfile" accept=".png, .jpg, .jpeg"
                 onchange="parseInputFloorPlanFile(this)">
-            <label for="inputFloorPlan">Load Floor Plan Image (PNG/JPG)</label>
+            <label for="inputFloorPlan">Floor Plan Image (PNG/JPG)</label>
             <input type="file" name="file" id="inputMovement" name="file" class="inputfile" multiple accept=".csv"
                 onchange="parseInputMovementFiles(this)">
-            <label for="inputMovement">Load Movement Files (CSV)</label>
+            <label for="inputMovement">Movement Files (CSV)</label>
             <input type="file" name="file" id="inputConversation" class="inputfile" accept=".csv"
                 onchange="parseInputConversationFile(this)">
-            <label for="inputConversation">Load Conversation File (CSV)</label>
+            <label for="inputConversation">Conversation File (CSV)</label>
             <input type="file" name="file" id="inputVideo" class="inputfile" accept=".mp4"
                 onchange="parseInputVideoFile(this)">
-            <label for="inputVideo">Load Video File (MP4)</label>
+            <label for="inputVideo">Video File (MP4)</label>
+            <button type="button" id="clearButton" class="inputfile" onclick="clearAllData()"></button>
+            <label for="clearButton">Clear Data</label>
         </form>
     </div>
 </body>

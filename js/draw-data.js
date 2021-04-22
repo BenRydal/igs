@@ -167,7 +167,7 @@ class DrawDataConversation extends DrawData {
     }
 
     setData(path) {
-        if (path.conversation.length > 0) this.setRects(path.conversation, path.name); // if path has conversation
+        this.setRects(path.conversation, path.name); // if path has conversation
     }
 
     setConversationBubble() {

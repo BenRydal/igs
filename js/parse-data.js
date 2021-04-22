@@ -68,6 +68,7 @@ function testConversationFile(results, file) {
         clearDataConversationFileInput();
         conversationFileResults = results.data; // set to new array of keyed values
         updateSpeakerList();
+        speakerList.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching paths array
         // Must reprocess movement files
         for (let i = 0; i < movementFileResults.length; i++) processMovementFile(movementFileResults[i][0], movementFileResults[i][1]);
     }
@@ -84,7 +85,20 @@ function parseInputVideoFile(input) {
     });
 }
 
+function clearAllData() {
+    if (videoPlayer !== undefined) videoPlayer.destroy(); // if there is a video, destroy it
+    floorPlan = undefined;
+    speakerList = [];
+    paths = [];
+    movementFileResults = [];
+    conversationFileResults = [];
+    paths = [];
+    totalTimeInSeconds = 0; // reset total time
+    updateMovementData = false; // reset
+}
+
 function clearDataConversationFileInput() {
+    conversationFileResults = [];
     speakerList = [];
     paths = [];
 }

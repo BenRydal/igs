@@ -30,9 +30,9 @@ let updateMovementData = false; // controls accepting first input file to trigge
  */
 class Speaker {
     constructor(sName, sCol) {
-        this.name = sName;
-        this.color = sCol;
-        this.show = true;
+        this.name = sName; // char indicating letter of speaker
+        this.color = sCol; // color set to gray to start, updated to match corresponding Path if one exists in processMovement
+        this.show = true;  // boolean indicating speaker is showing in GUI
     }
 }
 
@@ -41,12 +41,12 @@ class Speaker {
  * NOTE: constructed from movement .CSV file
  */
 class Path {
-    constructor(pathName, pathColor) {
+    constructor(pathName) {
         this.movement = []; // List of Point_Movement objects
         this.conversation = []; // List of Point_Conversation objects
         this.show = true; // boolean indicates if path is showing/selected
-        this.name = pathName; // Char indicating letter name of path
-        this.color = pathColor; // Color of path
+        this.name = pathName; // Char indicating letter name of path. Matches first letter of movement file name and created when Path is instantiated.
+        this.color = undefined; // Color of path, set in processMovement
     }
 }
 
@@ -120,6 +120,8 @@ let currPixelTimeMin, currPixelTimeMax;
 let yPosTimeScaleTop, yPosTimeScaleBottom, yPosTimeScaleSize;
 let timelineStart, timelineEnd, timelineHeight, timelineLength;
 let buttonSpacing, buttonWidth, speakerKeysHeight, buttonsHeight;
+
+// 12 Class Paired, Dark: purple, orange, green, blue, red, yellow, brown, lPurple, lOrange, lGreen, lBlue, lRed
 const speakerColorList = ['#6a3d9a', '#ff7f00', '#33a02c', '#1f78b4', '#e31a1c', '#ffff99', '#b15928', '#cab2d6', '#fdbf6f', '#b2df8a', '#a6cee3', '#fb9a99'];
 let animationCounter = 0; // controls animation
 let animation = false;
@@ -143,7 +145,7 @@ const floorPlanSelectorSize = 100;
 let bugPrecision, bugSize;
 let bugTimePosForVideo; // to draw slicer line when video is playing
 // purple, orange, green, blue, red, yellow, brown, lPurple, lOrange, lGreen, lBlue, lRed
-const colorGray = (150, 220),
+const colorGray = (150),
     pathWeight = 3,
     basePathColor = 100; // for paths that don't have associated speaker in speakerList
 
@@ -154,7 +156,6 @@ function preload() {
     font_PlayfairReg = loadFont("data/fonts/PlayfairDisplay-Regular.ttf");
     font_PlayfairItalic = loadFont("data/fonts/PlayfairDisplay-Italic.ttf");
     font_Lato = loadFont("data/fonts/Lato-Light.ttf");
-    loadExample(example_1);
 }
 
 function setup() {
@@ -167,7 +168,18 @@ function setup() {
 
 function draw() {
     background(255);
-    image(floorPlan, 0, 0, displayFloorPlanWidth, displayFloorPlanHeight);
+    if (floorPlan !== undefined) image(floorPlan, 0, 0, displayFloorPlanWidth, displayFloorPlanHeight);
+    // If both movement/convo loaded draw both or if movement loaded draw movement, can't draw convo by itself
+    if (paths !== undefined && speakerList !== undefined) setMovementAndConversationData();
+    else if (paths !== undefined) setMovementData();
+    if (videoPlayer !== undefined) {
+        if (videoIsShowing && !videoIsPlaying) updateVideoScrubbing();
+    }
+    let keys = new Keys();
+    keys.drawKeys();
+}
+
+function setMovementAndConversationData() {
     let drawConversationData = new DrawDataConversation();
     let drawMovementData = new DrawDataMovement();
     for (let i = 0; i < paths.length; i++) {
@@ -178,7 +190,12 @@ function draw() {
     }
     drawConversationData.setConversationBubble(); // draw conversation text last so it displays on top
     if (animation) setUpAnimation();
-    if (videoIsShowing && !videoIsPlaying) updateVideoScrubbing();
-    let keys = new Keys();
-    keys.drawKeys();
+}
+
+function setMovementData() {
+    let drawMovementData = new DrawDataMovement();
+    for (let i = 0; i < paths.length; i++) {
+        if (paths[i].show) drawMovementData.setData(paths[i]); // draw after conversation so bug displays on top
+    }
+    if (animation) setUpAnimation();
 }

@@ -3,6 +3,12 @@
     margin-bottom: 10px;
 }
 
+.inputBar {
+    text-align: center;
+    margin-bottom: 10px;
+    display: none;
+}
+
 .inputfile {
     width: 0.1px;
     height: 0.1px;

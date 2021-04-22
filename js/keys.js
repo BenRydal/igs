@@ -143,10 +143,10 @@ class Keys {
         stroke(0);
         strokeWeight(1);
         fill(255, 240);
-        rect(width / 2, height / 2, width / 1.75 + spacing, height / 1.75 + spacing);
+        rect(width / 2, height / 2.5, width / 1.75 + spacing, height / 1.75 + spacing);
         fill(0);
         textFont(font_Lato, keyTextSize);
-        text(introMSG, width / 2, height / 2, width / 1.75, height / 1.75);
+        text(introMSG, width / 2, height / 2.5, width / 1.75, height / 1.75);
         rectMode(CORNER);
     }
 }
