@@ -20,7 +20,7 @@ function parseInputMovementFiles(input) {
  * @param  {} fileList
  */
 function parseMovementFiles(fileList) {
-    updateMovementData = true; // trigger movement to reprocess, reset later
+    clearMovementData(); // clear exisiting movement data
     for (let i = 0; i < fileList.length; i++) {
         Papa.parse(fileList[i], {
             complete: testMovementFile,
@@ -34,7 +34,6 @@ function parseMovementFiles(fileList) {
 function testMovementFile(results, file) {
     console.log("Parsing complete:", results, file);
     if (testMovementFileData(results.data, results.meta.fields)) {
-        if (updateMovementData) clearDataMovementFileInput(); // clear data if first accepted file
         movementFileResults.push([results, file]);
         processMovementFile(results, file);
     }
@@ -55,6 +54,7 @@ function parseInputConversationFile(input) {
  * @param  {} file
  */
 function parseConversationFile(file) {
+    clearConversationData(); // clear exisiting conversation data
     Papa.parse(file, {
         complete: testConversationFile,
         header: true,
@@ -65,7 +65,6 @@ function parseConversationFile(file) {
 function testConversationFile(results, file) {
     console.log("Parsing complete:", results, file);
     if (testConversationFileData(results.data, results.meta.fields)) {
-        clearDataConversationFileInput();
         conversationFileResults = results.data; // set to new array of keyed values
         updateSpeakerList();
         speakerList.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching paths array
@@ -97,13 +96,13 @@ function clearAllData() {
     updateMovementData = false; // reset
 }
 
-function clearDataConversationFileInput() {
+function clearConversationData() {
     conversationFileResults = [];
     speakerList = [];
     paths = [];
 }
 
-function clearDataMovementFileInput() {
+function clearMovementData() {
     movementFileResults = [];
     paths = [];
     totalTimeInSeconds = 0; // reset total time

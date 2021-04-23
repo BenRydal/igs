@@ -48,48 +48,48 @@ class Keys {
         let currXPos = timelineStart + buttonSpacing / 2;
         fill(animation ? 0 : 150);
         // Button 1
-        text(button_1, currXPos, buttonsHeight);
+        text(buttons[0], currXPos, buttonsHeight);
         noFill();
         stroke(animation ? 0 : 150);
         strokeWeight(1);
-        rect(currXPos - buttonSpacing / 2, buttonsHeight, textWidth(button_1) + buttonSpacing, buttonSpacing * 1.5);
+        rect(currXPos - buttonSpacing / 2, buttonsHeight, textWidth(buttons[0]) + buttonSpacing, buttonSpacing * 1.5);
         noStroke();
-        currXPos += textWidth(button_1) + buttonSpacing * 2;
+        currXPos += textWidth(buttons[0]) + buttonSpacing * 2;
         // Button 2
         fill(conversationPositionTop ? 0 : 150);
-        text(button_2, currXPos, buttonsHeight);
+        text(buttons[1], currXPos, buttonsHeight);
         noFill();
         stroke(conversationPositionTop ? 0 : 150);
         strokeWeight(1);
-        rect(currXPos - buttonSpacing / 2, buttonsHeight, textWidth(button_2) + buttonSpacing, buttonSpacing * 1.5);
+        rect(currXPos - buttonSpacing / 2, buttonsHeight, textWidth(buttons[1]) + buttonSpacing, buttonSpacing * 1.5);
         noStroke();
-        currXPos += textWidth(button_2) + buttonSpacing * 2;
+        currXPos += textWidth(buttons[1]) + buttonSpacing * 2;
         // Button 3
         fill(allConversation ? 0 : 150);
-        text(button_3, currXPos, buttonsHeight);
+        text(buttons[2], currXPos, buttonsHeight);
         noFill();
         stroke(allConversation ? 0 : 150);
         strokeWeight(1);
-        rect(currXPos - buttonSpacing / 2, buttonsHeight, textWidth(button_3) + buttonSpacing, buttonSpacing * 1.5);
+        rect(currXPos - buttonSpacing / 2, buttonsHeight, textWidth(buttons[2]) + buttonSpacing, buttonSpacing * 1.5);
         noStroke();
-        currXPos += textWidth(button_3) + buttonSpacing * 2;
+        currXPos += textWidth(buttons[2]) + buttonSpacing * 2;
         // Button 4
         fill(videoIsShowing ? 0 : 150);
-        text(button_4, currXPos, buttonsHeight);
+        text(buttons[3], currXPos, buttonsHeight);
         noFill();
         stroke(videoIsShowing ? 0 : 150);
         strokeWeight(1);
-        rect(currXPos - buttonSpacing / 2, buttonsHeight, textWidth(button_4) + buttonSpacing, buttonSpacing * 1.5);
+        rect(currXPos - buttonSpacing / 2, buttonsHeight, textWidth(buttons[3]) + buttonSpacing, buttonSpacing * 1.5);
         noStroke();
-        currXPos += textWidth(button_4) + buttonSpacing * 2;
+        currXPos += textWidth(buttons[3]) + buttonSpacing * 2;
         // Button 5
-        textFont(font_PlayfairItalic);
+        textFont(font_PlayfairItalic, keyTextSize);
         fill(showIntroMsg ? 0 : 150);
-        text(button_5, currXPos, buttonsHeight);
+        text(buttons[4], currXPos, buttonsHeight);
         noFill();
         stroke(showIntroMsg ? 0 : 150);
         strokeWeight(1);
-        rect(currXPos - buttonSpacing / 2, buttonsHeight, textWidth(button_5) + buttonSpacing, buttonSpacing * 1.5);
+        rect(currXPos - buttonSpacing / 2, buttonsHeight, textWidth(buttons[4]) + buttonSpacing, buttonSpacing * 1.5);
         noStroke();
     }
 
@@ -122,7 +122,7 @@ class Keys {
         let minutesValue = floor(videoTimeInMinutes); // floor to get minutes
         let decimalSeconds = videoTimeInMinutes - minutesValue; //  Subtract minutes to get decimal seconds---e.g., 14.28571429 - 14... returns (.28571429)
         let secondsValue = floor(decimalSeconds.toFixed(2) * 60); // Converts number into a String and keeps only the specified number of decimals
-        let label_1 = minutesValue + " Minutes  " + secondsValue + " Seconds";
+        let label_1 = minutesValue + " minutes  " + secondsValue + " seconds";
         let label_2 = "MINUTES";
         textAlign(CENTER);
         if (overRect(timelineStart, 0, timelineLength, timelineHeight)) text(label_1, timelineStart + timelineLength / 2, timelineHeight);

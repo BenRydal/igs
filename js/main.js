@@ -16,8 +16,6 @@ const conversationHeaders = ['time', 'speaker', 'talk']; // String array indicat
 let totalTimeInSeconds = 0; // Number indicating time value in seconds that all displayed data is set to, set dynamically in processMovement methods
 const PLAN = 0,
     SPACETIME = 1; // Number constants indicating floorplan or space-time drawing modes
-// TODO: REMOVE below
-let updateMovementData = false; // controls accepting first input file to trigger update data processing
 
 /**
  * NOTE: Each speaker and path object can match/correspond to the same person but they don't have to match
@@ -32,7 +30,7 @@ class Speaker {
     constructor(sName, sCol) {
         this.name = sName; // char indicating letter of speaker
         this.color = sCol; // color set to gray to start, updated to match corresponding Path if one exists in processMovement
-        this.show = true;  // boolean indicating speaker is showing in GUI
+        this.show = true; // boolean indicating speaker is showing in GUI
     }
 }
 
@@ -132,11 +130,7 @@ const selSpacing = 20,
     spacing = 50,
     tickHeight = 25;
 // BUTTONS
-const button_1 = "Animate",
-    button_2 = "Align Talk",
-    button_3 = "All Talk",
-    button_4 = "Video",
-    button_5 = "How to Use";
+const buttons = ["Animate", "Align Talk", "All Talk", "Video", "How to Use"];
 let keyTextSize;
 const introMSG = "INTERACTION GEOGRAPHY SLICER (IGS) INDOOR\n\nby Ben Rydal Shapiro & contributers\nbuilt with p5.js & JavaScript\n\nHi There! This is a tool to visualize movement, conversation, and video data over space and time. Data are displayed over a floor plan view (left) and a space-time view (right), where the vertical axis corresponds to the vertical dimension of the floor plan. Use the top menu to visualize different sample datasets or upload your own data. Hover over the floor plan and use the timeline to selectively study displayed data. Use the bottom buttons to animate data, visualize conversation in different ways, and interact with video data by clicking the timeline to play & pause video.\n\nTo format your data for use in this tool visit: benrydal.com/software/igs-indoor";
 
@@ -161,9 +155,9 @@ function preload() {
 function setup() {
     canvas = createCanvas(window.innerWidth, window.innerHeight, P2D);
     frameRate(30);
-    textFont(font_Lato, 14);
     textAlign(LEFT, TOP);
     setGUI();
+    textFont(font_Lato, keyTextSize);
 }
 
 function draw() {
@@ -172,30 +166,7 @@ function draw() {
     // If both movement/convo loaded draw both or if movement loaded draw movement, can't draw convo by itself
     if (paths !== undefined && speakerList !== undefined) setMovementAndConversationData();
     else if (paths !== undefined) setMovementData();
-    if (videoPlayer !== undefined) {
-        if (videoIsShowing && !videoIsPlaying) updateVideoScrubbing();
-    }
+    if (videoPlayer !== undefined && videoIsShowing && !videoIsPlaying) setVideoScrubbing();
     let keys = new Keys();
     keys.drawKeys();
-}
-
-function setMovementAndConversationData() {
-    let drawConversationData = new DrawDataConversation();
-    let drawMovementData = new DrawDataMovement();
-    for (let i = 0; i < paths.length; i++) {
-        if (paths[i].show) {
-            drawConversationData.setData(paths[i]);
-            drawMovementData.setData(paths[i]); // draw after conversation so bug displays on top
-        }
-    }
-    drawConversationData.setConversationBubble(); // draw conversation text last so it displays on top
-    if (animation) setUpAnimation();
-}
-
-function setMovementData() {
-    let drawMovementData = new DrawDataMovement();
-    for (let i = 0; i < paths.length; i++) {
-        if (paths[i].show) drawMovementData.setData(paths[i]); // draw after conversation so bug displays on top
-    }
-    if (animation) setUpAnimation();
 }
