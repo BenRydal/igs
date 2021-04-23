@@ -39,7 +39,7 @@ function processMovementFile(results, file) {
     // Update global total time, make sure to cast/floor values as integers
     if (totalTimeInSeconds < Math.floor(movement[movement.length - 1].time)) totalTimeInSeconds = Math.floor(movement[movement.length - 1].time);
     // if no speakers, make path color match color list
-    if (speakerList === undefined) p.color = speakerColorList[paths.length % speakerColorList.length];
+    if (speakerList === undefined) p.color = colorList[paths.length % colorList.length];
     else p.color = setPathColorBySpeaker(p.name);
     paths.push(p);
     // sort after every file loaded
@@ -57,7 +57,7 @@ function setPathColorBySpeaker(pathName) {
     if (speakerList.some(e => e.name === pathName)) {
         const hasSameName = (element) => element.name === pathName; // condition to satisfy/does it have pathName
         return speakerList[speakerList.findIndex(hasSameName)].color; // returns first index that satisfies condition/index of speaker that matches pathName
-    } else return speakerColorList[speakerList.length + getNumPathsWithNoSpeaker() % speakerColorList.length]; // assign color to path
+    } else return colorList[speakerList.length + getNumPathsWithNoSpeaker() % colorList.length]; // assign color to path
 }
 
 /**
@@ -89,7 +89,7 @@ function updateSpeakerList() {
         let speaker = conversationFileResults[i][conversationHeaders[1]]; // get speaker
         // if row has all good data and speaker is not in list yet, add new Speaker Object to global speakerList
         if (testConversationDataRow(i) && !tempSpeakerList.includes(speaker)) {
-            let s = new Speaker(speaker, speakerColorList[speakerList.length % speakerColorList.length]); // instantiate new speaker with name and color
+            let s = new Speaker(speaker, colorList[speakerList.length % colorList.length]); // instantiate new speaker with name and color
             speakerList.push(s);
         }
     }
@@ -125,6 +125,7 @@ function testSampleMovementData(data, curRow) {
 }
 
 // Tests if current conversation row is less than total rows in table and if time is number and speaker is string and talk turn is not null or undefined
+// NOTE: this also tests if a conversation file is loaded
 function testConversationDataRow(curRow) {
     return curRow < conversationFileResults.length && typeof conversationFileResults[curRow][conversationHeaders[0]] === 'number' && typeof conversationFileResults[curRow][conversationHeaders[1]] === 'string' && conversationFileResults[curRow][conversationHeaders[2]] !== null && conversationFileResults[curRow][conversationHeaders[2]] !== undefined;
 }

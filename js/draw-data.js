@@ -38,6 +38,8 @@ class DrawDataMovement extends DrawData {
         this.bugXPos = -1;
         this.bugYPos = -1;
         this.bugTimePos = -1;
+        this.bugSize = width / 50;
+        this.bugSpacingComparison = timelineLength;
     }
 
     setData(path) {
@@ -73,7 +75,7 @@ class DrawDataMovement extends DrawData {
                 if (view == PLAN) curveVertex(scaledXPos, scaledYPos);
                 else if (view == SPACETIME) {
                     curveVertex(scaledTime, scaledYPos);
-                    if (this.testBugRecording(scaledTime)) this.recordBug(scaledXPos, scaledYPos, scaledTime);
+                    if (this.testPointForBug(scaledTime)) this.recordBug(scaledXPos, scaledYPos, scaledTime);
                 }
             }
         }
@@ -120,33 +122,52 @@ class DrawDataMovement extends DrawData {
         if (drawVertex) endShape(); // endShape if still true
     }
 
-    testBugRecording(timeValue) {
-        if (animation) return true;
-        else if (videoIsPlaying) {
-            let videoX = map(videoPlayer.getCurrentTime(), 0, totalTimeInSeconds, timelineStart, timelineEnd); // convert video time value in seconds to pixel position  
-            if (videoX >= timeValue - bugPrecision && videoX <= timeValue + bugPrecision) return true;
-        } else if (mouseY < timelineHeight && mouseX >= timeValue - bugPrecision && mouseX <= timeValue + bugPrecision) return true;
-        else return false;
+    /**
+     * Depending on mode, organizes methods to test if time 
+     * @param  {} scaledTimeToTest
+     */
+    testPointForBug(scaledTimeToTest) {
+        if (animation) return true; // always return true to set last/most recent point as the bug
+        else if (videoIsPlaying) return this.testVideoForBugPoint(scaledTimeToTest);
+        else if (mouseY < timelineHeight) return this.testMouseForBugPoint(scaledTimeToTest);
+        return false;
+    }
+
+    testVideoForBugPoint(scaledTimeToTest) {
+        const videoX = map(videoPlayer.getCurrentTime(), 0, totalTimeInSeconds, timelineStart, timelineEnd);
+        const scaledVideoX = map(videoX, currPixelTimeMin, currPixelTimeMax, timelineStart, timelineEnd);
+        if (scaledVideoX >= scaledTimeToTest - this.bugSpacingComparison && scaledVideoX <= scaledTimeToTest + this.bugSpacingComparison) {
+            this.bugSpacingComparison = Math.abs(scaledVideoX - scaledTimeToTest); // 
+            return true;
+        } else return false;
+    }
+
+    testMouseForBugPoint(scaledTimeToTest) {
+        if (mouseX >= scaledTimeToTest - this.bugSpacingComparison && mouseX <= scaledTimeToTest + this.bugSpacingComparison) {
+            this.bugSpacingComparison = Math.abs(mouseX - scaledTimeToTest); 
+            return true;
+        } else return false;
     }
 
     resetBug() {
         this.bugXPos = -1;
         this.bugYPos = -1;
         this.bugTimePos = -1;
+        this.bugSpacingComparison = timelineLength;
     }
     recordBug(xPos, yPos, timePos) {
         this.bugXPos = xPos;
         this.bugYPos = yPos;
         this.bugTimePos = timePos;
-        bugTimePosForVideo = timePos;
+        bugTimePosForVideoScrubbing = timePos;
     }
 
     drawBug(shade) {
         stroke(0);
         strokeWeight(5);
         fill(shade);
-        ellipse(this.bugXPos, this.bugYPos, bugSize, bugSize);
-        ellipse(this.bugTimePos, this.bugYPos, bugSize, bugSize);
+        ellipse(this.bugXPos, this.bugYPos, this.bugSize, this.bugSize);
+        ellipse(this.bugTimePos, this.bugYPos, this.bugSize, this.bugSize);
     }
 
     drawSlicer() {
@@ -244,12 +265,12 @@ class DrawDataConversation extends DrawData {
     }
 
     drawTextBox() {
-        
+
         let textBoxWidth = width / 3; // width of text and textbox drawn
         let textSpacing = width / 57; // textbox leading
         let boxSpacing = width / 141; // general textBox spacing variable
         let boxDistFromRect = width / 28.2; // distance from text rectangle of textbox
-        
+
         textFont(font_Lato, keyTextSize);
         textLeading(textSpacing);
         let point = this.conversationToDraw;

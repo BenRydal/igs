@@ -3,16 +3,16 @@ function mousePressed() {
     if (videoIsShowing && !animation && overRect(timelineStart, 0, timelineEnd, timelineHeight - tickHeight)) playPauseMovie();
     textSize(keyTextSize);
     overMovementConversationKeys();
-    if (movementKeyTitle) overPathKeys();
+    if (showMovementKeys) overPathKeys();
     else overSpeakerKeys();
     overInteractionButtons();
-    if (!animation && overRect(timelineStart, yPosTimeScaleTop, timelineLength, yPosTimeScaleSize)) handleTimeline();
+    if (!animation && overRect(timelineStart, yPosTimelineTop, timelineLength, timelineThickness)) handleTimeline();
 }
 
 function mouseDragged() {
     if (!animation) {
         if (lockedLeft || lockedRight) handleTimeline();
-        else if (overRect(timelineStart, yPosTimeScaleTop, timelineLength, yPosTimeScaleSize)) handleTimeline();
+        else if (overRect(timelineStart, yPosTimelineTop, timelineLength, timelineThickness)) handleTimeline();
     }
 }
 
@@ -23,8 +23,8 @@ function mouseReleased() {
 
 function overMovementConversationKeys() {
     let currXPos = timelineStart;
-    if (overRect(currXPos, speakerKeysHeight, buttonWidth + textWidth("Movement"), buttonWidth)) movementKeyTitle = true;
-    else if (overRect(currXPos + textWidth("Movement | "), speakerKeysHeight, buttonWidth + textWidth("Conversation"), buttonWidth)) movementKeyTitle = false;
+    if (overRect(currXPos, speakerKeysHeight, buttonWidth + textWidth("Movement"), buttonWidth)) showMovementKeys = true;
+    else if (overRect(currXPos + textWidth("Movement | "), speakerKeysHeight, buttonWidth + textWidth("Conversation"), buttonWidth)) showMovementKeys = false;
 }
 
 // Loop through speakerList and test if over any of speaker keys and update speaker accordingly
@@ -71,11 +71,11 @@ function handleTimeline() {
     let xPosRightSelector = currPixelTimeMax;
 
     // 3 types of selection that work together
-    if (lockedLeft || (!lockedRight && overRect(xPosLeftSelector - selSpacing, yPosTimeScaleTop, 2 * selSpacing, yPosTimeScaleSize))) {
+    if (lockedLeft || (!lockedRight && overRect(xPosLeftSelector - selSpacing, yPosTimelineTop, 2 * selSpacing, timelineThickness))) {
         lockedLeft = true;
         currPixelTimeMin = constrain(mouseX, timelineStart, timelineEnd);
         if (currPixelTimeMin > currPixelTimeMax - (2 * selSpacing)) currPixelTimeMin = currPixelTimeMax - (2 * selSpacing); // prevents overstriking
-    } else if (lockedRight || overRect(xPosRightSelector - selSpacing, yPosTimeScaleTop, 2 * selSpacing, yPosTimeScaleSize)) {
+    } else if (lockedRight || overRect(xPosRightSelector - selSpacing, yPosTimelineTop, 2 * selSpacing, timelineThickness)) {
         lockedRight = true;
         currPixelTimeMax = constrain(mouseX, timelineStart, timelineEnd);
         if (currPixelTimeMax < currPixelTimeMin + (2 * selSpacing)) currPixelTimeMax = currPixelTimeMin + (2 * selSpacing); // prevents overstriking

@@ -18,7 +18,8 @@ const PLAN = 0,
     SPACETIME = 1; // Number constants indicating floorplan or space-time drawing modes
 
 /**
- * NOTE: Each speaker and path object can match/correspond to the same person but they don't have to match
+ * NOTE: Speaker and path objects are separate due to how P5.js draws shapes in the browser.
+ * NOTE: Each speaker and path object can match/correspond to the same person but they don't have to match.
  * This allows variation in the number of movement files and speakers listed.
  */
 
@@ -42,9 +43,9 @@ class Path {
     constructor(pathName) {
         this.movement = []; // List of Point_Movement objects
         this.conversation = []; // List of Point_Conversation objects
-        this.show = true; // boolean indicates if path is showing/selected
         this.name = pathName; // Char indicating letter name of path. Matches first letter of movement file name and created when Path is instantiated.
         this.color = undefined; // Color of path, set in processMovement
+        this.show = true; // boolean indicates if path is showing/selected
     }
 }
 
@@ -80,17 +81,17 @@ class Point_Conversation {
  * Format as: {directory, floorplan image, conversation File, movement File[], video platform, video params (see Video Player Interface)}
  */
 const example_1 = ['data/example-1/', 'floorplan.png', 'conversation.csv', ['Teacher.csv'], 'Youtube', {
-    videoId: 'Iu0rxb-xkMk'
-}];
-const example_2 = ['data/example-2/', 'floorplan.png', 'conversation.csv', ['Teacher.csv', 'Sean.csv', 'Mei.csv', 'Cassandra.csv', 'Nathan.csv'], 'Youtube', {
-    videoId: 'Iu0rxb-xkMk'
-}];
-const example_3 = ['data/example-3/', 'floorplan.png', 'conversation.csv', ['Jordan.csv'], 'Youtube', {
-    videoId: 'iiMjfVOj8po'
-}];
-const example_4 = ['data/example-4/', 'floorplan.png', 'conversation.csv', ['Lily.csv', 'Jeans.csv', 'Adhir.csv', 'Mae.csv', 'Blake.csv'], 'Youtube', {
-    videoId: 'pWJ3xNk1Zpg'
-}];
+        videoId: 'Iu0rxb-xkMk'
+    }],
+    example_2 = ['data/example-2/', 'floorplan.png', 'conversation.csv', ['Teacher.csv', 'Sean.csv', 'Mei.csv', 'Cassandra.csv', 'Nathan.csv'], 'Youtube', {
+        videoId: 'Iu0rxb-xkMk'
+    }],
+    example_3 = ['data/example-3/', 'floorplan.png', 'conversation.csv', ['Jordan.csv'], 'Youtube', {
+        videoId: 'iiMjfVOj8po'
+    }],
+    example_4 = ['data/example-4/', 'floorplan.png', 'conversation.csv', ['Lily.csv', 'Jeans.csv', 'Adhir.csv', 'Mae.csv', 'Blake.csv'], 'Youtube', {
+        videoId: 'pWJ3xNk1Zpg'
+    }];
 
 //*************** FLOOR PLAN AND VIDEO ***************
 let inputFloorPlanPixelWidth, inputFloorPlanPixelHeight; // Number indicating pixel width/height of user inputted floor plan image file
@@ -107,43 +108,35 @@ let videoPlayer; // Object to interact with platform specific set of video playe
 let videoIsPlaying = false; // boolean indicating video is playing
 let videoIsShowing = false; // boolean indicating video is showing in GUI
 let videoWidth, videoHeight; // Number pixel width and height of video set in setup
+let bugTimePosForVideoScrubbing; // Set in draw movement data and used to display correct video frame when scrubbing video
 
 //*************** GUI ***************
-let movementKeyTitle = true;
-let conversationPositionTop = false; // controls positioning of conversation turns on path or top of screen
-let allConversation = true; // shows all speaker turns on path, set to true for example 1 currently
-let showIntroMsg = true; // sets intro message to start program
-let font_PlayfairReg, font_PlayfairItalic, font_Lato;
-let currPixelTimeMin, currPixelTimeMax;
-let yPosTimeScaleTop, yPosTimeScaleBottom, yPosTimeScaleSize;
-let timelineStart, timelineEnd, timelineHeight, timelineLength;
+// MODES
+let showMovementKeys = true; // boolean controls whether movement or conversation keys show
+let conversationPositionTop = false; // boolean controls positioning of conversation turns on path or top of screen
+let allConversation = true; // boolean controls whether single speaker or all conversation turns shown on path
+let animation = false; // boolean controls animation mode
+let animationCounter = 0; // boolean controls current value of animation
+// FONTS
+let keyTextSize, font_PlayfairReg, font_PlayfairItalic, font_Lato; // text size and fonts
+// INTRO MSG
+let showIntroMsg = true; // boolean controls intro message
+const introMSG = "INTERACTION GEOGRAPHY SLICER (IGS) INDOOR\n\nby Ben Rydal Shapiro & contributers\nbuilt with p5.js & JavaScript\n\nHi There! This is a tool to visualize movement, conversation, and video data over space and time. Data are displayed over a floor plan view (left) and a space-time view (right), where the vertical axis corresponds to the vertical dimension of the floor plan. Use the top menu to visualize different sample datasets or upload your own data. Hover over the floor plan and use the timeline to selectively study displayed data. Use the bottom buttons to animate data, visualize conversation in different ways, and interact with video data by clicking the timeline to play & pause video.\n\nTo format your data for use in this tool visit: benrydal.com/software/igs-indoor";
+// INTERFACE
+let timelineStart, timelineEnd, timelineHeight, timelineLength, yPosTimelineTop, yPosTimelineBottom, timelineThickness;
+let currPixelTimeMin, currPixelTimeMax; // Rescaled timeline start and end depending on user interactions
+// Color list--> 12 Class Paired Dark: purple, orange, green, blue, red, yellow, brown, lPurple, lOrange, lGreen, lBlue, lRed
+const colorList = ['#6a3d9a', '#ff7f00', '#33a02c', '#1f78b4', '#e31a1c', '#ffff99', '#b15928', '#cab2d6', '#fdbf6f', '#b2df8a', '#a6cee3', '#fb9a99'];
+const buttons = ["Animate", "Align Talk", "All Talk", "Video", "How to Use"];
 let buttonSpacing, buttonWidth, speakerKeysHeight, buttonsHeight;
-
-// 12 Class Paired, Dark: purple, orange, green, blue, red, yellow, brown, lPurple, lOrange, lGreen, lBlue, lRed
-const speakerColorList = ['#6a3d9a', '#ff7f00', '#33a02c', '#1f78b4', '#e31a1c', '#ffff99', '#b15928', '#cab2d6', '#fdbf6f', '#b2df8a', '#a6cee3', '#fb9a99'];
-let animationCounter = 0; // controls animation
-let animation = false;
-// TIMELINE
 let lockedLeft = false,
     lockedRight = false;
 const selSpacing = 20,
     spacing = 50,
-    tickHeight = 25;
-// BUTTONS
-const buttons = ["Animate", "Align Talk", "All Talk", "Video", "How to Use"];
-let keyTextSize;
-const introMSG = "INTERACTION GEOGRAPHY SLICER (IGS) INDOOR\n\nby Ben Rydal Shapiro & contributers\nbuilt with p5.js & JavaScript\n\nHi There! This is a tool to visualize movement, conversation, and video data over space and time. Data are displayed over a floor plan view (left) and a space-time view (right), where the vertical axis corresponds to the vertical dimension of the floor plan. Use the top menu to visualize different sample datasets or upload your own data. Hover over the floor plan and use the timeline to selectively study displayed data. Use the bottom buttons to animate data, visualize conversation in different ways, and interact with video data by clicking the timeline to play & pause video.\n\nTo format your data for use in this tool visit: benrydal.com/software/igs-indoor";
-
-
-const floorPlanSelectorSize = 100;
-let bugPrecision, bugSize;
-let bugTimePosForVideo; // to draw slicer line when video is playing
-// purple, orange, green, blue, red, yellow, brown, lPurple, lOrange, lGreen, lBlue, lRed
-const colorGray = (150),
+    tickHeight = 25,
+    floorPlanSelectorSize = 100,
     pathWeight = 3,
-    basePathColor = 100; // for paths that don't have associated speaker in speakerList
-
-
+    colorGray = 150;
 
 // Loads fonts and starting example
 function preload() {
@@ -159,11 +152,15 @@ function setup() {
     setGUI();
     textFont(font_Lato, keyTextSize);
 }
-
+/**
+ * Always draws background and keys. Organizes what data is drawing if it is loaded/not undefined.
+ * NOTE: Each conditional test tests if particular data structure is loaded (floorplan, paths[], speakerList[], videoPlayer)
+ * NOTE: Conversation can never be drawn unless movement has been loaded (paths[])
+ * NOTE: Movement can be drawn if conversation has not been loaded
+ */
 function draw() {
     background(255);
     if (floorPlan !== undefined) image(floorPlan, 0, 0, displayFloorPlanWidth, displayFloorPlanHeight);
-    // If both movement/convo loaded draw both or if movement loaded draw movement, can't draw convo by itself
     if (paths !== undefined && speakerList !== undefined) setMovementAndConversationData();
     else if (paths !== undefined) setMovementData();
     if (videoPlayer !== undefined && videoIsShowing && !videoIsPlaying) setVideoScrubbing();

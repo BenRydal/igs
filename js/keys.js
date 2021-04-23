@@ -3,7 +3,7 @@ class Keys {
     drawKeys() {
         textFont(font_PlayfairReg, keyTextSize);
         this.drawPathSpeakerTitle();
-        if (movementKeyTitle) this.drawPathSpeakerKeys(paths);
+        if (showMovementKeys) this.drawPathSpeakerKeys(paths);
         else this.drawPathSpeakerKeys(speakerList);
         this.drawTimeline();
         this.drawbuttons();
@@ -15,11 +15,11 @@ class Keys {
         let currXPos = timelineStart;
         let yPos = speakerKeysHeight - buttonWidth / 5;
         noStroke();
-        fill(movementKeyTitle ? 0 : 150);
+        fill(showMovementKeys ? 0 : 150);
         text("Movement", currXPos, yPos);
         fill(0);
         text(" | ", currXPos + textWidth("Movement"), yPos);
-        fill(!movementKeyTitle ? 0 : 150);
+        fill(!showMovementKeys ? 0 : 150);
         text("Conversation", currXPos + textWidth("Movement | "), yPos);
     }
 

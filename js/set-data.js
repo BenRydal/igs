@@ -34,7 +34,7 @@ function setVideoScrubbing() {
     if (animation) {
         let startValue = map(currPixelTimeMin, timelineStart, timelineEnd, 0, Math.floor(videoPlayer.getVideoDuration())); // remap starting point to seek for video
         let endValue = map(currPixelTimeMax, timelineStart, timelineEnd, 0, Math.floor(videoPlayer.getVideoDuration())); // remap starting point to seek for video
-        let vPos = Math.floor(map(bugTimePosForVideo, timelineStart, timelineEnd, startValue, endValue));
+        let vPos = Math.floor(map(bugTimePosForVideoScrubbing, timelineStart, timelineEnd, startValue, endValue));
         videoPlayer.seekTo(vPos);
     } else if (overRect(timelineStart, 0, timelineEnd, timelineHeight)) {
         let mPos = map(mouseX, timelineStart, timelineEnd, currPixelTimeMin, currPixelTimeMax); // first map mouse to selected time values in GUI
@@ -53,17 +53,14 @@ function setGUI() {
     displayFloorPlanHeight = timelineHeight;
     currPixelTimeMin = timelineStart; // adjustable timeline values
     currPixelTimeMax = timelineEnd;
-    yPosTimeScaleTop = timelineHeight - tickHeight;
-    yPosTimeScaleBottom = timelineHeight + tickHeight;
-    yPosTimeScaleSize = 2 * tickHeight;
+    yPosTimelineTop = timelineHeight - tickHeight;
+    yPosTimelineBottom = timelineHeight + tickHeight;
+    timelineThickness = yPosTimelineBottom - yPosTimelineTop;
     buttonSpacing = width / 71;
     buttonWidth = buttonSpacing;
     speakerKeysHeight = timelineHeight + (height - timelineHeight) / 4;
     buttonsHeight = timelineHeight + (height - timelineHeight) / 1.8;
-    bugPrecision = 3;
-    bugSize = width / 56;
     keyTextSize = width / 70;
-    // VIDEO
     videoWidth = width / 5;
     videoHeight = width / 6;
 }
