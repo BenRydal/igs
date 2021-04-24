@@ -1,4 +1,7 @@
-// Uploads floor plan image file and sends to update global floor plan image vars
+/**
+ * Parses user inputted floor plan image for processing
+ * @param  {PNG, JPG, JPEG Image File} input
+ */
 function parseInputFloorPlanFile(input) {
     processFloorPlan(URL.createObjectURL(input.files[0]));
     input.value = ''; // reset input value so you can load same file again in browser
@@ -6,7 +9,7 @@ function parseInputFloorPlanFile(input) {
 
 /**
  * Converts and sends user inputted movement files into fileList for processing
- * @param  {} input
+ * @param  {.CSV File} input
  */
 function parseInputMovementFiles(input) {
     let fileList = [];
@@ -17,7 +20,7 @@ function parseInputMovementFiles(input) {
 /**
  * Parses each movement file and sends for additional testing and processing
  * NOTE: boolean updateMovementData sets true to trigger clearing of current movement file data
- * @param  {} fileList
+ * @param  {File[]} fileList
  */
 function parseMovementFiles(fileList) {
     clearMovementData(); // clear exisiting movement data
@@ -51,7 +54,7 @@ function parseInputConversationFile(input) {
 /**
  * Parses single conversation file using Papa.parse library
  * NOTE: testConversationFile is called when parsing is complete
- * @param  {} file
+ * @param  {.CSV File} file
  */
 function parseConversationFile(file) {
     clearConversationData(); // clear exisiting conversation data
@@ -73,7 +76,10 @@ function testConversationFile(results, file) {
     }
 }
 
-// parses inputted video files from user computer
+/**
+ * Parses user inputted video file for processing
+ * @param  {.MP4 File} input
+ */
 function parseInputVideoFile(input) {
     if (videoIsShowing) overVideoButton(); // Turn off video that if showing
     let file = input.files[0];

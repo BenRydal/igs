@@ -54,9 +54,7 @@ class DrawDataMovement extends DrawData {
             this.draw(PLAN, path.movement, path.color);
             this.draw(SPACETIME, path.movement, path.color);
         }
-
         if (this.bugXPos != -1) this.drawBug(path.color); // if selected, draw bug
-        if (!animation) this.drawSlicer();
     }
 
     // Main draw method to draw movement paths, also sets bug values
@@ -129,7 +127,7 @@ class DrawDataMovement extends DrawData {
     testPointForBug(scaledTimeToTest) {
         if (animation) return true; // always return true to set last/most recent point as the bug
         else if (videoIsPlaying) return this.testVideoForBugPoint(scaledTimeToTest);
-        else if (mouseY < timelineHeight) return this.testMouseForBugPoint(scaledTimeToTest);
+        else if (overRect(timelineStart, 0, timelineLength, timelineHeight)) return this.testMouseForBugPoint(scaledTimeToTest);
         return false;
     }
 
@@ -144,7 +142,7 @@ class DrawDataMovement extends DrawData {
 
     testMouseForBugPoint(scaledTimeToTest) {
         if (mouseX >= scaledTimeToTest - this.bugSpacingComparison && mouseX <= scaledTimeToTest + this.bugSpacingComparison) {
-            this.bugSpacingComparison = Math.abs(mouseX - scaledTimeToTest); 
+            this.bugSpacingComparison = Math.abs(mouseX - scaledTimeToTest);
             return true;
         } else return false;
     }
@@ -174,7 +172,7 @@ class DrawDataMovement extends DrawData {
         fill(0);
         stroke(0);
         strokeWeight(2);
-        line(this.bugTimePos, 0, this.bugTimePos, timelineHeight);
+        line(mouseX, 0, mouseX, timelineHeight);
     }
 }
 

@@ -7,6 +7,7 @@ function setMovementAndConversationData() {
             drawMovementData.setData(paths[i]); // draw after conversation so bug displays on top
         }
     }
+    if (overRect(timelineStart, 0, timelineLength, timelineHeight)) drawMovementData.drawSlicer(); // draw slicer line after calculating all movement
     drawConversationData.setConversationBubble(); // draw conversation text last so it displays on top
     if (animation) setUpAnimation();
 }
@@ -16,6 +17,7 @@ function setMovementData() {
     for (let i = 0; i < paths.length; i++) {
         if (paths[i].show) drawMovementData.setData(paths[i]); // draw after conversation so bug displays on top
     }
+    if (overRect(timelineStart, 0, timelineLength, timelineHeight)) drawMovementData.drawSlicer(); // draw slicer line after calculating all movement
     if (animation) setUpAnimation();
 }
 
