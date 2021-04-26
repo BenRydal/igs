@@ -35,14 +35,13 @@ function hideInputBar() {
   element.style.display = 'none';
 }
 
-function loadExample(params) {
+async function loadExample(params) {
   hideInputBar();
   processVideo(params[4], params[5]);
   processFloorPlan(params[0] + params[1]);
-  // Async loading and processing of conversation file
-  getExampleConversationFile(params[0], params[2]).then(parseConversationFile).catch(alert);
-  // Async loading and processing of movement files
-  getExampleMovementFiles(params[0], params[3]).then(parseMovementFiles).catch(alert);
+  // Process conversation then movement files
+  await getExampleConversationFile(params[0], params[2]).then(parseConversationFile);
+  getExampleMovementFiles(params[0], params[3]).then(parseMovementFiles);
 }
 
 /**
