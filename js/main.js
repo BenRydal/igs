@@ -125,8 +125,6 @@ const introMSG = "INTERACTION GEOGRAPHY SLICER (IGS) INDOOR\n\nby Ben Rydal Shap
 // INTERFACE
 let timelineStart, timelineEnd, timelineHeight, timelineLength, yPosTimelineTop, yPosTimelineBottom, timelineThickness;
 let currPixelTimeMin, currPixelTimeMax; // Rescaled timeline start and end depending on user interactions
-// Color list--> 12 Class Paired Dark: purple, orange, green, blue, red, yellow, brown, lPurple, lOrange, lGreen, lBlue, lRed
-const colorList = ['#6a3d9a', '#ff7f00', '#33a02c', '#1f78b4', '#e31a1c', '#ffff99', '#b15928', '#cab2d6', '#fdbf6f', '#b2df8a', '#a6cee3', '#fb9a99'];
 const buttons = ["Animate", "Align Talk", "All Talk", "Video", "How to Use"];
 let buttonSpacing, buttonWidth, speakerKeysHeight, buttonsHeight;
 let lockedLeft = false,
@@ -137,14 +135,21 @@ const selSpacing = 20,
     floorPlanSelectorSize = 100,
     pathWeight = 3,
     colorGray = 150;
+// Color list--> 12 Class Paired Dark: purple, orange, green, blue, red, yellow, brown, lPurple, lOrange, lGreen, lBlue, lRed
+const colorList = ['#6a3d9a', '#ff7f00', '#33a02c', '#1f78b4', '#e31a1c', '#ffff99', '#b15928', '#cab2d6', '#fdbf6f', '#b2df8a', '#a6cee3', '#fb9a99'];
 
-// Loads fonts and starting example
+/**
+ * Optional P5.js method, here used to preload fonts
+ */
 function preload() {
     font_PlayfairReg = loadFont("data/fonts/PlayfairDisplay-Regular.ttf");
     font_PlayfairItalic = loadFont("data/fonts/PlayfairDisplay-Italic.ttf");
     font_Lato = loadFont("data/fonts/Lato-Light.ttf");
 }
 
+/**
+ * Required P5.js method, here used to setup GUI
+ */
 function setup() {
     canvas = createCanvas(window.innerWidth, window.innerHeight, P2D);
     frameRate(30);
@@ -154,7 +159,7 @@ function setup() {
 }
 /**
  * Always draws background and keys. Organizes what data is drawing if it is loaded/not undefined.
- * NOTE: Each conditional test tests if particular data structure is loaded (floorplan, paths[], speakerList[], videoPlayer)
+ * NOTE: Each conditional tests if particular data structure is loaded (floorplan, paths[], speakerList[], videoPlayer)
  * NOTE: Conversation can never be drawn unless movement has been loaded (paths[])
  * NOTE: Movement can be drawn if conversation has not been loaded
  */

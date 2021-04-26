@@ -1,4 +1,8 @@
-// From image file, sets floor plan width/height to display and scale movement data
+/**
+ * Creates P5 image file from path
+ * Updates global floorPlan image and input width/heights of floorPlan to properly scale and display data
+ * @param  {String} filePath
+ */
 function processFloorPlan(filePath) {
     loadImage(filePath, img => {
         floorPlan = img;
@@ -10,42 +14,53 @@ function processFloorPlan(filePath) {
     });
 }
 
-// Processes movement file in relation to conversation file data and adds both to path object
+/**
+ * Tests and samples array of movement data to add to Path Object
+ * Also tests conversation data to closest time value in movement data to add to Path object
+ * @param  {Results [] from PapaParse} results
+ * @param  {File} file
+ */
 function processMovementFile(results, file) {
-    let movement = []; // holds movement points (location data)
-    let conversation = []; // holds conversaton points (text and location data for conversation)
+    let movement = []; // Array to hold Point_Movement objects
+    let conversation = []; // Array to hold Point_Conversation
     let conversationCounter = 0;
     for (let i = 0; i < results.data.length; i++) {
-        // sample data and test to make sure row is good data
+        // sample and test data
         if (testSampleMovementData(results.data, i) && testMovementDataRowForType(results.data[i][movementHeaders[0]], results.data[i][movementHeaders[1]], results.data[i][movementHeaders[2]])) {
             let m = new Point_Movement();
             m.time = results.data[i][movementHeaders[0]];
             m.xPos = results.data[i][movementHeaders[1]];
             m.yPos = results.data[i][movementHeaders[2]];
-            movement.push(m); // always add to movement
-            // Test to make sure good data
-            if (testConversationDataRow(conversationCounter)) {
-                // load conversation turn and increment counter if movement time is larger than time in conversationFile results at curCounter
-                if (m.time >= conversationFileResults[conversationCounter][conversationHeaders[0]]) {
-                    conversation.push(processConversation(conversationCounter, m.xPos, m.yPos));
-                    conversationCounter++; // increment counter for next comparison
-                }
+            movement.push(m); // always add to movement []
+            // Test conversation is good data and movement time larger than conversation time at curCounter
+            // If both true, load process conversation data for that row and increment counter for next comparison
+            if (testConversationDataRow(conversationCounter) && testMovementLargerThanConversationTime(m.time, conversationFileResults[conversationCounter][conversationHeaders[0]])) {
+                conversation.push(processConversation(conversationCounter, m.xPos, m.yPos));
+                conversationCounter++;
             }
         }
     }
-    let p = new Path(file.name.charAt(0)); // initialize with name and grey/black color
+    updatePaths(file.name.charAt(0), movement, conversation);
+}
+/**
+ * Creates and adds new Path object to global paths []
+ * Also handles updating global totalTime and sorting paths []
+ * @param  {Char} letterName
+ * @param  {Point_Movement []} movement
+ * @param  {Point_Conversation []} conversation
+ */
+function updatePaths(letterName, movement, conversation) {
+    let p = new Path(letterName); // initialize with name and grey/black color
     p.movement = movement;
     p.conversation = conversation;
-    // Update global total time, make sure to cast/floor values as integers
-    if (totalTimeInSeconds < Math.floor(movement[movement.length - 1].time)) totalTimeInSeconds = Math.floor(movement[movement.length - 1].time);
-    // if no speakers, make path color match color list
-    if (speakerList === undefined) p.color = colorList[paths.length % colorList.length];
-    else p.color = setPathColorBySpeaker(p.name);
+    if (speakerList === undefined) p.color = colorList[paths.length % colorList.length]; // if no conversation file loaded path color is next in Color list
+    else p.color = setPathColorBySpeaker(p.name); // if conversation file loaded, send to method to calculate color
     paths.push(p);
-    // sort after every file loaded
     paths.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching speakerlist array
-
+    const curPathEndTime = Math.floor(movement[movement.length - 1].time);
+    if (totalTimeInSeconds < curPathEndTime) totalTimeInSeconds = curPathEndTime; // update global total time, make sure to floor value as integer
 }
+
 /**
  * Returns color based on whether pathName has corresponding speaker
  * If path has corresponding speaker, color returned matches speaker
@@ -70,7 +85,13 @@ function getNumPathsWithNoSpeaker() {
     }
     return count;
 }
-
+/**
+ * Creates Point_Conversation object
+ * NOTE: parameters are from movement data
+ * @param  {Integer} index
+ * @param  {} xPos
+ * @param  {} yPos
+ */
 function processConversation(index, xPos, yPos) {
     let c = new Point_Conversation();
     c.xPos = xPos; // set to x/y pos in movement file case
@@ -115,12 +136,22 @@ function testMovementDataRowForType(time, x, y) {
     return typeof time === 'number' && typeof x === 'number' && typeof y === 'number';
 }
 
-// Determines how to sample data depending on number of data cases or rows vs. pixel length of timeline
-// Reduces data size to provide optimal interaction with visualization and good curve drawing
+/**
+ * Method with conditionals that compare current to prior row to sample data
+ * Currently, if the number of rows in data is less than five times the pixel length of the timeline
+ * then current row/data case must be greater by 1 decimal point than previous row. Otherwise, floored/integer
+ * value of current row must be great than floored/integer value of prior row--this equates to 1 second greater
+ * NOTE: always return true on first two rows to set starting points for data
+ * NOTE: can be updated but this method necessary to optimize user interaction and good curve drawing
+ * 
+ * 
+ * @param  {Results [] from PapaParse} data
+ * @param  {Integer} curRow
+ */
 function testSampleMovementData(data, curRow) {
-    if (curRow === 0 || curRow === 1) return true; // always return true for first two rows
-    const sampleRateDivisor = 4; // temporary but 4 as rate seems to work best on most devices
-    if (data.length / sampleRateDivisor < timelineLength) return data[curRow][movementHeaders[0]] > data[curRow - 1][movementHeaders[0]];
+    if (curRow === 0 || curRow === 1) return true; // always return true for first two rows to set starting point
+    const sampleRateDivisor = 5; // 5 as rate seems to work best on most devices
+    if (data.length / sampleRateDivisor < timelineLength) return Number.parseFloat(data[curRow][movementHeaders[0]]).toFixed(1) > Number.parseFloat(data[curRow - 1][movementHeaders[0]]).toFixed(1);
     else return Math.floor(data[curRow][movementHeaders[0]]) > Math.floor(data[curRow - 1][movementHeaders[0]]); // if there are more data cases than pixels on timeline, sample based on integer floored values/every second
 }
 
@@ -128,4 +159,8 @@ function testSampleMovementData(data, curRow) {
 // NOTE: this also tests if a conversation file is loaded
 function testConversationDataRow(curRow) {
     return curRow < conversationFileResults.length && typeof conversationFileResults[curRow][conversationHeaders[0]] === 'number' && typeof conversationFileResults[curRow][conversationHeaders[1]] === 'string' && conversationFileResults[curRow][conversationHeaders[2]] !== null && conversationFileResults[curRow][conversationHeaders[2]] !== undefined;
+}
+
+function testMovementLargerThanConversationTime(movementTime, conversationTime) {
+    return movementTime >= conversationTime;
 }

@@ -1,6 +1,6 @@
 /**
  * Parses user inputted floor plan image for processing
- * @param  {PNG, JPG, JPEG Image File} input
+ * @param  {PNG, JPG, JPEG File} input
  */
 function parseInputFloorPlanFile(input) {
     processFloorPlan(URL.createObjectURL(input.files[0]));
@@ -44,7 +44,7 @@ function testMovementFile(results, file) {
 
 /**
  * Gets single file format from input and sends for conversation parsing
- * @param  {} input
+ * @param  {File} input
  */
 function parseInputConversationFile(input) {
     parseConversationFile(input.files[0]); // parse converted file
