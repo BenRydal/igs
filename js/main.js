@@ -28,9 +28,9 @@ const PLAN = 0,
  * NOTE: constructed from conversation .CSV file
  */
 class Speaker {
-    constructor(sName, sCol) {
-        this.name = sName; // char indicating letter of speaker
-        this.color = sCol; // color set to gray to start, updated to match corresponding Path if one exists in processMovement
+    constructor(name, col) {
+        this.name = name; // char indicating letter of speaker
+        this.color = col; // color set to gray to start, updated to match corresponding Path if one exists in processMovement
         this.show = true; // boolean indicating speaker is showing in GUI
     }
 }

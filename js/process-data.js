@@ -34,10 +34,11 @@ function processMovementFile(results, file) {
             movement.push(m); // always add to movement []
             // Test conversation is good data and movement time larger than conversation time at curCounter
             // If both true, load process conversation data for that row and increment counter for next comparison
-            if (testConversationDataRow(conversationCounter) && testMovementLargerThanConversationTime(m.time, conversationFileResults[conversationCounter][conversationHeaders[0]])) {
+            // If data is bad just increment counter to skip that row.
+            if (testConversationDataLengthAndRowForType(conversationCounter) && m.time >= conversationFileResults[conversationCounter][conversationHeaders[0]]) {
                 conversation.push(processConversation(conversationCounter, m.xPos, m.yPos));
                 conversationCounter++;
-            }
+            } else if (!testConversationDataLengthAndRowForType(conversationCounter)) conversationCounter++;
         }
     }
     updatePaths(file.name.charAt(0), movement, conversation);
@@ -89,31 +90,47 @@ function getNumPathsWithNoSpeaker() {
  * Creates Point_Conversation object
  * NOTE: parameters are from movement data
  * @param  {Integer} index
- * @param  {} xPos
- * @param  {} yPos
+ * @param  {Number/Float} xPos
+ * @param  {Number/Float} yPos
  */
 function processConversation(index, xPos, yPos) {
     let c = new Point_Conversation();
     c.xPos = xPos; // set to x/y pos in movement file case
     c.yPos = yPos;
     c.time = conversationFileResults[index][conversationHeaders[0]];
-    c.speaker = conversationFileResults[index][conversationHeaders[1]];
+    c.speaker = cleanSpeaker(conversationFileResults[index][conversationHeaders[1]]); // get cleaned speaker character
     c.talkTurn = conversationFileResults[index][conversationHeaders[2]];
     return c;
 }
 
-// Test all rows in conversation file to populate global speakerList with speaker objects based on first character
+/**
+ * Updates global speaker list from conversation file data/results
+ */
 function updateSpeakerList() {
     for (let i = 0; i < conversationFileResults.length; i++) {
         let tempSpeakerList = []; // create/populate temp list to store strings to test from global speakerList
         for (let j = 0; j < speakerList.length; j++) tempSpeakerList.push(speakerList[j].name);
-        let speaker = conversationFileResults[i][conversationHeaders[1]]; // get speaker
-        // if row has all good data and speaker is not in list yet, add new Speaker Object to global speakerList
-        if (testConversationDataRow(i) && !tempSpeakerList.includes(speaker)) {
-            let s = new Speaker(speaker, colorList[speakerList.length % colorList.length]); // instantiate new speaker with name and color
-            speakerList.push(s);
+        // If row is good data, test if speakerList already has speaker and if not add speaker 
+        if (testConversationDataLengthAndRowForType(i)) {
+            const speaker = cleanSpeaker(conversationFileResults[i][conversationHeaders[1]]); // get cleaned speaker character
+            if (!tempSpeakerList.includes(speaker)) addSpeakerToSpeakerList(speaker);
         }
     }
+}
+/**
+ * From String, trims white space, converts to uppercase and returns sub string of 2 characters
+ * @param  {String} s
+ */
+function cleanSpeaker(s) {
+    return s.trim().toUpperCase().substring(0,2);
+}
+
+/**
+ * Adds new speaker object with initial color to global speakerList from character
+ * @param  {Char} speaker
+ */
+function addSpeakerToSpeakerList(name) {
+    speakerList.push(new Speaker(name, colorList[speakerList.length % colorList.length]));
 }
 
 // Initialization for the video player
@@ -157,10 +174,6 @@ function testSampleMovementData(data, curRow) {
 
 // Tests if current conversation row is less than total rows in table and if time is number and speaker is string and talk turn is not null or undefined
 // NOTE: this also tests if a conversation file is loaded
-function testConversationDataRow(curRow) {
+function testConversationDataLengthAndRowForType(curRow) {
     return curRow < conversationFileResults.length && typeof conversationFileResults[curRow][conversationHeaders[0]] === 'number' && typeof conversationFileResults[curRow][conversationHeaders[1]] === 'string' && conversationFileResults[curRow][conversationHeaders[2]] !== null && conversationFileResults[curRow][conversationHeaders[2]] !== undefined;
-}
-
-function testMovementLargerThanConversationTime(movementTime, conversationTime) {
-    return movementTime >= conversationTime;
 }
