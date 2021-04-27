@@ -151,7 +151,7 @@ function testMovementDataRowForType(time, x, y) {
 function testSampleMovementData(data, curRow) {
     if (curRow === 0 || curRow === 1) return true; // always return true for first two rows to set starting point
     const sampleRateDivisor = 5; // 5 as rate seems to work best on most devices
-    if (data.length / sampleRateDivisor < timelineLength) return Number.parseFloat(data[curRow][movementHeaders[0]]).toFixed(1) > Number.parseFloat(data[curRow - 1][movementHeaders[0]]).toFixed(1);
+    if (data.length / sampleRateDivisor < timelineLength) return Number.parseFloat(data[curRow][movementHeaders[0]]).toFixed(2) > Number.parseFloat(data[curRow - 1][movementHeaders[0]]).toFixed(2);
     else return Math.floor(data[curRow][movementHeaders[0]]) > Math.floor(data[curRow - 1][movementHeaders[0]]); // if there are more data cases than pixels on timeline, sample based on integer floored values/every second
 }
 
