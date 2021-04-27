@@ -49,7 +49,7 @@ function testMovementFile(results, file) {
     // Test if file has data, file headers, and at least one row of correctly typed data
     if (results.data.length > 1 && testMovementFileHeaders(results.meta.fields) && testMovementFileRowsForType(results.data)) {
         movementFileResults.push([results, file]);
-        processMovementFile(results, file);
+        processMovementFile(results, file.name.charAt(0).toUpperCase()); // pass first letter and make it uppercase. Will represent name of path
     }
 }
 

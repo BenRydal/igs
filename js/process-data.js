@@ -20,7 +20,7 @@ function processFloorPlan(filePath) {
  * @param  {Results [] from PapaParse} results
  * @param  {File} file
  */
-function processMovementFile(results, file) {
+function processMovementFile(results, pathName) {
     let movement = []; // Array to hold Point_Movement objects
     let conversation = []; // Array to hold Point_Conversation
     let conversationCounter = 0;
@@ -41,7 +41,7 @@ function processMovementFile(results, file) {
             } else if (!testConversationDataLengthAndRowForType(conversationCounter)) conversationCounter++;
         }
     }
-    updatePaths(file.name.charAt(0), movement, conversation);
+    updatePaths(pathName, movement, conversation);
 }
 /**
  * Creates and adds new Path object to global paths []
