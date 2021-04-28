@@ -26,7 +26,7 @@ function processMovementFile(results, pathName) {
     let conversationCounter = 0;
     for (let i = 0; i < results.data.length; i++) {
         // sample and test data
-        if (testSampleMovementData(results.data, i) && testMovementDataRowForType(results.data[i][movementHeaders[0]], results.data[i][movementHeaders[1]], results.data[i][movementHeaders[2]])) {
+        if (testSampleMovementData(results.data, i) && testMovementDataRowForType(results.data, i)) {
             let m = new Point_Movement();
             m.time = results.data[i][movementHeaders[0]];
             m.xPos = results.data[i][movementHeaders[1]];
@@ -122,7 +122,7 @@ function updateSpeakerList() {
  * @param  {String} s
  */
 function cleanSpeaker(s) {
-    return s.trim().toUpperCase().substring(0,2);
+    return s.trim().toUpperCase().substring(0, 2);
 }
 
 /**
@@ -149,8 +149,8 @@ function processVideo(platform, params) {
 }
 
 // Returns true if all values are number type
-function testMovementDataRowForType(time, x, y) {
-    return typeof time === 'number' && typeof x === 'number' && typeof y === 'number';
+function testMovementDataRowForType(data, curRow) {
+    return typeof data[curRow][movementHeaders[0]] === 'number' && typeof data[curRow][movementHeaders[1]] === 'number' && typeof data[curRow][movementHeaders[2]] === 'number';
 }
 
 /**
