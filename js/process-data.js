@@ -36,7 +36,7 @@ function processMovementFile(results, pathName) {
             // If both true, load process conversation data for that row and increment counter for next comparison
             // If data is bad just increment counter to skip that row.
             if (testConversationDataLengthAndRowForType(conversationCounter) && m.time >= conversationFileResults[conversationCounter][conversationHeaders[0]]) {
-                conversation.push(processConversation(conversationCounter, m.xPos, m.yPos));
+                conversation.push(createConversationPoint(conversationCounter, m.xPos, m.yPos));
                 conversationCounter++;
             } else if (!testConversationDataLengthAndRowForType(conversationCounter)) conversationCounter++;
         }
@@ -93,7 +93,7 @@ function getNumPathsWithNoSpeaker() {
  * @param  {Number/Float} xPos
  * @param  {Number/Float} yPos
  */
-function processConversation(index, xPos, yPos) {
+function createConversationPoint(index, xPos, yPos) {
     let c = new Point_Conversation();
     c.xPos = xPos; // set to x/y pos in movement file case
     c.yPos = yPos;
