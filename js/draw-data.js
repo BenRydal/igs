@@ -73,7 +73,7 @@ class DrawDataMovement extends DrawData {
                 if (view == PLAN) curveVertex(scaledXPos, scaledYPos);
                 else if (view == SPACETIME) {
                     curveVertex(scaledTime, scaledYPos);
-                    if (this.testPointForBug(scaledTime)) this.recordBug(scaledXPos, scaledYPos, scaledTime);
+                    this.testPointForBug(scaledTime, scaledXPos, scaledYPos);
                 }
             }
         }
@@ -121,13 +121,18 @@ class DrawDataMovement extends DrawData {
     }
 
     /**
-     * Depending on mode, organizes methods to test if time 
-     * @param  {} scaledTimeToTest
+     * Tests for 3 modes: animation, video and mouse over space-time view
+     * For current mode, tests parameter values to set/record bug correctly
+     * @param  {Number/Float} scaledTimeToTest
+     * @param  {Number/Float} xPos
+     * @param  {Number/Float} yPos
      */
-    testPointForBug(scaledTimeToTest) {
-        if (animation) return true; // always return true to set last/most recent point as the bug
-        else if (videoIsPlaying) return this.testVideoForBugPoint(scaledTimeToTest);
-        else if (overRect(timelineStart, 0, timelineLength, timelineHeight)) return this.testMouseForBugPoint(scaledTimeToTest);
+    testPointForBug(scaledTimeToTest, xPos, yPos) {
+        if (animation) this.recordBug(scaledTimeToTest, xPos, yPos); // always return true to set last/most recent point as the bug
+        else if (videoIsPlaying) {
+            // Separate this test out from 3 mode tests to make sure if this is not true know other mode tests are run when video is playing
+            if (this.testVideoForBugPoint(scaledTimeToTest)) this.recordBug(scaledTimeToTest, xPos, yPos);
+        } else if (overRect(timelineStart, 0, timelineLength, timelineHeight) && this.testMouseForBugPoint(scaledTimeToTest)) this.recordBug(mouseX, xPos, yPos);
         return false;
     }
 
@@ -153,7 +158,7 @@ class DrawDataMovement extends DrawData {
         this.bugTimePos = -1;
         this.bugSpacingComparison = timelineLength;
     }
-    recordBug(xPos, yPos, timePos) {
+    recordBug(timePos, xPos, yPos) {
         this.bugXPos = xPos;
         this.bugYPos = yPos;
         this.bugTimePos = timePos;
