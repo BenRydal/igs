@@ -114,7 +114,7 @@ class DrawDataMovement extends DrawData {
                     }
                 } else {
                     if (drawStopPointMode) { // if drawing in stop mode, end it
-                        this.startEndShape(curPoint, this.smallPathWeight, shade);
+                        this.startEndShape(priorPoint, this.smallPathWeight, shade);
                         if (view === SPACETIME) this.testPointForBug(curPoint.scaledSpaceTimeXPos, curPoint.scaledXPos, curPoint.scaledYPos);
                         drawStopPointMode = false;
                     } else {
