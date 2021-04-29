@@ -25,8 +25,8 @@ function processMovementFile(results, pathName) {
     let conversation = []; // Array to hold Point_Conversation
     let conversationCounter = 0;
     for (let i = 0; i < results.data.length; i++) {
-        // sample and test data
-        if (testSampleMovementData(results.data, i) && testMovementDataRowForType(results.data, i)) {
+        // Test for type and then sample data
+        if (testMovementDataRowForType(results.data, i) && testSampleMovementData(results.data, i)) {
             let m = new Point_Movement();
             m.time = results.data[i][movementHeaders[0]];
             m.xPos = results.data[i][movementHeaders[1]];
@@ -154,22 +154,18 @@ function testMovementDataRowForType(data, curRow) {
 }
 
 /**
- * Method with conditionals that compare current to prior row to sample data
- * Currently, if the number of rows in data is less than five times the pixel length of the timeline
- * then current row/data case must be greater by 1 decimal point than previous row. Otherwise, floored/integer
- * value of current row must be great than floored/integer value of prior row--this equates to 1 second greater
- * NOTE: always return true on first two rows to set starting points for data
- * NOTE: can be updated but this method necessary to optimize user interaction and good curve drawing
- * 
- * 
+ * Method to sample data in two ways. Important to optimize user interaction and good curve drawing.
+ * SampleRateDivisor determines if there is large or small amount of data
+ * (1) If minimal amount of data, sample if curRow is greater than last row to 2 decimal places
+ * (2) If large amount of data, sample if curRow is one whole number greater than last row
  * @param  {Results [] from PapaParse} data
  * @param  {Integer} curRow
  */
 function testSampleMovementData(data, curRow) {
     if (curRow === 0 || curRow === 1) return true; // always return true for first two rows to set starting point
-    const sampleRateDivisor = 5; // 5 as rate seems to work best on most devices
-    if (data.length / sampleRateDivisor < timelineLength) return Number.parseFloat(data[curRow][movementHeaders[0]]).toFixed(2) > Number.parseFloat(data[curRow - 1][movementHeaders[0]]).toFixed(2);
-    else return Math.floor(data[curRow][movementHeaders[0]]) > Math.floor(data[curRow - 1][movementHeaders[0]]); // if there are more data cases than pixels on timeline, sample based on integer floored values/every second
+    const sampleRateDivisor = 5; // 5 as rate seems to work nicely on most devices
+    if (Math.floor(data.length / sampleRateDivisor) < timelineLength) return Number.parseFloat(data[curRow][movementHeaders[0]]).toFixed(2) > Number.parseFloat(data[curRow - 1][movementHeaders[0]]).toFixed(2);
+    else return Math.floor(data[curRow][movementHeaders[0]]) > Math.floor(data[curRow - 1][movementHeaders[0]]); // Large data sampling rate
 }
 
 // Tests if current conversation row is less than total rows in table and if time is number and speaker is string and talk turn is not null or undefined
