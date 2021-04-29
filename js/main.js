@@ -168,7 +168,10 @@ function draw() {
     if (floorPlan !== undefined) image(floorPlan, 0, 0, displayFloorPlanWidth, displayFloorPlanHeight);
     if (paths !== undefined && speakerList !== undefined) setMovementAndConversationData();
     else if (paths !== undefined) setMovementData();
-    if (videoPlayer !== undefined && videoIsShowing && !videoIsPlaying) setVideoScrubbing();
+    if (videoPlayer !== undefined && videoIsShowing) {
+        if (!videoIsPlaying) setVideoScrubbing();
+        if (mouseX !== pmouseX || mouseY !== pmouseY) select('#moviePlayer').position(mouseX - videoWidth, mouseY - videoHeight);
+    }
     let keys = new Keys();
     keys.drawKeys();
 }
