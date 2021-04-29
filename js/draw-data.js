@@ -40,6 +40,9 @@ class DrawDataMovement extends DrawData {
         this.bugTimePos = -1;
         this.bugSize = width / 50;
         this.bugSpacingComparison = timelineLength;
+        this.smallPathWeight = 3;
+        this.largePathWeight = 6;
+        this.colorGray = 150;
     }
 
     setData(path) {
@@ -54,8 +57,6 @@ class DrawDataMovement extends DrawData {
         }
         if (this.bugXPos != -1) this.drawBug(path.color); // if selected, draw bug
     }
-
-
 
     // // Main draw method to draw movement paths, also sets bug values
     // draw(view, points, shade) {
@@ -81,123 +82,131 @@ class DrawDataMovement extends DrawData {
     // }
 
     // Main draw method to draw movement paths, also sets bug values
-    draw(view, points, shade) {
-        strokeWeight(pathWeight);
+
+
+    /**
+     * Draws path in floor plan OR space-time view
+     * Path is separated into segments of stops with thick line thickness and moving of thinner line thickness
+     * Due to drawing methods in browsers, paths must be separated/segmented to draw different thicknesses or strokes
+     * @param  {Integer} view
+     * @param  {Path} path
+     * @param  {Color} shade
+     */
+    draw(view, path, shade) {
+        strokeWeight(this.smallPathWeight); // set small pathweight to start
         stroke(shade);
         noFill(); // important for curve drawing
-        let drawStopPointMode = false;
+        let drawStopPointMode = false; // mode indicating if stopped or moving measured by change from last point
         beginShape();
-        for (let i = 0; i < points.length; i++) {
-            let pixelTime = map(points[i].time, 0, totalTimeInSeconds, timelineStart, timelineEnd);
-            let scaledTime = map(pixelTime, currPixelTimeMin, currPixelTimeMax, timelineStart, timelineEnd);
-            let scaledXPos = points[i].xPos * displayFloorPlanWidth / inputFloorPlanPixelWidth; // scale to floor plan image file
-            let scaledYPos = points[i].yPos * displayFloorPlanHeight / inputFloorPlanPixelHeight; // scale to floor plan image file   
-            if (super.overTimeline(pixelTime) && super.overFloorPlan(scaledXPos, scaledYPos) && super.testAnimation(pixelTime)) {
-                let xPosToDraw;
-                if (view == PLAN) xPosToDraw = scaledXPos;
-                else if (view == SPACETIME) xPosToDraw = scaledTime;
-                if (i !== 0 && scaledXPos === (points[i - 1].xPos * displayFloorPlanWidth / inputFloorPlanPixelWidth) && scaledYPos === (points[i - 1].yPos * displayFloorPlanHeight / inputFloorPlanPixelHeight)) {
-
-                    let priorPixelTime = map(points[i - 1].time, 0, totalTimeInSeconds, timelineStart, timelineEnd);
-                    let priorScaledTime = map(priorPixelTime, currPixelTimeMin, currPixelTimeMax, timelineStart, timelineEnd);
-                    let priorScaledXPos = points[i - 1].xPos * displayFloorPlanWidth / inputFloorPlanPixelWidth; // scale to floor plan image file
-                    let priorSscaledYPos = points[i - 1].yPos * displayFloorPlanHeight / inputFloorPlanPixelHeight; // scale to floor plan image file
-                    let priorXPosToDraw;
-                    if (view == PLAN) priorXPosToDraw = priorScaledXPos;
-                    else if (view == SPACETIME) priorXPosToDraw = priorScaledTime;
-
+        // Start at 1 to test current and prior points for drawing
+        for (let i = 1; i < path.length; i++) {
+            let curPoint = this.getScaledPointValues(path[i], view);
+            let priorPoint = this.getScaledPointValues(path[i - 1], view);
+            if (super.overTimeline(curPoint.pixelTime) && super.overFloorPlan(curPoint.scaledXPos, curPoint.scaledYPos) && super.testAnimation(curPoint.pixelTime)) {
+                if (curPoint.scaledXPos === priorPoint.scaledXPos && curPoint.scaledYPos === priorPoint.scaledYPos) {
                     if (drawStopPointMode) { // if already drawing in stop mode, continue it
-                        curveVertex(xPosToDraw, scaledYPos);
-                        if (view == SPACETIME) this.testPointForBug(scaledTime, scaledXPos, scaledYPos);
+                        curveVertex(curPoint.scaledSpaceTimeXPos, curPoint.scaledYPos);
+                        if (view === SPACETIME) this.testPointForBug(curPoint.scaledPixelTime, curPoint.scaledXPos, curPoint.scaledYPos);
                     } else { // if not in drawing stop mode, begin it
-                        curveVertex(priorXPosToDraw, priorSscaledYPos); // draw cur point twice to mark end point
-                        curveVertex(priorXPosToDraw, priorSscaledYPos);
-                        endShape(); // then end shape
-                        strokeWeight(pathWeight * 2); // set large strokeWeight for not moving/stopped
-                        //stroke(0);
-                        beginShape(); // begin new shape
-                        curveVertex(priorXPosToDraw, priorSscaledYPos); // draw cur point twice to mark starting point
-                        curveVertex(priorXPosToDraw, priorSscaledYPos);
-                        if (view == SPACETIME) this.testPointForBug(xPosToDraw, scaledXPos, scaledYPos);
+                        this.startEndShape(priorPoint, this.largePathWeight, shade);
+                        if (view === SPACETIME) this.testPointForBug(curPoint.scaledSpaceTimeXPos, curPoint.scaledXPos, curPoint.scaledYPos);
                         drawStopPointMode = true;
                     }
                 } else {
                     if (drawStopPointMode) { // if drawing in stop mode, end it
-                        curveVertex(xPosToDraw, scaledYPos); // draw cur point twice to mark end point
-                        curveVertex(xPosToDraw, scaledYPos);
-                        endShape(); // then end shape
-                        strokeWeight(pathWeight); // set small strokeWeight for moving
-                        //stroke(shade);
-                        beginShape(); // begin new shape
-                        curveVertex(xPosToDraw, scaledYPos); // draw cur point twice to mark starting point
-                        curveVertex(xPosToDraw, scaledYPos);
-                        if (view == SPACETIME) this.testPointForBug(xPosToDraw, scaledXPos, scaledYPos);
+                        this.startEndShape(curPoint, this.smallPathWeight, shade);
+                        if (view === SPACETIME) this.testPointForBug(curPoint.scaledSpaceTimeXPos, curPoint.scaledXPos, curPoint.scaledYPos);
                         drawStopPointMode = false;
                     } else {
-                        curveVertex(xPosToDraw, scaledYPos);
-                        if (view == SPACETIME) this.testPointForBug(xPosToDraw, scaledXPos, scaledYPos);
+                        curveVertex(curPoint.scaledSpaceTimeXPos, curPoint.scaledYPos);
+                        if (view === SPACETIME) this.testPointForBug(curPoint.scaledSpaceTimeXPos, curPoint.scaledXPos, curPoint.scaledYPos);
+                    }
+                }
+            }
+        }
+        endShape(); // endshape in case still drawing
+    }
+
+    // Main draw method to draw movement paths, also sets bug values
+    /**
+     * Draws path in floor plan OR space-time view
+     * Path is separated into segments over cursor with thick line/highlight and not over cursor with thin line and grey color
+     * Due to drawing methods in browsers, paths must be separated/segmented to draw different thicknesses or strokes
+     * @param  {Integer} view
+     * @param  {Path} path
+     * @param  {Color} shade
+     */
+    drawWithCursorHighlight(view, path, shade) {
+        strokeWeight(this.smallPathWeight); // set small pathweight to start
+        stroke(this.colorGray); // start with gray color
+        noFill(); // important for curve drawing
+        let drawOverCursorPointMode = false;
+        beginShape();
+        for (let i = 0; i < path.length; i++) {
+            let curPoint = this.getScaledPointValues(path[i], view);
+            if (super.overTimeline(curPoint.pixelTime) && super.overFloorPlan(curPoint.scaledXPos, curPoint.scaledYPos) && super.testAnimation(curPoint.pixelTime)) {
+                if (super.overCursor(curPoint.scaledXPos, curPoint.scaledYPos)) {
+                    if (drawOverCursorPointMode) { // if already drawing in cursor mode, continue it
+                        curveVertex(curPoint.scaledSpaceTimeXPos, curPoint.scaledYPos);
+                        if (view == SPACETIME) this.testPointForBug(curPoint.scaledPixelTime, curPoint.scaledXPos, curPoint.scaledYPos);
+                    } else { // if not in drawing cursor mode, begin it
+                        this.startEndShape(curPoint, this.largePathWeight, shade);
+                        if (view === SPACETIME) this.testPointForBug(curPoint.scaledSpaceTimeXPos, curPoint.scaledXPos, curPoint.scaledYPos);
+                        drawOverCursorPointMode = true;
+                    }
+                } else {
+                    if (drawOverCursorPointMode) { // if drawing in cursor mode, end it
+                        this.startEndShape(curPoint, this.smallPathWeight, this.colorGray);
+                        if (view === SPACETIME) this.testPointForBug(curPoint.scaledSpaceTimeXPos, curPoint.scaledXPos, curPoint.scaledYPos);
+                        drawOverCursorPointMode = false;
+                    } else {
+                        curveVertex(curPoint.scaledSpaceTimeXPos, curPoint.scaledYPos);
+                        if (view === SPACETIME) this.testPointForBug(curPoint.scaledSpaceTimeXPos, curPoint.scaledXPos, curPoint.scaledYPos);
                     }
                 }
             }
         }
         endShape();
     }
-
-
-
-    // Main draw method to draw movement paths, also sets bug values
-    drawWithCursorHighlight(view, points, shade) {
-        strokeWeight(pathWeight);
-        stroke(colorGray);
-        noFill(); // important for curve drawing
-        let drawOverCursorPointMode = false;
-        beginShape();
-        for (let i = 0; i < points.length; i++) {
-            let point = points[i];
-            let pixelTime = map(point.time, 0, totalTimeInSeconds, timelineStart, timelineEnd);
-            let scaledTime = map(pixelTime, currPixelTimeMin, currPixelTimeMax, timelineStart, timelineEnd);
-            let scaledXPos = point.xPos * displayFloorPlanWidth / inputFloorPlanPixelWidth; // scale to floor plan image file
-            let scaledYPos = point.yPos * displayFloorPlanHeight / inputFloorPlanPixelHeight; // scale to floor plan image file
-            if (super.overTimeline(pixelTime) && super.overFloorPlan(scaledXPos, scaledYPos) && super.testAnimation(pixelTime)) {
-                let xPosToDraw;
-                if (view == PLAN) xPosToDraw = scaledXPos;
-                else if (view == SPACETIME) xPosToDraw = scaledTime;
-                if (i !== 0 && super.overCursor(scaledXPos, scaledYPos)) {
-                    if (drawOverCursorPointMode) { // if already drawing in stop mode, continue it
-                        curveVertex(xPosToDraw, scaledYPos);
-                        if (view == SPACETIME) this.testPointForBug(scaledTime, scaledXPos, scaledYPos);
-                    } else { // if not in drawing stop mode, begin it
-                        curveVertex(xPosToDraw, scaledYPos); // draw cur point twice to mark end point
-                        curveVertex(xPosToDraw, scaledYPos);
-                        endShape(); // then end shape
-                        strokeWeight(pathWeight * 2); // set large strokeWeight for not moving/stopped
-                        stroke(shade);
-                        beginShape(); // begin new shape
-                        curveVertex(xPosToDraw, scaledYPos); // draw cur point twice to mark starting point
-                        curveVertex(xPosToDraw, scaledYPos);
-                        if (view == SPACETIME) this.testPointForBug(xPosToDraw, scaledXPos, scaledYPos);
-                        drawOverCursorPointMode = true;
-                    }
-                } else {
-                    if (drawOverCursorPointMode) { // if drawing in stop mode, end it
-                        curveVertex(xPosToDraw, scaledYPos); // draw cur point twice to mark end point
-                        curveVertex(xPosToDraw, scaledYPos);
-                        endShape(); // then end shape
-                        strokeWeight(pathWeight); // set small strokeWeight for moving
-                        stroke(colorGray);
-                        beginShape(); // begin new shape
-                        curveVertex(xPosToDraw, scaledYPos); // draw cur point twice to mark starting point
-                        curveVertex(xPosToDraw, scaledYPos);
-                        if (view == SPACETIME) this.testPointForBug(xPosToDraw, scaledXPos, scaledYPos);
-                        drawOverCursorPointMode = false;
-                    } else {
-                        curveVertex(xPosToDraw, scaledYPos);
-                        if (view == SPACETIME) this.testPointForBug(xPosToDraw, scaledXPos, scaledYPos);
-                    }
-                }
-            }
-        }
-        endShape();
+    /**
+     * Returns scaled values for movement point
+     * NOTE: view determines which space-time xPos is returned
+     * @param  {Point_Movement} point
+     * @param  {Integer} view
+     */
+    getScaledPointValues(point, view) {
+        const pixel = map(point.time, 0, totalTimeInSeconds, timelineStart, timelineEnd);
+        const scaledPixel = map(pixel, currPixelTimeMin, currPixelTimeMax, timelineStart, timelineEnd);
+        const scaledX = point.xPos * displayFloorPlanWidth / inputFloorPlanPixelWidth;
+        const scaledY = point.yPos * displayFloorPlanHeight / inputFloorPlanPixelHeight;
+        let scaledSpaceTimeX;
+        if (view === PLAN) scaledSpaceTimeX = scaledX;
+        else if (view === SPACETIME) scaledSpaceTimeX = scaledPixel;
+        return {
+            pixelTime: pixel,
+            scaledPixelTime: scaledPixel,
+            scaledXPos: scaledX,
+            scaledYPos: scaledY,
+            scaledSpaceTimeXPos: scaledSpaceTimeX
+        };
+    }
+    /**
+     * Ends and begins a new drawing shape
+     * Draws two vertices to indicate starting and ending points
+     * Sets correct strokeweight and stroke depending on parameters for new shape
+     * @param  {Object returned from getScaledPointValues} scaledPoint
+     * @param  {Integer} weight
+     * @param  {Color} shade
+     */
+    startEndShape(scaledPoint, weight, shade) {
+        curveVertex(scaledPoint.scaledSpaceTimeXPos, scaledPoint.scaledYPos); // draw cur point twice to mark end point
+        curveVertex(scaledPoint.scaledSpaceTimeXPos, scaledPoint.scaledYPos);
+        endShape(); // then end shape
+        strokeWeight(weight); // set large strokeWeight for not moving/stopped
+        stroke(shade);
+        beginShape(); // begin new shape
+        curveVertex(scaledPoint.scaledSpaceTimeXPos, scaledPoint.scaledYPos); // draw cur point twice to mark starting point
+        curveVertex(scaledPoint.scaledSpaceTimeXPos, scaledPoint.scaledYPos);
     }
 
     /**
