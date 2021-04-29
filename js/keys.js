@@ -121,7 +121,7 @@ class Keys {
         let videoTimeInMinutes = videoTimeInSeconds / 60; // float value of minutes and seconds
         let minutesValue = floor(videoTimeInMinutes); // floor to get minutes
         let decimalSeconds = videoTimeInMinutes - minutesValue; //  Subtract minutes to get decimal seconds---e.g., 14.28571429 - 14... returns (.28571429)
-        let secondsValue = floor(decimalSeconds.toFixed(2) * 60); // Converts number into a String and keeps only the specified number of decimals
+        let secondsValue = floor((decimalSeconds * 60).toFixed(2)); // Converts number into a String and keeps only the specified number of decimals
         let label_1 = minutesValue + " minutes  " + secondsValue + " seconds";
         let label_2 = "MINUTES";
         textAlign(CENTER);
