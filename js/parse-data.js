@@ -119,7 +119,7 @@ function testConversationFile(results, file) {
             const [movement, conversation] = processMovementFile(movementFileResults[i][0]); // Reprocess movement file results
             updatePaths(movementFileResults[i][1], movement, conversation); // Pass movement file pathname and reprocessed movement file results to updatepaths
         }
-    }
+    } else alert("Error loading conversation file. Please make sure your file is a .CSV file formatted with column headers: " + conversationHeaders.toString());
 }
 
 /**
