@@ -139,7 +139,6 @@ function addSpeakerToSpeakerList(name) {
 
 // Initialization for the video player
 function processVideo(platform, params) {
-    noLoop(); // currently loop continued in videoPlayer API
     if (dataIsLoaded(videoPlayer)) videoPlayer.destroy();
     // Based on the specified platform, chose the appropriate type of videoPlayer to use
     switch (platform) {

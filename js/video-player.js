@@ -127,7 +127,6 @@ class P5FilePlayer {
                 URL.revokeObjectURL(this.src);
             }
             console.log("File Player Ready:");
-            loop();
         });
     }
 
