@@ -52,7 +52,7 @@ function overInteractionButtons() {
     if (overRect(currXPos, buttonsHeight, textWidth(buttons[0]), buttonWidth)) overAnimateButton();
     else if (overRect(currXPos + textWidth(buttons[0]) + 2 * buttonSpacing, buttonsHeight, textWidth(buttons[1]) + buttonSpacing, buttonWidth)) conversationPositionTop = !conversationPositionTop;
     else if (overRect(currXPos + textWidth(buttons[0] + buttons[1]) + 4 * buttonSpacing, buttonsHeight, textWidth(buttons[2]) + buttonSpacing, buttonWidth)) allConversation = !allConversation;
-    else if (videoPlayer !== undefined && overRect(currXPos + textWidth(buttons[0] + buttons[1] + buttons[2]) + 6 * buttonSpacing, buttonsHeight, textWidth(buttons[3]) + buttonSpacing, buttonWidth)) overVideoButton();
+    else if (dataIsLoaded(videoPlayer) && overRect(currXPos + textWidth(buttons[0] + buttons[1] + buttons[2]) + 6 * buttonSpacing, buttonsHeight, textWidth(buttons[3]) + buttonSpacing, buttonWidth)) overVideoButton();
     else if (overRect(currXPos + textWidth(buttons[0] + buttons[1] + buttons[2] + buttons[3]) + 8 * buttonSpacing, buttonsHeight, textWidth(buttons[4]) + buttonSpacing, buttonWidth)) showIntroMsg = !showIntroMsg;
 }
 

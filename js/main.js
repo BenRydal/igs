@@ -163,13 +163,20 @@ function setup() {
  */
 function draw() {
     background(255);
-    if (floorPlan !== undefined) image(floorPlan, 0, 0, displayFloorPlanWidth, displayFloorPlanHeight);
-    if (paths !== undefined && speakerList !== undefined) setMovementAndConversationData();
-    else if (paths !== undefined) setMovementData();
-    if (videoPlayer !== undefined && videoIsShowing) {
+    if (dataIsLoaded(floorPlan)) image(floorPlan, 0, 0, displayFloorPlanWidth, displayFloorPlanHeight);
+    if (dataIsLoaded(paths) && dataIsLoaded(speakerList)) setMovementAndConversationData();
+    else if (dataIsLoaded(paths)) setMovementData();
+    if (dataIsLoaded(videoPlayer) && videoIsShowing) {
         if (!videoIsPlaying) setVideoScrubbing();
         if (mouseX !== pmouseX || mouseY !== pmouseY) select('#moviePlayer').position(mouseX - videoWidth, mouseY - videoHeight);
     }
     let keys = new Keys();
     keys.drawKeys();
+}
+/**
+ * Returns false if parameter is undefined or null
+ * @param  {} data
+ */
+function dataIsLoaded(data) {
+    return data != null; // in javascript this tests for both undefined and null values
 }
