@@ -11,6 +11,9 @@ function processFloorPlan(filePath) {
         img.onload = function () {
             URL.revokeObjectURL(this.src);
         }
+    }, e => {
+        alert("Error loading floor plan image file. Please make sure it is correctly formatted as a PNG or JPG image file.")
+        console.log(e);
     });
 }
 
