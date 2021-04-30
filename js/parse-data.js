@@ -52,7 +52,7 @@ function testMovementFile(results, file) {
         const [movement, conversation] = processMovementFile(results); //
         updatePaths(pathName, movement, conversation);
         movementFileResults.push([results, pathName]); // add results and pathName to global []
-    }
+    } else alert("Error loading movement file. Please make sure your file is a .CSV file formatted with 'time', 'x', 'y' column headers.")
 }
 
 /**
