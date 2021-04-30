@@ -85,7 +85,7 @@ function updatePaths(letterName, movement, conversation) {
     let p = new Path(letterName); // initialize with name and grey/black color
     p.movement = movement;
     p.conversation = conversation;
-    if (speakerList === undefined) p.color = colorList[paths.length % colorList.length]; // if no conversation file loaded path color is next in Color list
+    if (dataIsLoaded(speakerList)) p.color = colorList[paths.length % colorList.length]; // if no conversation file loaded path color is next in Color list
     else p.color = setPathColorBySpeaker(p.name); // if conversation file loaded, send to method to calculate color
     paths.push(p);
     paths.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching speakerlist array
