@@ -137,7 +137,7 @@ function testConversationFileHeaders(meta) {
  */
 function testConversationFileRowsForType(data) {
     for (let i = 0; i < data.length; i++) {
-        if (typeof data[i][conversationHeaders[0]] === 'number' && typeof data[i][conversationHeaders[1]] === 'string' && data[i][conversationHeaders[2]] !== null && data[i][conversationHeaders[2]] !== undefined) return true;
+        if (typeof data[i][conversationHeaders[0]] === 'number' && typeof data[i][conversationHeaders[1]] === 'string' && data[i][conversationHeaders[2]] != null) return true;
     }
     return false;
 }
