@@ -14,34 +14,65 @@ function processFloorPlan(filePath) {
     });
 }
 
+// /**
+//  * Tests and samples array of movement data to add to Path Object
+//  * Also tests conversation data to closest time value in movement data to add to Path object
+//  * @param  {Results [] from PapaParse} results
+//  * @param  {File} file
+//  */
+// function processMovementFile(results, pathName) {
+//     let movement = []; // Array to hold Point_Movement objects
+//     let conversation = []; // Array to hold Point_Conversation
+//     let conversationCounter = 0;
+//     for (let i = 0; i < results.data.length; i++) {
+//         // Test for type and then sample data
+//         if (testMovementDataRowForType(results.data, i) && testSampleMovementData(results.data, i)) {
+//             let m = new Point_Movement();
+//             m.time = results.data[i][movementHeaders[0]];
+//             m.xPos = results.data[i][movementHeaders[1]];
+//             m.yPos = results.data[i][movementHeaders[2]];
+//             movement.push(m); // always add to movement []
+//             // Test conversation is good data and movement time larger than conversation time at curCounter
+//             // If both true, load process conversation data for that row and increment counter for next comparison
+//             // If data is bad just increment counter to skip that row.
+//             if (testConversationDataLengthAndRowForType(conversationCounter) && m.time >= conversationFileResults[conversationCounter][conversationHeaders[0]]) {
+//                 conversation.push(createConversationPoint(conversationCounter, m.xPos, m.yPos));
+//                 conversationCounter++;
+//             } else if (!testConversationDataLengthAndRowForType(conversationCounter)) conversationCounter++;
+//         }
+//     }
+//     updatePaths(pathName, movement, conversation);
+// }
+
 /**
  * Tests and samples array of movement data to add to Path Object
  * Also tests conversation data to closest time value in movement data to add to Path object
  * @param  {Results [] from PapaParse} results
- * @param  {File} file
  */
-function processMovementFile(results, pathName) {
+function processMovementFile(results) {
     let movement = []; // Array to hold Point_Movement objects
     let conversation = []; // Array to hold Point_Conversation
     let conversationCounter = 0;
     for (let i = 0; i < results.data.length; i++) {
-        // Test for type and then sample data
-        if (testMovementDataRowForType(results.data, i) && testSampleMovementData(results.data, i)) {
-            let m = new Point_Movement();
-            m.time = results.data[i][movementHeaders[0]];
-            m.xPos = results.data[i][movementHeaders[1]];
-            m.yPos = results.data[i][movementHeaders[2]];
+        // Sample movement row and test if row is good data
+        if (testSampleMovementData(results.data, i) && testMovementDataRowForType(results.data, i)) {
+            const m = createMovementPoint(results.data, i);
             movement.push(m); // always add to movement []
-            // Test conversation is good data and movement time larger than conversation time at curCounter
-            // If both true, load process conversation data for that row and increment counter for next comparison
-            // If data is bad just increment counter to skip that row.
             if (testConversationDataLengthAndRowForType(conversationCounter) && m.time >= conversationFileResults[conversationCounter][conversationHeaders[0]]) {
                 conversation.push(createConversationPoint(conversationCounter, m.xPos, m.yPos));
                 conversationCounter++;
             } else if (!testConversationDataLengthAndRowForType(conversationCounter)) conversationCounter++;
         }
     }
-    updatePaths(pathName, movement, conversation);
+    return [movement, conversation];
+}
+
+function createMovementPoint(data, curRow) {
+    let m = new Point_Movement();
+    m.time = data[curRow][movementHeaders[0]];
+    m.xPos = data[curRow][movementHeaders[1]];
+    m.yPos = data[curRow][movementHeaders[2]];
+    return m;
 }
 /**
  * Creates and adds new Path object to global paths []

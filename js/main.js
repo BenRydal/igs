@@ -6,7 +6,7 @@ CREDITS/LICENSE INFORMATION: This software is licensed under the GNU General Pub
 /**
  * Global movement and conversation file results arrays allow dynamic re-processing of individual data files
  */
-let movementFileResults = []; // List that holds a results array and file data from a parsed movement .CSV file
+let movementFileResults = []; // List that holds a results array and character letter indicating path name from a parsed movement .CSV file
 let conversationFileResults = []; // List that holds a results array and file data from a parsed conversation .CSV file
 let speakerList = []; // List that holds Speaker objects parsed from conversation file
 let paths = []; // List that holds path objects for each unique set of movement and conversation points constructed from parsed conversation and movement .CSV files

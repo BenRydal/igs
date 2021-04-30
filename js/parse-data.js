@@ -40,7 +40,7 @@ function parseMovementFiles(fileList) {
 
 /** 
  * Organizes testing of parsed movement file
- * If file passes, add data to global movementFileResults and process movement file
+ * If file passes, process movement file, update paths [] and add data to global movementFileResults
  * @param  {PapaParse Results []} results
  * @param  {File} file
  */
@@ -48,9 +48,10 @@ function testMovementFile(results, file) {
     console.log("Parsing complete:", results, file);
     // Test if file has data, file headers, and at least one row of correctly typed data
     if (results.data.length > 1 && testMovementFileHeaders(results.meta.fields) && testMovementFileRowsForType(results.data)) {
-        const pathName = file.name.charAt(0).toUpperCase(); // name of path, also used to test if associated speaker in conversation file
-        movementFileResults.push([results, pathName]);
-        processMovementFile(results, pathName); // pass first letter and make it uppercase. Will represent name of path
+        const pathName = file.name.charAt(0).toUpperCase(); // get name of path, also used to test if associated speaker in conversation file
+        const [movement, conversation] = processMovementFile(results); //
+        updatePaths(pathName, movement, conversation);
+        movementFileResults.push([results, pathName]); // add results and pathName to global []
     }
 }
 
@@ -101,7 +102,8 @@ function parseConversationFile(file) {
 
 /** 
  * Organizes testing of parsed conversation file
- * If file passes, add data to global conversationFileResults and update additional processing methods
+ * If file passes, add data to global conversationFileResults, update global speakerList [], sort the array
+ * And re process exisiting movement files
  * @param  {PapaParse Results []} results
  * @param  {File} file
  */
@@ -113,7 +115,10 @@ function testConversationFile(results, file) {
         updateSpeakerList();
         speakerList.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching paths array
         // Must reprocess existing movement files
-        for (let i = 0; i < movementFileResults.length; i++) processMovementFile(movementFileResults[i][0], movementFileResults[i][1]);
+        for (let i = 0; i < movementFileResults.length; i++) {
+            const [movement, conversation] = processMovementFile(movementFileResults[i][0]); // Reprocess movement file results
+            updatePaths(movementFileResults[i][1], movement, conversation); // Pass movement file pathname and reprocessed movement file results to updatepaths
+        }
     }
 }
 
