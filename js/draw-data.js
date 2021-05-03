@@ -1,28 +1,51 @@
-// Super class with 2 sub-classes drawDataMovement and drawDataConversation
+/**
+ * Drawing methods are implemented through super class and 2 sub classes drawDataMovement and drawDataConversation
+ * DrawData holds test methods used by both sub classes
+ */
 class DrawData {
 
     constructor() {}
-
-    overTimeline(timeValue) {
-        return timeValue >= currPixelTimeMin && timeValue <= currPixelTimeMax;
+    /**
+     * Returns true if value is within pixel range of timeline
+     * @param  {Number/Float} timeValue
+     */
+    overTimeline(pixelValue) {
+        return pixelValue >= currPixelTimeMin && pixelValue <= currPixelTimeMax;
     }
 
-    // Test if data is showing on floor plan
+    /**
+     * Returns true if value is within floor plan pixel display container 
+     * @param  {Number/Float} xPos
+     * @param  {Number/Float} yPos
+     */
     overFloorPlan(xPos, yPos) {
         return (xPos >= 0 && xPos <= displayFloorPlanWidth) && (yPos >= 0 && yPos <= displayFloorPlanHeight);
     }
-
+    /**
+     * Returns true if mouse cursor near xPos and yPos parameters
+     * NOTE: floorPlan SelectorSize set globally
+     * @param  {Number/Float} xPos
+     * @param  {Number/Float} yPos
+     */
     overCursor(xPos, yPos) {
-        return overCircle(xPos, yPos, floorPlanSelectorSize);
+        return overCircle(xPos, yPos, floorPlanCursorSelectSize);
     }
 
-    // Return true if not over floor plan, if over floor plan test if over cursor
-    testOverCursor(xPos, yPos) {
-        if (overRect(0, 0, displayFloorPlanWidth, displayFloorPlanHeight)) return overCircle(xPos, yPos, floorPlanSelectorSize);
-        else return true;
+    /**
+     * If mouse is over floor plan, returns true if mouse cursor near xPos and yPos parameters
+     * Always returns true if mouse is not over the floor plan
+     * @param  {Number/Float} xPos
+     * @param  {Number/Float} yPos
+     */
+    overFloorPlanAndCursor(xPos, yPos) {
+        return !this.overFloorPlan(mouseX, mouseY) || (this.overFloorPlan(mouseX, mouseY) && overCircle(xPos, yPos, floorPlanCursorSelectSize));
     }
 
-    // If animation on, returns true if time is less than counter. Returns true if animation is off.
+    /**
+     * If not animation mode, always return true
+     * If animation mode, return true only if time parameter is less than global animation counter
+     * @param  {Number/Float} timeValue
+     */
     testAnimation(timeValue) {
         if (animation) {
             let reMapTime = map(timeValue, timelineStart, timelineEnd, 0, totalTimeInSeconds);
@@ -303,7 +326,7 @@ class DrawDataConversation extends DrawData {
             let pixelTime = map(point.time, 0, totalTimeInSeconds, timelineStart, timelineEnd);
             let scaledXPos = point.xPos * displayFloorPlanWidth / inputFloorPlanPixelWidth; // scale to floor plan image file
             let scaledYPos = point.yPos * displayFloorPlanHeight / inputFloorPlanPixelHeight; // scale to floor plan image file
-            if (super.overTimeline(pixelTime) && super.overFloorPlan(scaledXPos, scaledYPos) && super.testAnimation(pixelTime) && super.testOverCursor(scaledXPos, scaledYPos)) {
+            if (super.overTimeline(pixelTime) && super.overFloorPlan(scaledXPos, scaledYPos) && super.testAnimation(pixelTime) && super.overFloorPlanAndCursor(scaledXPos, scaledYPos)) {
                 let curSpeaker = this.getSpeakerObject(points[i].speaker); // get speaker object equivalent to character
                 if (curSpeaker.show) {
                     if (allConversation) this.drawRects(point, curSpeaker.color); // draws all rects
