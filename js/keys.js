@@ -135,7 +135,7 @@ class Keys {
         noFill();
         strokeWeight(3);
         stroke(0);
-        circle(mouseX, mouseY, floorPlanSelectorSize);
+        circle(mouseX, mouseY, floorPlanCursorSelectSize);
     }
 
     drawIntroMsg() {

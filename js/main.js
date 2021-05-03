@@ -139,7 +139,7 @@ let lockedLeft = false,
 const selSpacing = 20,
     spacing = 50,
     tickHeight = 25,
-    floorPlanSelectorSize = 100;
+    floorPlanCursorSelectSize = 100;
 // Color list--> 12 Class Paired Dark: purple, orange, green, blue, red, yellow, brown, lPurple, lOrange, lGreen, lBlue, lRed
 const colorList = ['#6a3d9a', '#ff7f00', '#33a02c', '#1f78b4', '#e31a1c', '#ffff99', '#b15928', '#cab2d6', '#fdbf6f', '#b2df8a', '#a6cee3', '#fb9a99'];
 
