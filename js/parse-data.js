@@ -162,7 +162,10 @@ function parseInputVideoFile(input) {
 // ***** CLEAR DATA METHODS *****
 
 function clearAllData() {
-    if (dataIsLoaded(videoPlayer)) videoPlayer.destroy(); // if there is a video, destroy it
+    if (dataIsLoaded(videoPlayer)) {
+        if (videoIsShowing) overVideoButton(); // Turn off video before destroying it if showing
+        videoPlayer.destroy(); // if there is a video, destroy it
+    }
     floorPlan = undefined;
     speakerList = [];
     paths = [];
