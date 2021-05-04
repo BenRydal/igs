@@ -298,20 +298,26 @@ class DrawDataMovement extends DrawData {
 
 class DrawDataConversation extends DrawData {
 
-
-    // 3 values could become selected object
-
     constructor() {
         super();
-        // this.conversationBubble = {
-        //     selected: false,
-        //     point: -1,
-        //     view: PLAN
-        // };
-
-        this.conversationIsSelected = false; // indicates if a conversation turn has been selected by user
-        this.conversationToDraw = 0; // stores one Point_Conversation object for selected conversation turn
-        this.view = PLAN;
+        /**
+         * Conversation bubble represents user selected conversation comprised of 
+         * @boolean selected, @Point_Conversation and @integer view
+         */
+        this.conversationBubble = {
+            selected: false,
+            point: -1, // stores one Point_Conversation object for selected conversation turn
+            view: PLAN // view indicating if user selected conversation in floor plan or space-time views
+        };
+        /**
+         * Rect represents key parameters used in drawRects method to scale rectangles
+         * @Number for each parameter
+         */
+        this.rect = {
+            minPixelHeight: 3, // for really short conversation turns set a minimum pixel height
+            minPixelWidth: map(totalTimeInSeconds, 0, 3600, 10, 1, true), // map to inverse, values constrained between 10 and 1 (pixels)
+            maxPixelWidth: 10
+        };
     }
 
     /**
@@ -326,7 +332,7 @@ class DrawDataConversation extends DrawData {
      * NOTE: this is called after all conversation rects are drawn so it is displayed on top visually
      */
     setConversationBubble() {
-        if (this.conversationIsSelected) this.drawTextBox();
+        if (this.conversationBubble.selected) this.drawTextBox();
     }
 
     /**
@@ -383,81 +389,87 @@ class DrawDataConversation extends DrawData {
 
     /**
      * Draws properly scaled and colored rectangled for conversation turn of a Point_Conversation
-     * Also tests if conversation turn has been selected by user and sends to setText if so
-     * NOTE: A call to setText also results in highlighting current rect stroke in this method
+     * Also tests if conversation turn has been selected by user and sends to recordConversationBubble if so
+     * NOTE: A call to recordConversationBubble also results in highlighting current rect stroke in this method
      * @param  {Point_Conversation} point
      * @param  {Color} curColor
      */
     drawRects(point, curColor) {
-        // ***** SET FONTS/STROKES
+        // ***** SET FONTS/STROKES/CONSTANTS
         noStroke(); // reset if setDrawText is called previously in loop
         textFont(font_Lato, keyTextSize);
         textSize(1); // Controls measurement of pixels in a string that corredponds to vertical pixel height of rectangle.
-        // ***** SET RECT SCALING CONSTANTS
-        const minPixelHeight = 3; // for really short conversation turns set a minimum pixel height     
-        const minPixelWidth = map(totalTimeInSeconds, 0, 3600, 10, 1, true); // map to inverse, values constrained between 10 and 1 (pixels)
-        const maxPixelWidth = 10;
-        const rectWidth = map(currPixelTimeMax - currPixelTimeMin, 0, timelineLength, maxPixelWidth, minPixelWidth); // map to inverse of min/max to set rectWidth based on amount of pixel time selected
+        const rectWidth = map(currPixelTimeMax - currPixelTimeMin, 0, timelineLength, this.rect.maxPixelWidth, this.rect.minPixelWidth); // map to inverse of min/max to set rectWidth based on amount of pixel time selected
         let rectLength = textWidth(point.talkTurn);
-        if (rectLength < minPixelHeight) rectLength = minPixelHeight; // if current turn is small set it to the minimum height
-        // ***** GET CURPOINT SCALED VALUES
+        if (rectLength < this.rect.minPixelHeight) rectLength = this.rect.minPixelHeight; // if current turn is small set it to the minimum height
         const curPoint = this.getScaledConversationPointValues(point);
         let yPos;
         if (conversationPositionTop) yPos = 0; // if conversation turn positioning is at top of screen
         else yPos = curPoint.scaledYPos - rectLength;
-        // ***** TEST SET TEXT (sets stroke/strokeWeight to highlight rect if selected)
-        if (overRect(curPoint.scaledXPos, yPos, rectWidth, rectLength)) this.setText(point, PLAN); // if over plan
-        else if (overRect(curPoint.scaledTime, yPos, rectWidth, rectLength)) this.setText(point, SPACETIME); // if over spacetime
+        // ***** TEST SET TEXT
+        if (overRect(curPoint.scaledXPos, yPos, rectWidth, rectLength)) this.recordConversationBubble(point, PLAN); // if over plan
+        else if (overRect(curPoint.scaledTime, yPos, rectWidth, rectLength)) this.recordConversationBubble(point, SPACETIME); // if over spacetime
         // ***** DRAW CUR RECT
         fill(curColor);
         rect(curPoint.scaledXPos, yPos, rectWidth, rectLength); // PLAN VIEW
         rect(curPoint.scaledTime, yPos, rectWidth, rectLength); // SPACETIME VIEW
     }
 
-    setText(pointToDraw, view) {
-        this.conversationIsSelected = true;
-        this.conversationToDraw = pointToDraw;
-        this.view = view;
+    /**
+     * Records user selected conversation
+     * NOTE: Also sets stroke/strokeweight to highlight selected rectangle in drawRects method
+     * @param  {Point_Conversation} pointToDraw
+     * @param  {Integer} view
+     */
+    recordConversationBubble(pointToDraw, view) {
+        this.conversationBubble.selected = true;
+        this.conversationBubble.point = pointToDraw;
+        this.conversationBubble.view = view;
         stroke(0);
         strokeWeight(4);
     }
 
+    /**
+     * Draws textbox and cartoon "bubble" for user selected conversation
+     * Sets box dimensions based on size of conversation turn/text
+     */
     drawTextBox() {
-        let textBoxWidth = width / 3; // width of text and textbox drawn
-        let textSpacing = width / 57; // textbox leading
-        let boxSpacing = width / 141; // general textBox spacing variable
-        let boxDistFromRect = width / 28.2; // distance from text rectangle of textbox
+        // ***** SET FONTS/STROKES/CONSTANTS
+        const curPoint = this.getScaledConversationPointValues(this.conversationBubble.point); // get scaled values for selected point
+        const textBox = {
+            width: width / 3, // width of text and textbox drawn
+            textLeading: width / 57, // textbox leading
+            boxSpacing: width / 141, // general textBox spacing variable
+            rectSpacing: width / 28.2, // distance from text rectangle of textbox
+        }
+        textBox.height = textBox.textLeading * (ceil(textWidth(this.conversationBubble.point.talkTurn) / textBox.width)); // lines of talk in a text box rounded up
         textFont(font_Lato, keyTextSize);
-        textLeading(textSpacing);
-        let point = this.conversationToDraw;
-        let pixelTime = map(point.time, 0, totalTimeInSeconds, timelineStart, timelineEnd);
-        let scaledTime = map(pixelTime, currPixelTimeMin, currPixelTimeMax, timelineStart, timelineEnd);
-        let textBoxHeight = textSpacing * (ceil(textWidth(point.talkTurn) / textBoxWidth)); // lines of talk in a text box rounded up
+        textLeading(textBox.textLeading);
         let xPos; // set xPos, constrain prevents drawing off screen
-        if (this.view === PLAN) xPos = constrain((point.xPos * displayFloorPlanWidth / inputFloorPlanPixelWidth) - textBoxWidth / 2, boxSpacing, width - textBoxWidth - boxSpacing);
-        else xPos = constrain(scaledTime - textBoxWidth / 2, 0, width - textBoxWidth - boxSpacing);
+        if (this.conversationBubble.view === PLAN) xPos = constrain(curPoint.scaledXPos - textBox.width / 2, textBox.boxSpacing, width - textBox.width - textBox.boxSpacing);
+        else xPos = constrain(curPoint.scaledTime - textBox.width / 2, 0, width - textBox.width - textBox.boxSpacing);
         let yPos, yDif;
         if (mouseY < height / 2) { //if top half of screen, text box below rectangle
-            yPos = mouseY + boxDistFromRect;
-            yDif = -boxSpacing;
+            yPos = mouseY + textBox.rectSpacing;
+            yDif = -textBox.boxSpacing;
         } else { //if bottom half of screen, text box above rectangle
-            yPos = mouseY - boxDistFromRect - textBoxHeight;
-            yDif = textBoxHeight + boxSpacing;
+            yPos = mouseY - textBox.rectSpacing - textBox.height;
+            yDif = textBox.height + textBox.boxSpacing;
         }
-        // textbox
+        // ***** DRAW TEXTBOX
         stroke(0); //set color to black
         strokeWeight(1);
         fill(255, 200); // transparency for textbox
-        rect(xPos - boxSpacing, yPos - boxSpacing, textBoxWidth + 2 * boxSpacing, textBoxHeight + 2 * boxSpacing);
+        rect(xPos - textBox.boxSpacing, yPos - textBox.boxSpacing, textBox.width + 2 * textBox.boxSpacing, textBox.height + 2 * textBox.boxSpacing);
         fill(0);
-        text(point.speaker + ": " + point.talkTurn, xPos, yPos, textBoxWidth, textBoxHeight); // text
-        // conversation bubble
+        text(this.conversationBubble.point.speaker + ": " + this.conversationBubble.point.talkTurn, xPos, yPos, textBox.width, textBox.height); // text
+        // ***** DRAW CARTOON BUBBLE
         stroke(255);
         strokeWeight(2);
-        line(mouseX - boxDistFromRect, yPos + yDif, mouseX - boxDistFromRect / 2, yPos + yDif);
+        line(mouseX - textBox.rectSpacing, yPos + yDif, mouseX - textBox.rectSpacing / 2, yPos + yDif); // white line to hide black rect under cartoon bubble
         stroke(0);
         strokeWeight(1);
-        line(mouseX, mouseY, mouseX - boxDistFromRect, yPos + yDif);
-        line(mouseX, mouseY, mouseX - boxDistFromRect / 2, yPos + yDif);
+        line(mouseX, mouseY, mouseX - textBox.rectSpacing, yPos + yDif);
+        line(mouseX, mouseY, mouseX - textBox.rectSpacing / 2, yPos + yDif);
     }
 }
