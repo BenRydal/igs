@@ -1,8 +1,12 @@
 /*
 CREDITS/LICENSE INFORMATION: 
-This software is written in JavaScript and p5.js and uses YouTube and Kaltura Video Player APIs and the PapaParse library by Matt Holt for CSV file processing.
-This software is licensed under the GNU General Public License Version 2.0. See the GNU General Public License included with this software for more details. 
-IGS-Indoor software was originally developed by Ben Rydal Shapiro at Vanderbilt University
+This software is written in JavaScript and p5.js and uses YouTube and Kaltura Video Player APIs and the PapaParse library by Matt Holt for CSV file processing. 
+This software is licensed under the GNU General Public License Version 2.0. 
+See the GNU General Public License included with this software for more details. 
+Classroom discussion example data is used with special permission from Mathematics Teaching and Learning to Teach (MTLT), 
+University of Michigan. (2010). Sean Numbers-Ofala. Classroom science lesson data is made possible by the researchers 
+and teachers who created The Third International Mathematics and Science Study (TIMSS) 1999 Video Study. 
+IGS-Indoor software was originally developed by Ben Rydal Shapiro at Vanderbilt University 
 as part of his dissertation titled Interaction Geography & the Learning Sciences. 
 Copyright (C) 2018 Ben Rydal Shapiro, and contributors. 
 To reference or read more about this work please see: 
