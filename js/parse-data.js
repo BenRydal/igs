@@ -165,6 +165,7 @@ function clearAllData() {
     if (dataIsLoaded(videoPlayer)) {
         if (videoIsShowing) overVideoButton(); // Turn off video before destroying it if showing
         videoPlayer.destroy(); // if there is a video, destroy it
+        videoPlayer = null; // set videoPlayer to null
     }
     floorPlan = undefined;
     speakerList = [];
