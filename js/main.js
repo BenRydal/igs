@@ -177,9 +177,9 @@ function draw() {
     if (dataIsLoaded(floorPlan)) image(floorPlan, 0, 0, displayFloorPlanWidth, displayFloorPlanHeight);
     if (dataIsLoaded(paths) && dataIsLoaded(speakerList)) setMovementAndConversationData();
     else if (dataIsLoaded(paths)) setMovementData();
-    if (dataIsLoaded(videoPlayer) && videoIsShowing) {
+    if (dataIsLoaded(videoPlayer) && videoIsShowing && (mouseX !== pmouseX || mouseY !== pmouseY)) {
         if (!videoIsPlaying) setVideoScrubbing();
-        if (mouseX !== pmouseX || mouseY !== pmouseY) select('#moviePlayer').position(mouseX - videoWidth, mouseY - videoHeight);
+        select('#moviePlayer').position(mouseX - videoWidth, mouseY - videoHeight);
     }
     let keys = new Keys();
     keys.drawKeys();
@@ -249,6 +249,7 @@ function setVideoScrubbing() {
         // must floor vPos to prevent double finite error
         let vPos = Math.floor(map(mPos, timelineStart, timelineEnd, 0, Math.floor(videoPlayer.getVideoDuration())));
         videoPlayer.seekTo(vPos);
+        videoPlayer.pause(); // Add to prevent accidental video playing that seems to occur
     }
 }
 /**
