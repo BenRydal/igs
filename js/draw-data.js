@@ -58,11 +58,17 @@ class DrawDataMovement extends DrawData {
 
     constructor() {
         super();
-        this.bugXPos = -1; // bug values are used to compare and draw position of "bug" in floor plan and space-time views
-        this.bugYPos = -1;
-        this.bugTimePos = -1;
-        this.bugSize = width / 50; // controls size of bug drawn in both views
-        this.bugSpacingComparison = timelineLength;
+        /**
+         * Bug represents location dot drawn in floor plan and space-time views
+         * @Float xPos, yPos, timePos, size, spacingComparison
+         */
+        this.bug = {
+            xPos: NO_DATA,
+            yPos: NO_DATA,
+            timePos: NO_DATA,
+            size: width / 50,
+            spacingComparison: timelineLength // used to compare data points to find closest bug value
+        };
         this.smallPathWeight = 3;
         this.largePathWeight = 6;
         this.colorGray = 150;
@@ -78,7 +84,7 @@ class DrawDataMovement extends DrawData {
             this.draw(PLAN, path.movement, path.color);
             this.draw(SPACETIME, path.movement, path.color);
         }
-        if (this.bugXPos != -1) this.drawBug(path.color); // if selected, draw bug
+        if (this.bug.xPos != NO_DATA) this.drawBug(path.color); // if selected, draw bug
     }
 
     /**
@@ -253,30 +259,30 @@ class DrawDataMovement extends DrawData {
     testVideoForBugPoint(scaledTimeToTest) {
         const videoX = map(videoPlayer.getCurrentTime(), 0, totalTimeInSeconds, timelineStart, timelineEnd);
         const scaledVideoX = map(videoX, currPixelTimeMin, currPixelTimeMax, timelineStart, timelineEnd);
-        if (scaledVideoX >= scaledTimeToTest - this.bugSpacingComparison && scaledVideoX <= scaledTimeToTest + this.bugSpacingComparison) {
-            this.bugSpacingComparison = Math.abs(scaledVideoX - scaledTimeToTest);
+        if (scaledVideoX >= scaledTimeToTest - this.bug.spacingComparison && scaledVideoX <= scaledTimeToTest + this.bug.spacingComparison) {
+            this.bug.spacingComparison = Math.abs(scaledVideoX - scaledTimeToTest);
             return true;
         } else return false;
     }
 
     testMouseForBugPoint(scaledTimeToTest) {
-        if (mouseX >= scaledTimeToTest - this.bugSpacingComparison && mouseX <= scaledTimeToTest + this.bugSpacingComparison) {
-            this.bugSpacingComparison = Math.abs(mouseX - scaledTimeToTest);
+        if (mouseX >= scaledTimeToTest - this.bug.spacingComparison && mouseX <= scaledTimeToTest + this.bug.spacingComparison) {
+            this.bug.spacingComparison = Math.abs(mouseX - scaledTimeToTest);
             return true;
         } else return false;
     }
 
     resetBug() {
-        this.bugXPos = -1;
-        this.bugYPos = -1;
-        this.bugTimePos = -1;
-        this.bugSpacingComparison = timelineLength;
+        this.bug.xPos = NO_DATA;
+        this.bug.yPos = NO_DATA;
+        this.bug.timePos = NO_DATA;
+        this.bug.spacingComparison = timelineLength;
     }
 
     recordBug(timePos, xPos, yPos) {
-        this.bugXPos = xPos;
-        this.bugYPos = yPos;
-        this.bugTimePos = timePos;
+        this.bug.xPos = xPos;
+        this.bug.yPos = yPos;
+        this.bug.timePos = timePos;
         bugTimePosForVideoScrubbing = timePos;
     }
 
@@ -284,8 +290,8 @@ class DrawDataMovement extends DrawData {
         stroke(0);
         strokeWeight(5);
         fill(shade);
-        ellipse(this.bugXPos, this.bugYPos, this.bugSize, this.bugSize);
-        ellipse(this.bugTimePos, this.bugYPos, this.bugSize, this.bugSize);
+        ellipse(this.bug.xPos, this.bug.yPos, this.bug.size, this.bug.size);
+        ellipse(this.bug.timePos, this.bug.yPos, this.bug.size, this.bug.size);
     }
 
     drawSlicer() {
@@ -306,7 +312,7 @@ class DrawDataConversation extends DrawData {
          */
         this.conversationBubble = {
             selected: false,
-            point: -1, // stores one Point_Conversation object for selected conversation turn
+            point: NO_DATA, // stores one Point_Conversation object for selected conversation turn
             view: PLAN // view indicating if user selected conversation in floor plan or space-time views
         };
         /**

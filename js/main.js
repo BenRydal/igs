@@ -25,8 +25,9 @@ let floorPlan; // PNG or JPG floorplan image
 const movementHeaders = ['time', 'x', 'y']; // String array indicating movement movement file headers, data in each column should be of type number or it won't process
 const conversationHeaders = ['time', 'speaker', 'talk']; // String array indicating conversation file headers, data in time column shout be of type number, speaker column should be of type String, talk column should be not null or undefined
 let totalTimeInSeconds = 0; // Number indicating time value in seconds that all displayed data is set to, set dynamically in processMovement methods
-const PLAN = 0,
-    SPACETIME = 1; // Number constants indicating floorplan or space-time drawing modes
+const PLAN = 0, // Number constants indicating floorplan or space-time drawing modes
+    SPACETIME = 1,
+    NO_DATA = -1;
 
 /**
  * NOTE: Speaker and path objects are separate due to how P5.js draws shapes in the browser.
