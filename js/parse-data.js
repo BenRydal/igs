@@ -174,7 +174,6 @@ function clearAllData() {
     conversationFileResults = [];
     paths = [];
     totalTimeInSeconds = 0; // reset total time
-    updateMovementData = false; // reset
 }
 
 function clearConversationData() {
@@ -187,5 +186,4 @@ function clearMovementData() {
     movementFileResults = [];
     paths = [];
     totalTimeInSeconds = 0; // reset total time
-    updateMovementData = false; // reset
 }
