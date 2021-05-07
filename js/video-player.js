@@ -56,9 +56,8 @@ class YoutubePlayer {
 
     // The API will call this function when the video player is ready.
     onPlayerReady() {
-        // event.target.playVideo();
-        loop(); // restart p5 draw loop once loaded
         console.log("YT player ready: ");
+        overVideoButton(); // Show video once loaded
     }
 
     show() {
@@ -117,6 +116,7 @@ class P5FilePlayer {
                 URL.revokeObjectURL(this.src);
             }
             console.log("File Player Ready:");
+            overVideoButton(); // Show video once it has been loaded
         });
     }
 
