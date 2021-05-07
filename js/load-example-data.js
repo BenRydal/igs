@@ -1,3 +1,8 @@
+/**
+ * Selects load data or example data option
+ * NOTE: called from user selection in drop down menu
+ * NOTE: Calls input bar and clears all data for load data 
+ */
 function selectDataLoadOption() {
   if (videoIsShowing) overVideoButton(); // Turn off video that if showing
   if (showIntroMsg) showIntroMsg = false; // Hide intro msg if showing
@@ -34,7 +39,10 @@ function hideInputBar() {
   let element = document.querySelector('.inputBar');
   element.style.display = 'none';
 }
-
+/**
+ * Handles asynchronous loading of example data from a selected example array of data
+ * @param  {[String directory, String floorPlan image file, String conversation File, String movement File[], String video platform, video params (see Video Player Interface)]} params
+ */
 async function loadExample(params) {
   hideInputBar();
   processVideo(params[4], params[5]);
@@ -47,8 +55,8 @@ async function loadExample(params) {
 /**
  * Handles async loading of conversation file
  * NOTE: folder and filename are separated for convenience later in program
- * @param  {} folder
- * @param  {} fileName
+ * @param  {String} folder
+ * @param  {String} fileName
  */
 async function getExampleConversationFile(folder, fileName) {
   let response = await fetch(new Request(folder + fileName));
@@ -57,7 +65,12 @@ async function getExampleConversationFile(folder, fileName) {
     type: "text/csv",
   });
 }
-
+/**
+ * Handles async loading of movement file
+ * NOTE: folder and filename are separated for convenience later in program
+ * @param  {String} folder
+ * @param  {String} fileNames
+ */
 async function getExampleMovementFiles(folder, fileNames) {
   let fileList = [];
   for (let i = 0; i < fileNames.length; i++) {
