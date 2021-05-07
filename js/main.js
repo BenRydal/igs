@@ -90,7 +90,7 @@ class Point_Conversation {
 //*************** EXAMPLE DATA ***************
 /**
  * Data is dynamically loaded into program when selected by user
- * Format as: {directory, floorplan image, conversation File, movement File[], video platform, video params (see Video Player Interface)}
+ * Format as: [String directory, String floorPlan image file, String conversation File, String movement File[], String video platform, video params (see Video Player Interface)] 
  */
 const example_1 = ['data/example-1/', 'floorplan.png', 'conversation.csv', ['Teacher.csv'], 'Youtube', {
         videoId: 'Iu0rxb-xkMk'
