@@ -6,7 +6,7 @@ See the GNU General Public License included with this software for more details.
 Classroom discussion example data is used with special permission from Mathematics Teaching and Learning to Teach (MTLT), 
 University of Michigan. (2010). Sean Numbers-Ofala. Classroom science lesson data is made possible by the researchers 
 and teachers who created The Third International Mathematics and Science Study (TIMSS) 1999 Video Study. 
-IGS-Indoor software was originally developed by Ben Rydal Shapiro at Vanderbilt University 
+IGS software was originally developed by Ben Rydal Shapiro at Vanderbilt University 
 as part of his dissertation titled Interaction Geography & the Learning Sciences. 
 Copyright (C) 2018 Ben Rydal Shapiro, and contributors. 
 To reference or read more about this work please see: 
@@ -133,7 +133,7 @@ let animationCounter = 0; // boolean controls current value of animation
 let keyTextSize, font_PlayfairReg, font_PlayfairItalic, font_Lato; // text size and fonts
 // INTRO MSG
 let showIntroMsg = true; // boolean controls intro message
-const introMSG = "INTERACTION GEOGRAPHY SLICER (IGS) INDOOR\n\nby Ben Rydal Shapiro & contributers\nbuilt with p5.js & JavaScript\n\nHi There! This is a tool to visualize movement, conversation, and video data over space and time. Data are displayed over a floor plan view (left) and a space-time view (right), where the vertical axis corresponds to the vertical dimension of the floor plan. Use the top menu to visualize different sample datasets or upload your own data. Hover over the floor plan and use the timeline to selectively study displayed data. Use the bottom buttons to animate data, visualize conversation in different ways, and interact with video data by clicking the timeline to play & pause video. For more information see: benrydal.com/software/igs-indoor";
+const introMSG = "INTERACTION GEOGRAPHY SLICER (IGS)\n\nby Ben Rydal Shapiro & contributers\nbuilt with p5.js & JavaScript\n\nHi There! This is a tool to visualize movement, conversation, and video data over space and time. Data are displayed over a floor plan view (left) and a space-time view (right), where the vertical axis corresponds to the vertical dimension of the floor plan. Use the top menu to visualize different sample datasets or upload your own data. Hover over the floor plan and use the timeline to selectively study displayed data. Use the bottom buttons to animate data, visualize conversation in different ways, and interact with video data by clicking the timeline to play & pause video. For more information see: benrydal.com/software/igs";
 // INTERFACE
 let timelineStart, timelineEnd, timelineHeight, timelineLength, yPosTimelineTop, yPosTimelineBottom, timelineThickness;
 let currPixelTimeMin, currPixelTimeMax; // Rescaled timeline start and end depending on user interactions
