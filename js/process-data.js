@@ -23,12 +23,12 @@ function processFloorPlan(filePath) {
  * @param  {Results [] from PapaParse} results
  */
 function processMovementFile(results) {
-    let movement = []; // Array to hold Point_Movement objects
-    let conversation = []; // Array to hold Point_Conversation
+    let movement = []; // Arrays to hold Point_Movement and Point_Conversation objects
+    let conversation = [];
     let conversationCounter = 0;
     for (let i = 0; i < results.data.length; i++) {
         // Sample movement row and test if row is good data
-        if (testSampleMovementData(results.data, i) && testMovementDataRowForType(results.data, i)) {
+        if (testSampleMovementData(results.data, i) && testSingleMovementDataRowForType(results.data, i)) {
             const m = createMovementPoint(results.data, i);
             movement.push(m); // always add to movement []
             if (testConversationDataLengthAndRowForType(conversationCounter) && m.time >= conversationFileResults[conversationCounter][conversationHeaders[0]]) {
@@ -40,6 +40,30 @@ function processMovementFile(results) {
     return [movement, conversation];
 }
 
+/**
+ * Returns true if all values in provided row are of number type
+ * @param  {Results [] from PapaParse} data
+ * @param  {Integer} curRow
+ */
+function testSingleMovementDataRowForType(data, curRow) {
+    return typeof data[curRow][movementHeaders[0]] === 'number' && typeof data[curRow][movementHeaders[1]] === 'number' && typeof data[curRow][movementHeaders[2]] === 'number';
+}
+
+/**
+ * Method to sample data in two ways. Important to optimize user interaction and good curve drawing.
+ * SampleRateDivisor determines if there is large or small amount of data
+ * (1) If minimal amount of data, sample if curRow is greater than last row to 2 decimal places
+ * (2) If large amount of data, sample if curRow is one whole number greater than last row
+ * @param  {Results [] from PapaParse} data
+ * @param  {Integer} curRow
+ */
+function testSampleMovementData(data, curRow) {
+    if (curRow === 0 || curRow === 1) return true; // always return true for first two rows to set starting point
+    const sampleRateDivisor = 5; // 5 as rate seems to work nicely on most devices
+    if (Math.floor(data.length / sampleRateDivisor) < timelineLength) return Number.parseFloat(data[curRow][movementHeaders[0]]).toFixed(2) > Number.parseFloat(data[curRow - 1][movementHeaders[0]]).toFixed(2);
+    else return Math.floor(data[curRow][movementHeaders[0]]) > Math.floor(data[curRow - 1][movementHeaders[0]]); // Large data sampling rate
+}
+
 function createMovementPoint(data, curRow) {
     let m = new Point_Movement();
     m.time = data[curRow][movementHeaders[0]];
@@ -47,6 +71,7 @@ function createMovementPoint(data, curRow) {
     m.yPos = data[curRow][movementHeaders[2]];
     return m;
 }
+
 /**
  * Creates and adds new Path object to global paths []
  * Also handles updating global totalTime and sorting paths []
@@ -149,26 +174,6 @@ function processVideo(platform, params) {
             videoPlayer = new P5FilePlayer(params);
             break;
     }
-}
-
-// Returns true if all values are number type
-function testMovementDataRowForType(data, curRow) {
-    return typeof data[curRow][movementHeaders[0]] === 'number' && typeof data[curRow][movementHeaders[1]] === 'number' && typeof data[curRow][movementHeaders[2]] === 'number';
-}
-
-/**
- * Method to sample data in two ways. Important to optimize user interaction and good curve drawing.
- * SampleRateDivisor determines if there is large or small amount of data
- * (1) If minimal amount of data, sample if curRow is greater than last row to 2 decimal places
- * (2) If large amount of data, sample if curRow is one whole number greater than last row
- * @param  {Results [] from PapaParse} data
- * @param  {Integer} curRow
- */
-function testSampleMovementData(data, curRow) {
-    if (curRow === 0 || curRow === 1) return true; // always return true for first two rows to set starting point
-    const sampleRateDivisor = 5; // 5 as rate seems to work nicely on most devices
-    if (Math.floor(data.length / sampleRateDivisor) < timelineLength) return Number.parseFloat(data[curRow][movementHeaders[0]]).toFixed(2) > Number.parseFloat(data[curRow - 1][movementHeaders[0]]).toFixed(2);
-    else return Math.floor(data[curRow][movementHeaders[0]]) > Math.floor(data[curRow - 1][movementHeaders[0]]); // Large data sampling rate
 }
 
 // Tests if current conversation row is less than total rows in table and if time is number and speaker is string and talk turn is not null or undefined
