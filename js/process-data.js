@@ -18,12 +18,15 @@ function processFloorPlan(filePath) {
 }
 
 /**
- * Tests and samples array of movement data to add to Path Object
- * Also tests conversation data to closest time value in movement data to add to Path object
+ * Creates clean (good data) and sampled movement [] of Point_Movement objects and conversation []
+ * of Point_Conversation objects from PapaParse movement results [].
+ * To create the conversation [], a comparison between the global conversationFileResults [] 
+ * at a specified index to the current Point_Movement time is made--this comparison is what 
+ * determines when to create a new Conversation point if the current conversation row has good data
  * @param  {Results [] from PapaParse} results
  */
 function processMovementFile(results) {
-    let movement = []; // Arrays to hold Point_Movement and Point_Conversation objects
+    let movement = []; // Create empty arrays to hold Point_Movement and Point_Conversation objects
     let conversation = [];
     let conversationCounter = 0;
     for (let i = 0; i < results.data.length; i++) {
@@ -31,10 +34,11 @@ function processMovementFile(results) {
         if (testSampleMovementData(results.data, i) && testSingleMovementDataRowForType(results.data, i)) {
             const m = createMovementPoint(results.data, i);
             movement.push(m); // always add to movement []
+            // Test conversation data row for quality and if movement time is greater than conversationCounter time
             if (testConversationDataLengthAndRowForType(conversationCounter) && m.time >= conversationFileResults[conversationCounter][conversationHeaders[0]]) {
                 conversation.push(createConversationPoint(conversationCounter, m.xPos, m.yPos));
                 conversationCounter++;
-            } else if (!testConversationDataLengthAndRowForType(conversationCounter)) conversationCounter++;
+            } else if (!testConversationDataLengthAndRowForType(conversationCounter)) conversationCounter++; // make sure to increment counter if bad data to skip row in next iteration of loop
         }
     }
     return [movement, conversation];
