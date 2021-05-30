@@ -47,32 +47,12 @@ function parseMovementFiles(fileList) {
 function testMovementFile(results, file) {
     console.log("Parsing complete:", results, file);
     // Test if file has data, file headers, and at least one row of correctly typed data
-    if (results.data.length > 1 && testMovementFileHeaders(results.meta.fields) && testMovementFileRowsForType(results.data)) {
+    if (results.data.length > 1 && testData.movementHeaders(results.meta.fields) && testData.movementRowsForType(results.data)) {
         const pathName = file.name.charAt(0).toUpperCase(); // get name of path, also used to test if associated speaker in conversation file
         const [movement, conversation] = processData.processMovementFile(results); //
         processData.updatePaths(pathName, movement, conversation);
         movementFileResults.push([results, pathName]); // add results and pathName to global []
     } else alert("Error loading movement file. Please make sure your file is a .CSV file formatted with column headers: " + movementHeaders.toString());
-}
-
-/**
- * Tests if PapaParse meta results array includes correct headers for movement
- * @param  {PapaParse results.meta.fields} meta
- */
-function testMovementFileHeaders(meta) {
-    return meta.includes(movementHeaders[0]) && meta.includes(movementHeaders[1]) && meta.includes(movementHeaders[2]);
-}
-
-/**
- * Tests if at least one row of correctly typed data in PapaParse data array
- * Returns true on first row of PapaParse data array that has all correctly typed data for movement headers
- * @param  {PapaParse results.data []} data
- */
-function testMovementFileRowsForType(data) {
-    for (let i = 0; i < data.length; i++) {
-        if (typeof data[i][movementHeaders[0]] === 'number' && typeof data[i][movementHeaders[1]] === 'number' && typeof data[i][movementHeaders[2]] === 'number') return true;
-    }
-    return false;
 }
 
 // ***** CONVERSATION FILE INPUT METHODS *****
@@ -110,7 +90,7 @@ function parseConversationFile(file) {
 function testConversationFile(results, file) {
     console.log("Parsing complete:", results, file);
     // Test if file has data, file headers, and at least one row of correctly typed data
-    if (results.data.length > 1 && testConversationFileHeaders(results.meta.fields) && testConversationFileRowsForType(results.data)) {
+    if (results.data.length > 1 && testData.conversationHeaders(results.meta.fields) && testData.conversationRowsForType(results.data)) {
         conversationFileResults = results.data; // set to new array of keyed values
         processData.updateSpeakerList();
         speakerList.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching paths array
@@ -120,26 +100,6 @@ function testConversationFile(results, file) {
             processData.updatePaths(movementFileResults[i][1], movement, conversation); // Pass movement file pathname and reprocessed movement file results to updatepaths
         }
     } else alert("Error loading conversation file. Please make sure your file is a .CSV file formatted with column headers: " + conversationHeaders.toString());
-}
-
-/**
- * Tests if PapaParse meta results array includes correct headers for conversation
- * @param  {PapaParse results.meta.fields} meta
- */
-function testConversationFileHeaders(meta) {
-    return meta.includes(conversationHeaders[0]) && meta.includes(conversationHeaders[1]) && meta.includes(conversationHeaders[2]);
-}
-
-/**
- * Tests if at least one row of correctly typed data in PapaParse data array
- * Returns true on first row of PapaParse data array that has all correctly typed data for conversation headers
- * @param  {PapaParse results.data []} data
- */
-function testConversationFileRowsForType(data) {
-    for (let i = 0; i < data.length; i++) {
-        if (typeof data[i][conversationHeaders[0]] === 'number' && typeof data[i][conversationHeaders[1]] === 'string' && data[i][conversationHeaders[2]] != null) return true;
-    }
-    return false;
 }
 
 

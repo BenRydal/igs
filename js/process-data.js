@@ -91,41 +91,17 @@ class ProcessData {
         let conversationCounter = 0;
         for (let i = 0; i < results.data.length; i++) {
             // Sample movement row and test if row is good data
-            if (this.testSampleMovementData(results.data, i) && this.testSingleMovementDataRowForType(results.data, i)) {
+            if (testData.sampleMovementData(results.data, i) && testData.movementRowForType(results.data, i)) {
                 const m = this.createMovementPoint(results.data, i);
                 movement.push(m); // always add to movement []
                 // Test conversation data row for quality and if movement time is greater than conversationCounter time
-                if (this.testConversationDataLengthAndRowForType(conversationCounter) && m.time >= conversationFileResults[conversationCounter][conversationHeaders[0]]) {
+                if (testData.conversationLengthAndRowForType(conversationCounter) && m.time >= conversationFileResults[conversationCounter][conversationHeaders[0]]) {
                     conversation.push(this.createConversationPoint(conversationCounter, m.xPos, m.yPos));
                     conversationCounter++;
-                } else if (!this.testConversationDataLengthAndRowForType(conversationCounter)) conversationCounter++; // make sure to increment counter if bad data to skip row in next iteration of loop
+                } else if (!testData.conversationLengthAndRowForType(conversationCounter)) conversationCounter++; // make sure to increment counter if bad data to skip row in next iteration of loop
             }
         }
         return [movement, conversation];
-    }
-
-    /**
-     * Returns true if all values in provided row are of number type
-     * @param  {Results [] from PapaParse} data
-     * @param  {Integer} curRow
-     */
-    testSingleMovementDataRowForType(data, curRow) {
-        return typeof data[curRow][movementHeaders[0]] === 'number' && typeof data[curRow][movementHeaders[1]] === 'number' && typeof data[curRow][movementHeaders[2]] === 'number';
-    }
-
-    /**
-     * Method to sample data in two ways. Important to optimize user interaction and good curve drawing.
-     * SampleRateDivisor determines if there is large or small amount of data
-     * (1) If minimal amount of data, sample if curRow is greater than last row to 2 decimal places
-     * (2) If large amount of data, sample if curRow is one whole number greater than last row
-     * @param  {Results [] from PapaParse} data
-     * @param  {Integer} curRow
-     */
-    testSampleMovementData(data, curRow) {
-        if (curRow === 0 || curRow === 1) return true; // always return true for first two rows to set starting point
-        const sampleRateDivisor = 5; // 5 as rate seems to work nicely on most devices
-        if (Math.floor(data.length / sampleRateDivisor) < timelineLength) return Number.parseFloat(data[curRow][movementHeaders[0]]).toFixed(2) > Number.parseFloat(data[curRow - 1][movementHeaders[0]]).toFixed(2);
-        else return Math.floor(data[curRow][movementHeaders[0]]) > Math.floor(data[curRow - 1][movementHeaders[0]]); // Large data sampling rate
     }
 
     createMovementPoint(data, curRow) {
@@ -204,7 +180,7 @@ class ProcessData {
             let tempSpeakerList = []; // create/populate temp list to store strings to test from global speakerList
             for (let j = 0; j < speakerList.length; j++) tempSpeakerList.push(speakerList[j].name);
             // If row is good data, test if speakerList already has speaker and if not add speaker 
-            if (this.testConversationDataLengthAndRowForType(i)) {
+            if (testData.conversationLengthAndRowForType(i)) {
                 const speaker = this.cleanSpeaker(conversationFileResults[i][conversationHeaders[1]]); // get cleaned speaker character
                 if (!tempSpeakerList.includes(speaker)) this.addSpeakerToSpeakerList(speaker);
             }
@@ -238,11 +214,5 @@ class ProcessData {
                 videoPlayer = new P5FilePlayer(params);
                 break;
         }
-    }
-
-    // Tests if current conversation row is less than total rows in table and if time is number and speaker is string and talk turn is not null or undefined
-    // NOTE: this also tests if a conversation file is loaded
-    testConversationDataLengthAndRowForType(curRow) {
-        return curRow < conversationFileResults.length && typeof conversationFileResults[curRow][conversationHeaders[0]] === 'number' && typeof conversationFileResults[curRow][conversationHeaders[1]] === 'string' && conversationFileResults[curRow][conversationHeaders[2]] != null;
     }
 }

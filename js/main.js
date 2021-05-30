@@ -16,10 +16,12 @@ https://etd.library.vanderbilt.edu/available/etd-03212018-140140/unrestricted/Sh
 
 let exampleData;
 let processData;
-// parseData
+let testData;
 // testData
+// parseData
+// clear data?
 // move gui constants to keys and put keys in global space
-// have class for constants, declare globally
+// have class for constants, declare globally--could have "speaker/path etc. classes"
 // movie video variables under videoPlayer interface/as part of VideoPlayer object?
 
 //*************** FILE INPUT AND CORE VARS ***************
@@ -102,6 +104,7 @@ function setup() {
     textFont(font_Lato, keyTextSize);
     exampleData = new ExampleData();
     processData = new ProcessData();
+    testData = new TestData();
 }
 /**
  * Always draws background and keys. Organizes what data is drawing if it is loaded/not undefined.
