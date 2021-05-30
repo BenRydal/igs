@@ -5,7 +5,7 @@
  * @param  {PNG, JPG, JPEG File} input
  */
 function parseInputFloorPlanFile(input) {
-    processFloorPlan(URL.createObjectURL(input.files[0]));
+    processData.processFloorPlan(URL.createObjectURL(input.files[0]));
     input.value = ''; // reset input value so you can load same file again in browser
 }
 
@@ -49,8 +49,8 @@ function testMovementFile(results, file) {
     // Test if file has data, file headers, and at least one row of correctly typed data
     if (results.data.length > 1 && testMovementFileHeaders(results.meta.fields) && testMovementFileRowsForType(results.data)) {
         const pathName = file.name.charAt(0).toUpperCase(); // get name of path, also used to test if associated speaker in conversation file
-        const [movement, conversation] = processMovementFile(results); //
-        updatePaths(pathName, movement, conversation);
+        const [movement, conversation] = processData.processMovementFile(results); //
+        processData.updatePaths(pathName, movement, conversation);
         movementFileResults.push([results, pathName]); // add results and pathName to global []
     } else alert("Error loading movement file. Please make sure your file is a .CSV file formatted with column headers: " + movementHeaders.toString());
 }
@@ -112,12 +112,12 @@ function testConversationFile(results, file) {
     // Test if file has data, file headers, and at least one row of correctly typed data
     if (results.data.length > 1 && testConversationFileHeaders(results.meta.fields) && testConversationFileRowsForType(results.data)) {
         conversationFileResults = results.data; // set to new array of keyed values
-        updateSpeakerList();
+        processData.updateSpeakerList();
         speakerList.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching paths array
         // Must reprocess existing movement files
         for (let i = 0; i < movementFileResults.length; i++) {
-            const [movement, conversation] = processMovementFile(movementFileResults[i][0]); // Reprocess movement file results
-            updatePaths(movementFileResults[i][1], movement, conversation); // Pass movement file pathname and reprocessed movement file results to updatepaths
+            const [movement, conversation] = processData.processMovementFile(movementFileResults[i][0]); // Reprocess movement file results
+            processData.updatePaths(movementFileResults[i][1], movement, conversation); // Pass movement file pathname and reprocessed movement file results to updatepaths
         }
     } else alert("Error loading conversation file. Please make sure your file is a .CSV file formatted with column headers: " + conversationHeaders.toString());
 }
@@ -154,7 +154,7 @@ function parseInputVideoFile(input) {
     let file = input.files[0];
     input.value = ''; // reset input value so you can load same file again in browser
     let fileLocation = URL.createObjectURL(file);
-    processVideo('File', {
+    processData.processVideo('File', {
         fileName: fileLocation
     });
 }

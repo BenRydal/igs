@@ -13,6 +13,15 @@ To reference or read more about this work please see:
 https://etd.library.vanderbilt.edu/available/etd-03212018-140140/unrestricted/Shapiro_Dissertation.pdf
 */
 
+
+let exampleData;
+let processData;
+// parseData
+// testData
+// move gui constants to keys and put keys in global space
+// have class for constants, declare globally
+// movie video variables under videoPlayer interface/as part of VideoPlayer object?
+
 //*************** FILE INPUT AND CORE VARS ***************
 /**
  * Global movement and conversation file results arrays allow dynamic re-processing of individual data files
@@ -29,81 +38,6 @@ const PLAN = 0, // Number constants indicating floorplan or space-time drawing m
     SPACETIME = 1,
     NO_DATA = -1;
 
-/**
- * NOTE: Speaker and path objects are separate due to how P5.js draws shapes in the browser.
- * NOTE: Each speaker and path object can match/correspond to the same person but they don't have to match.
- * This allows variation in the number of movement files and speakers listed.
- */
-
-/**
- * Represents collection of data that comprises an individual speaker
- * NOTE: constructed from conversation .CSV file
- */
-class Speaker {
-    constructor(name, col) {
-        this.name = name; // char indicating letter of speaker
-        this.color = col; // color set to gray to start, updated to match corresponding Path if one exists in processMovement
-        this.show = true; // boolean indicating speaker is showing in GUI
-    }
-}
-
-/**
- * Represents collection of data that comrpises a path
- * NOTE: constructed from movement .CSV file
- */
-class Path {
-    constructor(pathName) {
-        this.movement = []; // List of Point_Movement objects
-        this.conversation = []; // List of Point_Conversation objects
-        this.name = pathName; // Char indicating letter name of path. Matches first letter of movement file name and created when Path is instantiated.
-        this.color = undefined; // Color of path, set in processMovement
-        this.show = true; // boolean indicates if path is showing/selected
-    }
-}
-
-/**
- * Represents a point on a path
- * NOTE: constructed from each row/case in a .CSV movement file
- */
-class Point_Movement {
-    constructor(xPos, yPos, time) {
-        this.xPos = xPos; // Number x and y position used to set pixel position
-        this.yPos = yPos;
-        this.time = time; // Time value in seconds
-    }
-}
-
-/**
- * Represents a point with conversation on a path
- * NOTE: constructed from both .CSV movement and conversation files
- */
-class Point_Conversation {
-    constructor(xPos, yPos, time, speaker, talkTurn) {
-        this.xPos = xPos; // Number x and y positions used to set pixel position, constructed from movement .CSV file
-        this.yPos = yPos;
-        this.time = time; // Time value in seconds
-        this.speaker = speaker; // Char indicating letter name of speaker
-        this.talkTurn = talkTurn; // String of text indicating spoken conversation
-    }
-}
-
-//*************** EXAMPLE DATA ***************
-/**
- * Data is dynamically loaded into program when selected by user
- * Format as: [String directory, String floorPlan image file, String conversation File, String movement File[], String video platform, video params (see Video Player Interface)] 
- */
-const example_1 = ['data/example-1/', 'floorplan.png', 'conversation.csv', ['Teacher.csv'], 'Youtube', {
-        videoId: 'Iu0rxb-xkMk'
-    }],
-    example_2 = ['data/example-2/', 'floorplan.png', 'conversation.csv', ['Teacher.csv', 'Sean.csv', 'Mei.csv', 'Cassandra.csv', 'Nathan.csv'], 'Youtube', {
-        videoId: 'OJSZCK4GPQY'
-    }],
-    example_3 = ['data/example-3/', 'floorplan.png', 'conversation.csv', ['Jordan.csv'], 'Youtube', {
-        videoId: 'iiMjfVOj8po'
-    }],
-    example_4 = ['data/example-4/', 'floorplan.png', 'conversation.csv', ['Lily.csv', 'Jeans.csv', 'Adhir.csv', 'Mae.csv', 'Blake.csv'], 'Youtube', {
-        videoId: 'pWJ3xNk1Zpg'
-    }];
 
 //*************** FLOOR PLAN AND VIDEO ***************
 let inputFloorPlanPixelWidth, inputFloorPlanPixelHeight; // Number indicating pixel width/height of user inputted floor plan image file
@@ -166,6 +100,8 @@ function setup() {
     textAlign(LEFT, TOP);
     setGUI();
     textFont(font_Lato, keyTextSize);
+    exampleData = new ExampleData();
+    processData = new ProcessData();
 }
 /**
  * Always draws background and keys. Organizes what data is drawing if it is loaded/not undefined.

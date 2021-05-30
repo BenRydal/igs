@@ -6,7 +6,7 @@ class Keys {
         if (showMovementKeys) this.drawPathSpeakerKeys(paths);
         else this.drawPathSpeakerKeys(speakerList);
         this.drawTimeline();
-        this.drawbuttons();
+        this.drawButtons();
         if (overRect(0, 0, displayFloorPlanWidth, displayFloorPlanHeight)) this.drawFloorPlanSelector();
         if (showIntroMsg) this.drawIntroMsg(); // draw intro message on program start up until mouse is pressed
     }
@@ -44,7 +44,7 @@ class Keys {
         }
     }
 
-    drawbuttons() {
+    drawButtons() {
         let currXPos = timelineStart + buttonSpacing / 2;
         fill(animation ? 0 : 150);
         // Button 1
