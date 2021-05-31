@@ -41,18 +41,18 @@
     <div class="inputBar">
         <form action="/action_page.php">
             <input type="file" name="file" id="inputFloorPlan" name="file" class="inputfile" accept=".png, .jpg, .jpeg"
-                onchange="parseInputFloorPlanFile(this)">
+                onchange="parseData.parseFloorPlanFile(this)">
             <label for="inputFloorPlan">Floor Plan Image (PNG/JPG)</label>
             <input type="file" name="file" id="inputMovement" name="file" class="inputfile" multiple accept=".csv"
-                onchange="parseInputMovementFiles(this)">
+                onchange="parseData.organizeInputMovementFiles(this)">
             <label for="inputMovement">Movement Files (CSV)</label>
             <input type="file" name="file" id="inputConversation" class="inputfile" accept=".csv"
-                onchange="parseInputConversationFile(this)">
+                onchange="parseData.organizeInputConversationFile(this)">
             <label for="inputConversation">Conversation File (CSV)</label>
             <input type="file" name="file" id="inputVideo" class="inputfile" accept=".mp4"
-                onchange="parseInputVideoFile(this)">
+                onchange="parseData.parseVideoFile(this)">
             <label for="inputVideo">Video File (MP4)</label>
-            <button type="button" id="clearButton" class="inputfile" onclick="clearAllData()"></button>
+            <button type="button" id="clearButton" class="inputfile" onclick="parseData.clearAllData()"></button>
             <label for="clearButton">Clear Data</label>
         </form>
     </div>

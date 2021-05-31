@@ -13,13 +13,11 @@ To reference or read more about this work please see:
 https://etd.library.vanderbilt.edu/available/etd-03212018-140140/unrestricted/Shapiro_Dissertation.pdf
 */
 
-
 let exampleData;
+let parseData;
 let processData;
 let testData;
-// testData
-// parseData
-// clear data?
+
 // move gui constants to keys and put keys in global space
 // have class for constants, declare globally--could have "speaker/path etc. classes"
 // movie video variables under videoPlayer interface/as part of VideoPlayer object?
@@ -102,6 +100,7 @@ function setup() {
     textAlign(LEFT, TOP);
     setGUI();
     textFont(font_Lato, keyTextSize);
+    parseData = new ParseData();
     exampleData = new ExampleData();
     processData = new ProcessData();
     testData = new TestData();

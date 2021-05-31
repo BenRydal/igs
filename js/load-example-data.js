@@ -13,7 +13,7 @@
       let option = document.getElementById("examples").value;
       switch (option) {
         case "Load Data":
-          clearAllData();
+          parseData.clearAllData();
           this.showInputBar();
           break;
         case "Example 1":
@@ -60,8 +60,8 @@
       processData.processVideo(params[4], params[5]);
       processData.processFloorPlan(params[0] + params[1]);
       // Process conversation then movement files
-      await this.getExampleConversationFile(params[0], params[2]).then(parseConversationFile);
-      this.getExampleMovementFiles(params[0], params[3]).then(parseMovementFiles);
+      await this.getExampleConversationFile(params[0], params[2]).then(parseData.parseConversationFile);
+      this.getExampleMovementFiles(params[0], params[3]).then(parseData.parseMovementFiles);
     }
 
     /**
