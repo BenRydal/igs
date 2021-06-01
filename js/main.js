@@ -13,8 +13,6 @@ To reference or read more about this work please see:
 https://etd.library.vanderbilt.edu/available/etd-03212018-140140/unrestricted/Shapiro_Dissertation.pdf
 */
 
-
-// move variables to keys and put keys in global space
 // have class for constants, declare globally--could have "speaker/path etc. classes"
 // movie video variables under videoPlayer interface/as part of VideoPlayer object?
 // movie functions in GUI to new class and add mode variables
@@ -99,6 +97,8 @@ function setup() {
     keys = new Keys();
     textAlign(LEFT, TOP);
     textFont(font_Lato, keys.keyTextSize);
+    videoWidth = width / 5;
+    videoHeight = width / 6;
 }
 /**
  * Always draws background and keys. Organizes what data is drawing if it is loaded/not undefined.
