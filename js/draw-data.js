@@ -42,12 +42,12 @@ class DrawData {
     }
 
     /**
-     * If not animation mode, always return true
-     * If animation mode, return true only if time parameter is less than global animation counter
+     * If not isAnimate mode, always return true
+     * If isAnimate mode, return true only if time parameter is less than global isAnimate counter
      * @param  {Number/Float} timeValue
      */
     testAnimation(timeValue) {
-        if (animation) {
+        if (isAnimate) {
             let reMapTime = map(timeValue, keys.timelineStart, keys.timelineEnd, 0, totalTimeInSeconds);
             return animationCounter > reMapTime;
         } else return true;
@@ -241,14 +241,14 @@ class DrawDataMovement extends DrawData {
     }
 
     /**
-     * Tests for 3 modes: animation, video and mouse over space-time view
+     * Tests for 3 modes: isAnimate, video and mouse over space-time view
      * For current mode, tests parameter values to set/record bug correctly
      * @param  {Number/Float} scaledTimeToTest
      * @param  {Number/Float} xPos
      * @param  {Number/Float} yPos
      */
     testPointForBug(scaledTimeToTest, xPos, yPos) {
-        if (animation) this.recordBug(scaledTimeToTest, xPos, yPos); // always return true to set last/most recent point as the bug
+        if (isAnimate) this.recordBug(scaledTimeToTest, xPos, yPos); // always return true to set last/most recent point as the bug
         else if (videoIsPlaying) {
             // Separate this test out from 3 mode tests to make sure if this is not true know other mode tests are run when video is playing
             if (this.testVideoForBugPoint(scaledTimeToTest)) this.recordBug(scaledTimeToTest, xPos, yPos);
@@ -355,7 +355,7 @@ class DrawDataConversation extends DrawData {
             if (super.overTimeline(curPoint.pixelTime) && super.overFloorPlan(curPoint.scaledXPos, curPoint.scaledYPos) && super.testAnimation(curPoint.pixelTime) && super.overFloorPlanAndCursor(curPoint.scaledXPos, curPoint.scaledYPos)) {
                 let curSpeaker = this.getSpeakerFromSpeakerList(points[i].speaker); // get speaker object from global list equivalent to the current speaker of point
                 if (curSpeaker != null && curSpeaker.show) {
-                    if (allConversation) this.drawRects(points[i], curSpeaker.color); // draws all rects
+                    if (isModeAllTalkOnPath) this.drawRects(points[i], curSpeaker.color); // draws all rects
                     else {
                         if (curSpeaker.name === pathName) this.drawRects(points[i], curSpeaker.color); // draws rects only for speaker matching path
                     }
@@ -410,7 +410,7 @@ class DrawDataConversation extends DrawData {
         if (rectLength < this.rect.minPixelHeight) rectLength = this.rect.minPixelHeight; // if current turn is small set it to the minimum height
         const curPoint = this.getScaledConversationPointValues(point);
         let yPos;
-        if (conversationPositionTop) yPos = 0; // if conversation turn positioning is at top of screen
+        if (isModeAlignTalkTop) yPos = 0; // if conversation turn positioning is at top of screen
         else yPos = curPoint.scaledYPos - rectLength;
         // ***** TEST SET TEXT
         if (overRect(curPoint.scaledXPos, yPos, rectWidth, rectLength)) this.recordConversationBubble(point, PLAN); // if over plan

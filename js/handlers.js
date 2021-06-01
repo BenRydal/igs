@@ -10,20 +10,20 @@ class Handlers {
      */
     handleMousePressed() {
         // Controls video when clicking over timeline region
-        if (videoIsShowing && !animation && overRect(keys.timelineStart, 0, keys.timelineEnd, keys.yPosTimelineBottom)) this.playPauseMovie();
+        if (videoIsShowing && !isAnimate && overRect(keys.timelineStart, 0, keys.timelineEnd, keys.yPosTimelineBottom)) this.playPauseMovie();
         this.overMovementConversationButtons();
         this.overInteractionButtons();
-        if (showMovementKeys) this.overPathKeys();
+        if (isModeMovement) this.overPathKeys();
         else this.overSpeakerKeys();
     }
 
     /**
      * Organizes timeline GUI methods. SELPADDING used to provide additionl "cushion" for mouse.
-     * NOTE: To activate timeline methods, animation mode must be false and 
+     * NOTE: To activate timeline methods, isAnimate mode must be false and 
      * Either mouse already dragging over timeline OR mouse cursor is over timeline bar.
      */
     handleMouseDragged() {
-        if (!animation && ((this.lockedLeft || this.lockedRight) || overRect(keys.timelineStart - SELPADDING, keys.yPosTimelineTop, keys.timelineLength + SELPADDING, keys.timelineThickness))) this.handleTimeline();
+        if (!isAnimate && ((this.lockedLeft || this.lockedRight) || overRect(keys.timelineStart - SELPADDING, keys.yPosTimelineTop, keys.timelineLength + SELPADDING, keys.timelineThickness))) this.handleTimeline();
     }
 
     /**
@@ -41,8 +41,8 @@ class Handlers {
     overMovementConversationButtons() {
         textSize(keys.keyTextSize);
         let currXPos = keys.timelineStart;
-        if (overRect(currXPos, keys.speakerKeysHeight, keys.buttonWidth + textWidth("Movement"), keys.buttonWidth)) showMovementKeys = true;
-        else if (overRect(currXPos + textWidth("Movement | "), keys.speakerKeysHeight, keys.buttonWidth + textWidth("Conversation"), keys.buttonWidth)) showMovementKeys = false;
+        if (overRect(currXPos, keys.speakerKeysHeight, keys.buttonWidth + textWidth("Movement"), keys.buttonWidth)) isModeMovement = true;
+        else if (overRect(currXPos + textWidth("Movement | "), keys.speakerKeysHeight, keys.buttonWidth + textWidth("Conversation"), keys.buttonWidth)) isModeMovement = false;
     }
 
     /**
@@ -81,21 +81,21 @@ class Handlers {
         textSize(keys.keyTextSize);
         let currXPos = keys.timelineStart + keys.buttonSpacing / 2;
         if (overRect(currXPos, keys.buttonsHeight, textWidth(buttons[0]), keys.buttonWidth)) this.overAnimateButton();
-        else if (overRect(currXPos + textWidth(buttons[0]) + 2 * keys.buttonSpacing, keys.buttonsHeight, textWidth(buttons[1]) + keys.buttonSpacing, keys.buttonWidth)) conversationPositionTop = !conversationPositionTop;
-        else if (overRect(currXPos + textWidth(buttons[0] + buttons[1]) + 4 * keys.buttonSpacing, keys.buttonsHeight, textWidth(buttons[2]) + keys.buttonSpacing, keys.buttonWidth)) allConversation = !allConversation;
+        else if (overRect(currXPos + textWidth(buttons[0]) + 2 * keys.buttonSpacing, keys.buttonsHeight, textWidth(buttons[1]) + keys.buttonSpacing, keys.buttonWidth)) isModeAlignTalkTop = !isModeAlignTalkTop;
+        else if (overRect(currXPos + textWidth(buttons[0] + buttons[1]) + 4 * keys.buttonSpacing, keys.buttonsHeight, textWidth(buttons[2]) + keys.buttonSpacing, keys.buttonWidth)) isModeAllTalkOnPath = !isModeAllTalkOnPath;
         else if (dataIsLoaded(videoPlayer) && overRect(currXPos + textWidth(buttons[0] + buttons[1] + buttons[2]) + 6 * keys.buttonSpacing, keys.buttonsHeight, textWidth(buttons[3]) + keys.buttonSpacing, keys.buttonWidth)) this.overVideoButton();
-        else if (overRect(currXPos + textWidth(buttons[0] + buttons[1] + buttons[2] + buttons[3]) + 8 * keys.buttonSpacing, keys.buttonsHeight, textWidth(buttons[4]) + keys.buttonSpacing, keys.buttonWidth)) showIntroMsg = !showIntroMsg;
+        else if (overRect(currXPos + textWidth(buttons[0] + buttons[1] + buttons[2] + buttons[3]) + 8 * keys.buttonSpacing, keys.buttonsHeight, textWidth(buttons[4]) + keys.buttonSpacing, keys.buttonWidth)) isIntroMsg = !isIntroMsg;
     }
 
     /**
-     * Toggle on and off animation mode and set/end global animation counter variable
+     * Toggle on and off isAnimate mode and set/end global isAnimate counter variable
      */
     overAnimateButton() {
-        if (animation) {
-            animation = false;
+        if (isAnimate) {
+            isAnimate = false;
             animationCounter = map(keys.curPixelTimeMax, keys.timelineStart, keys.timelineEnd, 0, totalTimeInSeconds); // set to keys.curPixelTimeMax mapped value
         } else {
-            animation = true;
+            isAnimate = true;
             animationCounter = map(keys.curPixelTimeMin, keys.timelineStart, keys.timelineEnd, 0, totalTimeInSeconds); // set to keys.curPixelTimeMin mapped value
         }
     }

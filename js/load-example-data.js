@@ -9,7 +9,7 @@
      */
     selectExampleData() {
       if (videoIsShowing) handlers.overVideoButton(); // Turn off video that if showing
-      if (showIntroMsg) showIntroMsg = false; // Hide intro msg if showing
+      if (isIntroMsg) isIntroMsg = false; // Hide intro msg if showing
       let option = document.getElementById("examples").value;
       switch (option) {
         case "Load Data":
@@ -25,19 +25,19 @@
           this.loadExample(['data/example-2/', 'floorplan.png', 'conversation.csv', ['Teacher.csv', 'Sean.csv', 'Mei.csv', 'Cassandra.csv', 'Nathan.csv'], 'Youtube', {
             videoId: 'OJSZCK4GPQY'
           }]);
-          allConversation = false; // not necessary, but fits example nicely
+          isModeAllTalkOnPath = false; // not necessary, but fits example nicely
           break;
         case "Example 3":
           this.loadExample(['data/example-3/', 'floorplan.png', 'conversation.csv', ['Jordan.csv'], 'Youtube', {
             videoId: 'iiMjfVOj8po'
           }]);
-          allConversation = false; // not necessary, but fits example nicely
+          isModeAllTalkOnPath = false; // not necessary, but fits example nicely
           break;
         case "Example 4":
           this.loadExample(['data/example-4/', 'floorplan.png', 'conversation.csv', ['Lily.csv', 'Jeans.csv', 'Adhir.csv', 'Mae.csv', 'Blake.csv'], 'Youtube', {
             videoId: 'pWJ3xNk1Zpg'
           }]);
-          allConversation = false; // not necessary, but fits example nicely
+          isModeAllTalkOnPath = false; // not necessary, but fits example nicely
           break;
       }
     }

@@ -24,23 +24,23 @@ class Keys {
     drawKeys() {
         textFont(font_PlayfairReg, this.keyTextSize);
         this.drawPathSpeakerTitle();
-        if (showMovementKeys) this.drawPathSpeakerKeys(paths);
+        if (isModeMovement) this.drawPathSpeakerKeys(paths);
         else this.drawPathSpeakerKeys(speakerList);
         this.drawTimeline();
         this.drawButtons();
         if (overRect(0, 0, this.displayFloorPlanWidth, this.displayFloorPlanHeight)) this.drawFloorPlanSelector();
-        if (showIntroMsg) this.drawIntroMsg(); // draw intro message on program start up until mouse is pressed
+        if (isIntroMsg) this.drawIntroMsg(); // draw intro message on program start up until mouse is pressed
     }
 
     drawPathSpeakerTitle() {
         let currXPos = this.timelineStart;
         let yPos = this.speakerKeysHeight - this.buttonWidth / 5;
         noStroke();
-        fill(showMovementKeys ? 0 : 150);
+        fill(isModeMovement ? 0 : 150);
         text("Movement", currXPos, yPos);
         fill(0);
         text(" | ", currXPos + textWidth("Movement"), yPos);
-        fill(!showMovementKeys ? 0 : 150);
+        fill(!isModeMovement ? 0 : 150);
         text("Conversation", currXPos + textWidth("Movement | "), yPos);
     }
 
@@ -67,29 +67,29 @@ class Keys {
 
     drawButtons() {
         let currXPos = this.timelineStart + this.buttonSpacing / 2;
-        fill(animation ? 0 : 150);
+        fill(isAnimate ? 0 : 150);
         // Button 1
         text(buttons[0], currXPos, this.buttonsHeight);
         noFill();
-        stroke(animation ? 0 : 150);
+        stroke(isAnimate ? 0 : 150);
         strokeWeight(1);
         rect(currXPos - this.buttonSpacing / 2, this.buttonsHeight, textWidth(buttons[0]) + this.buttonSpacing, this.buttonSpacing * 1.5);
         noStroke();
         currXPos += textWidth(buttons[0]) + this.buttonSpacing * 2;
         // Button 2
-        fill(conversationPositionTop ? 0 : 150);
+        fill(isModeAlignTalkTop ? 0 : 150);
         text(buttons[1], currXPos, this.buttonsHeight);
         noFill();
-        stroke(conversationPositionTop ? 0 : 150);
+        stroke(isModeAlignTalkTop ? 0 : 150);
         strokeWeight(1);
         rect(currXPos - this.buttonSpacing / 2, this.buttonsHeight, textWidth(buttons[1]) + this.buttonSpacing, this.buttonSpacing * 1.5);
         noStroke();
         currXPos += textWidth(buttons[1]) + this.buttonSpacing * 2;
         // Button 3
-        fill(allConversation ? 0 : 150);
+        fill(isModeAllTalkOnPath ? 0 : 150);
         text(buttons[2], currXPos, this.buttonsHeight);
         noFill();
-        stroke(allConversation ? 0 : 150);
+        stroke(isModeAllTalkOnPath ? 0 : 150);
         strokeWeight(1);
         rect(currXPos - this.buttonSpacing / 2, this.buttonsHeight, textWidth(buttons[2]) + this.buttonSpacing, this.buttonSpacing * 1.5);
         noStroke();
@@ -105,10 +105,10 @@ class Keys {
         currXPos += textWidth(buttons[3]) + this.buttonSpacing * 2;
         // Button 5
         textFont(font_PlayfairItalic, this.keyTextSize);
-        fill(showIntroMsg ? 0 : 150);
+        fill(isIntroMsg ? 0 : 150);
         text(buttons[4], currXPos, this.buttonsHeight);
         noFill();
-        stroke(showIntroMsg ? 0 : 150);
+        stroke(isIntroMsg ? 0 : 150);
         strokeWeight(1);
         rect(currXPos - this.buttonSpacing / 2, this.buttonsHeight, textWidth(buttons[4]) + this.buttonSpacing, this.buttonSpacing * 1.5);
         noStroke();
@@ -118,7 +118,7 @@ class Keys {
         // timeline selection rectangle
         fill(150, 150);
         noStroke();
-        if (animation) rect(this.curPixelTimeMin, this.timelineHeight - this.tickHeight, map(animationCounter, 0, totalTimeInSeconds, this.timelineStart, this.timelineEnd) - this.curPixelTimeMin, 2 * (this.tickHeight));
+        if (isAnimate) rect(this.curPixelTimeMin, this.timelineHeight - this.tickHeight, map(animationCounter, 0, totalTimeInSeconds, this.timelineStart, this.timelineEnd) - this.curPixelTimeMin, 2 * (this.tickHeight));
         else rect(this.curPixelTimeMin, this.timelineHeight - this.tickHeight, this.curPixelTimeMax - this.curPixelTimeMin, 2 * (this.tickHeight));
         // timeline
         stroke(0);
