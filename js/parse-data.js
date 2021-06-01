@@ -40,7 +40,7 @@ class ParseData {
 
     /** 
      * Organizes testing of parsed movement file
-     * If file passes, process movement file, update paths [] and add data to global movementFileResults
+     * If file passes, process movement file, update core.paths [] and add data to global core.movementFileResults
      * @param  {PapaParse Results []} results
      * @param  {File} file
      */
@@ -51,7 +51,7 @@ class ParseData {
             const pathName = file.name.charAt(0).toUpperCase(); // get name of path, also used to test if associated speaker in conversation file
             const [movement, conversation] = processData.processMovementFile(results); //
             processData.updatePaths(pathName, movement, conversation);
-            movementFileResults.push([results, pathName]); // add results and pathName to global []
+            core.movementFileResults.push([results, pathName]); // add results and pathName to global []
         } else alert("Error loading movement file. Please make sure your file is a .CSV file formatted with column headers: " + movementHeaders.toString());
     }
 
@@ -80,7 +80,7 @@ class ParseData {
 
     /** 
      * Organizes testing of parsed conversation file
-     * If file passes, add data to global conversationFileResults, update global speakerList [], sort the array
+     * If file passes, add data to global core.conversationFileResults, update global core.speakerList [], sort the array
      * And re process exisiting movement files
      * @param  {PapaParse Results []} results
      * @param  {File} file
@@ -89,13 +89,13 @@ class ParseData {
         console.log("Parsing complete:", results, file);
         // Test if file has data, file headers, and at least one row of correctly typed data
         if (results.data.length > 1 && testData.conversationHeaders(results.meta.fields) && testData.conversationRowsForType(results.data)) {
-            conversationFileResults = results.data; // set to new array of keyed values
+            core.conversationFileResults = results.data; // set to new array of keyed values
             processData.updateSpeakerList();
-            speakerList.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching paths array
+            core.speakerList.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching core.paths array
             // Must reprocess existing movement files
-            for (let i = 0; i < movementFileResults.length; i++) {
-                const [movement, conversation] = processData.processMovementFile(movementFileResults[i][0]); // Reprocess movement file results
-                processData.updatePaths(movementFileResults[i][1], movement, conversation); // Pass movement file pathname and reprocessed movement file results to updatepaths
+            for (let i = 0; i < core.movementFileResults.length; i++) {
+                const [movement, conversation] = processData.processMovementFile(core.movementFileResults[i][0]); // Reprocess movement file results
+                processData.updatePaths(core.movementFileResults[i][1], movement, conversation); // Pass movement file pathname and reprocessed movement file results to updatepaths
             }
         } else alert("Error loading conversation file. Please make sure your file is a .CSV file formatted with column headers: " + conversationHeaders.toString());
     }
@@ -105,7 +105,7 @@ class ParseData {
      * @param  {.MP4 File} input
      */
     parseVideoFile(input) {
-        if (videoIsShowing) handlers.overVideoButton(); // Turn off video that if showing
+        if (core.isModeVideoShowing) handlers.overVideoButton(); // Turn off video that if showing
         let file = input.files[0];
         input.value = ''; // reset input value so you can load same file again in browser
         let fileLocation = URL.createObjectURL(file);
@@ -116,28 +116,28 @@ class ParseData {
 
     clearAllData() {
         if (dataIsLoaded(videoPlayer)) {
-            if (videoIsShowing) handlers.overVideoButton(); // Turn off video before destroying it if showing
+            if (core.isModeVideoShowing) handlers.overVideoButton(); // Turn off video before destroying it if showing
             videoPlayer.destroy(); // if there is a video, destroy it
             videoPlayer = null; // set videoPlayer to null
         }
-        floorPlan = undefined;
-        speakerList = [];
-        paths = [];
-        movementFileResults = [];
-        conversationFileResults = [];
-        paths = [];
-        totalTimeInSeconds = 0; // reset total time
+        core.floorPlan = undefined;
+        core.speakerList = [];
+        core.paths = [];
+        core.movementFileResults = [];
+        core.conversationFileResults = [];
+        core.paths = [];
+        core.totalTimeInSeconds = 0; // reset total time
     }
 
     clearConversationData() {
-        conversationFileResults = [];
-        speakerList = [];
-        paths = [];
+        core.conversationFileResults = [];
+        core.speakerList = [];
+        core.paths = [];
     }
 
     clearMovementData() {
-        movementFileResults = [];
-        paths = [];
-        totalTimeInSeconds = 0; // reset total time
+        core.movementFileResults = [];
+        core.paths = [];
+        core.totalTimeInSeconds = 0; // reset total time
     }
 }

@@ -23,7 +23,7 @@ class DrawData {
     }
     /**
      * Returns true if mouse cursor near xPos and yPos parameters
-     * NOTE: floorPlan SelectorSize set globally
+     * NOTE: core.floorPlan SelectorSize set globally
      * @param  {Number/Float} xPos
      * @param  {Number/Float} yPos
      */
@@ -42,14 +42,14 @@ class DrawData {
     }
 
     /**
-     * If not isAnimate mode, always return true
-     * If isAnimate mode, return true only if time parameter is less than global isAnimate counter
+     * If not core.isModeAnimate mode, always return true
+     * If core.isModeAnimate mode, return true only if time parameter is less than global core.isModeAnimate counter
      * @param  {Number/Float} timeValue
      */
     testAnimation(timeValue) {
-        if (isAnimate) {
-            let reMapTime = map(timeValue, keys.timelineStart, keys.timelineEnd, 0, totalTimeInSeconds);
-            return animationCounter > reMapTime;
+        if (core.isModeAnimate) {
+            let reMapTime = map(timeValue, keys.timelineStart, keys.timelineEnd, 0, core.totalTimeInSeconds);
+            return core.animationCounter > reMapTime;
         } else return true;
     }
 }
@@ -101,10 +101,10 @@ class DrawDataMovement extends DrawData {
     //     beginShape();
     //     for (let i = 0; i < points.length; i++) {
     //         let point = points[i];
-    //         let pixelTime = map(point.time, 0, totalTimeInSeconds, keys.timelineStart, keys.timelineEnd);
+    //         let pixelTime = map(point.time, 0, core.totalTimeInSeconds, keys.timelineStart, keys.timelineEnd);
     //         let scaledTime = map(pixelTime, keys.curPixelTimeMin, keys.curPixelTimeMax, keys.timelineStart, keys.timelineEnd);
-    //         let scaledXPos = point.xPos * keys.displayFloorPlanWidth / inputFloorPlanPixelWidth; // scale to floor plan image file
-    //         let scaledYPos = point.yPos * keys.displayFloorPlanHeight / inputFloorPlanPixelHeight; // scale to floor plan image file
+    //         let scaledXPos = point.xPos * keys.displayFloorPlanWidth / core.inputFloorPlanPixelWidth; // scale to floor plan image file
+    //         let scaledYPos = point.yPos * keys.displayFloorPlanHeight / core.inputFloorPlanPixelHeight; // scale to floor plan image file
     //         if (super.overTimeline(pixelTime) && super.overFloorPlan(scaledXPos, scaledYPos) && super.testAnimation(pixelTime)) {
     //             if (view == PLAN) curveVertex(scaledXPos, scaledYPos);
     //             else if (view == SPACETIME) {
@@ -119,7 +119,7 @@ class DrawDataMovement extends DrawData {
     /**
      * Draws path in floor plan OR space-time view
      * Path is separated into segments of stops with thick line thickness and moving of thinner line thickness
-     * Due to drawing methods in browsers, paths must be separated/segmented to draw different thicknesses or strokes
+     * Due to drawing methods in browsers, core.paths must be separated/segmented to draw different thicknesses or strokes
      * @param  {Integer} view
      * @param  {Path} path
      * @param  {Color} shade
@@ -162,7 +162,7 @@ class DrawDataMovement extends DrawData {
     /**
      * Draws path in floor plan OR space-time view
      * Path is separated into segments over cursor with thick line/highlight and not over cursor with thin line and grey color
-     * Due to drawing methods in browsers, paths must be separated/segmented to draw different thicknesses or strokes
+     * Due to drawing methods in browsers, core.paths must be separated/segmented to draw different thicknesses or strokes
      * @param  {Integer} view
      * @param  {Path} path
      * @param  {Color} shade
@@ -206,10 +206,10 @@ class DrawDataMovement extends DrawData {
      * @param  {Integer} view
      */
     getScaledMovementPointValues(point, view) {
-        const pixel = map(point.time, 0, totalTimeInSeconds, keys.timelineStart, keys.timelineEnd);
+        const pixel = map(point.time, 0, core.totalTimeInSeconds, keys.timelineStart, keys.timelineEnd);
         const scaledPixel = map(pixel, keys.curPixelTimeMin, keys.curPixelTimeMax, keys.timelineStart, keys.timelineEnd);
-        const scaledX = point.xPos * keys.displayFloorPlanWidth / inputFloorPlanPixelWidth;
-        const scaledY = point.yPos * keys.displayFloorPlanHeight / inputFloorPlanPixelHeight;
+        const scaledX = point.xPos * keys.displayFloorPlanWidth / core.inputFloorPlanPixelWidth;
+        const scaledY = point.yPos * keys.displayFloorPlanHeight / core.inputFloorPlanPixelHeight;
         let scaledSpaceTimeX;
         if (view === PLAN) scaledSpaceTimeX = scaledX;
         else if (view === SPACETIME) scaledSpaceTimeX = scaledPixel;
@@ -241,15 +241,15 @@ class DrawDataMovement extends DrawData {
     }
 
     /**
-     * Tests for 3 modes: isAnimate, video and mouse over space-time view
+     * Tests for 3 modes: core.isModeAnimate, video and mouse over space-time view
      * For current mode, tests parameter values to set/record bug correctly
      * @param  {Number/Float} scaledTimeToTest
      * @param  {Number/Float} xPos
      * @param  {Number/Float} yPos
      */
     testPointForBug(scaledTimeToTest, xPos, yPos) {
-        if (isAnimate) this.recordBug(scaledTimeToTest, xPos, yPos); // always return true to set last/most recent point as the bug
-        else if (videoIsPlaying) {
+        if (core.isModeAnimate) this.recordBug(scaledTimeToTest, xPos, yPos); // always return true to set last/most recent point as the bug
+        else if (core.isModeVideoPlaying) {
             // Separate this test out from 3 mode tests to make sure if this is not true know other mode tests are run when video is playing
             if (this.testVideoForBugPoint(scaledTimeToTest)) this.recordBug(scaledTimeToTest, xPos, yPos);
         } else if (overRect(keys.timelineStart, 0, keys.timelineLength, keys.timelineHeight) && this.testMouseForBugPoint(scaledTimeToTest)) this.recordBug(mouseX, xPos, yPos);
@@ -257,7 +257,7 @@ class DrawDataMovement extends DrawData {
     }
 
     testVideoForBugPoint(scaledTimeToTest) {
-        const videoX = map(videoPlayer.getCurrentTime(), 0, totalTimeInSeconds, keys.timelineStart, keys.timelineEnd);
+        const videoX = map(videoPlayer.getCurrentTime(), 0, core.totalTimeInSeconds, keys.timelineStart, keys.timelineEnd);
         const scaledVideoX = map(videoX, keys.curPixelTimeMin, keys.curPixelTimeMax, keys.timelineStart, keys.timelineEnd);
         if (scaledVideoX >= scaledTimeToTest - this.bug.lengthToCompare && scaledVideoX <= scaledTimeToTest + this.bug.lengthToCompare) {
             this.bug.lengthToCompare = Math.abs(scaledVideoX - scaledTimeToTest);
@@ -283,7 +283,7 @@ class DrawDataMovement extends DrawData {
         this.bug.xPos = xPos;
         this.bug.yPos = yPos;
         this.bug.timePos = timePos;
-        bugTimePosForVideoScrubbing = timePos;
+        core.bugTimePosForVideoScrubbing = timePos;
     }
 
     drawBug(shade) {
@@ -321,7 +321,7 @@ class DrawDataConversation extends DrawData {
          */
         this.rect = {
             minPixelHeight: 3, // for really short conversation turns set a minimum pixel height
-            minPixelWidth: map(totalTimeInSeconds, 0, 3600, 10, 1, true), // map to inverse, values constrained between 10 and 1 (pixels)
+            minPixelWidth: map(core.totalTimeInSeconds, 0, 3600, 10, 1, true), // map to inverse, values constrained between 10 and 1 (pixels)
             maxPixelWidth: 10
         };
     }
@@ -355,7 +355,7 @@ class DrawDataConversation extends DrawData {
             if (super.overTimeline(curPoint.pixelTime) && super.overFloorPlan(curPoint.scaledXPos, curPoint.scaledYPos) && super.testAnimation(curPoint.pixelTime) && super.overFloorPlanAndCursor(curPoint.scaledXPos, curPoint.scaledYPos)) {
                 let curSpeaker = this.getSpeakerFromSpeakerList(points[i].speaker); // get speaker object from global list equivalent to the current speaker of point
                 if (curSpeaker != null && curSpeaker.show) {
-                    if (isModeAllTalkOnPath) this.drawRects(points[i], curSpeaker.color); // draws all rects
+                    if (core.isModeAllTalkOnPath) this.drawRects(points[i], curSpeaker.color); // draws all rects
                     else {
                         if (curSpeaker.name === pathName) this.drawRects(points[i], curSpeaker.color); // draws rects only for speaker matching path
                     }
@@ -369,10 +369,10 @@ class DrawDataConversation extends DrawData {
      * @param  {Point_Conversation} point
      */
     getScaledConversationPointValues(point) {
-        const pixel = map(point.time, 0, totalTimeInSeconds, keys.timelineStart, keys.timelineEnd);
+        const pixel = map(point.time, 0, core.totalTimeInSeconds, keys.timelineStart, keys.timelineEnd);
         const scaledPixel = map(pixel, keys.curPixelTimeMin, keys.curPixelTimeMax, keys.timelineStart, keys.timelineEnd);
-        const scaledX = point.xPos * keys.displayFloorPlanWidth / inputFloorPlanPixelWidth; // scale to floor plan image file
-        const scaledY = point.yPos * keys.displayFloorPlanHeight / inputFloorPlanPixelHeight; // scale to floor plan image file
+        const scaledX = point.xPos * keys.displayFloorPlanWidth / core.inputFloorPlanPixelWidth; // scale to floor plan image file
+        const scaledY = point.yPos * keys.displayFloorPlanHeight / core.inputFloorPlanPixelHeight; // scale to floor plan image file
         return {
             pixelTime: pixel,
             scaledTime: scaledPixel,
@@ -387,8 +387,8 @@ class DrawDataConversation extends DrawData {
      * @param  {Char} curSpeaker
      */
     getSpeakerFromSpeakerList(curSpeaker) {
-        for (let i = 0; i < speakerList.length; i++) {
-            if (speakerList[i].name === curSpeaker) return speakerList[i];
+        for (let i = 0; i < core.speakerList.length; i++) {
+            if (core.speakerList[i].name === curSpeaker) return core.speakerList[i];
         }
         return null;
     }
@@ -410,7 +410,7 @@ class DrawDataConversation extends DrawData {
         if (rectLength < this.rect.minPixelHeight) rectLength = this.rect.minPixelHeight; // if current turn is small set it to the minimum height
         const curPoint = this.getScaledConversationPointValues(point);
         let yPos;
-        if (isModeAlignTalkTop) yPos = 0; // if conversation turn positioning is at top of screen
+        if (core.isModeAlignTalkTop) yPos = 0; // if conversation turn positioning is at top of screen
         else yPos = curPoint.scaledYPos - rectLength;
         // ***** TEST SET TEXT
         if (overRect(curPoint.scaledXPos, yPos, rectWidth, rectLength)) this.recordConversationBubble(point, PLAN); // if over plan

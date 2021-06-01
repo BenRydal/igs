@@ -60,14 +60,14 @@ class ProcessData {
 
     /**
      * Creates P5 image file from path
-     * Updates global floorPlan image and input width/heights of floorPlan to properly scale and display data
+     * Updates global core.floorPlan image and input width/heights of core.floorPlan to properly scale and display data
      * @param  {String} filePath
      */
     processFloorPlan(filePath) {
         loadImage(filePath, img => {
-            floorPlan = img;
-            inputFloorPlanPixelWidth = floorPlan.width;
-            inputFloorPlanPixelHeight = floorPlan.height;
+            core.floorPlan = img;
+            core.inputFloorPlanPixelWidth = core.floorPlan.width;
+            core.inputFloorPlanPixelHeight = core.floorPlan.height;
             img.onload = function () {
                 URL.revokeObjectURL(this.src);
             }
@@ -80,7 +80,7 @@ class ProcessData {
     /**
      * Creates clean (good data) and sampled movement [] of Point_Movement objects and conversation []
      * of Point_Conversation objects from PapaParse movement results [].
-     * To create the conversation [], a comparison between the global conversationFileResults [] 
+     * To create the conversation [], a comparison between the global core.conversationFileResults [] 
      * at a specified index to the current Point_Movement time is made--this comparison is what 
      * determines when to create a new Conversation point if the current conversation row has good data
      * @param  {Results [] from PapaParse} results
@@ -95,7 +95,7 @@ class ProcessData {
                 const m = this.createMovementPoint(results.data, i);
                 movement.push(m); // always add to movement []
                 // Test conversation data row for quality and if movement time is greater than conversationCounter time
-                if (testData.conversationLengthAndRowForType(conversationCounter) && m.time >= conversationFileResults[conversationCounter][conversationHeaders[0]]) {
+                if (testData.conversationLengthAndRowForType(conversationCounter) && m.time >= core.conversationFileResults[conversationCounter][conversationHeaders[0]]) {
                     conversation.push(this.createConversationPoint(conversationCounter, m.xPos, m.yPos));
                     conversationCounter++;
                 } else if (!testData.conversationLengthAndRowForType(conversationCounter)) conversationCounter++; // make sure to increment counter if bad data to skip row in next iteration of loop
@@ -113,8 +113,8 @@ class ProcessData {
     }
 
     /**
-     * Creates and adds new Path object to global paths []
-     * Also handles updating global totalTime and sorting paths []
+     * Creates and adds new Path object to global core.paths []
+     * Also handles updating global totalTime and sorting core.paths []
      * @param  {Char} letterName
      * @param  {Point_Movement []} movement
      * @param  {Point_Conversation []} conversation
@@ -123,12 +123,12 @@ class ProcessData {
         let p = new Path(letterName); // initialize with name and grey/black color
         p.movement = movement;
         p.conversation = conversation;
-        if (dataIsLoaded(speakerList)) p.color = this.setPathColorBySpeaker(p.name); // if conversation file loaded, send to method to calculate color
-        else p.color = colorList[paths.length % colorList.length]; // if no conversation file loaded path color is next in Color list
-        paths.push(p);
-        paths.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching speakerlist array
+        if (dataIsLoaded(core.speakerList)) p.color = this.setPathColorBySpeaker(p.name); // if conversation file loaded, send to method to calculate color
+        else p.color = colorList[core.paths.length % colorList.length]; // if no conversation file loaded path color is next in Color list
+        core.paths.push(p);
+        core.paths.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching core.speakerList array
         const curPathEndTime = Math.floor(movement[movement.length - 1].time);
-        if (totalTimeInSeconds < curPathEndTime) totalTimeInSeconds = curPathEndTime; // update global total time, make sure to floor value as integer
+        if (core.totalTimeInSeconds < curPathEndTime) core.totalTimeInSeconds = curPathEndTime; // update global total time, make sure to floor value as integer
     }
 
     /**
@@ -139,19 +139,19 @@ class ProcessData {
      * @param  {} pathName
      */
     setPathColorBySpeaker(pathName) {
-        if (speakerList.some(e => e.name === pathName)) {
+        if (core.speakerList.some(e => e.name === pathName)) {
             const hasSameName = (element) => element.name === pathName; // condition to satisfy/does it have pathName
-            return speakerList[speakerList.findIndex(hasSameName)].color; // returns first index that satisfies condition/index of speaker that matches pathName
-        } else return colorList[speakerList.length + this.getNumPathsWithNoSpeaker() % colorList.length]; // assign color to path
+            return core.speakerList[core.speakerList.findIndex(hasSameName)].color; // returns first index that satisfies condition/index of speaker that matches pathName
+        } else return colorList[core.speakerList.length + this.getNumPathsWithNoSpeaker() % colorList.length]; // assign color to path
     }
 
     /**
-     * Returns number of movement paths that do not have corresponding speaker
+     * Returns number of movement core.paths that do not have corresponding speaker
      */
     getNumPathsWithNoSpeaker() {
         let count = 0;
-        for (let i = 0; i < paths.length; i++) {
-            if (!speakerList.some(e => e.name === paths[i].name)) count++;
+        for (let i = 0; i < core.paths.length; i++) {
+            if (!core.speakerList.some(e => e.name === core.paths[i].name)) count++;
         }
         return count;
     }
@@ -166,9 +166,9 @@ class ProcessData {
         let c = new Point_Conversation();
         c.xPos = xPos; // set to x/y pos in movement file case
         c.yPos = yPos;
-        c.time = conversationFileResults[index][conversationHeaders[0]];
-        c.speaker = this.cleanSpeaker(conversationFileResults[index][conversationHeaders[1]]); // get cleaned speaker character
-        c.talkTurn = conversationFileResults[index][conversationHeaders[2]];
+        c.time = core.conversationFileResults[index][conversationHeaders[0]];
+        c.speaker = this.cleanSpeaker(core.conversationFileResults[index][conversationHeaders[1]]); // get cleaned speaker character
+        c.talkTurn = core.conversationFileResults[index][conversationHeaders[2]];
         return c;
     }
 
@@ -176,12 +176,12 @@ class ProcessData {
      * Updates global speaker list from conversation file data/results
      */
     updateSpeakerList() {
-        for (let i = 0; i < conversationFileResults.length; i++) {
-            let tempSpeakerList = []; // create/populate temp list to store strings to test from global speakerList
-            for (let j = 0; j < speakerList.length; j++) tempSpeakerList.push(speakerList[j].name);
-            // If row is good data, test if speakerList already has speaker and if not add speaker 
+        for (let i = 0; i < core.conversationFileResults.length; i++) {
+            let tempSpeakerList = []; // create/populate temp list to store strings to test from global core.speakerList
+            for (let j = 0; j < core.speakerList.length; j++) tempSpeakerList.push(core.speakerList[j].name);
+            // If row is good data, test if core.speakerList already has speaker and if not add speaker 
             if (testData.conversationLengthAndRowForType(i)) {
-                const speaker = this.cleanSpeaker(conversationFileResults[i][conversationHeaders[1]]); // get cleaned speaker character
+                const speaker = this.cleanSpeaker(core.conversationFileResults[i][conversationHeaders[1]]); // get cleaned speaker character
                 if (!tempSpeakerList.includes(speaker)) this.addSpeakerToSpeakerList(speaker);
             }
         }
@@ -195,11 +195,11 @@ class ProcessData {
     }
 
     /**
-     * Adds new speaker object with initial color to global speakerList from character
+     * Adds new speaker object with initial color to global core.speakerList from character
      * @param  {Char} speaker
      */
     addSpeakerToSpeakerList(name) {
-        speakerList.push(new Speaker(name, colorList[speakerList.length % colorList.length]));
+        core.speakerList.push(new Speaker(name, colorList[core.speakerList.length % colorList.length]));
     }
 
     // Initialization for the video player

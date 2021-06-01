@@ -10,20 +10,20 @@ class Handlers {
      */
     handleMousePressed() {
         // Controls video when clicking over timeline region
-        if (videoIsShowing && !isAnimate && overRect(keys.timelineStart, 0, keys.timelineEnd, keys.yPosTimelineBottom)) this.playPauseMovie();
+        if (core.isModeVideoShowing && !core.isModeAnimate && overRect(keys.timelineStart, 0, keys.timelineEnd, keys.yPosTimelineBottom)) this.playPauseMovie();
         this.overMovementConversationButtons();
         this.overInteractionButtons();
-        if (isModeMovement) this.overPathKeys();
+        if (core.isModeMovement) this.overPathKeys();
         else this.overSpeakerKeys();
     }
 
     /**
      * Organizes timeline GUI methods. SELPADDING used to provide additionl "cushion" for mouse.
-     * NOTE: To activate timeline methods, isAnimate mode must be false and 
+     * NOTE: To activate timeline methods, core.isModeAnimate mode must be false and 
      * Either mouse already dragging over timeline OR mouse cursor is over timeline bar.
      */
     handleMouseDragged() {
-        if (!isAnimate && ((this.lockedLeft || this.lockedRight) || overRect(keys.timelineStart - SELPADDING, keys.yPosTimelineTop, keys.timelineLength + SELPADDING, keys.timelineThickness))) this.handleTimeline();
+        if (!core.isModeAnimate && ((this.lockedLeft || this.lockedRight) || overRect(keys.timelineStart - SELPADDING, keys.yPosTimelineTop, keys.timelineLength + SELPADDING, keys.timelineThickness))) this.handleTimeline();
     }
 
     /**
@@ -41,34 +41,34 @@ class Handlers {
     overMovementConversationButtons() {
         textSize(keys.keyTextSize);
         let currXPos = keys.timelineStart;
-        if (overRect(currXPos, keys.speakerKeysHeight, keys.buttonWidth + textWidth("Movement"), keys.buttonWidth)) isModeMovement = true;
-        else if (overRect(currXPos + textWidth("Movement | "), keys.speakerKeysHeight, keys.buttonWidth + textWidth("Conversation"), keys.buttonWidth)) isModeMovement = false;
+        if (overRect(currXPos, keys.speakerKeysHeight, keys.buttonWidth + textWidth("Movement"), keys.buttonWidth)) core.isModeMovement = true;
+        else if (overRect(currXPos + textWidth("Movement | "), keys.speakerKeysHeight, keys.buttonWidth + textWidth("Conversation"), keys.buttonWidth)) core.isModeMovement = false;
     }
 
     /**
-     * Iterate over global speakerList and test if mouse is over any of speaker keys and update speaker accordingly
+     * Iterate over global core.speakerList and test if mouse is over any of speaker keys and update speaker accordingly
      * NOTE: textSize is way to control dynamic scaling for gui methods and interface
      */
     overSpeakerKeys() {
         textSize(keys.keyTextSize);
         let currXPos = keys.timelineStart + textWidth("Movement | Conversation") + keys.buttonWidth;
-        for (let i = 0; i < speakerList.length; i++) {
-            let nameWidth = textWidth(speakerList[i].name); // set nameWidth to pixel width of speaker code
-            if (overRect(currXPos, keys.speakerKeysHeight, keys.buttonWidth + nameWidth, keys.buttonWidth)) speakerList[i].show = !speakerList[i].show;
+        for (let i = 0; i < core.speakerList.length; i++) {
+            let nameWidth = textWidth(core.speakerList[i].name); // set nameWidth to pixel width of speaker code
+            if (overRect(currXPos, keys.speakerKeysHeight, keys.buttonWidth + nameWidth, keys.buttonWidth)) core.speakerList[i].show = !core.speakerList[i].show;
             currXPos += keys.buttonWidth + nameWidth + keys.buttonSpacing;
         }
     }
 
     /**
-     * Iterate over global paths list and test if mouse is over any of paths and update accordingly
+     * Iterate over global core.paths list and test if mouse is over any of core.paths and update accordingly
      * NOTE: textSize is way to control dynamic scaling for gui methods and interface
      */
     overPathKeys() {
         textSize(keys.keyTextSize);
         let currXPos = keys.timelineStart + textWidth("Movement | Conversation") + keys.buttonWidth;
-        for (let i = 0; i < paths.length; i++) {
-            const nameWidth = textWidth(paths[i].name); // set nameWidth to pixel width of path name
-            if (overRect(currXPos, keys.speakerKeysHeight, keys.buttonWidth + nameWidth, keys.buttonWidth)) paths[i].show = !paths[i].show;
+        for (let i = 0; i < core.paths.length; i++) {
+            const nameWidth = textWidth(core.paths[i].name); // set nameWidth to pixel width of path name
+            if (overRect(currXPos, keys.speakerKeysHeight, keys.buttonWidth + nameWidth, keys.buttonWidth)) core.paths[i].show = !core.paths[i].show;
             currXPos += keys.buttonWidth + nameWidth + keys.buttonSpacing;
         }
     }
@@ -81,22 +81,22 @@ class Handlers {
         textSize(keys.keyTextSize);
         let currXPos = keys.timelineStart + keys.buttonSpacing / 2;
         if (overRect(currXPos, keys.buttonsHeight, textWidth(buttons[0]), keys.buttonWidth)) this.overAnimateButton();
-        else if (overRect(currXPos + textWidth(buttons[0]) + 2 * keys.buttonSpacing, keys.buttonsHeight, textWidth(buttons[1]) + keys.buttonSpacing, keys.buttonWidth)) isModeAlignTalkTop = !isModeAlignTalkTop;
-        else if (overRect(currXPos + textWidth(buttons[0] + buttons[1]) + 4 * keys.buttonSpacing, keys.buttonsHeight, textWidth(buttons[2]) + keys.buttonSpacing, keys.buttonWidth)) isModeAllTalkOnPath = !isModeAllTalkOnPath;
+        else if (overRect(currXPos + textWidth(buttons[0]) + 2 * keys.buttonSpacing, keys.buttonsHeight, textWidth(buttons[1]) + keys.buttonSpacing, keys.buttonWidth)) core.isModeAlignTalkTop = !core.isModeAlignTalkTop;
+        else if (overRect(currXPos + textWidth(buttons[0] + buttons[1]) + 4 * keys.buttonSpacing, keys.buttonsHeight, textWidth(buttons[2]) + keys.buttonSpacing, keys.buttonWidth)) core.isModeAllTalkOnPath = !core.isModeAllTalkOnPath;
         else if (dataIsLoaded(videoPlayer) && overRect(currXPos + textWidth(buttons[0] + buttons[1] + buttons[2]) + 6 * keys.buttonSpacing, keys.buttonsHeight, textWidth(buttons[3]) + keys.buttonSpacing, keys.buttonWidth)) this.overVideoButton();
-        else if (overRect(currXPos + textWidth(buttons[0] + buttons[1] + buttons[2] + buttons[3]) + 8 * keys.buttonSpacing, keys.buttonsHeight, textWidth(buttons[4]) + keys.buttonSpacing, keys.buttonWidth)) isIntroMsg = !isIntroMsg;
+        else if (overRect(currXPos + textWidth(buttons[0] + buttons[1] + buttons[2] + buttons[3]) + 8 * keys.buttonSpacing, keys.buttonsHeight, textWidth(buttons[4]) + keys.buttonSpacing, keys.buttonWidth)) core.isModeIntro = !core.isModeIntro;
     }
 
     /**
-     * Toggle on and off isAnimate mode and set/end global isAnimate counter variable
+     * Toggle on and off core.isModeAnimate mode and set/end global core.isModeAnimate counter variable
      */
     overAnimateButton() {
-        if (isAnimate) {
-            isAnimate = false;
-            animationCounter = map(keys.curPixelTimeMax, keys.timelineStart, keys.timelineEnd, 0, totalTimeInSeconds); // set to keys.curPixelTimeMax mapped value
+        if (core.isModeAnimate) {
+            core.isModeAnimate = false;
+            core.animationCounter = map(keys.curPixelTimeMax, keys.timelineStart, keys.timelineEnd, 0, core.totalTimeInSeconds); // set to keys.curPixelTimeMax mapped value
         } else {
-            isAnimate = true;
-            animationCounter = map(keys.curPixelTimeMin, keys.timelineStart, keys.timelineEnd, 0, totalTimeInSeconds); // set to keys.curPixelTimeMin mapped value
+            core.isModeAnimate = true;
+            core.animationCounter = map(keys.curPixelTimeMin, keys.timelineStart, keys.timelineEnd, 0, core.totalTimeInSeconds); // set to keys.curPixelTimeMin mapped value
         }
     }
 
@@ -123,24 +123,24 @@ class Handlers {
      * NOTE: this is different than playPauseMovie method
      */
     overVideoButton() {
-        if (videoIsShowing) {
+        if (core.isModeVideoShowing) {
             videoPlayer.pause();
             videoPlayer.hide();
-            videoIsPlaying = false; // important to set this
+            core.isModeVideoPlaying = false; // important to set this
         } else {
             videoPlayer.show();
         }
-        videoIsShowing = !videoIsShowing; // set after testing
+        core.isModeVideoShowing = !core.isModeVideoShowing; // set after testing
     }
 
     /**
      * Plays/pauses movie and updates videoPlayhead if setting to play
-     * Also toggles global videoIsPlaying variable
+     * Also toggles global core.isModeVideoPlaying variable
      */
     playPauseMovie() {
-        if (videoIsPlaying) {
+        if (core.isModeVideoPlaying) {
             videoPlayer.pause();
-            videoIsPlaying = false;
+            core.isModeVideoPlaying = false;
         } else {
             // first map mouse to selected time values in GUI
             const mapMousePos = map(mouseX, keys.timelineStart, keys.timelineEnd, keys.curPixelTimeMin, keys.curPixelTimeMax);
@@ -148,7 +148,7 @@ class Handlers {
             const videoPos = Math.floor(map(mapMousePos, keys.timelineStart, keys.timelineEnd, 0, Math.floor(videoPlayer.getVideoDuration())));
             videoPlayer.play();
             videoPlayer.seekTo(videoPos);
-            videoIsPlaying = true;
+            core.isModeVideoPlaying = true;
         }
     }
 }

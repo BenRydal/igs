@@ -28,6 +28,8 @@ class YoutubePlayer {
     constructor(params) {
         this.targetId = 'moviePlayer';
         this.videoId = params['videoId'];
+        this.videoWidth = width / 5;
+        this.videoHeight = width / 6;
         this.initializeDiv();
         this.initializePlayer();
     }
@@ -35,7 +37,7 @@ class YoutubePlayer {
     initializeDiv() {
         movie = createDiv(); // create the div that will hold the video if other player
         movie.id(this.targetId);
-        movie.size(videoWidth, videoHeight);
+        movie.size(this.videoWidth, this.videoHeight);
         movie.hide();
         movie.position(keys.timelineStart, 0);
     }
@@ -107,9 +109,11 @@ class YoutubePlayer {
 class P5FilePlayer {
 
     constructor(params) {
+        this.videoWidth = width / 5;
+        this.videoHeight = width / 6;
         movie = createVideo(params['fileName'], function () {
             movie.id('moviePlayer');
-            movie.size(videoWidth, videoHeight);
+            movie.size(width / 5, width / 6);
             movie.hide();
             movie.position(keys.timelineStart, 0);
             movie.onload = function () {
