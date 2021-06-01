@@ -13,10 +13,6 @@ To reference or read more about this work please see:
 https://etd.library.vanderbilt.edu/available/etd-03212018-140140/unrestricted/Shapiro_Dissertation.pdf
 */
 
-//*************** FILE INPUT AND CORE VARS ***************
-/**
- * Global movement and conversation file results arrays allow dynamic re-processing of individual data files
- */
 let core;
 let exampleData;
 let parseData;
