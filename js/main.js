@@ -69,22 +69,16 @@ function setup() {
  */
 function draw() {
     background(255);
-    if (dataIsLoaded(core.floorPlan)) image(core.floorPlan, 0, 0, keys.displayFloorPlanWidth, keys.displayFloorPlanHeight);
-    if (dataIsLoaded(core.paths) && dataIsLoaded(core.speakerList)) setMovementAndConversationData();
-    else if (dataIsLoaded(core.paths)) setMovementData();
-    if (dataIsLoaded(videoPlayer) && core.isModeVideoShowing && (mouseX !== pmouseX || mouseY !== pmouseY)) {
+    if (testData.dataIsLoaded(core.floorPlan)) image(core.floorPlan, 0, 0, keys.displayFloorPlanWidth, keys.displayFloorPlanHeight);
+    if (testData.dataIsLoaded(core.paths) && testData.dataIsLoaded(core.speakerList)) setMovementAndConversationData();
+    else if (testData.dataIsLoaded(core.paths)) setMovementData();
+    if (testData.dataIsLoaded(videoPlayer) && core.isModeVideoShowing && (mouseX !== pmouseX || mouseY !== pmouseY)) {
         if (!core.isModeVideoPlaying) setVideoScrubbing();
         select('#moviePlayer').position(mouseX - videoPlayer.videoWidth, mouseY - videoPlayer.videoHeight);
     }
     keys.drawKeys();
 }
-/**
- * Returns false if parameter is undefined or null
- * @param  {Any Type} data
- */
-function dataIsLoaded(data) {
-    return data != null; // in javascript this tests for both undefined and null values
-}
+
 /**
  * Organizes drawing methods for movement and conversation drawData classes
  * Also organizes drawing of slicer line, conversation bubble if selected by user, and updating core.isModeAnimate

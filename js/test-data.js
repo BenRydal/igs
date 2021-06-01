@@ -1,6 +1,14 @@
 class TestData {
 
     /**
+     * Returns false if parameter is undefined or null
+     * @param  {Any Type} data
+     */
+    dataIsLoaded(data) {
+        return data != null; // in javascript this tests for both undefined and null values
+    }
+
+    /**
      * Tests if PapaParse meta results array includes correct headers for movement
      * @param  {PapaParse results.meta.fields} meta
      */

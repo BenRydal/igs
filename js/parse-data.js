@@ -115,7 +115,7 @@ class ParseData {
     }
 
     clearAllData() {
-        if (dataIsLoaded(videoPlayer)) {
+        if (testData.dataIsLoaded(videoPlayer)) {
             if (core.isModeVideoShowing) handlers.overVideoButton(); // Turn off video before destroying it if showing
             videoPlayer.destroy(); // if there is a video, destroy it
             videoPlayer = null; // set videoPlayer to null

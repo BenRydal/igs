@@ -65,7 +65,7 @@ class ProcessData {
         let p = new Path(letterName); // initialize with name and grey/black color
         p.movement = movement;
         p.conversation = conversation;
-        if (dataIsLoaded(core.speakerList)) p.color = this.setPathColorBySpeaker(p.name); // if conversation file loaded, send to method to calculate color
+        if (testData.dataIsLoaded(core.speakerList)) p.color = this.setPathColorBySpeaker(p.name); // if conversation file loaded, send to method to calculate color
         else p.color = colorList[core.paths.length % colorList.length]; // if no conversation file loaded path color is next in Color list
         core.paths.push(p);
         core.paths.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching core.speakerList array
@@ -146,7 +146,7 @@ class ProcessData {
 
     // Initialization for the video player
     processVideo(platform, params) {
-        if (dataIsLoaded(videoPlayer)) videoPlayer.destroy();
+        if (testData.dataIsLoaded(videoPlayer)) videoPlayer.destroy();
         // Based on the specified platform, chose the appropriate type of videoPlayer to use
         switch (platform) {
             case "Youtube":

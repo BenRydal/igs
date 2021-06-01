@@ -83,7 +83,7 @@ class Handlers {
         if (overRect(currXPos, keys.buttonsHeight, textWidth(buttons[0]), keys.buttonWidth)) this.overAnimateButton();
         else if (overRect(currXPos + textWidth(buttons[0]) + 2 * keys.buttonSpacing, keys.buttonsHeight, textWidth(buttons[1]) + keys.buttonSpacing, keys.buttonWidth)) core.isModeAlignTalkTop = !core.isModeAlignTalkTop;
         else if (overRect(currXPos + textWidth(buttons[0] + buttons[1]) + 4 * keys.buttonSpacing, keys.buttonsHeight, textWidth(buttons[2]) + keys.buttonSpacing, keys.buttonWidth)) core.isModeAllTalkOnPath = !core.isModeAllTalkOnPath;
-        else if (dataIsLoaded(videoPlayer) && overRect(currXPos + textWidth(buttons[0] + buttons[1] + buttons[2]) + 6 * keys.buttonSpacing, keys.buttonsHeight, textWidth(buttons[3]) + keys.buttonSpacing, keys.buttonWidth)) this.overVideoButton();
+        else if (testData.dataIsLoaded(videoPlayer) && overRect(currXPos + textWidth(buttons[0] + buttons[1] + buttons[2]) + 6 * keys.buttonSpacing, keys.buttonsHeight, textWidth(buttons[3]) + keys.buttonSpacing, keys.buttonWidth)) this.overVideoButton();
         else if (overRect(currXPos + textWidth(buttons[0] + buttons[1] + buttons[2] + buttons[3]) + 8 * keys.buttonSpacing, keys.buttonsHeight, textWidth(buttons[4]) + keys.buttonSpacing, keys.buttonWidth)) core.isModeIntro = !core.isModeIntro;
     }
 
