@@ -1,6 +1,5 @@
   class ExampleData {
 
-    constructor() {}
     /**
      * Selects load data or example data option
      * Example data format: [String directory, String floorPlan image file, String conversation File, String movement File[], String video platform, video params(see Video Player Interface)]

@@ -19,10 +19,14 @@ class Keys {
         this.buttonsHeight = this.timelineHeight + (height - this.timelineHeight) / 1.8;
         this.keyTextSize = width / 70;
         this.floorPlanCursorSelectSize = 100;
+        this.font_PlayfairReg = loadFont("data/fonts/PlayfairDisplay-Regular.ttf");
+        this.font_PlayfairItalic = loadFont("data/fonts/PlayfairDisplay-Italic.ttf");
+        this.font_Lato = loadFont("data/fonts/Lato-Light.ttf");
     }
 
     drawKeys() {
-        textFont(font_PlayfairReg, this.keyTextSize);
+        textAlign(LEFT, TOP);
+        textFont(this.font_PlayfairReg, this.keyTextSize);
         this.drawPathSpeakerTitle();
         if (core.isModeMovement) this.drawPathSpeakerKeys(core.paths);
         else this.drawPathSpeakerKeys(core.speakerList);
@@ -104,7 +108,7 @@ class Keys {
         noStroke();
         currXPos += textWidth(buttons[3]) + this.buttonSpacing * 2;
         // Button 5
-        textFont(font_PlayfairItalic, this.keyTextSize);
+        textFont(this.font_PlayfairItalic, this.keyTextSize);
         fill(core.isModeIntro ? 0 : 150);
         text(buttons[4], currXPos, this.buttonsHeight);
         noFill();
@@ -166,7 +170,7 @@ class Keys {
         fill(255, 240);
         rect(width / 2, height / 2.5, width / 1.75 + 50, height / 1.75 + 50);
         fill(0);
-        textFont(font_Lato, this.keyTextSize);
+        textFont(this.font_Lato, this.keyTextSize);
         text(introMSG, width / 2, height / 2.5, width / 1.75, height / 1.75);
         rectMode(CORNER);
     }

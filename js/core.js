@@ -2,9 +2,7 @@ class Core {
 
     constructor() {
         // DATA
-        /**
-         * Movement and conversation file results arrays allow dynamic re-processing of individual data files
-         */
+        // Movement and conversation file results arrays allow dynamic re-processing of individual data files
         this.movementFileResults = []; // List that holds a results array and character letter indicating path name from a parsed movement .CSV file
         this.conversationFileResults = []; // List that holds a results array and file data from a parsed conversation .CSV file
         this.speakerList = []; // List that holds Speaker objects parsed from conversation file

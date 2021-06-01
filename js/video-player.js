@@ -22,7 +22,6 @@ var videoPlatform = 'Kaltura';
 var videoParams = { wid: '_1038472', uiconf_id: '33084471', entry_id: '1_9tp4soob' };
 **********************************************************************************************/
 
-// This is the VideoPlayer implementation that utilizes the Youtube Player API
 class YoutubePlayer {
 
     constructor(params) {
