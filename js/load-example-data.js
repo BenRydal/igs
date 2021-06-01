@@ -8,7 +8,7 @@
      * NOTE: Calls input bar and clears all data for load data 
      */
     selectExampleData() {
-      if (videoIsShowing) overVideoButton(); // Turn off video that if showing
+      if (videoIsShowing) handlers.overVideoButton(); // Turn off video that if showing
       if (showIntroMsg) showIntroMsg = false; // Hide intro msg if showing
       let option = document.getElementById("examples").value;
       switch (option) {

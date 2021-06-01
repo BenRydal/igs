@@ -105,7 +105,7 @@ class ParseData {
      * @param  {.MP4 File} input
      */
     parseVideoFile(input) {
-        if (videoIsShowing) overVideoButton(); // Turn off video that if showing
+        if (videoIsShowing) handlers.overVideoButton(); // Turn off video that if showing
         let file = input.files[0];
         input.value = ''; // reset input value so you can load same file again in browser
         let fileLocation = URL.createObjectURL(file);
@@ -116,7 +116,7 @@ class ParseData {
 
     clearAllData() {
         if (dataIsLoaded(videoPlayer)) {
-            if (videoIsShowing) overVideoButton(); // Turn off video before destroying it if showing
+            if (videoIsShowing) handlers.overVideoButton(); // Turn off video before destroying it if showing
             videoPlayer.destroy(); // if there is a video, destroy it
             videoPlayer = null; // set videoPlayer to null
         }

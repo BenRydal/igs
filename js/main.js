@@ -26,6 +26,7 @@ let parseData;
 let processData;
 let testData;
 let keys;
+let handlers;
 
 // let core; // ???
 let movementFileResults = []; // List that holds a results array and character letter indicating path name from a parsed movement .CSV file
@@ -46,15 +47,14 @@ const introMSG = "INTERACTION GEOGRAPHY SLICER (IGS)\n\nby Ben Rydal Shapiro & c
 const buttons = ["Animate", "Align Talk", "All Talk", "Video", "How to Use"];
 
 // MODES
+// isModeMovement
+// isModeConvoTop
 let showMovementKeys = true; // boolean controls whether movement or conversation keys show
 let conversationPositionTop = false; // boolean controls positioning of conversation turns on path or top of screen
 let allConversation = true; // boolean controls whether single speaker or all conversation turns shown on path
 let animation = false; // boolean controls animation mode
 let animationCounter = 0; // boolean controls current value of animation
-let lockedLeft = false;
-let lockedRight = false;
 let showIntroMsg = true; // boolean controls intro message
-
 
 const SELPADDING = 20;
 let inputFloorPlanPixelWidth, inputFloorPlanPixelHeight; // Number indicating pixel width/height of user inputted floor plan image file
@@ -95,6 +95,8 @@ function setup() {
     processData = new ProcessData();
     testData = new TestData();
     keys = new Keys();
+    handlers = new Handlers();
+
     textAlign(LEFT, TOP);
     textFont(font_Lato, keys.keyTextSize);
     videoWidth = width / 5;
@@ -184,4 +186,30 @@ function setVideoScrubbing() {
         videoPlayer.seekTo(vPos);
         videoPlayer.pause(); // Add to prevent accidental video playing that seems to occur
     }
+}
+
+/**
+ * Organizes mousePressed method calls for video, movement/conversation and interaction buttons and path/speaker keys
+ */
+function mousePressed() {
+    handlers.handleMousePressed();
+}
+
+function mouseDragged() {
+    handlers.handleMouseDragged();
+}
+
+function mouseReleased() {
+    handlers.handleMouseReleased();
+}
+
+function overCircle(x, y, diameter) {
+    const disX = x - mouseX;
+    const disY = y - mouseY;
+    return sqrt(sq(disX) + sq(disY)) < diameter / 2;
+}
+
+// Tests if over rectangle with x, y, and width/height
+function overRect(x, y, boxWidth, boxHeight) {
+    return mouseX >= x && mouseX <= x + boxWidth && mouseY >= y && mouseY <= y + boxHeight;
 }
