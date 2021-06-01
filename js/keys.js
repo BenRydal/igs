@@ -1,19 +1,40 @@
 class Keys {
 
+    constructor() {
+        this.timelineStart = width * 0.4638;
+        this.timelineEnd = width * 0.9638;
+        this.tickHeight = 25;
+        this.curPixelTimeMin = this.timelineStart; // adjustable timeline values
+        this.curPixelTimeMax = this.timelineEnd;
+        this.timelineLength = this.timelineEnd - this.timelineStart;
+        this.timelineHeight = height * .81;
+        this.displayFloorPlanWidth = this.timelineStart - (width - this.timelineEnd);
+        this.displayFloorPlanHeight = this.timelineHeight;
+        this.yPosTimelineTop = this.timelineHeight - this.tickHeight;
+        this.yPosTimelineBottom = this.timelineHeight + this.tickHeight;
+        this.timelineThickness = this.yPosTimelineBottom - this.yPosTimelineTop;
+        this.buttonSpacing = width / 71;
+        this.buttonWidth = this.buttonSpacing;
+        this.speakerKeysHeight = this.timelineHeight + (height - this.timelineHeight) / 4;
+        this.buttonsHeight = this.timelineHeight + (height - this.timelineHeight) / 1.8;
+        this.keyTextSize = width / 70;
+        this.floorPlanCursorSelectSize = 100;
+    }
+
     drawKeys() {
-        textFont(font_PlayfairReg, keyTextSize);
+        textFont(font_PlayfairReg, this.keyTextSize);
         this.drawPathSpeakerTitle();
         if (showMovementKeys) this.drawPathSpeakerKeys(paths);
         else this.drawPathSpeakerKeys(speakerList);
         this.drawTimeline();
         this.drawButtons();
-        if (overRect(0, 0, displayFloorPlanWidth, displayFloorPlanHeight)) this.drawFloorPlanSelector();
+        if (overRect(0, 0, this.displayFloorPlanWidth, this.displayFloorPlanHeight)) this.drawFloorPlanSelector();
         if (showIntroMsg) this.drawIntroMsg(); // draw intro message on program start up until mouse is pressed
     }
 
     drawPathSpeakerTitle() {
-        let currXPos = timelineStart;
-        let yPos = speakerKeysHeight - buttonWidth / 5;
+        let currXPos = this.timelineStart;
+        let yPos = this.speakerKeysHeight - this.buttonWidth / 5;
         noStroke();
         fill(showMovementKeys ? 0 : 150);
         text("Movement", currXPos, yPos);
@@ -25,71 +46,71 @@ class Keys {
 
     // Loop through speakers and set fill/stroke in keys for all if showing/not showing
     drawPathSpeakerKeys(list) {
-        let currXPos = timelineStart + textWidth("Movement | Conversation") + buttonWidth;
-        let yPos = speakerKeysHeight - buttonWidth / 5;
+        let currXPos = this.timelineStart + textWidth("Movement | Conversation") + this.buttonWidth;
+        let yPos = this.speakerKeysHeight - this.buttonWidth / 5;
         strokeWeight(5);
         for (let i = 0; i < list.length; i++) {
             let curObject = list[i];
             stroke(curObject.color);
             noFill();
-            rect(currXPos, speakerKeysHeight, buttonWidth, buttonWidth);
+            rect(currXPos, this.speakerKeysHeight, this.buttonWidth, this.buttonWidth);
             if (curObject.show) {
                 fill(curObject.color);
-                rect(currXPos, speakerKeysHeight, buttonWidth, buttonWidth);
+                rect(currXPos, this.speakerKeysHeight, this.buttonWidth, this.buttonWidth);
             }
             fill(0);
             noStroke();
-            text(curObject.name, currXPos + 1.3 * buttonWidth, yPos);
-            currXPos += buttonWidth + textWidth(curObject.name) + buttonSpacing;
+            text(curObject.name, currXPos + 1.3 * this.buttonWidth, yPos);
+            currXPos += this.buttonWidth + textWidth(curObject.name) + this.buttonSpacing;
         }
     }
 
     drawButtons() {
-        let currXPos = timelineStart + buttonSpacing / 2;
+        let currXPos = this.timelineStart + this.buttonSpacing / 2;
         fill(animation ? 0 : 150);
         // Button 1
-        text(buttons[0], currXPos, buttonsHeight);
+        text(buttons[0], currXPos, this.buttonsHeight);
         noFill();
         stroke(animation ? 0 : 150);
         strokeWeight(1);
-        rect(currXPos - buttonSpacing / 2, buttonsHeight, textWidth(buttons[0]) + buttonSpacing, buttonSpacing * 1.5);
+        rect(currXPos - this.buttonSpacing / 2, this.buttonsHeight, textWidth(buttons[0]) + this.buttonSpacing, this.buttonSpacing * 1.5);
         noStroke();
-        currXPos += textWidth(buttons[0]) + buttonSpacing * 2;
+        currXPos += textWidth(buttons[0]) + this.buttonSpacing * 2;
         // Button 2
         fill(conversationPositionTop ? 0 : 150);
-        text(buttons[1], currXPos, buttonsHeight);
+        text(buttons[1], currXPos, this.buttonsHeight);
         noFill();
         stroke(conversationPositionTop ? 0 : 150);
         strokeWeight(1);
-        rect(currXPos - buttonSpacing / 2, buttonsHeight, textWidth(buttons[1]) + buttonSpacing, buttonSpacing * 1.5);
+        rect(currXPos - this.buttonSpacing / 2, this.buttonsHeight, textWidth(buttons[1]) + this.buttonSpacing, this.buttonSpacing * 1.5);
         noStroke();
-        currXPos += textWidth(buttons[1]) + buttonSpacing * 2;
+        currXPos += textWidth(buttons[1]) + this.buttonSpacing * 2;
         // Button 3
         fill(allConversation ? 0 : 150);
-        text(buttons[2], currXPos, buttonsHeight);
+        text(buttons[2], currXPos, this.buttonsHeight);
         noFill();
         stroke(allConversation ? 0 : 150);
         strokeWeight(1);
-        rect(currXPos - buttonSpacing / 2, buttonsHeight, textWidth(buttons[2]) + buttonSpacing, buttonSpacing * 1.5);
+        rect(currXPos - this.buttonSpacing / 2, this.buttonsHeight, textWidth(buttons[2]) + this.buttonSpacing, this.buttonSpacing * 1.5);
         noStroke();
-        currXPos += textWidth(buttons[2]) + buttonSpacing * 2;
+        currXPos += textWidth(buttons[2]) + this.buttonSpacing * 2;
         // Button 4
         fill(videoIsShowing ? 0 : 150);
-        text(buttons[3], currXPos, buttonsHeight);
+        text(buttons[3], currXPos, this.buttonsHeight);
         noFill();
         stroke(videoIsShowing ? 0 : 150);
         strokeWeight(1);
-        rect(currXPos - buttonSpacing / 2, buttonsHeight, textWidth(buttons[3]) + buttonSpacing, buttonSpacing * 1.5);
+        rect(currXPos - this.buttonSpacing / 2, this.buttonsHeight, textWidth(buttons[3]) + this.buttonSpacing, this.buttonSpacing * 1.5);
         noStroke();
-        currXPos += textWidth(buttons[3]) + buttonSpacing * 2;
+        currXPos += textWidth(buttons[3]) + this.buttonSpacing * 2;
         // Button 5
-        textFont(font_PlayfairItalic, keyTextSize);
+        textFont(font_PlayfairItalic, this.keyTextSize);
         fill(showIntroMsg ? 0 : 150);
-        text(buttons[4], currXPos, buttonsHeight);
+        text(buttons[4], currXPos, this.buttonsHeight);
         noFill();
         stroke(showIntroMsg ? 0 : 150);
         strokeWeight(1);
-        rect(currXPos - buttonSpacing / 2, buttonsHeight, textWidth(buttons[4]) + buttonSpacing, buttonSpacing * 1.5);
+        rect(currXPos - this.buttonSpacing / 2, this.buttonsHeight, textWidth(buttons[4]) + this.buttonSpacing, this.buttonSpacing * 1.5);
         noStroke();
     }
 
@@ -97,27 +118,27 @@ class Keys {
         // timeline selection rectangle
         fill(150, 150);
         noStroke();
-        if (animation) rect(currPixelTimeMin, timelineHeight - tickHeight, map(animationCounter, 0, totalTimeInSeconds, timelineStart, timelineEnd) - currPixelTimeMin, 2 * (tickHeight));
-        else rect(currPixelTimeMin, timelineHeight - tickHeight, currPixelTimeMax - currPixelTimeMin, 2 * (tickHeight));
+        if (animation) rect(this.curPixelTimeMin, this.timelineHeight - this.tickHeight, map(animationCounter, 0, totalTimeInSeconds, this.timelineStart, this.timelineEnd) - this.curPixelTimeMin, 2 * (this.tickHeight));
+        else rect(this.curPixelTimeMin, this.timelineHeight - this.tickHeight, this.curPixelTimeMax - this.curPixelTimeMin, 2 * (this.tickHeight));
         // timeline
         stroke(0);
         strokeWeight(1);
-        line(timelineStart, timelineHeight, timelineEnd, timelineHeight); // horizontal
+        line(this.timelineStart, this.timelineHeight, this.timelineEnd, this.timelineHeight); // horizontal
         // Selector lines
         strokeWeight(4);
-        line(currPixelTimeMin, timelineHeight - tickHeight, currPixelTimeMin, timelineHeight + tickHeight);
-        line(currPixelTimeMax, timelineHeight - tickHeight, currPixelTimeMax, timelineHeight + tickHeight);
+        line(this.curPixelTimeMin, this.timelineHeight - this.tickHeight, this.curPixelTimeMin, this.timelineHeight + this.tickHeight);
+        line(this.curPixelTimeMax, this.timelineHeight - this.tickHeight, this.curPixelTimeMax, this.timelineHeight + this.tickHeight);
 
         // Text for minutes at start/end of timeline
         noStroke();
         fill(0);
-        let startValue = floor(map(currPixelTimeMin, timelineStart, timelineEnd, 0, totalTimeInSeconds));
-        let endValue = ceil(map(currPixelTimeMax, timelineStart, timelineEnd, 0, totalTimeInSeconds));
-        text(floor(startValue / 60), timelineStart + tickHeight / 2, timelineHeight);
-        text(ceil(endValue / 60), timelineEnd - tickHeight, timelineHeight);
+        let startValue = floor(map(this.curPixelTimeMin, this.timelineStart, this.timelineEnd, 0, totalTimeInSeconds));
+        let endValue = ceil(map(this.curPixelTimeMax, this.timelineStart, this.timelineEnd, 0, totalTimeInSeconds));
+        text(floor(startValue / 60), this.timelineStart + this.tickHeight / 2, this.timelineHeight);
+        text(ceil(endValue / 60), this.timelineEnd - this.tickHeight, this.timelineHeight);
         // Text for timeline label
-        let mapMouseX = map(mouseX, timelineStart, timelineEnd, currPixelTimeMin, currPixelTimeMax);
-        let videoTimeInSeconds = map(mapMouseX, timelineStart, timelineEnd, 0, totalTimeInSeconds); // remap to get seconds in video from remapped mouse position   
+        let mapMouseX = map(mouseX, this.timelineStart, this.timelineEnd, this.curPixelTimeMin, this.curPixelTimeMax);
+        let videoTimeInSeconds = map(mapMouseX, this.timelineStart, this.timelineEnd, 0, totalTimeInSeconds); // remap to get seconds in video from remapped mouse position   
         let videoTimeInMinutes = videoTimeInSeconds / 60; // float value of minutes and seconds
         let minutesValue = floor(videoTimeInMinutes); // floor to get minutes
         let decimalSeconds = videoTimeInMinutes - minutesValue; //  Subtract minutes to get decimal seconds---e.g., 14.28571429 - 14... returns (.28571429)
@@ -125,8 +146,8 @@ class Keys {
         let label_1 = minutesValue + " minutes  " + secondsValue + " seconds";
         let label_2 = "MINUTES";
         textAlign(CENTER);
-        if (overRect(timelineStart, 0, timelineLength, timelineHeight)) text(label_1, timelineStart + timelineLength / 2, timelineHeight);
-        else text(label_2, timelineStart + timelineLength / 2, timelineHeight);
+        if (overRect(this.timelineStart, 0, this.timelineLength, this.timelineHeight)) text(label_1, this.timelineStart + this.timelineLength / 2, this.timelineHeight);
+        else text(label_2, this.timelineStart + this.timelineLength / 2, this.timelineHeight);
         textAlign(LEFT); // reset
 
     }
@@ -135,7 +156,7 @@ class Keys {
         noFill();
         strokeWeight(3);
         stroke(0);
-        circle(mouseX, mouseY, floorPlanCursorSelectSize);
+        circle(mouseX, mouseY, this.floorPlanCursorSelectSize);
     }
 
     drawIntroMsg() {
@@ -143,9 +164,9 @@ class Keys {
         stroke(0);
         strokeWeight(1);
         fill(255, 240);
-        rect(width / 2, height / 2.5, width / 1.75 + spacing, height / 1.75 + spacing);
+        rect(width / 2, height / 2.5, width / 1.75 + 50, height / 1.75 + 50);
         fill(0);
-        textFont(font_Lato, keyTextSize);
+        textFont(font_Lato, this.keyTextSize);
         text(introMSG, width / 2, height / 2.5, width / 1.75, height / 1.75);
         rectMode(CORNER);
     }

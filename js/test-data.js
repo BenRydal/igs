@@ -66,7 +66,7 @@ class TestData {
     sampleMovementData(data, curRow) {
         if (curRow === 0 || curRow === 1) return true; // always return true for first two rows to set starting point
         const sampleRateDivisor = 5; // 5 as rate seems to work nicely on most devices
-        if (Math.floor(data.length / sampleRateDivisor) < timelineLength) return Number.parseFloat(data[curRow][movementHeaders[0]]).toFixed(2) > Number.parseFloat(data[curRow - 1][movementHeaders[0]]).toFixed(2);
+        if (Math.floor(data.length / sampleRateDivisor) < keys.timelineLength) return Number.parseFloat(data[curRow][movementHeaders[0]]).toFixed(2) > Number.parseFloat(data[curRow - 1][movementHeaders[0]]).toFixed(2);
         else return Math.floor(data[curRow][movementHeaders[0]]) > Math.floor(data[curRow - 1][movementHeaders[0]]); // Large data sampling rate
     }
 }

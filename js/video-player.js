@@ -37,7 +37,7 @@ class YoutubePlayer {
         movie.id(this.targetId);
         movie.size(videoWidth, videoHeight);
         movie.hide();
-        movie.position(timelineStart, 0);
+        movie.position(keys.timelineStart, 0);
     }
 
 
@@ -111,7 +111,7 @@ class P5FilePlayer {
             movie.id('moviePlayer');
             movie.size(videoWidth, videoHeight);
             movie.hide();
-            movie.position(timelineStart, 0);
+            movie.position(keys.timelineStart, 0);
             movie.onload = function () {
                 URL.revokeObjectURL(this.src);
             }

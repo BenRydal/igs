@@ -3,19 +3,19 @@
  */
 function mousePressed() {
     // Controls video when clicking over timeline region
-    if (videoIsShowing && !animation && overRect(timelineStart, 0, timelineEnd, yPosTimelineBottom)) playPauseMovie();
+    if (videoIsShowing && !animation && overRect(keys.timelineStart, 0, keys.timelineEnd, keys.yPosTimelineBottom)) playPauseMovie();
     overMovementConversationButtons();
     overInteractionButtons();
     if (showMovementKeys) overPathKeys();
     else overSpeakerKeys();
 }
 /**
- * Organizes timeline GUI methods. SelSpacing used to provide additionl "cushion" for mouse.
+ * Organizes timeline GUI methods. SELPADDING used to provide additionl "cushion" for mouse.
  * NOTE: To activate timeline methods, animation mode must be false and 
  * Either mouse already dragging over timeline OR mouse cursor is over timeline bar.
  */
 function mouseDragged() {
-    if (!animation && ((lockedLeft || lockedRight) || overRect(timelineStart - selSpacing, yPosTimelineTop, timelineLength + selSpacing, timelineThickness))) handleTimeline();
+    if (!animation && ((lockedLeft || lockedRight) || overRect(keys.timelineStart - SELPADDING, keys.yPosTimelineTop, keys.timelineLength + SELPADDING, keys.timelineThickness))) handleTimeline();
 }
 /**
  * Set locked global vars to false to be able to re-engage timeline GUI methods
@@ -29,10 +29,10 @@ function mouseReleased() {
  * NOTE: textSize is way to control dynamic scaling for gui methods and interface
  */
 function overMovementConversationButtons() {
-    textSize(keyTextSize);
-    let currXPos = timelineStart;
-    if (overRect(currXPos, speakerKeysHeight, buttonWidth + textWidth("Movement"), buttonWidth)) showMovementKeys = true;
-    else if (overRect(currXPos + textWidth("Movement | "), speakerKeysHeight, buttonWidth + textWidth("Conversation"), buttonWidth)) showMovementKeys = false;
+    textSize(keys.keyTextSize);
+    let currXPos = keys.timelineStart;
+    if (overRect(currXPos, keys.speakerKeysHeight, keys.buttonWidth + textWidth("Movement"), keys.buttonWidth)) showMovementKeys = true;
+    else if (overRect(currXPos + textWidth("Movement | "), keys.speakerKeysHeight, keys.buttonWidth + textWidth("Conversation"), keys.buttonWidth)) showMovementKeys = false;
 }
 
 /**
@@ -40,12 +40,12 @@ function overMovementConversationButtons() {
  * NOTE: textSize is way to control dynamic scaling for gui methods and interface
  */
 function overSpeakerKeys() {
-    textSize(keyTextSize);
-    let currXPos = timelineStart + textWidth("Movement | Conversation") + buttonWidth;
+    textSize(keys.keyTextSize);
+    let currXPos = keys.timelineStart + textWidth("Movement | Conversation") + keys.buttonWidth;
     for (let i = 0; i < speakerList.length; i++) {
         let nameWidth = textWidth(speakerList[i].name); // set nameWidth to pixel width of speaker code
-        if (overRect(currXPos, speakerKeysHeight, buttonWidth + nameWidth, buttonWidth)) speakerList[i].show = !speakerList[i].show;
-        currXPos += buttonWidth + nameWidth + buttonSpacing;
+        if (overRect(currXPos, keys.speakerKeysHeight, keys.buttonWidth + nameWidth, keys.buttonWidth)) speakerList[i].show = !speakerList[i].show;
+        currXPos += keys.buttonWidth + nameWidth + keys.buttonSpacing;
     }
 }
 
@@ -54,12 +54,12 @@ function overSpeakerKeys() {
  * NOTE: textSize is way to control dynamic scaling for gui methods and interface
  */
 function overPathKeys() {
-    textSize(keyTextSize);
-    let currXPos = timelineStart + textWidth("Movement | Conversation") + buttonWidth;
+    textSize(keys.keyTextSize);
+    let currXPos = keys.timelineStart + textWidth("Movement | Conversation") + keys.buttonWidth;
     for (let i = 0; i < paths.length; i++) {
         const nameWidth = textWidth(paths[i].name); // set nameWidth to pixel width of path name
-        if (overRect(currXPos, speakerKeysHeight, buttonWidth + nameWidth, buttonWidth)) paths[i].show = !paths[i].show;
-        currXPos += buttonWidth + nameWidth + buttonSpacing;
+        if (overRect(currXPos, keys.speakerKeysHeight, keys.buttonWidth + nameWidth, keys.buttonWidth)) paths[i].show = !paths[i].show;
+        currXPos += keys.buttonWidth + nameWidth + keys.buttonSpacing;
     }
 }
 
@@ -68,13 +68,13 @@ function overPathKeys() {
  * NOTE: textSize is way to control dynamic scaling for gui methods and interface
  */
 function overInteractionButtons() {
-    textSize(keyTextSize);
-    let currXPos = timelineStart + buttonSpacing / 2;
-    if (overRect(currXPos, buttonsHeight, textWidth(buttons[0]), buttonWidth)) overAnimateButton();
-    else if (overRect(currXPos + textWidth(buttons[0]) + 2 * buttonSpacing, buttonsHeight, textWidth(buttons[1]) + buttonSpacing, buttonWidth)) conversationPositionTop = !conversationPositionTop;
-    else if (overRect(currXPos + textWidth(buttons[0] + buttons[1]) + 4 * buttonSpacing, buttonsHeight, textWidth(buttons[2]) + buttonSpacing, buttonWidth)) allConversation = !allConversation;
-    else if (dataIsLoaded(videoPlayer) && overRect(currXPos + textWidth(buttons[0] + buttons[1] + buttons[2]) + 6 * buttonSpacing, buttonsHeight, textWidth(buttons[3]) + buttonSpacing, buttonWidth)) overVideoButton();
-    else if (overRect(currXPos + textWidth(buttons[0] + buttons[1] + buttons[2] + buttons[3]) + 8 * buttonSpacing, buttonsHeight, textWidth(buttons[4]) + buttonSpacing, buttonWidth)) showIntroMsg = !showIntroMsg;
+    textSize(keys.keyTextSize);
+    let currXPos = keys.timelineStart + keys.buttonSpacing / 2;
+    if (overRect(currXPos, keys.buttonsHeight, textWidth(buttons[0]), keys.buttonWidth)) overAnimateButton();
+    else if (overRect(currXPos + textWidth(buttons[0]) + 2 * keys.buttonSpacing, keys.buttonsHeight, textWidth(buttons[1]) + keys.buttonSpacing, keys.buttonWidth)) conversationPositionTop = !conversationPositionTop;
+    else if (overRect(currXPos + textWidth(buttons[0] + buttons[1]) + 4 * keys.buttonSpacing, keys.buttonsHeight, textWidth(buttons[2]) + keys.buttonSpacing, keys.buttonWidth)) allConversation = !allConversation;
+    else if (dataIsLoaded(videoPlayer) && overRect(currXPos + textWidth(buttons[0] + buttons[1] + buttons[2]) + 6 * keys.buttonSpacing, keys.buttonsHeight, textWidth(buttons[3]) + keys.buttonSpacing, keys.buttonWidth)) overVideoButton();
+    else if (overRect(currXPos + textWidth(buttons[0] + buttons[1] + buttons[2] + buttons[3]) + 8 * keys.buttonSpacing, keys.buttonsHeight, textWidth(buttons[4]) + keys.buttonSpacing, keys.buttonWidth)) showIntroMsg = !showIntroMsg;
 }
 
 /**
@@ -83,28 +83,28 @@ function overInteractionButtons() {
 function overAnimateButton() {
     if (animation) {
         animation = false;
-        animationCounter = map(currPixelTimeMax, timelineStart, timelineEnd, 0, totalTimeInSeconds); // set to currPixelTimeMax mapped value
+        animationCounter = map(keys.curPixelTimeMax, keys.timelineStart, keys.timelineEnd, 0, totalTimeInSeconds); // set to keys.curPixelTimeMax mapped value
     } else {
         animation = true;
-        animationCounter = map(currPixelTimeMin, timelineStart, timelineEnd, 0, totalTimeInSeconds); // set to currPixelTimeMin mapped value
+        animationCounter = map(keys.curPixelTimeMin, keys.timelineStart, keys.timelineEnd, 0, totalTimeInSeconds); // set to keys.curPixelTimeMin mapped value
     }
 }
 
 /**
- * Updates currPixelTimeMin or currPixelTimeMax global variables depending on left or right selector that user is over
+ * Updates keys.curPixelTimeMin or keys.curPixelTimeMax global variables depending on left or right selector that user is over
  * NOTE: Is triggered if user already dragging or begins dragging
  */
 function handleTimeline() {
-    const xPosLeftSelector = currPixelTimeMin;
-    const xPosRightSelector = currPixelTimeMax;
-    if (lockedLeft || (!lockedRight && overRect(xPosLeftSelector - selSpacing, yPosTimelineTop, 2 * selSpacing, timelineThickness))) {
+    const xPosLeftSelector = keys.curPixelTimeMin;
+    const xPosRightSelector = keys.curPixelTimeMax;
+    if (lockedLeft || (!lockedRight && overRect(xPosLeftSelector - SELPADDING, keys.yPosTimelineTop, 2 * SELPADDING, keys.timelineThickness))) {
         lockedLeft = true;
-        currPixelTimeMin = constrain(mouseX, timelineStart, timelineEnd);
-        if (currPixelTimeMin > currPixelTimeMax - (2 * selSpacing)) currPixelTimeMin = currPixelTimeMax - (2 * selSpacing); // prevents overstriking
-    } else if (lockedRight || overRect(xPosRightSelector - selSpacing, yPosTimelineTop, 2 * selSpacing, timelineThickness)) {
+        keys.curPixelTimeMin = constrain(mouseX, keys.timelineStart, keys.timelineEnd);
+        if (keys.curPixelTimeMin > keys.curPixelTimeMax - (2 * SELPADDING)) keys.curPixelTimeMin = keys.curPixelTimeMax - (2 * SELPADDING); // prevents overstriking
+    } else if (lockedRight || overRect(xPosRightSelector - SELPADDING, keys.yPosTimelineTop, 2 * SELPADDING, keys.timelineThickness)) {
         lockedRight = true;
-        currPixelTimeMax = constrain(mouseX, timelineStart, timelineEnd);
-        if (currPixelTimeMax < currPixelTimeMin + (2 * selSpacing)) currPixelTimeMax = currPixelTimeMin + (2 * selSpacing); // prevents overstriking
+        keys.curPixelTimeMax = constrain(mouseX, keys.timelineStart, keys.timelineEnd);
+        if (keys.curPixelTimeMax < keys.curPixelTimeMin + (2 * SELPADDING)) keys.curPixelTimeMax = keys.curPixelTimeMin + (2 * SELPADDING); // prevents overstriking
     }
 }
 
@@ -133,9 +133,9 @@ function playPauseMovie() {
         videoIsPlaying = false;
     } else {
         // first map mouse to selected time values in GUI
-        const mapMousePos = map(mouseX, timelineStart, timelineEnd, currPixelTimeMin, currPixelTimeMax);
+        const mapMousePos = map(mouseX, keys.timelineStart, keys.timelineEnd, keys.curPixelTimeMin, keys.curPixelTimeMax);
         // must floor vPos to prevent double finite error
-        const videoPos = Math.floor(map(mapMousePos, timelineStart, timelineEnd, 0, Math.floor(videoPlayer.getVideoDuration())));
+        const videoPos = Math.floor(map(mapMousePos, keys.timelineStart, keys.timelineEnd, 0, Math.floor(videoPlayer.getVideoDuration())));
         videoPlayer.play();
         videoPlayer.seekTo(videoPos);
         videoIsPlaying = true;

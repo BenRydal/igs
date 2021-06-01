@@ -10,7 +10,7 @@ class DrawData {
      * @param  {Number/Float} timeValue
      */
     overTimeline(pixelValue) {
-        return pixelValue >= currPixelTimeMin && pixelValue <= currPixelTimeMax;
+        return pixelValue >= keys.curPixelTimeMin && pixelValue <= keys.curPixelTimeMax;
     }
 
     /**
@@ -19,7 +19,7 @@ class DrawData {
      * @param  {Number/Float} yPos
      */
     overFloorPlan(xPos, yPos) {
-        return (xPos >= 0 && xPos <= displayFloorPlanWidth) && (yPos >= 0 && yPos <= displayFloorPlanHeight);
+        return (xPos >= 0 && xPos <= keys.displayFloorPlanWidth) && (yPos >= 0 && yPos <= keys.displayFloorPlanHeight);
     }
     /**
      * Returns true if mouse cursor near xPos and yPos parameters
@@ -28,7 +28,7 @@ class DrawData {
      * @param  {Number/Float} yPos
      */
     overCursor(xPos, yPos) {
-        return overCircle(xPos, yPos, floorPlanCursorSelectSize);
+        return overCircle(xPos, yPos, keys.floorPlanCursorSelectSize);
     }
 
     /**
@@ -38,7 +38,7 @@ class DrawData {
      * @param  {Number/Float} yPos
      */
     overFloorPlanAndCursor(xPos, yPos) {
-        return !this.overFloorPlan(mouseX, mouseY) || (this.overFloorPlan(mouseX, mouseY) && overCircle(xPos, yPos, floorPlanCursorSelectSize));
+        return !this.overFloorPlan(mouseX, mouseY) || (this.overFloorPlan(mouseX, mouseY) && overCircle(xPos, yPos, keys.floorPlanCursorSelectSize));
     }
 
     /**
@@ -48,7 +48,7 @@ class DrawData {
      */
     testAnimation(timeValue) {
         if (animation) {
-            let reMapTime = map(timeValue, timelineStart, timelineEnd, 0, totalTimeInSeconds);
+            let reMapTime = map(timeValue, keys.timelineStart, keys.timelineEnd, 0, totalTimeInSeconds);
             return animationCounter > reMapTime;
         } else return true;
     }
@@ -60,14 +60,14 @@ class DrawDataMovement extends DrawData {
         super();
         /**
          * Bug represents location dot drawn in floor plan and space-time views
-         * @Float xPos, yPos, timePos, size, spacingComparison
+         * @Float xPos, yPos, timePos, size, lengthToCompare
          */
         this.bug = {
             xPos: NO_DATA,
             yPos: NO_DATA,
             timePos: NO_DATA,
             size: width / 50,
-            spacingComparison: timelineLength // used to compare data points to find closest bug value
+            lengthToCompare: keys.timelineLength // used to compare data points to find closest bug value
         };
         this.smallPathWeight = 3;
         this.largePathWeight = 6;
@@ -77,7 +77,7 @@ class DrawDataMovement extends DrawData {
     setData(path) {
         this.resetBug(); // always reset bug values
         // if overMap draw selection of movement and gray scale the rest
-        if (overRect(0, 0, displayFloorPlanWidth, displayFloorPlanHeight)) {
+        if (overRect(0, 0, keys.displayFloorPlanWidth, keys.displayFloorPlanHeight)) {
             this.drawWithCursorHighlight(PLAN, path.movement, path.color);
             this.drawWithCursorHighlight(SPACETIME, path.movement, path.color);
         } else {
@@ -101,10 +101,10 @@ class DrawDataMovement extends DrawData {
     //     beginShape();
     //     for (let i = 0; i < points.length; i++) {
     //         let point = points[i];
-    //         let pixelTime = map(point.time, 0, totalTimeInSeconds, timelineStart, timelineEnd);
-    //         let scaledTime = map(pixelTime, currPixelTimeMin, currPixelTimeMax, timelineStart, timelineEnd);
-    //         let scaledXPos = point.xPos * displayFloorPlanWidth / inputFloorPlanPixelWidth; // scale to floor plan image file
-    //         let scaledYPos = point.yPos * displayFloorPlanHeight / inputFloorPlanPixelHeight; // scale to floor plan image file
+    //         let pixelTime = map(point.time, 0, totalTimeInSeconds, keys.timelineStart, keys.timelineEnd);
+    //         let scaledTime = map(pixelTime, keys.curPixelTimeMin, keys.curPixelTimeMax, keys.timelineStart, keys.timelineEnd);
+    //         let scaledXPos = point.xPos * keys.displayFloorPlanWidth / inputFloorPlanPixelWidth; // scale to floor plan image file
+    //         let scaledYPos = point.yPos * keys.displayFloorPlanHeight / inputFloorPlanPixelHeight; // scale to floor plan image file
     //         if (super.overTimeline(pixelTime) && super.overFloorPlan(scaledXPos, scaledYPos) && super.testAnimation(pixelTime)) {
     //             if (view == PLAN) curveVertex(scaledXPos, scaledYPos);
     //             else if (view == SPACETIME) {
@@ -206,10 +206,10 @@ class DrawDataMovement extends DrawData {
      * @param  {Integer} view
      */
     getScaledMovementPointValues(point, view) {
-        const pixel = map(point.time, 0, totalTimeInSeconds, timelineStart, timelineEnd);
-        const scaledPixel = map(pixel, currPixelTimeMin, currPixelTimeMax, timelineStart, timelineEnd);
-        const scaledX = point.xPos * displayFloorPlanWidth / inputFloorPlanPixelWidth;
-        const scaledY = point.yPos * displayFloorPlanHeight / inputFloorPlanPixelHeight;
+        const pixel = map(point.time, 0, totalTimeInSeconds, keys.timelineStart, keys.timelineEnd);
+        const scaledPixel = map(pixel, keys.curPixelTimeMin, keys.curPixelTimeMax, keys.timelineStart, keys.timelineEnd);
+        const scaledX = point.xPos * keys.displayFloorPlanWidth / inputFloorPlanPixelWidth;
+        const scaledY = point.yPos * keys.displayFloorPlanHeight / inputFloorPlanPixelHeight;
         let scaledSpaceTimeX;
         if (view === PLAN) scaledSpaceTimeX = scaledX;
         else if (view === SPACETIME) scaledSpaceTimeX = scaledPixel;
@@ -252,22 +252,22 @@ class DrawDataMovement extends DrawData {
         else if (videoIsPlaying) {
             // Separate this test out from 3 mode tests to make sure if this is not true know other mode tests are run when video is playing
             if (this.testVideoForBugPoint(scaledTimeToTest)) this.recordBug(scaledTimeToTest, xPos, yPos);
-        } else if (overRect(timelineStart, 0, timelineLength, timelineHeight) && this.testMouseForBugPoint(scaledTimeToTest)) this.recordBug(mouseX, xPos, yPos);
+        } else if (overRect(keys.timelineStart, 0, keys.timelineLength, keys.timelineHeight) && this.testMouseForBugPoint(scaledTimeToTest)) this.recordBug(mouseX, xPos, yPos);
         return false;
     }
 
     testVideoForBugPoint(scaledTimeToTest) {
-        const videoX = map(videoPlayer.getCurrentTime(), 0, totalTimeInSeconds, timelineStart, timelineEnd);
-        const scaledVideoX = map(videoX, currPixelTimeMin, currPixelTimeMax, timelineStart, timelineEnd);
-        if (scaledVideoX >= scaledTimeToTest - this.bug.spacingComparison && scaledVideoX <= scaledTimeToTest + this.bug.spacingComparison) {
-            this.bug.spacingComparison = Math.abs(scaledVideoX - scaledTimeToTest);
+        const videoX = map(videoPlayer.getCurrentTime(), 0, totalTimeInSeconds, keys.timelineStart, keys.timelineEnd);
+        const scaledVideoX = map(videoX, keys.curPixelTimeMin, keys.curPixelTimeMax, keys.timelineStart, keys.timelineEnd);
+        if (scaledVideoX >= scaledTimeToTest - this.bug.lengthToCompare && scaledVideoX <= scaledTimeToTest + this.bug.lengthToCompare) {
+            this.bug.lengthToCompare = Math.abs(scaledVideoX - scaledTimeToTest);
             return true;
         } else return false;
     }
 
     testMouseForBugPoint(scaledTimeToTest) {
-        if (mouseX >= scaledTimeToTest - this.bug.spacingComparison && mouseX <= scaledTimeToTest + this.bug.spacingComparison) {
-            this.bug.spacingComparison = Math.abs(mouseX - scaledTimeToTest);
+        if (mouseX >= scaledTimeToTest - this.bug.lengthToCompare && mouseX <= scaledTimeToTest + this.bug.lengthToCompare) {
+            this.bug.lengthToCompare = Math.abs(mouseX - scaledTimeToTest);
             return true;
         } else return false;
     }
@@ -276,7 +276,7 @@ class DrawDataMovement extends DrawData {
         this.bug.xPos = NO_DATA;
         this.bug.yPos = NO_DATA;
         this.bug.timePos = NO_DATA;
-        this.bug.spacingComparison = timelineLength;
+        this.bug.lengthToCompare = keys.timelineLength;
     }
 
     recordBug(timePos, xPos, yPos) {
@@ -298,7 +298,7 @@ class DrawDataMovement extends DrawData {
         fill(0);
         stroke(0);
         strokeWeight(2);
-        line(mouseX, 0, mouseX, timelineHeight);
+        line(mouseX, 0, mouseX, keys.timelineHeight);
     }
 }
 
@@ -369,10 +369,10 @@ class DrawDataConversation extends DrawData {
      * @param  {Point_Conversation} point
      */
     getScaledConversationPointValues(point) {
-        const pixel = map(point.time, 0, totalTimeInSeconds, timelineStart, timelineEnd);
-        const scaledPixel = map(pixel, currPixelTimeMin, currPixelTimeMax, timelineStart, timelineEnd);
-        const scaledX = point.xPos * displayFloorPlanWidth / inputFloorPlanPixelWidth; // scale to floor plan image file
-        const scaledY = point.yPos * displayFloorPlanHeight / inputFloorPlanPixelHeight; // scale to floor plan image file
+        const pixel = map(point.time, 0, totalTimeInSeconds, keys.timelineStart, keys.timelineEnd);
+        const scaledPixel = map(pixel, keys.curPixelTimeMin, keys.curPixelTimeMax, keys.timelineStart, keys.timelineEnd);
+        const scaledX = point.xPos * keys.displayFloorPlanWidth / inputFloorPlanPixelWidth; // scale to floor plan image file
+        const scaledY = point.yPos * keys.displayFloorPlanHeight / inputFloorPlanPixelHeight; // scale to floor plan image file
         return {
             pixelTime: pixel,
             scaledTime: scaledPixel,
@@ -403,9 +403,9 @@ class DrawDataConversation extends DrawData {
     drawRects(point, curColor) {
         // ***** SET FONTS/STROKES/CONSTANTS
         noStroke(); // reset if setDrawText is called previously in loop
-        textFont(font_Lato, keyTextSize);
+        textFont(font_Lato, keys.keyTextSize);
         textSize(1); // Controls measurement of pixels in a string that corredponds to vertical pixel height of rectangle.
-        const rectWidth = map(currPixelTimeMax - currPixelTimeMin, 0, timelineLength, this.rect.maxPixelWidth, this.rect.minPixelWidth); // map to inverse of min/max to set rectWidth based on amount of pixel time selected
+        const rectWidth = map(keys.curPixelTimeMax - keys.curPixelTimeMin, 0, keys.timelineLength, this.rect.maxPixelWidth, this.rect.minPixelWidth); // map to inverse of min/max to set rectWidth based on amount of pixel time selected
         let rectLength = textWidth(point.talkTurn);
         if (rectLength < this.rect.minPixelHeight) rectLength = this.rect.minPixelHeight; // if current turn is small set it to the minimum height
         const curPoint = this.getScaledConversationPointValues(point);
@@ -449,7 +449,7 @@ class DrawDataConversation extends DrawData {
             rectSpacing: width / 28.2, // distance from text rectangle of textbox
         }
         textBox.height = textBox.textLeading * (ceil(textWidth(this.conversationBubble.point.talkTurn) / textBox.width)); // lines of talk in a text box rounded up
-        textFont(font_Lato, keyTextSize);
+        textFont(font_Lato, keys.keyTextSize);
         textLeading(textBox.textLeading);
         let xPos; // set xPos, constrain prevents drawing off screen
         if (this.conversationBubble.view === PLAN) xPos = constrain(curPoint.scaledXPos - textBox.width / 2, textBox.boxSpacing, width - textBox.width - textBox.boxSpacing);
