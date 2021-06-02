@@ -158,3 +158,61 @@ class ProcessData {
         }
     }
 }
+
+/**
+ * NOTE: Speaker and path objects are separate due to how P5.js draws shapes in the browser.
+ * NOTE: Each speaker and path object can match/correspond to the same person but they don't have to match.
+ * This allows variation in the number of movement files and speakers listed.
+ */
+
+/**
+ * Represents collection of data that comprises an individual speaker
+ * NOTE: constructed from conversation .CSV file
+ */
+class Speaker {
+    constructor(name, col) {
+        this.name = name; // char indicating letter of speaker
+        this.color = col; // color set to gray to start, updated to match corresponding Path if one exists in processMovement
+        this.show = true; // boolean indicating speaker is showing in GUI
+    }
+}
+
+/**
+ * Represents collection of data that comrpises a path
+ * NOTE: constructed from movement .CSV file
+ */
+class Path {
+    constructor(pathName) {
+        this.movement = []; // List of Point_Movement objects
+        this.conversation = []; // List of Point_Conversation objects
+        this.name = pathName; // Char indicating letter name of path. Matches first letter of movement file name and created when Path is instantiated.
+        this.color = undefined; // Color of path, set in processMovement
+        this.show = true; // boolean indicates if path is showing/selected
+    }
+}
+
+/**
+ * Represents a point on a path
+ * NOTE: constructed from each row/case in a .CSV movement file
+ */
+class Point_Movement {
+    constructor(xPos, yPos, time) {
+        this.xPos = xPos; // Number x and y position used to set pixel position
+        this.yPos = yPos;
+        this.time = time; // Time value in seconds
+    }
+}
+
+/**
+ * Represents a point with conversation on a path
+ * NOTE: constructed from both .CSV movement and conversation files
+ */
+class Point_Conversation {
+    constructor(xPos, yPos, time, speaker, talkTurn) {
+        this.xPos = xPos; // Number x and y positions used to set pixel position, constructed from movement .CSV file
+        this.yPos = yPos;
+        this.time = time; // Time value in seconds
+        this.speaker = speaker; // Char indicating letter name of speaker
+        this.talkTurn = talkTurn; // String of text indicating spoken conversation
+    }
+}

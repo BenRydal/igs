@@ -54,10 +54,8 @@ function setup() {
 }
 
 /**
- * Always draws background and keys. Organizes what data is drawing if it is loaded/not undefined.
- * NOTE: Each conditional tests if particular data structure is loaded (core.floorPlan, core.paths[], core.speakerList[], videoPlayer)
- * NOTE: Conversation can never be drawn unless movement has been loaded (core.paths[])
- * NOTE: Movement can be drawn if conversation has not been loaded
+ * Draws background, keys and organizes drawing data if loaded
+ * NOTE: Conversation can never be drawn unless movement has been loaded
  */
 function draw() {
     background(255);
@@ -68,7 +66,7 @@ function draw() {
         if (!core.isModeVideoPlaying) setData.setVideoScrubbing();
         select('#moviePlayer').position(mouseX - videoPlayer.videoWidth, mouseY - videoPlayer.videoHeight);
     }
-    keys.drawKeys();
+    keys.drawKeys(); // draw keys last
 }
 
 function mousePressed() {
