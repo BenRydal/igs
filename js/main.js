@@ -13,7 +13,10 @@ To reference or read more about this work please see:
 https://etd.library.vanderbilt.edu/available/etd-03212018-140140/unrestricted/Shapiro_Dissertation.pdf
 */
 
-// ******* CLASSES/MODULES *******
+/**
+ * CLASSES/MODULES
+ * Each class is currently treated as a singleton with respective .js file/module
+ */
 let core;
 let setData;
 let exampleData;
@@ -22,20 +25,27 @@ let processData;
 let testData;
 let keys;
 let handlers;
-let videoPlayer; // Object to interact with platform specific set of video player methods
-let movie; // Div to hold the videoPlayer object
 
-// ******* CONSTANTS *******
-const movementHeaders = ['time', 'x', 'y']; // String array indicating movement movement file headers, data in each column should be of type number or it won't process
-const conversationHeaders = ['time', 'speaker', 'talk']; // String array indicating conversation file headers, data in time column shout be of type number, speaker column should be of type String, talk column should be not null or undefined
-const PLAN = 0; // Number constants indicating core.floorPlan or space-time drawing modes
+/**
+ * videoPlayer acts like an abstract class with different video classes defined in video-player.js.
+ * videoPlayer is instantiated in processVideo method
+ * movie holds the "Div" created/destroyed by different video classes
+ */
+let videoPlayer;
+let movie;
+
+/**
+ * CONSTANTS
+ */
+const CSVHEADERS_MOVEMENT = ['time', 'x', 'y']; // String array indicating movement movement file headers, data in each column should be of type number or it won't process
+const CSVHEADERS_CONVERSATION = ['time', 'speaker', 'talk']; // String array indicating conversation file headers, data in time column shout be of type number, speaker column should be of type String, talk column should be not null or undefined
+const PLAN = 0; // Number constants plan and spacetime indicate two drawing modes
 const SPACETIME = 1;
 const NO_DATA = -1;
-const SELPADDING = 20;
-const introMSG = "INTERACTION GEOGRAPHY SLICER (IGS)\n\nby Ben Rydal Shapiro & contributors\nbuilt with p5.js & JavaScript\n\nHi There! This is a tool to visualize movement, conversation, and video data over space and time. Data are displayed over a floor plan view (left) and a space-time view (right), where the vertical axis corresponds to the vertical dimension of the floor plan. Use the top menu to visualize different sample datasets or upload your own data. Hover over the floor plan and use the timeline to selectively study displayed data. Use the bottom buttons to animate data, visualize conversation in different ways, and interact with video data by clicking the timeline to play & pause video. For more information see: benrydal.com/software/igs";
-const buttons = ["Animate", "Align Talk", "All Talk", "Video", "How to Use"];
-// 12 Class Paired color scheme: (Dark) purple, orange, green, blue, red, yellow, brown, (Light) lPurple, lOrange, lGreen, lBlue, lRed
-const colorList = ['#6a3d9a', '#ff7f00', '#33a02c', '#1f78b4', '#e31a1c', '#ffff99', '#b15928', '#cab2d6', '#fdbf6f', '#b2df8a', '#a6cee3', '#fb9a99'];
+const INTROMSG = "INTERACTION GEOGRAPHY SLICER (IGS)\n\nby Ben Rydal Shapiro & contributors\nbuilt with p5.js & JavaScript\n\nHi There! This is a tool to visualize movement, conversation, and video data over space and time. Data are displayed over a floor plan view (left) and a space-time view (right), where the vertical axis corresponds to the vertical dimension of the floor plan. Use the top menu to visualize different sample datasets or upload your own data. Hover over the floor plan and use the timeline to selectively study displayed data. Use the bottom BUTTON_NAMES to animate data, visualize conversation in different ways, and interact with video data by clicking the timeline to play & pause video. For more information see: benrydal.com/software/igs";
+const BUTTON_NAMES = ["Animate", "Align Talk", "All Talk", "Video", "How to Use"];
+const COLOR_LIST = ['#6a3d9a', '#ff7f00', '#33a02c', '#1f78b4', '#e31a1c', '#ffff99', '#b15928', '#cab2d6', '#fdbf6f', '#b2df8a', '#a6cee3', '#fb9a99'];
+// 12 Class Paired: (Dark) purple, orange, green, blue, red, yellow, brown, (Light) lPurple, lOrange, lGreen, lBlue, lRed
 
 /**
  * Required P5.js method, here used to setup GUI
@@ -54,8 +64,7 @@ function setup() {
 }
 
 /**
- * Draws background, keys and organizes drawing data if loaded
- * NOTE: Conversation can never be drawn unless movement has been loaded
+ * Draws background, keys and organizes drawing of different data sources if data is loaded
  */
 function draw() {
     background(255);

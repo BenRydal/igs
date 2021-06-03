@@ -3,10 +3,11 @@ class Handlers {
     constructor() {
         this.lockedLeft = false;
         this.lockedRight = false;
+        this.selPadding = 20; // cushion for user selection on timeline
     }
 
     /**
-     * Organizes mousePressed method calls for video, movement/conversation and interaction buttons and path/speaker keys
+     * Organizes mousePressed method calls for video, movement/conversation and interaction BUTTON_NAMES and path/speaker keys
      */
     handleMousePressed() {
         // Controls video when clicking over timeline region
@@ -18,12 +19,12 @@ class Handlers {
     }
 
     /**
-     * Organizes timeline GUI methods. SELPADDING used to provide additionl "cushion" for mouse.
+     * Organizes timeline GUI methods. this.selPadding used to provide additionl "cushion" for mouse.
      * NOTE: To activate timeline methods, core.isModeAnimate mode must be false and 
      * Either mouse already dragging over timeline OR mouse cursor is over timeline bar.
      */
     handleMouseDragged() {
-        if (!core.isModeAnimate && ((this.lockedLeft || this.lockedRight) || overRect(keys.timelineStart - SELPADDING, keys.yPosTimelineTop, keys.timelineLength + SELPADDING, keys.timelineThickness))) this.handleTimeline();
+        if (!core.isModeAnimate && ((this.lockedLeft || this.lockedRight) || overRect(keys.timelineStart - this.selPadding, keys.yPosTimelineTop, keys.timelineLength + this.selPadding, keys.timelineThickness))) this.handleTimeline();
     }
 
     /**
@@ -80,11 +81,11 @@ class Handlers {
     overInteractionButtons() {
         textSize(keys.keyTextSize);
         let currXPos = keys.timelineStart + keys.buttonSpacing / 2;
-        if (overRect(currXPos, keys.buttonsHeight, textWidth(buttons[0]), keys.buttonWidth)) this.overAnimateButton();
-        else if (overRect(currXPos + textWidth(buttons[0]) + 2 * keys.buttonSpacing, keys.buttonsHeight, textWidth(buttons[1]) + keys.buttonSpacing, keys.buttonWidth)) core.isModeAlignTalkTop = !core.isModeAlignTalkTop;
-        else if (overRect(currXPos + textWidth(buttons[0] + buttons[1]) + 4 * keys.buttonSpacing, keys.buttonsHeight, textWidth(buttons[2]) + keys.buttonSpacing, keys.buttonWidth)) core.isModeAllTalkOnPath = !core.isModeAllTalkOnPath;
-        else if (testData.dataIsLoaded(videoPlayer) && overRect(currXPos + textWidth(buttons[0] + buttons[1] + buttons[2]) + 6 * keys.buttonSpacing, keys.buttonsHeight, textWidth(buttons[3]) + keys.buttonSpacing, keys.buttonWidth)) this.overVideoButton();
-        else if (overRect(currXPos + textWidth(buttons[0] + buttons[1] + buttons[2] + buttons[3]) + 8 * keys.buttonSpacing, keys.buttonsHeight, textWidth(buttons[4]) + keys.buttonSpacing, keys.buttonWidth)) core.isModeIntro = !core.isModeIntro;
+        if (overRect(currXPos, keys.buttonsHeight, textWidth(BUTTON_NAMES[0]), keys.buttonWidth)) this.overAnimateButton();
+        else if (overRect(currXPos + textWidth(BUTTON_NAMES[0]) + 2 * keys.buttonSpacing, keys.buttonsHeight, textWidth(BUTTON_NAMES[1]) + keys.buttonSpacing, keys.buttonWidth)) core.isModeAlignTalkTop = !core.isModeAlignTalkTop;
+        else if (overRect(currXPos + textWidth(BUTTON_NAMES[0] + BUTTON_NAMES[1]) + 4 * keys.buttonSpacing, keys.buttonsHeight, textWidth(BUTTON_NAMES[2]) + keys.buttonSpacing, keys.buttonWidth)) core.isModeAllTalkOnPath = !core.isModeAllTalkOnPath;
+        else if (testData.dataIsLoaded(videoPlayer) && overRect(currXPos + textWidth(BUTTON_NAMES[0] + BUTTON_NAMES[1] + BUTTON_NAMES[2]) + 6 * keys.buttonSpacing, keys.buttonsHeight, textWidth(BUTTON_NAMES[3]) + keys.buttonSpacing, keys.buttonWidth)) this.overVideoButton();
+        else if (overRect(currXPos + textWidth(BUTTON_NAMES[0] + BUTTON_NAMES[1] + BUTTON_NAMES[2] + BUTTON_NAMES[3]) + 8 * keys.buttonSpacing, keys.buttonsHeight, textWidth(BUTTON_NAMES[4]) + keys.buttonSpacing, keys.buttonWidth)) core.isModeIntro = !core.isModeIntro;
     }
 
     /**
@@ -107,14 +108,14 @@ class Handlers {
     handleTimeline() {
         const xPosLeftSelector = keys.curPixelTimeMin;
         const xPosRightSelector = keys.curPixelTimeMax;
-        if (this.lockedLeft || (!this.lockedRight && overRect(xPosLeftSelector - SELPADDING, keys.yPosTimelineTop, 2 * SELPADDING, keys.timelineThickness))) {
+        if (this.lockedLeft || (!this.lockedRight && overRect(xPosLeftSelector - this.selPadding, keys.yPosTimelineTop, 2 * this.selPadding, keys.timelineThickness))) {
             this.lockedLeft = true;
             keys.curPixelTimeMin = constrain(mouseX, keys.timelineStart, keys.timelineEnd);
-            if (keys.curPixelTimeMin > keys.curPixelTimeMax - (2 * SELPADDING)) keys.curPixelTimeMin = keys.curPixelTimeMax - (2 * SELPADDING); // prevents overstriking
-        } else if (this.lockedRight || overRect(xPosRightSelector - SELPADDING, keys.yPosTimelineTop, 2 * SELPADDING, keys.timelineThickness)) {
+            if (keys.curPixelTimeMin > keys.curPixelTimeMax - (2 * this.selPadding)) keys.curPixelTimeMin = keys.curPixelTimeMax - (2 * this.selPadding); // prevents overstriking
+        } else if (this.lockedRight || overRect(xPosRightSelector - this.selPadding, keys.yPosTimelineTop, 2 * this.selPadding, keys.timelineThickness)) {
             this.lockedRight = true;
             keys.curPixelTimeMax = constrain(mouseX, keys.timelineStart, keys.timelineEnd);
-            if (keys.curPixelTimeMax < keys.curPixelTimeMin + (2 * SELPADDING)) keys.curPixelTimeMax = keys.curPixelTimeMin + (2 * SELPADDING); // prevents overstriking
+            if (keys.curPixelTimeMax < keys.curPixelTimeMin + (2 * this.selPadding)) keys.curPixelTimeMax = keys.curPixelTimeMin + (2 * this.selPadding); // prevents overstriking
         }
     }
 

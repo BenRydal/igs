@@ -47,12 +47,12 @@ class ParseData {
     prepareMovementFile(results, file) {
         console.log("Parsing complete:", results, file);
         // Test if file has data, file headers, and at least one row of correctly typed data
-        if (results.data.length > 1 && testData.movementHeaders(results.meta.fields) && testData.movementRowsForType(results.data)) {
+        if (results.data.length > 1 && testData.CSVHEADERS_MOVEMENT(results.meta.fields) && testData.movementRowsForType(results.data)) {
             const pathName = file.name.charAt(0).toUpperCase(); // get name of path, also used to test if associated speaker in conversation file
             const [movement, conversation] = processData.processMovementFile(results); //
             processData.updatePaths(pathName, movement, conversation);
             core.movementFileResults.push([results, pathName]); // add results and pathName to global []
-        } else alert("Error loading movement file. Please make sure your file is a .CSV file formatted with column headers: " + movementHeaders.toString());
+        } else alert("Error loading movement file. Please make sure your file is a .CSV file formatted with column headers: " + CSVHEADERS_MOVEMENT.toString());
     }
 
     /**
@@ -88,7 +88,7 @@ class ParseData {
     prepareConversationFile(results, file) {
         console.log("Parsing complete:", results, file);
         // Test if file has data, file headers, and at least one row of correctly typed data
-        if (results.data.length > 1 && testData.conversationHeaders(results.meta.fields) && testData.conversationRowsForType(results.data)) {
+        if (results.data.length > 1 && testData.CSVHEADERS_CONVERSATION(results.meta.fields) && testData.conversationRowsForType(results.data)) {
             core.conversationFileResults = results.data; // set to new array of keyed values
             processData.updateSpeakerList();
             core.speakerList.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching core.paths array
@@ -97,7 +97,7 @@ class ParseData {
                 const [movement, conversation] = processData.processMovementFile(core.movementFileResults[i][0]); // Reprocess movement file results
                 processData.updatePaths(core.movementFileResults[i][1], movement, conversation); // Pass movement file pathname and reprocessed movement file results to updatepaths
             }
-        } else alert("Error loading conversation file. Please make sure your file is a .CSV file formatted with column headers: " + conversationHeaders.toString());
+        } else alert("Error loading conversation file. Please make sure your file is a .CSV file formatted with column headers: " + CSVHEADERS_CONVERSATION.toString());
     }
 
     /**

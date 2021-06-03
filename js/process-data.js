@@ -37,7 +37,7 @@ class ProcessData {
                 const m = this.createMovementPoint(results.data, i);
                 movement.push(m); // always add to movement []
                 // Test conversation data row for quality and if movement time is greater than conversationCounter time
-                if (testData.conversationLengthAndRowForType(conversationCounter) && m.time >= core.conversationFileResults[conversationCounter][conversationHeaders[0]]) {
+                if (testData.conversationLengthAndRowForType(conversationCounter) && m.time >= core.conversationFileResults[conversationCounter][CSVHEADERS_CONVERSATION[0]]) {
                     conversation.push(this.createConversationPoint(conversationCounter, m.xPos, m.yPos));
                     conversationCounter++;
                 } else if (!testData.conversationLengthAndRowForType(conversationCounter)) conversationCounter++; // make sure to increment counter if bad data to skip row in next iteration of loop
@@ -48,9 +48,9 @@ class ProcessData {
 
     createMovementPoint(data, curRow) {
         let m = new Point_Movement();
-        m.time = data[curRow][movementHeaders[0]];
-        m.xPos = data[curRow][movementHeaders[1]];
-        m.yPos = data[curRow][movementHeaders[2]];
+        m.time = data[curRow][CSVHEADERS_MOVEMENT[0]];
+        m.xPos = data[curRow][CSVHEADERS_MOVEMENT[1]];
+        m.yPos = data[curRow][CSVHEADERS_MOVEMENT[2]];
         return m;
     }
 
@@ -66,7 +66,7 @@ class ProcessData {
         p.movement = movement;
         p.conversation = conversation;
         if (testData.dataIsLoaded(core.speakerList)) p.color = this.setPathColorBySpeaker(p.name); // if conversation file loaded, send to method to calculate color
-        else p.color = colorList[core.paths.length % colorList.length]; // if no conversation file loaded path color is next in Color list
+        else p.color = COLOR_LIST[core.paths.length % COLOR_LIST.length]; // if no conversation file loaded path color is next in Color list
         core.paths.push(p);
         core.paths.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching core.speakerList array
         const curPathEndTime = Math.floor(movement[movement.length - 1].time);
@@ -76,7 +76,7 @@ class ProcessData {
     /**
      * Returns color based on whether pathName has corresponding speaker
      * If path has corresponding speaker, color returned matches speaker
-     * If it does not, color returned selects from global colorList based on num of speakers + numOfPaths that do not have corresponding speaker
+     * If it does not, color returned selects from global COLOR_LIST based on num of speakers + numOfPaths that do not have corresponding speaker
      * 
      * @param  {} pathName
      */
@@ -84,7 +84,7 @@ class ProcessData {
         if (core.speakerList.some(e => e.name === pathName)) {
             const hasSameName = (element) => element.name === pathName; // condition to satisfy/does it have pathName
             return core.speakerList[core.speakerList.findIndex(hasSameName)].color; // returns first index that satisfies condition/index of speaker that matches pathName
-        } else return colorList[core.speakerList.length + this.getNumPathsWithNoSpeaker() % colorList.length]; // assign color to path
+        } else return COLOR_LIST[core.speakerList.length + this.getNumPathsWithNoSpeaker() % COLOR_LIST.length]; // assign color to path
     }
 
     /**
@@ -108,9 +108,9 @@ class ProcessData {
         let c = new Point_Conversation();
         c.xPos = xPos; // set to x/y pos in movement file case
         c.yPos = yPos;
-        c.time = core.conversationFileResults[index][conversationHeaders[0]];
-        c.speaker = this.cleanSpeaker(core.conversationFileResults[index][conversationHeaders[1]]); // get cleaned speaker character
-        c.talkTurn = core.conversationFileResults[index][conversationHeaders[2]];
+        c.time = core.conversationFileResults[index][CSVHEADERS_CONVERSATION[0]];
+        c.speaker = this.cleanSpeaker(core.conversationFileResults[index][CSVHEADERS_CONVERSATION[1]]); // get cleaned speaker character
+        c.talkTurn = core.conversationFileResults[index][CSVHEADERS_CONVERSATION[2]];
         return c;
     }
 
@@ -123,7 +123,7 @@ class ProcessData {
             for (let j = 0; j < core.speakerList.length; j++) tempSpeakerList.push(core.speakerList[j].name);
             // If row is good data, test if core.speakerList already has speaker and if not add speaker 
             if (testData.conversationLengthAndRowForType(i)) {
-                const speaker = this.cleanSpeaker(core.conversationFileResults[i][conversationHeaders[1]]); // get cleaned speaker character
+                const speaker = this.cleanSpeaker(core.conversationFileResults[i][CSVHEADERS_CONVERSATION[1]]); // get cleaned speaker character
                 if (!tempSpeakerList.includes(speaker)) this.addSpeakerToSpeakerList(speaker);
             }
         }
@@ -141,7 +141,7 @@ class ProcessData {
      * @param  {Char} speaker
      */
     addSpeakerToSpeakerList(name) {
-        core.speakerList.push(new Speaker(name, colorList[core.speakerList.length % colorList.length]));
+        core.speakerList.push(new Speaker(name, COLOR_LIST[core.speakerList.length % COLOR_LIST.length]));
     }
 
     // Initialization for the video player

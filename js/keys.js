@@ -73,48 +73,48 @@ class Keys {
         let currXPos = this.timelineStart + this.buttonSpacing / 2;
         fill(core.isModeAnimate ? 0 : 150);
         // Button 1
-        text(buttons[0], currXPos, this.buttonsHeight);
+        text(BUTTON_NAMES[0], currXPos, this.buttonsHeight);
         noFill();
         stroke(core.isModeAnimate ? 0 : 150);
         strokeWeight(1);
-        rect(currXPos - this.buttonSpacing / 2, this.buttonsHeight, textWidth(buttons[0]) + this.buttonSpacing, this.buttonSpacing * 1.5);
+        rect(currXPos - this.buttonSpacing / 2, this.buttonsHeight, textWidth(BUTTON_NAMES[0]) + this.buttonSpacing, this.buttonSpacing * 1.5);
         noStroke();
-        currXPos += textWidth(buttons[0]) + this.buttonSpacing * 2;
+        currXPos += textWidth(BUTTON_NAMES[0]) + this.buttonSpacing * 2;
         // Button 2
         fill(core.isModeAlignTalkTop ? 0 : 150);
-        text(buttons[1], currXPos, this.buttonsHeight);
+        text(BUTTON_NAMES[1], currXPos, this.buttonsHeight);
         noFill();
         stroke(core.isModeAlignTalkTop ? 0 : 150);
         strokeWeight(1);
-        rect(currXPos - this.buttonSpacing / 2, this.buttonsHeight, textWidth(buttons[1]) + this.buttonSpacing, this.buttonSpacing * 1.5);
+        rect(currXPos - this.buttonSpacing / 2, this.buttonsHeight, textWidth(BUTTON_NAMES[1]) + this.buttonSpacing, this.buttonSpacing * 1.5);
         noStroke();
-        currXPos += textWidth(buttons[1]) + this.buttonSpacing * 2;
+        currXPos += textWidth(BUTTON_NAMES[1]) + this.buttonSpacing * 2;
         // Button 3
         fill(core.isModeAllTalkOnPath ? 0 : 150);
-        text(buttons[2], currXPos, this.buttonsHeight);
+        text(BUTTON_NAMES[2], currXPos, this.buttonsHeight);
         noFill();
         stroke(core.isModeAllTalkOnPath ? 0 : 150);
         strokeWeight(1);
-        rect(currXPos - this.buttonSpacing / 2, this.buttonsHeight, textWidth(buttons[2]) + this.buttonSpacing, this.buttonSpacing * 1.5);
+        rect(currXPos - this.buttonSpacing / 2, this.buttonsHeight, textWidth(BUTTON_NAMES[2]) + this.buttonSpacing, this.buttonSpacing * 1.5);
         noStroke();
-        currXPos += textWidth(buttons[2]) + this.buttonSpacing * 2;
+        currXPos += textWidth(BUTTON_NAMES[2]) + this.buttonSpacing * 2;
         // Button 4
         fill(core.isModeVideoShowing ? 0 : 150);
-        text(buttons[3], currXPos, this.buttonsHeight);
+        text(BUTTON_NAMES[3], currXPos, this.buttonsHeight);
         noFill();
         stroke(core.isModeVideoShowing ? 0 : 150);
         strokeWeight(1);
-        rect(currXPos - this.buttonSpacing / 2, this.buttonsHeight, textWidth(buttons[3]) + this.buttonSpacing, this.buttonSpacing * 1.5);
+        rect(currXPos - this.buttonSpacing / 2, this.buttonsHeight, textWidth(BUTTON_NAMES[3]) + this.buttonSpacing, this.buttonSpacing * 1.5);
         noStroke();
-        currXPos += textWidth(buttons[3]) + this.buttonSpacing * 2;
+        currXPos += textWidth(BUTTON_NAMES[3]) + this.buttonSpacing * 2;
         // Button 5
         textFont(this.font_PlayfairItalic, this.keyTextSize);
         fill(core.isModeIntro ? 0 : 150);
-        text(buttons[4], currXPos, this.buttonsHeight);
+        text(BUTTON_NAMES[4], currXPos, this.buttonsHeight);
         noFill();
         stroke(core.isModeIntro ? 0 : 150);
         strokeWeight(1);
-        rect(currXPos - this.buttonSpacing / 2, this.buttonsHeight, textWidth(buttons[4]) + this.buttonSpacing, this.buttonSpacing * 1.5);
+        rect(currXPos - this.buttonSpacing / 2, this.buttonsHeight, textWidth(BUTTON_NAMES[4]) + this.buttonSpacing, this.buttonSpacing * 1.5);
         noStroke();
     }
 
@@ -171,7 +171,7 @@ class Keys {
         rect(width / 2, height / 2.5, width / 1.75 + 50, height / 1.75 + 50);
         fill(0);
         textFont(this.font_Lato, this.keyTextSize);
-        text(introMSG, width / 2, height / 2.5, width / 1.75, height / 1.75);
+        text(INTROMSG, width / 2, height / 2.5, width / 1.75, height / 1.75);
         rectMode(CORNER);
     }
 }

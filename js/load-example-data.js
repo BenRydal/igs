@@ -8,7 +8,7 @@
      */
     selectExampleData() {
       if (core.isModeVideoShowing) handlers.overVideoButton(); // Turn off video that if showing
-      if (core.isModeIntro) core.isModeIntro = false; // Hide intro msg if showing
+      core.isModeIntro = false; // Hide intro msg if showing
       let option = document.getElementById("examples").value;
       switch (option) {
         case "Load Data":
