@@ -28,7 +28,7 @@ class DrawData {
      * @param  {Number/Float} yPos
      */
     overCursor(xPos, yPos) {
-        return overCircle(xPos, yPos, keys.floorPlanCursorSelectSize);
+        return handlers.overCircle(xPos, yPos, keys.floorPlanCursorSelectSize);
     }
 
     /**
@@ -38,7 +38,7 @@ class DrawData {
      * @param  {Number/Float} yPos
      */
     overFloorPlanAndCursor(xPos, yPos) {
-        return !this.overFloorPlan(mouseX, mouseY) || (this.overFloorPlan(mouseX, mouseY) && overCircle(xPos, yPos, keys.floorPlanCursorSelectSize));
+        return !this.overFloorPlan(mouseX, mouseY) || (this.overFloorPlan(mouseX, mouseY) && handlers.overCircle(xPos, yPos, keys.floorPlanCursorSelectSize));
     }
 
     /**
@@ -77,7 +77,7 @@ class DrawDataMovement extends DrawData {
     setData(path) {
         this.resetBug(); // always reset bug values
         // if overMap draw selection of movement and gray scale the rest
-        if (overRect(0, 0, keys.displayFloorPlanWidth, keys.displayFloorPlanHeight)) {
+        if (handlers.overRect(0, 0, keys.displayFloorPlanWidth, keys.displayFloorPlanHeight)) {
             this.drawWithCursorHighlight(PLAN, path.movement, path.color);
             this.drawWithCursorHighlight(SPACETIME, path.movement, path.color);
         } else {
@@ -252,7 +252,7 @@ class DrawDataMovement extends DrawData {
         else if (core.isModeVideoPlaying) {
             // Separate this test out from 3 mode tests to make sure if this is not true know other mode tests are run when video is playing
             if (this.testVideoForBugPoint(scaledTimeToTest)) this.recordBug(scaledTimeToTest, xPos, yPos);
-        } else if (overRect(keys.timelineStart, 0, keys.timelineLength, keys.timelineHeight) && this.testMouseForBugPoint(scaledTimeToTest)) this.recordBug(mouseX, xPos, yPos);
+        } else if (handlers.overRect(keys.timelineStart, 0, keys.timelineLength, keys.timelineHeight) && this.testMouseForBugPoint(scaledTimeToTest)) this.recordBug(mouseX, xPos, yPos);
         return false;
     }
 
@@ -413,8 +413,8 @@ class DrawDataConversation extends DrawData {
         if (core.isModeAlignTalkTop) yPos = 0; // if conversation turn positioning is at top of screen
         else yPos = curPoint.scaledYPos - rectLength;
         // ***** TEST SET TEXT
-        if (overRect(curPoint.scaledXPos, yPos, rectWidth, rectLength)) this.recordConversationBubble(point, PLAN); // if over plan
-        else if (overRect(curPoint.scaledTime, yPos, rectWidth, rectLength)) this.recordConversationBubble(point, SPACETIME); // if over spacetime
+        if (handlers.overRect(curPoint.scaledXPos, yPos, rectWidth, rectLength)) this.recordConversationBubble(point, PLAN); // if over plan
+        else if (handlers.overRect(curPoint.scaledTime, yPos, rectWidth, rectLength)) this.recordConversationBubble(point, SPACETIME); // if over spacetime
         // ***** DRAW CUR RECT
         fill(curColor);
         rect(curPoint.scaledXPos, yPos, rectWidth, rectLength); // PLAN VIEW

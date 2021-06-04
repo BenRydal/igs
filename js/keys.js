@@ -32,7 +32,7 @@ class Keys {
         else this.drawPathSpeakerKeys(core.speakerList);
         this.drawTimeline();
         this.drawButtons();
-        if (overRect(0, 0, this.displayFloorPlanWidth, this.displayFloorPlanHeight)) this.drawFloorPlanSelector();
+        if (handlers.overRect(0, 0, this.displayFloorPlanWidth, this.displayFloorPlanHeight)) this.drawFloorPlanSelector();
         if (core.isModeIntro) this.drawIntroMsg(); // draw intro message on program start up until mouse is pressed
     }
 
@@ -150,7 +150,7 @@ class Keys {
         let label_1 = minutesValue + " minutes  " + secondsValue + " seconds";
         let label_2 = "MINUTES";
         textAlign(CENTER);
-        if (overRect(this.timelineStart, 0, this.timelineLength, this.timelineHeight)) text(label_1, this.timelineStart + this.timelineLength / 2, this.timelineHeight);
+        if (handlers.overRect(this.timelineStart, 0, this.timelineLength, this.timelineHeight)) text(label_1, this.timelineStart + this.timelineLength / 2, this.timelineHeight);
         else text(label_2, this.timelineStart + this.timelineLength / 2, this.timelineHeight);
         textAlign(LEFT); // reset
 

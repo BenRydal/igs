@@ -13,7 +13,7 @@ class SetData {
                 drawMovementData.setData(core.paths[i]); // draw after conversation so bug displays on top
             }
         }
-        if (overRect(keys.timelineStart, 0, keys.timelineLength, keys.timelineHeight)) drawMovementData.drawSlicer(); // draw slicer line after calculating all movement
+        if (handlers.overRect(keys.timelineStart, 0, keys.timelineLength, keys.timelineHeight)) drawMovementData.drawSlicer(); // draw slicer line after calculating all movement
         drawConversationData.setConversationBubble(); // draw conversation text last so it displays on top
         if (core.isModeAnimate) this.setUpAnimation();
     }
@@ -27,7 +27,7 @@ class SetData {
         for (let i = 0; i < core.paths.length; i++) {
             if (core.paths[i].show) drawMovementData.setData(core.paths[i]); // draw after conversation so bug displays on top
         }
-        if (overRect(keys.timelineStart, 0, keys.timelineLength, keys.timelineHeight)) drawMovementData.drawSlicer(); // draw slicer line after calculating all movement
+        if (handlers.overRect(keys.timelineStart, 0, keys.timelineLength, keys.timelineHeight)) drawMovementData.drawSlicer(); // draw slicer line after calculating all movement
         if (core.isModeAnimate) this.setUpAnimation();
     }
 
@@ -53,7 +53,7 @@ class SetData {
             let endValue = map(keys.curPixelTimeMax, keys.timelineStart, keys.timelineEnd, 0, Math.floor(videoPlayer.getVideoDuration())); // remap starting point to seek for video
             let vPos = Math.floor(map(core.bugTimePosForVideoScrubbing, keys.timelineStart, keys.timelineEnd, startValue, endValue));
             videoPlayer.seekTo(vPos);
-        } else if (overRect(keys.timelineStart, 0, keys.timelineEnd, keys.timelineHeight)) {
+        } else if (handlers.overRect(keys.timelineStart, 0, keys.timelineEnd, keys.timelineHeight)) {
             let mPos = map(mouseX, keys.timelineStart, keys.timelineEnd, keys.curPixelTimeMin, keys.curPixelTimeMax); // first map mouse to selected time values in GUI
             // must floor vPos to prevent double finite error
             let vPos = Math.floor(map(mPos, keys.timelineStart, keys.timelineEnd, 0, Math.floor(videoPlayer.getVideoDuration())));

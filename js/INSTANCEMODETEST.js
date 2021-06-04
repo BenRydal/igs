@@ -93,13 +93,13 @@ let myp5 = new p5((igs) => {
         handlers.handleMouseReleased();
     }
 
-    igs.overCircle = (x, y, diameter) => {
+    igs.handlers.overCircle = (x, y, diameter) => {
         const disX = x - igs.mouseX;
         const disY = y - igs.mouseY;
         return sqrt(sq(disX) + sq(disY)) < diameter / 2;
     }
 
-    igs.overRect = (x, y, boxWidth, boxHeight) => {
+    igs.handlers.overRect = (x, y, boxWidth, boxHeight) => {
         return mouseX >= x && mouseX <= x + boxWidth && mouseY >= y && mouseY <= y + boxHeight;
     }
 });

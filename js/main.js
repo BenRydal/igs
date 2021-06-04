@@ -89,14 +89,3 @@ function mouseDragged() {
 function mouseReleased() {
     handlers.handleMouseReleased();
 }
-
-function overCircle(x, y, diameter) {
-    const disX = x - mouseX;
-    const disY = y - mouseY;
-    return sqrt(sq(disX) + sq(disY)) < diameter / 2;
-}
-
-// Tests if over rectangle with x, y, and width/height
-function overRect(x, y, boxWidth, boxHeight) {
-    return mouseX >= x && mouseX <= x + boxWidth && mouseY >= y && mouseY <= y + boxHeight;
-}
