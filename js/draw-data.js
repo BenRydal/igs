@@ -202,7 +202,7 @@ class DrawDataMovement extends DrawData {
     /**
      * Returns scaled values for movement point
      * NOTE: view determines which space-time xPos is returned
-     * @param  {Point_Movement} point
+     * @param  {MovementPoint} point
      * @param  {Integer} view
      */
     getScaledMovementPointValues(point, view) {
@@ -308,11 +308,11 @@ class DrawDataConversation extends DrawData {
         super();
         /**
          * Conversation bubble represents user selected conversation comprised of 
-         * @boolean selected, @Point_Conversation and @integer view
+         * @boolean selected, @ConversationPoint and @integer view
          */
         this.conversationBubble = {
             selected: false,
-            point: NO_DATA, // stores one Point_Conversation object for selected conversation turn
+            point: NO_DATA, // stores one ConversationPoint object for selected conversation turn
             view: PLAN // view indicating if user selected conversation in floor plan or space-time views
         };
         /**
@@ -345,8 +345,8 @@ class DrawDataConversation extends DrawData {
      * Tests if current point is in the viewing space
      * If it is, determines whether it is drawn depending on 2 modes:
      * (1) Draws all visible rects regardless of speaker (all conversation)
-     * (2) Draws only rects where speaker of particular conversation turn matches the specific pathName of the Path that holds this particular list of Point_Conversation objects
-     * @param  {[] Point_Conversation} points
+     * (2) Draws only rects where speaker of particular conversation turn matches the specific pathName of the Path that holds this particular list of ConversationPoint objects
+     * @param  {[] ConversationPoint} points
      * @param  {Char} pathName
      */
     setRects(points, pathName) {
@@ -366,7 +366,7 @@ class DrawDataConversation extends DrawData {
 
     /**
      * Returns scaled values for conversation point
-     * @param  {Point_Conversation} point
+     * @param  {ConversationPoint} point
      */
     getScaledConversationPointValues(point) {
         const pixel = map(point.time, 0, core.totalTimeInSeconds, keys.timelineStart, keys.timelineEnd);
@@ -394,10 +394,10 @@ class DrawDataConversation extends DrawData {
     }
 
     /**
-     * Draws properly scaled and colored rectangled for conversation turn of a Point_Conversation
+     * Draws properly scaled and colored rectangled for conversation turn of a ConversationPoint
      * Also tests if conversation turn has been selected by user and sends to recordConversationBubble if so
      * NOTE: A call to recordConversationBubble also results in highlighting current rect stroke in this method
-     * @param  {Point_Conversation} point
+     * @param  {ConversationPoint} point
      * @param  {Color} curColor
      */
     drawRects(point, curColor) {
@@ -424,7 +424,7 @@ class DrawDataConversation extends DrawData {
     /**
      * Records user selected conversation
      * NOTE: Also sets stroke/strokeweight to highlight selected rectangle in drawRects method
-     * @param  {Point_Conversation} pointToDraw
+     * @param  {ConversationPoint} pointToDraw
      * @param  {Integer} view
      */
     recordConversationBubble(pointToDraw, view) {

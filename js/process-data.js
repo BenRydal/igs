@@ -19,26 +19,50 @@ class ProcessData {
         });
     }
 
+    // Initialization for the video player
+    processVideo(platform, params) {
+        if (testData.dataIsLoaded(videoPlayer)) videoPlayer.destroy();
+        // Based on the specified platform, chose the appropriate type of videoPlayer to use
+        switch (platform) {
+            case "Youtube":
+                videoPlayer = new YoutubePlayer(params);
+                break;
+            case "File":
+                videoPlayer = new P5FilePlayer(params);
+                break;
+        }
+    }
+
     /**
-     * Creates clean (good data) and sampled movement [] of Point_Movement objects and conversation []
-     * of Point_Conversation objects from PapaParse movement results [].
+     * Creates clean (good data) and sampled movement [] of MovementPoint objects and conversation []
+     * of ConversationPoint objects from PapaParse movement results [].
      * To create the conversation [], a comparison between the global core.conversationFileResults [] 
-     * at a specified index to the current Point_Movement time is made--this comparison is what 
+     * at a specified index to the current MovementPoint time is made--this comparison is what 
      * determines when to create a new Conversation point if the current conversation row has good data
      * @param  {Results [] from PapaParse} results
      */
     processMovementFile(results) {
-        let movement = []; // Create empty arrays to hold Point_Movement and Point_Conversation objects
+        let movement = []; // Create empty arrays to hold MovementPoint and ConversationPoint objects
         let conversation = [];
         let conversationCounter = 0;
         for (let i = 0; i < results.data.length; i++) {
             // Sample movement row and test if row is good data
             if (testData.sampleMovementData(results.data, i) && testData.movementRowForType(results.data, i)) {
-                const m = this.createMovementPoint(results.data, i);
+                const m = core.createMovementPoint(
+                    results.data[i][CSVHEADERS_MOVEMENT[1]], // xPos
+                    results.data[i][CSVHEADERS_MOVEMENT[2]], // yPos
+                    results.data[i][CSVHEADERS_MOVEMENT[0]] // time
+                );
                 movement.push(m); // always add to movement []
                 // Test conversation data row for quality and if movement time is greater than conversationCounter time
                 if (testData.conversationLengthAndRowForType(conversationCounter) && m.time >= core.conversationFileResults[conversationCounter][CSVHEADERS_CONVERSATION[0]]) {
-                    conversation.push(this.createConversationPoint(conversationCounter, m.xPos, m.yPos));
+                    conversation.push(core.createConversationPoint(
+                        m.xPos,
+                        m.yPos,
+                        core.conversationFileResults[conversationCounter][CSVHEADERS_CONVERSATION[0]],
+                        this.cleanSpeaker(core.conversationFileResults[conversationCounter][CSVHEADERS_CONVERSATION[1]]),
+                        core.conversationFileResults[conversationCounter][CSVHEADERS_CONVERSATION[2]]
+                    ));
                     conversationCounter++;
                 } else if (!testData.conversationLengthAndRowForType(conversationCounter)) conversationCounter++; // make sure to increment counter if bad data to skip row in next iteration of loop
             }
@@ -46,27 +70,18 @@ class ProcessData {
         return [movement, conversation];
     }
 
-    createMovementPoint(data, curRow) {
-        let m = new Point_Movement();
-        m.time = data[curRow][CSVHEADERS_MOVEMENT[0]];
-        m.xPos = data[curRow][CSVHEADERS_MOVEMENT[1]];
-        m.yPos = data[curRow][CSVHEADERS_MOVEMENT[2]];
-        return m;
-    }
-
     /**
      * Creates and adds new Path object to global core.paths []
      * Also handles updating global totalTime and sorting core.paths []
      * @param  {Char} letterName
-     * @param  {Point_Movement []} movement
-     * @param  {Point_Conversation []} conversation
+     * @param  {MovementPoint []} movement
+     * @param  {ConversationPoint []} conversation
      */
     updatePaths(letterName, movement, conversation) {
-        let p = new Path(letterName); // initialize with name and grey/black color
-        p.movement = movement;
-        p.conversation = conversation;
-        if (testData.dataIsLoaded(core.speakerList)) p.color = this.setPathColorBySpeaker(p.name); // if conversation file loaded, send to method to calculate color
-        else p.color = COLOR_LIST[core.paths.length % COLOR_LIST.length]; // if no conversation file loaded path color is next in Color list
+        let curPathColor;
+        if (testData.dataIsLoaded(core.speakerList)) curPathColor = this.setPathColorBySpeaker(letterName); // if conversation file loaded, send to method to calculate color
+        else curPathColor = COLOR_LIST[core.paths.length % COLOR_LIST.length]; // if no conversation file loaded path color is next in Color list
+        let p = core.createPath(letterName, movement, conversation, curPathColor, true); // initialize with name, movement [] and conversation []
         core.paths.push(p);
         core.paths.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching core.speakerList array
         const curPathEndTime = Math.floor(movement[movement.length - 1].time);
@@ -97,22 +112,6 @@ class ProcessData {
         }
         return count;
     }
-    /**
-     * Creates Point_Conversation object
-     * NOTE: parameters are from movement data
-     * @param  {Integer} index
-     * @param  {Number/Float} xPos
-     * @param  {Number/Float} yPos
-     */
-    createConversationPoint(index, xPos, yPos) {
-        let c = new Point_Conversation();
-        c.xPos = xPos; // set to x/y pos in movement file case
-        c.yPos = yPos;
-        c.time = core.conversationFileResults[index][CSVHEADERS_CONVERSATION[0]];
-        c.speaker = this.cleanSpeaker(core.conversationFileResults[index][CSVHEADERS_CONVERSATION[1]]); // get cleaned speaker character
-        c.talkTurn = core.conversationFileResults[index][CSVHEADERS_CONVERSATION[2]];
-        return c;
-    }
 
     /**
      * Updates global speaker list from conversation file data/results
@@ -141,78 +140,6 @@ class ProcessData {
      * @param  {Char} speaker
      */
     addSpeakerToSpeakerList(name) {
-        core.speakerList.push(new Speaker(name, COLOR_LIST[core.speakerList.length % COLOR_LIST.length]));
-    }
-
-    // Initialization for the video player
-    processVideo(platform, params) {
-        if (testData.dataIsLoaded(videoPlayer)) videoPlayer.destroy();
-        // Based on the specified platform, chose the appropriate type of videoPlayer to use
-        switch (platform) {
-            case "Youtube":
-                videoPlayer = new YoutubePlayer(params);
-                break;
-            case "File":
-                videoPlayer = new P5FilePlayer(params);
-                break;
-        }
-    }
-}
-
-/**
- * NOTE: Speaker and path objects are separate due to how P5.js draws shapes in the browser.
- * NOTE: Each speaker and path object can match/correspond to the same person but they don't have to match.
- * This allows variation in the number of movement files and speakers listed.
- */
-
-/**
- * Represents collection of data that comprises an individual speaker
- * NOTE: constructed from conversation .CSV file
- */
-class Speaker {
-    constructor(name, col) {
-        this.name = name; // char indicating letter of speaker
-        this.color = col; // color set to gray to start, updated to match corresponding Path if one exists in processMovement
-        this.show = true; // boolean indicating speaker is showing in GUI
-    }
-}
-
-/**
- * Represents collection of data that comrpises a path
- * NOTE: constructed from movement .CSV file
- */
-class Path {
-    constructor(pathName) {
-        this.movement = []; // List of Point_Movement objects
-        this.conversation = []; // List of Point_Conversation objects
-        this.name = pathName; // Char indicating letter name of path. Matches first letter of movement file name and created when Path is instantiated.
-        this.color = undefined; // Color of path, set in processMovement
-        this.show = true; // boolean indicates if path is showing/selected
-    }
-}
-
-/**
- * Represents a point on a path
- * NOTE: constructed from each row/case in a .CSV movement file
- */
-class Point_Movement {
-    constructor(xPos, yPos, time) {
-        this.xPos = xPos; // Number x and y position used to set pixel position
-        this.yPos = yPos;
-        this.time = time; // Time value in seconds
-    }
-}
-
-/**
- * Represents a point with conversation on a path
- * NOTE: constructed from both .CSV movement and conversation files
- */
-class Point_Conversation {
-    constructor(xPos, yPos, time, speaker, talkTurn) {
-        this.xPos = xPos; // Number x and y positions used to set pixel position, constructed from movement .CSV file
-        this.yPos = yPos;
-        this.time = time; // Time value in seconds
-        this.speaker = speaker; // Char indicating letter name of speaker
-        this.talkTurn = talkTurn; // String of text indicating spoken conversation
+        core.speakerList.push(core.createSpeaker(name, COLOR_LIST[core.speakerList.length % COLOR_LIST.length], true));
     }
 }
