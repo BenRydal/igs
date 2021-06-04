@@ -1,29 +1,14 @@
-/**********************************************************************************************
-Additional implementation of VideoPlayer should have the following methods: seekTo(time), play(), pause(), mute(), 
-unMute(), getCurrentTime(), getVideoDuration(), destroy(), show(), hide()
-
-/ ******* FilePlayer Vars *******
-Videoparams expects 1 item, the fileName, videoParams = { fileName: 'your_fileName_here' };
-let videoPlatform = 'File'; // what platform the video is being hosted on, specifies what videoPlayer should be instantiated during setupMovie
-let videoParams = { fileName: '[your_directory_fileLocation]' };
-
-// ******* YouTube Vars *******
-Include following script in head of the format: 
-<script type="text/javascript" src="https://www.youtube.com/iframe_api"></script>
-VideoParams expects 1 item, the videoId, videoParams = { videoId: 'your_videoId_here' };
-let videoPlatform = 'Youtube'; 
-let videoParams = { videoId: 'Iu0rxb-xkMk'};
-
-// ******* Kaltura Vars *******
-Include following script in head of the format: 
-<script src="https://cdnapi.kaltura.com/p/{partner_id}/sp/{partnerId}00/embedIframeJs/uiconf_id/{uiconf_id}/partner_id/{partnerId}"></script>
-VideoParams expects 3 items, the wid, uiconf_id, and entry_id, videoParams = { wid: 'your_wid_here', uiconf_id: 'your_uiconf_id_here', entry_id: 'your_entry_id_here' };
-var videoPlatform = 'Kaltura';
-var videoParams = { wid: '_1038472', uiconf_id: '33084471', entry_id: '1_9tp4soob' };
-**********************************************************************************************/
-
+/**
+ * This file contains different video player classes 
+ * A global videoPlayer object acts as an abstract class to coordinate method calls to one of these classes
+ * Future video player classes should have the following methods:
+ * seekTo(time), play(), pause(), mute(), unMute(), getCurrentTime(), getVideoDuration(), destroy(), show(), hide()
+ */
 class YoutubePlayer {
-
+    /**
+     * Include the following script in head of the format: <script type = "text/javascript" src = "https://www.youtube.com/iframe_api"> < /script>
+     * @param  {videoId: 'your_videoId_here'} params
+     */
     constructor(params) {
         this.targetId = 'moviePlayer';
         this.videoId = params['videoId'];
@@ -107,6 +92,9 @@ class YoutubePlayer {
 
 class P5FilePlayer {
 
+    /**
+     * @param  {fileName: 'your_fileLocation_here'} params
+     */
     constructor(params) {
         this.videoWidth = width / 5;
         this.videoHeight = width / 6;
@@ -134,7 +122,7 @@ class P5FilePlayer {
     }
 
     seekTo(t) {
-        movie.time(t); // jumps to time parameter
+        movie.time(t);
     }
 
     play() {
