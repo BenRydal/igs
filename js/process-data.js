@@ -48,21 +48,14 @@ class ProcessData {
         for (let i = 0; i < results.data.length; i++) {
             // Sample movement row and test if row is good data
             if (testData.sampleMovementData(results.data, i) && testData.movementRowForType(results.data, i)) {
-                const m = core.createMovementPoint(
-                    results.data[i][CSVHEADERS_MOVEMENT[1]], // xPos
-                    results.data[i][CSVHEADERS_MOVEMENT[2]], // yPos
-                    results.data[i][CSVHEADERS_MOVEMENT[0]] // time
-                );
-                movement.push(m); // always add to movement []
-                // Test conversation data row for quality and if movement time is greater than conversationCounter time
+                const m = core.createMovementPoint(results.data[i][CSVHEADERS_MOVEMENT[1]], results.data[i][CSVHEADERS_MOVEMENT[2]], results.data[i][CSVHEADERS_MOVEMENT[0]]);
+                movement.push(m);
+                // Test conversation data row for quality first and then compare movement and conversation times
                 if (testData.conversationLengthAndRowForType(conversationCounter) && m.time >= core.conversationFileResults[conversationCounter][CSVHEADERS_CONVERSATION[0]]) {
-                    conversation.push(core.createConversationPoint(
-                        m.xPos,
-                        m.yPos,
-                        core.conversationFileResults[conversationCounter][CSVHEADERS_CONVERSATION[0]],
-                        this.cleanSpeaker(core.conversationFileResults[conversationCounter][CSVHEADERS_CONVERSATION[1]]),
-                        core.conversationFileResults[conversationCounter][CSVHEADERS_CONVERSATION[2]]
-                    ));
+                    const curTalkTimePos = core.conversationFileResults[conversationCounter][CSVHEADERS_CONVERSATION[0]];
+                    const curSpeaker = this.cleanSpeaker(core.conversationFileResults[conversationCounter][CSVHEADERS_CONVERSATION[1]]);
+                    const curTalkTurn = core.conversationFileResults[conversationCounter][CSVHEADERS_CONVERSATION[2]];
+                    conversation.push(core.createConversationPoint(m.xPos, m.yPos, curTalkTimePos, curSpeaker, curTalkTurn));
                     conversationCounter++;
                 } else if (!testData.conversationLengthAndRowForType(conversationCounter)) conversationCounter++; // make sure to increment counter if bad data to skip row in next iteration of loop
             }
