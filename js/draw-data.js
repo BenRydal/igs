@@ -1,10 +1,9 @@
 /**
- * Drawing methods are implemented through super class and 2 sub classes drawDataMovement and drawDataConversation
+ * Drawing methods are implemented through super class and 2 sub classes DrawDataMovement and DrawDataConversation
  * DrawData holds test methods used by both sub classes
  */
 class DrawData {
 
-    constructor() {}
     /**
      * Returns true if value is within pixel range of timeline
      * @param  {Number/Float} timeValue
