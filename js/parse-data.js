@@ -31,28 +31,16 @@ class ParseData {
         parseData.clearMovementData(); // clear existing movement data
         for (let i = 0; i < fileList.length; i++) {
             Papa.parse(fileList[i], {
-                complete: parseData.prepareMovementFile,
+                complete: function (results, f) {
+                    console.log("Parsing complete:", results, f);
+                    loop(); // rerun P5 draw loop
+                    if (testData.movementResults(results)) processData.processMovement(results, f);
+                    else alert("Error loading movement file. Please make sure your file is a .CSV file formatted with column headers: " + CSVHEADERS_MOVEMENT.toString());
+                },
                 header: true,
                 dynamicTyping: true,
             });
         }
-    }
-
-    /** 
-     * Organizes testing of parsed movement file
-     * If file passes, process movement file, update core.paths [] and add data to global core.movementFileResults
-     * @param  {PapaParse Results []} results
-     * @param  {File} file
-     */
-    prepareMovementFile(results, file) {
-        console.log("Parsing complete:", results, file);
-        loop(); // rerun P5 draw loop
-        if (testData.movementResults(results)) {
-            const pathName = file.name.charAt(0).toUpperCase(); // get name of path, also used to test if associated speaker in conversation file
-            const [movement, conversation] = processData.processMovementFile(results); //
-            processData.updatePaths(pathName, movement, conversation);
-            core.movementFileResults.push([results, pathName]); // add results and pathName to global []
-        } else alert("Error loading movement file. Please make sure your file is a .CSV file formatted with column headers: " + CSVHEADERS_MOVEMENT.toString());
     }
 
     /**
@@ -72,33 +60,15 @@ class ParseData {
     parseConversationFile(file) {
         parseData.clearConversationData(); // clear existing conversation data
         Papa.parse(file, {
-            complete: parseData.prepareConversationFile,
+            complete: function (results, f) {
+                console.log("Parsing complete:", results, f);
+                loop(); // rerun P5 draw loop
+                if (testData.conversationResults(results)) processData.processConversation(results);
+                else alert("Error loading conversation file. Please make sure your file is a .CSV file formatted with column headers: " + CSVHEADERS_CONVERSATION.toString());
+            },
             header: true,
             dynamicTyping: true,
         });
-    }
-
-    /** 
-     * Organizes testing of parsed conversation file
-     * If file passes, add data to global core.conversationFileResults, update global core.speakerList [], sort the array
-     * And re process exisiting movement files
-     * @param  {PapaParse Results []} results
-     * @param  {File} file
-     */
-    prepareConversationFile(results, file) {
-        console.log("Parsing complete:", results, file);
-        loop(); // rerun P5 draw loop
-        // Test if file has data, file headers, and at least one row of correctly typed data
-        if (testData.conversationResults(results)) {
-            core.conversationFileResults = results.data; // set to new array of keyed values
-            processData.updateSpeakerList();
-            core.speakerList.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching core.paths array
-            // Must reprocess existing movement files
-            for (let i = 0; i < core.movementFileResults.length; i++) {
-                const [movement, conversation] = processData.processMovementFile(core.movementFileResults[i][0]); // Reprocess movement file results
-                processData.updatePaths(core.movementFileResults[i][1], movement, conversation); // Pass movement file pathname and reprocessed movement file results to updatepaths
-            }
-        } else alert("Error loading conversation file. Please make sure your file is a .CSV file formatted with column headers: " + CSVHEADERS_CONVERSATION.toString());
     }
 
     /**

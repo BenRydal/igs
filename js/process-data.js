@@ -35,6 +35,18 @@ class ProcessData {
         }
     }
 
+    /** 
+     * ADD
+     * @param  {PapaParse Results []} results
+     * @param {CSV} file
+     */
+    processMovement(results, file) {
+        const pathName = file.name.charAt(0).toUpperCase(); // get name of path, also used to test if associated speaker in conversation file
+        const [movement, conversation] = this.createMovementConversationArrays(results); //
+        this.updatePaths(pathName, movement, conversation);
+        core.movementFileResults.push([results, pathName]); // add results and pathName to global []
+    }
+
     /**
      * Creates clean (good data) and sampled movement [] of MovementPoint objects and conversation []
      * of ConversationPoint objects from PapaParse movement results [].
@@ -43,7 +55,7 @@ class ProcessData {
      * determines when to create a new Conversation point if the current conversation row has good data
      * @param  {Results [] from PapaParse} results
      */
-    processMovementFile(results) {
+    createMovementConversationArrays(results) {
         let movement = []; // Create empty arrays to hold MovementPoint and ConversationPoint objects
         let conversation = [];
         let conversationCounter = 0;
@@ -106,6 +118,21 @@ class ProcessData {
             if (!core.speakerList.some(e => e.name === core.paths[i].name)) count++;
         }
         return count;
+    }
+
+    /** 
+     * Update core conversation data, speakerList and reprocess movement data
+     * @param  {PapaParse Results []} results
+     */
+    processConversation(results) {
+        core.conversationFileResults = results.data; // set to new array of keyed values
+        this.updateSpeakerList();
+        core.speakerList.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching core.paths array
+        // Must reprocess existing movement files
+        for (let i = 0; i < core.movementFileResults.length; i++) {
+            const [movement, conversation] = this.createMovementConversationArrays(core.movementFileResults[i][0]); // Reprocess movement file results
+            this.updatePaths(core.movementFileResults[i][1], movement, conversation); // Pass movement file pathname and reprocessed movement file results to updatepaths
+        }
     }
 
     /**
