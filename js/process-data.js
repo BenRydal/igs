@@ -1,8 +1,7 @@
 class ProcessData {
 
     /**
-     * Creates P5 image file from path
-     * Updates global core.floorPlan image and input width/heights of core.floorPlan to properly scale and display data
+     * Creates P5 image file from path and updates core floorPlan image and input width/heights to properly scale and display data
      * @param  {String} filePath
      */
     processFloorPlan(filePath) {
@@ -21,8 +20,11 @@ class ProcessData {
         });
     }
 
-    // Initialization for the video player
-    // Based on the specified platform, chose the appropriate type of videoPlayer to use
+    /**
+     * Replaces existing videoPlayer object with new VideoPlayer object (YouTube or P5FilePlayer)
+     * @param  {String} platform
+     * @param  {VideoPlayer Specific Params} params
+     */
     processVideo(platform, params) {
         if (testData.dataIsLoaded(videoPlayer)) videoPlayer.destroy();
         switch (platform) {
@@ -36,7 +38,7 @@ class ProcessData {
     }
 
     /** 
-     * ADD
+     * Organizes methods to process and update core movementFileResults []
      * @param  {PapaParse Results []} results
      * @param {CSV} file
      */
@@ -44,27 +46,24 @@ class ProcessData {
         const pathName = file.name.charAt(0).toUpperCase(); // get name of path, also used to test if associated speaker in conversation file
         const [movement, conversation] = this.createMovementConversationArrays(results); //
         this.updatePaths(pathName, movement, conversation);
-        core.movementFileResults.push([results, pathName]); // add results and pathName to global []
+        core.movementFileResults.push([results, pathName]); // add results and pathName to core []
     }
 
     /**
-     * Creates clean (good data) and sampled movement [] of MovementPoint objects and conversation []
-     * of ConversationPoint objects from PapaParse movement results [].
-     * To create the conversation [], a comparison between the global core.conversationFileResults [] 
-     * at a specified index to the current MovementPoint time is made--this comparison is what 
-     * determines when to create a new Conversation point if the current conversation row has good data
-     * @param  {Results [] from PapaParse} results
+     * Returns clean movement and conversation arrays of MovementPoint and ConversationPoint objects
+     * Location data for conversation array is drawn from comparison to movement file/results data
+     *  @param  {PapaParse Results []} results
      */
     createMovementConversationArrays(results) {
         let movement = []; // Create empty arrays to hold MovementPoint and ConversationPoint objects
         let conversation = [];
-        let conversationCounter = 0;
+        let conversationCounter = 0; // Current row count of conversation file for comparison
         for (let i = 0; i < results.data.length; i++) {
-            // Sample movement row and test if row is good data
+            // Sample current movement row and test if row is good data
             if (testData.sampleMovementData(results.data, i) && testData.movementRowForType(results.data, i)) {
                 const m = core.createMovementPoint(results.data[i][CSVHEADERS_MOVEMENT[1]], results.data[i][CSVHEADERS_MOVEMENT[2]], results.data[i][CSVHEADERS_MOVEMENT[0]]);
-                movement.push(m);
-                // Test conversation data row for quality first and then compare movement and conversation times
+                movement.push(m); // add good data to movement []
+                // Test conversation data row for quality first and then compare movement and conversation times to see if closest movement data to conversation time
                 if (testData.conversationLengthAndRowForType(conversationCounter) && m.time >= core.conversationFileResults[conversationCounter][CSVHEADERS_CONVERSATION[0]]) {
                     const curTalkTimePos = core.conversationFileResults[conversationCounter][CSVHEADERS_CONVERSATION[0]];
                     const curSpeaker = this.cleanSpeaker(core.conversationFileResults[conversationCounter][CSVHEADERS_CONVERSATION[1]]);
@@ -78,9 +77,8 @@ class ProcessData {
     }
 
     /**
-     * Creates and adds new Path object to global core.paths []
-     * Also handles updating global totalTime and sorting core.paths []
-     * @param  {Char} letterName
+     * Adds new Path object to and sorts core paths []. Also updates time in seconds in program 
+     * @param  {char} letterName
      * @param  {MovementPoint []} movement
      * @param  {ConversationPoint []} conversation
      */
@@ -96,11 +94,9 @@ class ProcessData {
     }
 
     /**
-     * Returns color based on whether pathName has corresponding speaker
-     * If path has corresponding speaker, color returned matches speaker
-     * If it does not, color returned selects from global COLOR_LIST based on num of speakers + numOfPaths that do not have corresponding speaker
-     * 
-     * @param  {} pathName
+     * If path has corresponding speaker, returns color that matches speaker
+     * Otherwise returns color from global COLOR_LIST based on num of speakers + numOfPaths that do not have corresponding speaker
+     * @param  {char} pathName
      */
     setPathColorBySpeaker(pathName) {
         if (core.speakerList.some(e => e.name === pathName)) {
@@ -110,7 +106,7 @@ class ProcessData {
     }
 
     /**
-     * Returns number of movement core.paths that do not have corresponding speaker
+     * Returns number of movement Paths that do not have corresponding speaker
      */
     getNumPathsWithNoSpeaker() {
         let count = 0;
@@ -121,14 +117,14 @@ class ProcessData {
     }
 
     /** 
-     * Update core conversation data, speakerList and reprocess movement data
+     * Organizes methods to process and update conversationFileResults
      * @param  {PapaParse Results []} results
      */
     processConversation(results) {
         core.conversationFileResults = results.data; // set to new array of keyed values
         this.updateSpeakerList();
         core.speakerList.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching core.paths array
-        // Must reprocess existing movement files
+        // Reprocess existing movement files
         for (let i = 0; i < core.movementFileResults.length; i++) {
             const [movement, conversation] = this.createMovementConversationArrays(core.movementFileResults[i][0]); // Reprocess movement file results
             this.updatePaths(core.movementFileResults[i][1], movement, conversation); // Pass movement file pathname and reprocessed movement file results to updatepaths
@@ -136,7 +132,7 @@ class ProcessData {
     }
 
     /**
-     * Updates global speaker list from conversation file data/results
+     * Updates core speaker list from conversation file data/results
      */
     updateSpeakerList() {
         for (let i = 0; i < core.conversationFileResults.length; i++) {
