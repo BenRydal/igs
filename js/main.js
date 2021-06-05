@@ -28,7 +28,7 @@ let handlers;
 
 /**
  * videoPlayer acts like an abstract class with different video classes defined in video-player.js.
- * videoPlayer is instantiated in processVideo method
+ * videoPlayer is instantiated/updated in processVideo method
  * movie holds the "Div" created/destroyed by different video classes
  */
 let videoPlayer;
@@ -52,7 +52,6 @@ const COLOR_LIST = ['#6a3d9a', '#ff7f00', '#33a02c', '#1f78b4', '#e31a1c', '#fff
  */
 function setup() {
     canvas = createCanvas(window.innerWidth, window.innerHeight, P2D);
-    frameRate(30);
     core = new Core();
     setData = new SetData();
     parseData = new ParseData();
@@ -65,6 +64,7 @@ function setup() {
 
 /**
  * Draws background, keys and organizes drawing of different data sources if data is loaded
+ * Continues looping if animate or videoPlaying mode is true
  */
 function draw() {
     background(255);
@@ -76,16 +76,25 @@ function draw() {
         select('#moviePlayer').position(mouseX - videoPlayer.videoWidth, mouseY - videoPlayer.videoHeight);
     }
     keys.drawKeys(); // draw keys last
+    if (core.isModeAnimate || core.isModeVideoPlaying) loop();
+    else noLoop();
 }
 
 function mousePressed() {
     handlers.handleMousePressed();
+    loop(); // Update all drawing if mouse pressed
 }
 
 function mouseDragged() {
     handlers.handleMouseDragged();
+    loop(); // Update all drawing if mouse dragged
 }
 
 function mouseReleased() {
     handlers.handleMouseReleased();
+    loop(); // Update all drawing if mouse released
+}
+
+function mouseMoved() {
+    loop(); // Update all drawing if mouse moves
 }

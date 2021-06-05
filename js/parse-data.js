@@ -46,6 +46,7 @@ class ParseData {
      */
     prepareMovementFile(results, file) {
         console.log("Parsing complete:", results, file);
+        loop(); // rerun P5 draw loop
         // Test if file has data, file headers, and at least one row of correctly typed data
         if (results.data.length > 1 && testData.CSVHEADERS_MOVEMENT(results.meta.fields) && testData.movementRowsForType(results.data)) {
             const pathName = file.name.charAt(0).toUpperCase(); // get name of path, also used to test if associated speaker in conversation file
@@ -87,6 +88,7 @@ class ParseData {
      */
     prepareConversationFile(results, file) {
         console.log("Parsing complete:", results, file);
+        loop(); // rerun P5 draw loop
         // Test if file has data, file headers, and at least one row of correctly typed data
         if (results.data.length > 1 && testData.CSVHEADERS_CONVERSATION(results.meta.fields) && testData.conversationRowsForType(results.data)) {
             core.conversationFileResults = results.data; // set to new array of keyed values
@@ -115,6 +117,7 @@ class ParseData {
     }
 
     clearAllData() {
+        loop(); // rerun P5 draw loop
         if (testData.dataIsLoaded(videoPlayer)) {
             if (core.isModeVideoShowing) handlers.overVideoButton(); // Turn off video before destroying it if showing
             videoPlayer.destroy(); // if there is a video, destroy it

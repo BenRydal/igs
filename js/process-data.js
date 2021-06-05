@@ -7,6 +7,8 @@ class ProcessData {
      */
     processFloorPlan(filePath) {
         loadImage(filePath, img => {
+            console.log("Floor Plan Image Loaded");
+            loop(); // rerun P5 draw loop after loading image
             core.floorPlan = img;
             core.inputFloorPlanPixelWidth = core.floorPlan.width;
             core.inputFloorPlanPixelHeight = core.floorPlan.height;
@@ -20,9 +22,9 @@ class ProcessData {
     }
 
     // Initialization for the video player
+    // Based on the specified platform, chose the appropriate type of videoPlayer to use
     processVideo(platform, params) {
         if (testData.dataIsLoaded(videoPlayer)) videoPlayer.destroy();
-        // Based on the specified platform, chose the appropriate type of videoPlayer to use
         switch (platform) {
             case "Youtube":
                 videoPlayer = new YoutubePlayer(params);

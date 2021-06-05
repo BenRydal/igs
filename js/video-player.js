@@ -44,6 +44,7 @@ class YoutubePlayer {
     onPlayerReady() {
         console.log("YT player ready: ");
         handlers.overVideoButton(); // Show video once loaded
+        loop(); // rerun P5 draw loop after loading image
     }
 
     show() {
@@ -106,8 +107,9 @@ class P5FilePlayer {
             movie.onload = function () {
                 URL.revokeObjectURL(this.src);
             }
-            console.log("File Player Ready:");
             handlers.overVideoButton(); // Show video once it has been loaded
+            console.log("File Player Ready:");
+            loop(); // rerun P5 draw loop after loading image
         });
     }
 
