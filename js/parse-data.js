@@ -1,5 +1,3 @@
-// TODO: Deal with "this" in parseData/other classes
-// TEMP: added parseData. for this here
 class ParseData {
 
     /**
@@ -23,18 +21,17 @@ class ParseData {
     }
 
     /**
-     * Clears existing movement data
-     * Parses each movement file and sends for additional testing and processing
+     * Clears existing movement data and parses each movement file and sends for additional testing and processing
      * @param  {.CSV File[]} fileList
      */
     parseMovementFiles(fileList) {
         core.clearMovementData(); // clear existing movement data
-        for (let i = 0; i < fileList.length; i++) {
-            Papa.parse(fileList[i], {
-                complete: function (results, f) {
-                    console.log("Parsing complete:", results, f);
+        for (const fileToParse of fileList) {
+            Papa.parse(fileToParse, {
+                complete: function (results, file) {
+                    console.log("Parsing complete:", results, file);
                     loop(); // rerun P5 draw loop
-                    if (testData.movementResults(results)) processData.processMovement(results, f);
+                    if (testData.movementResults(results)) processData.processMovement(results, file);
                     else alert("Error loading movement file. Please make sure your file is a .CSV file formatted with column headers: " + CSVHEADERS_MOVEMENT.toString());
                 },
                 header: true,
@@ -53,8 +50,7 @@ class ParseData {
     }
 
     /**
-     * Clears exisiting conversation data
-     * Parses single conversation file using PapaParse library and sends for additional testing and processing
+     * Clears existing conversation data and parses single conversation file using PapaParse library and sends for additional testing and processing
      * @param  {.CSV File} file
      */
     parseConversationFile(file) {
