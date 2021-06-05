@@ -47,8 +47,7 @@ class ParseData {
     prepareMovementFile(results, file) {
         console.log("Parsing complete:", results, file);
         loop(); // rerun P5 draw loop
-        // Test if file has data, file headers, and at least one row of correctly typed data
-        if (results.data.length > 1 && testData.CSVHEADERS_MOVEMENT(results.meta.fields) && testData.movementRowsForType(results.data)) {
+        if (testData.movementResults(results)) {
             const pathName = file.name.charAt(0).toUpperCase(); // get name of path, also used to test if associated speaker in conversation file
             const [movement, conversation] = processData.processMovementFile(results); //
             processData.updatePaths(pathName, movement, conversation);
@@ -90,7 +89,7 @@ class ParseData {
         console.log("Parsing complete:", results, file);
         loop(); // rerun P5 draw loop
         // Test if file has data, file headers, and at least one row of correctly typed data
-        if (results.data.length > 1 && testData.CSVHEADERS_CONVERSATION(results.meta.fields) && testData.conversationRowsForType(results.data)) {
+        if (testData.conversationResults(results)) {
             core.conversationFileResults = results.data; // set to new array of keyed values
             processData.updateSpeakerList();
             core.speakerList.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching core.paths array

@@ -9,10 +9,26 @@ class TestData {
     }
 
     /**
+     * Test if results array has data, correct file headers, and at least one row of correctly typed data
+     * @param  {PapaParse Results []} results
+     */
+    movementResults(results) {
+        return results.data.length > 1 && this.movementHeaders(results.meta.fields) && this.movementRowsForType(results.data);
+    }
+
+    /**
+     * Test if results array has data, correct file headers, and at least one row of correctly typed data
+     * @param  {PapaParse Results []} results
+     */
+    conversationResults(results) {
+        return results.data.length > 1 && this.conversationHeaders(results.meta.fields) && this.conversationRowsForType(results.data);
+    }
+
+    /**
      * Tests if PapaParse meta results array includes correct headers for movement
      * @param  {PapaParse results.meta.fields} meta
      */
-    CSVHEADERS_MOVEMENT(meta) {
+    movementHeaders(meta) {
         return meta.includes(CSVHEADERS_MOVEMENT[0]) && meta.includes(CSVHEADERS_MOVEMENT[1]) && meta.includes(CSVHEADERS_MOVEMENT[2]);
     }
 
@@ -20,7 +36,7 @@ class TestData {
      * Tests if PapaParse meta results array includes correct headers for conversation
      * @param  {PapaParse results.meta.fields} meta
      */
-    CSVHEADERS_CONVERSATION(meta) {
+    conversationHeaders(meta) {
         return meta.includes(CSVHEADERS_CONVERSATION[0]) && meta.includes(CSVHEADERS_CONVERSATION[1]) && meta.includes(CSVHEADERS_CONVERSATION[2]);
     }
 
