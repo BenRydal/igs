@@ -12,8 +12,9 @@
       let option = document.getElementById("examples").value;
       switch (option) {
         case "Load Data":
-          parseData.clearAllData();
+          core.clearAllData();
           this.showInputBar();
+          loop(); // rerun P5 draw loop
           break;
         case "Example 1":
           this.loadExample(['data/example-1/', 'floorplan.png', 'conversation.csv', ['Teacher.csv'], 'Youtube', {

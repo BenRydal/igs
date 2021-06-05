@@ -94,4 +94,32 @@ class Core {
             talkTurn
         }
     }
+
+    clearAllData() {
+        loop(); // rerun P5 draw loop
+        if (testData.dataIsLoaded(videoPlayer)) {
+            if (this.isModeVideoShowing) handlers.overVideoButton(); // Turn off video before destroying it if showing
+            videoPlayer.destroy(); // if there is a video, destroy it
+            videoPlayer = null; // set videoPlayer to null
+        }
+        this.floorPlan = undefined;
+        this.conversationFileResults = [];
+        this.speakerList = [];
+        this.paths = [];
+        this.movementFileResults = [];
+        this.paths = [];
+        this.totalTimeInSeconds = 0; // reset total time
+    }
+
+    clearConversationData() {
+        this.conversationFileResults = [];
+        this.speakerList = [];
+        this.paths = [];
+    }
+
+    clearMovementData() {
+        this.movementFileResults = [];
+        this.paths = [];
+        this.totalTimeInSeconds = 0; // reset total time
+    }
 }

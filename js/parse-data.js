@@ -28,7 +28,7 @@ class ParseData {
      * @param  {.CSV File[]} fileList
      */
     parseMovementFiles(fileList) {
-        parseData.clearMovementData(); // clear existing movement data
+        core.clearMovementData(); // clear existing movement data
         for (let i = 0; i < fileList.length; i++) {
             Papa.parse(fileList[i], {
                 complete: function (results, f) {
@@ -58,7 +58,7 @@ class ParseData {
      * @param  {.CSV File} file
      */
     parseConversationFile(file) {
-        parseData.clearConversationData(); // clear existing conversation data
+        core.clearConversationData(); // clear existing conversation data
         Papa.parse(file, {
             complete: function (results, f) {
                 console.log("Parsing complete:", results, f);
@@ -83,33 +83,5 @@ class ParseData {
         processData.processVideo('File', {
             fileName: fileLocation
         });
-    }
-
-    clearAllData() {
-        loop(); // rerun P5 draw loop
-        if (testData.dataIsLoaded(videoPlayer)) {
-            if (core.isModeVideoShowing) handlers.overVideoButton(); // Turn off video before destroying it if showing
-            videoPlayer.destroy(); // if there is a video, destroy it
-            videoPlayer = null; // set videoPlayer to null
-        }
-        core.floorPlan = undefined;
-        core.speakerList = [];
-        core.paths = [];
-        core.movementFileResults = [];
-        core.conversationFileResults = [];
-        core.paths = [];
-        core.totalTimeInSeconds = 0; // reset total time
-    }
-
-    clearConversationData() {
-        core.conversationFileResults = [];
-        core.speakerList = [];
-        core.paths = [];
-    }
-
-    clearMovementData() {
-        core.movementFileResults = [];
-        core.paths = [];
-        core.totalTimeInSeconds = 0; // reset total time
     }
 }
