@@ -27,7 +27,7 @@ let keys;
 let handlers;
 
 /**
- * videoPlayer acts like an abstract class with different video classes defined in video-player.js.
+ * videoPlayer acts like an abstract class for different Player Classes (see video-player.js)
  * videoPlayer is instantiated/updated in processVideo method
  * movie holds the "Div" created/destroyed by different video classes
  */
