@@ -44,8 +44,15 @@ const SPACETIME = 1;
 const NO_DATA = -1;
 const INTROMSG = "INTERACTION GEOGRAPHY SLICER (IGS)\n\nby Ben Rydal Shapiro & contributors\nbuilt with p5.js & JavaScript\n\nHi There! This is a tool to visualize movement, conversation, and video data over space and time. Data are displayed over a floor plan view (left) and a space-time view (right), where the vertical axis corresponds to the vertical dimension of the floor plan. Use the top menu to visualize different sample datasets or upload your own data. Hover over the floor plan and use the timeline to selectively study displayed data. Use the bottom BUTTON_NAMES to animate data, visualize conversation in different ways, and interact with video data by clicking the timeline to play & pause video. For more information see: benrydal.com/software/igs";
 const BUTTON_NAMES = ["Animate", "Align Talk", "All Talk", "Video", "How to Use"];
-const COLOR_LIST = ['#6a3d9a', '#ff7f00', '#33a02c', '#1f78b4', '#e31a1c', '#ffff99', '#b15928', '#cab2d6', '#fdbf6f', '#b2df8a', '#a6cee3', '#fb9a99'];
-// 12 Class Paired: (Dark) purple, orange, green, blue, red, yellow, brown, (Light) lPurple, lOrange, lGreen, lBlue, lRed
+const COLOR_LIST = ['#6a3d9a', '#ff7f00', '#33a02c', '#1f78b4', '#e31a1c', '#ffff99', '#b15928', '#cab2d6', '#fdbf6f', '#b2df8a', '#a6cee3', '#fb9a99']; // 12 Class Paired: (Dark) purple, orange, green, blue, red, yellow, brown, (Light) lPurple, lOrange, lGreen, lBlue, lRed
+let font_Lato; // primary font used across program
+
+/**
+ * Optional P5.js method, here used to load fonts prior to page load
+ */
+function preload() {
+    font_Lato = loadFont("data/fonts/Lato-Light.ttf");
+}
 
 /**
  * Required P5.js method, here used to setup GUI
@@ -53,12 +60,12 @@ const COLOR_LIST = ['#6a3d9a', '#ff7f00', '#33a02c', '#1f78b4', '#e31a1c', '#fff
 function setup() {
     canvas = createCanvas(window.innerWidth, window.innerHeight, P2D);
     core = new Core();
+    keys = new Keys();
     setData = new SetData();
     parseData = new ParseData();
     exampleData = new ExampleData();
     processData = new ProcessData();
     testData = new TestData();
-    keys = new Keys();
     handlers = new Handlers();
 }
 

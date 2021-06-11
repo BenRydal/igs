@@ -402,7 +402,7 @@ class DrawDataConversation extends DrawData {
     drawRects(point, curColor) {
         // ***** SET FONTS/STROKES/CONSTANTS
         noStroke(); // reset if setDrawText is called previously in loop
-        textFont(keys.font_Lato, keys.keyTextSize);
+        textFont(font_Lato, keys.keyTextSize);
         textSize(1); // Controls measurement of pixels in a string that corredponds to vertical pixel height of rectangle.
         const rectWidth = map(keys.curPixelTimeMax - keys.curPixelTimeMin, 0, keys.timelineLength, this.rect.maxPixelWidth, this.rect.minPixelWidth); // map to inverse of min/max to set rectWidth based on amount of pixel time selected
         let rectLength = textWidth(point.talkTurn);
@@ -448,7 +448,7 @@ class DrawDataConversation extends DrawData {
             rectSpacing: width / 28.2, // distance from text rectangle of textbox
         }
         textBox.height = textBox.textLeading * (ceil(textWidth(this.conversationBubble.point.talkTurn) / textBox.width)); // lines of talk in a text box rounded up
-        textFont(keys.font_Lato, keys.keyTextSize);
+        textFont(font_Lato, keys.keyTextSize);
         textLeading(textBox.textLeading);
         let xPos; // set xPos, constrain prevents drawing off screen
         if (this.conversationBubble.view === PLAN) xPos = constrain(curPoint.scaledXPos - textBox.width / 2, textBox.boxSpacing, width - textBox.width - textBox.boxSpacing);

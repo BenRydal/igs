@@ -21,7 +21,6 @@ class Keys {
         this.floorPlanCursorSelectSize = 100;
         this.font_PlayfairReg = loadFont("data/fonts/PlayfairDisplay-Regular.ttf");
         this.font_PlayfairItalic = loadFont("data/fonts/PlayfairDisplay-Italic.ttf");
-        this.font_Lato = loadFont("data/fonts/Lato-Light.ttf");
     }
 
     drawKeys() {
@@ -170,7 +169,7 @@ class Keys {
         fill(255, 240);
         rect(width / 2, height / 2.5, width / 1.75 + 50, height / 1.75 + 50);
         fill(0);
-        textFont(this.font_Lato, this.keyTextSize);
+        textFont(font_Lato, this.keyTextSize);
         text(INTROMSG, width / 2, height / 2.5, width / 1.75, height / 1.75);
         rectMode(CORNER);
     }
