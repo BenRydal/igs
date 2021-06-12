@@ -13,7 +13,7 @@ class SetData {
                 drawMovementData.setData(core.paths[i]); // draw after conversation so bug displays on top
             }
         }
-        if (handlers.overRect(keys.timelineStart, 0, keys.timelineLength, keys.timelineHeight)) drawMovementData.drawSlicer(); // draw slicer line after calculating all movement
+        if (handlers.overRect(keys.timelineStart, 0, keys.timelineLength, keys.timelineHeight)) keys.drawSlicer(); // draw slicer line after calculating all movement
         drawConversationData.setConversationBubble(); // draw conversation text last so it displays on top
         if (core.isModeAnimate) this.setUpAnimation();
     }
@@ -27,7 +27,7 @@ class SetData {
         for (let i = 0; i < core.paths.length; i++) {
             if (core.paths[i].show) drawMovementData.setData(core.paths[i]); // draw after conversation so bug displays on top
         }
-        if (handlers.overRect(keys.timelineStart, 0, keys.timelineLength, keys.timelineHeight)) drawMovementData.drawSlicer(); // draw slicer line after calculating all movement
+        if (handlers.overRect(keys.timelineStart, 0, keys.timelineLength, keys.timelineHeight)) keys.drawSlicer(); // draw slicer line after calculating all movement
         if (core.isModeAnimate) this.setUpAnimation();
     }
 

@@ -162,6 +162,13 @@ class Keys {
         circle(mouseX, mouseY, this.floorPlanCursorSelectSize);
     }
 
+    drawSlicer() {
+        fill(0);
+        stroke(0);
+        strokeWeight(2);
+        line(mouseX, 0, mouseX, this.timelineHeight);
+    }
+
     drawIntroMsg() {
         rectMode(CENTER);
         stroke(0);

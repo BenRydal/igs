@@ -292,13 +292,6 @@ class DrawDataMovement extends DrawData {
         ellipse(this.bug.xPos, this.bug.yPos, this.bug.size, this.bug.size);
         ellipse(this.bug.timePos, this.bug.yPos, this.bug.size, this.bug.size);
     }
-
-    drawSlicer() {
-        fill(0);
-        stroke(0);
-        strokeWeight(2);
-        line(mouseX, 0, mouseX, keys.timelineHeight);
-    }
 }
 
 class DrawDataConversation extends DrawData {
