@@ -43,7 +43,13 @@ class SetData {
         if (core.animationCounter < map(keys.curPixelTimeMax, keys.timelineStart, keys.timelineEnd, 0, core.totalTimeInSeconds)) core.animationCounter += animationIncrementValue; // updates core.isModeAnimate
         else core.isModeAnimate = false;
     }
-
+    /**
+     * Updates video position to curMousePosition and calls scrubbing method if not playing
+     */
+    setVideoPosition() {
+        if (!core.isModeVideoPlaying) this.setVideoScrubbing();
+        select('#moviePlayer').position(mouseX - videoPlayer.videoWidth, mouseY - videoPlayer.videoHeight);
+    }
     /**
      * Updates time selected in video depending on mouse position or core.isModeAnimate over timeline
      */

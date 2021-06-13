@@ -55,7 +55,7 @@ function preload() {
 }
 
 /**
- * Required P5.js method, here used to setup GUI
+ * Required P5.js method, used to setup GUI
  */
 function setup() {
     canvas = createCanvas(window.innerWidth, window.innerHeight, P2D);
@@ -70,7 +70,7 @@ function setup() {
 }
 
 /**
- * Draws background, keys and organizes drawing of different data sources if data is loaded
+ * Required P5.js draw loop method, draws background, keys and organizes drawing of different data sources if loaded
  * Continues looping if animate or videoPlaying mode is true
  */
 function draw() {
@@ -78,10 +78,7 @@ function draw() {
     if (testData.dataIsLoaded(core.floorPlan)) image(core.floorPlan, 0, 0, keys.displayFloorPlanWidth, keys.displayFloorPlanHeight);
     if (testData.dataIsLoaded(core.paths) && testData.dataIsLoaded(core.speakerList)) setData.setMovementAndConversationData();
     else if (testData.dataIsLoaded(core.paths)) setData.setMovementData();
-    if (testData.dataIsLoaded(videoPlayer) && core.isModeVideoShowing && (mouseX !== pmouseX || mouseY !== pmouseY)) {
-        if (!core.isModeVideoPlaying) setData.setVideoScrubbing();
-        select('#moviePlayer').position(mouseX - videoPlayer.videoWidth, mouseY - videoPlayer.videoHeight);
-    }
+    if (testData.dataIsLoaded(videoPlayer) && core.isModeVideoShowing) setData.setVideoPosition();
     keys.drawKeys(); // draw keys last
     if (core.isModeAnimate || core.isModeVideoPlaying) loop();
     else noLoop();
