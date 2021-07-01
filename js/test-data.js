@@ -79,18 +79,11 @@ class TestData {
         return curRow < core.conversationFileResults.length && typeof core.conversationFileResults[curRow][CSVHEADERS_CONVERSATION[0]] === 'number' && typeof core.conversationFileResults[curRow][CSVHEADERS_CONVERSATION[1]] === 'string' && core.conversationFileResults[curRow][CSVHEADERS_CONVERSATION[2]] != null;
     }
 
-    /**
-     * Method to sample data in two ways. Important to optimize user interaction and good curve drawing.
-     * SampleRateDivisor determines if there is large or small amount of data
-     * (1) If minimal amount of data, sample if curRow is greater than last row to 2 decimal places
-     * (2) If large amount of data, sample if curRow is one whole number greater than last row
-     * @param  {Results [] from PapaParse} data
-     * @param  {Integer} curRow
-     */
     sampleMovementData(data, curRow) {
+        const posChange = 2;
         if (curRow === 0 || curRow === 1) return true; // always return true for first two rows to set starting point
-        const sampleRateDivisor = 5; // 5 as rate seems to work nicely on most devices
-        if (Math.floor(data.length / sampleRateDivisor) < keys.timelineLength) return Number.parseFloat(data[curRow][CSVHEADERS_MOVEMENT[0]]).toFixed(2) > Number.parseFloat(data[curRow - 1][CSVHEADERS_MOVEMENT[0]]).toFixed(2);
-        else return Math.floor(data[curRow][CSVHEADERS_MOVEMENT[0]]) > Math.floor(data[curRow - 1][CSVHEADERS_MOVEMENT[0]]); // Large data sampling rate
+        return (Math.floor(data[curRow][CSVHEADERS_MOVEMENT[0]]) > Math.floor(data[curRow - 1][CSVHEADERS_MOVEMENT[0]])) || (Math.abs(Math.floor(data[curRow][CSVHEADERS_MOVEMENT[1]]) - Math.floor(data[curRow - 1][CSVHEADERS_MOVEMENT[1]])) > posChange) || (Math.abs(Math.floor(data[curRow][CSVHEADERS_MOVEMENT[2]]) - Math.floor(data[curRow - 1][CSVHEADERS_MOVEMENT[2]])) > posChange);
+        //return (data[curRow][CSVHEADERS_MOVEMENT[0]]) > Math.floor(data[curRow - 1][CSVHEADERS_MOVEMENT[0]]) || (Math.abs(data[curRow][CSVHEADERS_MOVEMENT[1]] - data[curRow - 1][CSVHEADERS_MOVEMENT[1]] > posChange) || (Math.abs(data[curRow][CSVHEADERS_MOVEMENT[2]] - data[curRow - 1][CSVHEADERS_MOVEMENT[2]]) > posChange));
+        //return (data[curRow][CSVHEADERS_MOVEMENT[0]] > data[curRow - 1][CSVHEADERS_MOVEMENT[0]]) || (Math.abs(Math.floor(data[curRow][CSVHEADERS_MOVEMENT[1]]) - Math.floor(data[curRow - 1][CSVHEADERS_MOVEMENT[1]]) > posChange) || (Math.abs(Math.floor(data[curRow][CSVHEADERS_MOVEMENT[2]]) - Math.floor(data[curRow - 1][CSVHEADERS_MOVEMENT[2]]) > posChange)));
     }
 }
