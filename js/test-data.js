@@ -78,12 +78,14 @@ class TestData {
     conversationLengthAndRowForType(curRow) {
         return curRow < core.conversationFileResults.length && typeof core.conversationFileResults[curRow][CSVHEADERS_CONVERSATION[0]] === 'number' && typeof core.conversationFileResults[curRow][CSVHEADERS_CONVERSATION[1]] === 'string' && core.conversationFileResults[curRow][CSVHEADERS_CONVERSATION[2]] != null;
     }
-
+    /**
+     * Samples data based on comparing time and x/y positions of two points
+     * @param  {PapaParse results[]} data
+     * @param  {Number} curRow
+     */
     sampleMovementData(data, curRow) {
-        const posChange = 2;
+        const posChange = 2; // number of pixels to compare change in x/y position
         if (curRow === 0 || curRow === 1) return true; // always return true for first two rows to set starting point
-        //return Number.parseFloat(data[curRow][CSVHEADERS_MOVEMENT[0]]).toFixed(2) > Number.parseFloat(data[curRow - 1][CSVHEADERS_MOVEMENT[0]]).toFixed(2);
         return (Number.parseFloat(data[curRow][CSVHEADERS_MOVEMENT[0]]).toFixed(1) > Number.parseFloat(data[curRow - 1][CSVHEADERS_MOVEMENT[0]]).toFixed(1)) || (Math.abs(Math.floor(data[curRow][CSVHEADERS_MOVEMENT[1]]) - Math.floor(data[curRow - 1][CSVHEADERS_MOVEMENT[1]])) > posChange) || (Math.abs(Math.floor(data[curRow][CSVHEADERS_MOVEMENT[2]]) - Math.floor(data[curRow - 1][CSVHEADERS_MOVEMENT[2]])) > posChange);
-        //return (Math.floor(data[curRow][CSVHEADERS_MOVEMENT[0]]) > Math.floor(data[curRow - 1][CSVHEADERS_MOVEMENT[0]])) || (Math.abs(Math.floor(data[curRow][CSVHEADERS_MOVEMENT[1]]) - Math.floor(data[curRow - 1][CSVHEADERS_MOVEMENT[1]])) > posChange) || (Math.abs(Math.floor(data[curRow][CSVHEADERS_MOVEMENT[2]]) - Math.floor(data[curRow - 1][CSVHEADERS_MOVEMENT[2]])) > posChange);
     }
 }
