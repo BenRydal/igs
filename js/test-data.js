@@ -82,8 +82,8 @@ class TestData {
     sampleMovementData(data, curRow) {
         const posChange = 2;
         if (curRow === 0 || curRow === 1) return true; // always return true for first two rows to set starting point
-        return (Math.floor(data[curRow][CSVHEADERS_MOVEMENT[0]]) > Math.floor(data[curRow - 1][CSVHEADERS_MOVEMENT[0]])) || (Math.abs(Math.floor(data[curRow][CSVHEADERS_MOVEMENT[1]]) - Math.floor(data[curRow - 1][CSVHEADERS_MOVEMENT[1]])) > posChange) || (Math.abs(Math.floor(data[curRow][CSVHEADERS_MOVEMENT[2]]) - Math.floor(data[curRow - 1][CSVHEADERS_MOVEMENT[2]])) > posChange);
-        //return (data[curRow][CSVHEADERS_MOVEMENT[0]]) > Math.floor(data[curRow - 1][CSVHEADERS_MOVEMENT[0]]) || (Math.abs(data[curRow][CSVHEADERS_MOVEMENT[1]] - data[curRow - 1][CSVHEADERS_MOVEMENT[1]] > posChange) || (Math.abs(data[curRow][CSVHEADERS_MOVEMENT[2]] - data[curRow - 1][CSVHEADERS_MOVEMENT[2]]) > posChange));
-        //return (data[curRow][CSVHEADERS_MOVEMENT[0]] > data[curRow - 1][CSVHEADERS_MOVEMENT[0]]) || (Math.abs(Math.floor(data[curRow][CSVHEADERS_MOVEMENT[1]]) - Math.floor(data[curRow - 1][CSVHEADERS_MOVEMENT[1]]) > posChange) || (Math.abs(Math.floor(data[curRow][CSVHEADERS_MOVEMENT[2]]) - Math.floor(data[curRow - 1][CSVHEADERS_MOVEMENT[2]]) > posChange)));
+        //return Number.parseFloat(data[curRow][CSVHEADERS_MOVEMENT[0]]).toFixed(2) > Number.parseFloat(data[curRow - 1][CSVHEADERS_MOVEMENT[0]]).toFixed(2);
+        return (Number.parseFloat(data[curRow][CSVHEADERS_MOVEMENT[0]]).toFixed(1) > Number.parseFloat(data[curRow - 1][CSVHEADERS_MOVEMENT[0]]).toFixed(1)) || (Math.abs(Math.floor(data[curRow][CSVHEADERS_MOVEMENT[1]]) - Math.floor(data[curRow - 1][CSVHEADERS_MOVEMENT[1]])) > posChange) || (Math.abs(Math.floor(data[curRow][CSVHEADERS_MOVEMENT[2]]) - Math.floor(data[curRow - 1][CSVHEADERS_MOVEMENT[2]])) > posChange);
+        //return (Math.floor(data[curRow][CSVHEADERS_MOVEMENT[0]]) > Math.floor(data[curRow - 1][CSVHEADERS_MOVEMENT[0]])) || (Math.abs(Math.floor(data[curRow][CSVHEADERS_MOVEMENT[1]]) - Math.floor(data[curRow - 1][CSVHEADERS_MOVEMENT[1]])) > posChange) || (Math.abs(Math.floor(data[curRow][CSVHEADERS_MOVEMENT[2]]) - Math.floor(data[curRow - 1][CSVHEADERS_MOVEMENT[2]])) > posChange);
     }
 }
