@@ -14,8 +14,7 @@ https://etd.library.vanderbilt.edu/available/etd-03212018-140140/unrestricted/Sh
 */
 
 /**
- * CLASSES/MODULES
- * Each class is currently treated as a singleton with respective .js file/module
+ * CLASSES/MODULES treated as singletons with respective .js file/module
  */
 let core;
 let setData;
@@ -25,14 +24,7 @@ let processData;
 let testData;
 let keys;
 let handlers;
-
-/**
- * videoPlayer acts like an abstract class for different Player Classes (see video-player.js)
- * videoPlayer is instantiated/updated in processVideo method
- * movie holds the "Div" created/destroyed by different video classes
- */
-let videoPlayer;
-let movie;
+let videoPlayer; // abstract class for different play classes instantiated/updated in processVideo method (see video-player.js)
 
 /**
  * CONSTANTS

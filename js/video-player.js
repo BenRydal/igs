@@ -1,7 +1,6 @@
 /**
  * A global videoPlayer object acts as an abstract class for all Player sub-classes
- * All Player classes must implement the following methods:
- * seekTo(time), play(), pause(), mute(), unMute(), getCurrentTime(), getVideoDuration(), destroy(), show(), hide()
+ * All Player classes must implement the following methods: seekTo(time), play(), pause(), mute(), unMute(), getCurrentTime(), getVideoDuration(), destroy(), show(), hide()
  */
 class YoutubePlayer {
     /**
@@ -13,16 +12,16 @@ class YoutubePlayer {
         this.videoId = params['videoId'];
         this.videoWidth = width / 5;
         this.videoHeight = width / 6;
-        this.initializeDiv();
+        this.movie = createDiv();
+        this.setMovieDiv();
         this.initializePlayer();
     }
 
-    initializeDiv() {
-        movie = createDiv(); // create the div that will hold the video if other player
-        movie.id(this.targetId);
-        movie.size(this.videoWidth, this.videoHeight);
-        movie.hide();
-        movie.position(keys.timelineStart, 0);
+    setMovieDiv() {
+        this.movie.id(this.targetId);
+        this.movie.size(this.videoWidth, this.videoHeight);
+        this.movie.hide();
+        this.movie.position(keys.timelineStart, 0);
     }
 
 
@@ -86,7 +85,7 @@ class YoutubePlayer {
 
     destroy() {
         this.player.destroy(); // destroy the player object
-        movie.remove(); // remove the div element
+        this.movie.remove(); // remove the div element
     }
 }
 
@@ -98,18 +97,21 @@ class P5FilePlayer {
     constructor(params) {
         this.videoWidth = width / 5;
         this.videoHeight = width / 6;
-        movie = createVideo(params['fileName'], function () {
-            movie.id('moviePlayer');
-            movie.size(width / 5, width / 6);
-            movie.hide();
-            movie.position(keys.timelineStart, 0);
-            movie.onload = function () {
-                URL.revokeObjectURL(this.src);
-            }
+        //this.movieDiv = sketch.createVideo(fileLocation, () => {
+        this.movie = createVideo(params['fileName'], () => {
+            this.movie.onload = () => URL.revokeObjectURL(this.src);
+            this.setMovieDiv();
             handlers.overVideoButton(); // Show video once it has been loaded
             console.log("File Player Ready:");
             loop(); // rerun P5 draw loop after loading image
         });
+    }
+
+    setMovieDiv() {
+        this.movie.id('moviePlayer');
+        this.movie.size(width / 5, width / 6);
+        this.movie.hide();
+        this.movie.position(keys.timelineStart, 0);
     }
 
     show() {
@@ -123,34 +125,34 @@ class P5FilePlayer {
     }
 
     seekTo(t) {
-        movie.time(t);
+        this.movie.time(t);
     }
 
     play() {
-        movie.play();
+        this.movie.play();
     }
 
     pause() {
-        movie.pause();
+        this.movie.pause();
     }
 
     mute() {
-        movie.volume(0);
+        this.movie.volume(0);
     }
 
     unMute() {
-        movie.volume(1);
+        this.movie.volume(1);
     }
 
     getCurrentTime() {
-        return movie.time();
+        return this.movie.time();
     }
 
     getVideoDuration() {
-        return movie.duration();
+        return this.movie.duration();
     }
 
     destroy() {
-        movie.remove(); // remove the div element
+        this.movie.remove(); // remove the div element
     }
 }
