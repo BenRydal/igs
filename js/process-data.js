@@ -7,13 +7,11 @@ class ProcessData {
     processFloorPlan(filePath) {
         loadImage(filePath, img => {
             console.log("Floor Plan Image Loaded");
+            img.onload = () => URL.revokeObjectURL(this.src);
             loop(); // rerun P5 draw loop after loading image
             core.floorPlan = img;
             core.inputFloorPlanPixelWidth = core.floorPlan.width;
             core.inputFloorPlanPixelHeight = core.floorPlan.height;
-            img.onload = function () {
-                URL.revokeObjectURL(this.src);
-            }
         }, e => {
             alert("Error loading floor plan image file. Please make sure it is correctly formatted as a PNG or JPG image file.")
             console.log(e);
@@ -46,6 +44,7 @@ class ProcessData {
         const pathName = file.name.charAt(0).toUpperCase(); // get name of path, also used to test if associated speaker in conversation file
         const [movement, conversation] = this.createMovementConversationArrays(results); //
         this.updatePaths(pathName, movement, conversation);
+        this.updateTotalTime(movement);
         core.movementFileResults.push([results, pathName]); // add results and pathName to core []
     }
 
@@ -86,9 +85,11 @@ class ProcessData {
         let curPathColor;
         if (testData.dataIsLoaded(core.speakerList)) curPathColor = this.setPathColorBySpeaker(letterName); // if conversation file loaded, send to method to calculate color
         else curPathColor = COLOR_LIST[core.paths.length % COLOR_LIST.length]; // if no conversation file loaded path color is next in Color list
-        let p = core.createPath(letterName, movement, conversation, curPathColor, true); // initialize with name, movement [] and conversation []
-        core.paths.push(p);
+        core.paths.push(core.createPath(letterName, movement, conversation, curPathColor, true));
         core.paths.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching core.speakerList array
+    }
+
+    updateTotalTime(movement) {
         const curPathEndTime = Math.floor(movement[movement.length - 1].time);
         if (core.totalTimeInSeconds < curPathEndTime) core.totalTimeInSeconds = curPathEndTime; // update global total time, make sure to floor value as integer
     }
@@ -124,10 +125,13 @@ class ProcessData {
         core.conversationFileResults = results.data; // set to new array of keyed values
         this.updateSpeakerList();
         core.speakerList.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching core.paths array
-        // Reprocess existing movement files
+        this.reProcessMovementFiles();
+    }
+
+    reProcessMovementFiles() {
         for (let i = 0; i < core.movementFileResults.length; i++) {
-            const [movement, conversation] = this.createMovementConversationArrays(core.movementFileResults[i][0]); // Reprocess movement file results
-            this.updatePaths(core.movementFileResults[i][1], movement, conversation); // Pass movement file pathname and reprocessed movement file results to updatepaths
+            const [movement, conversation] = this.createMovementConversationArrays(core.movementFileResults[i][0]);
+            this.updatePaths(core.movementFileResults[i][1], movement, conversation);
         }
     }
 
