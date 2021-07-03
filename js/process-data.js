@@ -129,9 +129,9 @@ class ProcessData {
     }
 
     reProcessMovementFiles() {
-        for (let i = 0; i < core.movementFileResults.length; i++) {
-            const [movement, conversation] = this.createMovementConversationArrays(core.movementFileResults[i][0]);
-            this.updatePaths(core.movementFileResults[i][1], movement, conversation);
+        for (const results of core.movementFileResults) {
+            const [movement, conversation] = this.createMovementConversationArrays(results[0]);
+            this.updatePaths(results[1], movement, conversation);
         }
     }
 
@@ -141,7 +141,7 @@ class ProcessData {
     updateSpeakerList() {
         for (let i = 0; i < core.conversationFileResults.length; i++) {
             let tempSpeakerList = []; // create/populate temp list to store strings to test from global core.speakerList
-            for (let j = 0; j < core.speakerList.length; j++) tempSpeakerList.push(core.speakerList[j].name);
+            for (const tempSpeaker of core.speakerList) tempSpeakerList.push(tempSpeaker.name);
             // If row is good data, test if core.speakerList already has speaker and if not add speaker 
             if (testData.conversationLengthAndRowForType(i)) {
                 const speaker = this.cleanSpeaker(core.conversationFileResults[i][CSVHEADERS_CONVERSATION[1]]); // get cleaned speaker character
