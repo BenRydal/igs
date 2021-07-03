@@ -102,13 +102,9 @@ class Core {
             videoPlayer.destroy(); // if there is a video, destroy it
             videoPlayer = null; // set videoPlayer to null
         }
-        this.floorPlan = undefined;
-        this.conversationFileResults = [];
-        this.speakerList = [];
-        this.paths = [];
-        this.movementFileResults = [];
-        this.paths = [];
-        this.totalTimeInSeconds = 0; // reset total time
+        this.floorPlan = null;
+        this.clearConversationData();
+        this.clearMovementData();
     }
 
     clearConversationData() {
