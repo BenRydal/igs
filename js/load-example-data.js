@@ -1,20 +1,14 @@
   class ExampleData {
 
     /**
-     * Selects load data or example data option
      * Example data format: [String directory, String floorPlan image file, String conversation File, String movement File[], String video platform, video params(see Video Player Interface)]
-     * NOTE: called from user selection in drop down menu
-     * NOTE: Calls input bar and clears all data for load data 
      */
-    selectExampleData() {
+    selectExampleData(option) {
       if (core.isModeVideoShowing) handlers.overVideoButton(); // Turn off video that if showing
       core.isModeIntro = false; // Hide intro msg if showing
-      let option = document.getElementById("examples").value;
       switch (option) {
         case "Load Data":
-          core.clearAllData();
-          this.showInputBar();
-          loop(); // rerun P5 draw loop
+          this.loadUserData();
           break;
         case "Example 1":
           this.loadExample(['data/example-1/', 'floorplan.png', 'conversation.csv', ['Teacher.csv'], 'Youtube', {
@@ -51,6 +45,13 @@
       let element = document.querySelector('.inputBar');
       element.style.display = 'none';
     }
+
+
+    loadUserData() {
+      core.clearAllData();
+      this.showInputBar();
+      loop(); // rerun P5 draw loop
+    }
     /**
      * Handles asynchronous loading of example data from a selected example array of data
      * @param  {[String directory, String floorPlan image file, String conversation File, String movement File[], String video platform, video params (see Video Player Interface)]} params
@@ -60,8 +61,8 @@
       processData.processVideo(params[4], params[5]);
       processData.processFloorPlan(params[0] + params[1]);
       // Process conversation then movement files
-      await this.getExampleConversationFile(params[0], params[2]).then(parseData.parseConversationFile);
-      this.getExampleMovementFiles(params[0], params[3]).then(parseData.parseMovementFiles);
+      await this.getExampleConversationFile(params[0], params[2]).then(controller.parseConversationFile);
+      this.getExampleMovementFiles(params[0], params[3]).then(controller.parseMovementFiles);
     }
 
     /**

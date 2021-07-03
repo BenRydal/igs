@@ -9,7 +9,7 @@
     <script src="js/main.js"></script>
     <script src="js/core.js"></script>
     <script src="js/setData.js"></script>
-    <script src="js/parse-data.js"></script>
+    <script src="js/controller.js"></script>
     <script src="js/process-data.js"></script>
     <script src="js/load-example-data.js"></script>
     <script src="js/handlers.js"></script>
@@ -30,7 +30,7 @@
 <body>
     <div class="introBar">
         <form action="/action_page.php">
-            <select id="examples" name="examples" onchange="exampleData.selectExampleData()">
+            <select id="examples" name="examples" onchange="controller.handleExampleDropDown()">
                 <option disabled selected value> -- Select an Option -- </option>
                 <option value="Load Data">LOAD DATA</option>
                 <option value="Example 1">EXAMPLE 1: CLASSROOM SCIENCE LESSON</option>
@@ -43,18 +43,22 @@
     <div class="inputBar">
         <form action="/action_page.php">
             <input type="file" name="file" id="inputFloorPlan" name="file" class="inputfile" accept=".png, .jpg, .jpeg"
-                onchange="parseData.parseFloorPlanFile(this)">
+                onchange="controller.handleFloorPlanFile(this)">
             <label for="inputFloorPlan">Floor Plan Image (PNG/JPG)</label>
+
             <input type="file" name="file" id="inputMovement" name="file" class="inputfile" multiple accept=".csv"
-                onchange="parseData.organizeInputMovementFiles(this)">
+                onchange="controller.handleMovementFiles(this)">
             <label for="inputMovement">Movement Files (CSV)</label>
+
             <input type="file" name="file" id="inputConversation" class="inputfile" accept=".csv"
-                onchange="parseData.organizeInputConversationFile(this)">
+                onchange="controller.handleConversationFile(this)">
             <label for="inputConversation">Conversation File (CSV)</label>
+
             <input type="file" name="file" id="inputVideo" class="inputfile" accept=".mp4"
-                onchange="parseData.parseVideoFile(this)">
+                onchange="controller.handleVideoFile(this)">
             <label for="inputVideo">Video File (MP4)</label>
-            <button type="button" id="clearButton" class="inputfile" onclick="core.clearAllData()"></button>
+
+            <button type="button" id="clearButton" class="inputfile" onclick="controller.handleClearButton()"></button>
             <label for="clearButton">Clear Data</label>
         </form>
     </div>

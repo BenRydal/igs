@@ -1,10 +1,10 @@
-class ParseData {
+class Controller {
 
     /**
      * Parses user inputted floor plan image for processing
      * @param  {PNG, JPG, JPEG File} input
      */
-    parseFloorPlanFile(input) {
+    handleFloorPlanFile(input) {
         processData.processFloorPlan(URL.createObjectURL(input.files[0]));
         input.value = ''; // reset input value so you can load same file again in browser
     }
@@ -13,7 +13,7 @@ class ParseData {
      * Sends user inputted movement files into fileList for processing
      * @param  {.CSV File} input
      */
-    organizeInputMovementFiles(input) {
+    handleMovementFiles(input) {
         let fileList = [];
         for (let i = 0; i < input.files.length; i++) fileList.push(input.files[i]);
         this.parseMovementFiles(fileList);
@@ -44,7 +44,7 @@ class ParseData {
      * Sends file from user input for conversation parsing
      * @param  {File} input
      */
-    organizeInputConversationFile(input) {
+    handleConversationFile(input) {
         this.parseConversationFile(input.files[0]); // parse converted file
         input.value = ''; // reset input value so you can load same file again in browser
     }
@@ -71,7 +71,7 @@ class ParseData {
      * Parses user inputted video file for processing
      * @param  {.MP4 File} input
      */
-    parseVideoFile(input) {
+    handleVideoFile(input) {
         if (core.isModeVideoShowing) handlers.overVideoButton(); // Turn off video that if showing
         let file = input.files[0];
         input.value = ''; // reset input value so you can load same file again in browser
@@ -79,5 +79,14 @@ class ParseData {
         processData.processVideo('File', {
             fileName: fileLocation
         });
+    }
+
+    handleClearButton() {
+        core.clearAllData()
+    }
+
+    handleExampleDropDown() {
+        let option = document.getElementById("examples").value;
+        exampleData.selectExampleData(option);
     }
 }
