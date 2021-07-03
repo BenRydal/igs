@@ -92,35 +92,6 @@ class DrawDataMovement extends DrawData {
     }
 
     /**
-     * Simplest drawing method.
-     * Draws movement path with no change in stroke color or weight
-     * @param  {Integer} view
-     * @param  {Path} path
-     * @param  {Color} shade
-     */
-    // draw(view, points, shade) {
-    //     strokeWeight(pathWeight);
-    //     stroke(shade);
-    //     noFill(); // important for curve drawing
-    //     beginShape();
-    //     for (let i = 0; i < points.length; i++) {
-    //         let point = points[i];
-    //         let pixelTime = map(point.time, 0, core.totalTimeInSeconds, keys.timelineStart, keys.timelineEnd);
-    //         let scaledTime = map(pixelTime, keys.curPixelTimeMin, keys.curPixelTimeMax, keys.timelineStart, keys.timelineEnd);
-    //         let scaledXPos = point.xPos * keys.displayFloorPlanWidth / core.inputFloorPlanPixelWidth; // scale to floor plan image file
-    //         let scaledYPos = point.yPos * keys.displayFloorPlanHeight / core.inputFloorPlanPixelHeight; // scale to floor plan image file
-    //         if (super.overTimeline(pixelTime) && super.overFloorPlan(scaledXPos, scaledYPos) && super.testAnimation(pixelTime)) {
-    //             if (view == this.PLAN) curveVertex(scaledXPos, scaledYPos);
-    //             else if (view == this.SPACETIME) {
-    //                 curveVertex(scaledTime, scaledYPos);
-    //                 this.testPointForBug(scaledTime, scaledXPos, scaledYPos);
-    //             }
-    //         }
-    //     }
-    //     endShape();
-    // }
-
-    /**
      * Draws path in floor plan OR space-time view
      * Path is separated into segments of stops with thick line thickness and moving of thinner line thickness
      * Due to drawing methods in browsers, core.paths must be separated/segmented to draw different thicknesses or strokes
@@ -172,13 +143,13 @@ class DrawDataMovement extends DrawData {
      * @param  {Color} shade
      */
     drawWithCursorHighlight(view, path, shade) {
-        strokeWeight(this.smallPathWeight); // set small pathweight to start
-        stroke(this.colorGray); // start with gray color
+        strokeWeight(this.smallPathWeight);
+        stroke(this.colorGray);
         noFill(); // important for curve drawing
         let over_Cursor_Mode = false;
         beginShape();
-        for (let i = 0; i < path.length; i++) {
-            let curPoint = this.getScaledMovementPointValues(path[i], view);
+        for (const point of path) {
+            let curPoint = this.getScaledMovementPointValues(point, view);
             if (super.overTimeline(curPoint.pixelTime) && super.overFloorPlan(curPoint.scaledXPos, curPoint.scaledYPos) && super.testAnimation(curPoint.pixelTime)) {
                 if (super.overCursor(curPoint.scaledXPos, curPoint.scaledYPos)) {
                     if (over_Cursor_Mode) { // if already drawing in cursor mode, continue it
@@ -346,16 +317,14 @@ class DrawDataConversation extends DrawData {
      * @param  {[] ConversationPoint} points
      * @param  {Char} pathName
      */
-    setRects(points, pathName) {
-        for (let i = 0; i < points.length; i++) {
-            const curPoint = this.getScaledConversationPointValues(points[i]);
+    setRects(conversation, pathName) {
+        for (const point of conversation) {
+            const curPoint = this.getScaledConversationPointValues(point);
             if (super.overTimeline(curPoint.pixelTime) && super.overFloorPlan(curPoint.scaledXPos, curPoint.scaledYPos) && super.testAnimation(curPoint.pixelTime) && super.overFloorPlanAndCursor(curPoint.scaledXPos, curPoint.scaledYPos)) {
-                let curSpeaker = this.getSpeakerFromSpeakerList(points[i].speaker); // get speaker object from global list equivalent to the current speaker of point
+                const curSpeaker = this.getSpeakerFromSpeakerList(point.speaker); // get speaker object from global list equivalent to the current speaker of point
                 if (curSpeaker != null && curSpeaker.show) {
-                    if (core.isModeAllTalkOnPath) this.drawRects(points[i], curSpeaker.color); // draws all rects
-                    else {
-                        if (curSpeaker.name === pathName) this.drawRects(points[i], curSpeaker.color); // draws rects only for speaker matching path
-                    }
+                    if (core.isModeAllTalkOnPath) this.drawRects(point, curSpeaker.color); // draws all rects
+                    else if (curSpeaker.name === pathName) this.drawRects(point, curSpeaker.color); // draws rects only for speaker matching path
                 }
             }
         }
@@ -384,8 +353,8 @@ class DrawDataConversation extends DrawData {
      * @param  {Char} curSpeaker
      */
     getSpeakerFromSpeakerList(curSpeaker) {
-        for (let i = 0; i < core.speakerList.length; i++) {
-            if (core.speakerList[i].name === curSpeaker) return core.speakerList[i];
+        for (const speaker of core.speakerList) {
+            if (speaker.name === curSpeaker) return speaker;
         }
         return null;
     }
@@ -476,3 +445,32 @@ class DrawDataConversation extends DrawData {
         line(mouseX, mouseY, mouseX - textBox.rectSpacing / 2, yPos + yDif);
     }
 }
+
+/**
+ * Simplest drawing method.
+ * Draws movement path with no change in stroke color or weight
+ * @param  {Integer} view
+ * @param  {Path} path
+ * @param  {Color} shade
+ */
+// draw(view, points, shade) {
+//     strokeWeight(pathWeight);
+//     stroke(shade);
+//     noFill(); // important for curve drawing
+//     beginShape();
+//     for (let i = 0; i < points.length; i++) {
+//         let point = points[i];
+//         let pixelTime = map(point.time, 0, core.totalTimeInSeconds, keys.timelineStart, keys.timelineEnd);
+//         let scaledTime = map(pixelTime, keys.curPixelTimeMin, keys.curPixelTimeMax, keys.timelineStart, keys.timelineEnd);
+//         let scaledXPos = point.xPos * keys.displayFloorPlanWidth / core.inputFloorPlanPixelWidth; // scale to floor plan image file
+//         let scaledYPos = point.yPos * keys.displayFloorPlanHeight / core.inputFloorPlanPixelHeight; // scale to floor plan image file
+//         if (super.overTimeline(pixelTime) && super.overFloorPlan(scaledXPos, scaledYPos) && super.testAnimation(pixelTime)) {
+//             if (view == this.PLAN) curveVertex(scaledXPos, scaledYPos);
+//             else if (view == this.SPACETIME) {
+//                 curveVertex(scaledTime, scaledYPos);
+//                 this.testPointForBug(scaledTime, scaledXPos, scaledYPos);
+//             }
+//         }
+//     }
+//     endShape();
+// }
