@@ -18,7 +18,6 @@ https://etd.library.vanderbilt.edu/available/etd-03212018-140140/unrestricted/Sh
  */
 let core;
 let setData;
-let exampleData;
 let controller;
 let processData;
 let testData;
@@ -55,7 +54,6 @@ function setup() {
     keys = new Keys();
     setData = new SetData();
     controller = new Controller();
-    exampleData = new ExampleData();
     processData = new ProcessData();
     testData = new TestData();
     handlers = new Handlers();
