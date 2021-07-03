@@ -52,7 +52,7 @@ class DrawData {
      */
     testAnimation(timeValue) {
         if (core.isModeAnimate) {
-            let reMapTime = map(timeValue, keys.timelineStart, keys.timelineEnd, 0, core.totalTimeInSeconds);
+            const reMapTime = map(timeValue, keys.timelineStart, keys.timelineEnd, 0, core.totalTimeInSeconds);
             return core.animationCounter > reMapTime;
         } else return true;
     }
@@ -62,12 +62,8 @@ class DrawDataMovement extends DrawData {
 
     constructor() {
         super();
-        /**
-         * Bug represents location dot drawn in floor plan and space-time views
-         * @Float xPos, yPos, timePos, size, lengthToCompare
-         */
-        this.bug = {
-            xPos: this.NO_DATA,
+        this.bug = { // represents user selection dot drawn in both floor plan and space-time views
+            xPos: this.NO_DATA, // number/float values
             yPos: this.NO_DATA,
             timePos: this.NO_DATA,
             size: width / 50,
@@ -180,20 +176,21 @@ class DrawDataMovement extends DrawData {
      * @param  {MovementPoint} point
      * @param  {Integer} view
      */
+
     getScaledMovementPointValues(point, view) {
-        const pixel = map(point.time, 0, core.totalTimeInSeconds, keys.timelineStart, keys.timelineEnd);
-        const scaledPixel = map(pixel, keys.curPixelTimeMin, keys.curPixelTimeMax, keys.timelineStart, keys.timelineEnd);
-        const scaledX = point.xPos * keys.displayFloorPlanWidth / core.inputFloorPlanPixelWidth;
-        const scaledY = point.yPos * keys.displayFloorPlanHeight / core.inputFloorPlanPixelHeight;
-        let scaledSpaceTimeX;
-        if (view === this.PLAN) scaledSpaceTimeX = scaledX;
-        else if (view === this.SPACETIME) scaledSpaceTimeX = scaledPixel;
+        const pixelTime = map(point.time, 0, core.totalTimeInSeconds, keys.timelineStart, keys.timelineEnd);
+        const scaledPixelTime = map(pixelTime, keys.curPixelTimeMin, keys.curPixelTimeMax, keys.timelineStart, keys.timelineEnd);
+        const scaledXPos = point.xPos * keys.displayFloorPlanWidth / core.inputFloorPlanPixelWidth;
+        const scaledYPos = point.yPos * keys.displayFloorPlanHeight / core.inputFloorPlanPixelHeight;
+        let scaledSpaceTimeXPos;
+        if (view === this.PLAN) scaledSpaceTimeXPos = scaledXPos;
+        else if (view === this.SPACETIME) scaledSpaceTimeXPos = scaledPixelTime;
         return {
-            pixelTime: pixel,
-            scaledPixelTime: scaledPixel,
-            scaledXPos: scaledX,
-            scaledYPos: scaledY,
-            scaledSpaceTimeXPos: scaledSpaceTimeX
+            pixelTime,
+            scaledPixelTime,
+            scaledXPos,
+            scaledYPos,
+            scaledSpaceTimeXPos
         };
     }
     /**
@@ -274,12 +271,9 @@ class DrawDataConversation extends DrawData {
 
     constructor() {
         super();
-        /**
-         * Conversation bubble represents user selected conversation comprised of 
-         * @boolean selected, @ConversationPoint and @integer view
-         */
-        this.conversationBubble = {
-            selected: false,
+
+        this.conversationBubble = { // represents user selected conversation
+            isSelected: false,
             point: this.NO_DATA, // stores one ConversationPoint object for selected conversation turn
             view: this.PLAN // view indicating if user selected conversation in floor plan or space-time views
         };
@@ -306,7 +300,7 @@ class DrawDataConversation extends DrawData {
      * NOTE: this is called after all conversation rects are drawn so it is displayed on top visually
      */
     setConversationBubble() {
-        if (this.conversationBubble.selected) this.drawTextBox();
+        if (this.conversationBubble.isSelected) this.drawTextBox();
     }
 
     /**
@@ -335,15 +329,15 @@ class DrawDataConversation extends DrawData {
      * @param  {ConversationPoint} point
      */
     getScaledConversationPointValues(point) {
-        const pixel = map(point.time, 0, core.totalTimeInSeconds, keys.timelineStart, keys.timelineEnd);
-        const scaledPixel = map(pixel, keys.curPixelTimeMin, keys.curPixelTimeMax, keys.timelineStart, keys.timelineEnd);
-        const scaledX = point.xPos * keys.displayFloorPlanWidth / core.inputFloorPlanPixelWidth; // scale to floor plan image file
-        const scaledY = point.yPos * keys.displayFloorPlanHeight / core.inputFloorPlanPixelHeight; // scale to floor plan image file
+        const pixelTime = map(point.time, 0, core.totalTimeInSeconds, keys.timelineStart, keys.timelineEnd);
+        const scaledTime = map(pixelTime, keys.curPixelTimeMin, keys.curPixelTimeMax, keys.timelineStart, keys.timelineEnd);
+        const scaledXPos = point.xPos * keys.displayFloorPlanWidth / core.inputFloorPlanPixelWidth; // scale to floor plan image file
+        const scaledYPos = point.yPos * keys.displayFloorPlanHeight / core.inputFloorPlanPixelHeight; // scale to floor plan image file
         return {
-            pixelTime: pixel,
-            scaledTime: scaledPixel,
-            scaledXPos: scaledX,
-            scaledYPos: scaledY
+            pixelTime,
+            scaledTime,
+            scaledXPos,
+            scaledYPos
         };
     }
 
@@ -394,7 +388,7 @@ class DrawDataConversation extends DrawData {
      * @param  {Integer} view
      */
     recordConversationBubble(pointToDraw, view) {
-        this.conversationBubble.selected = true;
+        this.conversationBubble.isSelected = true;
         this.conversationBubble.point = pointToDraw;
         this.conversationBubble.view = view;
         stroke(0);
