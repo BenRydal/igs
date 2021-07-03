@@ -83,7 +83,7 @@ class ProcessData {
      */
     updatePaths(letterName, movement, conversation) {
         let curPathColor;
-        if (testData.dataIsLoaded(core.speakerList)) curPathColor = this.setPathColorBySpeaker(letterName); // if conversation file loaded, send to method to calculate color
+        if (testData.arrayIsLoaded(core.speakerList)) curPathColor = this.setPathColorBySpeaker(letterName); // if conversation file loaded, send to method to calculate color
         else curPathColor = COLOR_LIST[core.paths.length % COLOR_LIST.length]; // if no conversation file loaded path color is next in Color list
         core.paths.push(core.createPath(letterName, movement, conversation, curPathColor, true));
         core.paths.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching core.speakerList array

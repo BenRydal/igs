@@ -9,6 +9,14 @@ class TestData {
     }
 
     /**
+     * Tests if parameter is an array with length
+     * @param  {Any Type} data
+     */
+    arrayIsLoaded(data) {
+        return Array.isArray(data) && data.length;
+    }
+
+    /**
      * Test if results array has data, correct file headers, and at least one row of correctly typed data
      * @param  {PapaParse Results []} results
      */
