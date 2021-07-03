@@ -34,10 +34,10 @@ const COLOR_LIST = ['#6a3d9a', '#ff7f00', '#33a02c', '#1f78b4', '#e31a1c', '#fff
 const BUTTON_NAMES = ["Animate", "Align Talk", "All Talk", "Video", "How to Use"];
 let font_Lato;
 
+
 function preload() {
     font_Lato = loadFont("data/fonts/Lato-Light.ttf");
 }
-
 
 function setup() {
     canvas = createCanvas(window.innerWidth, window.innerHeight, P2D);
@@ -50,8 +50,7 @@ function setup() {
 }
 
 /**
- * Required P5.js draw loop method, draws background, keys and organizes drawing of different data sources if loaded
- * Continues looping if animate or videoPlaying mode is true
+ * Organizes draw loop depending on data that has been loaded and animation state
  */
 function draw() {
     background(255);
@@ -60,7 +59,7 @@ function draw() {
     else if (testData.dataIsLoaded(core.paths)) setMovementData();
     if (testData.dataIsLoaded(videoPlayer) && core.isModeVideoShowing) setVideoPosition();
     keys.drawKeys(); // draw keys last
-    if (core.isModeAnimate || core.isModeVideoPlaying) loop();
+    if (core.isModeAnimate) loop();
     else noLoop();
 }
 
