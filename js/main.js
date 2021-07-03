@@ -95,11 +95,11 @@ function setMovementData() {
  * Updates animation mode variable depending on animation state
  */
 function setUpAnimation() {
-    let animationIncrementRateDivisor = 1000; // this seems to work best
+    const animationIncrementRateDivisor = 1000; // this seems to work best
     // Get amount of time in seconds currently displayed
-    let curTimeIntervalInSeconds = map(keys.curPixelTimeMax, keys.timelineStart, keys.timelineEnd, 0, core.totalTimeInSeconds) - map(keys.curPixelTimeMin, keys.timelineStart, keys.timelineEnd, 0, core.totalTimeInSeconds);
+    const curTimeIntervalInSeconds = map(keys.curPixelTimeMax, keys.timelineStart, keys.timelineEnd, 0, core.totalTimeInSeconds) - map(keys.curPixelTimeMin, keys.timelineStart, keys.timelineEnd, 0, core.totalTimeInSeconds);
     // set increment value based on that value/divisor to keep constant core.isModeAnimate speed regardless of time interval selected
-    let animationIncrementValue = curTimeIntervalInSeconds / animationIncrementRateDivisor;
+    const animationIncrementValue = curTimeIntervalInSeconds / animationIncrementRateDivisor;
     if (core.animationCounter < map(keys.curPixelTimeMax, keys.timelineStart, keys.timelineEnd, 0, core.totalTimeInSeconds)) core.animationCounter += animationIncrementValue; // updates core.isModeAnimate
     else core.isModeAnimate = false;
 }
@@ -115,14 +115,14 @@ function setVideoPosition() {
  */
 function setVideoScrubbing() {
     if (core.isModeAnimate) {
-        let startValue = map(keys.curPixelTimeMin, keys.timelineStart, keys.timelineEnd, 0, Math.floor(videoPlayer.getVideoDuration())); // remap starting point to seek for video
-        let endValue = map(keys.curPixelTimeMax, keys.timelineStart, keys.timelineEnd, 0, Math.floor(videoPlayer.getVideoDuration())); // remap starting point to seek for video
-        let vPos = Math.floor(map(core.bugTimePosForVideoScrubbing, keys.timelineStart, keys.timelineEnd, startValue, endValue));
+        const startValue = map(keys.curPixelTimeMin, keys.timelineStart, keys.timelineEnd, 0, Math.floor(videoPlayer.getVideoDuration())); // remap starting point to seek for video
+        const endValue = map(keys.curPixelTimeMax, keys.timelineStart, keys.timelineEnd, 0, Math.floor(videoPlayer.getVideoDuration())); // remap starting point to seek for video
+        const vPos = Math.floor(map(core.bugTimePosForVideoScrubbing, keys.timelineStart, keys.timelineEnd, startValue, endValue));
         videoPlayer.seekTo(vPos);
     } else if (handlers.overRect(keys.timelineStart, 0, keys.timelineEnd, keys.timelineHeight)) {
-        let mPos = map(mouseX, keys.timelineStart, keys.timelineEnd, keys.curPixelTimeMin, keys.curPixelTimeMax); // first map mouse to selected time values in GUI
+        const mPos = map(mouseX, keys.timelineStart, keys.timelineEnd, keys.curPixelTimeMin, keys.curPixelTimeMax); // first map mouse to selected time values in GUI
         // must floor vPos to prevent double finite error
-        let vPos = Math.floor(map(mPos, keys.timelineStart, keys.timelineEnd, 0, Math.floor(videoPlayer.getVideoDuration())));
+        const vPos = Math.floor(map(mPos, keys.timelineStart, keys.timelineEnd, 0, Math.floor(videoPlayer.getVideoDuration())));
         videoPlayer.seekTo(vPos);
         videoPlayer.pause(); // Add to prevent accidental video playing that seems to occur
     }
