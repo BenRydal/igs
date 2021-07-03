@@ -63,8 +63,8 @@ class TestData {
      * @param  {PapaParse results.data []} data
      */
     movementRowsForType(data) {
-        for (let i = 0; i < data.length; i++) {
-            if (typeof data[i][CSVHEADERS_MOVEMENT[0]] === 'number' && typeof data[i][CSVHEADERS_MOVEMENT[1]] === 'number' && typeof data[i][CSVHEADERS_MOVEMENT[2]] === 'number') return true;
+        for (const row of data) {
+            if (typeof row[CSVHEADERS_MOVEMENT[0]] === 'number' && typeof row[CSVHEADERS_MOVEMENT[1]] === 'number' && typeof row[CSVHEADERS_MOVEMENT[2]] === 'number') return true;
         }
         return false;
     }
@@ -75,8 +75,8 @@ class TestData {
      * @param  {PapaParse results.data []} data
      */
     conversationRowsForType(data) {
-        for (let i = 0; i < data.length; i++) {
-            if (typeof data[i][CSVHEADERS_CONVERSATION[0]] === 'number' && typeof data[i][CSVHEADERS_CONVERSATION[1]] === 'string' && data[i][CSVHEADERS_CONVERSATION[2]] != null) return true;
+        for (const row of data) {
+            if (typeof row[CSVHEADERS_CONVERSATION[0]] === 'number' && typeof row[CSVHEADERS_CONVERSATION[1]] === 'string' && row[CSVHEADERS_CONVERSATION[2]] != null) return true;
         }
         return false;
     }
