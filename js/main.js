@@ -46,6 +46,7 @@ function setup() {
     processData = new ProcessData();
     testData = new TestData();
     handlers = new Handlers();
+    videoPlayer = null;
 }
 
 /**
@@ -58,10 +59,9 @@ function draw() {
     else if (testData.arrayIsLoaded(core.paths)) setMovement();
     if (testData.dataIsLoaded(videoPlayer) && core.isModeVideoShowing) setVideoPosition();
     keys.drawKeys(); // draw keys last
-    if (core.isModeAnimate) {
-        this.setUpAnimation();
-        loop();
-    } else noLoop();
+    if (core.isModeAnimate) this.setUpAnimation();
+    if (core.isModeAnimate || core.isModeVideoPlaying) loop();
+    else noLoop();
 }
 
 /**
@@ -93,7 +93,7 @@ function setMovement() {
  * Updates animation mode variable depending on animation state
  */
 function setUpAnimation() {
-    const animationIncrementRateDivisor = 1000; // this seems to work best
+    const animationIncrementRateDivisor = 1000; // this divisor seems to work best
     // Get amount of time in seconds currently displayed
     const curTimeIntervalInSeconds = map(keys.curPixelTimeMax, keys.timelineStart, keys.timelineEnd, 0, core.totalTimeInSeconds) - map(keys.curPixelTimeMin, keys.timelineStart, keys.timelineEnd, 0, core.totalTimeInSeconds);
     // set increment value based on that value/divisor to keep constant core.isModeAnimate speed regardless of time interval selected
