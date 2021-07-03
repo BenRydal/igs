@@ -82,9 +82,8 @@ class TestData {
     }
 
     // Tests if current conversation row is less than total rows in table and if time is number and speaker is string and talk turn is not null or undefined
-    // NOTE: this also tests if a conversation file is loaded
-    conversationLengthAndRowForType(curRow) {
-        return curRow < core.conversationFileResults.length && typeof core.conversationFileResults[curRow][CSVHEADERS_CONVERSATION[0]] === 'number' && typeof core.conversationFileResults[curRow][CSVHEADERS_CONVERSATION[1]] === 'string' && core.conversationFileResults[curRow][CSVHEADERS_CONVERSATION[2]] != null;
+    conversationLengthAndRowForType(results, curRow) {
+        return curRow < results.length && typeof results[curRow][CSVHEADERS_CONVERSATION[0]] === 'number' && typeof results[curRow][CSVHEADERS_CONVERSATION[1]] === 'string' && results[curRow][CSVHEADERS_CONVERSATION[2]] != null;
     }
     /**
      * Samples data based on comparing time and x/y positions of two points

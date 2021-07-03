@@ -63,13 +63,13 @@ class ProcessData {
                 const m = core.createMovementPoint(results.data[i][CSVHEADERS_MOVEMENT[1]], results.data[i][CSVHEADERS_MOVEMENT[2]], results.data[i][CSVHEADERS_MOVEMENT[0]]);
                 movement.push(m); // add good data to movement []
                 // Test conversation data row for quality first and then compare movement and conversation times to see if closest movement data to conversation time
-                if (testData.conversationLengthAndRowForType(conversationCounter) && m.time >= core.conversationFileResults[conversationCounter][CSVHEADERS_CONVERSATION[0]]) {
+                if (testData.conversationLengthAndRowForType(core.conversationFileResults, conversationCounter) && m.time >= core.conversationFileResults[conversationCounter][CSVHEADERS_CONVERSATION[0]]) {
                     const curTalkTimePos = core.conversationFileResults[conversationCounter][CSVHEADERS_CONVERSATION[0]];
                     const curSpeaker = this.cleanSpeaker(core.conversationFileResults[conversationCounter][CSVHEADERS_CONVERSATION[1]]);
                     const curTalkTurn = core.conversationFileResults[conversationCounter][CSVHEADERS_CONVERSATION[2]];
                     conversation.push(core.createConversationPoint(m.xPos, m.yPos, curTalkTimePos, curSpeaker, curTalkTurn));
                     conversationCounter++;
-                } else if (!testData.conversationLengthAndRowForType(conversationCounter)) conversationCounter++; // make sure to increment counter if bad data to skip row in next iteration of loop
+                } else if (!testData.conversationLengthAndRowForType(core.conversationFileResults, conversationCounter)) conversationCounter++; // make sure to increment counter if bad data to skip row in next iteration of loop
             }
         }
         return [movement, conversation];
@@ -143,7 +143,7 @@ class ProcessData {
             let tempSpeakerList = []; // create/populate temp list to store strings to test from global core.speakerList
             for (const tempSpeaker of core.speakerList) tempSpeakerList.push(tempSpeaker.name);
             // If row is good data, test if core.speakerList already has speaker and if not add speaker 
-            if (testData.conversationLengthAndRowForType(i)) {
+            if (testData.conversationLengthAndRowForType(core.conversationFileResults, i)) {
                 const speaker = this.cleanSpeaker(core.conversationFileResults[i][CSVHEADERS_CONVERSATION[1]]); // get cleaned speaker character
                 if (!tempSpeakerList.includes(speaker)) this.addSpeakerToSpeakerList(speaker);
             }
