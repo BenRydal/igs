@@ -55,8 +55,10 @@ function setup() {
 function draw() {
     background(255);
     if (testData.dataIsLoaded(core.floorPlan)) image(core.floorPlan, 0, 0, keys.displayFloorPlanWidth, keys.displayFloorPlanHeight);
-    if (testData.arrayIsLoaded(core.paths) && testData.arrayIsLoaded(core.speakerList)) setMovementAndConversation();
-    else if (testData.arrayIsLoaded(core.paths)) setMovement();
+    if (testData.arrayIsLoaded(core.paths)) {
+        if (testData.arrayIsLoaded(core.speakerList)) setMovementAndConversation();
+        else setMovement();
+    }
     if (testData.dataIsLoaded(videoPlayer) && core.isModeVideoShowing) setVideoPosition();
     keys.drawKeys(); // draw keys last
     if (core.isModeAnimate) this.setUpAnimation();
