@@ -34,6 +34,7 @@ class Keys {
         this.drawTimeline();
         this.drawButtons();
         if (handlers.overRect(0, 0, this.displayFloorPlanWidth, this.displayFloorPlanHeight)) this.drawFloorPlanSelector();
+        if (handlers.overRect(this.timelineStart, 0, this.timelineLength, this.timelineHeight)) this.drawSlicer(); // draw slicer line after calculating all movement
         if (core.isModeIntro) this.drawIntroMsg(); // draw intro message on program start up until mouse is pressed
     }
 

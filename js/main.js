@@ -54,41 +54,39 @@ function setup() {
 function draw() {
     background(255);
     if (testData.dataIsLoaded(core.floorPlan)) image(core.floorPlan, 0, 0, keys.displayFloorPlanWidth, keys.displayFloorPlanHeight);
-    if (testData.dataIsLoaded(core.paths) && testData.dataIsLoaded(core.speakerList)) setMovementAndConversationData();
-    else if (testData.dataIsLoaded(core.paths)) setMovementData();
+    if (testData.dataIsLoaded(core.paths) && testData.dataIsLoaded(core.speakerList)) setMovementAndConversation();
+    else if (testData.dataIsLoaded(core.paths)) setMovement();
     if (testData.dataIsLoaded(videoPlayer) && core.isModeVideoShowing) setVideoPosition();
     keys.drawKeys(); // draw keys last
-    if (core.isModeAnimate) loop();
-    else noLoop();
+    if (core.isModeAnimate) {
+        this.setUpAnimation();
+        loop();
+    } else noLoop();
 }
 
 /**
  * Organizes drawing methods for movement and conversation including slicer line and conversation bubble
  */
-function setMovementAndConversationData() {
-    let drawConversationData = new DrawDataConversation();
-    let drawMovementData = new DrawDataMovement();
-    for (let i = 0; i < core.paths.length; i++) {
-        if (core.paths[i].show) {
-            drawConversationData.setData(core.paths[i]);
-            drawMovementData.setData(core.paths[i]); // draw after conversation so bug displays on top
+function setMovementAndConversation() {
+    const drawConversationData = new DrawDataConversation();
+    const drawMovementData = new DrawDataMovement();
+    for (const path of core.paths) {
+        if (path.show) {
+            drawConversationData.setData(path);
+            drawMovementData.setData(path); // draw after conversation so bug displays on top
         }
     }
-    if (handlers.overRect(keys.timelineStart, 0, keys.timelineLength, keys.timelineHeight)) keys.drawSlicer(); // draw slicer line after calculating all movement
     drawConversationData.setConversationBubble(); // draw conversation text last so it displays on top
-    if (core.isModeAnimate) this.setUpAnimation();
 }
 
 /**
  * Organizes drawing methods for movement only
  */
-function setMovementData() {
+function setMovement() {
     let drawMovementData = new DrawDataMovement();
-    for (let i = 0; i < core.paths.length; i++) {
-        if (core.paths[i].show) drawMovementData.setData(core.paths[i]); // draw after conversation so bug displays on top
+    for (const path of core.paths) {
+        if (path.show) drawMovementData.setData(path); // draw after conversation so bug displays on top
     }
-    if (handlers.overRect(keys.timelineStart, 0, keys.timelineLength, keys.timelineHeight)) keys.drawSlicer(); // draw slicer line after calculating all movement
-    if (core.isModeAnimate) this.setUpAnimation();
 }
 
 /**
@@ -100,7 +98,7 @@ function setUpAnimation() {
     const curTimeIntervalInSeconds = map(keys.curPixelTimeMax, keys.timelineStart, keys.timelineEnd, 0, core.totalTimeInSeconds) - map(keys.curPixelTimeMin, keys.timelineStart, keys.timelineEnd, 0, core.totalTimeInSeconds);
     // set increment value based on that value/divisor to keep constant core.isModeAnimate speed regardless of time interval selected
     const animationIncrementValue = curTimeIntervalInSeconds / animationIncrementRateDivisor;
-    if (core.animationCounter < map(keys.curPixelTimeMax, keys.timelineStart, keys.timelineEnd, 0, core.totalTimeInSeconds)) core.animationCounter += animationIncrementValue; // updates core.isModeAnimate
+    if (core.animationCounter < map(keys.curPixelTimeMax, keys.timelineStart, keys.timelineEnd, 0, core.totalTimeInSeconds)) core.animationCounter += animationIncrementValue;
     else core.isModeAnimate = false;
 }
 /**
