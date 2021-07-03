@@ -21,6 +21,8 @@ class Keys {
         this.floorPlanCursorSelectSize = 100;
         this.font_PlayfairReg = loadFont("data/fonts/PlayfairDisplay-Regular.ttf");
         this.font_PlayfairItalic = loadFont("data/fonts/PlayfairDisplay-Italic.ttf");
+        this.introMsg = "INTERACTION GEOGRAPHY SLICER (IGS)\n\nby Ben Rydal Shapiro & contributors\nbuilt with p5.js & JavaScript\n\nHi There! This is a tool to visualize movement, conversation, and video data over space and time. Data are displayed over a floor plan view (left) and a space-time view (right), where the vertical axis corresponds to the vertical dimension of the floor plan. Use the top menu to visualize different sample datasets or upload your own data. Hover over the floor plan and use the timeline to selectively study displayed data. Use the bottom buttons to animate data, visualize conversation in different ways, and interact with video data by clicking the timeline to play & pause video. For more information see: benrydal.com/software/igs";
+
     }
 
     drawKeys() {
@@ -177,7 +179,7 @@ class Keys {
         rect(width / 2, height / 2.5, width / 1.75 + 50, height / 1.75 + 50);
         fill(0);
         textFont(font_Lato, this.keyTextSize);
-        text(INTROMSG, width / 2, height / 2.5, width / 1.75, height / 1.75);
+        text(this.introMsg, width / 2, height / 2.5, width / 1.75, height / 1.75);
         rectMode(CORNER);
     }
 }

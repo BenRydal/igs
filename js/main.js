@@ -14,7 +14,7 @@ https://etd.library.vanderbilt.edu/available/etd-03212018-140140/unrestricted/Sh
 */
 
 /**
- * CLASSES/MODULES treated as singletons with respective .js file/module
+ * Classes/modules treated as singletons with respective .js file/module
  */
 let core;
 let setData;
@@ -26,33 +26,23 @@ let handlers;
 let videoPlayer; // abstract class for different play classes instantiated/updated in processVideo method (see video-player.js)
 
 /**
- * CONSTANTS
+ * Constants
  */
 const CSVHEADERS_MOVEMENT = ['time', 'x', 'y']; // String array indicating movement movement file headers, data in each column should be of type number or it won't process
 const CSVHEADERS_CONVERSATION = ['time', 'speaker', 'talk']; // String array indicating conversation file headers, data in time column shout be of type number, speaker column should be of type String, talk column should be not null or undefined
-const PLAN = 0; // Number constants plan and spacetime indicate two drawing modes
-const SPACETIME = 1;
-const NO_DATA = -1;
-const INTROMSG = "INTERACTION GEOGRAPHY SLICER (IGS)\n\nby Ben Rydal Shapiro & contributors\nbuilt with p5.js & JavaScript\n\nHi There! This is a tool to visualize movement, conversation, and video data over space and time. Data are displayed over a floor plan view (left) and a space-time view (right), where the vertical axis corresponds to the vertical dimension of the floor plan. Use the top menu to visualize different sample datasets or upload your own data. Hover over the floor plan and use the timeline to selectively study displayed data. Use the bottom buttons to animate data, visualize conversation in different ways, and interact with video data by clicking the timeline to play & pause video. For more information see: benrydal.com/software/igs";
-const BUTTON_NAMES = ["Animate", "Align Talk", "All Talk", "Video", "How to Use"];
 const COLOR_LIST = ['#6a3d9a', '#ff7f00', '#33a02c', '#1f78b4', '#e31a1c', '#ffff99', '#b15928', '#cab2d6', '#fdbf6f', '#b2df8a', '#a6cee3', '#fb9a99']; // 12 Class Paired: (Dark) purple, orange, green, blue, red, yellow, brown, (Light) lPurple, lOrange, lGreen, lBlue, lRed
-let font_Lato; // primary font used across program
+const BUTTON_NAMES = ["Animate", "Align Talk", "All Talk", "Video", "How to Use"];
+let font_Lato;
 
-/**
- * Optional P5.js method, here used to load fonts prior to page load
- */
 function preload() {
     font_Lato = loadFont("data/fonts/Lato-Light.ttf");
 }
 
-/**
- * Required P5.js method, used to setup GUI
- */
+
 function setup() {
     canvas = createCanvas(window.innerWidth, window.innerHeight, P2D);
     core = new Core();
     keys = new Keys();
-    setData = new SetData();
     controller = new Controller();
     processData = new ProcessData();
     testData = new TestData();
@@ -66,12 +56,78 @@ function setup() {
 function draw() {
     background(255);
     if (testData.dataIsLoaded(core.floorPlan)) image(core.floorPlan, 0, 0, keys.displayFloorPlanWidth, keys.displayFloorPlanHeight);
-    if (testData.dataIsLoaded(core.paths) && testData.dataIsLoaded(core.speakerList)) setData.setMovementAndConversationData();
-    else if (testData.dataIsLoaded(core.paths)) setData.setMovementData();
-    if (testData.dataIsLoaded(videoPlayer) && core.isModeVideoShowing) setData.setVideoPosition();
+    if (testData.dataIsLoaded(core.paths) && testData.dataIsLoaded(core.speakerList)) setMovementAndConversationData();
+    else if (testData.dataIsLoaded(core.paths)) setMovementData();
+    if (testData.dataIsLoaded(videoPlayer) && core.isModeVideoShowing) setVideoPosition();
     keys.drawKeys(); // draw keys last
     if (core.isModeAnimate || core.isModeVideoPlaying) loop();
     else noLoop();
+}
+
+/**
+ * Organizes drawing methods for movement and conversation including slicer line and conversation bubble
+ */
+function setMovementAndConversationData() {
+    let drawConversationData = new DrawDataConversation();
+    let drawMovementData = new DrawDataMovement();
+    for (let i = 0; i < core.paths.length; i++) {
+        if (core.paths[i].show) {
+            drawConversationData.setData(core.paths[i]);
+            drawMovementData.setData(core.paths[i]); // draw after conversation so bug displays on top
+        }
+    }
+    if (handlers.overRect(keys.timelineStart, 0, keys.timelineLength, keys.timelineHeight)) keys.drawSlicer(); // draw slicer line after calculating all movement
+    drawConversationData.setConversationBubble(); // draw conversation text last so it displays on top
+    if (core.isModeAnimate) this.setUpAnimation();
+}
+
+/**
+ * Organizes drawing methods for movement only
+ */
+function setMovementData() {
+    let drawMovementData = new DrawDataMovement();
+    for (let i = 0; i < core.paths.length; i++) {
+        if (core.paths[i].show) drawMovementData.setData(core.paths[i]); // draw after conversation so bug displays on top
+    }
+    if (handlers.overRect(keys.timelineStart, 0, keys.timelineLength, keys.timelineHeight)) keys.drawSlicer(); // draw slicer line after calculating all movement
+    if (core.isModeAnimate) this.setUpAnimation();
+}
+
+/**
+ * Updates animation mode variable depending on animation state
+ */
+function setUpAnimation() {
+    let animationIncrementRateDivisor = 1000; // this seems to work best
+    // Get amount of time in seconds currently displayed
+    let curTimeIntervalInSeconds = map(keys.curPixelTimeMax, keys.timelineStart, keys.timelineEnd, 0, core.totalTimeInSeconds) - map(keys.curPixelTimeMin, keys.timelineStart, keys.timelineEnd, 0, core.totalTimeInSeconds);
+    // set increment value based on that value/divisor to keep constant core.isModeAnimate speed regardless of time interval selected
+    let animationIncrementValue = curTimeIntervalInSeconds / animationIncrementRateDivisor;
+    if (core.animationCounter < map(keys.curPixelTimeMax, keys.timelineStart, keys.timelineEnd, 0, core.totalTimeInSeconds)) core.animationCounter += animationIncrementValue; // updates core.isModeAnimate
+    else core.isModeAnimate = false;
+}
+/**
+ * Updates video position to curMousePosition and calls scrubbing method if not playing
+ */
+function setVideoPosition() {
+    if (!core.isModeVideoPlaying) this.setVideoScrubbing();
+    select('#moviePlayer').position(mouseX - videoPlayer.videoWidth, mouseY - videoPlayer.videoHeight);
+}
+/**
+ * Updates time selected in video depending on mouse position or core.isModeAnimate over timeline
+ */
+function setVideoScrubbing() {
+    if (core.isModeAnimate) {
+        let startValue = map(keys.curPixelTimeMin, keys.timelineStart, keys.timelineEnd, 0, Math.floor(videoPlayer.getVideoDuration())); // remap starting point to seek for video
+        let endValue = map(keys.curPixelTimeMax, keys.timelineStart, keys.timelineEnd, 0, Math.floor(videoPlayer.getVideoDuration())); // remap starting point to seek for video
+        let vPos = Math.floor(map(core.bugTimePosForVideoScrubbing, keys.timelineStart, keys.timelineEnd, startValue, endValue));
+        videoPlayer.seekTo(vPos);
+    } else if (handlers.overRect(keys.timelineStart, 0, keys.timelineEnd, keys.timelineHeight)) {
+        let mPos = map(mouseX, keys.timelineStart, keys.timelineEnd, keys.curPixelTimeMin, keys.curPixelTimeMax); // first map mouse to selected time values in GUI
+        // must floor vPos to prevent double finite error
+        let vPos = Math.floor(map(mPos, keys.timelineStart, keys.timelineEnd, 0, Math.floor(videoPlayer.getVideoDuration())));
+        videoPlayer.seekTo(vPos);
+        videoPlayer.pause(); // Add to prevent accidental video playing that seems to occur
+    }
 }
 
 function mousePressed() {
