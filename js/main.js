@@ -16,13 +16,12 @@ https://etd.library.vanderbilt.edu/available/etd-03212018-140140/unrestricted/Sh
 /**
  * Classes/modules treated as singletons with respective .js file/module
  */
-let core;
-let setData;
-let controller;
-let processData;
-let testData;
-let keys;
-let handlers;
+let core; // core program variables and factory functions
+let controller; // handles DOM/button user interaction and initial data parsing
+let processData; // handles all data processing
+let testData; // data loading/sampling tests
+let keys; // interface vars and methods
+let handlers; // handles P5 user interaction
 let videoPlayer; // abstract class for different play classes instantiated/updated in processVideo method (see video-player.js)
 
 /**
