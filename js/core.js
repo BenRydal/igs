@@ -98,7 +98,7 @@ class Core {
     clearAllData() {
         loop(); // rerun P5 draw loop
         if (testData.dataIsLoaded(videoPlayer)) {
-            if (this.isModeVideoShowing) handlers.overVideoButton(); // Turn off video before destroying it if showing
+            if (this.isModeVideoShowing) keys.overVideoButton(); // Turn off video before destroying it if showing
             videoPlayer.destroy(); // if there is a video, destroy it
             videoPlayer = null; // set videoPlayer to null
         }

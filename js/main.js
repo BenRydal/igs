@@ -21,7 +21,6 @@ let controller; // handles DOM/button user interaction and initial data parsing
 let processData; // handles all data processing
 let testData; // data loading/sampling tests
 let keys; // interface vars and methods
-let handlers; // handles P5 user interaction
 let videoPlayer; // abstract class for different play classes instantiated/updated in processVideo method (see video-player.js)
 
 /**
@@ -45,7 +44,6 @@ function setup() {
     controller = new Controller();
     processData = new ProcessData();
     testData = new TestData();
-    handlers = new Handlers();
     videoPlayer = null;
 }
 
@@ -119,7 +117,7 @@ function setVideoScrubbing() {
         const endValue = map(keys.curPixelTimeMax, keys.timelineStart, keys.timelineEnd, 0, Math.floor(videoPlayer.getVideoDuration())); // remap starting point to seek for video
         const vPos = Math.floor(map(core.bugTimePosForVideoScrubbing, keys.timelineStart, keys.timelineEnd, startValue, endValue));
         videoPlayer.seekTo(vPos);
-    } else if (handlers.overRect(keys.timelineStart, 0, keys.timelineEnd, keys.timelineHeight)) {
+    } else if (keys.overRect(keys.timelineStart, 0, keys.timelineEnd, keys.timelineHeight)) {
         const mPos = map(mouseX, keys.timelineStart, keys.timelineEnd, keys.curPixelTimeMin, keys.curPixelTimeMax); // first map mouse to selected time values in GUI
         // must floor vPos to prevent double finite error
         const vPos = Math.floor(map(mPos, keys.timelineStart, keys.timelineEnd, 0, Math.floor(videoPlayer.getVideoDuration())));
@@ -129,20 +127,31 @@ function setVideoScrubbing() {
 }
 
 function mousePressed() {
-    handlers.handleMousePressed();
-    loop(); // Update all drawing if mouse pressed
+    // Controls video when clicking over timeline region
+    if (core.isModeVideoShowing && !core.isModeAnimate && keys.overRect(keys.timelineStart, 0, keys.timelineEnd, keys.yPosTimelineBottom)) keys.playPauseMovie();
+    keys.overMovementConversationButtons();
+    keys.overInteractionButtons();
+    if (core.isModeMovement) keys.overPathKeys();
+    else keys.overSpeakerKeys();
+    loop();
 }
 
+/**
+ * Organizes timeline GUI methods. this.selPadding used to provide additionl "cushion" for mouse.
+ * NOTE: To activate timeline methods, core.isModeAnimate mode must be false and 
+ * Either mouse already dragging over timeline OR mouse cursor is over timeline bar.
+ */
 function mouseDragged() {
-    handlers.handleMouseDragged();
-    loop(); // Update all drawing if mouse dragged
+    if (!core.isModeAnimate && ((keys.lockedLeft || keys.lockedRight) || keys.overRect(keys.timelineStart - keys.selPadding, keys.yPosTimelineTop, keys.timelineLength + keys.selPadding, keys.timelineThickness))) keys.handleTimeline();
+    loop();
 }
 
 function mouseReleased() {
-    handlers.handleMouseReleased();
-    loop(); // Update all drawing if mouse released
+    keys.lockedLeft = false;
+    keys.lockedRight = false;
+    loop();
 }
 
 function mouseMoved() {
-    loop(); // Update all drawing if mouse moves
+    loop();
 }
