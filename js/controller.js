@@ -15,7 +15,7 @@ class Controller {
      */
     handleMovementFiles(input) {
         let fileList = [];
-        for (let i = 0; i < input.files.length; i++) fileList.push(input.files[i]);
+        for (const file of input.files) fileList.push(file);
         this.parseMovementFiles(fileList);
         input.value = ''; // reset input value so you can load same file(s) again in browser
     }
@@ -158,8 +158,8 @@ class Controller {
      * @param  {String} fileName
      */
     async getExampleConversationFile(folder, fileName) {
-        let response = await fetch(new Request(folder + fileName));
-        let buffer = await response.arrayBuffer();
+        const response = await fetch(new Request(folder + fileName));
+        const buffer = await response.arrayBuffer();
         return new File([buffer], fileName, {
             type: "text/csv",
         });
@@ -172,10 +172,10 @@ class Controller {
      */
     async getExampleMovementFiles(folder, fileNames) {
         let fileList = [];
-        for (let i = 0; i < fileNames.length; i++) {
-            let response = await fetch(new Request(folder + fileNames[i]));
-            let buffer = await response.arrayBuffer();
-            fileList.push(new File([buffer], fileNames[i], {
+        for (const name of fileNames) {
+            const response = await fetch(new Request(folder + name));
+            const buffer = await response.arrayBuffer();
+            fileList.push(new File([buffer], name, {
                 type: "text/csv",
             }));
         }
