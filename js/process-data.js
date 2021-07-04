@@ -111,8 +111,8 @@ class ProcessData {
      */
     getNumPathsWithNoSpeaker() {
         let count = 0;
-        for (let i = 0; i < core.paths.length; i++) {
-            if (!core.speakerList.some(e => e.name === core.paths[i].name)) count++;
+        for (const path of core.paths) {
+            if (!core.speakerList.some(e => e.name === path.name)) count++;
         }
         return count;
     }
