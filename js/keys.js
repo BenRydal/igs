@@ -23,6 +23,8 @@ class Keys {
         this.font_PlayfairItalic = loadFont("data/fonts/PlayfairDisplay-Italic.ttf");
         this.introMsg = "INTERACTION GEOGRAPHY SLICER (IGS)\n\nby Ben Rydal Shapiro & contributors\nbuilt with p5.js & JavaScript\n\nHi There! This is a tool to visualize movement, conversation, and video data over space and time. Data are displayed over a floor plan view (left) and a space-time view (right), where the vertical axis corresponds to the vertical dimension of the floor plan. Use the top menu to visualize different sample datasets or upload your own data. Hover over the floor plan and use the timeline to selectively study displayed data. Use the bottom buttons to animate data, visualize conversation in different ways, and interact with video data by clicking the timeline to play & pause video. For more information see: benrydal.com/software/igs";
 
+        this.BUTTON_NAMES = ["Animate", "Align Talk", "All Talk", "Video", "How to Use"];
+
         this.lockedLeft = false;
         this.lockedRight = false;
         this.selPadding = 20; // cushion for user selection on timeline
@@ -77,48 +79,48 @@ class Keys {
         let currXPos = this.timelineStart + this.buttonSpacing / 2;
         fill(core.isModeAnimate ? 0 : 150);
         // Button 1
-        text(BUTTON_NAMES[0], currXPos, this.buttonsHeight);
+        text(this.BUTTON_NAMES[0], currXPos, this.buttonsHeight);
         noFill();
         stroke(core.isModeAnimate ? 0 : 150);
         strokeWeight(1);
-        rect(currXPos - this.buttonSpacing / 2, this.buttonsHeight, textWidth(BUTTON_NAMES[0]) + this.buttonSpacing, this.buttonSpacing * 1.5);
+        rect(currXPos - this.buttonSpacing / 2, this.buttonsHeight, textWidth(this.BUTTON_NAMES[0]) + this.buttonSpacing, this.buttonSpacing * 1.5);
         noStroke();
-        currXPos += textWidth(BUTTON_NAMES[0]) + this.buttonSpacing * 2;
+        currXPos += textWidth(this.BUTTON_NAMES[0]) + this.buttonSpacing * 2;
         // Button 2
         fill(core.isModeAlignTalkTop ? 0 : 150);
-        text(BUTTON_NAMES[1], currXPos, this.buttonsHeight);
+        text(this.BUTTON_NAMES[1], currXPos, this.buttonsHeight);
         noFill();
         stroke(core.isModeAlignTalkTop ? 0 : 150);
         strokeWeight(1);
-        rect(currXPos - this.buttonSpacing / 2, this.buttonsHeight, textWidth(BUTTON_NAMES[1]) + this.buttonSpacing, this.buttonSpacing * 1.5);
+        rect(currXPos - this.buttonSpacing / 2, this.buttonsHeight, textWidth(this.BUTTON_NAMES[1]) + this.buttonSpacing, this.buttonSpacing * 1.5);
         noStroke();
-        currXPos += textWidth(BUTTON_NAMES[1]) + this.buttonSpacing * 2;
+        currXPos += textWidth(this.BUTTON_NAMES[1]) + this.buttonSpacing * 2;
         // Button 3
         fill(core.isModeAllTalkOnPath ? 0 : 150);
-        text(BUTTON_NAMES[2], currXPos, this.buttonsHeight);
+        text(this.BUTTON_NAMES[2], currXPos, this.buttonsHeight);
         noFill();
         stroke(core.isModeAllTalkOnPath ? 0 : 150);
         strokeWeight(1);
-        rect(currXPos - this.buttonSpacing / 2, this.buttonsHeight, textWidth(BUTTON_NAMES[2]) + this.buttonSpacing, this.buttonSpacing * 1.5);
+        rect(currXPos - this.buttonSpacing / 2, this.buttonsHeight, textWidth(this.BUTTON_NAMES[2]) + this.buttonSpacing, this.buttonSpacing * 1.5);
         noStroke();
-        currXPos += textWidth(BUTTON_NAMES[2]) + this.buttonSpacing * 2;
+        currXPos += textWidth(this.BUTTON_NAMES[2]) + this.buttonSpacing * 2;
         // Button 4
         fill(core.isModeVideoShowing ? 0 : 150);
-        text(BUTTON_NAMES[3], currXPos, this.buttonsHeight);
+        text(this.BUTTON_NAMES[3], currXPos, this.buttonsHeight);
         noFill();
         stroke(core.isModeVideoShowing ? 0 : 150);
         strokeWeight(1);
-        rect(currXPos - this.buttonSpacing / 2, this.buttonsHeight, textWidth(BUTTON_NAMES[3]) + this.buttonSpacing, this.buttonSpacing * 1.5);
+        rect(currXPos - this.buttonSpacing / 2, this.buttonsHeight, textWidth(this.BUTTON_NAMES[3]) + this.buttonSpacing, this.buttonSpacing * 1.5);
         noStroke();
-        currXPos += textWidth(BUTTON_NAMES[3]) + this.buttonSpacing * 2;
+        currXPos += textWidth(this.BUTTON_NAMES[3]) + this.buttonSpacing * 2;
         // Button 5
         textFont(this.font_PlayfairItalic, this.keyTextSize);
         fill(core.isModeIntro ? 0 : 150);
-        text(BUTTON_NAMES[4], currXPos, this.buttonsHeight);
+        text(this.BUTTON_NAMES[4], currXPos, this.buttonsHeight);
         noFill();
         stroke(core.isModeIntro ? 0 : 150);
         strokeWeight(1);
-        rect(currXPos - this.buttonSpacing / 2, this.buttonsHeight, textWidth(BUTTON_NAMES[4]) + this.buttonSpacing, this.buttonSpacing * 1.5);
+        rect(currXPos - this.buttonSpacing / 2, this.buttonsHeight, textWidth(this.BUTTON_NAMES[4]) + this.buttonSpacing, this.buttonSpacing * 1.5);
         noStroke();
     }
 
@@ -240,11 +242,11 @@ class Keys {
     overInteractionButtons() {
         textSize(keys.keyTextSize);
         let currXPos = keys.timelineStart + keys.buttonSpacing / 2;
-        if (this.overRect(currXPos, keys.buttonsHeight, textWidth(BUTTON_NAMES[0]), keys.buttonWidth)) this.overAnimateButton();
-        else if (this.overRect(currXPos + textWidth(BUTTON_NAMES[0]) + 2 * keys.buttonSpacing, keys.buttonsHeight, textWidth(BUTTON_NAMES[1]) + keys.buttonSpacing, keys.buttonWidth)) core.isModeAlignTalkTop = !core.isModeAlignTalkTop;
-        else if (this.overRect(currXPos + textWidth(BUTTON_NAMES[0] + BUTTON_NAMES[1]) + 4 * keys.buttonSpacing, keys.buttonsHeight, textWidth(BUTTON_NAMES[2]) + keys.buttonSpacing, keys.buttonWidth)) core.isModeAllTalkOnPath = !core.isModeAllTalkOnPath;
-        else if (testData.dataIsLoaded(videoPlayer) && this.overRect(currXPos + textWidth(BUTTON_NAMES[0] + BUTTON_NAMES[1] + BUTTON_NAMES[2]) + 6 * keys.buttonSpacing, keys.buttonsHeight, textWidth(BUTTON_NAMES[3]) + keys.buttonSpacing, keys.buttonWidth)) this.overVideoButton();
-        else if (this.overRect(currXPos + textWidth(BUTTON_NAMES[0] + BUTTON_NAMES[1] + BUTTON_NAMES[2] + BUTTON_NAMES[3]) + 8 * keys.buttonSpacing, keys.buttonsHeight, textWidth(BUTTON_NAMES[4]) + keys.buttonSpacing, keys.buttonWidth)) core.isModeIntro = !core.isModeIntro;
+        if (this.overRect(currXPos, keys.buttonsHeight, textWidth(this.BUTTON_NAMES[0]), keys.buttonWidth)) this.overAnimateButton();
+        else if (this.overRect(currXPos + textWidth(this.BUTTON_NAMES[0]) + 2 * keys.buttonSpacing, keys.buttonsHeight, textWidth(this.BUTTON_NAMES[1]) + keys.buttonSpacing, keys.buttonWidth)) core.isModeAlignTalkTop = !core.isModeAlignTalkTop;
+        else if (this.overRect(currXPos + textWidth(this.BUTTON_NAMES[0] + this.BUTTON_NAMES[1]) + 4 * keys.buttonSpacing, keys.buttonsHeight, textWidth(this.BUTTON_NAMES[2]) + keys.buttonSpacing, keys.buttonWidth)) core.isModeAllTalkOnPath = !core.isModeAllTalkOnPath;
+        else if (testData.dataIsLoaded(videoPlayer) && this.overRect(currXPos + textWidth(this.BUTTON_NAMES[0] + this.BUTTON_NAMES[1] + this.BUTTON_NAMES[2]) + 6 * keys.buttonSpacing, keys.buttonsHeight, textWidth(this.BUTTON_NAMES[3]) + keys.buttonSpacing, keys.buttonWidth)) this.overVideoButton();
+        else if (this.overRect(currXPos + textWidth(this.BUTTON_NAMES[0] + this.BUTTON_NAMES[1] + this.BUTTON_NAMES[2] + this.BUTTON_NAMES[3]) + 8 * keys.buttonSpacing, keys.buttonsHeight, textWidth(this.BUTTON_NAMES[4]) + keys.buttonSpacing, keys.buttonWidth)) core.isModeIntro = !core.isModeIntro;
     }
 
     /**
