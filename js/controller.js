@@ -24,7 +24,7 @@ class Controller {
      * Clears existing movement data and parses each movement file and sends for additional testing and processing
      * @param  {.CSV File[]} fileList
      */
-    parseMovementFiles(fileList, callback) {
+    parseMovementFiles(fileList) {
         core.clearMovementData(); // clear existing movement data
         for (const fileToParse of fileList) {
             Papa.parse(fileToParse, {
