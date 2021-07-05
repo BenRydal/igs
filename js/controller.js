@@ -34,7 +34,7 @@ class Controller {
      * @param  {.MP4 File} input
      */
     handleVideoFile(input) {
-        if (core.isModeVideoShowing) keys.overVideoButton(); // Turn off video that if showing
+        if (isModeVideoShowing) keys.overVideoButton(); // Turn off video that if showing
         let file = input.files[0];
         input.value = ''; // reset input value so you can load same file again in browser
         let fileLocation = URL.createObjectURL(file);
@@ -52,8 +52,8 @@ class Controller {
      */
     handleExampleDropDown() {
         let option = document.getElementById("examples").value;
-        if (core.isModeVideoShowing) keys.overVideoButton(); // Turn off video that if showing
-        core.isModeIntro = false; // Hide intro msg if showing
+        if (isModeVideoShowing) keys.overVideoButton(); // Turn off video that if showing
+        isModeIntro = false; // Hide intro msg if showing
         switch (option) {
             case "Load Data":
                 this.loadUserData();
@@ -67,19 +67,19 @@ class Controller {
                 this.loadExample(['data/example-2/', 'floorplan.png', 'conversation.csv', ['Teacher.csv', 'Sean.csv', 'Mei.csv', 'Cassandra.csv', 'Nathan.csv'], 'Youtube', {
                     videoId: 'OJSZCK4GPQY'
                 }]);
-                core.isModeAllTalkOnPath = false; // not necessary, but fits example nicely
+                isModeAllTalkOnPath = false; // not necessary, but fits example nicely
                 break;
             case "Example 3":
                 this.loadExample(['data/example-3/', 'floorplan.png', 'conversation.csv', ['Jordan.csv'], 'Youtube', {
                     videoId: 'iiMjfVOj8po'
                 }]);
-                core.isModeAllTalkOnPath = false; // not necessary, but fits example nicely
+                isModeAllTalkOnPath = false; // not necessary, but fits example nicely
                 break;
             case "Example 4":
                 this.loadExample(['data/example-4/', 'floorplan.png', 'conversation.csv', ['Lily.csv', 'Jeans.csv', 'Adhir.csv', 'Mae.csv', 'Blake.csv'], 'Youtube', {
                     videoId: 'pWJ3xNk1Zpg'
                 }]);
-                core.isModeAllTalkOnPath = false; // not necessary, but fits example nicely
+                isModeAllTalkOnPath = false; // not necessary, but fits example nicely
                 break;
         }
     }

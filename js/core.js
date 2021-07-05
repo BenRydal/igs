@@ -2,26 +2,15 @@ class Core {
 
     constructor() {
         // CORE DATA VARIABLES
-        // Movement and conversation file results arrays allow dynamic re-processing of individual data files
         this.movementFileResults = []; // List that holds a results array and character letter indicating path name from a parsed movement .CSV file
         this.conversationFileResults = []; // List that holds a results array and file data from a parsed conversation .CSV file
         this.speakerList = []; // List that holds Speaker objects parsed from conversation file
         this.paths = []; // List that holds path objects for each unique set of movement and conversation points constructed from parsed conversation and movement .CSV files
         this.floorPlan = null; // PNG or JPG core.core.floorPlan image
-        // CORE MODES
-        this.isModeMovement = true; // boolean controls whether movement or conversation keys show
-        this.isModeAnimate = false; // boolean controls positioning of conversation turns on path or top of screen
-        this.isModeAlignTalkTop = false; // boolean controls whether single speaker or all conversation turns shown on path
-        this.isModeAllTalkOnPath = true; // boolean controls core.isModeAnimate mode
-        this.isModeIntro = true; // boolean controls intro message
-        this.isModeVideoPlaying = false; // boolean indicating video is playing
-        this.isModeVideoShowing = false; // boolean indicating video is showing in GUI
-        // CORE MISC VARIABLES
-        this.animationCounter = 0; // counter to synchronize animation across all data
-        this.bugTimePosForVideoScrubbing = null; // Set in draw movement data and used to display correct video frame when scrubbing video
         this.inputFloorPlanPixelWidth = null;
         this.inputFloorPlanPixelHeight = null; // Number indicating pixel width/height of user inputted floor plan image file
         this.totalTimeInSeconds = 0; // Number indicating time value in seconds that all displayed data is set to, set dynamically in processMovement methods
+        this.COLOR_LIST = ['#6a3d9a', '#ff7f00', '#33a02c', '#1f78b4', '#e31a1c', '#ffff99', '#b15928', '#cab2d6', '#fdbf6f', '#b2df8a', '#a6cee3', '#fb9a99']; // 12 Class Paired: (Dark) purple, orange, green, blue, red, yellow, brown, (Light) lPurple, lOrange, lGreen, lBlue, lRed
     }
 
     clearAllData() {
@@ -51,7 +40,7 @@ class Core {
     /** 
      * Organizes methods to process and update core movementFileResults []
      * @param {Integer} fileNum
-     * @param  {PapaParse Results []} results
+     * @param {PapaParse Results []} results
      * @param {CSV} file
      * @param {[]]} MovementPoints
      * @param {[]]} ConversationPoints
@@ -73,7 +62,7 @@ class Core {
     updatePaths(letterName, movement, conversation) {
         let curPathColor;
         if (testData.arrayIsLoaded(this.speakerList)) curPathColor = this.setPathColorBySpeaker(letterName); // if conversation file loaded, send to method to calculate color
-        else curPathColor = COLOR_LIST[this.paths.length % COLOR_LIST.length]; // if no conversation file loaded path color is next in Color list
+        else curPathColor = this.COLOR_LIST[this.paths.length % this.COLOR_LIST.length]; // if no conversation file loaded path color is next in Color list
         this.paths.push(this.createPath(letterName, movement, conversation, curPathColor, true));
         this.paths.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching core.speakerList array
     }
@@ -86,14 +75,14 @@ class Core {
 
     /**
      * If path has corresponding speaker, returns color that matches speaker
-     * Otherwise returns color from global COLOR_LIST based on num of speakers + numOfPaths that do not have corresponding speaker
+     * Otherwise returns color from global this.COLOR_LIST based on num of speakers + numOfPaths that do not have corresponding speaker
      * @param  {char} pathName
      */
     setPathColorBySpeaker(pathName) {
         if (this.speakerList.some(e => e.name === pathName)) {
             const hasSameName = (element) => element.name === pathName; // condition to satisfy/does it have pathName
             return this.speakerList[this.speakerList.findIndex(hasSameName)].color; // returns first index that satisfies condition/index of speaker that matches pathName
-        } else return COLOR_LIST[this.speakerList.length + this.getNumPathsWithNoSpeaker() % COLOR_LIST.length]; // assign color to path
+        } else return this.COLOR_LIST[this.speakerList.length + this.getNumPathsWithNoSpeaker() % this.COLOR_LIST.length]; // assign color to path
     }
 
 
@@ -147,7 +136,7 @@ class Core {
      * @param  {Char} speaker
      */
     addSpeakerToSpeakerList(name) {
-        this.speakerList.push(this.createSpeaker(name, COLOR_LIST[this.speakerList.length % COLOR_LIST.length], true));
+        this.speakerList.push(this.createSpeaker(name, this.COLOR_LIST[this.speakerList.length % this.COLOR_LIST.length], true));
     }
 
     /**

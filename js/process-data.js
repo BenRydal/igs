@@ -42,41 +42,45 @@ class ProcessData {
     parseMovementFiles(fileList) {
         for (let fileNum = 0; fileNum < fileList.length; fileNum++) {
             Papa.parse(fileList[fileNum], {
-                complete: function (results, file) {
-                    console.log("Parsing complete:", results, file);
-                    loop(); // rerun P5 draw loop
-                    if (testData.movementResults(results)) {
-                        const [movement, conversation] = processData.createMovementConversationArrays(results);
-                        core.updateMovement(fileNum, results, file, movement, conversation);
-                    } else alert("Error loading movement file. Please make sure your file is a .CSV file formatted with column headers: " + CSVHEADERS_MOVEMENT.toString());
-                },
+                complete: (results, file) => processData.processMovementFile(results, file, fileNum),
                 header: true,
                 dynamicTyping: true,
             });
         }
     }
 
-    // TODO: fix core references below
+    processMovementFile(results, file, fileNum) {
+        console.log("Parsing complete:", results, file);
+        loop(); // rerun P5 draw loop
+        if (testData.movementResults(results)) {
+            const [movement, conversation] = processData.createMovementConversationArrays(results);
+            core.updateMovement(fileNum, results, file, movement, conversation);
+        } else alert("Error loading movement file. Please make sure your file is a .CSV file formatted with column headers: " + CSVHEADERS_MOVEMENT.toString());
+    }
+
     /**
      * Clears existing conversation data and parses single conversation file using PapaParse library and sends for additional testing and processing
      * @param  {.CSV File} file
      */
     parseConversationFile(file) {
         Papa.parse(file, {
-            complete: function (results, f) {
-                console.log("Parsing complete:", results, f);
-                loop(); // rerun P5 draw loop
-                if (testData.conversationResults(results)) {
-                    core.updateConversation(results);
-                    processData.reProcessMovement(core.movementFileResults);
-                } else alert("Error loading conversation file. Please make sure your file is a .CSV file formatted with column headers: " + CSVHEADERS_CONVERSATION.toString());
-            },
+            complete: (results, parsedFile) => processData.processConversationFile(results, parsedFile),
             header: true,
             dynamicTyping: true,
         });
     }
 
-    reProcessMovement(movementFileResults) {
+    processConversationFile(results, file) {
+        console.log("Parsing complete:", results, file);
+        loop(); // rerun P5 draw loop
+        if (testData.conversationResults(results)) {
+            core.updateConversation(results);
+            processData.reProcessMovementFiles(core.movementFileResults); // must reprocess movement
+        } else alert("Error loading conversation file. Please make sure your file is a .CSV file formatted with column headers: " + CSVHEADERS_CONVERSATION.toString());
+
+    }
+
+    reProcessMovementFiles(movementFileResults) {
         for (const results of movementFileResults) {
             const [movement, conversation] = this.createMovementConversationArrays(results[0]);
             core.updatePaths(results[1], movement, conversation);
