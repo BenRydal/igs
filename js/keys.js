@@ -14,16 +14,12 @@ class Keys {
             bottom: height * .81 + 25,
             thickness: 25 * 2,
         }
-
-        // this.floorPlan = {
-        //     width: this.timeline.start - (width - this.timeline.end),
-        //     height: this.timeline.height
-        // }
-        this.displayFloorPlanWidth = this.timeline.start - (width - this.timeline.end);
-        this.displayFloorPlanHeight = this.timeline.height;
-
+        this.floorPlan = {
+            width: this.timeline.start - (width - this.timeline.end),
+            height: this.timeline.height,
+            selectorSize: 100
+        }
         this.keyTextSize = width / 70;
-        this.floorPlanCursorSelectSize = 100;
         this.introMsg = "INTERACTION GEOGRAPHY SLICER (IGS)\n\nby Ben Rydal Shapiro & contributors\nbuilt with p5.js & JavaScript\n\nHi There! This is a tool to visualize movement, conversation, and video data over space and time. Data are displayed over a floor plan view (left) and a space-time view (right), where the vertical axis corresponds to the vertical dimension of the floor plan. Use the top menu to visualize different sample datasets or upload your own data. Hover over the floor plan and use the timeline to selectively study displayed data. Use the bottom buttons to animate data, visualize conversation in different ways, and interact with video data by clicking the timeline to play & pause video. For more information see: benrydal.com/software/igs";
         this.lockedLeft = false;
         this.lockedRight = false;
@@ -39,7 +35,7 @@ class Keys {
         if (isModeMovement) this.drawPathSpeakerKeys(core.paths);
         else this.drawPathSpeakerKeys(core.speakerList);
         this.drawTimeline();
-        if (this.overRect(0, 0, this.displayFloorPlanWidth, this.displayFloorPlanHeight)) this.drawFloorPlanSelector();
+        if (this.overRect(0, 0, this.floorPlan.width, this.floorPlan.height)) this.drawFloorPlanSelector();
         if (this.overRect(this.timeline.start, 0, this.timeline.length, this.timeline.height)) this.drawSlicer(); // draw slicer line after calculating all movement
         if (isModeIntro) this.drawIntroMsg(); // draw intro message on program start up until mouse is pressed
     }
@@ -118,7 +114,7 @@ class Keys {
         noFill();
         strokeWeight(3);
         stroke(0);
-        circle(mouseX, mouseY, this.floorPlanCursorSelectSize);
+        circle(mouseX, mouseY, this.floorPlan.selectorSize);
     }
 
     drawSlicer() {

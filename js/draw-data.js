@@ -23,7 +23,7 @@ class DrawData {
      * @param  {Number/Float} yPos
      */
     overFloorPlan(xPos, yPos) {
-        return (xPos >= 0 && xPos <= keys.displayFloorPlanWidth) && (yPos >= 0 && yPos <= keys.displayFloorPlanHeight);
+        return (xPos >= 0 && xPos <= keys.floorPlan.width) && (yPos >= 0 && yPos <= keys.floorPlan.height);
     }
     /**
      * Returns true if mouse cursor near xPos and yPos parameters
@@ -32,7 +32,7 @@ class DrawData {
      * @param  {Number/Float} yPos
      */
     overCursor(xPos, yPos) {
-        return keys.overCircle(xPos, yPos, keys.floorPlanCursorSelectSize);
+        return keys.overCircle(xPos, yPos, keys.floorPlan.selectorSize);
     }
 
     /**
@@ -42,7 +42,7 @@ class DrawData {
      * @param  {Number/Float} yPos
      */
     overFloorPlanAndCursor(xPos, yPos) {
-        return !this.overFloorPlan(mouseX, mouseY) || (this.overFloorPlan(mouseX, mouseY) && keys.overCircle(xPos, yPos, keys.floorPlanCursorSelectSize));
+        return !this.overFloorPlan(mouseX, mouseY) || (this.overFloorPlan(mouseX, mouseY) && keys.overCircle(xPos, yPos, keys.floorPlan.selectorSize));
     }
 
     /**
@@ -77,7 +77,7 @@ class DrawDataMovement extends DrawData {
     setData(path) {
         this.resetBug(); // always reset bug values
         // if overMap draw selection of movement and gray scale the rest
-        if (keys.overRect(0, 0, keys.displayFloorPlanWidth, keys.displayFloorPlanHeight)) {
+        if (keys.overRect(0, 0, keys.floorPlan.width, keys.floorPlan.height)) {
             this.drawWithCursorHighlight(this.PLAN, path.movement, path.color);
             this.drawWithCursorHighlight(this.SPACETIME, path.movement, path.color);
         } else {
@@ -180,8 +180,8 @@ class DrawDataMovement extends DrawData {
     getScaledMovementPointValues(point, view) {
         const pixelTime = map(point.time, 0, core.totalTimeInSeconds, keys.timeline.start, keys.timeline.end);
         const scaledPixelTime = map(pixelTime, keys.timeline.selectStart, keys.timeline.selectEnd, keys.timeline.start, keys.timeline.end);
-        const scaledXPos = point.xPos * keys.displayFloorPlanWidth / core.floorPlan.inputPixelWidth;
-        const scaledYPos = point.yPos * keys.displayFloorPlanHeight / core.floorPlan.inputPixelHeight;
+        const scaledXPos = point.xPos * keys.floorPlan.width / core.floorPlan.inputPixelWidth;
+        const scaledYPos = point.yPos * keys.floorPlan.height / core.floorPlan.inputPixelHeight;
         let scaledSpaceTimeXPos;
         if (view === this.PLAN) scaledSpaceTimeXPos = scaledXPos;
         else if (view === this.SPACETIME) scaledSpaceTimeXPos = scaledPixelTime;
@@ -341,8 +341,8 @@ class DrawDataConversation extends DrawData {
     getScaledConversationPointValues(point) {
         const pixelTime = map(point.time, 0, core.totalTimeInSeconds, keys.timeline.start, keys.timeline.end);
         const scaledTime = map(pixelTime, keys.timeline.selectStart, keys.timeline.selectEnd, keys.timeline.start, keys.timeline.end);
-        const scaledXPos = point.xPos * keys.displayFloorPlanWidth / core.floorPlan.inputPixelWidth; // scale to floor plan image file
-        const scaledYPos = point.yPos * keys.displayFloorPlanHeight / core.floorPlan.inputPixelHeight; // scale to floor plan image file
+        const scaledXPos = point.xPos * keys.floorPlan.width / core.floorPlan.inputPixelWidth; // scale to floor plan image file
+        const scaledYPos = point.yPos * keys.floorPlan.height / core.floorPlan.inputPixelHeight; // scale to floor plan image file
         return {
             pixelTime,
             scaledTime,
@@ -466,8 +466,8 @@ class DrawDataConversation extends DrawData {
 //         let point = points[i];
 //         let pixelTime = map(point.time, 0, core.totalTimeInSeconds, keys.timeline.start, keys.timeline.end);
 //         let scaledTime = map(pixelTime, keys.timeline.selectStart, keys.timeline.selectEnd, keys.timeline.start, keys.timeline.end);
-//         let scaledXPos = point.xPos * keys.displayFloorPlanWidth / core.inputFloorPlanPixelWidth; // scale to floor plan image file
-//         let scaledYPos = point.yPos * keys.displayFloorPlanHeight / core.inputFloorPlanPixelHeight; // scale to floor plan image file
+//         let scaledXPos = point.xPos * keys.floorPlan.width / core.inputFloorPlanPixelWidth; // scale to floor plan image file
+//         let scaledYPos = point.yPos * keys.floorPlan.height / core.inputFloorPlanPixelHeight; // scale to floor plan image file
 //         if (super.overTimeline(pixelTime) && super.overFloorPlan(scaledXPos, scaledYPos) && super.testAnimation(pixelTime)) {
 //             if (view == this.PLAN) curveVertex(scaledXPos, scaledYPos);
 //             else if (view == this.SPACETIME) {
