@@ -48,50 +48,18 @@ class Core {
         this.totalTimeInSeconds = 0; // reset total time
     }
 
-    // TODO: deal with processData call (can't call "this")
-
-
-    /**
-     * Clears existing movement data and parses each movement file and sends for additional testing and processing
-     * @param  {.CSV File[]} fileList
+    /** 
+     * Organizes methods to process and update core movementFileResults []
+     * @param  {PapaParse Results []} results
+     * @param {CSV} file
+     * @param {[]]} MovementPoints
+     * @param {[]]} ConversationPoints
      */
-    parseMovementFiles(fileList) {
-        core.clearMovementData(); // clear existing movement data
-        for (const fileToParse of fileList) {
-            Papa.parse(fileToParse, {
-                complete: function (results, file) {
-                    console.log("Parsing complete:", results, file);
-                    loop(); // rerun P5 draw loop
-                    if (testData.movementResults(results)) processData.processMovement(results, file);
-                    else alert("Error loading movement file. Please make sure your file is a .CSV file formatted with column headers: " + CSVHEADERS_MOVEMENT.toString());
-                },
-                header: true,
-                dynamicTyping: true,
-            });
-        }
-    }
-
-    // TODO: fix core references below
-    /**
-     * Clears existing conversation data and parses single conversation file using PapaParse library and sends for additional testing and processing
-     * @param  {.CSV File} file
-     */
-    parseConversationFile(file) {
-        core.clearConversationData(); // clear existing conversation data
-        Papa.parse(file, {
-            complete: function (results, f) {
-                console.log("Parsing complete:", results, f);
-                loop(); // rerun P5 draw loop
-                if (testData.conversationResults(results)) {
-                    core.conversationFileResults = results.data; // set to new array of keyed values
-                    core.updateSpeakerList();
-                    core.speakerList.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching core.paths array
-                    processData.reProcessMovement(core.movementFileResults);
-                } else alert("Error loading conversation file. Please make sure your file is a .CSV file formatted with column headers: " + CSVHEADERS_CONVERSATION.toString());
-            },
-            header: true,
-            dynamicTyping: true,
-        });
+    updateMovement(results, file, movement, conversation) {
+        const pathName = file.name.charAt(0).toUpperCase(); // get name of path, also used to test if associated speaker in conversation file
+        this.updatePaths(pathName, movement, conversation);
+        this.updateTotalTime(movement);
+        this.movementFileResults.push([results, pathName]); // add results and pathName to core []
     }
 
     /**
@@ -138,6 +106,14 @@ class Core {
         return count;
     }
 
+    /**
+     *  @param  {PapaParse Results []} results
+     */
+    updateConversation(results) {
+        this.conversationFileResults = results.data; // set to new array of keyed values
+        this.updateSpeakerList();
+        this.speakerList.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching core.paths array
+    }
 
     /**
      * Updates core speaker list from conversation file data/results

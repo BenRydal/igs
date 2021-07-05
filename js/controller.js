@@ -16,7 +16,7 @@ class Controller {
     handleMovementFiles(input) {
         let fileList = [];
         for (const file of input.files) fileList.push(file);
-        core.parseMovementFiles(fileList);
+        processData.parseMovementFiles(fileList);
         input.value = ''; // reset input value so you can load same file(s) again in browser
     }
 
@@ -25,7 +25,7 @@ class Controller {
      * @param  {File} input
      */
     handleConversationFile(input) {
-        core.parseConversationFile(input.files[0]); // parse converted file
+        processData.parseConversationFile(input.files[0]); // parse converted file
         input.value = ''; // reset input value so you can load same file again in browser
     }
 
@@ -109,8 +109,8 @@ class Controller {
         processData.processVideo(params[4], params[5]);
         processData.processFloorPlan(params[0] + params[1]);
         // Process conversation then movement files
-        await this.getExampleConversationFile(params[0], params[2]).then(core.parseConversationFile);
-        this.getExampleMovementFiles(params[0], params[3]).then(core.parseMovementFiles);
+        await this.getExampleConversationFile(params[0], params[2]).then(processData.parseConversationFile);
+        this.getExampleMovementFiles(params[0], params[3]).then(processData.parseMovementFiles);
     }
 
     /**

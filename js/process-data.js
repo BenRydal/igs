@@ -35,17 +35,47 @@ class ProcessData {
         }
     }
 
-    /** 
-     * Organizes methods to process and update core movementFileResults []
-     * @param  {PapaParse Results []} results
-     * @param {CSV} file
+    /**
+     * Clears existing movement data and parses each movement file and sends for additional testing and processing
+     * @param  {.CSV File[]} fileList
      */
-    processMovement(results, file) {
-        const pathName = file.name.charAt(0).toUpperCase(); // get name of path, also used to test if associated speaker in conversation file
-        const [movement, conversation] = this.createMovementConversationArrays(results); //
-        core.updatePaths(pathName, movement, conversation);
-        core.updateTotalTime(movement);
-        core.movementFileResults.push([results, pathName]); // add results and pathName to core []
+    parseMovementFiles(fileList) {
+        core.clearMovementData(); // clear existing movement data
+        for (const fileToParse of fileList) {
+            Papa.parse(fileToParse, {
+                complete: function (results, file) {
+                    console.log("Parsing complete:", results, file);
+                    loop(); // rerun P5 draw loop
+                    if (testData.movementResults(results)) {
+                        const [movement, conversation] = processData.createMovementConversationArrays(results);
+                        core.updateMovement(results, file, movement, conversation);
+                    } else alert("Error loading movement file. Please make sure your file is a .CSV file formatted with column headers: " + CSVHEADERS_MOVEMENT.toString());
+                },
+                header: true,
+                dynamicTyping: true,
+            });
+        }
+    }
+
+    // TODO: fix core references below
+    /**
+     * Clears existing conversation data and parses single conversation file using PapaParse library and sends for additional testing and processing
+     * @param  {.CSV File} file
+     */
+    parseConversationFile(file) {
+        core.clearConversationData(); // clear existing conversation data
+        Papa.parse(file, {
+            complete: function (results, f) {
+                console.log("Parsing complete:", results, f);
+                loop(); // rerun P5 draw loop
+                if (testData.conversationResults(results)) {
+                    core.updateConversation(results);
+                    processData.reProcessMovement(core.movementFileResults);
+                } else alert("Error loading conversation file. Please make sure your file is a .CSV file formatted with column headers: " + CSVHEADERS_CONVERSATION.toString());
+            },
+            header: true,
+            dynamicTyping: true,
+        });
     }
 
     reProcessMovement(movementFileResults) {
