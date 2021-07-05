@@ -47,6 +47,26 @@ class Controller {
         core.clearAllData()
     }
 
+    handleAnimateButton() {
+        keys.overAnimateButton();
+    }
+
+    handleAlignTalkButton() {
+        isModeAlignTalkTop = !isModeAlignTalkTop;
+    }
+
+    handleAllTalkButton() {
+        isModeAllTalkOnPath = !isModeAllTalkOnPath;
+    }
+
+    handleVideoButton() {
+        keys.overVideoButton();
+    }
+
+    handleHowToButton() {
+        isModeIntro = !isModeIntro;
+    }
+
     /**
      * Example data format: [String directory, String floorPlan image file, String conversation File, String movement File[], String video platform, video params(see Video Player Interface)]
      */

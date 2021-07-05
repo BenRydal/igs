@@ -136,7 +136,6 @@ function mousePressed() {
     // Controls video when clicking over timeline region
     if (isModeVideoShowing && !isModeAnimate && keys.overRect(keys.timelineStart, 0, keys.timelineEnd, keys.yPosTimelineBottom)) keys.playPauseMovie();
     keys.overMovementConversationButtons();
-    keys.overInteractionButtons();
     if (isModeMovement) keys.overPathKeys();
     else keys.overSpeakerKeys();
     loop();

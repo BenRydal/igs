@@ -16,15 +16,9 @@ class Keys {
         this.buttonSpacing = width / 71;
         this.buttonWidth = this.buttonSpacing;
         this.speakerKeysHeight = this.timelineHeight + (height - this.timelineHeight) / 4;
-        this.buttonsHeight = this.timelineHeight + (height - this.timelineHeight) / 1.8;
         this.keyTextSize = width / 70;
         this.floorPlanCursorSelectSize = 100;
-        this.font_PlayfairReg = loadFont("data/fonts/PlayfairDisplay-Regular.ttf");
-        this.font_PlayfairItalic = loadFont("data/fonts/PlayfairDisplay-Italic.ttf");
         this.introMsg = "INTERACTION GEOGRAPHY SLICER (IGS)\n\nby Ben Rydal Shapiro & contributors\nbuilt with p5.js & JavaScript\n\nHi There! This is a tool to visualize movement, conversation, and video data over space and time. Data are displayed over a floor plan view (left) and a space-time view (right), where the vertical axis corresponds to the vertical dimension of the floor plan. Use the top menu to visualize different sample datasets or upload your own data. Hover over the floor plan and use the timeline to selectively study displayed data. Use the bottom buttons to animate data, visualize conversation in different ways, and interact with video data by clicking the timeline to play & pause video. For more information see: benrydal.com/software/igs";
-
-        this.BUTTON_NAMES = ["Animate", "Align Talk", "All Talk", "Video", "How to Use"];
-
         this.lockedLeft = false;
         this.lockedRight = false;
         this.selPadding = 20; // cushion for user selection on timeline
@@ -32,12 +26,11 @@ class Keys {
 
     drawKeys() {
         textAlign(LEFT, TOP);
-        textFont(this.font_PlayfairReg, this.keyTextSize);
+        textFont(font_Lato, this.keyTextSize);
         this.drawPathSpeakerTitle();
         if (isModeMovement) this.drawPathSpeakerKeys(core.paths);
         else this.drawPathSpeakerKeys(core.speakerList);
         this.drawTimeline();
-        this.drawButtons();
         if (this.overRect(0, 0, this.displayFloorPlanWidth, this.displayFloorPlanHeight)) this.drawFloorPlanSelector();
         if (this.overRect(this.timelineStart, 0, this.timelineLength, this.timelineHeight)) this.drawSlicer(); // draw slicer line after calculating all movement
         if (isModeIntro) this.drawIntroMsg(); // draw intro message on program start up until mouse is pressed
@@ -75,54 +68,6 @@ class Keys {
         }
     }
 
-    drawButtons() {
-        let currXPos = this.timelineStart + this.buttonSpacing / 2;
-        fill(isModeAnimate ? 0 : 150);
-        // Button 1
-        text(this.BUTTON_NAMES[0], currXPos, this.buttonsHeight);
-        noFill();
-        stroke(isModeAnimate ? 0 : 150);
-        strokeWeight(1);
-        rect(currXPos - this.buttonSpacing / 2, this.buttonsHeight, textWidth(this.BUTTON_NAMES[0]) + this.buttonSpacing, this.buttonSpacing * 1.5);
-        noStroke();
-        currXPos += textWidth(this.BUTTON_NAMES[0]) + this.buttonSpacing * 2;
-        // Button 2
-        fill(isModeAlignTalkTop ? 0 : 150);
-        text(this.BUTTON_NAMES[1], currXPos, this.buttonsHeight);
-        noFill();
-        stroke(isModeAlignTalkTop ? 0 : 150);
-        strokeWeight(1);
-        rect(currXPos - this.buttonSpacing / 2, this.buttonsHeight, textWidth(this.BUTTON_NAMES[1]) + this.buttonSpacing, this.buttonSpacing * 1.5);
-        noStroke();
-        currXPos += textWidth(this.BUTTON_NAMES[1]) + this.buttonSpacing * 2;
-        // Button 3
-        fill(isModeAllTalkOnPath ? 0 : 150);
-        text(this.BUTTON_NAMES[2], currXPos, this.buttonsHeight);
-        noFill();
-        stroke(isModeAllTalkOnPath ? 0 : 150);
-        strokeWeight(1);
-        rect(currXPos - this.buttonSpacing / 2, this.buttonsHeight, textWidth(this.BUTTON_NAMES[2]) + this.buttonSpacing, this.buttonSpacing * 1.5);
-        noStroke();
-        currXPos += textWidth(this.BUTTON_NAMES[2]) + this.buttonSpacing * 2;
-        // Button 4
-        fill(isModeVideoShowing ? 0 : 150);
-        text(this.BUTTON_NAMES[3], currXPos, this.buttonsHeight);
-        noFill();
-        stroke(isModeVideoShowing ? 0 : 150);
-        strokeWeight(1);
-        rect(currXPos - this.buttonSpacing / 2, this.buttonsHeight, textWidth(this.BUTTON_NAMES[3]) + this.buttonSpacing, this.buttonSpacing * 1.5);
-        noStroke();
-        currXPos += textWidth(this.BUTTON_NAMES[3]) + this.buttonSpacing * 2;
-        // Button 5
-        textFont(this.font_PlayfairItalic, this.keyTextSize);
-        fill(isModeIntro ? 0 : 150);
-        text(this.BUTTON_NAMES[4], currXPos, this.buttonsHeight);
-        noFill();
-        stroke(isModeIntro ? 0 : 150);
-        strokeWeight(1);
-        rect(currXPos - this.buttonSpacing / 2, this.buttonsHeight, textWidth(this.BUTTON_NAMES[4]) + this.buttonSpacing, this.buttonSpacing * 1.5);
-        noStroke();
-    }
 
     drawTimeline() {
         // timeline selection rectangle
@@ -233,20 +178,6 @@ class Keys {
             if (this.overRect(currXPos, keys.speakerKeysHeight, keys.buttonWidth + nameWidth, keys.buttonWidth)) path.show = !path.show;
             currXPos += keys.buttonWidth + nameWidth + keys.buttonSpacing;
         }
-    }
-
-    /**
-     * Iterate over each interaction button and toggle boolean or call corresponding gui method for button
-     * NOTE: textSize is way to control dynamic scaling for gui methods and interface
-     */
-    overInteractionButtons() {
-        textSize(keys.keyTextSize);
-        let currXPos = keys.timelineStart + keys.buttonSpacing / 2;
-        if (this.overRect(currXPos, keys.buttonsHeight, textWidth(this.BUTTON_NAMES[0]), keys.buttonWidth)) this.overAnimateButton();
-        else if (this.overRect(currXPos + textWidth(this.BUTTON_NAMES[0]) + 2 * keys.buttonSpacing, keys.buttonsHeight, textWidth(this.BUTTON_NAMES[1]) + keys.buttonSpacing, keys.buttonWidth)) isModeAlignTalkTop = !isModeAlignTalkTop;
-        else if (this.overRect(currXPos + textWidth(this.BUTTON_NAMES[0] + this.BUTTON_NAMES[1]) + 4 * keys.buttonSpacing, keys.buttonsHeight, textWidth(this.BUTTON_NAMES[2]) + keys.buttonSpacing, keys.buttonWidth)) isModeAllTalkOnPath = !isModeAllTalkOnPath;
-        else if (testData.dataIsLoaded(core.videoPlayer) && this.overRect(currXPos + textWidth(this.BUTTON_NAMES[0] + this.BUTTON_NAMES[1] + this.BUTTON_NAMES[2]) + 6 * keys.buttonSpacing, keys.buttonsHeight, textWidth(this.BUTTON_NAMES[3]) + keys.buttonSpacing, keys.buttonWidth)) this.overVideoButton();
-        else if (this.overRect(currXPos + textWidth(this.BUTTON_NAMES[0] + this.BUTTON_NAMES[1] + this.BUTTON_NAMES[2] + this.BUTTON_NAMES[3]) + 8 * keys.buttonSpacing, keys.buttonsHeight, textWidth(this.BUTTON_NAMES[4]) + keys.buttonSpacing, keys.buttonWidth)) isModeIntro = !isModeIntro;
     }
 
     /**
