@@ -304,24 +304,34 @@ class DrawDataConversation extends DrawData {
     }
 
     /**
-     * Tests if current point is in the viewing space
-     * If it is, determines whether it is drawn depending on 2 modes:
-     * (1) Draws all visible rects regardless of speaker (all conversation)
-     * (2) Draws only rects where speaker of particular conversation turn matches the specific pathName of the Path that holds this particular list of ConversationPoint objects
+     * Organizes tests and drawing for conversation points
      * @param  {[] ConversationPoint} points
      * @param  {Char} pathName
      */
     setRects(conversation, pathName) {
         for (const point of conversation) {
             const curPoint = this.getScaledConversationPointValues(point);
-            if (super.overTimeline(curPoint.pixelTime) && super.overFloorPlan(curPoint.scaledXPos, curPoint.scaledYPos) && super.testAnimation(curPoint.pixelTime) && super.overFloorPlanAndCursor(curPoint.scaledXPos, curPoint.scaledYPos)) {
+            if (this.testConversationPointToDraw(curPoint)) {
                 const curSpeaker = this.getSpeakerFromSpeakerList(point.speaker); // get speaker object from global list equivalent to the current speaker of point
-                if (curSpeaker != null && curSpeaker.show) {
-                    if (isModeAllTalkOnPath) this.drawRects(point, curSpeaker.color); // draws all rects
-                    else if (curSpeaker.name === pathName) this.drawRects(point, curSpeaker.color); // draws rects only for speaker matching path
-                }
+                if (this.testSpeakerToDraw(curSpeaker, pathName)) this.drawRects(point, curSpeaker.color); // draws all rects
             }
         }
+    }
+    /**
+     * Test if point is in user view
+     * @param  {ConversationPoint} curPoint
+     */
+    testConversationPointToDraw(curPoint) {
+        return super.overTimeline(curPoint.pixelTime) && super.overFloorPlan(curPoint.scaledXPos, curPoint.scaledYPos) && super.testAnimation(curPoint.pixelTime) && super.overFloorPlanAndCursor(curPoint.scaledXPos, curPoint.scaledYPos);
+    }
+    /**
+     * Tests whether to draw selected speaker
+     * Speaker must be showing and either program on all talk mode or speaker matches pathname
+     * @param  {Char} speaker
+     * @param  {Char} pathName
+     */
+    testSpeakerToDraw(speaker, pathName) {
+        return speaker != null && speaker.show && (isModeAllTalkOnPath || speaker.name === pathName);
     }
 
     /**
