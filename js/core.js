@@ -6,35 +6,48 @@ class Core {
         this.conversationFileResults = []; // List that holds a results array and file data from a parsed conversation .CSV file
         this.speakerList = []; // List that holds Speaker objects parsed from conversation file
         this.paths = []; // List that holds path objects for each unique set of movement and conversation points constructed from parsed conversation and movement .CSV files
-        this.floorPlan = null; // PNG or JPG core.core.floorPlan image
-        this.inputFloorPlanPixelWidth = null;
-        this.inputFloorPlanPixelHeight = null; // Number indicating pixel width/height of user inputted floor plan image file
+        this.floorPlan = {
+            img: null,
+            inputPixelWidth: null,
+            inputPixelHeight: null
+        }
         this.totalTimeInSeconds = 0; // Number indicating time value in seconds that all displayed data is set to, set dynamically in processMovement methods
         this.COLOR_LIST = ['#6a3d9a', '#ff7f00', '#33a02c', '#1f78b4', '#e31a1c', '#ffff99', '#b15928', '#cab2d6', '#fdbf6f', '#b2df8a', '#a6cee3', '#fb9a99']; // 12 Class Paired: (Dark) purple, orange, green, blue, red, yellow, brown, (Light) lPurple, lOrange, lGreen, lBlue, lRed
     }
 
-    clearAllData() {
-        loop(); // rerun P5 draw loop
-        if (testData.dataIsLoaded(videoPlayer)) {
-            if (this.isModeVideoShowing) keys.overVideoButton(); // Turn off video before destroying it if showing
-            videoPlayer.destroy(); // if there is a video, destroy it
-            videoPlayer = null; // set videoPlayer to null
+    /**
+     * Creates P5 image file from path and updates core floorPlan image and input width/heights to properly scale and display data
+     * @param  {String} filePath
+     */
+    updateFloorPlan(filePath) {
+        loadImage(filePath, img => {
+            console.log("Floor Plan Image Loaded");
+            img.onload = () => URL.revokeObjectURL(this.src);
+            loop(); // rerun P5 draw loop after loading image
+            this.floorPlan.img = img;
+            this.floorPlan.inputPixelWidth = img.width;
+            this.floorPlan.inputPixelHeight = img.height;
+        }, e => {
+            alert("Error loading floor plan image file. Please make sure it is correctly formatted as a PNG or JPG image file.")
+            console.log(e);
+        });
+    }
+
+    /**
+     * Replaces existing videoPlayer object with new VideoPlayer object (YouTube or P5FilePlayer)
+     * @param  {String} platform
+     * @param  {VideoPlayer Specific Params} params
+     */
+    updateVideo(platform, params) {
+        if (testData.dataIsLoaded(videoPlayer)) videoPlayer.destroy();
+        switch (platform) {
+            case "Youtube":
+                videoPlayer = new YoutubePlayer(params);
+                break;
+            case "File":
+                videoPlayer = new P5FilePlayer(params);
+                break;
         }
-        this.floorPlan = null;
-        this.clearConversationData();
-        this.clearMovementData();
-    }
-
-    clearConversationData() {
-        this.conversationFileResults = [];
-        this.speakerList = [];
-        this.paths = [];
-    }
-
-    clearMovementData() {
-        this.movementFileResults = [];
-        this.paths = [];
-        this.totalTimeInSeconds = 0; // reset total time
     }
 
     /** 
@@ -176,5 +189,35 @@ class Core {
             color,
             show
         }
+    }
+
+    clearAllData() {
+        loop(); // rerun P5 draw loop
+        if (testData.dataIsLoaded(videoPlayer)) {
+            if (this.isModeVideoShowing) keys.overVideoButton(); // Turn off video before destroying it if showing
+            videoPlayer.destroy(); // if there is a video, destroy it
+            videoPlayer = null; // set videoPlayer to null
+        }
+        this.clearFloorPlan();
+        this.clearConversationData();
+        this.clearMovementData();
+    }
+
+    clearFloorPlan() {
+        this.floorPlan.img = null;
+        this.floorPlan.inputPixelWidth = null;
+        this.floorPlan.inputPixelHeight = null;
+    }
+
+    clearConversationData() {
+        this.conversationFileResults = [];
+        this.speakerList = [];
+        this.paths = [];
+    }
+
+    clearMovementData() {
+        this.movementFileResults = [];
+        this.paths = [];
+        this.totalTimeInSeconds = 0; // reset total time
     }
 }

@@ -180,8 +180,8 @@ class DrawDataMovement extends DrawData {
     getScaledMovementPointValues(point, view) {
         const pixelTime = map(point.time, 0, core.totalTimeInSeconds, keys.timelineStart, keys.timelineEnd);
         const scaledPixelTime = map(pixelTime, keys.curPixelTimeMin, keys.curPixelTimeMax, keys.timelineStart, keys.timelineEnd);
-        const scaledXPos = point.xPos * keys.displayFloorPlanWidth / core.inputFloorPlanPixelWidth;
-        const scaledYPos = point.yPos * keys.displayFloorPlanHeight / core.inputFloorPlanPixelHeight;
+        const scaledXPos = point.xPos * keys.displayFloorPlanWidth / core.floorPlan.inputPixelWidth;
+        const scaledYPos = point.yPos * keys.displayFloorPlanHeight / core.floorPlan.inputPixelHeight;
         let scaledSpaceTimeXPos;
         if (view === this.PLAN) scaledSpaceTimeXPos = scaledXPos;
         else if (view === this.SPACETIME) scaledSpaceTimeXPos = scaledPixelTime;
@@ -331,8 +331,8 @@ class DrawDataConversation extends DrawData {
     getScaledConversationPointValues(point) {
         const pixelTime = map(point.time, 0, core.totalTimeInSeconds, keys.timelineStart, keys.timelineEnd);
         const scaledTime = map(pixelTime, keys.curPixelTimeMin, keys.curPixelTimeMax, keys.timelineStart, keys.timelineEnd);
-        const scaledXPos = point.xPos * keys.displayFloorPlanWidth / core.inputFloorPlanPixelWidth; // scale to floor plan image file
-        const scaledYPos = point.yPos * keys.displayFloorPlanHeight / core.inputFloorPlanPixelHeight; // scale to floor plan image file
+        const scaledXPos = point.xPos * keys.displayFloorPlanWidth / core.floorPlan.inputPixelWidth; // scale to floor plan image file
+        const scaledYPos = point.yPos * keys.displayFloorPlanHeight / core.floorPlan.inputPixelHeight; // scale to floor plan image file
         return {
             pixelTime,
             scaledTime,

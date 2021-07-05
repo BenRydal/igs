@@ -1,41 +1,6 @@
 class ProcessData {
 
     /**
-     * Creates P5 image file from path and updates core floorPlan image and input width/heights to properly scale and display data
-     * @param  {String} filePath
-     */
-    processFloorPlan(filePath) {
-        loadImage(filePath, img => {
-            console.log("Floor Plan Image Loaded");
-            img.onload = () => URL.revokeObjectURL(this.src);
-            loop(); // rerun P5 draw loop after loading image
-            core.floorPlan = img;
-            core.inputFloorPlanPixelWidth = core.floorPlan.width;
-            core.inputFloorPlanPixelHeight = core.floorPlan.height;
-        }, e => {
-            alert("Error loading floor plan image file. Please make sure it is correctly formatted as a PNG or JPG image file.")
-            console.log(e);
-        });
-    }
-
-    /**
-     * Replaces existing videoPlayer object with new VideoPlayer object (YouTube or P5FilePlayer)
-     * @param  {String} platform
-     * @param  {VideoPlayer Specific Params} params
-     */
-    processVideo(platform, params) {
-        if (testData.dataIsLoaded(videoPlayer)) videoPlayer.destroy();
-        switch (platform) {
-            case "Youtube":
-                videoPlayer = new YoutubePlayer(params);
-                break;
-            case "File":
-                videoPlayer = new P5FilePlayer(params);
-                break;
-        }
-    }
-
-    /**
      * Clears existing movement data and parses each movement file and sends for additional testing and processing
      * @param  {.CSV File[]} fileList
      */

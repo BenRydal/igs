@@ -5,7 +5,7 @@ class Controller {
      * @param  {PNG, JPG, JPEG File} input
      */
     handleFloorPlanFile(input) {
-        processData.processFloorPlan(URL.createObjectURL(input.files[0]));
+        core.updateFloorPlan(URL.createObjectURL(input.files[0]));
         input.value = ''; // reset input value so you can load same file again in browser
     }
 
@@ -38,7 +38,7 @@ class Controller {
         let file = input.files[0];
         input.value = ''; // reset input value so you can load same file again in browser
         let fileLocation = URL.createObjectURL(file);
-        processData.processVideo('File', {
+        core.updateVideo('File', {
             fileName: fileLocation
         });
     }
@@ -106,8 +106,8 @@ class Controller {
      */
     async loadExample(params) {
         this.hideInputBar();
-        processData.processVideo(params[4], params[5]);
-        processData.processFloorPlan(params[0] + params[1]);
+        core.updateVideo(params[4], params[5]);
+        core.updateFloorPlan(params[0] + params[1]);
         // Process conversation then movement files
         await this.getExampleConversationFile(params[0], params[2]).then(processData.parseConversationFile);
         this.getExampleMovementFiles(params[0], params[3]).then(processData.parseMovementFiles);

@@ -60,7 +60,7 @@ function setup() {
  */
 function draw() {
     background(255);
-    if (testData.dataIsLoaded(core.floorPlan)) image(core.floorPlan, 0, 0, keys.displayFloorPlanWidth, keys.displayFloorPlanHeight);
+    if (testData.dataIsLoaded(core.floorPlan.img)) image(core.floorPlan.img, 0, 0, keys.displayFloorPlanWidth, keys.displayFloorPlanHeight);
     if (testData.arrayIsLoaded(core.paths)) {
         if (testData.arrayIsLoaded(core.speakerList)) setMovementAndConversation();
         else setMovement();
