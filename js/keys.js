@@ -13,6 +13,8 @@ class Keys {
             top: height * .81 - 25,
             bottom: height * .81 + 25,
             thickness: 25 * 2,
+            isLockedLeft: false,
+            isLockedRight: false
         }
         this.floorPlan = {
             width: this.timeline.start - (width - this.timeline.end),
@@ -21,8 +23,6 @@ class Keys {
         }
         this.keyTextSize = width / 70;
         this.introMsg = "INTERACTION GEOGRAPHY SLICER (IGS)\n\nby Ben Rydal Shapiro & contributors\nbuilt with p5.js & JavaScript\n\nHi There! This is a tool to visualize movement, conversation, and video data over space and time. Data are displayed over a floor plan view (left) and a space-time view (right), where the vertical axis corresponds to the vertical dimension of the floor plan. Use the top menu to visualize different sample datasets or upload your own data. Hover over the floor plan and use the timeline to selectively study displayed data. Use the bottom buttons to animate data, visualize conversation in different ways, and interact with video data by clicking the timeline to play & pause video. For more information see: benrydal.com/software/igs";
-        this.lockedLeft = false;
-        this.lockedRight = false;
         this.buttonSpacing = width / 71;
         this.buttonWidth = this.buttonSpacing;
         this.speakerKeysHeight = this.timeline.height + (height - this.timeline.height) / 4;
@@ -203,12 +203,12 @@ class Keys {
     handleTimeline() {
         const xPosLeftSelector = keys.timeline.selectStart;
         const xPosRightSelector = keys.timeline.selectEnd;
-        if (this.lockedLeft || (!this.lockedRight && this.overRect(xPosLeftSelector - this.timeline.padding, keys.timeline.top, 2 * this.timeline.padding, keys.timeline.thickness))) {
-            this.lockedLeft = true;
+        if (this.timeline.isLockedLeft || (!this.timeline.isLockedRight && this.overRect(xPosLeftSelector - this.timeline.padding, keys.timeline.top, 2 * this.timeline.padding, keys.timeline.thickness))) {
+            this.timeline.isLockedLeft = true;
             keys.timeline.selectStart = constrain(mouseX, keys.timeline.start, keys.timeline.end);
             if (keys.timeline.selectStart > keys.timeline.selectEnd - (2 * this.timeline.padding)) keys.timeline.selectStart = keys.timeline.selectEnd - (2 * this.timeline.padding); // prevents overstriking
-        } else if (this.lockedRight || this.overRect(xPosRightSelector - this.timeline.padding, keys.timeline.top, 2 * this.timeline.padding, keys.timeline.thickness)) {
-            this.lockedRight = true;
+        } else if (this.timeline.isLockedRight || this.overRect(xPosRightSelector - this.timeline.padding, keys.timeline.top, 2 * this.timeline.padding, keys.timeline.thickness)) {
+            this.timeline.isLockedRight = true;
             keys.timeline.selectEnd = constrain(mouseX, keys.timeline.start, keys.timeline.end);
             if (keys.timeline.selectEnd < keys.timeline.selectStart + (2 * this.timeline.padding)) keys.timeline.selectEnd = keys.timeline.selectStart + (2 * this.timeline.padding); // prevents overstriking
         }

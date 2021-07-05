@@ -147,13 +147,13 @@ function mousePressed() {
  * Either mouse already dragging over timeline OR mouse cursor is over timeline bar.
  */
 function mouseDragged() {
-    if (!isModeAnimate && ((keys.lockedLeft || keys.lockedRight) || keys.overRect(keys.timeline.start - keys.timeline.padding, keys.timeline.top, keys.timeline.length + keys.timeline.padding, keys.timeline.thickness))) keys.handleTimeline();
+    if (!isModeAnimate && ((keys.timeline.isLockedLeft || keys.timeline.isLockedRight) || keys.overRect(keys.timeline.start - keys.timeline.padding, keys.timeline.top, keys.timeline.length + keys.timeline.padding, keys.timeline.thickness))) keys.handleTimeline();
     loop();
 }
 
 function mouseReleased() {
-    keys.lockedLeft = false;
-    keys.lockedRight = false;
+    keys.timeline.isLockedLeft = false;
+    keys.timeline.isLockedRight = false;
     loop();
 }
 
