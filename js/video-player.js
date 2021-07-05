@@ -21,7 +21,7 @@ class YoutubePlayer {
         this.movie.id(this.targetId);
         this.movie.size(this.videoWidth, this.videoHeight);
         this.movie.hide();
-        this.movie.position(keys.timelineStart, 0);
+        this.movie.position(keys.timeline.start, 0);
     }
 
 
@@ -111,7 +111,7 @@ class P5FilePlayer {
         this.movie.id('moviePlayer');
         this.movie.size(width / 5, width / 6);
         this.movie.hide();
-        this.movie.position(keys.timelineStart, 0);
+        this.movie.position(keys.timeline.start, 0);
     }
 
     show() {

@@ -14,7 +14,7 @@ class DrawData {
      * @param  {Number/Float} timeValue
      */
     overTimeline(pixelValue) {
-        return pixelValue >= keys.curPixelTimeMin && pixelValue <= keys.curPixelTimeMax;
+        return pixelValue >= keys.timeline.selectStart && pixelValue <= keys.timeline.selectEnd;
     }
 
     /**
@@ -52,7 +52,7 @@ class DrawData {
      */
     testAnimation(timeValue) {
         if (isModeAnimate) {
-            const reMapTime = map(timeValue, keys.timelineStart, keys.timelineEnd, 0, core.totalTimeInSeconds);
+            const reMapTime = map(timeValue, keys.timeline.start, keys.timeline.end, 0, core.totalTimeInSeconds);
             return animationCounter > reMapTime;
         } else return true;
     }
@@ -67,7 +67,7 @@ class DrawDataMovement extends DrawData {
             yPos: this.NO_DATA,
             timePos: this.NO_DATA,
             size: width / 50,
-            lengthToCompare: keys.timelineLength // used to compare data points to find closest bug value
+            lengthToCompare: keys.timeline.length // used to compare data points to find closest bug value
         };
         this.smallPathWeight = 3;
         this.largePathWeight = 6;
@@ -178,8 +178,8 @@ class DrawDataMovement extends DrawData {
      */
 
     getScaledMovementPointValues(point, view) {
-        const pixelTime = map(point.time, 0, core.totalTimeInSeconds, keys.timelineStart, keys.timelineEnd);
-        const scaledPixelTime = map(pixelTime, keys.curPixelTimeMin, keys.curPixelTimeMax, keys.timelineStart, keys.timelineEnd);
+        const pixelTime = map(point.time, 0, core.totalTimeInSeconds, keys.timeline.start, keys.timeline.end);
+        const scaledPixelTime = map(pixelTime, keys.timeline.selectStart, keys.timeline.selectEnd, keys.timeline.start, keys.timeline.end);
         const scaledXPos = point.xPos * keys.displayFloorPlanWidth / core.floorPlan.inputPixelWidth;
         const scaledYPos = point.yPos * keys.displayFloorPlanHeight / core.floorPlan.inputPixelHeight;
         let scaledSpaceTimeXPos;
@@ -224,13 +224,13 @@ class DrawDataMovement extends DrawData {
         else if (isModeVideoPlaying) {
             // Separate this test out from 3 mode tests to make sure if this is not true know other mode tests are run when video is playing
             if (this.testVideoForBugPoint(scaledTimeToTest)) this.recordBug(scaledTimeToTest, xPos, yPos);
-        } else if (keys.overRect(keys.timelineStart, 0, keys.timelineLength, keys.timelineHeight) && this.testMouseForBugPoint(scaledTimeToTest)) this.recordBug(mouseX, xPos, yPos);
+        } else if (keys.overRect(keys.timeline.start, 0, keys.timeline.length, keys.timeline.height) && this.testMouseForBugPoint(scaledTimeToTest)) this.recordBug(mouseX, xPos, yPos);
         return false;
     }
 
     testVideoForBugPoint(scaledTimeToTest) {
-        const videoX = map(core.videoPlayer.getCurrentTime(), 0, core.totalTimeInSeconds, keys.timelineStart, keys.timelineEnd);
-        const scaledVideoX = map(videoX, keys.curPixelTimeMin, keys.curPixelTimeMax, keys.timelineStart, keys.timelineEnd);
+        const videoX = map(core.videoPlayer.getCurrentTime(), 0, core.totalTimeInSeconds, keys.timeline.start, keys.timeline.end);
+        const scaledVideoX = map(videoX, keys.timeline.selectStart, keys.timeline.selectEnd, keys.timeline.start, keys.timeline.end);
         if (scaledVideoX >= scaledTimeToTest - this.bug.lengthToCompare && scaledVideoX <= scaledTimeToTest + this.bug.lengthToCompare) {
             this.bug.lengthToCompare = Math.abs(scaledVideoX - scaledTimeToTest);
             return true;
@@ -248,7 +248,7 @@ class DrawDataMovement extends DrawData {
         this.bug.xPos = this.NO_DATA;
         this.bug.yPos = this.NO_DATA;
         this.bug.timePos = this.NO_DATA;
-        this.bug.lengthToCompare = keys.timelineLength;
+        this.bug.lengthToCompare = keys.timeline.length;
     }
 
     recordBug(timePos, xPos, yPos) {
@@ -339,8 +339,8 @@ class DrawDataConversation extends DrawData {
      * @param  {ConversationPoint} point
      */
     getScaledConversationPointValues(point) {
-        const pixelTime = map(point.time, 0, core.totalTimeInSeconds, keys.timelineStart, keys.timelineEnd);
-        const scaledTime = map(pixelTime, keys.curPixelTimeMin, keys.curPixelTimeMax, keys.timelineStart, keys.timelineEnd);
+        const pixelTime = map(point.time, 0, core.totalTimeInSeconds, keys.timeline.start, keys.timeline.end);
+        const scaledTime = map(pixelTime, keys.timeline.selectStart, keys.timeline.selectEnd, keys.timeline.start, keys.timeline.end);
         const scaledXPos = point.xPos * keys.displayFloorPlanWidth / core.floorPlan.inputPixelWidth; // scale to floor plan image file
         const scaledYPos = point.yPos * keys.displayFloorPlanHeight / core.floorPlan.inputPixelHeight; // scale to floor plan image file
         return {
@@ -375,7 +375,7 @@ class DrawDataConversation extends DrawData {
         noStroke(); // reset if setDrawText is called previously in loop
         textFont(font_Lato, keys.keyTextSize);
         textSize(1); // Controls measurement of pixels in a string that corredponds to vertical pixel height of rectangle.
-        const rectWidth = map(keys.curPixelTimeMax - keys.curPixelTimeMin, 0, keys.timelineLength, this.rect.maxPixelWidth, this.rect.minPixelWidth); // map to inverse of min/max to set rectWidth based on amount of pixel time selected
+        const rectWidth = map(keys.timeline.selectEnd - keys.timeline.selectStart, 0, keys.timeline.length, this.rect.maxPixelWidth, this.rect.minPixelWidth); // map to inverse of min/max to set rectWidth based on amount of pixel time selected
         let rectLength = textWidth(point.talkTurn);
         if (rectLength < this.rect.minPixelHeight) rectLength = this.rect.minPixelHeight; // if current turn is small set it to the minimum height
         const curPoint = this.getScaledConversationPointValues(point);
@@ -464,8 +464,8 @@ class DrawDataConversation extends DrawData {
 //     beginShape();
 //     for (let i = 0; i < points.length; i++) {
 //         let point = points[i];
-//         let pixelTime = map(point.time, 0, core.totalTimeInSeconds, keys.timelineStart, keys.timelineEnd);
-//         let scaledTime = map(pixelTime, keys.curPixelTimeMin, keys.curPixelTimeMax, keys.timelineStart, keys.timelineEnd);
+//         let pixelTime = map(point.time, 0, core.totalTimeInSeconds, keys.timeline.start, keys.timeline.end);
+//         let scaledTime = map(pixelTime, keys.timeline.selectStart, keys.timeline.selectEnd, keys.timeline.start, keys.timeline.end);
 //         let scaledXPos = point.xPos * keys.displayFloorPlanWidth / core.inputFloorPlanPixelWidth; // scale to floor plan image file
 //         let scaledYPos = point.yPos * keys.displayFloorPlanHeight / core.inputFloorPlanPixelHeight; // scale to floor plan image file
 //         if (super.overTimeline(pixelTime) && super.overFloorPlan(scaledXPos, scaledYPos) && super.testAnimation(pixelTime)) {

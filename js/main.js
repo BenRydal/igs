@@ -101,10 +101,10 @@ function setMovement() {
 function setUpAnimation() {
     const animationIncrementRateDivisor = 1000; // this divisor seems to work best
     // Get amount of time in seconds currently displayed
-    const curTimeIntervalInSeconds = map(keys.curPixelTimeMax, keys.timelineStart, keys.timelineEnd, 0, core.totalTimeInSeconds) - map(keys.curPixelTimeMin, keys.timelineStart, keys.timelineEnd, 0, core.totalTimeInSeconds);
+    const curTimeIntervalInSeconds = map(keys.timeline.selectEnd, keys.timeline.start, keys.timeline.end, 0, core.totalTimeInSeconds) - map(keys.timeline.selectStart, keys.timeline.start, keys.timeline.end, 0, core.totalTimeInSeconds);
     // set increment value based on that value/divisor to keep constant isModeAnimate speed regardless of time interval selected
     const animationIncrementValue = curTimeIntervalInSeconds / animationIncrementRateDivisor;
-    if (animationCounter < map(keys.curPixelTimeMax, keys.timelineStart, keys.timelineEnd, 0, core.totalTimeInSeconds)) animationCounter += animationIncrementValue;
+    if (animationCounter < map(keys.timeline.selectEnd, keys.timeline.start, keys.timeline.end, 0, core.totalTimeInSeconds)) animationCounter += animationIncrementValue;
     else isModeAnimate = false;
 }
 /**
@@ -119,14 +119,14 @@ function setVideoPosition() {
  */
 function setVideoScrubbing() {
     if (isModeAnimate) {
-        const startValue = map(keys.curPixelTimeMin, keys.timelineStart, keys.timelineEnd, 0, Math.floor(core.videoPlayer.getVideoDuration())); // remap starting point to seek for video
-        const endValue = map(keys.curPixelTimeMax, keys.timelineStart, keys.timelineEnd, 0, Math.floor(core.videoPlayer.getVideoDuration())); // remap starting point to seek for video
-        const vPos = Math.floor(map(bugTimePosForVideoScrubbing, keys.timelineStart, keys.timelineEnd, startValue, endValue));
+        const startValue = map(keys.timeline.selectStart, keys.timeline.start, keys.timeline.end, 0, Math.floor(core.videoPlayer.getVideoDuration())); // remap starting point to seek for video
+        const endValue = map(keys.timeline.selectEnd, keys.timeline.start, keys.timeline.end, 0, Math.floor(core.videoPlayer.getVideoDuration())); // remap starting point to seek for video
+        const vPos = Math.floor(map(bugTimePosForVideoScrubbing, keys.timeline.start, keys.timeline.end, startValue, endValue));
         core.videoPlayer.seekTo(vPos);
-    } else if (keys.overRect(keys.timelineStart, 0, keys.timelineEnd, keys.timelineHeight)) {
-        const mPos = map(mouseX, keys.timelineStart, keys.timelineEnd, keys.curPixelTimeMin, keys.curPixelTimeMax); // first map mouse to selected time values in GUI
+    } else if (keys.overRect(keys.timeline.start, 0, keys.timeline.end, keys.timeline.height)) {
+        const mPos = map(mouseX, keys.timeline.start, keys.timeline.end, keys.timeline.selectStart, keys.timeline.selectEnd); // first map mouse to selected time values in GUI
         // must floor vPos to prevent double finite error
-        const vPos = Math.floor(map(mPos, keys.timelineStart, keys.timelineEnd, 0, Math.floor(core.videoPlayer.getVideoDuration())));
+        const vPos = Math.floor(map(mPos, keys.timeline.start, keys.timeline.end, 0, Math.floor(core.videoPlayer.getVideoDuration())));
         core.videoPlayer.seekTo(vPos);
         core.videoPlayer.pause(); // Add to prevent accidental video playing that seems to occur
     }
@@ -134,7 +134,7 @@ function setVideoScrubbing() {
 
 function mousePressed() {
     // Controls video when clicking over timeline region
-    if (isModeVideoShowing && !isModeAnimate && keys.overRect(keys.timelineStart, 0, keys.timelineEnd, keys.yPosTimelineBottom)) keys.playPauseMovie();
+    if (isModeVideoShowing && !isModeAnimate && keys.overRect(keys.timeline.start, 0, keys.timeline.end, keys.timeline.bottom)) keys.playPauseMovie();
     keys.overMovementConversationButtons();
     if (isModeMovement) keys.overPathKeys();
     else keys.overSpeakerKeys();
@@ -142,12 +142,12 @@ function mousePressed() {
 }
 
 /**
- * Organizes timeline GUI methods. this.selPadding used to provide additionl "cushion" for mouse.
+ * Organizes timeline GUI methods. this.timeline.padding used to provide additionl "cushion" for mouse.
  * NOTE: To activate timeline methods, isModeAnimate mode must be false and 
  * Either mouse already dragging over timeline OR mouse cursor is over timeline bar.
  */
 function mouseDragged() {
-    if (!isModeAnimate && ((keys.lockedLeft || keys.lockedRight) || keys.overRect(keys.timelineStart - keys.selPadding, keys.yPosTimelineTop, keys.timelineLength + keys.selPadding, keys.timelineThickness))) keys.handleTimeline();
+    if (!isModeAnimate && ((keys.lockedLeft || keys.lockedRight) || keys.overRect(keys.timeline.start - keys.timeline.padding, keys.timeline.top, keys.timeline.length + keys.timeline.padding, keys.timeline.thickness))) keys.handleTimeline();
     loop();
 }
 
