@@ -11,6 +11,7 @@ class Core {
             inputPixelWidth: null,
             inputPixelHeight: null
         }
+        this.videoPlayer = null; // abstract class for different play classes instantiated/updated in processVideo method (see video-player.js)
         this.totalTimeInSeconds = 0; // Number indicating time value in seconds that all displayed data is set to, set dynamically in processMovement methods
         this.COLOR_LIST = ['#6a3d9a', '#ff7f00', '#33a02c', '#1f78b4', '#e31a1c', '#ffff99', '#b15928', '#cab2d6', '#fdbf6f', '#b2df8a', '#a6cee3', '#fb9a99']; // 12 Class Paired: (Dark) purple, orange, green, blue, red, yellow, brown, (Light) lPurple, lOrange, lGreen, lBlue, lRed
     }
@@ -34,18 +35,18 @@ class Core {
     }
 
     /**
-     * Replaces existing videoPlayer object with new VideoPlayer object (YouTube or P5FilePlayer)
+     * Replaces existing core.videoPlayer object with new VideoPlayer object (YouTube or P5FilePlayer)
      * @param  {String} platform
      * @param  {VideoPlayer Specific Params} params
      */
     updateVideo(platform, params) {
-        if (testData.dataIsLoaded(videoPlayer)) videoPlayer.destroy();
+        if (testData.dataIsLoaded(core.videoPlayer)) core.videoPlayer.destroy();
         switch (platform) {
             case "Youtube":
-                videoPlayer = new YoutubePlayer(params);
+                core.videoPlayer = new YoutubePlayer(params);
                 break;
             case "File":
-                videoPlayer = new P5FilePlayer(params);
+                core.videoPlayer = new P5FilePlayer(params);
                 break;
         }
     }
@@ -193,10 +194,10 @@ class Core {
 
     clearAllData() {
         loop(); // rerun P5 draw loop
-        if (testData.dataIsLoaded(videoPlayer)) {
+        if (testData.dataIsLoaded(core.videoPlayer)) {
             if (this.isModeVideoShowing) keys.overVideoButton(); // Turn off video before destroying it if showing
-            videoPlayer.destroy(); // if there is a video, destroy it
-            videoPlayer = null; // set videoPlayer to null
+            core.videoPlayer.destroy(); // if there is a video, destroy it
+            core.videoPlayer = null; // set core.videoPlayer to null
         }
         this.clearFloorPlan();
         this.clearConversationData();

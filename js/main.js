@@ -21,7 +21,6 @@ let controller; // handles DOM/button user interaction and initial data parsing
 let processData; // handles all data processing
 let testData; // data loading/sampling tests
 let keys; // interface vars and methods
-let videoPlayer; // abstract class for different play classes instantiated/updated in processVideo method (see video-player.js)
 
 /**
  * Constants
@@ -52,7 +51,6 @@ function setup() {
     controller = new Controller();
     processData = new ProcessData();
     testData = new TestData();
-    videoPlayer = null;
 }
 
 /**
@@ -65,7 +63,7 @@ function draw() {
         if (testData.arrayIsLoaded(core.speakerList)) setMovementAndConversation();
         else setMovement();
     }
-    if (testData.dataIsLoaded(videoPlayer) && isModeVideoShowing) setVideoPosition();
+    if (testData.dataIsLoaded(core.videoPlayer) && isModeVideoShowing) setVideoPosition();
     keys.drawKeys(); // draw keys last
     if (isModeAnimate) this.setUpAnimation();
     if (isModeAnimate || isModeVideoPlaying) loop();
@@ -114,23 +112,23 @@ function setUpAnimation() {
  */
 function setVideoPosition() {
     if (!isModeVideoPlaying) this.setVideoScrubbing();
-    select('#moviePlayer').position(mouseX - videoPlayer.videoWidth, mouseY - videoPlayer.videoHeight);
+    select('#moviePlayer').position(mouseX - core.videoPlayer.videoWidth, mouseY - core.videoPlayer.videoHeight);
 }
 /**
  * Updates time selected in video depending on mouse position or isModeAnimate over timeline
  */
 function setVideoScrubbing() {
     if (isModeAnimate) {
-        const startValue = map(keys.curPixelTimeMin, keys.timelineStart, keys.timelineEnd, 0, Math.floor(videoPlayer.getVideoDuration())); // remap starting point to seek for video
-        const endValue = map(keys.curPixelTimeMax, keys.timelineStart, keys.timelineEnd, 0, Math.floor(videoPlayer.getVideoDuration())); // remap starting point to seek for video
+        const startValue = map(keys.curPixelTimeMin, keys.timelineStart, keys.timelineEnd, 0, Math.floor(core.videoPlayer.getVideoDuration())); // remap starting point to seek for video
+        const endValue = map(keys.curPixelTimeMax, keys.timelineStart, keys.timelineEnd, 0, Math.floor(core.videoPlayer.getVideoDuration())); // remap starting point to seek for video
         const vPos = Math.floor(map(bugTimePosForVideoScrubbing, keys.timelineStart, keys.timelineEnd, startValue, endValue));
-        videoPlayer.seekTo(vPos);
+        core.videoPlayer.seekTo(vPos);
     } else if (keys.overRect(keys.timelineStart, 0, keys.timelineEnd, keys.timelineHeight)) {
         const mPos = map(mouseX, keys.timelineStart, keys.timelineEnd, keys.curPixelTimeMin, keys.curPixelTimeMax); // first map mouse to selected time values in GUI
         // must floor vPos to prevent double finite error
-        const vPos = Math.floor(map(mPos, keys.timelineStart, keys.timelineEnd, 0, Math.floor(videoPlayer.getVideoDuration())));
-        videoPlayer.seekTo(vPos);
-        videoPlayer.pause(); // Add to prevent accidental video playing that seems to occur
+        const vPos = Math.floor(map(mPos, keys.timelineStart, keys.timelineEnd, 0, Math.floor(core.videoPlayer.getVideoDuration())));
+        core.videoPlayer.seekTo(vPos);
+        core.videoPlayer.pause(); // Add to prevent accidental video playing that seems to occur
     }
 }
 

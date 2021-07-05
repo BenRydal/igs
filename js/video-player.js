@@ -1,5 +1,5 @@
 /**
- * A global videoPlayer object acts as an abstract class for all Player sub-classes
+ * A global core.videoPlayer object acts as an abstract class for all Player sub-classes
  * All Player classes must implement the following methods: seekTo(time), play(), pause(), mute(), unMute(), getCurrentTime(), getVideoDuration(), destroy(), show(), hide()
  */
 class YoutubePlayer {

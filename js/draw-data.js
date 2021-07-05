@@ -229,7 +229,7 @@ class DrawDataMovement extends DrawData {
     }
 
     testVideoForBugPoint(scaledTimeToTest) {
-        const videoX = map(videoPlayer.getCurrentTime(), 0, core.totalTimeInSeconds, keys.timelineStart, keys.timelineEnd);
+        const videoX = map(core.videoPlayer.getCurrentTime(), 0, core.totalTimeInSeconds, keys.timelineStart, keys.timelineEnd);
         const scaledVideoX = map(videoX, keys.curPixelTimeMin, keys.curPixelTimeMax, keys.timelineStart, keys.timelineEnd);
         if (scaledVideoX >= scaledTimeToTest - this.bug.lengthToCompare && scaledVideoX <= scaledTimeToTest + this.bug.lengthToCompare) {
             this.bug.lengthToCompare = Math.abs(scaledVideoX - scaledTimeToTest);

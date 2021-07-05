@@ -245,7 +245,7 @@ class Keys {
         if (this.overRect(currXPos, keys.buttonsHeight, textWidth(this.BUTTON_NAMES[0]), keys.buttonWidth)) this.overAnimateButton();
         else if (this.overRect(currXPos + textWidth(this.BUTTON_NAMES[0]) + 2 * keys.buttonSpacing, keys.buttonsHeight, textWidth(this.BUTTON_NAMES[1]) + keys.buttonSpacing, keys.buttonWidth)) isModeAlignTalkTop = !isModeAlignTalkTop;
         else if (this.overRect(currXPos + textWidth(this.BUTTON_NAMES[0] + this.BUTTON_NAMES[1]) + 4 * keys.buttonSpacing, keys.buttonsHeight, textWidth(this.BUTTON_NAMES[2]) + keys.buttonSpacing, keys.buttonWidth)) isModeAllTalkOnPath = !isModeAllTalkOnPath;
-        else if (testData.dataIsLoaded(videoPlayer) && this.overRect(currXPos + textWidth(this.BUTTON_NAMES[0] + this.BUTTON_NAMES[1] + this.BUTTON_NAMES[2]) + 6 * keys.buttonSpacing, keys.buttonsHeight, textWidth(this.BUTTON_NAMES[3]) + keys.buttonSpacing, keys.buttonWidth)) this.overVideoButton();
+        else if (testData.dataIsLoaded(core.videoPlayer) && this.overRect(currXPos + textWidth(this.BUTTON_NAMES[0] + this.BUTTON_NAMES[1] + this.BUTTON_NAMES[2]) + 6 * keys.buttonSpacing, keys.buttonsHeight, textWidth(this.BUTTON_NAMES[3]) + keys.buttonSpacing, keys.buttonWidth)) this.overVideoButton();
         else if (this.overRect(currXPos + textWidth(this.BUTTON_NAMES[0] + this.BUTTON_NAMES[1] + this.BUTTON_NAMES[2] + this.BUTTON_NAMES[3]) + 8 * keys.buttonSpacing, keys.buttonsHeight, textWidth(this.BUTTON_NAMES[4]) + keys.buttonSpacing, keys.buttonWidth)) isModeIntro = !isModeIntro;
     }
 
@@ -286,11 +286,11 @@ class Keys {
      */
     overVideoButton() {
         if (isModeVideoShowing) {
-            videoPlayer.pause();
-            videoPlayer.hide();
+            core.videoPlayer.pause();
+            core.videoPlayer.hide();
             isModeVideoPlaying = false; // important to set this
         } else {
-            videoPlayer.show();
+            core.videoPlayer.show();
         }
         isModeVideoShowing = !isModeVideoShowing; // set after testing
     }
@@ -301,15 +301,15 @@ class Keys {
      */
     playPauseMovie() {
         if (isModeVideoPlaying) {
-            videoPlayer.pause();
+            core.videoPlayer.pause();
             isModeVideoPlaying = false;
         } else {
             // first map mouse to selected time values in GUI
             const mapMousePos = map(mouseX, keys.timelineStart, keys.timelineEnd, keys.curPixelTimeMin, keys.curPixelTimeMax);
             // must floor vPos to prevent double finite error
-            const videoPos = Math.floor(map(mapMousePos, keys.timelineStart, keys.timelineEnd, 0, Math.floor(videoPlayer.getVideoDuration())));
-            videoPlayer.play();
-            videoPlayer.seekTo(videoPos);
+            const videoPos = Math.floor(map(mapMousePos, keys.timelineStart, keys.timelineEnd, 0, Math.floor(core.videoPlayer.getVideoDuration())));
+            core.videoPlayer.play();
+            core.videoPlayer.seekTo(videoPos);
             isModeVideoPlaying = true;
         }
     }
