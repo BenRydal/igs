@@ -50,12 +50,14 @@ class Core {
 
     /** 
      * Organizes methods to process and update core movementFileResults []
+     * @param {Integer} fileNum
      * @param  {PapaParse Results []} results
      * @param {CSV} file
      * @param {[]]} MovementPoints
      * @param {[]]} ConversationPoints
      */
-    updateMovement(results, file, movement, conversation) {
+    updateMovement(fileNum, results, file, movement, conversation) {
+        if (fileNum === 0) core.clearMovementData(); // clear existing movement data for first new file only
         const pathName = file.name.charAt(0).toUpperCase(); // get name of path, also used to test if associated speaker in conversation file
         this.updatePaths(pathName, movement, conversation);
         this.updateTotalTime(movement);
@@ -110,6 +112,7 @@ class Core {
      *  @param  {PapaParse Results []} results
      */
     updateConversation(results) {
+        this.clearConversationData(); // clear existing conversation data
         this.conversationFileResults = results.data; // set to new array of keyed values
         this.updateSpeakerList();
         this.speakerList.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching core.paths array

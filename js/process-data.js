@@ -40,15 +40,14 @@ class ProcessData {
      * @param  {.CSV File[]} fileList
      */
     parseMovementFiles(fileList) {
-        core.clearMovementData(); // clear existing movement data
-        for (const fileToParse of fileList) {
-            Papa.parse(fileToParse, {
+        for (let fileNum = 0; fileNum < fileList.length; fileNum++) {
+            Papa.parse(fileList[fileNum], {
                 complete: function (results, file) {
                     console.log("Parsing complete:", results, file);
                     loop(); // rerun P5 draw loop
                     if (testData.movementResults(results)) {
                         const [movement, conversation] = processData.createMovementConversationArrays(results);
-                        core.updateMovement(results, file, movement, conversation);
+                        core.updateMovement(fileNum, results, file, movement, conversation);
                     } else alert("Error loading movement file. Please make sure your file is a .CSV file formatted with column headers: " + CSVHEADERS_MOVEMENT.toString());
                 },
                 header: true,
@@ -63,7 +62,6 @@ class ProcessData {
      * @param  {.CSV File} file
      */
     parseConversationFile(file) {
-        core.clearConversationData(); // clear existing conversation data
         Papa.parse(file, {
             complete: function (results, f) {
                 console.log("Parsing complete:", results, f);
