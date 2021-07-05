@@ -16,7 +16,6 @@ class ProcessData {
 
     processMovementFile(results, file, fileNum) {
         console.log("Parsing complete:", results, file);
-        loop(); // rerun P5 draw loop
         if (testData.movementResults(results)) {
             const [movement, conversation] = processData.createMovementConversationArrays(results);
             core.updateMovement(fileNum, results, file, movement, conversation);
@@ -37,7 +36,6 @@ class ProcessData {
 
     processConversationFile(results, file) {
         console.log("Parsing complete:", results, file);
-        loop(); // rerun P5 draw loop
         if (testData.conversationResults(results)) {
             core.updateConversation(results);
             processData.reProcessMovementFiles(core.movementFileResults); // must reprocess movement

@@ -65,6 +65,7 @@ class Core {
         this.updatePaths(pathName, movement, conversation);
         this.updateTotalTime(movement);
         this.movementFileResults.push([results, pathName]); // add results and pathName to core []
+        loop(); // rerun P5 draw loop
     }
 
     /**
@@ -119,6 +120,7 @@ class Core {
         this.conversationFileResults = results.data; // set to new array of keyed values
         this.updateSpeakerList();
         this.speakerList.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching core.paths array
+        loop(); // rerun P5 draw loop
     }
 
     /**
