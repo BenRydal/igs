@@ -35,18 +35,18 @@ class Core {
     }
 
     /**
-     * Replaces existing core.videoPlayer object with new VideoPlayer object (YouTube or P5FilePlayer)
+     * Replaces existing videoPlayer object with new VideoPlayer object (YouTube or P5FilePlayer)
      * @param  {String} platform
      * @param  {VideoPlayer Specific Params} params
      */
     updateVideo(platform, params) {
-        if (testData.dataIsLoaded(core.videoPlayer)) core.videoPlayer.destroy();
+        if (testData.dataIsLoaded(this.videoPlayer)) this.videoPlayer.destroy();
         switch (platform) {
             case "Youtube":
-                core.videoPlayer = new YoutubePlayer(params);
+                this.videoPlayer = new YoutubePlayer(params);
                 break;
             case "File":
-                core.videoPlayer = new P5FilePlayer(params);
+                this.videoPlayer = new P5FilePlayer(params);
                 break;
         }
     }
@@ -156,14 +156,10 @@ class Core {
     }
 
     /**
-     * CORE DATA FACTORY FUNCTIONS
-     * Speaker and Path objects are separate due to how shapes are drawn in browser on Canvas element.
-     * Each speaker and path object can match/correspond to the same person but can also vary to
-     * allow for different number of movement files and speakers.
+     * Speaker and Path objects are separate due to how shapes are drawn in browser on Canvas element. Each speaker and path object can match/correspond to the same person but can also vary to allow for different number of movement files and speakers.
      */
 
     /**
-     * Factory function that creates a Speaker object
      * @param  {char} name // name of speaker
      * @param  {color} color // color of speaker
      * @param  {boolean} show // if speaker is showing in GUI
@@ -177,7 +173,6 @@ class Core {
     }
 
     /**
-     * Factory function that creates a speaker Path object
      * @param  {char} name // Name of Path. Matches 1st letter of CSV file
      * @param  {MovementPoint []} movement // Path is comprised of 2 arrays of MovementPoint and ConversationPoint objects
      * @param  {ConversationPoint []} conversation
@@ -195,15 +190,15 @@ class Core {
     }
 
     clearAllData() {
-        loop(); // rerun P5 draw loop
-        if (testData.dataIsLoaded(core.videoPlayer)) {
+        if (testData.dataIsLoaded(this.videoPlayer)) {
             if (this.isModeVideoShowing) keys.overVideoButton(); // Turn off video before destroying it if showing
-            core.videoPlayer.destroy(); // if there is a video, destroy it
-            core.videoPlayer = null; // set core.videoPlayer to null
+            this.videoPlayer.destroy(); // if there is a video, destroy it
+            this.videoPlayer = null;
         }
         this.clearFloorPlan();
         this.clearConversationData();
         this.clearMovementData();
+        loop(); // rerun P5 draw loop
     }
 
     clearFloorPlan() {
