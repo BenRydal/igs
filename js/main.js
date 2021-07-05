@@ -25,17 +25,22 @@ let keys; // interface vars and methods
 /**
  * Constants
  */
+
 const CSVHEADERS_MOVEMENT = ['time', 'x', 'y']; // String array indicating movement movement file headers, data in each column should be of type number or it won't process
 const CSVHEADERS_CONVERSATION = ['time', 'speaker', 'talk']; // String array indicating conversation file headers, data in time column shout be of type number, speaker column should be of type String, talk column should be not null or undefined
 let font_Lato;
+
 // MODES
-let isModeMovement = true; // boolean controls whether movement or conversation keys show
-let isModeAnimate = false; // boolean controls positioning of conversation turns on path or top of screen
-let isModeAlignTalkTop = false; // boolean controls whether single speaker or all conversation turns shown on path
-let isModeAllTalkOnPath = true; // boolean controls isModeAnimate mode
-let isModeIntro = true; // boolean controls intro message
-let isModeVideoPlaying = false; // boolean indicating video is playing
-let isModeVideoShowing = false; // boolean indicating video is showing in GUI
+let mode = {
+    isMovement: true,
+    isAnimate: false,
+    isAlignTalk: false,
+    isAllTalk: true,
+    isIntro: true,
+    isVideoPlay: false,
+    isVideoShow: false
+}
+
 let animationCounter = 0; // counter to synchronize animation across all data
 let bugTimePosForVideoScrubbing = null; // Set in draw movement data and used to display correct video frame when scrubbing video
 
@@ -63,10 +68,10 @@ function draw() {
         if (testData.arrayIsLoaded(core.speakerList)) setMovementAndConversation();
         else setMovement();
     }
-    if (testData.dataIsLoaded(core.videoPlayer) && isModeVideoShowing) setVideoPosition();
+    if (testData.dataIsLoaded(core.videoPlayer) && mode.isVideoShow) setVideoPosition();
     keys.drawKeys(); // draw keys last
-    if (isModeAnimate) this.setUpAnimation();
-    if (isModeAnimate || isModeVideoPlaying) loop();
+    if (mode.isAnimate) this.setUpAnimation();
+    if (mode.isAnimate || mode.isVideoPlay) loop();
     else noLoop();
 }
 
@@ -102,23 +107,23 @@ function setUpAnimation() {
     const animationIncrementRateDivisor = 1000; // this divisor seems to work best
     // Get amount of time in seconds currently displayed
     const curTimeIntervalInSeconds = map(keys.timeline.selectEnd, keys.timeline.start, keys.timeline.end, 0, core.totalTimeInSeconds) - map(keys.timeline.selectStart, keys.timeline.start, keys.timeline.end, 0, core.totalTimeInSeconds);
-    // set increment value based on that value/divisor to keep constant isModeAnimate speed regardless of time interval selected
+    // set increment value based on that value/divisor to keep constant mode.isAnimate speed regardless of time interval selected
     const animationIncrementValue = curTimeIntervalInSeconds / animationIncrementRateDivisor;
     if (animationCounter < map(keys.timeline.selectEnd, keys.timeline.start, keys.timeline.end, 0, core.totalTimeInSeconds)) animationCounter += animationIncrementValue;
-    else isModeAnimate = false;
+    else mode.isAnimate = false;
 }
 /**
  * Updates video position to curMousePosition and calls scrubbing method if not playing
  */
 function setVideoPosition() {
-    if (!isModeVideoPlaying) this.setVideoScrubbing();
-    select('#moviePlayer').position(mouseX - core.videoPlayer.videoWidth, mouseY - core.videoPlayer.videoHeight);
+    if (!mode.isVideoPlay) this.setVideoScrubbing();
+    select('#moviePlayer').position(mouseX - core.videoPlayer.videoWidth, mouseY + 100);
 }
 /**
- * Updates time selected in video depending on mouse position or isModeAnimate over timeline
+ * Updates time selected in video depending on mouse position or mode.isAnimate over timeline
  */
 function setVideoScrubbing() {
-    if (isModeAnimate) {
+    if (mode.isAnimate) {
         const startValue = map(keys.timeline.selectStart, keys.timeline.start, keys.timeline.end, 0, Math.floor(core.videoPlayer.getVideoDuration())); // remap starting point to seek for video
         const endValue = map(keys.timeline.selectEnd, keys.timeline.start, keys.timeline.end, 0, Math.floor(core.videoPlayer.getVideoDuration())); // remap starting point to seek for video
         const vPos = Math.floor(map(bugTimePosForVideoScrubbing, keys.timeline.start, keys.timeline.end, startValue, endValue));
@@ -134,20 +139,20 @@ function setVideoScrubbing() {
 
 function mousePressed() {
     // Controls video when clicking over timeline region
-    if (isModeVideoShowing && !isModeAnimate && keys.overRect(keys.timeline.start, 0, keys.timeline.end, keys.timeline.bottom)) keys.playPauseMovie();
+    if (mode.isVideoShow && !mode.isAnimate && keys.overRect(keys.timeline.start, 0, keys.timeline.end, keys.timeline.bottom)) keys.playPauseMovie();
     keys.overMovementConversationButtons();
-    if (isModeMovement) keys.overPathKeys();
+    if (mode.isMovement) keys.overPathKeys();
     else keys.overSpeakerKeys();
     loop();
 }
 
 /**
  * Organizes timeline GUI methods. this.timeline.padding used to provide additionl "cushion" for mouse.
- * NOTE: To activate timeline methods, isModeAnimate mode must be false and 
+ * NOTE: To activate timeline methods, mode.isAnimate mode must be false and 
  * Either mouse already dragging over timeline OR mouse cursor is over timeline bar.
  */
 function mouseDragged() {
-    if (!isModeAnimate && ((keys.timeline.isLockedLeft || keys.timeline.isLockedRight) || keys.overRect(keys.timeline.start - keys.timeline.padding, keys.timeline.top, keys.timeline.length + keys.timeline.padding, keys.timeline.thickness))) keys.handleTimeline();
+    if (!mode.isAnimate && ((keys.timeline.isLockedLeft || keys.timeline.isLockedRight) || keys.overRect(keys.timeline.start - keys.timeline.padding, keys.timeline.top, keys.timeline.length + keys.timeline.padding, keys.timeline.thickness))) keys.handleTimeline();
     loop();
 }
 

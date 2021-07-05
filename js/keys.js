@@ -32,23 +32,23 @@ class Keys {
         textAlign(LEFT, TOP);
         textFont(font_Lato, this.keyTextSize);
         this.drawPathSpeakerTitle();
-        if (isModeMovement) this.drawPathSpeakerKeys(core.paths);
+        if (mode.isMovement) this.drawPathSpeakerKeys(core.paths);
         else this.drawPathSpeakerKeys(core.speakerList);
         this.drawTimeline();
         if (this.overRect(0, 0, this.floorPlan.width, this.floorPlan.height)) this.drawFloorPlanSelector();
         if (this.overRect(this.timeline.start, 0, this.timeline.length, this.timeline.height)) this.drawSlicer(); // draw slicer line after calculating all movement
-        if (isModeIntro) this.drawIntroMsg(); // draw intro message on program start up until mouse is pressed
+        if (mode.isIntro) this.drawIntroMsg(); // draw intro message on program start up until mouse is pressed
     }
 
     drawPathSpeakerTitle() {
         let currXPos = this.timeline.start;
         let yPos = this.speakerKeysHeight - this.buttonWidth / 5;
         noStroke();
-        fill(isModeMovement ? 0 : 150);
+        fill(mode.isMovement ? 0 : 150);
         text("Movement", currXPos, yPos);
         fill(0);
         text(" | ", currXPos + textWidth("Movement"), yPos);
-        fill(!isModeMovement ? 0 : 150);
+        fill(!mode.isMovement ? 0 : 150);
         text("Conversation", currXPos + textWidth("Movement | "), yPos);
     }
 
@@ -77,7 +77,7 @@ class Keys {
         // timeline selection rectangle
         fill(150, 150);
         noStroke();
-        if (isModeAnimate) rect(this.timeline.selectStart, this.timeline.height - this.timeline.tickHeight, map(animationCounter, 0, core.totalTimeInSeconds, this.timeline.start, this.timeline.end) - this.timeline.selectStart, 2 * (this.timeline.tickHeight));
+        if (mode.isAnimate) rect(this.timeline.selectStart, this.timeline.height - this.timeline.tickHeight, map(animationCounter, 0, core.totalTimeInSeconds, this.timeline.start, this.timeline.end) - this.timeline.selectStart, 2 * (this.timeline.tickHeight));
         else rect(this.timeline.selectStart, this.timeline.height - this.timeline.tickHeight, this.timeline.selectEnd - this.timeline.selectStart, 2 * (this.timeline.tickHeight));
         // timeline
         stroke(0);
@@ -151,8 +151,8 @@ class Keys {
     overMovementConversationButtons() {
         textSize(keys.keyTextSize);
         let currXPos = keys.timeline.start;
-        if (this.overRect(currXPos, keys.speakerKeysHeight, keys.buttonWidth + textWidth("Movement"), keys.buttonWidth)) isModeMovement = true;
-        else if (this.overRect(currXPos + textWidth("Movement | "), keys.speakerKeysHeight, keys.buttonWidth + textWidth("Conversation"), keys.buttonWidth)) isModeMovement = false;
+        if (this.overRect(currXPos, keys.speakerKeysHeight, keys.buttonWidth + textWidth("Movement"), keys.buttonWidth)) mode.isMovement = true;
+        else if (this.overRect(currXPos + textWidth("Movement | "), keys.speakerKeysHeight, keys.buttonWidth + textWidth("Conversation"), keys.buttonWidth)) mode.isMovement = false;
     }
 
     /**
@@ -184,14 +184,14 @@ class Keys {
     }
 
     /**
-     * Toggle on and off isModeAnimate mode and set/end global isModeAnimate counter variable
+     * Toggle on and off mode.isAnimate mode and set/end global mode.isAnimate counter variable
      */
     overAnimateButton() {
-        if (isModeAnimate) {
-            isModeAnimate = false;
+        if (mode.isAnimate) {
+            mode.isAnimate = false;
             animationCounter = map(keys.timeline.selectEnd, keys.timeline.start, keys.timeline.end, 0, core.totalTimeInSeconds); // set to keys.timeline.selectEnd mapped value
         } else {
-            isModeAnimate = true;
+            mode.isAnimate = true;
             animationCounter = map(keys.timeline.selectStart, keys.timeline.start, keys.timeline.end, 0, core.totalTimeInSeconds); // set to keys.timeline.selectStart mapped value
         }
     }
@@ -219,24 +219,24 @@ class Keys {
      * NOTE: this is different than playPauseMovie method
      */
     overVideoButton() {
-        if (isModeVideoShowing) {
+        if (mode.isVideoShow) {
             core.videoPlayer.pause();
             core.videoPlayer.hide();
-            isModeVideoPlaying = false; // important to set this
+            mode.isVideoPlay = false; // important to set this
         } else {
             core.videoPlayer.show();
         }
-        isModeVideoShowing = !isModeVideoShowing; // set after testing
+        mode.isVideoShow = !mode.isVideoShow; // set after testing
     }
 
     /**
      * Plays/pauses movie and updates videoPlayhead if setting to play
-     * Also toggles global isModeVideoPlaying variable
+     * Also toggles global mode.isVideoPlay variable
      */
     playPauseMovie() {
-        if (isModeVideoPlaying) {
+        if (mode.isVideoPlay) {
             core.videoPlayer.pause();
-            isModeVideoPlaying = false;
+            mode.isVideoPlay = false;
         } else {
             // first map mouse to selected time values in GUI
             const mapMousePos = map(mouseX, keys.timeline.start, keys.timeline.end, keys.timeline.selectStart, keys.timeline.selectEnd);
@@ -244,7 +244,7 @@ class Keys {
             const videoPos = Math.floor(map(mapMousePos, keys.timeline.start, keys.timeline.end, 0, Math.floor(core.videoPlayer.getVideoDuration())));
             core.videoPlayer.play();
             core.videoPlayer.seekTo(videoPos);
-            isModeVideoPlaying = true;
+            mode.isVideoPlay = true;
         }
     }
 }
