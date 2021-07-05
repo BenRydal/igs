@@ -24,6 +24,153 @@ class Core {
         this.totalTimeInSeconds = 0; // Number indicating time value in seconds that all displayed data is set to, set dynamically in processMovement methods
     }
 
+    clearAllData() {
+        loop(); // rerun P5 draw loop
+        if (testData.dataIsLoaded(videoPlayer)) {
+            if (this.isModeVideoShowing) keys.overVideoButton(); // Turn off video before destroying it if showing
+            videoPlayer.destroy(); // if there is a video, destroy it
+            videoPlayer = null; // set videoPlayer to null
+        }
+        this.floorPlan = null;
+        this.clearConversationData();
+        this.clearMovementData();
+    }
+
+    clearConversationData() {
+        this.conversationFileResults = [];
+        this.speakerList = [];
+        this.paths = [];
+    }
+
+    clearMovementData() {
+        this.movementFileResults = [];
+        this.paths = [];
+        this.totalTimeInSeconds = 0; // reset total time
+    }
+
+    // TODO: deal with processData call (can't call "this")
+
+
+    /**
+     * Clears existing movement data and parses each movement file and sends for additional testing and processing
+     * @param  {.CSV File[]} fileList
+     */
+    parseMovementFiles(fileList) {
+        core.clearMovementData(); // clear existing movement data
+        for (const fileToParse of fileList) {
+            Papa.parse(fileToParse, {
+                complete: function (results, file) {
+                    console.log("Parsing complete:", results, file);
+                    loop(); // rerun P5 draw loop
+                    if (testData.movementResults(results)) processData.processMovement(results, file);
+                    else alert("Error loading movement file. Please make sure your file is a .CSV file formatted with column headers: " + CSVHEADERS_MOVEMENT.toString());
+                },
+                header: true,
+                dynamicTyping: true,
+            });
+        }
+    }
+
+    // TODO: fix core references below
+    /**
+     * Clears existing conversation data and parses single conversation file using PapaParse library and sends for additional testing and processing
+     * @param  {.CSV File} file
+     */
+    parseConversationFile(file) {
+        core.clearConversationData(); // clear existing conversation data
+        Papa.parse(file, {
+            complete: function (results, f) {
+                console.log("Parsing complete:", results, f);
+                loop(); // rerun P5 draw loop
+                if (testData.conversationResults(results)) {
+                    core.conversationFileResults = results.data; // set to new array of keyed values
+                    core.updateSpeakerList();
+                    core.speakerList.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching core.paths array
+                    processData.reProcessMovement(core.movementFileResults);
+                } else alert("Error loading conversation file. Please make sure your file is a .CSV file formatted with column headers: " + CSVHEADERS_CONVERSATION.toString());
+            },
+            header: true,
+            dynamicTyping: true,
+        });
+    }
+
+    /**
+     * Adds new Path object to and sorts core paths []. Also updates time in seconds in program 
+     * @param  {char} letterName
+     * @param  {MovementPoint []} movement
+     * @param  {ConversationPoint []} conversation
+     */
+    updatePaths(letterName, movement, conversation) {
+        let curPathColor;
+        if (testData.arrayIsLoaded(this.speakerList)) curPathColor = this.setPathColorBySpeaker(letterName); // if conversation file loaded, send to method to calculate color
+        else curPathColor = COLOR_LIST[this.paths.length % COLOR_LIST.length]; // if no conversation file loaded path color is next in Color list
+        this.paths.push(this.createPath(letterName, movement, conversation, curPathColor, true));
+        this.paths.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching core.speakerList array
+    }
+
+
+    updateTotalTime(movement) {
+        const curPathEndTime = Math.floor(movement[movement.length - 1].time);
+        if (this.totalTimeInSeconds < curPathEndTime) this.totalTimeInSeconds = curPathEndTime; // update global total time, make sure to floor value as integer
+    }
+
+    /**
+     * If path has corresponding speaker, returns color that matches speaker
+     * Otherwise returns color from global COLOR_LIST based on num of speakers + numOfPaths that do not have corresponding speaker
+     * @param  {char} pathName
+     */
+    setPathColorBySpeaker(pathName) {
+        if (this.speakerList.some(e => e.name === pathName)) {
+            const hasSameName = (element) => element.name === pathName; // condition to satisfy/does it have pathName
+            return this.speakerList[this.speakerList.findIndex(hasSameName)].color; // returns first index that satisfies condition/index of speaker that matches pathName
+        } else return COLOR_LIST[this.speakerList.length + this.getNumPathsWithNoSpeaker() % COLOR_LIST.length]; // assign color to path
+    }
+
+
+    /**
+     * Returns number of movement Paths that do not have corresponding speaker
+     */
+    getNumPathsWithNoSpeaker() {
+        let count = 0;
+        for (const path of this.paths) {
+            if (!this.speakerList.some(e => e.name === path.name)) count++;
+        }
+        return count;
+    }
+
+
+    /**
+     * Updates core speaker list from conversation file data/results
+     */
+    updateSpeakerList() {
+        for (let i = 0; i < this.conversationFileResults.length; i++) {
+            let tempSpeakerList = []; // create/populate temp list to store strings to test from global core.speakerList
+            for (const tempSpeaker of this.speakerList) tempSpeakerList.push(tempSpeaker.name);
+            // If row is good data, test if core.speakerList already has speaker and if not add speaker 
+            if (testData.conversationLengthAndRowForType(this.conversationFileResults, i)) {
+                const speaker = this.cleanSpeaker(this.conversationFileResults[i][CSVHEADERS_CONVERSATION[1]]); // get cleaned speaker character
+                if (!tempSpeakerList.includes(speaker)) this.addSpeakerToSpeakerList(speaker);
+            }
+        }
+    }
+
+
+    /**
+     * From String, trims white space, converts to uppercase and returns sub string of 2 characters
+     * @param  {String} s
+     */
+    cleanSpeaker(s) {
+        return s.trim().toUpperCase().substring(0, 2);
+    }
+
+    /**
+     * Adds new speaker object with initial color to global core.speakerList from character
+     * @param  {Char} speaker
+     */
+    addSpeakerToSpeakerList(name) {
+        this.speakerList.push(this.createSpeaker(name, COLOR_LIST[this.speakerList.length % COLOR_LIST.length], true));
+    }
+
     /**
      * CORE DATA FACTORY FUNCTIONS
      * Speaker and Path objects are separate due to how shapes are drawn in browser on Canvas element.
@@ -61,61 +208,5 @@ class Core {
             color,
             show
         }
-    }
-
-    /**
-     * Object constructed from .CSV movement file representing a location in space and time along a path
-     * @param  {Number} xPos // x and y pixel positions on floor plan
-     * @param  {Number} time // time value in seconds
-     */
-    createMovementPoint(xPos, yPos, time) {
-        return {
-            xPos,
-            yPos,
-            time
-        }
-    }
-
-    /**
-     * Object constructed from .CSV movement AND conversation files representing a location
-     * in space and time and String values of a single conversation turn
-     * @param  {Number} xPos // x and y pixel positions on floor plan
-     * @param  {Number} yPos
-     * @param  {Number} time // Time value in seconds
-     * @param  {String} speaker // Name of speaker
-     * @param  {String} talkTurn // Text of conversation turn
-     */
-    createConversationPoint(xPos, yPos, time, speaker, talkTurn) {
-        return {
-            xPos,
-            yPos,
-            time,
-            speaker,
-            talkTurn
-        }
-    }
-
-    clearAllData() {
-        loop(); // rerun P5 draw loop
-        if (testData.dataIsLoaded(videoPlayer)) {
-            if (this.isModeVideoShowing) keys.overVideoButton(); // Turn off video before destroying it if showing
-            videoPlayer.destroy(); // if there is a video, destroy it
-            videoPlayer = null; // set videoPlayer to null
-        }
-        this.floorPlan = null;
-        this.clearConversationData();
-        this.clearMovementData();
-    }
-
-    clearConversationData() {
-        this.conversationFileResults = [];
-        this.speakerList = [];
-        this.paths = [];
-    }
-
-    clearMovementData() {
-        this.movementFileResults = [];
-        this.paths = [];
-        this.totalTimeInSeconds = 0; // reset total time
     }
 }
