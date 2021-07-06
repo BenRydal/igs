@@ -18,6 +18,7 @@ https://etd.library.vanderbilt.edu/available/etd-03212018-140140/unrestricted/Sh
  */
 let core; // core program variables and factory functions
 let controller; // handles DOM/button user interaction and initial data parsing
+let sketchController;
 let processData; // handles all data processing
 let testData; // data loading/sampling tests
 let keys; // interface vars and methods
@@ -54,6 +55,7 @@ function setup() {
     core = new Core();
     keys = new Keys();
     controller = new Controller();
+    sketchController = new SketchController();
     processData = new ProcessData();
     testData = new TestData();
 }
@@ -112,6 +114,7 @@ function setUpAnimation() {
     if (animationCounter < map(keys.timeline.selectEnd, keys.timeline.start, keys.timeline.end, 0, core.totalTimeInSeconds)) animationCounter += animationIncrementValue;
     else mode.isAnimate = false;
 }
+
 /**
  * Updates video position to curMousePosition and calls scrubbing method if not playing
  */
@@ -137,28 +140,19 @@ function setVideoScrubbing() {
     }
 }
 
+
 function mousePressed() {
-    // Controls video when clicking over timeline region
-    if (mode.isVideoShow && !mode.isAnimate && keys.overRect(keys.timeline.start, 0, keys.timeline.end, keys.timeline.bottom)) keys.playPauseMovie();
-    keys.overMovementConversationButtons();
-    if (mode.isMovement) keys.overPathKeys();
-    else keys.overSpeakerKeys();
+    sketchController.handleMousePressed();
     loop();
 }
 
-/**
- * Organizes timeline GUI methods. this.timeline.padding used to provide additionl "cushion" for mouse.
- * NOTE: To activate timeline methods, mode.isAnimate mode must be false and 
- * Either mouse already dragging over timeline OR mouse cursor is over timeline bar.
- */
 function mouseDragged() {
-    if (!mode.isAnimate && ((keys.timeline.isLockedLeft || keys.timeline.isLockedRight) || keys.overRect(keys.timeline.start - keys.timeline.padding, keys.timeline.top, keys.timeline.length + keys.timeline.padding, keys.timeline.thickness))) keys.handleTimeline();
+    sketchController.handleMouseDragged();
     loop();
 }
 
 function mouseReleased() {
-    keys.timeline.isLockedLeft = false;
-    keys.timeline.isLockedRight = false;
+    sketchController.handleMouseReleased();
     loop();
 }
 

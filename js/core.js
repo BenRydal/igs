@@ -191,7 +191,7 @@ class Core {
 
     clearAllData() {
         if (testData.dataIsLoaded(this.videoPlayer)) {
-            if (mode.isVideoShow) keys.overVideoButton(); // Turn off video before destroying it if showing
+            if (mode.isVideoShow) sketchController.overVideoButton(); // Turn off video before destroying it if showing
             this.videoPlayer.destroy(); // if there is a video, destroy it
             this.videoPlayer = null;
         }

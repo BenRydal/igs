@@ -183,18 +183,6 @@ class Keys {
         }
     }
 
-    /**
-     * Toggle on and off mode.isAnimate mode and set/end global mode.isAnimate counter variable
-     */
-    overAnimateButton() {
-        if (mode.isAnimate) {
-            mode.isAnimate = false;
-            animationCounter = map(keys.timeline.selectEnd, keys.timeline.start, keys.timeline.end, 0, core.totalTimeInSeconds); // set to keys.timeline.selectEnd mapped value
-        } else {
-            mode.isAnimate = true;
-            animationCounter = map(keys.timeline.selectStart, keys.timeline.start, keys.timeline.end, 0, core.totalTimeInSeconds); // set to keys.timeline.selectStart mapped value
-        }
-    }
 
     /**
      * Updates keys.timeline.selectStart or keys.timeline.selectEnd global variables depending on left or right selector that user is over
@@ -211,40 +199,6 @@ class Keys {
             this.timeline.isLockedRight = true;
             keys.timeline.selectEnd = constrain(mouseX, keys.timeline.start, keys.timeline.end);
             if (keys.timeline.selectEnd < keys.timeline.selectStart + (2 * this.timeline.padding)) keys.timeline.selectEnd = keys.timeline.selectStart + (2 * this.timeline.padding); // prevents overstriking
-        }
-    }
-
-    /**
-     * Toggle whether video is playing and whether video is showing
-     * NOTE: this is different than playPauseMovie method
-     */
-    overVideoButton() {
-        if (mode.isVideoShow) {
-            core.videoPlayer.pause();
-            core.videoPlayer.hide();
-            mode.isVideoPlay = false; // important to set this
-        } else {
-            core.videoPlayer.show();
-        }
-        mode.isVideoShow = !mode.isVideoShow; // set after testing
-    }
-
-    /**
-     * Plays/pauses movie and updates videoPlayhead if setting to play
-     * Also toggles global mode.isVideoPlay variable
-     */
-    playPauseMovie() {
-        if (mode.isVideoPlay) {
-            core.videoPlayer.pause();
-            mode.isVideoPlay = false;
-        } else {
-            // first map mouse to selected time values in GUI
-            const mapMousePos = map(mouseX, keys.timeline.start, keys.timeline.end, keys.timeline.selectStart, keys.timeline.selectEnd);
-            // must floor vPos to prevent double finite error
-            const videoPos = Math.floor(map(mapMousePos, keys.timeline.start, keys.timeline.end, 0, Math.floor(core.videoPlayer.getVideoDuration())));
-            core.videoPlayer.play();
-            core.videoPlayer.seekTo(videoPos);
-            mode.isVideoPlay = true;
         }
     }
 }

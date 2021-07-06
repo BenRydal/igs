@@ -34,7 +34,7 @@ class Controller {
      * @param  {.MP4 File} input
      */
     handleVideoFile(input) {
-        if (mode.isVideoShow) keys.overVideoButton(); // Turn off video that if showing
+        if (mode.isVideoShow) sketchController.overVideoButton(); // Turn off video that if showing
         let file = input.files[0];
         input.value = ''; // reset input value so you can load same file again in browser
         let fileLocation = URL.createObjectURL(file);
@@ -48,23 +48,23 @@ class Controller {
     }
 
     handleAnimateButton() {
-        keys.overAnimateButton();
+        sketchController.overAnimateButton();
     }
 
     handleAlignTalkButton() {
-        mode.isAlignTalk = !mode.isAlignTalk;
+        sketchController.setAlignTalk(!mode.isAlignTalk);
     }
 
     handleAllTalkButton() {
-        mode.isAllTalk = !mode.isAllTalk;
+        sketchController.setAllTalk(!mode.isAllTalk);
     }
 
     handleVideoButton() {
-        keys.overVideoButton();
+        sketchController.overVideoButton();
     }
 
     handleHowToButton() {
-        mode.isIntro = !mode.isIntro;
+        sketchController.setIntro(!mode.isIntro);
     }
 
     /**
@@ -72,7 +72,7 @@ class Controller {
      */
     handleExampleDropDown() {
         let option = document.getElementById("examples").value;
-        if (mode.isVideoShow) keys.overVideoButton(); // Turn off video that if showing
+        if (mode.isVideoShow) sketchController.overVideoButton(); // Turn off video that if showing
         mode.isIntro = false; // Hide intro msg if showing
         switch (option) {
             case "Load Data":
