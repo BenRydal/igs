@@ -55,9 +55,9 @@ function draw() {
         if (testData.arrayIsLoaded(core.speakerList)) setMovementAndConversation();
         else setMovement();
     }
-    if (testData.dataIsLoaded(core.videoPlayer)) sketchController.checkVideo();
+    if (testData.dataIsLoaded(core.videoPlayer)) sketchController.updateVideoDisplay();
     keys.drawKeys(); // draw keys last
-    if (sketchController.mode.isAnimate) sketchController.checkAnimation();
+    if (sketchController.mode.isAnimate) sketchController.updateAnimation();
     if (sketchController.mode.isAnimate || sketchController.mode.isVideoPlay) loop();
     else noLoop();
 }

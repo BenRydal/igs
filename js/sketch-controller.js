@@ -1,23 +1,5 @@
-/*
-IGS (move core booleans here with getters/setters)
-- core (holds program data and update methods)
-- processData (handles parsing/processing of CSVs)
-- keys (GUI position vars, draw methods)
-- p5controller? (boolean modes, handlers)
-- drawData (testSketch?)
-
-Controller
-
-TestData
-
-TODO: update parameters in all data calls, textFont/textSize?
-Move videoIsShowing/playing and overvideobutton into videoPlayer?
-
-    // all the "set methods" THEN p5 sketch itself deals with all the mouse handling??
-    // setters/getters still all in here SO this is where things change and sketch is where flow is handled
-    // COULD pass keys object/videoPlayer reference to all of these methods???
-*/
-
+// setters/getters still all in here SO this is where things change and sketch is where flow is handled
+// COULD pass keys object/videoPlayer reference to all of these methods???
 class SketchController {
 
     constructor() {
@@ -33,9 +15,9 @@ class SketchController {
         }
         this.animationCounter = 0; // counter to synchronize animation across all data
         this.bugTimeForVideoScrub = null; // Set in draw movement data and used to display correct video frame when scrubbing video
-
     }
 
+    // TODO: Add GETTERS
     setIsAnimate(value) {
         this.mode.isAnimate = value;
     }
@@ -52,8 +34,27 @@ class SketchController {
         this.mode.isIntro = value;
     }
 
+    setVideoPlay(value) {
+        this.mode.isVideoPlay = value;
+    }
+
+    setVideoShow(value) {
+        this.mode.isVideoShow = value;
+    }
+
+    mapFromTimelineToVideo(value) {
+        return map(value, keys.timeline.start, keys.timeline.end, 0, core.totalTimeInSeconds);
+    }
+
+    mapToVideoDuration(value) {
+        return map(value, keys.timeline.start, keys.timeline.end, 0, Math.floor(core.videoPlayer.getVideoDuration())); // must floor vPos to prevent double finite error
+    }
+
+    mapFromTimelineToSelection(value) {
+        return map(value, keys.timeline.start, keys.timeline.end, keys.timeline.selectStart, keys.timeline.selectEnd);
+    }
+
     handleMousePressed() {
-        // Controls video when clicking over timeline region
         if (this.mode.isVideoShow && !this.mode.isAnimate && keys.overRect(keys.timeline.start, 0, keys.timeline.end, keys.timeline.bottom)) this.playPauseMovie();
         keys.overMovementConversationButtons();
         if (this.mode.isMovement) keys.overPathKeys();
@@ -71,28 +72,34 @@ class SketchController {
     }
 
     /**
+     * @param  {Number/Float} timeValue
+     */
+    testAnimation(value) {
+        if (sketchController.mode.isAnimate) return this.animationCounter > this.mapFromTimelineToVideo(value);
+        else return true;
+    }
+
+    /**
      * Toggle on and off this.mode.isAnimate mode and set/end global this.mode.isAnimate counter variable
      */
     overAnimateButton() {
-        if (this.mode.isAnimate) this.animationCounter = map(keys.timeline.selectEnd, keys.timeline.start, keys.timeline.end, 0, core.totalTimeInSeconds); // set to keys.timeline.selectEnd mapped value
-        else this.animationCounter = map(keys.timeline.selectStart, keys.timeline.start, keys.timeline.end, 0, core.totalTimeInSeconds); // set to keys.timeline.selectStart mapped value
+        if (this.mode.isAnimate) this.animationCounter = this.mapFromTimelineToVideo(keys.timeline.selectEnd);
+        else this.animationCounter = this.mapFromTimelineToVideo(keys.timeline.selectStart);
         this.setIsAnimate(!this.mode.isAnimate);
     }
 
     /**
      * Updates animation mode variable depending on animation state
      */
-    checkAnimation() {
+    updateAnimation() {
         const animationIncrementRateDivisor = 1000; // this divisor seems to work best
-        // Get amount of time in seconds currently displayed
-        const curTimeIntervalInSeconds = map(keys.timeline.selectEnd, keys.timeline.start, keys.timeline.end, 0, core.totalTimeInSeconds) - map(keys.timeline.selectStart, keys.timeline.start, keys.timeline.end, 0, core.totalTimeInSeconds);
-        // set increment value based on that value/divisor to keep constant sketchController.mode.isAnimate speed regardless of time interval selected
-        const animationIncrementValue = curTimeIntervalInSeconds / animationIncrementRateDivisor;
-        if (sketchController.animationCounter < map(keys.timeline.selectEnd, keys.timeline.start, keys.timeline.end, 0, core.totalTimeInSeconds)) sketchController.animationCounter += animationIncrementValue;
+        const curTimeIntervalInSeconds = this.mapFromTimelineToVideo(keys.timeline.selectEnd) - this.mapFromTimelineToVideo(keys.timeline.selectStart); // Get amount of time in seconds currently displayed
+        const animationIncrementValue = curTimeIntervalInSeconds / animationIncrementRateDivisor; // set increment value based on that value/divisor to keep constant sketchController.mode.isAnimate speed regardless of time interval selected
+        if (sketchController.animationCounter < this.mapFromTimelineToVideo(keys.timeline.selectEnd)) sketchController.animationCounter += animationIncrementValue;
         else sketchController.setIsAnimate(false);
     }
 
-    checkVideo() {
+    updateVideoDisplay() {
         if (this.mode.isVideoShow) {
             core.videoPlayer.updatePos(mouseX, mouseY, 100);
             if (!this.mode.isVideoPlay) this.setVideoScrubbing();
@@ -107,65 +114,56 @@ class SketchController {
             const vPos = Math.floor(map(sketchController.bugTimeForVideoScrub, keys.timeline.start, keys.timeline.end, this.mapToVideoDuration(keys.timeline.selectStart), this.mapToVideoDuration(keys.timeline.selectEnd)));
             core.videoPlayer.seekTo(vPos);
         } else if (keys.overRect(keys.timeline.start, 0, keys.timeline.end, keys.timeline.height)) {
-            const vPos = Math.floor(this.mapToVideoDuration(map(mouseX, keys.timeline.start, keys.timeline.end, keys.timeline.selectStart, keys.timeline.selectEnd)));
+            const vPos = Math.floor(this.mapToVideoDuration(this.mapFromTimelineToSelection(mouseX)));
             core.videoPlayer.seekTo(vPos);
             core.videoPlayer.pause(); // Add to prevent accidental video playing that seems to occur
         }
     }
 
-    mapToVideoDuration(value) {
-        return map(value, keys.timeline.start, keys.timeline.end, 0, Math.floor(core.videoPlayer.getVideoDuration()));
-    }
-
     /**
      * Toggle whether video is playing and whether video is showing
-     * NOTE: this is different than playPauseMovie method
      */
     overVideoButton() {
         if (this.mode.isVideoShow) {
             core.videoPlayer.pause();
             core.videoPlayer.hide();
-            this.mode.isVideoPlay = false; // important to set this
+            this.setVideoPlay(false);
+            this.setVideoShow(false);
         } else {
             core.videoPlayer.show();
+            this.setVideoShow(true);
         }
-        this.mode.isVideoShow = !this.mode.isVideoShow; // set after testing
     }
 
     /**
      * Plays/pauses movie and updates videoPlayhead if setting to play
-     * Also toggles global this.mode.isVideoPlay variable
      */
     playPauseMovie() {
         if (this.mode.isVideoPlay) {
             core.videoPlayer.pause();
-            this.mode.isVideoPlay = false;
+            this.setVideoPlay(false);
         } else {
-            // first map mouse to selected time values in GUI
-            const mapMousePos = map(mouseX, keys.timeline.start, keys.timeline.end, keys.timeline.selectStart, keys.timeline.selectEnd);
-            // must floor vPos to prevent double finite error
-            const videoPos = Math.floor(map(mapMousePos, keys.timeline.start, keys.timeline.end, 0, Math.floor(core.videoPlayer.getVideoDuration())));
             core.videoPlayer.play();
-            core.videoPlayer.seekTo(videoPos);
-            this.mode.isVideoPlay = true;
+            core.videoPlayer.seekTo(Math.floor(this.mapToVideoDuration(this.mapFromTimelineToSelection(mouseX))));
+            this.setVideoPlay(true);
         }
     }
 
     loadUserData() {
-        this.checkSettings();
+        this.updateSettingsOnLoad();
         core.clearAllData();
     }
     /**
      * @param  {[String directory, String floorPlan image file, String conversation File, String movement File[], String video platform, video params (see Video Player Interface)]} params
      */
     loadExampleData(params) {
-        this.checkSettings();
+        this.updateSettingsOnLoad();
         core.updateVideo(params[4], params[5]);
         core.updateFloorPlan(params[0] + params[1]);
         processData.parseExampleData(params);
     }
 
-    checkSettings() {
+    updateSettingsOnLoad() {
         if (this.mode.isVideoShow) this.overVideoButton(); // Turn off video that if showing
         this.mode.isIntro = false; // Hide intro msg if showing
     }

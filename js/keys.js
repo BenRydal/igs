@@ -28,6 +28,7 @@ class Keys {
         this.speakerKeysHeight = this.timeline.height + (height - this.timeline.height) / 4;
     }
 
+    // TODO: pass a list for drawing
     drawKeys() {
         textAlign(LEFT, TOP);
         textFont(font_Lato, this.keyTextSize);
@@ -178,18 +179,6 @@ class Keys {
      */
     overFloorPlanAndCursor(xPos, yPos) {
         return !this.overFloorPlan(mouseX, mouseY) || (this.overFloorPlan(mouseX, mouseY) && this.overCircle(xPos, yPos, this.floorPlan.selectorSize));
-    }
-
-    /**
-     * If not sketchController.mode.isAnimate mode, always return true
-     * If sketchController.mode.isAnimate mode, return true only if time parameter is less than global sketchController.mode.isAnimate counter
-     * @param  {Number/Float} timeValue
-     */
-    testAnimation(timeValue) {
-        if (sketchController.mode.isAnimate) {
-            const reMapTime = map(timeValue, keys.timeline.start, keys.timeline.end, 0, core.totalTimeInSeconds);
-            return sketchController.animationCounter > reMapTime;
-        } else return true;
     }
 
     /**

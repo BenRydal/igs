@@ -41,8 +41,8 @@ class Core {
      */
     updateVideo(platform, params) {
         if (testData.dataIsLoaded(this.videoPlayer)) {
-            sketchController.mode.isVideoPlay = false;
-            sketchController.mode.isVideoShow = false;
+            sketchController.setVideoPlay(false);
+            sketchController.setVideoShow(false);
             this.videoPlayer.destroy(); // important to set this
         }
         switch (platform) {

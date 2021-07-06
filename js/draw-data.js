@@ -47,7 +47,7 @@ class DrawDataMovement {
         for (let i = 1; i < path.length; i++) {
             let curPoint = this.getScaledMovementPointValues(path[i], view); // get current and prior points for comparison
             let priorPoint = this.getScaledMovementPointValues(path[i - 1], view);
-            if (keys.overTimeline(curPoint.pixelTime) && keys.overFloorPlan(curPoint.scaledXPos, curPoint.scaledYPos) && keys.testAnimation(curPoint.pixelTime)) {
+            if (keys.overTimeline(curPoint.pixelTime) && keys.overFloorPlan(curPoint.scaledXPos, curPoint.scaledYPos) && sketchController.testAnimation(curPoint.pixelTime)) {
                 if (curPoint.scaledXPos === priorPoint.scaledXPos && curPoint.scaledYPos === priorPoint.scaledYPos) {
                     if (stop_Mode) { // if already drawing in stop mode, continue it
                         curveVertex(curPoint.scaledSpaceTimeXPos, curPoint.scaledYPos);
@@ -88,7 +88,7 @@ class DrawDataMovement {
         beginShape();
         for (const point of path) {
             let curPoint = this.getScaledMovementPointValues(point, view);
-            if (keys.overTimeline(curPoint.pixelTime) && keys.overFloorPlan(curPoint.scaledXPos, curPoint.scaledYPos) && keys.testAnimation(curPoint.pixelTime)) {
+            if (keys.overTimeline(curPoint.pixelTime) && keys.overFloorPlan(curPoint.scaledXPos, curPoint.scaledYPos) && sketchController.testAnimation(curPoint.pixelTime)) {
                 if (keys.overCursor(curPoint.scaledXPos, curPoint.scaledYPos)) {
                     if (over_Cursor_Mode) { // if already drawing in cursor mode, continue it
                         curveVertex(curPoint.scaledSpaceTimeXPos, curPoint.scaledYPos);
@@ -265,7 +265,7 @@ class DrawDataConversation {
      * @param  {ConversationPoint} curPoint
      */
     testConversationPointToDraw(curPoint) {
-        return keys.overTimeline(curPoint.pixelTime) && keys.overFloorPlan(curPoint.scaledXPos, curPoint.scaledYPos) && keys.testAnimation(curPoint.pixelTime) && keys.overFloorPlanAndCursor(curPoint.scaledXPos, curPoint.scaledYPos);
+        return keys.overTimeline(curPoint.pixelTime) && keys.overFloorPlan(curPoint.scaledXPos, curPoint.scaledYPos) && sketchController.testAnimation(curPoint.pixelTime) && keys.overFloorPlanAndCursor(curPoint.scaledXPos, curPoint.scaledYPos);
     }
     /**
      * Tests whether to draw selected speaker
