@@ -145,6 +145,54 @@ class Keys {
     }
 
     /**
+     * Returns true if value is within pixel range of timeline
+     * @param  {Number/Float} timeValue
+     */
+    overTimeline(pixelValue) {
+        return pixelValue >= this.timeline.selectStart && pixelValue <= this.timeline.selectEnd;
+    }
+
+    /**
+     * Returns true if value is within floor plan pixel display container 
+     * @param  {Number/Float} xPos
+     * @param  {Number/Float} yPos
+     */
+    overFloorPlan(xPos, yPos) {
+        return (xPos >= 0 && xPos <= this.floorPlan.width) && (yPos >= 0 && yPos <= this.floorPlan.height);
+    }
+    /**
+     * Returns true if mouse cursor near xPos and yPos parameters
+     * NOTE: core.floorPlan SelectorSize set globally
+     * @param  {Number/Float} xPos
+     * @param  {Number/Float} yPos
+     */
+    overCursor(xPos, yPos) {
+        return this.overCircle(xPos, yPos, this.floorPlan.selectorSize);
+    }
+
+    /**
+     * If mouse is over floor plan, returns true if mouse cursor near xPos and yPos parameters
+     * Always returns true if mouse is not over the floor plan
+     * @param  {Number/Float} xPos
+     * @param  {Number/Float} yPos
+     */
+    overFloorPlanAndCursor(xPos, yPos) {
+        return !this.overFloorPlan(mouseX, mouseY) || (this.overFloorPlan(mouseX, mouseY) && this.overCircle(xPos, yPos, this.floorPlan.selectorSize));
+    }
+
+    /**
+     * If not sketchController.mode.isAnimate mode, always return true
+     * If sketchController.mode.isAnimate mode, return true only if time parameter is less than global sketchController.mode.isAnimate counter
+     * @param  {Number/Float} timeValue
+     */
+    testAnimation(timeValue) {
+        if (sketchController.mode.isAnimate) {
+            const reMapTime = map(timeValue, keys.timeline.start, keys.timeline.end, 0, core.totalTimeInSeconds);
+            return sketchController.animationCounter > reMapTime;
+        } else return true;
+    }
+
+    /**
      * Toggles on and off global showMovement var to determine if movement or conversation keys show
      * NOTE: textSize is way to control dynamic scaling for gui methods and interface
      */

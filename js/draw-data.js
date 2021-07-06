@@ -1,67 +1,9 @@
-/**
- * Drawing methods are implemented through super class and 2 sub classes DrawDataMovement and DrawDataConversation
- * DrawData holds test methods used by both sub classes
- */
-class DrawData {
+class DrawDataMovement {
 
     constructor() {
         this.PLAN = 0; // two drawing mode constants
         this.SPACETIME = 1;
         this.NO_DATA = -1;
-    }
-    /**
-     * Returns true if value is within pixel range of timeline
-     * @param  {Number/Float} timeValue
-     */
-    overTimeline(pixelValue) {
-        return pixelValue >= keys.timeline.selectStart && pixelValue <= keys.timeline.selectEnd;
-    }
-
-    /**
-     * Returns true if value is within floor plan pixel display container 
-     * @param  {Number/Float} xPos
-     * @param  {Number/Float} yPos
-     */
-    overFloorPlan(xPos, yPos) {
-        return (xPos >= 0 && xPos <= keys.floorPlan.width) && (yPos >= 0 && yPos <= keys.floorPlan.height);
-    }
-    /**
-     * Returns true if mouse cursor near xPos and yPos parameters
-     * NOTE: core.floorPlan SelectorSize set globally
-     * @param  {Number/Float} xPos
-     * @param  {Number/Float} yPos
-     */
-    overCursor(xPos, yPos) {
-        return keys.overCircle(xPos, yPos, keys.floorPlan.selectorSize);
-    }
-
-    /**
-     * If mouse is over floor plan, returns true if mouse cursor near xPos and yPos parameters
-     * Always returns true if mouse is not over the floor plan
-     * @param  {Number/Float} xPos
-     * @param  {Number/Float} yPos
-     */
-    overFloorPlanAndCursor(xPos, yPos) {
-        return !this.overFloorPlan(mouseX, mouseY) || (this.overFloorPlan(mouseX, mouseY) && keys.overCircle(xPos, yPos, keys.floorPlan.selectorSize));
-    }
-
-    /**
-     * If not sketchController.mode.isAnimate mode, always return true
-     * If sketchController.mode.isAnimate mode, return true only if time parameter is less than global sketchController.mode.isAnimate counter
-     * @param  {Number/Float} timeValue
-     */
-    testAnimation(timeValue) {
-        if (sketchController.mode.isAnimate) {
-            const reMapTime = map(timeValue, keys.timeline.start, keys.timeline.end, 0, core.totalTimeInSeconds);
-            return sketchController.animationCounter > reMapTime;
-        } else return true;
-    }
-}
-
-class DrawDataMovement extends DrawData {
-
-    constructor() {
-        super();
         this.bug = { // represents user selection dot drawn in both floor plan and space-time views
             xPos: this.NO_DATA, // number/float values
             yPos: this.NO_DATA,
@@ -105,7 +47,7 @@ class DrawDataMovement extends DrawData {
         for (let i = 1; i < path.length; i++) {
             let curPoint = this.getScaledMovementPointValues(path[i], view); // get current and prior points for comparison
             let priorPoint = this.getScaledMovementPointValues(path[i - 1], view);
-            if (super.overTimeline(curPoint.pixelTime) && super.overFloorPlan(curPoint.scaledXPos, curPoint.scaledYPos) && super.testAnimation(curPoint.pixelTime)) {
+            if (keys.overTimeline(curPoint.pixelTime) && keys.overFloorPlan(curPoint.scaledXPos, curPoint.scaledYPos) && keys.testAnimation(curPoint.pixelTime)) {
                 if (curPoint.scaledXPos === priorPoint.scaledXPos && curPoint.scaledYPos === priorPoint.scaledYPos) {
                     if (stop_Mode) { // if already drawing in stop mode, continue it
                         curveVertex(curPoint.scaledSpaceTimeXPos, curPoint.scaledYPos);
@@ -146,8 +88,8 @@ class DrawDataMovement extends DrawData {
         beginShape();
         for (const point of path) {
             let curPoint = this.getScaledMovementPointValues(point, view);
-            if (super.overTimeline(curPoint.pixelTime) && super.overFloorPlan(curPoint.scaledXPos, curPoint.scaledYPos) && super.testAnimation(curPoint.pixelTime)) {
-                if (super.overCursor(curPoint.scaledXPos, curPoint.scaledYPos)) {
+            if (keys.overTimeline(curPoint.pixelTime) && keys.overFloorPlan(curPoint.scaledXPos, curPoint.scaledYPos) && keys.testAnimation(curPoint.pixelTime)) {
+                if (keys.overCursor(curPoint.scaledXPos, curPoint.scaledYPos)) {
                     if (over_Cursor_Mode) { // if already drawing in cursor mode, continue it
                         curveVertex(curPoint.scaledSpaceTimeXPos, curPoint.scaledYPos);
                         if (view == this.SPACETIME) this.testPointForBug(curPoint.scaledPixelTime, curPoint.scaledXPos, curPoint.scaledYPos);
@@ -267,11 +209,12 @@ class DrawDataMovement extends DrawData {
     }
 }
 
-class DrawDataConversation extends DrawData {
+class DrawDataConversation {
 
     constructor() {
-        super();
-
+        this.PLAN = 0; // two drawing mode constants
+        this.SPACETIME = 1;
+        this.NO_DATA = -1;
         this.conversationBubble = { // represents user selected conversation
             isSelected: false,
             point: this.NO_DATA, // stores one ConversationPoint object for selected conversation turn
@@ -322,7 +265,7 @@ class DrawDataConversation extends DrawData {
      * @param  {ConversationPoint} curPoint
      */
     testConversationPointToDraw(curPoint) {
-        return super.overTimeline(curPoint.pixelTime) && super.overFloorPlan(curPoint.scaledXPos, curPoint.scaledYPos) && super.testAnimation(curPoint.pixelTime) && super.overFloorPlanAndCursor(curPoint.scaledXPos, curPoint.scaledYPos);
+        return keys.overTimeline(curPoint.pixelTime) && keys.overFloorPlan(curPoint.scaledXPos, curPoint.scaledYPos) && keys.testAnimation(curPoint.pixelTime) && keys.overFloorPlanAndCursor(curPoint.scaledXPos, curPoint.scaledYPos);
     }
     /**
      * Tests whether to draw selected speaker
@@ -468,7 +411,7 @@ class DrawDataConversation extends DrawData {
 //         let scaledTime = map(pixelTime, keys.timeline.selectStart, keys.timeline.selectEnd, keys.timeline.start, keys.timeline.end);
 //         let scaledXPos = point.xPos * keys.floorPlan.width / core.inputFloorPlanPixelWidth; // scale to floor plan image file
 //         let scaledYPos = point.yPos * keys.floorPlan.height / core.inputFloorPlanPixelHeight; // scale to floor plan image file
-//         if (super.overTimeline(pixelTime) && super.overFloorPlan(scaledXPos, scaledYPos) && super.testAnimation(pixelTime)) {
+//         if (keys.overTimeline(pixelTime) && keys.overFloorPlan(scaledXPos, scaledYPos) && keys.testAnimation(pixelTime)) {
 //             if (view == this.PLAN) curveVertex(scaledXPos, scaledYPos);
 //             else if (view == this.SPACETIME) {
 //                 curveVertex(scaledTime, scaledYPos);
