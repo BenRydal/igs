@@ -22,28 +22,44 @@ Move videoIsShowing/playing and overvideobutton into videoPlayer?
 
 class SketchController {
 
+    constructor() {
+        // TODO: REMOVE isMovement Mode!!! Just for key display
+        this.mode = {
+            isMovement: true,
+            isAnimate: false,
+            isAlignTalk: false,
+            isAllTalk: true,
+            isIntro: true,
+            isVideoPlay: false,
+            isVideoShow: false
+        }
+        this.animationCounter = 0; // counter to synchronize animation across all data
+        this.bugTimePosForVideoScrubbing = null; // Set in draw movement data and used to display correct video frame when scrubbing video
+
+    }
+
     setAlignTalk(value) {
-        mode.isAlignTalk = value;
+        this.mode.isAlignTalk = value;
     }
 
     setAllTalk(value) {
-        mode.isAllTalk = value;
+        this.mode.isAllTalk = value;
     }
 
     setIntro(value) {
-        mode.isIntro = value;
+        this.mode.isIntro = value;
     }
 
     handleMousePressed() {
         // Controls video when clicking over timeline region
-        if (mode.isVideoShow && !mode.isAnimate && keys.overRect(keys.timeline.start, 0, keys.timeline.end, keys.timeline.bottom)) this.playPauseMovie();
+        if (this.mode.isVideoShow && !this.mode.isAnimate && keys.overRect(keys.timeline.start, 0, keys.timeline.end, keys.timeline.bottom)) this.playPauseMovie();
         keys.overMovementConversationButtons();
-        if (mode.isMovement) keys.overPathKeys();
+        if (this.mode.isMovement) keys.overPathKeys();
         else keys.overSpeakerKeys();
     }
 
     handleMouseDragged() {
-        if (!mode.isAnimate && ((keys.timeline.isLockedLeft || keys.timeline.isLockedRight) || keys.overRect(keys.timeline.start - keys.timeline.padding, keys.timeline.top, keys.timeline.length + keys.timeline.padding, keys.timeline.thickness))) keys.handleTimeline();
+        if (!this.mode.isAnimate && ((keys.timeline.isLockedLeft || keys.timeline.isLockedRight) || keys.overRect(keys.timeline.start - keys.timeline.padding, keys.timeline.top, keys.timeline.length + keys.timeline.padding, keys.timeline.thickness))) keys.handleTimeline();
 
     }
 
@@ -53,15 +69,15 @@ class SketchController {
     }
 
     /**
-     * Toggle on and off mode.isAnimate mode and set/end global mode.isAnimate counter variable
+     * Toggle on and off this.mode.isAnimate mode and set/end global this.mode.isAnimate counter variable
      */
     overAnimateButton() {
-        if (mode.isAnimate) {
-            mode.isAnimate = false;
-            animationCounter = map(keys.timeline.selectEnd, keys.timeline.start, keys.timeline.end, 0, core.totalTimeInSeconds); // set to keys.timeline.selectEnd mapped value
+        if (this.mode.isAnimate) {
+            this.mode.isAnimate = false;
+            this.animationCounter = map(keys.timeline.selectEnd, keys.timeline.start, keys.timeline.end, 0, core.totalTimeInSeconds); // set to keys.timeline.selectEnd mapped value
         } else {
-            mode.isAnimate = true;
-            animationCounter = map(keys.timeline.selectStart, keys.timeline.start, keys.timeline.end, 0, core.totalTimeInSeconds); // set to keys.timeline.selectStart mapped value
+            this.mode.isAnimate = true;
+            this.animationCounter = map(keys.timeline.selectStart, keys.timeline.start, keys.timeline.end, 0, core.totalTimeInSeconds); // set to keys.timeline.selectStart mapped value
         }
     }
 
@@ -70,24 +86,24 @@ class SketchController {
      * NOTE: this is different than playPauseMovie method
      */
     overVideoButton() {
-        if (mode.isVideoShow) {
+        if (this.mode.isVideoShow) {
             core.videoPlayer.pause();
             core.videoPlayer.hide();
-            mode.isVideoPlay = false; // important to set this
+            this.mode.isVideoPlay = false; // important to set this
         } else {
             core.videoPlayer.show();
         }
-        mode.isVideoShow = !mode.isVideoShow; // set after testing
+        this.mode.isVideoShow = !this.mode.isVideoShow; // set after testing
     }
 
     /**
      * Plays/pauses movie and updates videoPlayhead if setting to play
-     * Also toggles global mode.isVideoPlay variable
+     * Also toggles global this.mode.isVideoPlay variable
      */
     playPauseMovie() {
-        if (mode.isVideoPlay) {
+        if (this.mode.isVideoPlay) {
             core.videoPlayer.pause();
-            mode.isVideoPlay = false;
+            this.mode.isVideoPlay = false;
         } else {
             // first map mouse to selected time values in GUI
             const mapMousePos = map(mouseX, keys.timeline.start, keys.timeline.end, keys.timeline.selectStart, keys.timeline.selectEnd);
@@ -95,7 +111,7 @@ class SketchController {
             const videoPos = Math.floor(map(mapMousePos, keys.timeline.start, keys.timeline.end, 0, Math.floor(core.videoPlayer.getVideoDuration())));
             core.videoPlayer.play();
             core.videoPlayer.seekTo(videoPos);
-            mode.isVideoPlay = true;
+            this.mode.isVideoPlay = true;
         }
     }
 
@@ -114,7 +130,7 @@ class SketchController {
     }
 
     checkSettings() {
-        if (mode.isVideoShow) sketchController.overVideoButton(); // Turn off video that if showing
-        mode.isIntro = false; // Hide intro msg if showing
+        if (this.mode.isVideoShow) this.overVideoButton(); // Turn off video that if showing
+        this.mode.isIntro = false; // Hide intro msg if showing
     }
 }

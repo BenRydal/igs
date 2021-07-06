@@ -41,8 +41,8 @@ class Core {
      */
     updateVideo(platform, params) {
         if (testData.dataIsLoaded(this.videoPlayer)) {
-            mode.isVideoPlay = false;
-            mode.isVideoShow = false;
+            sketchController.mode.isVideoPlay = false;
+            sketchController.mode.isVideoShow = false;
             this.videoPlayer.destroy(); // important to set this
         }
         switch (platform) {
@@ -195,7 +195,7 @@ class Core {
 
     clearAllData() {
         if (testData.dataIsLoaded(this.videoPlayer)) {
-            if (mode.isVideoShow) sketchController.overVideoButton(); // Turn off video before destroying it if showing
+            if (sketchController.mode.isVideoShow) sketchController.overVideoButton(); // Turn off video before destroying it if showing
             this.videoPlayer.destroy(); // if there is a video, destroy it
             this.videoPlayer = null;
         }

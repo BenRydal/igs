@@ -46,14 +46,14 @@ class DrawData {
     }
 
     /**
-     * If not mode.isAnimate mode, always return true
-     * If mode.isAnimate mode, return true only if time parameter is less than global mode.isAnimate counter
+     * If not sketchController.mode.isAnimate mode, always return true
+     * If sketchController.mode.isAnimate mode, return true only if time parameter is less than global sketchController.mode.isAnimate counter
      * @param  {Number/Float} timeValue
      */
     testAnimation(timeValue) {
-        if (mode.isAnimate) {
+        if (sketchController.mode.isAnimate) {
             const reMapTime = map(timeValue, keys.timeline.start, keys.timeline.end, 0, core.totalTimeInSeconds);
-            return animationCounter > reMapTime;
+            return sketchController.animationCounter > reMapTime;
         } else return true;
     }
 }
@@ -213,15 +213,15 @@ class DrawDataMovement extends DrawData {
     }
 
     /**
-     * Tests for 3 modes: mode.isAnimate, video and mouse over space-time view
+     * Tests for 3 modes: sketchController.mode.isAnimate, video and mouse over space-time view
      * For current mode, tests parameter values to set/record bug correctly
      * @param  {Number/Float} scaledTimeToTest
      * @param  {Number/Float} xPos
      * @param  {Number/Float} yPos
      */
     testPointForBug(scaledTimeToTest, xPos, yPos) {
-        if (mode.isAnimate) this.recordBug(scaledTimeToTest, xPos, yPos); // always return true to set last/most recent point as the bug
-        else if (mode.isVideoPlay) {
+        if (sketchController.mode.isAnimate) this.recordBug(scaledTimeToTest, xPos, yPos); // always return true to set last/most recent point as the bug
+        else if (sketchController.mode.isVideoPlay) {
             // Separate this test out from 3 mode tests to make sure if this is not true know other mode tests are run when video is playing
             if (this.testVideoForBugPoint(scaledTimeToTest)) this.recordBug(scaledTimeToTest, xPos, yPos);
         } else if (keys.overRect(keys.timeline.start, 0, keys.timeline.length, keys.timeline.height) && this.testMouseForBugPoint(scaledTimeToTest)) this.recordBug(mouseX, xPos, yPos);
@@ -255,7 +255,7 @@ class DrawDataMovement extends DrawData {
         this.bug.xPos = xPos;
         this.bug.yPos = yPos;
         this.bug.timePos = timePos;
-        bugTimePosForVideoScrubbing = timePos;
+        sketchController.bugTimePosForVideoScrubbing = timePos;
     }
 
     drawBug(shade) {
@@ -331,7 +331,7 @@ class DrawDataConversation extends DrawData {
      * @param  {Char} pathName
      */
     testSpeakerToDraw(speaker, pathName) {
-        return speaker != null && speaker.show && (mode.isAllTalk || speaker.name === pathName);
+        return speaker != null && speaker.show && (sketchController.mode.isAllTalk || speaker.name === pathName);
     }
 
     /**
@@ -380,7 +380,7 @@ class DrawDataConversation extends DrawData {
         if (rectLength < this.rect.minPixelHeight) rectLength = this.rect.minPixelHeight; // if current turn is small set it to the minimum height
         const curPoint = this.getScaledConversationPointValues(point);
         let yPos;
-        if (mode.isAlignTalk) yPos = 0; // if conversation turn positioning is at top of screen
+        if (sketchController.mode.isAlignTalk) yPos = 0; // if conversation turn positioning is at top of screen
         else yPos = curPoint.scaledYPos - rectLength;
         // ***** TEST SET TEXT
         if (keys.overRect(curPoint.scaledXPos, yPos, rectWidth, rectLength)) this.recordConversationBubble(point, this.PLAN); // if over plan

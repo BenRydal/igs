@@ -32,23 +32,23 @@ class Keys {
         textAlign(LEFT, TOP);
         textFont(font_Lato, this.keyTextSize);
         this.drawPathSpeakerTitle();
-        if (mode.isMovement) this.drawPathSpeakerKeys(core.paths);
+        if (sketchController.mode.isMovement) this.drawPathSpeakerKeys(core.paths);
         else this.drawPathSpeakerKeys(core.speakerList);
         this.drawTimeline();
         if (this.overRect(0, 0, this.floorPlan.width, this.floorPlan.height)) this.drawFloorPlanSelector();
         if (this.overRect(this.timeline.start, 0, this.timeline.length, this.timeline.height)) this.drawSlicer(); // draw slicer line after calculating all movement
-        if (mode.isIntro) this.drawIntroMsg(); // draw intro message on program start up until mouse is pressed
+        if (sketchController.mode.isIntro) this.drawIntroMsg(); // draw intro message on program start up until mouse is pressed
     }
 
     drawPathSpeakerTitle() {
         let currXPos = this.timeline.start;
         let yPos = this.speakerKeysHeight - this.buttonWidth / 5;
         noStroke();
-        fill(mode.isMovement ? 0 : 150);
+        fill(sketchController.mode.isMovement ? 0 : 150);
         text("Movement", currXPos, yPos);
         fill(0);
         text(" | ", currXPos + textWidth("Movement"), yPos);
-        fill(!mode.isMovement ? 0 : 150);
+        fill(!sketchController.mode.isMovement ? 0 : 150);
         text("Conversation", currXPos + textWidth("Movement | "), yPos);
     }
 
@@ -77,7 +77,7 @@ class Keys {
         // timeline selection rectangle
         fill(150, 150);
         noStroke();
-        if (mode.isAnimate) rect(this.timeline.selectStart, this.timeline.height - this.timeline.tickHeight, map(animationCounter, 0, core.totalTimeInSeconds, this.timeline.start, this.timeline.end) - this.timeline.selectStart, 2 * (this.timeline.tickHeight));
+        if (sketchController.mode.isAnimate) rect(this.timeline.selectStart, this.timeline.height - this.timeline.tickHeight, map(sketchController.animationCounter, 0, core.totalTimeInSeconds, this.timeline.start, this.timeline.end) - this.timeline.selectStart, 2 * (this.timeline.tickHeight));
         else rect(this.timeline.selectStart, this.timeline.height - this.timeline.tickHeight, this.timeline.selectEnd - this.timeline.selectStart, 2 * (this.timeline.tickHeight));
         // timeline
         stroke(0);
@@ -151,8 +151,8 @@ class Keys {
     overMovementConversationButtons() {
         textSize(keys.keyTextSize);
         let currXPos = keys.timeline.start;
-        if (this.overRect(currXPos, keys.speakerKeysHeight, keys.buttonWidth + textWidth("Movement"), keys.buttonWidth)) mode.isMovement = true;
-        else if (this.overRect(currXPos + textWidth("Movement | "), keys.speakerKeysHeight, keys.buttonWidth + textWidth("Conversation"), keys.buttonWidth)) mode.isMovement = false;
+        if (this.overRect(currXPos, keys.speakerKeysHeight, keys.buttonWidth + textWidth("Movement"), keys.buttonWidth)) sketchController.mode.isMovement = true;
+        else if (this.overRect(currXPos + textWidth("Movement | "), keys.speakerKeysHeight, keys.buttonWidth + textWidth("Conversation"), keys.buttonWidth)) sketchController.mode.isMovement = false;
     }
 
     /**

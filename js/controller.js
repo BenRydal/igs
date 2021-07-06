@@ -34,7 +34,7 @@ class Controller {
      * @param  {.MP4 File} input
      */
     handleVideoFile(input) {
-        //if (mode.isVideoShow) sketchController.overVideoButton(); // Turn off video that if showing
+        //if (sketchController.mode.isVideoShow) sketchController.overVideoButton(); // Turn off video that if showing
         let file = input.files[0];
         input.value = ''; // reset input value so you can load same file again in browser
         let fileLocation = URL.createObjectURL(file);
@@ -52,11 +52,11 @@ class Controller {
     }
 
     handleAlignTalkButton() {
-        sketchController.setAlignTalk(!mode.isAlignTalk);
+        sketchController.setAlignTalk(!sketchController.mode.isAlignTalk);
     }
 
     handleAllTalkButton() {
-        sketchController.setAllTalk(!mode.isAllTalk);
+        sketchController.setAllTalk(!sketchController.mode.isAllTalk);
     }
 
     handleVideoButton() {
@@ -64,7 +64,7 @@ class Controller {
     }
 
     handleHowToButton() {
-        sketchController.setIntro(!mode.isIntro);
+        sketchController.setIntro(!sketchController.mode.isIntro);
     }
 
     /**
@@ -82,24 +82,25 @@ class Controller {
                 sketchController.loadExampleData(['data/example-1/', 'floorplan.png', 'conversation.csv', ['Teacher.csv'], 'Youtube', {
                     videoId: 'Iu0rxb-xkMk'
                 }]);
+                sketchController.setAllTalk(true); // not essential but setting matches each case differently
                 break;
             case "Example 2":
                 sketchController.loadExampleData(['data/example-2/', 'floorplan.png', 'conversation.csv', ['Teacher.csv', 'Sean.csv', 'Mei.csv', 'Cassandra.csv', 'Nathan.csv'], 'Youtube', {
                     videoId: 'OJSZCK4GPQY'
                 }]);
-                mode.isAllTalk = false; // not necessary, but fits example nicely
+                sketchController.setAllTalk(false);
                 break;
             case "Example 3":
                 sketchController.loadExampleData(['data/example-3/', 'floorplan.png', 'conversation.csv', ['Jordan.csv'], 'Youtube', {
                     videoId: 'iiMjfVOj8po'
                 }]);
-                mode.isAllTalk = false; // not necessary, but fits example nicely
+                sketchController.setAllTalk(false);
                 break;
             case "Example 4":
                 sketchController.loadExampleData(['data/example-4/', 'floorplan.png', 'conversation.csv', ['Lily.csv', 'Jeans.csv', 'Adhir.csv', 'Mae.csv', 'Blake.csv'], 'Youtube', {
                     videoId: 'pWJ3xNk1Zpg'
                 }]);
-                mode.isAllTalk = false; // not necessary, but fits example nicely
+                sketchController.setAllTalk(false);
                 break;
         }
     }

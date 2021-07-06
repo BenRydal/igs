@@ -31,21 +31,6 @@ const CSVHEADERS_MOVEMENT = ['time', 'x', 'y']; // String array indicating movem
 const CSVHEADERS_CONVERSATION = ['time', 'speaker', 'talk']; // String array indicating conversation file headers, data in time column shout be of type number, speaker column should be of type String, talk column should be not null or undefined
 let font_Lato;
 
-// MODES
-let mode = {
-    isMovement: true,
-    isAnimate: false,
-    isAlignTalk: false,
-    isAllTalk: true,
-    isIntro: true,
-    isVideoPlay: false,
-    isVideoShow: false
-}
-
-let animationCounter = 0; // counter to synchronize animation across all data
-let bugTimePosForVideoScrubbing = null; // Set in draw movement data and used to display correct video frame when scrubbing video
-
-
 function preload() {
     font_Lato = loadFont("data/fonts/Lato-Light.ttf");
 }
@@ -70,10 +55,10 @@ function draw() {
         if (testData.arrayIsLoaded(core.speakerList)) setMovementAndConversation();
         else setMovement();
     }
-    if (testData.dataIsLoaded(core.videoPlayer) && mode.isVideoShow) setVideoPosition();
+    if (testData.dataIsLoaded(core.videoPlayer) && sketchController.mode.isVideoShow) setVideoPosition();
     keys.drawKeys(); // draw keys last
-    if (mode.isAnimate) this.setUpAnimation();
-    if (mode.isAnimate || mode.isVideoPlay) loop();
+    if (sketchController.mode.isAnimate) this.setUpAnimation();
+    if (sketchController.mode.isAnimate || sketchController.mode.isVideoPlay) loop();
     else noLoop();
 }
 
@@ -109,27 +94,27 @@ function setUpAnimation() {
     const animationIncrementRateDivisor = 1000; // this divisor seems to work best
     // Get amount of time in seconds currently displayed
     const curTimeIntervalInSeconds = map(keys.timeline.selectEnd, keys.timeline.start, keys.timeline.end, 0, core.totalTimeInSeconds) - map(keys.timeline.selectStart, keys.timeline.start, keys.timeline.end, 0, core.totalTimeInSeconds);
-    // set increment value based on that value/divisor to keep constant mode.isAnimate speed regardless of time interval selected
+    // set increment value based on that value/divisor to keep constant sketchController.mode.isAnimate speed regardless of time interval selected
     const animationIncrementValue = curTimeIntervalInSeconds / animationIncrementRateDivisor;
-    if (animationCounter < map(keys.timeline.selectEnd, keys.timeline.start, keys.timeline.end, 0, core.totalTimeInSeconds)) animationCounter += animationIncrementValue;
-    else mode.isAnimate = false;
+    if (sketchController.animationCounter < map(keys.timeline.selectEnd, keys.timeline.start, keys.timeline.end, 0, core.totalTimeInSeconds)) sketchController.animationCounter += animationIncrementValue;
+    else sketchController.mode.isAnimate = false;
 }
 
 /**
  * Updates video position to curMousePosition and calls scrubbing method if not playing
  */
 function setVideoPosition() {
-    if (!mode.isVideoPlay) this.setVideoScrubbing();
+    if (!sketchController.mode.isVideoPlay) this.setVideoScrubbing();
     select('#moviePlayer').position(mouseX - core.videoPlayer.videoWidth, mouseY + 100);
 }
 /**
- * Updates time selected in video depending on mouse position or mode.isAnimate over timeline
+ * Updates time selected in video depending on mouse position or sketchController.mode.isAnimate over timeline
  */
 function setVideoScrubbing() {
-    if (mode.isAnimate) {
+    if (sketchController.mode.isAnimate) {
         const startValue = map(keys.timeline.selectStart, keys.timeline.start, keys.timeline.end, 0, Math.floor(core.videoPlayer.getVideoDuration())); // remap starting point to seek for video
         const endValue = map(keys.timeline.selectEnd, keys.timeline.start, keys.timeline.end, 0, Math.floor(core.videoPlayer.getVideoDuration())); // remap starting point to seek for video
-        const vPos = Math.floor(map(bugTimePosForVideoScrubbing, keys.timeline.start, keys.timeline.end, startValue, endValue));
+        const vPos = Math.floor(map(sketchController.bugTimePosForVideoScrubbing, keys.timeline.start, keys.timeline.end, startValue, endValue));
         core.videoPlayer.seekTo(vPos);
     } else if (keys.overRect(keys.timeline.start, 0, keys.timeline.end, keys.timeline.height)) {
         const mPos = map(mouseX, keys.timeline.start, keys.timeline.end, keys.timeline.selectStart, keys.timeline.selectEnd); // first map mouse to selected time values in GUI
