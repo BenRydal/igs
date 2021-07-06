@@ -8,7 +8,7 @@
     <script src="libs/papaparse.min.js"></script>
     <script src="js/main.js"></script>
     <script src="js/core.js"></script>
-    <script src="js/controller.js"></script>
+    <script src="js/dom-controller.js"></script>
     <script src="js/sketch-controller.js"></script>
     <script src="js/process-data.js"></script>
     <script src="js/test-data.js"></script>
@@ -28,7 +28,7 @@
 <body>
     <div class="introBar">
         <form action="/action_page.php">
-            <select id="examples" name="examples" onchange="controller.handleExampleDropDown()">
+            <select id="examples" name="examples" onchange="domController.handleExampleDropDown()">
                 <option disabled selected value> -- Select an Option -- </option>
                 <option value="Load Data">LOAD DATA</option>
                 <option value="Example 1">EXAMPLE 1: CLASSROOM SCIENCE LESSON</option>
@@ -38,43 +38,43 @@
             </select>
 
             <button type="button" id="animateButton" class="inputfile"
-                onclick="controller.handleAnimateButton()"></button>
+                onclick="domController.handleAnimateButton()"></button>
             <label for="animateButton">Animate</label>
 
             <button type="button" id="alignButton" class="inputfile"
-                onclick="controller.handleAlignTalkButton()"></button>
+                onclick="domController.handleAlignTalkButton()"></button>
             <label for="alignButton">Align Talk</label>
 
             <button type="button" id="allTalkButton" class="inputfile"
-                onclick="controller.handleAllTalkButton()"></button>
+                onclick="domController.handleAllTalkButton()"></button>
             <label for="allTalkButton">All Talk</label>
 
-            <button type="button" id="videoButton" class="inputfile" onclick="controller.handleVideoButton()"></button>
+            <button type="button" id="videoButton" class="inputfile" onclick="domController.handleVideoButton()"></button>
             <label for="videoButton">Video</label>
 
-            <button type="button" id="howToButton" class="inputfile" onclick="controller.handleHowToButton()"></button>
+            <button type="button" id="howToButton" class="inputfile" onclick="domController.handleHowToButton()"></button>
             <label for="howToButton">How to Use</label>
         </form>
     </div>
     <div class="inputBar">
         <form action="/action_page.php">
             <input type="file" name="file" id="inputFloorPlan" name="file" class="inputfile" accept=".png, .jpg, .jpeg"
-                onchange="controller.handleFloorPlanFile(this)">
+                onchange="domController.handleFloorPlanFile(this)">
             <label for="inputFloorPlan">Floor Plan Image (PNG/JPG)</label>
 
             <input type="file" name="file" id="inputMovement" name="file" class="inputfile" multiple accept=".csv"
-                onchange="controller.handleMovementFiles(this)">
+                onchange="domController.handleMovementFiles(this)">
             <label for="inputMovement">Movement Files (CSV)</label>
 
             <input type="file" name="file" id="inputConversation" class="inputfile" accept=".csv"
-                onchange="controller.handleConversationFile(this)">
+                onchange="domController.handleConversationFile(this)">
             <label for="inputConversation">Conversation File (CSV)</label>
 
             <input type="file" name="file" id="inputVideo" class="inputfile" accept=".mp4"
-                onchange="controller.handleVideoFile(this)">
+                onchange="domController.handleVideoFile(this)">
             <label for="inputVideo">Video File (MP4)</label>
 
-            <button type="button" id="clearButton" class="inputfile" onclick="controller.handleClearButton()"></button>
+            <button type="button" id="clearButton" class="inputfile" onclick="domController.handleClearButton()"></button>
             <label for="clearButton">Clear Data</label>
         </form>
     </div>

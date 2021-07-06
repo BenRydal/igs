@@ -38,6 +38,10 @@ class SketchController {
 
     }
 
+    setIsAnimate(value) {
+        this.mode.isAnimate = value;
+    }
+
     setAlignTalk(value) {
         this.mode.isAlignTalk = value;
     }
@@ -72,13 +76,22 @@ class SketchController {
      * Toggle on and off this.mode.isAnimate mode and set/end global this.mode.isAnimate counter variable
      */
     overAnimateButton() {
-        if (this.mode.isAnimate) {
-            this.mode.isAnimate = false;
-            this.animationCounter = map(keys.timeline.selectEnd, keys.timeline.start, keys.timeline.end, 0, core.totalTimeInSeconds); // set to keys.timeline.selectEnd mapped value
-        } else {
-            this.mode.isAnimate = true;
-            this.animationCounter = map(keys.timeline.selectStart, keys.timeline.start, keys.timeline.end, 0, core.totalTimeInSeconds); // set to keys.timeline.selectStart mapped value
-        }
+        if (this.mode.isAnimate) this.animationCounter = map(keys.timeline.selectEnd, keys.timeline.start, keys.timeline.end, 0, core.totalTimeInSeconds); // set to keys.timeline.selectEnd mapped value
+        else this.animationCounter = map(keys.timeline.selectStart, keys.timeline.start, keys.timeline.end, 0, core.totalTimeInSeconds); // set to keys.timeline.selectStart mapped value
+        this.setIsAnimate(!this.mode.isAnimate);
+    }
+
+    /**
+     * Updates animation mode variable depending on animation state
+     */
+    checkAnimation() {
+        const animationIncrementRateDivisor = 1000; // this divisor seems to work best
+        // Get amount of time in seconds currently displayed
+        const curTimeIntervalInSeconds = map(keys.timeline.selectEnd, keys.timeline.start, keys.timeline.end, 0, core.totalTimeInSeconds) - map(keys.timeline.selectStart, keys.timeline.start, keys.timeline.end, 0, core.totalTimeInSeconds);
+        // set increment value based on that value/divisor to keep constant sketchController.mode.isAnimate speed regardless of time interval selected
+        const animationIncrementValue = curTimeIntervalInSeconds / animationIncrementRateDivisor;
+        if (sketchController.animationCounter < map(keys.timeline.selectEnd, keys.timeline.start, keys.timeline.end, 0, core.totalTimeInSeconds)) sketchController.animationCounter += animationIncrementValue;
+        else sketchController.setIsAnimate(false);
     }
 
     /**

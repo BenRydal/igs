@@ -1,4 +1,4 @@
-class Controller {
+class DomController {
 
     /**
      * Parses user inputted floor plan image for processing

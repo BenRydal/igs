@@ -17,7 +17,7 @@ https://etd.library.vanderbilt.edu/available/etd-03212018-140140/unrestricted/Sh
  * Classes/modules treated as singletons with respective .js file/module
  */
 let core; // core program variables and factory functions
-let controller; // handles DOM/button user interaction and initial data parsing
+let domController; // handles DOM/button user interaction and initial data parsing
 let sketchController;
 let processData; // handles all data processing
 let testData; // data loading/sampling tests
@@ -39,7 +39,7 @@ function setup() {
     canvas = createCanvas(window.innerWidth, window.innerHeight, P2D);
     core = new Core();
     keys = new Keys();
-    controller = new Controller();
+    domController = new DomController();
     sketchController = new SketchController();
     processData = new ProcessData();
     testData = new TestData();
@@ -57,7 +57,7 @@ function draw() {
     }
     if (testData.dataIsLoaded(core.videoPlayer) && sketchController.mode.isVideoShow) setVideoPosition();
     keys.drawKeys(); // draw keys last
-    if (sketchController.mode.isAnimate) this.setUpAnimation();
+    if (sketchController.mode.isAnimate) sketchController.checkAnimation();
     if (sketchController.mode.isAnimate || sketchController.mode.isVideoPlay) loop();
     else noLoop();
 }
@@ -85,19 +85,6 @@ function setMovement() {
     for (const path of core.paths) {
         if (path.show) drawMovementData.setData(path); // draw after conversation so bug displays on top
     }
-}
-
-/**
- * Updates animation mode variable depending on animation state
- */
-function setUpAnimation() {
-    const animationIncrementRateDivisor = 1000; // this divisor seems to work best
-    // Get amount of time in seconds currently displayed
-    const curTimeIntervalInSeconds = map(keys.timeline.selectEnd, keys.timeline.start, keys.timeline.end, 0, core.totalTimeInSeconds) - map(keys.timeline.selectStart, keys.timeline.start, keys.timeline.end, 0, core.totalTimeInSeconds);
-    // set increment value based on that value/divisor to keep constant sketchController.mode.isAnimate speed regardless of time interval selected
-    const animationIncrementValue = curTimeIntervalInSeconds / animationIncrementRateDivisor;
-    if (sketchController.animationCounter < map(keys.timeline.selectEnd, keys.timeline.start, keys.timeline.end, 0, core.totalTimeInSeconds)) sketchController.animationCounter += animationIncrementValue;
-    else sketchController.mode.isAnimate = false;
 }
 
 /**
