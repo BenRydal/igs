@@ -40,7 +40,11 @@ class Core {
      * @param  {VideoPlayer Specific Params} params
      */
     updateVideo(platform, params) {
-        if (testData.dataIsLoaded(this.videoPlayer)) this.videoPlayer.destroy();
+        if (testData.dataIsLoaded(this.videoPlayer)) {
+            mode.isVideoPlay = false;
+            mode.isVideoShow = false;
+            this.videoPlayer.destroy(); // important to set this
+        }
         switch (platform) {
             case "Youtube":
                 this.videoPlayer = new YoutubePlayer(params);

@@ -108,4 +108,45 @@ class ProcessData {
             talkTurn
         }
     }
+
+    /**
+     * Handles asynchronous loading of example data from a selected example array of data
+     * Process conversation then movement files
+     * @param  {[String directory, String floorPlan image file, String conversation File, String movement File[], String video platform, video params (see Video Player Interface)]} params
+     */
+    async parseExampleData(params) {
+        await this.getExampleConversationFile(params[0], params[2]).then(this.parseConversationFile);
+        await this.getExampleMovementFiles(params[0], params[3]).then(this.parseMovementFiles);
+    }
+
+    /**
+     * Handles async loading of conversation file
+     * NOTE: folder and filename are separated for convenience later in program
+     * @param  {String} folder
+     * @param  {String} fileName
+     */
+    async getExampleConversationFile(folder, fileName) {
+        const response = await fetch(new Request(folder + fileName));
+        const buffer = await response.arrayBuffer();
+        return new File([buffer], fileName, {
+            type: "text/csv",
+        });
+    }
+    /**
+     * Handles async loading of movement file
+     * NOTE: folder and filename are separated for convenience later in program
+     * @param  {String} folder
+     * @param  {String} fileNames
+     */
+    async getExampleMovementFiles(folder, fileNames) {
+        let fileList = [];
+        for (const name of fileNames) {
+            const response = await fetch(new Request(folder + name));
+            const buffer = await response.arrayBuffer();
+            fileList.push(new File([buffer], name, {
+                type: "text/csv",
+            }));
+        }
+        return fileList;
+    }
 }

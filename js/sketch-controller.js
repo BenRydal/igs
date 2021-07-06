@@ -98,4 +98,23 @@ class SketchController {
             mode.isVideoPlay = true;
         }
     }
+
+    loadUserData() {
+        this.checkSettings();
+        core.clearAllData();
+    }
+    /**
+     * @param  {[String directory, String floorPlan image file, String conversation File, String movement File[], String video platform, video params (see Video Player Interface)]} params
+     */
+    loadExampleData(params) {
+        this.checkSettings();
+        core.updateVideo(params[4], params[5]);
+        core.updateFloorPlan(params[0] + params[1]);
+        processData.parseExampleData(params);
+    }
+
+    checkSettings() {
+        if (mode.isVideoShow) sketchController.overVideoButton(); // Turn off video that if showing
+        mode.isIntro = false; // Hide intro msg if showing
+    }
 }
