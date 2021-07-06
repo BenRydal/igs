@@ -83,6 +83,10 @@ class YoutubePlayer {
         return this.player.getDuration();
     }
 
+    updatePos(xPos, yPos, offset) {
+        select('#moviePlayer').position(xPos - this.videoWidth, yPos + offset);
+    }
+
     destroy() {
         this.player.destroy(); // destroy the player object
         this.movie.remove(); // remove the div element
@@ -150,6 +154,10 @@ class P5FilePlayer {
 
     getVideoDuration() {
         return this.movie.duration();
+    }
+
+    updatePos(xPos, yPos, offset) {
+        select('#moviePlayer').position(xPos - this.videoWidth, yPos + offset);
     }
 
     destroy() {

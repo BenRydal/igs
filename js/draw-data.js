@@ -255,7 +255,7 @@ class DrawDataMovement extends DrawData {
         this.bug.xPos = xPos;
         this.bug.yPos = yPos;
         this.bug.timePos = timePos;
-        sketchController.bugTimePosForVideoScrubbing = timePos;
+        sketchController.bugTimeForVideoScrub = timePos;
     }
 
     drawBug(shade) {

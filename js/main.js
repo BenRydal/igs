@@ -55,7 +55,7 @@ function draw() {
         if (testData.arrayIsLoaded(core.speakerList)) setMovementAndConversation();
         else setMovement();
     }
-    if (testData.dataIsLoaded(core.videoPlayer) && sketchController.mode.isVideoShow) setVideoPosition();
+    if (testData.dataIsLoaded(core.videoPlayer)) sketchController.checkVideo();
     keys.drawKeys(); // draw keys last
     if (sketchController.mode.isAnimate) sketchController.checkAnimation();
     if (sketchController.mode.isAnimate || sketchController.mode.isVideoPlay) loop();
@@ -86,32 +86,6 @@ function setMovement() {
         if (path.show) drawMovementData.setData(path); // draw after conversation so bug displays on top
     }
 }
-
-/**
- * Updates video position to curMousePosition and calls scrubbing method if not playing
- */
-function setVideoPosition() {
-    if (!sketchController.mode.isVideoPlay) this.setVideoScrubbing();
-    select('#moviePlayer').position(mouseX - core.videoPlayer.videoWidth, mouseY + 100);
-}
-/**
- * Updates time selected in video depending on mouse position or sketchController.mode.isAnimate over timeline
- */
-function setVideoScrubbing() {
-    if (sketchController.mode.isAnimate) {
-        const startValue = map(keys.timeline.selectStart, keys.timeline.start, keys.timeline.end, 0, Math.floor(core.videoPlayer.getVideoDuration())); // remap starting point to seek for video
-        const endValue = map(keys.timeline.selectEnd, keys.timeline.start, keys.timeline.end, 0, Math.floor(core.videoPlayer.getVideoDuration())); // remap starting point to seek for video
-        const vPos = Math.floor(map(sketchController.bugTimePosForVideoScrubbing, keys.timeline.start, keys.timeline.end, startValue, endValue));
-        core.videoPlayer.seekTo(vPos);
-    } else if (keys.overRect(keys.timeline.start, 0, keys.timeline.end, keys.timeline.height)) {
-        const mPos = map(mouseX, keys.timeline.start, keys.timeline.end, keys.timeline.selectStart, keys.timeline.selectEnd); // first map mouse to selected time values in GUI
-        // must floor vPos to prevent double finite error
-        const vPos = Math.floor(map(mPos, keys.timeline.start, keys.timeline.end, 0, Math.floor(core.videoPlayer.getVideoDuration())));
-        core.videoPlayer.seekTo(vPos);
-        core.videoPlayer.pause(); // Add to prevent accidental video playing that seems to occur
-    }
-}
-
 
 function mousePressed() {
     sketchController.handleMousePressed();

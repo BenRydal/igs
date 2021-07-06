@@ -15,8 +15,6 @@ Move videoIsShowing/playing and overvideobutton into videoPlayer?
 
     // all the "set methods" THEN p5 sketch itself deals with all the mouse handling??
     // setters/getters still all in here SO this is where things change and sketch is where flow is handled
-
-    // NEED getters/setters for all modes!--COULD have one for array?
     // COULD pass keys object/videoPlayer reference to all of these methods???
 */
 
@@ -34,7 +32,7 @@ class SketchController {
             isVideoShow: false
         }
         this.animationCounter = 0; // counter to synchronize animation across all data
-        this.bugTimePosForVideoScrubbing = null; // Set in draw movement data and used to display correct video frame when scrubbing video
+        this.bugTimeForVideoScrub = null; // Set in draw movement data and used to display correct video frame when scrubbing video
 
     }
 
@@ -92,6 +90,31 @@ class SketchController {
         const animationIncrementValue = curTimeIntervalInSeconds / animationIncrementRateDivisor;
         if (sketchController.animationCounter < map(keys.timeline.selectEnd, keys.timeline.start, keys.timeline.end, 0, core.totalTimeInSeconds)) sketchController.animationCounter += animationIncrementValue;
         else sketchController.setIsAnimate(false);
+    }
+
+    checkVideo() {
+        if (this.mode.isVideoShow) {
+            core.videoPlayer.updatePos(mouseX, mouseY, 100);
+            if (!this.mode.isVideoPlay) this.setVideoScrubbing();
+        }
+    }
+
+    /**
+     * Updates time selected in video depending on mouse position or sketchController.mode.isAnimate over timeline
+     */
+    setVideoScrubbing() {
+        if (this.mode.isAnimate) {
+            const vPos = Math.floor(map(sketchController.bugTimeForVideoScrub, keys.timeline.start, keys.timeline.end, this.mapToVideoDuration(keys.timeline.selectStart), this.mapToVideoDuration(keys.timeline.selectEnd)));
+            core.videoPlayer.seekTo(vPos);
+        } else if (keys.overRect(keys.timeline.start, 0, keys.timeline.end, keys.timeline.height)) {
+            const vPos = Math.floor(this.mapToVideoDuration(map(mouseX, keys.timeline.start, keys.timeline.end, keys.timeline.selectStart, keys.timeline.selectEnd)));
+            core.videoPlayer.seekTo(vPos);
+            core.videoPlayer.pause(); // Add to prevent accidental video playing that seems to occur
+        }
+    }
+
+    mapToVideoDuration(value) {
+        return map(value, keys.timeline.start, keys.timeline.end, 0, Math.floor(core.videoPlayer.getVideoDuration()));
     }
 
     /**
