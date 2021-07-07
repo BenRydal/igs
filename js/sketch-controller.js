@@ -126,8 +126,9 @@ class SketchController {
             core.videoPlayer.pause();
             this.setVideoPlay(false);
         } else {
+            const tPos = this.mapFromPixelToVideoTime(this.mapFromPixelToSelectedTime(mouseX));
             core.videoPlayer.play();
-            core.videoPlayer.seekTo(Math.floor(this.mapFromPixelToVideoTime(this.mapFromPixelToSelectedTime(mouseX))));
+            core.videoPlayer.seekTo(tPos);
             this.setVideoPlay(true);
         }
     }
@@ -193,7 +194,7 @@ class SketchController {
     }
 
     mapFromPixelToVideoTime(value) {
-        return map(value, keys.timeline.start, keys.timeline.end, 0, Math.floor(core.videoPlayer.getVideoDuration())); // must floor vPos to prevent double finite error
+        return Math.floor(map(value, keys.timeline.start, keys.timeline.end, 0, Math.floor(core.videoPlayer.getVideoDuration()))); // must floor vPos to prevent double finite error
     }
 
     mapFromPixelToSelectedTime(value) {
