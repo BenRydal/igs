@@ -41,12 +41,14 @@ class Core {
      */
     updateVideo(platform, params) {
         if (testData.dataIsLoaded(this.videoPlayer)) this.clearVideo();
+        const videoWidth = width / 5;
+        const videoHeight = width / 6;
         switch (platform) {
             case "Youtube":
-                this.videoPlayer = new YoutubePlayer(params);
+                this.videoPlayer = new YoutubePlayer(params, videoWidth, videoHeight);
                 break;
             case "File":
-                this.videoPlayer = new P5FilePlayer(params);
+                this.videoPlayer = new P5FilePlayer(params, videoWidth, videoHeight);
                 break;
         }
     }

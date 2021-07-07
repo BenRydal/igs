@@ -7,11 +7,11 @@ class YoutubePlayer {
      * Include the following script in head of the format: <script type = "text/javascript" src = "https://www.youtube.com/iframe_api"> < /script>
      * @param  {videoId: 'your_videoId_here'} params
      */
-    constructor(params) {
+    constructor(params, videoWidth, videoHeight) {
         this.targetId = 'moviePlayer';
         this.videoId = params['videoId'];
-        this.videoWidth = width / 5;
-        this.videoHeight = width / 6;
+        this.videoWidth = videoWidth;
+        this.videoHeight = videoHeight;
         this.movie = createDiv();
         this.setMovieDiv();
         this.initializePlayer();
@@ -21,7 +21,7 @@ class YoutubePlayer {
         this.movie.id(this.targetId);
         this.movie.size(this.videoWidth, this.videoHeight);
         this.movie.hide();
-        this.movie.position(keys.timeline.start, 0);
+        this.movie.position(0, 0);
     }
 
 
@@ -98,9 +98,9 @@ class P5FilePlayer {
     /**
      * @param  {fileName: 'your_fileLocation_here'} params
      */
-    constructor(params) {
-        this.videoWidth = width / 5;
-        this.videoHeight = width / 6;
+    constructor(params, videoWidth, videoHeight) {
+        this.videoWidth = videoWidth;
+        this.videoHeight = videoHeight;
         //this.movieDiv = sketch.createVideo(fileLocation, () => {
         this.movie = createVideo(params['fileName'], () => {
             this.movie.onload = () => URL.revokeObjectURL(this.src);
@@ -115,7 +115,7 @@ class P5FilePlayer {
         this.movie.id('moviePlayer');
         this.movie.size(width / 5, width / 6);
         this.movie.hide();
-        this.movie.position(keys.timeline.start, 0);
+        this.movie.position(0, 0);
     }
 
     show() {

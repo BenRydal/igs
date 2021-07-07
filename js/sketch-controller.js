@@ -48,9 +48,6 @@ class SketchController {
         if (testData.dataIsLoaded(core.videoPlayer)) this.toggleVideoShowHide();
     }
 
-    /**
-     * Toggle on and off this.mode.isAnimate mode and set/end global this.mode.isAnimate counter variable
-     */
     overAnimateButton() {
         if (this.mode.isAnimate) this.animationCounter = this.mapFromPixelToTotalTime(keys.timeline.selectEnd);
         else this.animationCounter = this.mapFromPixelToTotalTime(keys.timeline.selectStart);
