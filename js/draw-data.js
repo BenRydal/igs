@@ -35,38 +35,33 @@ class DrawDataMovement {
      * @param  {Color} shade
      */
     draw(view, path, shade) {
-        strokeWeight(this.smallPathWeight); // set small pathweight to start
-        stroke(shade);
-        noFill(); // important for curve drawing
+        this.setStartinglineStyle(shade);
         let stop_Mode = false; // mode indicating if stopped or moving measured by change from last point
         beginShape();
         // Start at 1 to test current and prior points for drawing
         for (let i = 1; i < path.length; i++) {
-            let curPoint = this.getScaledMovementPointValues(path[i], view); // get current and prior points for comparison
-            let priorPoint = this.getScaledMovementPointValues(path[i - 1], view);
+            const curPoint = this.getScaledMovementPointValues(path[i], view); // get current and prior points for comparison
+            const priorPoint = this.getScaledMovementPointValues(path[i - 1], view);
             if (keys.overTimeline(curPoint.pixelTime) && keys.overFloorPlan(curPoint.scaledXPos, curPoint.scaledYPos) && sketchController.testAnimation(curPoint.pixelTime)) {
+                if (view === SPACETIME) this.testPointForBug(curPoint.scaledPixelTime, curPoint.scaledXPos, curPoint.scaledYPos);
                 if (curPoint.scaledXPos === priorPoint.scaledXPos && curPoint.scaledYPos === priorPoint.scaledYPos) {
                     if (stop_Mode) { // if already drawing in stop mode, continue it
                         curveVertex(curPoint.scaledSpaceTimeXPos, curPoint.scaledYPos);
-                        if (view === SPACETIME) this.testPointForBug(curPoint.scaledPixelTime, curPoint.scaledXPos, curPoint.scaledYPos);
                     } else { // if not in drawing stop mode, begin it
                         this.startEndShape(priorPoint, this.largePathWeight, shade);
-                        if (view === SPACETIME) this.testPointForBug(curPoint.scaledSpaceTimeXPos, curPoint.scaledXPos, curPoint.scaledYPos);
                         stop_Mode = true;
                     }
                 } else {
                     if (stop_Mode) { // if drawing in stop mode, end it
                         this.startEndShape(priorPoint, this.smallPathWeight, shade);
-                        if (view === SPACETIME) this.testPointForBug(curPoint.scaledSpaceTimeXPos, curPoint.scaledXPos, curPoint.scaledYPos);
                         stop_Mode = false;
                     } else {
                         curveVertex(curPoint.scaledSpaceTimeXPos, curPoint.scaledYPos);
-                        if (view === SPACETIME) this.testPointForBug(curPoint.scaledSpaceTimeXPos, curPoint.scaledXPos, curPoint.scaledYPos);
                     }
                 }
             }
         }
-        endShape(); // endshape in case still drawing
+        endShape(); // end shape in case still drawing
     }
 
     /**
@@ -78,36 +73,37 @@ class DrawDataMovement {
      * @param  {Color} shade
      */
     drawWithCursorHighlight(view, path, shade) {
-        strokeWeight(this.smallPathWeight);
-        stroke(this.colorGray);
-        noFill(); // important for curve drawing
+        this.setStartinglineStyle(this.colorGray);
         let over_Cursor_Mode = false;
         beginShape();
         for (const point of path) {
-            let curPoint = this.getScaledMovementPointValues(point, view);
+            const curPoint = this.getScaledMovementPointValues(point, view);
             if (keys.overTimeline(curPoint.pixelTime) && keys.overFloorPlan(curPoint.scaledXPos, curPoint.scaledYPos) && sketchController.testAnimation(curPoint.pixelTime)) {
+                if (view == SPACETIME) this.testPointForBug(curPoint.scaledPixelTime, curPoint.scaledXPos, curPoint.scaledYPos);
                 if (keys.overCursor(curPoint.scaledXPos, curPoint.scaledYPos)) {
                     if (over_Cursor_Mode) { // if already drawing in cursor mode, continue it
                         curveVertex(curPoint.scaledSpaceTimeXPos, curPoint.scaledYPos);
-                        if (view == SPACETIME) this.testPointForBug(curPoint.scaledPixelTime, curPoint.scaledXPos, curPoint.scaledYPos);
                     } else { // if not in drawing cursor mode, begin it
                         this.startEndShape(curPoint, this.largePathWeight, shade);
-                        if (view === SPACETIME) this.testPointForBug(curPoint.scaledSpaceTimeXPos, curPoint.scaledXPos, curPoint.scaledYPos);
                         over_Cursor_Mode = true;
                     }
                 } else {
                     if (over_Cursor_Mode) { // if drawing in cursor mode, end it
                         this.startEndShape(curPoint, this.smallPathWeight, this.colorGray);
-                        if (view === SPACETIME) this.testPointForBug(curPoint.scaledSpaceTimeXPos, curPoint.scaledXPos, curPoint.scaledYPos);
                         over_Cursor_Mode = false;
                     } else {
                         curveVertex(curPoint.scaledSpaceTimeXPos, curPoint.scaledYPos);
-                        if (view === SPACETIME) this.testPointForBug(curPoint.scaledSpaceTimeXPos, curPoint.scaledXPos, curPoint.scaledYPos);
                     }
                 }
             }
         }
         endShape();
+    }
+
+    setStartinglineStyle(lineColor) {
+        strokeWeight(this.smallPathWeight);
+        stroke(lineColor);
+        noFill(); // important for curve drawing
     }
     /**
      * Returns scaled values for movement point
@@ -151,37 +147,19 @@ class DrawDataMovement {
         curveVertex(scaledPoint.scaledSpaceTimeXPos, scaledPoint.scaledYPos);
     }
 
-    /**
-     * Tests for 3 modes: sketchController.mode.isAnimate, video and mouse over space-time view
-     * For current mode, tests parameter values to set/record bug correctly
-     * @param  {Number/Float} scaledTimeToTest
-     * @param  {Number/Float} xPos
-     * @param  {Number/Float} yPos
-     */
     testPointForBug(scaledTimeToTest, xPos, yPos) {
-        if (sketchController.mode.isAnimate) this.recordBug(scaledTimeToTest, xPos, yPos); // always return true to set last/most recent point as the bug
+        if (sketchController.mode.isAnimate) this.recordBug(scaledTimeToTest, xPos, yPos, NO_DATA); // always return true to set last/most recent point as the bug
         else if (sketchController.mode.isVideoPlay) {
-            // Separate this test out from 3 mode tests to make sure if this is not true know other mode tests are run when video is playing
-            if (this.testVideoForBugPoint(scaledTimeToTest)) this.recordBug(scaledTimeToTest, xPos, yPos);
-        } else if (keys.overRect(keys.timeline.start, 0, keys.timeline.length, keys.timeline.height) && this.testMouseForBugPoint(scaledTimeToTest)) this.recordBug(mouseX, xPos, yPos);
-        return false;
+            const videoX = map(core.videoPlayer.getCurrentTime(), 0, core.totalTimeInSeconds, keys.timeline.start, keys.timeline.end);
+            const scaledVideoX = map(videoX, keys.timeline.selectStart, keys.timeline.selectEnd, keys.timeline.start, keys.timeline.end);
+            if (this.compareValuesBySpacing(scaledVideoX, scaledTimeToTest, this.bug.lengthToCompare)) this.recordBug(scaledTimeToTest, xPos, yPos, Math.abs(scaledVideoX - scaledTimeToTest));
+        } else if (keys.overRect(keys.timeline.start, 0, keys.timeline.length, keys.timeline.height) && this.compareValuesBySpacing(mouseX, scaledTimeToTest, this.bug.lengthToCompare)) this.recordBug(mouseX, xPos, yPos, Math.abs(mouseX - scaledTimeToTest));
     }
 
-    testVideoForBugPoint(scaledTimeToTest) {
-        const videoX = map(core.videoPlayer.getCurrentTime(), 0, core.totalTimeInSeconds, keys.timeline.start, keys.timeline.end);
-        const scaledVideoX = map(videoX, keys.timeline.selectStart, keys.timeline.selectEnd, keys.timeline.start, keys.timeline.end);
-        if (scaledVideoX >= scaledTimeToTest - this.bug.lengthToCompare && scaledVideoX <= scaledTimeToTest + this.bug.lengthToCompare) {
-            this.bug.lengthToCompare = Math.abs(scaledVideoX - scaledTimeToTest);
-            return true;
-        } else return false;
+    compareValuesBySpacing(value1, value2, spacing) {
+        return value1 >= value2 - spacing && value1 <= value2 + spacing;
     }
 
-    testMouseForBugPoint(scaledTimeToTest) {
-        if (mouseX >= scaledTimeToTest - this.bug.lengthToCompare && mouseX <= scaledTimeToTest + this.bug.lengthToCompare) {
-            this.bug.lengthToCompare = Math.abs(mouseX - scaledTimeToTest);
-            return true;
-        } else return false;
-    }
 
     resetBug() {
         this.bug.xPos = NO_DATA;
@@ -190,10 +168,11 @@ class DrawDataMovement {
         this.bug.lengthToCompare = keys.timeline.length;
     }
 
-    recordBug(timePos, xPos, yPos) {
+    recordBug(timePos, xPos, yPos, lengthToCompare) {
         this.bug.xPos = xPos;
         this.bug.yPos = yPos;
         this.bug.timePos = timePos;
+        this.bug.lengthToCompare = lengthToCompare;
         sketchController.bugTimeForVideoScrub = timePos;
     }
 
@@ -214,10 +193,7 @@ class DrawDataConversation {
             point: NO_DATA, // stores one ConversationPoint object for selected conversation turn
             view: PLAN // view indicating if user selected conversation in floor plan or space-time views
         };
-        /**
-         * Rect represents key parameters used in drawRects method to scale rectangles
-         */
-        this.rect = {
+        this.rect = { // Rect represents key parameters used in drawRects method to scale rectangles
             minPixelHeight: 3, // for really short conversation turns set a minimum pixel height
             minPixelWidth: map(core.totalTimeInSeconds, 0, 3600, 10, 1, true), // map to inverse, values constrained between 10 and 1 (pixels)
             maxPixelWidth: 10
@@ -247,19 +223,13 @@ class DrawDataConversation {
     setRects(conversation, pathName) {
         for (const point of conversation) {
             const curPoint = this.getScaledConversationPointValues(point);
-            if (this.testConversationPointToDraw(curPoint)) {
+            if (sketchController.testConversationPointToDraw(curPoint)) {
                 const curSpeaker = this.getSpeakerFromSpeakerList(point.speaker); // get speaker object from global list equivalent to the current speaker of point
                 if (this.testSpeakerToDraw(curSpeaker, pathName)) this.drawRects(point, curSpeaker.color); // draws all rects
             }
         }
     }
-    /**
-     * Test if point is in user view
-     * @param  {ConversationPoint} curPoint
-     */
-    testConversationPointToDraw(curPoint) {
-        return keys.overTimeline(curPoint.pixelTime) && keys.overFloorPlan(curPoint.scaledXPos, curPoint.scaledYPos) && sketchController.testAnimation(curPoint.pixelTime) && keys.overFloorPlanAndCursor(curPoint.scaledXPos, curPoint.scaledYPos);
-    }
+
     /**
      * Tests whether to draw selected speaker
      * Speaker must be showing and either program on all talk mode or speaker matches pathname
@@ -307,7 +277,6 @@ class DrawDataConversation {
      * @param  {Color} curColor
      */
     drawRects(point, curColor) {
-        // ***** SET FONTS/STROKES/CONSTANTS
         noStroke(); // reset if setDrawText is called previously in loop
         textFont(font_Lato, keys.keyTextSize);
         textSize(1); // Controls measurement of pixels in a string that corredponds to vertical pixel height of rectangle.

@@ -80,6 +80,14 @@ class SketchController {
     }
 
     /**
+     * Test if point is in user view
+     * @param  {ConversationPoint} curPoint
+     */
+    testConversationPointToDraw(curPoint) {
+        return keys.overTimeline(curPoint.pixelTime) && keys.overFloorPlan(curPoint.scaledXPos, curPoint.scaledYPos) && this.testAnimation(curPoint.pixelTime) && keys.overFloorPlanAndCursor(curPoint.scaledXPos, curPoint.scaledYPos);
+    }
+
+    /**
      * Toggle on and off this.mode.isAnimate mode and set/end global this.mode.isAnimate counter variable
      */
     overAnimateButton() {
