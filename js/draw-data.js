@@ -433,6 +433,7 @@ class DrawDataConversation extends DrawData {
      */
     drawTextBox() {
         // ***** SET FONTS/STROKES/CONSTANTS
+        textFont(font_Lato, keys.keyTextSize);
         const curPoint = this.getScaledConversationPointValues(this.conversationBubble.point); // get scaled values for selected point
         const textBox = {
             width: width / 3, // width of text and textbox drawn
@@ -441,7 +442,6 @@ class DrawDataConversation extends DrawData {
             rectSpacing: width / 28.2, // distance from text rectangle of textbox
         }
         textBox.height = textBox.textLeading * (ceil(textWidth(this.conversationBubble.point.talkTurn) / textBox.width)); // lines of talk in a text box rounded up
-        textFont(font_Lato, keys.keyTextSize);
         textLeading(textBox.textLeading);
         let xPos; // set xPos, constrain prevents drawing off screen
         if (this.conversationBubble.view === PLAN) xPos = constrain(curPoint.scaledXPos - textBox.width / 2, textBox.boxSpacing, width - textBox.width - textBox.boxSpacing);
