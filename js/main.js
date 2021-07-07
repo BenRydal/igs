@@ -60,9 +60,8 @@ function draw() {
     }
     if (testData.dataIsLoaded(core.videoPlayer)) sketchController.updateVideoDisplay();
     keys.drawKeys(); // draw keys last
-    if (sketchController.mode.isAnimate) sketchController.updateAnimation();
-    if (sketchController.mode.isAnimate || sketchController.mode.isVideoPlay) loop();
-    else noLoop();
+    sketchController.updateAnimation();
+    sketchController.updateLoop();
 }
 
 /**
@@ -73,7 +72,7 @@ function setMovementAndConversation() {
     const drawMovementData = new DrawDataMovement();
     for (const path of core.paths) {
         if (path.show) {
-            drawConversationData.setData(path);
+            drawConversationData.setData(path, core.speakerList);
             drawMovementData.setData(path); // draw after conversation so bug displays on top
         }
     }
@@ -92,19 +91,19 @@ function setMovement() {
 
 function mousePressed() {
     sketchController.handleMousePressed();
-    loop();
+    sketchController.startLoop();
 }
 
 function mouseDragged() {
     sketchController.handleMouseDragged();
-    loop();
+    sketchController.startLoop();
 }
 
 function mouseReleased() {
     sketchController.handleMouseReleased();
-    loop();
+    sketchController.startLoop();
 }
 
 function mouseMoved() {
-    loop();
+    sketchController.startLoop();
 }

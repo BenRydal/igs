@@ -15,7 +15,6 @@ class DrawDataMovement {
 
     setData(path) {
         this.resetBug(); // always reset bug values
-        // if overMap draw selection of movement and gray scale the rest
         if (keys.overRect(0, 0, keys.floorPlan.width, keys.floorPlan.height)) {
             this.drawWithCursorHighlight(PLAN, path.movement, path.color);
             this.drawWithCursorHighlight(SPACETIME, path.movement, path.color);
@@ -29,21 +28,21 @@ class DrawDataMovement {
     /**
      * Draws path in floor plan OR space-time view
      * Path is separated into segments of stops with thick line thickness and moving of thinner line thickness
-     * Due to drawing methods in browsers, core.paths must be separated/segmented to draw different thicknesses or strokes
+     * Due to drawing methods in browsers, paths must be separated/segmented to draw different thicknesses or strokes
      * @param  {Integer} view
      * @param  {Path} path
      * @param  {Color} shade
      */
     draw(view, path, shade) {
-        this.setStartinglineStyle(shade);
+        this.setLineStyle(shade);
         let stop_Mode = false; // mode indicating if stopped or moving measured by change from last point
         beginShape();
         // Start at 1 to test current and prior points for drawing
         for (let i = 1; i < path.length; i++) {
-            const curPoint = this.getScaledMovementPointValues(path[i], view); // get current and prior points for comparison
-            const priorPoint = this.getScaledMovementPointValues(path[i - 1], view);
+            const curPoint = sketchController.getScaledPointValues(path[i], view); // get current and prior points for comparison
+            const priorPoint = sketchController.getScaledPointValues(path[i - 1], view);
             if (keys.overTimeline(curPoint.pixelTime) && keys.overFloorPlan(curPoint.scaledXPos, curPoint.scaledYPos) && sketchController.testAnimation(curPoint.pixelTime)) {
-                if (view === SPACETIME) this.testPointForBug(curPoint.scaledPixelTime, curPoint.scaledXPos, curPoint.scaledYPos);
+                if (view === SPACETIME) this.testPointForBug(curPoint.scaledTime, curPoint.scaledXPos, curPoint.scaledYPos);
                 if (curPoint.scaledXPos === priorPoint.scaledXPos && curPoint.scaledYPos === priorPoint.scaledYPos) {
                     if (stop_Mode) { // if already drawing in stop mode, continue it
                         curveVertex(curPoint.scaledSpaceTimeXPos, curPoint.scaledYPos);
@@ -67,19 +66,19 @@ class DrawDataMovement {
     /**
      * Draws path in floor plan OR space-time view
      * Path is separated into segments over cursor with thick line/highlight and not over cursor with thin line and grey color
-     * Due to drawing methods in browsers, core.paths must be separated/segmented to draw different thicknesses or strokes
+     * Due to drawing methods in browsers, paths must be separated/segmented to draw different thicknesses or strokes
      * @param  {Integer} view
      * @param  {Path} path
      * @param  {Color} shade
      */
     drawWithCursorHighlight(view, path, shade) {
-        this.setStartinglineStyle(this.colorGray);
+        this.setLineStyle(this.colorGray);
         let over_Cursor_Mode = false;
         beginShape();
         for (const point of path) {
-            const curPoint = this.getScaledMovementPointValues(point, view);
+            const curPoint = sketchController.getScaledPointValues(point, view);
             if (keys.overTimeline(curPoint.pixelTime) && keys.overFloorPlan(curPoint.scaledXPos, curPoint.scaledYPos) && sketchController.testAnimation(curPoint.pixelTime)) {
-                if (view == SPACETIME) this.testPointForBug(curPoint.scaledPixelTime, curPoint.scaledXPos, curPoint.scaledYPos);
+                if (view === SPACETIME) this.testPointForBug(curPoint.scaledTime, curPoint.scaledXPos, curPoint.scaledYPos);
                 if (keys.overCursor(curPoint.scaledXPos, curPoint.scaledYPos)) {
                     if (over_Cursor_Mode) { // if already drawing in cursor mode, continue it
                         curveVertex(curPoint.scaledSpaceTimeXPos, curPoint.scaledYPos);
@@ -100,49 +99,27 @@ class DrawDataMovement {
         endShape();
     }
 
-    setStartinglineStyle(lineColor) {
+    setLineStyle(lineColor) {
         strokeWeight(this.smallPathWeight);
         stroke(lineColor);
         noFill(); // important for curve drawing
     }
-    /**
-     * Returns scaled values for movement point
-     * NOTE: view determines which space-time xPos is returned
-     * @param  {MovementPoint} point
-     * @param  {Integer} view
-     */
 
-    getScaledMovementPointValues(point, view) {
-        const pixelTime = map(point.time, 0, core.totalTimeInSeconds, keys.timeline.start, keys.timeline.end);
-        const scaledPixelTime = map(pixelTime, keys.timeline.selectStart, keys.timeline.selectEnd, keys.timeline.start, keys.timeline.end);
-        const scaledXPos = point.xPos * keys.floorPlan.width / core.floorPlan.inputPixelWidth;
-        const scaledYPos = point.yPos * keys.floorPlan.height / core.floorPlan.inputPixelHeight;
-        let scaledSpaceTimeXPos;
-        if (view === PLAN) scaledSpaceTimeXPos = scaledXPos;
-        else if (view === SPACETIME) scaledSpaceTimeXPos = scaledPixelTime;
-        return {
-            pixelTime,
-            scaledPixelTime,
-            scaledXPos,
-            scaledYPos,
-            scaledSpaceTimeXPos
-        };
-    }
     /**
      * Ends and begins a new drawing shape
      * Draws two vertices to indicate starting and ending points
      * Sets correct strokeweight and stroke depending on parameters for new shape
-     * @param  {Object returned from getScaledMovementPointValues} scaledPoint
+     * @param  {Object returned from getScaledPointValues} scaledPoint
      * @param  {Integer} weight
      * @param  {Color} shade
      */
     startEndShape(scaledPoint, weight, shade) {
         curveVertex(scaledPoint.scaledSpaceTimeXPos, scaledPoint.scaledYPos); // draw cur point twice to mark end point
         curveVertex(scaledPoint.scaledSpaceTimeXPos, scaledPoint.scaledYPos);
-        endShape(); // then end shape
-        strokeWeight(weight); // set large strokeWeight for not moving/stopped
+        endShape();
+        strokeWeight(weight);
         stroke(shade);
-        beginShape(); // begin new shape
+        beginShape();
         curveVertex(scaledPoint.scaledSpaceTimeXPos, scaledPoint.scaledYPos); // draw cur point twice to mark starting point
         curveVertex(scaledPoint.scaledSpaceTimeXPos, scaledPoint.scaledYPos);
     }
@@ -150,16 +127,14 @@ class DrawDataMovement {
     testPointForBug(scaledTimeToTest, xPos, yPos) {
         if (sketchController.mode.isAnimate) this.recordBug(scaledTimeToTest, xPos, yPos, NO_DATA); // always return true to set last/most recent point as the bug
         else if (sketchController.mode.isVideoPlay) {
-            const videoX = map(core.videoPlayer.getCurrentTime(), 0, core.totalTimeInSeconds, keys.timeline.start, keys.timeline.end);
-            const scaledVideoX = map(videoX, keys.timeline.selectStart, keys.timeline.selectEnd, keys.timeline.start, keys.timeline.end);
-            if (this.compareValuesBySpacing(scaledVideoX, scaledTimeToTest, this.bug.lengthToCompare)) this.recordBug(scaledTimeToTest, xPos, yPos, Math.abs(scaledVideoX - scaledTimeToTest));
+            const selTime = sketchController.mapFromVideoToSelectedTime();
+            if (this.compareValuesBySpacing(selTime, scaledTimeToTest, this.bug.lengthToCompare)) this.recordBug(scaledTimeToTest, xPos, yPos, Math.abs(selTime - scaledTimeToTest));
         } else if (keys.overRect(keys.timeline.start, 0, keys.timeline.length, keys.timeline.height) && this.compareValuesBySpacing(mouseX, scaledTimeToTest, this.bug.lengthToCompare)) this.recordBug(mouseX, xPos, yPos, Math.abs(mouseX - scaledTimeToTest));
     }
 
     compareValuesBySpacing(value1, value2, spacing) {
         return value1 >= value2 - spacing && value1 <= value2 + spacing;
     }
-
 
     resetBug() {
         this.bug.xPos = NO_DATA;
@@ -195,7 +170,7 @@ class DrawDataConversation {
         };
         this.rect = { // Rect represents key parameters used in drawRects method to scale rectangles
             minPixelHeight: 3, // for really short conversation turns set a minimum pixel height
-            minPixelWidth: map(core.totalTimeInSeconds, 0, 3600, 10, 1, true), // map to inverse, values constrained between 10 and 1 (pixels)
+            minPixelWidth: sketchController.mapConversationRectRange(),
             maxPixelWidth: 10
         };
     }
@@ -203,31 +178,23 @@ class DrawDataConversation {
     /**
      * Organizes drawing of conversation rects
      * @param  {Path} path
+     * @param  {[Speaker]} speakerList
      */
-    setData(path) {
-        this.setRects(path.conversation, path.name);
+    setData(path, speakerList) {
+        for (const point of path.conversation) {
+            const curPoint = sketchController.getScaledPointValues(point, NO_DATA);
+            if (sketchController.testConversationPointToDraw(curPoint)) {
+                const curSpeaker = this.getSpeakerFromSpeakerList(point.speaker, speakerList); // get speaker object from global list equivalent to the current speaker of point
+                if (this.testSpeakerToDraw(curSpeaker, path.name)) this.drawRects(point, curSpeaker.color); // draws all rects
+            }
+        }
     }
     /**
      * Organizes drawing of single text/textbox for a selected conversation
      * NOTE: this is called after all conversation rects are drawn so it is displayed on top visually
      */
     setConversationBubble() {
-        if (this.conversationBubble.isSelected) this.drawTextBox();
-    }
-
-    /**
-     * Organizes tests and drawing for conversation points
-     * @param  {[] ConversationPoint} points
-     * @param  {Char} pathName
-     */
-    setRects(conversation, pathName) {
-        for (const point of conversation) {
-            const curPoint = this.getScaledConversationPointValues(point);
-            if (sketchController.testConversationPointToDraw(curPoint)) {
-                const curSpeaker = this.getSpeakerFromSpeakerList(point.speaker); // get speaker object from global list equivalent to the current speaker of point
-                if (this.testSpeakerToDraw(curSpeaker, pathName)) this.drawRects(point, curSpeaker.color); // draws all rects
-            }
-        }
+        if (this.conversationBubble.isSelected) this.drawTextBox(this.conversationBubble.point);
     }
 
     /**
@@ -241,29 +208,12 @@ class DrawDataConversation {
     }
 
     /**
-     * Returns scaled values for conversation point
-     * @param  {ConversationPoint} point
-     */
-    getScaledConversationPointValues(point) {
-        const pixelTime = map(point.time, 0, core.totalTimeInSeconds, keys.timeline.start, keys.timeline.end);
-        const scaledTime = map(pixelTime, keys.timeline.selectStart, keys.timeline.selectEnd, keys.timeline.start, keys.timeline.end);
-        const scaledXPos = point.xPos * keys.floorPlan.width / core.floorPlan.inputPixelWidth; // scale to floor plan image file
-        const scaledYPos = point.yPos * keys.floorPlan.height / core.floorPlan.inputPixelHeight; // scale to floor plan image file
-        return {
-            pixelTime,
-            scaledTime,
-            scaledXPos,
-            scaledYPos
-        };
-    }
-
-    /**
      * Returns speaker object based from global speaker list if it matches passed character paramater
      * Returns null if no match found
      * @param  {Char} curSpeaker
      */
-    getSpeakerFromSpeakerList(curSpeaker) {
-        for (const speaker of core.speakerList) {
+    getSpeakerFromSpeakerList(curSpeaker, speakerList) {
+        for (const speaker of speakerList) {
             if (speaker.name === curSpeaker) return speaker;
         }
         return null;
@@ -283,7 +233,7 @@ class DrawDataConversation {
         const rectWidth = map(keys.timeline.selectEnd - keys.timeline.selectStart, 0, keys.timeline.length, this.rect.maxPixelWidth, this.rect.minPixelWidth); // map to inverse of min/max to set rectWidth based on amount of pixel time selected
         let rectLength = textWidth(point.talkTurn);
         if (rectLength < this.rect.minPixelHeight) rectLength = this.rect.minPixelHeight; // if current turn is small set it to the minimum height
-        const curPoint = this.getScaledConversationPointValues(point);
+        const curPoint = sketchController.getScaledPointValues(point, NO_DATA);
         let yPos;
         if (sketchController.mode.isAlignTalk) yPos = 0; // if conversation turn positioning is at top of screen
         else yPos = curPoint.scaledYPos - rectLength;
@@ -314,44 +264,45 @@ class DrawDataConversation {
      * Draws textbox and cartoon "bubble" for user selected conversation
      * Sets box dimensions based on size of conversation turn/text
      */
-    drawTextBox() {
+    drawTextBox(point) {
         textFont(font_Lato, keys.keyTextSize);
-        // ***** SET FONTS/STROKES/CONSTANTS
-        const curPoint = this.getScaledConversationPointValues(this.conversationBubble.point); // get scaled values for selected point
-        const textBox = {
+        const textBox = this.addTextBoxParams(this.getTextBoxParams(), point.talkTurn);
+        stroke(0);
+        strokeWeight(1);
+        fill(255, 200);
+        rect(textBox.xPos - textBox.boxSpacing, textBox.yPos - textBox.boxSpacing, textBox.width + 2 * textBox.boxSpacing, textBox.height + (2 * textBox.boxSpacing));
+        fill(0);
+        text(point.speaker + ": " + point.talkTurn, textBox.xPos, textBox.yPos, textBox.width, textBox.height); // text
+        // Cartoon bubble lines
+        stroke(255);
+        strokeWeight(2);
+        line(mouseX - textBox.rectSpacing, textBox.yPos + textBox.yDif, mouseX - textBox.rectSpacing / 2, textBox.yPos + textBox.yDif); // white line to hide black rect under cartoon bubble
+        stroke(0);
+        strokeWeight(1);
+        line(mouseX, mouseY, mouseX - textBox.rectSpacing, textBox.yPos + textBox.yDif);
+        line(mouseX, mouseY, mouseX - textBox.rectSpacing / 2, textBox.yPos + textBox.yDif);
+    }
+
+    getTextBoxParams() {
+        return {
             width: width / 3, // width of text and textbox drawn
             textLeading: width / 57, // textbox leading
             boxSpacing: width / 141, // general textBox spacing variable
             rectSpacing: width / 28.2, // distance from text rectangle of textbox
         }
-        textBox.height = textBox.textLeading * (ceil(textWidth(this.conversationBubble.point.talkTurn) / textBox.width)); // lines of talk in a text box rounded up
-        textLeading(textBox.textLeading);
-        let xPos; // set xPos, constrain prevents drawing off screen
-        if (this.conversationBubble.view === PLAN) xPos = constrain(curPoint.scaledXPos - textBox.width / 2, textBox.boxSpacing, width - textBox.width - textBox.boxSpacing);
-        else xPos = constrain(curPoint.scaledTime - textBox.width / 2, 0, width - textBox.width - textBox.boxSpacing);
-        let yPos, yDif;
+    }
+
+    addTextBoxParams(textBox, talkTurn) {
+        textBox.height = textBox.textLeading * (ceil(textWidth(talkTurn) / textBox.width));
+        textBox.xPos = constrain(mouseX - textBox.width / 2, textBox.boxSpacing, width - textBox.width - (2 * textBox.boxSpacing));
         if (mouseY < height / 2) { //if top half of screen, text box below rectangle
-            yPos = mouseY + textBox.rectSpacing;
-            yDif = -textBox.boxSpacing;
+            textBox.yPos = mouseY + textBox.rectSpacing;
+            textBox.yDif = -textBox.boxSpacing;
         } else { //if bottom half of screen, text box above rectangle
-            yPos = mouseY - textBox.rectSpacing - textBox.height;
-            yDif = textBox.height + textBox.boxSpacing;
+            textBox.yPos = mouseY - textBox.rectSpacing - textBox.height;
+            textBox.yDif = textBox.height + textBox.boxSpacing;
         }
-        // ***** DRAW TEXTBOX
-        stroke(0); //set color to black
-        strokeWeight(1);
-        fill(255, 200); // transparency for textbox
-        rect(xPos - textBox.boxSpacing, yPos - textBox.boxSpacing, textBox.width + 2 * textBox.boxSpacing, textBox.height + 2 * textBox.boxSpacing);
-        fill(0);
-        text(this.conversationBubble.point.speaker + ": " + this.conversationBubble.point.talkTurn, xPos, yPos, textBox.width, textBox.height); // text
-        // ***** DRAW CARTOON BUBBLE
-        stroke(255);
-        strokeWeight(2);
-        line(mouseX - textBox.rectSpacing, yPos + yDif, mouseX - textBox.rectSpacing / 2, yPos + yDif); // white line to hide black rect under cartoon bubble
-        stroke(0);
-        strokeWeight(1);
-        line(mouseX, mouseY, mouseX - textBox.rectSpacing, yPos + yDif);
-        line(mouseX, mouseY, mouseX - textBox.rectSpacing / 2, yPos + yDif);
+        return textBox;
     }
 }
 

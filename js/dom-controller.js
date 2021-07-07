@@ -5,7 +5,7 @@ class DomController {
      * @param  {PNG, JPG, JPEG File} input
      */
     handleFloorPlanFile(input) {
-        core.updateFloorPlan(URL.createObjectURL(input.files[0]));
+        sketchController.overLoadFloorPlanButton(URL.createObjectURL(input.files[0]));
         input.value = ''; // reset input value so you can load same file again in browser
     }
 
@@ -16,7 +16,7 @@ class DomController {
     handleMovementFiles(input) {
         let fileList = [];
         for (const file of input.files) fileList.push(file);
-        processData.parseMovementFiles(fileList);
+        sketchController.overLoadMovementButton(fileList);
         input.value = ''; // reset input value so you can load same file(s) again in browser
     }
 
@@ -25,7 +25,7 @@ class DomController {
      * @param  {File} input
      */
     handleConversationFile(input) {
-        processData.parseConversationFile(input.files[0]); // parse converted file
+        sketchController.overLoadConversationButton(input.files[0]);
         input.value = ''; // reset input value so you can load same file again in browser
     }
 
@@ -34,12 +34,8 @@ class DomController {
      * @param  {.MP4 File} input
      */
     handleVideoFile(input) {
-        let file = input.files[0];
+        sketchController.overLoadVideoButton(URL.createObjectURL(input.files[0]))
         input.value = ''; // reset input value so you can load same file again in browser
-        let fileLocation = URL.createObjectURL(file);
-        core.updateVideo('File', {
-            fileName: fileLocation
-        });
     }
 
     handleClearButton() {

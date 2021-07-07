@@ -24,7 +24,7 @@ class Core {
         loadImage(filePath, img => {
             console.log("Floor Plan Image Loaded");
             img.onload = () => URL.revokeObjectURL(this.src);
-            loop(); // rerun P5 draw loop after loading image
+            sketchController.startLoop(); // rerun P5 draw loop after loading image
             this.floorPlan.img = img;
             this.floorPlan.inputPixelWidth = img.width;
             this.floorPlan.inputPixelHeight = img.height;
@@ -40,11 +40,7 @@ class Core {
      * @param  {VideoPlayer Specific Params} params
      */
     updateVideo(platform, params) {
-        if (testData.dataIsLoaded(this.videoPlayer)) {
-            sketchController.setVideoPlay(false);
-            sketchController.setVideoShow(false);
-            this.videoPlayer.destroy(); // important to set this
-        }
+        if (testData.dataIsLoaded(this.videoPlayer)) this.clearVideo();
         switch (platform) {
             case "Youtube":
                 this.videoPlayer = new YoutubePlayer(params);
@@ -69,7 +65,7 @@ class Core {
         this.updatePaths(pathName, movement, conversation);
         this.updateTotalTime(movement);
         this.movementFileResults.push([results, pathName]); // add results and pathName to core []
-        loop(); // rerun P5 draw loop
+        sketchController.startLoop(); // rerun P5 draw loop
     }
 
     /**
@@ -124,7 +120,7 @@ class Core {
         this.conversationFileResults = results.data; // set to new array of keyed values
         this.updateSpeakerList();
         this.speakerList.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching core.paths array
-        loop(); // rerun P5 draw loop
+        sketchController.startLoop(); // rerun P5 draw loop
     }
 
     /**
@@ -194,15 +190,18 @@ class Core {
     }
 
     clearAllData() {
-        if (testData.dataIsLoaded(this.videoPlayer)) {
-            if (sketchController.mode.isVideoShow) sketchController.overVideoButton(); // Turn off video before destroying it if showing
-            this.videoPlayer.destroy(); // if there is a video, destroy it
-            this.videoPlayer = null;
-        }
+        if (testData.dataIsLoaded(this.videoPlayer)) this.clearVideo();
         this.clearFloorPlan();
         this.clearConversationData();
         this.clearMovementData();
-        loop(); // rerun P5 draw loop
+        sketchController.startLoop(); // rerun P5 draw loop
+    }
+
+    clearVideo() {
+        this.videoPlayer.destroy(); // if there is a video, destroy it
+        this.videoPlayer = null;
+        sketchController.setVideoPlay(false);
+        sketchController.setVideoShow(false);
     }
 
     clearFloorPlan() {
