@@ -1,13 +1,10 @@
 class DrawDataMovement {
 
     constructor() {
-        this.PLAN = 0; // two drawing mode constants
-        this.SPACETIME = 1;
-        this.NO_DATA = -1;
         this.bug = { // represents user selection dot drawn in both floor plan and space-time views
-            xPos: this.NO_DATA, // number/float values
-            yPos: this.NO_DATA,
-            timePos: this.NO_DATA,
+            xPos: NO_DATA, // number/float values
+            yPos: NO_DATA,
+            timePos: NO_DATA,
             size: width / 50,
             lengthToCompare: keys.timeline.length // used to compare data points to find closest bug value
         };
@@ -20,13 +17,13 @@ class DrawDataMovement {
         this.resetBug(); // always reset bug values
         // if overMap draw selection of movement and gray scale the rest
         if (keys.overRect(0, 0, keys.floorPlan.width, keys.floorPlan.height)) {
-            this.drawWithCursorHighlight(this.PLAN, path.movement, path.color);
-            this.drawWithCursorHighlight(this.SPACETIME, path.movement, path.color);
+            this.drawWithCursorHighlight(PLAN, path.movement, path.color);
+            this.drawWithCursorHighlight(SPACETIME, path.movement, path.color);
         } else {
-            this.draw(this.PLAN, path.movement, path.color);
-            this.draw(this.SPACETIME, path.movement, path.color);
+            this.draw(PLAN, path.movement, path.color);
+            this.draw(SPACETIME, path.movement, path.color);
         }
-        if (this.bug.xPos != this.NO_DATA) this.drawBug(path.color); // if selected, draw bug
+        if (this.bug.xPos != NO_DATA) this.drawBug(path.color); // if selected, draw bug
     }
 
     /**
@@ -51,20 +48,20 @@ class DrawDataMovement {
                 if (curPoint.scaledXPos === priorPoint.scaledXPos && curPoint.scaledYPos === priorPoint.scaledYPos) {
                     if (stop_Mode) { // if already drawing in stop mode, continue it
                         curveVertex(curPoint.scaledSpaceTimeXPos, curPoint.scaledYPos);
-                        if (view === this.SPACETIME) this.testPointForBug(curPoint.scaledPixelTime, curPoint.scaledXPos, curPoint.scaledYPos);
+                        if (view === SPACETIME) this.testPointForBug(curPoint.scaledPixelTime, curPoint.scaledXPos, curPoint.scaledYPos);
                     } else { // if not in drawing stop mode, begin it
                         this.startEndShape(priorPoint, this.largePathWeight, shade);
-                        if (view === this.SPACETIME) this.testPointForBug(curPoint.scaledSpaceTimeXPos, curPoint.scaledXPos, curPoint.scaledYPos);
+                        if (view === SPACETIME) this.testPointForBug(curPoint.scaledSpaceTimeXPos, curPoint.scaledXPos, curPoint.scaledYPos);
                         stop_Mode = true;
                     }
                 } else {
                     if (stop_Mode) { // if drawing in stop mode, end it
                         this.startEndShape(priorPoint, this.smallPathWeight, shade);
-                        if (view === this.SPACETIME) this.testPointForBug(curPoint.scaledSpaceTimeXPos, curPoint.scaledXPos, curPoint.scaledYPos);
+                        if (view === SPACETIME) this.testPointForBug(curPoint.scaledSpaceTimeXPos, curPoint.scaledXPos, curPoint.scaledYPos);
                         stop_Mode = false;
                     } else {
                         curveVertex(curPoint.scaledSpaceTimeXPos, curPoint.scaledYPos);
-                        if (view === this.SPACETIME) this.testPointForBug(curPoint.scaledSpaceTimeXPos, curPoint.scaledXPos, curPoint.scaledYPos);
+                        if (view === SPACETIME) this.testPointForBug(curPoint.scaledSpaceTimeXPos, curPoint.scaledXPos, curPoint.scaledYPos);
                     }
                 }
             }
@@ -92,20 +89,20 @@ class DrawDataMovement {
                 if (keys.overCursor(curPoint.scaledXPos, curPoint.scaledYPos)) {
                     if (over_Cursor_Mode) { // if already drawing in cursor mode, continue it
                         curveVertex(curPoint.scaledSpaceTimeXPos, curPoint.scaledYPos);
-                        if (view == this.SPACETIME) this.testPointForBug(curPoint.scaledPixelTime, curPoint.scaledXPos, curPoint.scaledYPos);
+                        if (view == SPACETIME) this.testPointForBug(curPoint.scaledPixelTime, curPoint.scaledXPos, curPoint.scaledYPos);
                     } else { // if not in drawing cursor mode, begin it
                         this.startEndShape(curPoint, this.largePathWeight, shade);
-                        if (view === this.SPACETIME) this.testPointForBug(curPoint.scaledSpaceTimeXPos, curPoint.scaledXPos, curPoint.scaledYPos);
+                        if (view === SPACETIME) this.testPointForBug(curPoint.scaledSpaceTimeXPos, curPoint.scaledXPos, curPoint.scaledYPos);
                         over_Cursor_Mode = true;
                     }
                 } else {
                     if (over_Cursor_Mode) { // if drawing in cursor mode, end it
                         this.startEndShape(curPoint, this.smallPathWeight, this.colorGray);
-                        if (view === this.SPACETIME) this.testPointForBug(curPoint.scaledSpaceTimeXPos, curPoint.scaledXPos, curPoint.scaledYPos);
+                        if (view === SPACETIME) this.testPointForBug(curPoint.scaledSpaceTimeXPos, curPoint.scaledXPos, curPoint.scaledYPos);
                         over_Cursor_Mode = false;
                     } else {
                         curveVertex(curPoint.scaledSpaceTimeXPos, curPoint.scaledYPos);
-                        if (view === this.SPACETIME) this.testPointForBug(curPoint.scaledSpaceTimeXPos, curPoint.scaledXPos, curPoint.scaledYPos);
+                        if (view === SPACETIME) this.testPointForBug(curPoint.scaledSpaceTimeXPos, curPoint.scaledXPos, curPoint.scaledYPos);
                     }
                 }
             }
@@ -125,8 +122,8 @@ class DrawDataMovement {
         const scaledXPos = point.xPos * keys.floorPlan.width / core.floorPlan.inputPixelWidth;
         const scaledYPos = point.yPos * keys.floorPlan.height / core.floorPlan.inputPixelHeight;
         let scaledSpaceTimeXPos;
-        if (view === this.PLAN) scaledSpaceTimeXPos = scaledXPos;
-        else if (view === this.SPACETIME) scaledSpaceTimeXPos = scaledPixelTime;
+        if (view === PLAN) scaledSpaceTimeXPos = scaledXPos;
+        else if (view === SPACETIME) scaledSpaceTimeXPos = scaledPixelTime;
         return {
             pixelTime,
             scaledPixelTime,
@@ -187,9 +184,9 @@ class DrawDataMovement {
     }
 
     resetBug() {
-        this.bug.xPos = this.NO_DATA;
-        this.bug.yPos = this.NO_DATA;
-        this.bug.timePos = this.NO_DATA;
+        this.bug.xPos = NO_DATA;
+        this.bug.yPos = NO_DATA;
+        this.bug.timePos = NO_DATA;
         this.bug.lengthToCompare = keys.timeline.length;
     }
 
@@ -212,17 +209,13 @@ class DrawDataMovement {
 class DrawDataConversation {
 
     constructor() {
-        this.PLAN = 0; // two drawing mode constants
-        this.SPACETIME = 1;
-        this.NO_DATA = -1;
         this.conversationBubble = { // represents user selected conversation
             isSelected: false,
-            point: this.NO_DATA, // stores one ConversationPoint object for selected conversation turn
-            view: this.PLAN // view indicating if user selected conversation in floor plan or space-time views
+            point: NO_DATA, // stores one ConversationPoint object for selected conversation turn
+            view: PLAN // view indicating if user selected conversation in floor plan or space-time views
         };
         /**
          * Rect represents key parameters used in drawRects method to scale rectangles
-         * @Number for each parameter
          */
         this.rect = {
             minPixelHeight: 3, // for really short conversation turns set a minimum pixel height
@@ -326,12 +319,12 @@ class DrawDataConversation {
         if (sketchController.mode.isAlignTalk) yPos = 0; // if conversation turn positioning is at top of screen
         else yPos = curPoint.scaledYPos - rectLength;
         // ***** TEST SET TEXT
-        if (keys.overRect(curPoint.scaledXPos, yPos, rectWidth, rectLength)) this.recordConversationBubble(point, this.PLAN); // if over plan
-        else if (keys.overRect(curPoint.scaledTime, yPos, rectWidth, rectLength)) this.recordConversationBubble(point, this.SPACETIME); // if over spacetime
+        if (keys.overRect(curPoint.scaledXPos, yPos, rectWidth, rectLength)) this.recordConversationBubble(point, PLAN); // if over plan
+        else if (keys.overRect(curPoint.scaledTime, yPos, rectWidth, rectLength)) this.recordConversationBubble(point, SPACETIME); // if over spacetime
         // ***** DRAW CUR RECT
         fill(curColor);
-        rect(curPoint.scaledXPos, yPos, rectWidth, rectLength); // this.PLAN VIEW
-        rect(curPoint.scaledTime, yPos, rectWidth, rectLength); // this.SPACETIME VIEW
+        rect(curPoint.scaledXPos, yPos, rectWidth, rectLength); // PLAN VIEW
+        rect(curPoint.scaledTime, yPos, rectWidth, rectLength); // SPACETIME VIEW
     }
 
     /**
@@ -353,7 +346,7 @@ class DrawDataConversation {
      * Sets box dimensions based on size of conversation turn/text
      */
     drawTextBox() {
-        textSize(keys.keyTextSize);
+        textFont(font_Lato, keys.keyTextSize);
         // ***** SET FONTS/STROKES/CONSTANTS
         const curPoint = this.getScaledConversationPointValues(this.conversationBubble.point); // get scaled values for selected point
         const textBox = {
@@ -363,10 +356,9 @@ class DrawDataConversation {
             rectSpacing: width / 28.2, // distance from text rectangle of textbox
         }
         textBox.height = textBox.textLeading * (ceil(textWidth(this.conversationBubble.point.talkTurn) / textBox.width)); // lines of talk in a text box rounded up
-        textFont(font_Lato, keys.keyTextSize);
         textLeading(textBox.textLeading);
         let xPos; // set xPos, constrain prevents drawing off screen
-        if (this.conversationBubble.view === this.PLAN) xPos = constrain(curPoint.scaledXPos - textBox.width / 2, textBox.boxSpacing, width - textBox.width - textBox.boxSpacing);
+        if (this.conversationBubble.view === PLAN) xPos = constrain(curPoint.scaledXPos - textBox.width / 2, textBox.boxSpacing, width - textBox.width - textBox.boxSpacing);
         else xPos = constrain(curPoint.scaledTime - textBox.width / 2, 0, width - textBox.width - textBox.boxSpacing);
         let yPos, yDif;
         if (mouseY < height / 2) { //if top half of screen, text box below rectangle
@@ -413,8 +405,8 @@ class DrawDataConversation {
 //         let scaledXPos = point.xPos * keys.floorPlan.width / core.inputFloorPlanPixelWidth; // scale to floor plan image file
 //         let scaledYPos = point.yPos * keys.floorPlan.height / core.inputFloorPlanPixelHeight; // scale to floor plan image file
 //         if (keys.overTimeline(pixelTime) && keys.overFloorPlan(scaledXPos, scaledYPos) && keys.testAnimation(pixelTime)) {
-//             if (view == this.PLAN) curveVertex(scaledXPos, scaledYPos);
-//             else if (view == this.SPACETIME) {
+//             if (view == PLAN) curveVertex(scaledXPos, scaledYPos);
+//             else if (view == SPACETIME) {
 //                 curveVertex(scaledTime, scaledYPos);
 //                 this.testPointForBug(scaledTime, scaledXPos, scaledYPos);
 //             }

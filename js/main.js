@@ -30,6 +30,9 @@ let keys; // interface vars and methods
 const CSVHEADERS_MOVEMENT = ['time', 'x', 'y']; // String array indicating movement movement file headers, data in each column should be of type number or it won't process
 const CSVHEADERS_CONVERSATION = ['time', 'speaker', 'talk']; // String array indicating conversation file headers, data in time column shout be of type number, speaker column should be of type String, talk column should be not null or undefined
 let font_Lato;
+const PLAN = 0; // two drawing mode constants
+const SPACETIME = 1;
+const NO_DATA = -1;
 
 function preload() {
     font_Lato = loadFont("data/fonts/Lato-Light.ttf");
