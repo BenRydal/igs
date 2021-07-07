@@ -353,6 +353,7 @@ class DrawDataConversation {
      * Sets box dimensions based on size of conversation turn/text
      */
     drawTextBox() {
+        textSize(keys.keyTextSize);
         // ***** SET FONTS/STROKES/CONSTANTS
         const curPoint = this.getScaledConversationPointValues(this.conversationBubble.point); // get scaled values for selected point
         const textBox = {

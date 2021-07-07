@@ -34,7 +34,6 @@ class DomController {
      * @param  {.MP4 File} input
      */
     handleVideoFile(input) {
-        //if (sketchController.mode.isVideoShow) sketchController.overVideoButton(); // Turn off video that if showing
         let file = input.files[0];
         input.value = ''; // reset input value so you can load same file again in browser
         let fileLocation = URL.createObjectURL(file);

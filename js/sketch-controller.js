@@ -42,15 +42,15 @@ class SketchController {
         this.mode.isVideoShow = value;
     }
 
-    mapFromTimelineToVideo(value) {
+    mapFromPixelToTotalTime(value) {
         return map(value, keys.timeline.start, keys.timeline.end, 0, core.totalTimeInSeconds);
     }
 
-    mapToVideoDuration(value) {
+    mapFromPixelToVideoTime(value) {
         return map(value, keys.timeline.start, keys.timeline.end, 0, Math.floor(core.videoPlayer.getVideoDuration())); // must floor vPos to prevent double finite error
     }
 
-    mapFromTimelineToSelection(value) {
+    mapFromPixelToSelectedTime(value) {
         return map(value, keys.timeline.start, keys.timeline.end, keys.timeline.selectStart, keys.timeline.selectEnd);
     }
 
@@ -75,7 +75,7 @@ class SketchController {
      * @param  {Number/Float} timeValue
      */
     testAnimation(value) {
-        if (sketchController.mode.isAnimate) return this.animationCounter > this.mapFromTimelineToVideo(value);
+        if (sketchController.mode.isAnimate) return this.animationCounter > this.mapFromPixelToTotalTime(value);
         else return true;
     }
 
@@ -83,8 +83,8 @@ class SketchController {
      * Toggle on and off this.mode.isAnimate mode and set/end global this.mode.isAnimate counter variable
      */
     overAnimateButton() {
-        if (this.mode.isAnimate) this.animationCounter = this.mapFromTimelineToVideo(keys.timeline.selectEnd);
-        else this.animationCounter = this.mapFromTimelineToVideo(keys.timeline.selectStart);
+        if (this.mode.isAnimate) this.animationCounter = this.mapFromPixelToTotalTime(keys.timeline.selectEnd);
+        else this.animationCounter = this.mapFromPixelToTotalTime(keys.timeline.selectStart);
         this.setIsAnimate(!this.mode.isAnimate);
     }
 
@@ -93,9 +93,9 @@ class SketchController {
      */
     updateAnimation() {
         const animationIncrementRateDivisor = 1000; // this divisor seems to work best
-        const curTimeIntervalInSeconds = this.mapFromTimelineToVideo(keys.timeline.selectEnd) - this.mapFromTimelineToVideo(keys.timeline.selectStart); // Get amount of time in seconds currently displayed
+        const curTimeIntervalInSeconds = this.mapFromPixelToTotalTime(keys.timeline.selectEnd) - this.mapFromPixelToTotalTime(keys.timeline.selectStart); // Get amount of time in seconds currently displayed
         const animationIncrementValue = curTimeIntervalInSeconds / animationIncrementRateDivisor; // set increment value based on that value/divisor to keep constant sketchController.mode.isAnimate speed regardless of time interval selected
-        if (sketchController.animationCounter < this.mapFromTimelineToVideo(keys.timeline.selectEnd)) sketchController.animationCounter += animationIncrementValue;
+        if (sketchController.animationCounter < this.mapFromPixelToTotalTime(keys.timeline.selectEnd)) sketchController.animationCounter += animationIncrementValue;
         else sketchController.setIsAnimate(false);
     }
 
@@ -111,10 +111,10 @@ class SketchController {
      */
     setVideoScrubbing() {
         if (this.mode.isAnimate) {
-            const vPos = Math.floor(map(sketchController.bugTimeForVideoScrub, keys.timeline.start, keys.timeline.end, this.mapToVideoDuration(keys.timeline.selectStart), this.mapToVideoDuration(keys.timeline.selectEnd)));
+            const vPos = Math.floor(map(sketchController.bugTimeForVideoScrub, keys.timeline.start, keys.timeline.end, this.mapFromPixelToVideoTime(keys.timeline.selectStart), this.mapFromPixelToVideoTime(keys.timeline.selectEnd)));
             core.videoPlayer.seekTo(vPos);
         } else if (keys.overRect(keys.timeline.start, 0, keys.timeline.end, keys.timeline.height)) {
-            const vPos = Math.floor(this.mapToVideoDuration(this.mapFromTimelineToSelection(mouseX)));
+            const vPos = Math.floor(this.mapFromPixelToVideoTime(this.mapFromPixelToSelectedTime(mouseX)));
             core.videoPlayer.seekTo(vPos);
             core.videoPlayer.pause(); // Add to prevent accidental video playing that seems to occur
         }
@@ -144,7 +144,7 @@ class SketchController {
             this.setVideoPlay(false);
         } else {
             core.videoPlayer.play();
-            core.videoPlayer.seekTo(Math.floor(this.mapToVideoDuration(this.mapFromTimelineToSelection(mouseX))));
+            core.videoPlayer.seekTo(Math.floor(this.mapFromPixelToVideoTime(this.mapFromPixelToSelectedTime(mouseX))));
             this.setVideoPlay(true);
         }
     }
