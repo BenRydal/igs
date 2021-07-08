@@ -39,7 +39,7 @@ class DomController {
     }
 
     handleClearButton() {
-        core.clearAllData()
+        sketchController.overClearButton();
     }
 
     handleAnimateButton() {

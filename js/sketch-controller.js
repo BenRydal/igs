@@ -50,6 +50,10 @@ class SketchController {
         this.setIsAnimate(!this.mode.isAnimate);
     }
 
+    overClearButton() {
+        core.clearAllData();
+    }
+
     handleMousePressed() {
         if (this.testVideoToPlay()) this.playPauseMovie();
         keys.handleKeys(core.paths, core.speakerList);

@@ -1,7 +1,7 @@
 class ProcessData {
 
     /**
-     * Clears existing movement data and parses each movement file and sends for additional testing and processing
+     * Parse input files and send to processData method
      * @param  {.CSV File[]} fileList
      */
     parseMovementFiles(fileList) {
@@ -23,7 +23,7 @@ class ProcessData {
     }
 
     /**
-     * Clears existing conversation data and parses single conversation file using PapaParse library and sends for additional testing and processing
+     * Parse input files and send to processData method
      * @param  {.CSV File} file
      */
     parseConversationFile(file) {
