@@ -164,13 +164,13 @@ class Core {
     /**
      * @param  {char} name // name of speaker
      * @param  {color} color // color of speaker
-     * @param  {boolean} show // if speaker is showing in GUI
+     * @param  {boolean} isShowing // if speaker is showing in GUI
      */
-    createSpeaker(name, color, show) {
+    createSpeaker(name, color, isShowing) {
         return {
             name,
             color,
-            show
+            isShowing
         };
     }
 
@@ -179,15 +179,15 @@ class Core {
      * @param  {MovementPoint []} movement // Path is comprised of 2 arrays of MovementPoint and ConversationPoint objects
      * @param  {ConversationPoint []} conversation
      * @param  {color} color // color of Path
-     * @param  {boolean} show // if speaker is showing in GUI
+     * @param  {boolean} isShowing // if speaker is showing in GUI
      */
-    createPath(name, movement, conversation, color, show) {
+    createPath(name, movement, conversation, color, isShowing) {
         return {
             name,
             movement,
             conversation,
             color,
-            show
+            isShowing
         }
     }
 

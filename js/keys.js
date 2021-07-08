@@ -62,7 +62,7 @@ class Keys {
             stroke(person.color);
             noFill();
             rect(currXPos, this.panel.keyHeight, this.panel.spacing, this.panel.spacing);
-            if (person.show) {
+            if (person.isShowing) {
                 fill(person.color);
                 rect(currXPos, this.panel.keyHeight, this.panel.spacing, this.panel.spacing);
             }

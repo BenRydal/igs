@@ -204,7 +204,7 @@ class DrawDataConversation {
      * @param  {Char} pathName
      */
     testSpeakerToDraw(speaker, pathName) {
-        return speaker != null && speaker.show && (sketchController.mode.isAllTalk || speaker.name === pathName);
+        return speaker != null && speaker.isShowing && (sketchController.mode.isAllTalk || speaker.name === pathName);
     }
 
     /**

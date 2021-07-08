@@ -68,7 +68,7 @@ function setMovementAndConversation() {
     const drawConversationData = new DrawDataConversation();
     const drawMovementData = new DrawDataMovement();
     for (const path of core.paths) {
-        if (path.show) {
+        if (path.isShowing) {
             drawConversationData.setData(path, core.speakerList);
             drawMovementData.setData(path); // draw after conversation so bug displays on top
         }
@@ -79,7 +79,7 @@ function setMovementAndConversation() {
 function setMovement() {
     const drawMovementData = new DrawDataMovement();
     for (const path of core.paths) {
-        if (path.show) drawMovementData.setData(path); // draw after conversation so bug displays on top
+        if (path.isShowing) drawMovementData.setData(path); // draw after conversation so bug displays on top
     }
 }
 

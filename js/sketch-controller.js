@@ -201,11 +201,11 @@ class SketchController {
     }
 
     setSpeakerShow(speaker) {
-        speaker.show = !speaker.show;
+        speaker.isShowing = !speaker.isShowing;
     }
 
     setPathShow(path) {
-        path.show = !path.show;
+        path.isShowing = !path.isShowing;
     }
 
     setIsAnimate(value) {
