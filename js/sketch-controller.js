@@ -2,7 +2,6 @@ class SketchController {
 
     constructor() {
         this.mode = {
-            isMovement: true,
             isAnimate: false,
             isAlignTalk: false,
             isAllTalk: true,
@@ -53,9 +52,7 @@ class SketchController {
 
     handleMousePressed() {
         if (this.testVideoToPlay()) this.playPauseMovie();
-        keys.overMovementConversationButtons();
-        if (this.mode.isMovement) keys.overPathKeys(core.paths);
-        else keys.overSpeakerKeys(core.speakerList);
+        keys.handleKeys(core.paths, core.speakerList);
     }
 
     handleMouseDragged() {

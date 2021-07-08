@@ -26,7 +26,8 @@ class Keys {
             titleHeight: this.timeline.bottom + (this.timeline.height / 40),
             keyHeight: this.timeline.bottom + (this.timeline.height / 12),
             xPos: this.timeline.start,
-            spacing: width / 71
+            spacing: width / 71,
+            isMovement: true // toggle between showing movement/conversation keys
         }
         this.keyTextSize = width / 70;
         this.introMsg = "INTERACTION GEOGRAPHY SLICER (IGS)\n\nby Ben Rydal Shapiro & contributors\nbuilt with p5.js & JavaScript\n\nHi There! This is a tool to visualize movement, conversation, and video data over space and time. Data are displayed over a floor plan view (left) and a space-time view (right), where the vertical axis corresponds to the vertical dimension of the floor plan. Use the top menu to visualize different sample datasets or upload your own data. Hover over the floor plan and use the timeline to selectively study displayed data. Use the bottom buttons to animate data, visualize conversation in different ways, and interact with video data by clicking the timeline to play & pause video. For more information see: benrydal.com/software/igs";
@@ -36,7 +37,7 @@ class Keys {
         textAlign(LEFT, TOP);
         textSize(this.keyTextSize);
         this.drawPanelTitles();
-        if (sketchController.mode.isMovement) this.drawPanelKeys(pathList);
+        if (this.panel.isMovement) this.drawPanelKeys(pathList);
         else this.drawPanelKeys(speakerList);
         this.drawTimeline();
         if (this.overFloorPlan(mouseX, mouseY)) this.drawFloorPlanSelector();
@@ -46,11 +47,11 @@ class Keys {
 
     drawPanelTitles() {
         noStroke();
-        fill(sketchController.mode.isMovement ? 0 : 150);
+        fill(this.panel.isMovement ? 0 : 150);
         text("Movement", this.timeline.start, this.panel.titleHeight);
         fill(0);
         text(" | ", this.timeline.start + textWidth("Movement"), this.panel.titleHeight);
-        fill(!sketchController.mode.isMovement ? 0 : 150);
+        fill(!this.panel.isMovement ? 0 : 150);
         text("Conversation", this.timeline.start + textWidth("Movement | "), this.panel.titleHeight);
     }
 
@@ -152,11 +153,17 @@ class Keys {
         rect(xPos, yPos, width - xPos, height - yPos);
     }
 
+    handleKeys(paths, speakerList) {
+        this.overMovementConversationButtons();
+        if (this.panel.isMovement) this.overPathKeys(paths);
+        else this.overSpeakerKeys(speakerList);
+    }
+
     overMovementConversationButtons() {
         textSize(this.keyTextSize);
         let currXPos = this.timeline.start;
-        if (this.overRect(currXPos, this.panel.titleHeight, this.panel.spacing + textWidth("Movement"), this.panel.spacing)) sketchController.mode.isMovement = true;
-        else if (this.overRect(currXPos + textWidth("Movement | "), this.panel.titleHeight, this.panel.spacing + textWidth("Conversation"), this.panel.spacing)) sketchController.mode.isMovement = false;
+        if (this.overRect(currXPos, this.panel.titleHeight, this.panel.spacing + textWidth("Movement"), this.panel.spacing)) this.panel.isMovement = true;
+        else if (this.overRect(currXPos + textWidth("Movement | "), this.panel.titleHeight, this.panel.spacing + textWidth("Conversation"), this.panel.spacing)) this.panel.isMovement = false;
     }
 
 
