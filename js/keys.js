@@ -152,42 +152,6 @@ class Keys {
         rect(xPos, yPos, width - xPos, height - yPos);
     }
 
-    overCircle(x, y, diameter) {
-        return sqrt(sq(x - mouseX) + sq(y - mouseY)) < diameter / 2;
-    }
-
-    overRect(x, y, boxWidth, boxHeight) {
-        return mouseX >= x && mouseX <= x + boxWidth && mouseY >= y && mouseY <= y + boxHeight;
-    }
-
-    overSpaceTimeView(xPos, yPos) {
-        return (xPos >= this.timeline.start && xPos <= this.timeline.end) && (yPos >= 0 && yPos <= this.timeline.height);
-    }
-
-    overFloorPlan(xPos, yPos) {
-        return (xPos >= 0 && xPos <= this.floorPlan.width) && (yPos >= 0 && yPos <= this.floorPlan.height);
-    }
-
-    overCursor(xPos, yPos) {
-        return this.overCircle(xPos, yPos, this.floorPlan.selectorSize);
-    }
-
-    overFloorPlanAndCursor(xPos, yPos) {
-        return !this.overFloorPlan(mouseX, mouseY) || (this.overFloorPlan(mouseX, mouseY) && this.overCursor(xPos, yPos));
-    }
-
-    overTimelineAxis(pixelValue) {
-        return pixelValue >= this.timeline.selectStart && pixelValue <= this.timeline.selectEnd;
-    }
-
-    overSelector(selector) {
-        return this.overRect(selector - this.timeline.padding, this.timeline.top, this.timeline.doublePadding, this.timeline.thickness);
-    }
-
-    overTimelineAxisRegion() {
-        return this.overRect(this.timeline.start - this.timeline.doublePadding, this.timeline.top, this.timeline.length + this.timeline.doublePadding, this.timeline.thickness);
-    }
-
     overMovementConversationButtons() {
         textSize(this.keyTextSize);
         let currXPos = this.timeline.start;
@@ -229,5 +193,41 @@ class Keys {
             this.timeline.selectEnd = constrain(mouseX, this.timeline.start, this.timeline.end);
             if (this.timeline.selectEnd < this.timeline.selectStart + this.timeline.doublePadding) this.timeline.selectEnd = this.timeline.selectStart + this.timeline.doublePadding; // prevents overstriking
         }
+    }
+
+    overCircle(x, y, diameter) {
+        return sqrt(sq(x - mouseX) + sq(y - mouseY)) < diameter / 2;
+    }
+
+    overRect(x, y, boxWidth, boxHeight) {
+        return mouseX >= x && mouseX <= x + boxWidth && mouseY >= y && mouseY <= y + boxHeight;
+    }
+
+    overSpaceTimeView(xPos, yPos) {
+        return (xPos >= this.timeline.start && xPos <= this.timeline.end) && (yPos >= 0 && yPos <= this.timeline.height);
+    }
+
+    overFloorPlan(xPos, yPos) {
+        return (xPos >= 0 && xPos <= this.floorPlan.width) && (yPos >= 0 && yPos <= this.floorPlan.height);
+    }
+
+    overCursor(xPos, yPos) {
+        return this.overCircle(xPos, yPos, this.floorPlan.selectorSize);
+    }
+
+    overFloorPlanAndCursor(xPos, yPos) {
+        return !this.overFloorPlan(mouseX, mouseY) || (this.overFloorPlan(mouseX, mouseY) && this.overCursor(xPos, yPos));
+    }
+
+    overTimelineAxis(pixelValue) {
+        return pixelValue >= this.timeline.selectStart && pixelValue <= this.timeline.selectEnd;
+    }
+
+    overSelector(selector) {
+        return this.overRect(selector - this.timeline.padding, this.timeline.top, this.timeline.doublePadding, this.timeline.thickness);
+    }
+
+    overTimelineAxisRegion() {
+        return this.overRect(this.timeline.start - this.timeline.doublePadding, this.timeline.top, this.timeline.length + this.timeline.doublePadding, this.timeline.thickness);
     }
 }
