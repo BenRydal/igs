@@ -15,7 +15,7 @@ class DrawDataMovement {
 
     setData(path) {
         this.resetBug(); // always reset bug values
-        if (keys.overRect(0, 0, keys.floorPlan.width, keys.floorPlan.height)) {
+        if (keys.overFloorPlan(mouseX, mouseY)) {
             this.drawWithCursorHighlight(PLAN, path.movement, path.color);
             this.drawWithCursorHighlight(SPACETIME, path.movement, path.color);
         } else {
@@ -41,7 +41,7 @@ class DrawDataMovement {
         for (let i = 1; i < path.length; i++) {
             const curPoint = sketchController.getScaledPointValues(path[i], view); // get current and prior points for comparison
             const priorPoint = sketchController.getScaledPointValues(path[i - 1], view);
-            if (keys.overTimeline(curPoint.pixelTime) && keys.overFloorPlan(curPoint.scaledXPos, curPoint.scaledYPos) && sketchController.testAnimation(curPoint.pixelTime)) {
+            if (sketchController.testMovementPointToDraw(curPoint)) {
                 if (view === SPACETIME) this.testPointForBug(curPoint.scaledTime, curPoint.scaledXPos, curPoint.scaledYPos);
                 if (curPoint.scaledXPos === priorPoint.scaledXPos && curPoint.scaledYPos === priorPoint.scaledYPos) {
                     if (stop_Mode) { // if already drawing in stop mode, continue it
@@ -77,7 +77,7 @@ class DrawDataMovement {
         beginShape();
         for (const point of path) {
             const curPoint = sketchController.getScaledPointValues(point, view);
-            if (keys.overTimeline(curPoint.pixelTime) && keys.overFloorPlan(curPoint.scaledXPos, curPoint.scaledYPos) && sketchController.testAnimation(curPoint.pixelTime)) {
+            if (sketchController.testMovementPointToDraw(curPoint)) {
                 if (view === SPACETIME) this.testPointForBug(curPoint.scaledTime, curPoint.scaledXPos, curPoint.scaledYPos);
                 if (keys.overCursor(curPoint.scaledXPos, curPoint.scaledYPos)) {
                     if (over_Cursor_Mode) { // if already drawing in cursor mode, continue it
@@ -129,7 +129,7 @@ class DrawDataMovement {
         else if (sketchController.mode.isVideoPlay) {
             const selTime = sketchController.mapFromVideoToSelectedTime();
             if (this.compareValuesBySpacing(selTime, scaledTimeToTest, this.bug.lengthToCompare)) this.recordBug(scaledTimeToTest, xPos, yPos, Math.abs(selTime - scaledTimeToTest));
-        } else if (keys.overRect(keys.timeline.start, 0, keys.timeline.length, keys.timeline.height) && this.compareValuesBySpacing(mouseX, scaledTimeToTest, this.bug.lengthToCompare)) this.recordBug(mouseX, xPos, yPos, Math.abs(mouseX - scaledTimeToTest));
+        } else if (keys.overSpaceTimeView(mouseX, mouseY) && this.compareValuesBySpacing(mouseX, scaledTimeToTest, this.bug.lengthToCompare)) this.recordBug(mouseX, xPos, yPos, Math.abs(mouseX - scaledTimeToTest));
     }
 
     compareValuesBySpacing(value1, value2, spacing) {

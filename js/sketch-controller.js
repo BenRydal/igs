@@ -55,7 +55,7 @@ class SketchController {
     }
 
     handleMousePressed() {
-        if (this.testVideoIsReady()) this.playPauseMovie();
+        if (this.testVideoToPlay()) this.playPauseMovie();
         keys.overMovementConversationButtons();
         if (this.mode.isMovement) keys.overPathKeys();
         else keys.overSpeakerKeys();
@@ -63,14 +63,12 @@ class SketchController {
 
     handleMouseDragged() {
         if (!this.mode.isAnimate && ((keys.timeline.isLockedLeft || keys.timeline.isLockedRight) || keys.overRect(keys.timeline.start - keys.timeline.padding, keys.timeline.top, keys.timeline.length + keys.timeline.padding, keys.timeline.thickness))) keys.handleTimeline();
-
     }
 
     handleMouseReleased() {
         keys.timeline.isLockedLeft = false;
         keys.timeline.isLockedRight = false;
     }
-
 
     updateAnimation() {
         if (this.mode.isAnimate) {
@@ -93,16 +91,13 @@ class SketchController {
         if (this.mode.isAnimate) {
             const vPos = Math.floor(map(sketchController.bugTimeForVideoScrub, keys.timeline.start, keys.timeline.end, this.mapFromPixelToVideoTime(keys.timeline.selectStart), this.mapFromPixelToVideoTime(keys.timeline.selectEnd)));
             core.videoPlayer.seekTo(vPos);
-        } else if (keys.overRect(keys.timeline.start, 0, keys.timeline.end, keys.timeline.height)) {
+        } else if (keys.overSpaceTimeView(mouseX, mouseY)) {
             const vPos = Math.floor(this.mapFromPixelToVideoTime(this.mapFromPixelToSelectedTime(mouseX)));
             core.videoPlayer.seekTo(vPos);
             core.videoPlayer.pause(); // Add to prevent accidental video playing that seems to occur
         }
     }
 
-    /**
-     * Toggle whether video is playing and whether video is showing
-     */
     toggleVideoShowHide() {
         if (this.mode.isVideoShow) {
             core.videoPlayer.pause();
@@ -115,9 +110,7 @@ class SketchController {
         }
     }
 
-    /**
-     * Plays/pauses movie and updates videoPlayhead if setting to play
-     */
+
     playPauseMovie() {
         if (this.mode.isVideoPlay) {
             core.videoPlayer.pause();
@@ -170,6 +163,10 @@ class SketchController {
         else return true;
     }
 
+
+    testMovementPointToDraw(curPoint) {
+        return keys.overTimeline(curPoint.pixelTime) && keys.overFloorPlan(curPoint.scaledXPos, curPoint.scaledYPos) && this.testAnimation(curPoint.pixelTime);
+    }
     /**
      * Test if point is in user view
      * @param  {ConversationPoint} curPoint
@@ -178,7 +175,7 @@ class SketchController {
         return keys.overTimeline(curPoint.pixelTime) && keys.overFloorPlan(curPoint.scaledXPos, curPoint.scaledYPos) && this.testAnimation(curPoint.pixelTime) && keys.overFloorPlanAndCursor(curPoint.scaledXPos, curPoint.scaledYPos);
     }
 
-    testVideoIsReady() {
+    testVideoToPlay() {
         return testData.dataIsLoaded(core.videoPlayer) && this.mode.isVideoShow && !this.mode.isAnimate && keys.overRect(keys.timeline.start, 0, keys.timeline.end, keys.timeline.bottom)
     }
     // map to inverse, values constrained between 10 and 1 (pixels)
@@ -188,6 +185,10 @@ class SketchController {
 
     mapFromPixelToTotalTime(value) {
         return map(value, keys.timeline.start, keys.timeline.end, 0, core.totalTimeInSeconds);
+    }
+
+    mapFromTotalToPixelTime(value) {
+        return map(value, 0, core.totalTimeInSeconds, keys.timeline.start, keys.timeline.end);
     }
 
     mapFromPixelToVideoTime(value) {

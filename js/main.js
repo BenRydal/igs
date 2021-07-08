@@ -40,6 +40,7 @@ function preload() {
 
 function setup() {
     canvas = createCanvas(window.innerWidth, window.innerHeight, P2D);
+    rectMode(CORNER);
     core = new Core();
     keys = new Keys();
     domController = new DomController();

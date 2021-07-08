@@ -6,8 +6,9 @@ class Keys {
             end: width * 0.9638,
             selectStart: width * 0.4638,
             selectEnd: width * 0.9638,
-            tickHeight: 25,
+            spacing: 25,
             padding: 20,
+            doublePadding: 40,
             length: width * 0.9638 - width * 0.4638,
             height: height * .81,
             top: height * .81 - 25,
@@ -21,11 +22,16 @@ class Keys {
             height: this.timeline.height,
             selectorSize: 100
         }
+        this.panel = {
+            titleHeight: this.timeline.bottom + 10,
+            keyHeight: this.timeline.bottom + 50,
+            xPos: this.timeline.start,
+            spacing: width / 71
+        }
         this.keyTextSize = width / 70;
         this.introMsg = "INTERACTION GEOGRAPHY SLICER (IGS)\n\nby Ben Rydal Shapiro & contributors\nbuilt with p5.js & JavaScript\n\nHi There! This is a tool to visualize movement, conversation, and video data over space and time. Data are displayed over a floor plan view (left) and a space-time view (right), where the vertical axis corresponds to the vertical dimension of the floor plan. Use the top menu to visualize different sample datasets or upload your own data. Hover over the floor plan and use the timeline to selectively study displayed data. Use the bottom buttons to animate data, visualize conversation in different ways, and interact with video data by clicking the timeline to play & pause video. For more information see: benrydal.com/software/igs";
-        this.buttonSpacing = width / 71;
-        this.buttonWidth = this.buttonSpacing;
-        this.speakerKeysHeight = this.timeline.height + (height - this.timeline.height) / 4;
+        // this.speakerKeysHeight = this.timeline.height + (height - this.timeline.height) / 4;
+        // this.panel.xPos = this.timeline.start + textWidth("Movement | Conversation") + this.panel.spacing;
     }
 
     // TODO: pass a list for drawing
@@ -36,78 +42,86 @@ class Keys {
         if (sketchController.mode.isMovement) this.drawPathSpeakerKeys(core.paths);
         else this.drawPathSpeakerKeys(core.speakerList);
         this.drawTimeline();
-        if (this.overRect(0, 0, this.floorPlan.width, this.floorPlan.height)) this.drawFloorPlanSelector();
-        if (this.overRect(this.timeline.start, 0, this.timeline.length, this.timeline.height)) this.drawSlicer(); // draw slicer line after calculating all movement
+        if (this.overFloorPlan(mouseX, mouseY)) this.drawFloorPlanSelector();
+        if (this.overSpaceTimeView(mouseX, mouseY)) this.drawSlicer();
         if (sketchController.mode.isIntro) this.drawIntroMsg(); // draw intro message on program start up until mouse is pressed
     }
 
     drawPathSpeakerTitle() {
-        let currXPos = this.timeline.start;
-        let yPos = this.speakerKeysHeight - this.buttonWidth / 5;
         noStroke();
         fill(sketchController.mode.isMovement ? 0 : 150);
-        text("Movement", currXPos, yPos);
+        text("Movement", this.timeline.start, this.panel.titleHeight);
         fill(0);
-        text(" | ", currXPos + textWidth("Movement"), yPos);
+        text(" | ", this.timeline.start + textWidth("Movement"), this.panel.titleHeight);
         fill(!sketchController.mode.isMovement ? 0 : 150);
-        text("Conversation", currXPos + textWidth("Movement | "), yPos);
+        text("Conversation", this.timeline.start + textWidth("Movement | "), this.panel.titleHeight);
     }
 
-    // Loop through speakers and set fill/stroke in keys for all if showing/not showing
+    // Loop through speakers and set fill/stroke in this for all if showing/not showing
     drawPathSpeakerKeys(list) {
-        let currXPos = this.timeline.start + textWidth("Movement | Conversation") + this.buttonWidth;
-        let yPos = this.speakerKeysHeight - this.buttonWidth / 5;
+        let currXPos = this.panel.xPos;
         strokeWeight(5);
         for (const person of list) {
             stroke(person.color);
             noFill();
-            rect(currXPos, this.speakerKeysHeight, this.buttonWidth, this.buttonWidth);
+            rect(currXPos, this.panel.keyHeight, this.panel.spacing, this.panel.spacing);
             if (person.show) {
                 fill(person.color);
-                rect(currXPos, this.speakerKeysHeight, this.buttonWidth, this.buttonWidth);
+                rect(currXPos, this.panel.keyHeight, this.panel.spacing, this.panel.spacing);
             }
             fill(0);
             noStroke();
-            text(person.name, currXPos + 1.3 * this.buttonWidth, yPos);
-            currXPos += this.buttonWidth + textWidth(person.name) + this.buttonSpacing;
+            text(person.name, currXPos + 1.3 * this.panel.spacing, this.panel.keyHeight);
+            currXPos += this.panel.spacing + textWidth(person.name) + this.panel.spacing;
         }
     }
 
-
     drawTimeline() {
-        // timeline selection rectangle
+        this.drawSelectionRect();
+        this.drawAxis();
+        this.drawSelectors();
+        this.drawEndLabels();
+        this.drawCenterLabel();
+    }
+
+    drawSelectionRect() {
         fill(150, 150);
         noStroke();
-        if (sketchController.mode.isAnimate) rect(this.timeline.selectStart, this.timeline.height - this.timeline.tickHeight, map(sketchController.animationCounter, 0, core.totalTimeInSeconds, this.timeline.start, this.timeline.end) - this.timeline.selectStart, 2 * (this.timeline.tickHeight));
-        else rect(this.timeline.selectStart, this.timeline.height - this.timeline.tickHeight, this.timeline.selectEnd - this.timeline.selectStart, 2 * (this.timeline.tickHeight));
-        // timeline
+        if (sketchController.mode.isAnimate) this.drawRect(this.timeline.selectStart, this.timeline.top, sketchController.mapFromTotalToPixelTime(sketchController.animationCounter), this.timeline.bottom);
+        else this.drawRect(this.timeline.selectStart, this.timeline.top, this.timeline.selectEnd, this.timeline.bottom);
+    }
+
+    drawAxis() {
         stroke(0);
         strokeWeight(1);
-        line(this.timeline.start, this.timeline.height, this.timeline.end, this.timeline.height); // horizontal
-        // Selector lines
-        strokeWeight(4);
-        line(this.timeline.selectStart, this.timeline.height - this.timeline.tickHeight, this.timeline.selectStart, this.timeline.height + this.timeline.tickHeight);
-        line(this.timeline.selectEnd, this.timeline.height - this.timeline.tickHeight, this.timeline.selectEnd, this.timeline.height + this.timeline.tickHeight);
+        line(this.timeline.start, this.timeline.height, this.timeline.end, this.timeline.height);
+    }
 
-        // Text for minutes at start/end of timeline
+    drawSelectors() {
+        strokeWeight(4);
+        line(this.timeline.selectStart, this.timeline.top, this.timeline.selectStart, this.timeline.bottom);
+        line(this.timeline.selectEnd, this.timeline.top, this.timeline.selectEnd, this.timeline.bottom);
+    }
+
+    drawEndLabels() {
         noStroke();
         fill(0);
-        let startValue = floor(map(this.timeline.selectStart, this.timeline.start, this.timeline.end, 0, core.totalTimeInSeconds));
-        let endValue = ceil(map(this.timeline.selectEnd, this.timeline.start, this.timeline.end, 0, core.totalTimeInSeconds));
-        text(floor(startValue / 60), this.timeline.start + this.timeline.tickHeight / 2, this.timeline.height);
-        text(ceil(endValue / 60), this.timeline.end - this.timeline.tickHeight, this.timeline.height);
-        // Text for timeline label
-        let mapMouseX = map(mouseX, this.timeline.start, this.timeline.end, this.timeline.selectStart, this.timeline.selectEnd);
-        let videoTimeInSeconds = map(mapMouseX, this.timeline.start, this.timeline.end, 0, core.totalTimeInSeconds); // remap to get seconds in video from remapped mouse position   
-        let videoTimeInMinutes = videoTimeInSeconds / 60; // float value of minutes and seconds
-        let minutesValue = floor(videoTimeInMinutes); // floor to get minutes
-        let decimalSeconds = videoTimeInMinutes - minutesValue; //  Subtract minutes to get decimal seconds---e.g., 14.28571429 - 14... returns (.28571429)
-        let secondsValue = floor((decimalSeconds * 60).toFixed(2)); // Converts number into a String and keeps only the specified number of decimals
-        let label_1 = minutesValue + " minutes  " + secondsValue + " seconds";
-        let label_2 = "MINUTES";
+        const leftLabel = Math.floor(sketchController.mapFromPixelToTotalTime(this.timeline.selectStart) / 60);
+        const rightLabel = Math.ceil(sketchController.mapFromPixelToTotalTime(this.timeline.selectEnd) / 60);
+        text(leftLabel, this.timeline.start + this.timeline.spacing, this.timeline.height);
+        text(rightLabel, this.timeline.end - this.timeline.spacing - textWidth(rightLabel), this.timeline.height);
+    }
+
+    drawCenterLabel() {
         textAlign(CENTER);
-        if (this.overRect(this.timeline.start, 0, this.timeline.length, this.timeline.height)) text(label_1, this.timeline.start + this.timeline.length / 2, this.timeline.height);
-        else text(label_2, this.timeline.start + this.timeline.length / 2, this.timeline.height);
+        if (this.overSpaceTimeView(mouseX, mouseY)) {
+            const mapMouseX = sketchController.mapFromPixelToSelectedTime(mouseX);
+            const timeInSeconds = sketchController.mapFromPixelToTotalTime(mapMouseX);
+            const minutes = Math.floor(timeInSeconds / 60);
+            const seconds = Math.floor(timeInSeconds - minutes * 60);
+            const label = minutes + " minutes  " + seconds + " seconds";
+            text(label, this.timeline.start + this.timeline.length / 2, this.timeline.height);
+        } else text("MINUTES", this.timeline.start + this.timeline.length / 2, this.timeline.height);
         textAlign(LEFT); // reset
     }
 
@@ -137,6 +151,11 @@ class Keys {
         rectMode(CORNER);
     }
 
+    // need this method to draw rects different than draw Data class
+    drawRect(xPos, yPos, width, height) {
+        rect(xPos, yPos, width - xPos, height - yPos);
+    }
+
     overCircle(x, y, diameter) {
         return sqrt(sq(x - mouseX) + sq(y - mouseY)) < diameter / 2;
     }
@@ -145,97 +164,72 @@ class Keys {
         return mouseX >= x && mouseX <= x + boxWidth && mouseY >= y && mouseY <= y + boxHeight;
     }
 
-    /**
-     * Returns true if value is within pixel range of timeline
-     * @param  {Number/Float} timeValue
-     */
     overTimeline(pixelValue) {
         return pixelValue >= this.timeline.selectStart && pixelValue <= this.timeline.selectEnd;
     }
 
-    /**
-     * Returns true if value is within floor plan pixel display container 
-     * @param  {Number/Float} xPos
-     * @param  {Number/Float} yPos
-     */
+    overSpaceTimeView(xPos, yPos) {
+        return (xPos >= this.timeline.start && xPos <= this.timeline.end) && (yPos >= 0 && yPos <= this.timeline.height);
+    }
+
     overFloorPlan(xPos, yPos) {
         return (xPos >= 0 && xPos <= this.floorPlan.width) && (yPos >= 0 && yPos <= this.floorPlan.height);
     }
-    /**
-     * Returns true if mouse cursor near xPos and yPos parameters
-     * NOTE: core.floorPlan SelectorSize set globally
-     * @param  {Number/Float} xPos
-     * @param  {Number/Float} yPos
-     */
+
     overCursor(xPos, yPos) {
         return this.overCircle(xPos, yPos, this.floorPlan.selectorSize);
     }
 
-    /**
-     * If mouse is over floor plan, returns true if mouse cursor near xPos and yPos parameters
-     * Always returns true if mouse is not over the floor plan
-     * @param  {Number/Float} xPos
-     * @param  {Number/Float} yPos
-     */
     overFloorPlanAndCursor(xPos, yPos) {
-        return !this.overFloorPlan(mouseX, mouseY) || (this.overFloorPlan(mouseX, mouseY) && this.overCircle(xPos, yPos, this.floorPlan.selectorSize));
+        return !this.overFloorPlan(mouseX, mouseY) || (this.overFloorPlan(mouseX, mouseY) && this.overCursor(xPos, yPos));
     }
 
-    /**
-     * Toggles on and off global showMovement var to determine if movement or conversation keys show
-     * NOTE: textSize is way to control dynamic scaling for gui methods and interface
-     */
+    overSelector(selector) {
+        return this.overRect(selector - this.timeline.padding, this.timeline.top, this.timeline.doublePadding, this.timeline.thickness);
+    }
+
     overMovementConversationButtons() {
-        textSize(keys.keyTextSize);
-        let currXPos = keys.timeline.start;
-        if (this.overRect(currXPos, keys.speakerKeysHeight, keys.buttonWidth + textWidth("Movement"), keys.buttonWidth)) sketchController.mode.isMovement = true;
-        else if (this.overRect(currXPos + textWidth("Movement | "), keys.speakerKeysHeight, keys.buttonWidth + textWidth("Conversation"), keys.buttonWidth)) sketchController.mode.isMovement = false;
+        textSize(this.keyTextSize);
+        let currXPos = this.timeline.start;
+        if (this.overRect(currXPos, this.panel.titleHeight, this.panel.spacing + textWidth("Movement"), this.panel.spacing)) sketchController.mode.isMovement = true;
+        else if (this.overRect(currXPos + textWidth("Movement | "), this.panel.titleHeight, this.panel.spacing + textWidth("Conversation"), this.panel.spacing)) sketchController.mode.isMovement = false;
     }
 
-    /**
-     * Iterate over global core.speakerList and test if mouse is over any of speaker keys and update speaker accordingly
-     * NOTE: textSize is way to control dynamic scaling for gui methods and interface
-     */
+
     overSpeakerKeys() {
-        textSize(keys.keyTextSize);
-        let currXPos = keys.timeline.start + textWidth("Movement | Conversation") + keys.buttonWidth;
+        textSize(this.keyTextSize);
+        let currXPos = this.panel.xPos;
         for (const speaker of core.speakerList) {
             let nameWidth = textWidth(speaker.name); // set nameWidth to pixel width of speaker code
-            if (this.overRect(currXPos, keys.speakerKeysHeight, keys.buttonWidth + nameWidth, keys.buttonWidth)) speaker.show = !speaker.show;
-            currXPos += keys.buttonWidth + nameWidth + keys.buttonSpacing;
+            if (this.overRect(currXPos, this.panel.keyHeight, this.panel.spacing + nameWidth, this.panel.spacing)) speaker.show = !speaker.show;
+            currXPos += this.panel.spacing + nameWidth + this.panel.spacing;
         }
     }
 
-    /**
-     * Iterate over global core.paths list and test if mouse is over any of core.paths and update accordingly
-     * NOTE: textSize is way to control dynamic scaling for gui methods and interface
-     */
     overPathKeys() {
-        textSize(keys.keyTextSize);
-        let currXPos = keys.timeline.start + textWidth("Movement | Conversation") + keys.buttonWidth;
+        textSize(this.keyTextSize);
+        let currXPos = this.panel.xPos;
         for (const path of core.paths) {
             const nameWidth = textWidth(path.name); // set nameWidth to pixel width of path name
-            if (this.overRect(currXPos, keys.speakerKeysHeight, keys.buttonWidth + nameWidth, keys.buttonWidth)) path.show = !path.show;
-            currXPos += keys.buttonWidth + nameWidth + keys.buttonSpacing;
+            if (this.overRect(currXPos, this.panel.keyHeight, this.panel.spacing + nameWidth, this.panel.spacing)) path.show = !path.show;
+            currXPos += this.panel.spacing + nameWidth + this.panel.spacing;
         }
     }
 
 
     /**
-     * Updates keys.timeline.selectStart or keys.timeline.selectEnd global variables depending on left or right selector that user is over
+     * Updates this.timeline.selectStart or this.timeline.selectEnd global variables depending on left or right selector that user is over
      * NOTE: Is triggered if user already dragging or begins dragging
      */
     handleTimeline() {
-        const xPosLeftSelector = keys.timeline.selectStart;
-        const xPosRightSelector = keys.timeline.selectEnd;
-        if (this.timeline.isLockedLeft || (!this.timeline.isLockedRight && this.overRect(xPosLeftSelector - this.timeline.padding, keys.timeline.top, 2 * this.timeline.padding, keys.timeline.thickness))) {
+        if (this.timeline.isLockedLeft || (!this.timeline.isLockedRight && this.overSelector(this.timeline.selectStart))) {
             this.timeline.isLockedLeft = true;
-            keys.timeline.selectStart = constrain(mouseX, keys.timeline.start, keys.timeline.end);
-            if (keys.timeline.selectStart > keys.timeline.selectEnd - (2 * this.timeline.padding)) keys.timeline.selectStart = keys.timeline.selectEnd - (2 * this.timeline.padding); // prevents overstriking
-        } else if (this.timeline.isLockedRight || this.overRect(xPosRightSelector - this.timeline.padding, keys.timeline.top, 2 * this.timeline.padding, keys.timeline.thickness)) {
+            this.timeline.selectStart = constrain(mouseX, this.timeline.start, this.timeline.end);
+            if (this.timeline.selectStart > this.timeline.selectEnd - this.timeline.doublePadding) this.timeline.selectStart = this.timeline.selectEnd - this.timeline.doublePadding; // prevents overstriking
+        } else if (this.timeline.isLockedRight || this.overSelector(this.timeline.selectEnd)) {
             this.timeline.isLockedRight = true;
-            keys.timeline.selectEnd = constrain(mouseX, keys.timeline.start, keys.timeline.end);
-            if (keys.timeline.selectEnd < keys.timeline.selectStart + (2 * this.timeline.padding)) keys.timeline.selectEnd = keys.timeline.selectStart + (2 * this.timeline.padding); // prevents overstriking
+            this.timeline.selectEnd = constrain(mouseX, this.timeline.start, this.timeline.end);
+            if (this.timeline.selectEnd < this.timeline.selectStart + this.timeline.doublePadding) this.timeline.selectEnd = this.timeline.selectStart + this.timeline.doublePadding; // prevents overstriking
         }
     }
 }
