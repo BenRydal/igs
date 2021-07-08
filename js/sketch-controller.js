@@ -1,9 +1,6 @@
-// setters/getters still all in here SO this is where things change and sketch is where flow is handled
-// COULD pass keys object/videoPlayer reference to all of these methods???
 class SketchController {
 
     constructor() {
-        // TODO: REMOVE isMovement Mode!!! Just for key display
         this.mode = {
             isMovement: true,
             isAnimate: false,
@@ -57,12 +54,12 @@ class SketchController {
     handleMousePressed() {
         if (this.testVideoToPlay()) this.playPauseMovie();
         keys.overMovementConversationButtons();
-        if (this.mode.isMovement) keys.overPathKeys();
-        else keys.overSpeakerKeys();
+        if (this.mode.isMovement) keys.overPathKeys(core.paths);
+        else keys.overSpeakerKeys(core.speakerList);
     }
 
     handleMouseDragged() {
-        if (!this.mode.isAnimate && ((keys.timeline.isLockedLeft || keys.timeline.isLockedRight) || keys.overRect(keys.timeline.start - keys.timeline.padding, keys.timeline.top, keys.timeline.length + keys.timeline.padding, keys.timeline.thickness))) keys.handleTimeline();
+        if (!this.mode.isAnimate && ((keys.timeline.isLockedLeft || keys.timeline.isLockedRight) || keys.overTimelineAxisRegion())) keys.handleTimeline();
     }
 
     handleMouseReleased() {
@@ -75,8 +72,8 @@ class SketchController {
             const animationIncrementRateDivisor = 1000; // this divisor seems to work best
             const curTimeIntervalInSeconds = this.mapFromPixelToTotalTime(keys.timeline.selectEnd) - this.mapFromPixelToTotalTime(keys.timeline.selectStart); // Get amount of time in seconds currently displayed
             const animationIncrementValue = curTimeIntervalInSeconds / animationIncrementRateDivisor; // set increment value based on that value/divisor to keep constant sketchController.mode.isAnimate speed regardless of time interval selected
-            if (sketchController.animationCounter < this.mapFromPixelToTotalTime(keys.timeline.selectEnd)) sketchController.animationCounter += animationIncrementValue;
-            else sketchController.setIsAnimate(false);
+            if (this.animationCounter < this.mapFromPixelToTotalTime(keys.timeline.selectEnd)) this.animationCounter += animationIncrementValue;
+            else this.setIsAnimate(false);
         }
     }
 
@@ -89,7 +86,7 @@ class SketchController {
 
     setVideoScrubbing() {
         if (this.mode.isAnimate) {
-            const vPos = Math.floor(map(sketchController.bugTimeForVideoScrub, keys.timeline.start, keys.timeline.end, this.mapFromPixelToVideoTime(keys.timeline.selectStart), this.mapFromPixelToVideoTime(keys.timeline.selectEnd)));
+            const vPos = Math.floor(map(this.bugTimeForVideoScrub, keys.timeline.start, keys.timeline.end, this.mapFromPixelToVideoTime(keys.timeline.selectStart), this.mapFromPixelToVideoTime(keys.timeline.selectEnd)));
             core.videoPlayer.seekTo(vPos);
         } else if (keys.overSpaceTimeView(mouseX, mouseY)) {
             const vPos = Math.floor(this.mapFromPixelToVideoTime(this.mapFromPixelToSelectedTime(mouseX)));
@@ -109,7 +106,6 @@ class SketchController {
             this.setVideoShow(true);
         }
     }
-
 
     playPauseMovie() {
         if (this.mode.isVideoPlay) {
@@ -155,29 +151,29 @@ class SketchController {
         };
     }
 
-    /**
-     * @param  {Number/Float} timeValue
-     */
-    testAnimation(value) {
-        if (sketchController.mode.isAnimate) return this.animationCounter > this.mapFromPixelToTotalTime(value);
-        else return true;
-    }
-
-
     testMovementPointToDraw(curPoint) {
-        return keys.overTimeline(curPoint.pixelTime) && keys.overFloorPlan(curPoint.scaledXPos, curPoint.scaledYPos) && this.testAnimation(curPoint.pixelTime);
+        return keys.overTimelineAxis(curPoint.pixelTime) && keys.overFloorPlan(curPoint.scaledXPos, curPoint.scaledYPos) && this.testAnimation(curPoint.pixelTime);
     }
     /**
      * Test if point is in user view
      * @param  {ConversationPoint} curPoint
      */
     testConversationPointToDraw(curPoint) {
-        return keys.overTimeline(curPoint.pixelTime) && keys.overFloorPlan(curPoint.scaledXPos, curPoint.scaledYPos) && this.testAnimation(curPoint.pixelTime) && keys.overFloorPlanAndCursor(curPoint.scaledXPos, curPoint.scaledYPos);
+        return keys.overTimelineAxis(curPoint.pixelTime) && keys.overFloorPlan(curPoint.scaledXPos, curPoint.scaledYPos) && this.testAnimation(curPoint.pixelTime) && keys.overFloorPlanAndCursor(curPoint.scaledXPos, curPoint.scaledYPos);
+    }
+
+    /**
+     * @param  {Number/Float} timeValue
+     */
+    testAnimation(value) {
+        if (this.mode.isAnimate) return this.animationCounter > this.mapFromPixelToTotalTime(value);
+        else return true;
     }
 
     testVideoToPlay() {
         return testData.dataIsLoaded(core.videoPlayer) && this.mode.isVideoShow && !this.mode.isAnimate && keys.overRect(keys.timeline.start, 0, keys.timeline.end, keys.timeline.bottom)
     }
+
     // map to inverse, values constrained between 10 and 1 (pixels)
     mapConversationRectRange() {
         return map(core.totalTimeInSeconds, 0, 3600, 10, 1, true)
@@ -204,7 +200,14 @@ class SketchController {
         return map(timelinePos, keys.timeline.selectStart, keys.timeline.selectEnd, keys.timeline.start, keys.timeline.end);
     }
 
-    // TODO: Add GETTERS
+    setSpeakerShow(speaker) {
+        speaker.show = !speaker.show;
+    }
+
+    setPathShow(path) {
+        path.show = !path.show;
+    }
+
     setIsAnimate(value) {
         this.mode.isAnimate = value;
     }

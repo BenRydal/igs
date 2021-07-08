@@ -13,7 +13,7 @@ class Keys {
             height: height * .81,
             top: height * .81 - 25,
             bottom: height * .81 + 25,
-            thickness: 25 * 2,
+            thickness: 50,
             isLockedLeft: false,
             isLockedRight: false
         }
@@ -23,31 +23,28 @@ class Keys {
             selectorSize: 100
         }
         this.panel = {
-            titleHeight: this.timeline.bottom + 10,
-            keyHeight: this.timeline.bottom + 50,
+            titleHeight: this.timeline.bottom + (this.timeline.height / 40),
+            keyHeight: this.timeline.bottom + (this.timeline.height / 12),
             xPos: this.timeline.start,
             spacing: width / 71
         }
         this.keyTextSize = width / 70;
         this.introMsg = "INTERACTION GEOGRAPHY SLICER (IGS)\n\nby Ben Rydal Shapiro & contributors\nbuilt with p5.js & JavaScript\n\nHi There! This is a tool to visualize movement, conversation, and video data over space and time. Data are displayed over a floor plan view (left) and a space-time view (right), where the vertical axis corresponds to the vertical dimension of the floor plan. Use the top menu to visualize different sample datasets or upload your own data. Hover over the floor plan and use the timeline to selectively study displayed data. Use the bottom buttons to animate data, visualize conversation in different ways, and interact with video data by clicking the timeline to play & pause video. For more information see: benrydal.com/software/igs";
-        // this.speakerKeysHeight = this.timeline.height + (height - this.timeline.height) / 4;
-        // this.panel.xPos = this.timeline.start + textWidth("Movement | Conversation") + this.panel.spacing;
     }
 
-    // TODO: pass a list for drawing
-    drawKeys() {
+    drawKeys(pathList, speakerList) {
         textAlign(LEFT, TOP);
-        textFont(font_Lato, this.keyTextSize);
-        this.drawPathSpeakerTitle();
-        if (sketchController.mode.isMovement) this.drawPathSpeakerKeys(core.paths);
-        else this.drawPathSpeakerKeys(core.speakerList);
+        textSize(this.keyTextSize);
+        this.drawPanelTitles();
+        if (sketchController.mode.isMovement) this.drawPanelKeys(pathList);
+        else this.drawPanelKeys(speakerList);
         this.drawTimeline();
         if (this.overFloorPlan(mouseX, mouseY)) this.drawFloorPlanSelector();
         if (this.overSpaceTimeView(mouseX, mouseY)) this.drawSlicer();
-        if (sketchController.mode.isIntro) this.drawIntroMsg(); // draw intro message on program start up until mouse is pressed
+        if (sketchController.mode.isIntro) this.drawIntroMsg();
     }
 
-    drawPathSpeakerTitle() {
+    drawPanelTitles() {
         noStroke();
         fill(sketchController.mode.isMovement ? 0 : 150);
         text("Movement", this.timeline.start, this.panel.titleHeight);
@@ -58,7 +55,7 @@ class Keys {
     }
 
     // Loop through speakers and set fill/stroke in this for all if showing/not showing
-    drawPathSpeakerKeys(list) {
+    drawPanelKeys(list) {
         let currXPos = this.panel.xPos;
         strokeWeight(5);
         for (const person of list) {
@@ -72,7 +69,7 @@ class Keys {
             fill(0);
             noStroke();
             text(person.name, currXPos + 1.3 * this.panel.spacing, this.panel.keyHeight);
-            currXPos += this.panel.spacing + textWidth(person.name) + this.panel.spacing;
+            currXPos += (2 * this.panel.spacing) + textWidth(person.name);
         }
     }
 
@@ -146,12 +143,11 @@ class Keys {
         fill(255, 240);
         rect(width / 2, height / 2.5, width / 1.75 + 50, height / 1.75 + 50);
         fill(0);
-        textFont(font_Lato, this.keyTextSize);
+        textSize(this.keyTextSize);
         text(this.introMsg, width / 2, height / 2.5, width / 1.75, height / 1.75);
         rectMode(CORNER);
     }
 
-    // need this method to draw rects different than draw Data class
     drawRect(xPos, yPos, width, height) {
         rect(xPos, yPos, width - xPos, height - yPos);
     }
@@ -162,10 +158,6 @@ class Keys {
 
     overRect(x, y, boxWidth, boxHeight) {
         return mouseX >= x && mouseX <= x + boxWidth && mouseY >= y && mouseY <= y + boxHeight;
-    }
-
-    overTimeline(pixelValue) {
-        return pixelValue >= this.timeline.selectStart && pixelValue <= this.timeline.selectEnd;
     }
 
     overSpaceTimeView(xPos, yPos) {
@@ -184,8 +176,16 @@ class Keys {
         return !this.overFloorPlan(mouseX, mouseY) || (this.overFloorPlan(mouseX, mouseY) && this.overCursor(xPos, yPos));
     }
 
+    overTimelineAxis(pixelValue) {
+        return pixelValue >= this.timeline.selectStart && pixelValue <= this.timeline.selectEnd;
+    }
+
     overSelector(selector) {
         return this.overRect(selector - this.timeline.padding, this.timeline.top, this.timeline.doublePadding, this.timeline.thickness);
+    }
+
+    overTimelineAxisRegion() {
+        return this.overRect(this.timeline.start - this.timeline.doublePadding, this.timeline.top, this.timeline.length + this.timeline.doublePadding, this.timeline.thickness);
     }
 
     overMovementConversationButtons() {
@@ -196,30 +196,28 @@ class Keys {
     }
 
 
-    overSpeakerKeys() {
+    overSpeakerKeys(speakerList) {
         textSize(this.keyTextSize);
         let currXPos = this.panel.xPos;
-        for (const speaker of core.speakerList) {
+        for (const speaker of speakerList) {
             let nameWidth = textWidth(speaker.name); // set nameWidth to pixel width of speaker code
-            if (this.overRect(currXPos, this.panel.keyHeight, this.panel.spacing + nameWidth, this.panel.spacing)) speaker.show = !speaker.show;
+            if (this.overRect(currXPos, this.panel.keyHeight, this.panel.spacing + nameWidth, this.panel.spacing)) sketchController.setSpeakerShow(speaker);
             currXPos += this.panel.spacing + nameWidth + this.panel.spacing;
         }
     }
 
-    overPathKeys() {
+    overPathKeys(pathList) {
         textSize(this.keyTextSize);
         let currXPos = this.panel.xPos;
-        for (const path of core.paths) {
+        for (const path of pathList) {
             const nameWidth = textWidth(path.name); // set nameWidth to pixel width of path name
-            if (this.overRect(currXPos, this.panel.keyHeight, this.panel.spacing + nameWidth, this.panel.spacing)) path.show = !path.show;
+            if (this.overRect(currXPos, this.panel.keyHeight, this.panel.spacing + nameWidth, this.panel.spacing)) sketchController.setPathShow(path);
             currXPos += this.panel.spacing + nameWidth + this.panel.spacing;
         }
     }
-
 
     /**
-     * Updates this.timeline.selectStart or this.timeline.selectEnd global variables depending on left or right selector that user is over
-     * NOTE: Is triggered if user already dragging or begins dragging
+     * updates selectStart/end vars and is triggered if user already dragging or begins dragging
      */
     handleTimeline() {
         if (this.timeline.isLockedLeft || (!this.timeline.isLockedRight && this.overSelector(this.timeline.selectStart))) {

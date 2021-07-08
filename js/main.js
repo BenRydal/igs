@@ -16,17 +16,16 @@ https://etd.library.vanderbilt.edu/available/etd-03212018-140140/unrestricted/Sh
 /**
  * Classes/modules treated as singletons with respective .js file/module
  */
-let core; // core program variables and factory functions
-let domController; // handles DOM/button user interaction and initial data parsing
-let sketchController;
+let core; // core program variables and update methods
+let domController; // handles DOM/buttons user interaction
+let sketchController; // coordinates calls across classes and updates state variables
 let processData; // handles all data processing
-let testData; // data loading/sampling tests
-let keys; // interface vars and methods
+let testData; // holds all tests for different program data
+let keys; // GUI vars and methods
 
 /**
  * Constants
  */
-
 const CSVHEADERS_MOVEMENT = ['time', 'x', 'y']; // String array indicating movement movement file headers, data in each column should be of type number or it won't process
 const CSVHEADERS_CONVERSATION = ['time', 'speaker', 'talk']; // String array indicating conversation file headers, data in time column shout be of type number, speaker column should be of type String, talk column should be not null or undefined
 let font_Lato;
@@ -40,17 +39,17 @@ function preload() {
 
 function setup() {
     canvas = createCanvas(window.innerWidth, window.innerHeight, P2D);
-    rectMode(CORNER);
     core = new Core();
     keys = new Keys();
     domController = new DomController();
     sketchController = new SketchController();
     processData = new ProcessData();
     testData = new TestData();
+    textFont(font_Lato);
 }
 
 /**
- * Organizes draw loop depending on data that has been loaded and animation state
+ * Organizes draw loop depending on what data has been loaded
  */
 function draw() {
     background(255);
@@ -60,14 +59,11 @@ function draw() {
         else setMovement();
     }
     if (testData.dataIsLoaded(core.videoPlayer)) sketchController.updateVideoDisplay();
-    keys.drawKeys(); // draw keys last
+    keys.drawKeys(core.paths, core.speakerList); // draw keys last
     sketchController.updateAnimation();
     sketchController.updateLoop();
 }
 
-/**
- * Organizes drawing methods for movement and conversation including slicer line and conversation bubble
- */
 function setMovementAndConversation() {
     const drawConversationData = new DrawDataConversation();
     const drawMovementData = new DrawDataMovement();
@@ -80,11 +76,8 @@ function setMovementAndConversation() {
     drawConversationData.setConversationBubble(); // draw conversation text last so it displays on top
 }
 
-/**
- * Organizes drawing methods for movement only
- */
 function setMovement() {
-    let drawMovementData = new DrawDataMovement();
+    const drawMovementData = new DrawDataMovement();
     for (const path of core.paths) {
         if (path.show) drawMovementData.setData(path); // draw after conversation so bug displays on top
     }

@@ -62,7 +62,7 @@ class Core {
      * @param {[]]} ConversationPoints
      */
     updateMovement(fileNum, results, file, movement, conversation) {
-        if (fileNum === 0) core.clearMovementData(); // clear existing movement data for first new file only
+        if (fileNum === 0) this.clearMovementData(); // clear existing movement data for first new file only
         const pathName = file.name.charAt(0).toUpperCase(); // get name of path, also used to test if associated speaker in conversation file
         this.updatePaths(pathName, movement, conversation);
         this.updateTotalTime(movement);

@@ -228,7 +228,6 @@ class DrawDataConversation {
      */
     drawRects(point, curColor) {
         noStroke(); // reset if setDrawText is called previously in loop
-        textFont(font_Lato, keys.keyTextSize);
         textSize(1); // Controls measurement of pixels in a string that corredponds to vertical pixel height of rectangle.
         const rectWidth = map(keys.timeline.selectEnd - keys.timeline.selectStart, 0, keys.timeline.length, this.rect.maxPixelWidth, this.rect.minPixelWidth); // map to inverse of min/max to set rectWidth based on amount of pixel time selected
         let rectLength = textWidth(point.talkTurn);
@@ -244,6 +243,7 @@ class DrawDataConversation {
         fill(curColor);
         rect(curPoint.scaledXPos, yPos, rectWidth, rectLength); // PLAN VIEW
         rect(curPoint.scaledTime, yPos, rectWidth, rectLength); // SPACETIME VIEW
+        textSize(keys.keyTextSize); // reset
     }
 
     /**
@@ -265,7 +265,7 @@ class DrawDataConversation {
      * Sets box dimensions based on size of conversation turn/text
      */
     drawTextBox(point) {
-        textFont(font_Lato, keys.keyTextSize);
+        textSize(keys.keyTextSize);
         const textBox = this.addTextBoxParams(this.getTextBoxParams(), point.talkTurn);
         stroke(0);
         strokeWeight(1);
@@ -324,7 +324,7 @@ class DrawDataConversation {
 //         let scaledTime = map(pixelTime, keys.timeline.selectStart, keys.timeline.selectEnd, keys.timeline.start, keys.timeline.end);
 //         let scaledXPos = point.xPos * keys.floorPlan.width / core.inputFloorPlanPixelWidth; // scale to floor plan image file
 //         let scaledYPos = point.yPos * keys.floorPlan.height / core.inputFloorPlanPixelHeight; // scale to floor plan image file
-//         if (keys.overTimeline(pixelTime) && keys.overFloorPlan(scaledXPos, scaledYPos) && keys.testAnimation(pixelTime)) {
+//         if (keys.overTimelineAxis(pixelTime) && keys.overFloorPlan(scaledXPos, scaledYPos) && keys.testAnimation(pixelTime)) {
 //             if (view == PLAN) curveVertex(scaledXPos, scaledYPos);
 //             else if (view == SPACETIME) {
 //                 curveVertex(scaledTime, scaledYPos);

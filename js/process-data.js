@@ -17,7 +17,7 @@ class ProcessData {
     processMovementFile(results, file, fileNum) {
         console.log("Parsing complete:", results, file);
         if (testData.movementResults(results)) {
-            const [movement, conversation] = processData.createMovementConversationArrays(results);
+            const [movement, conversation] = this.createMovementConversationArrays(results);
             core.updateMovement(fileNum, results, file, movement, conversation);
         } else alert("Error loading movement file. Please make sure your file is a .CSV file formatted with column headers: " + CSVHEADERS_MOVEMENT.toString());
     }
@@ -38,7 +38,7 @@ class ProcessData {
         console.log("Parsing complete:", results, file);
         if (testData.conversationResults(results)) {
             core.updateConversation(results);
-            processData.reProcessMovementFiles(core.movementFileResults); // must reprocess movement
+            this.reProcessMovementFiles(core.movementFileResults); // must reprocess movement
         } else alert("Error loading conversation file. Please make sure your file is a .CSV file formatted with column headers: " + CSVHEADERS_CONVERSATION.toString());
 
     }
