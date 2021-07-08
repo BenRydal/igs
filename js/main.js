@@ -13,91 +13,80 @@ To reference or read more about this work please see:
 https://etd.library.vanderbilt.edu/available/etd-03212018-140140/unrestricted/Shapiro_Dissertation.pdf
 */
 
-/**
- * Classes/modules treated as singletons with respective .js file/module
- */
-let core; // core program variables and update methods
-let domController; // handles DOM/buttons user interaction
-let sketchController; // coordinates calls across classes and updates state variables
-let processData; // handles all data processing
-let testData; // holds all tests for different program data
-let keys; // GUI vars and methods
+let igs = new p5((sketch) => {
 
-/**
- * Constants
- */
-const CSVHEADERS_MOVEMENT = ['time', 'x', 'y']; // String array indicating movement movement file headers, data in each column should be of type number or it won't process
-const CSVHEADERS_CONVERSATION = ['time', 'speaker', 'talk']; // String array indicating conversation file headers, data in time column shout be of type number, speaker column should be of type String, talk column should be not null or undefined
-let font_Lato;
-const PLAN = 0; // two drawing mode constants
-const SPACETIME = 1;
-const NO_DATA = -1;
-
-function preload() {
-    font_Lato = loadFont("data/fonts/Lato-Light.ttf");
-}
-
-function setup() {
-    canvas = createCanvas(window.innerWidth, window.innerHeight, P2D);
-    core = new Core();
-    keys = new Keys();
-    domController = new DomController();
-    sketchController = new SketchController();
-    processData = new ProcessData();
-    testData = new TestData();
-    textFont(font_Lato);
-}
-
-/**
- * Organizes draw loop depending on what data has been loaded
- */
-function draw() {
-    background(255);
-    if (testData.dataIsLoaded(core.floorPlan.img)) image(core.floorPlan.img, 0, 0, keys.floorPlan.width, keys.floorPlan.height);
-    if (testData.arrayIsLoaded(core.paths)) {
-        if (testData.arrayIsLoaded(core.speakerList)) setMovementAndConversation();
-        else setMovement();
+    sketch.preload = function () {
+        sketch.font_Lato = sketch.loadFont("data/fonts/Lato-Light.ttf");
     }
-    if (testData.dataIsLoaded(core.videoPlayer)) sketchController.updateVideoDisplay();
-    keys.drawKeys(core.paths, core.speakerList); // draw keys last
-    sketchController.updateAnimation();
-    sketchController.updateLoop();
-}
 
-function setMovementAndConversation() {
-    const drawConversationData = new DrawDataConversation();
-    const drawMovementData = new DrawDataMovement();
-    for (const path of core.paths) {
-        if (path.isShowing) {
-            drawConversationData.setData(path, core.speakerList);
-            drawMovementData.setData(path); // draw after conversation so bug displays on top
+    sketch.setup = function () {
+        sketch.canvas = sketch.createCanvas(window.innerWidth, window.innerHeight, sketch.P2D);
+        /**
+         * SINGLETONS with respective .js file/module
+         */
+        sketch.core = new Core(sketch); // core program variables and update methods
+        sketch.keys = new Keys(sketch); // GUI vars and methods
+        sketch.domController = new DomController(sketch); // handles DOM/buttons user interaction
+        sketch.sketchController = new SketchController(sketch); // coordinates calls across classes and updates state variables
+        sketch.processData = new ProcessData(sketch); // handles all data processing
+        sketch.testData = new TestData(sketch);
+        sketch.textFont(font_Lato);
+        /**
+         * CONSTANTS
+         */
+        sketch.CSVHEADERS_MOVEMENT = ['time', 'x', 'y']; // String array indicating movement movement file headers, data in each column should be of type number or it won't process
+        sketch.CSVHEADERS_CONVERSATION = ['time', 'speaker', 'talk']; // String array indicating conversation file headers, data in time column shout be of type number, speaker column should be of type String, talk column should be not null or undefined
+        sketch.PLAN = 0; // two drawing modes
+        sketch.SPACETIME = 1;
+        sketch.NO_DATA = -1;
+    }
+
+    sketch.draw = function () {
+        sketch.background(255);
+        if (sketch.testData.dataIsLoaded(core.floorPlan.img)) this.image(sketch.core.floorPlan.img, 0, 0, sketch.keys.floorPlan.width, sketch.keys.floorPlan.height);
+        if (sketch.testData.arrayIsLoaded(sketch.core.paths)) {
+            if (sketch.testData.arrayIsLoaded(sketch.core.speakerList)) sketch.setMovementAndConversation();
+            else sketch.setMovement();
+        }
+        if (sketch.testData.dataIsLoaded(sketch.core.videoPlayer)) sketch.sketchController.updateVideoDisplay();
+        sketch.keys.drawKeys(sketch.core.paths, sketch.core.speakerList); // draw keys last
+        sketch.sketchController.updateAnimation();
+        sketch.sketchController.updateLoop();
+    }
+
+    sketch.setMovementAndConversation = function () {
+        const drawConversationData = new DrawDataConversation(sketch);
+        const drawMovementData = new DrawDataMovement(sketch);
+        for (const path of sketch.core.paths) {
+            if (path.isShowing) {
+                drawConversationData.setData(path, sketch.core.speakerList);
+                drawMovementData.setData(path); // draw after conversation so bug displays on top
+            }
+        }
+        drawConversationData.setConversationBubble(); // draw conversation text last so it displays on top
+    }
+
+    sketch.setMovement = function () {
+        const drawMovementData = new DrawDataMovement(sketch);
+        for (const path of sketch.core.paths) {
+            if (path.isShowing) drawMovementData.setData(path); // draw after conversation so bug displays on top
         }
     }
-    drawConversationData.setConversationBubble(); // draw conversation text last so it displays on top
-}
 
-function setMovement() {
-    const drawMovementData = new DrawDataMovement();
-    for (const path of core.paths) {
-        if (path.isShowing) drawMovementData.setData(path); // draw after conversation so bug displays on top
+    sketch.mousePressed = function () {
+        sketch.sketchController.handleMousePressed();
+        sketch.sketchController.startLoop();
     }
-}
 
-function mousePressed() {
-    sketchController.handleMousePressed();
-    sketchController.startLoop();
-}
-
-function mouseDragged() {
-    sketchController.handleMouseDragged();
-    sketchController.startLoop();
-}
-
-function mouseReleased() {
-    sketchController.handleMouseReleased();
-    sketchController.startLoop();
-}
-
-function mouseMoved() {
-    sketchController.startLoop();
-}
+    sketch.mouseDragged = function () {
+        sketch.sketchController.handleMouseDragged();
+        sketch.sketchController.startLoop();
+    }
+    sketch.mouseReleased = function () {
+        sketch.sketchController.handleMouseReleased();
+        sketch.sketchController.startLoop();
+    }
+    sketch.mouseMoved = function () {
+        sketch.sketchController.startLoop();
+    }
+});
