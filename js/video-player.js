@@ -13,7 +13,7 @@ class YoutubePlayer {
         this.videoId = params['videoId'];
         this.videoWidth = videoWidth;
         this.videoHeight = videoHeight;
-        this.movie = igs.createDiv();
+        this.movie = this.sketch.createDiv();
         this.setMovieDiv();
         this.initializePlayer();
     }
@@ -115,7 +115,7 @@ class P5FilePlayer {
 
     setMovieDiv() {
         this.movie.id('moviePlayer');
-        this.movie.size(width / 5, width / 6);
+        this.movie.size(this.videoWidth, this.videoHeight);
         this.movie.hide();
         this.movie.position(0, 0);
     }

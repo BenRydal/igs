@@ -48,7 +48,7 @@ class ProcessData {
 
     reProcessMovementFiles(movementFileResults) {
         for (const results of movementFileResults) {
-            const [movement, conversation] = this.createMovementConversationArrays(results, this.sketch.core.conversationFileResults);
+            const [movement, conversation] = this.createMovementConversationArrays(results[0], this.sketch.core.conversationFileResults);
             this.sketch.core.updatePaths(results, movement, conversation);
         }
     }
