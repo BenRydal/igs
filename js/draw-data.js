@@ -3,10 +3,10 @@ class DrawDataMovement {
     constructor(sketch) {
         this.sketch = sketch;
         this.bug = { // represents user selection dot drawn in both floor plan and space-time views
-            xPos: NO_DATA, // number/float values
-            yPos: NO_DATA,
-            timePos: NO_DATA,
-            size: width / 50,
+            xPos: this.sketch.NO_DATA, // number/float values
+            yPos: this.sketch.NO_DATA,
+            timePos: this.sketch.NO_DATA,
+            size: this.sketch.width / 50,
             lengthToCompare: this.sketch.keys.timeline.length // used to compare data points to find closest bug value
         };
         this.smallPathWeight = 3;
@@ -23,7 +23,7 @@ class DrawDataMovement {
             this.draw(this.sketch.PLAN, path.movement, path.color);
             this.draw(this.sketch.SPACETIME, path.movement, path.color);
         }
-        if (this.bug.xPos != NO_DATA) this.drawBug(path.color); // if selected, draw bug
+        if (this.bug.xPos != this.sketch.NO_DATA) this.drawBug(path.color); // if selected, draw bug
     }
 
     /**
@@ -126,7 +126,7 @@ class DrawDataMovement {
     }
 
     testPointForBug(scaledTimeToTest, xPos, yPos) {
-        if (this.sketch.sketchController.mode.isAnimate) this.recordBug(scaledTimeToTest, xPos, yPos, NO_DATA); // always return true to set last/most recent point as the bug
+        if (this.sketch.sketchController.mode.isAnimate) this.recordBug(scaledTimeToTest, xPos, yPos, this.sketch.NO_DATA); // always return true to set last/most recent point as the bug
         else if (this.sketch.sketchController.mode.isVideoPlay) {
             const selTime = this.sketch.sketchController.mapFromVideoToSelectedTime();
             if (this.compareValuesBySpacing(selTime, scaledTimeToTest, this.bug.lengthToCompare)) this.recordBug(scaledTimeToTest, xPos, yPos, Math.abs(selTime - scaledTimeToTest));
@@ -138,9 +138,9 @@ class DrawDataMovement {
     }
 
     resetBug() {
-        this.bug.xPos = NO_DATA;
-        this.bug.yPos = NO_DATA;
-        this.bug.timePos = NO_DATA;
+        this.bug.xPos = this.sketch.NO_DATA;
+        this.bug.yPos = this.sketch.NO_DATA;
+        this.bug.timePos = this.sketch.NO_DATA;
         this.bug.lengthToCompare = this.sketch.keys.timeline.length;
     }
 
@@ -167,7 +167,7 @@ class DrawDataConversation {
         this.sketch = sketch;
         this.conversationBubble = { // represents user selected conversation
             isSelected: false,
-            point: NO_DATA, // stores one ConversationPoint object for selected conversation turn
+            point: this.sketch.NO_DATA, // stores one ConversationPoint object for selected conversation turn
             view: this.sketch.PLAN // view indicating if user selected conversation in floor plan or space-time views
         };
         this.rect = { // Rect represents key parameters used in drawRects method to scale rectangles
@@ -184,7 +184,7 @@ class DrawDataConversation {
      */
     setData(path, speakerList) {
         for (const point of path.conversation) {
-            const curPoint = this.sketch.sketchController.getScaledPointValues(point, NO_DATA);
+            const curPoint = this.sketch.sketchController.getScaledPointValues(point, this.sketch.NO_DATA);
             if (this.sketch.sketchController.testConversationPointToDraw(curPoint)) {
                 const curSpeaker = this.getSpeakerFromSpeakerList(point.speaker, speakerList); // get speaker object from global list equivalent to the current speaker of point
                 if (this.testSpeakerToDraw(curSpeaker, path.name)) this.drawRects(point, curSpeaker.color); // draws all rects
@@ -234,7 +234,7 @@ class DrawDataConversation {
         const rectWidth = this.sketch.map(this.sketch.keys.timeline.selectEnd - this.sketch.keys.timeline.selectStart, 0, this.sketch.keys.timeline.length, this.rect.maxPixelWidth, this.rect.minPixelWidth); // map to inverse of min/max to set rectWidth based on amount of pixel time selected
         let rectLength = this.sketch.textWidth(point.talkTurn);
         if (rectLength < this.rect.minPixelHeight) rectLength = this.rect.minPixelHeight; // if current turn is small set it to the minimum height
-        const curPoint = this.sketch.sketchController.getScaledPointValues(point, NO_DATA);
+        const curPoint = this.sketch.sketchController.getScaledPointValues(point, this.sketch.NO_DATA);
         let yPos;
         if (this.sketch.sketchController.mode.isAlignTalk) yPos = 0; // if conversation turn positioning is at top of screen
         else yPos = curPoint.scaledYPos - rectLength;
@@ -295,8 +295,8 @@ class DrawDataConversation {
     }
 
     addTextBoxParams(textBox, talkTurn) {
-        textBox.height = textBox.textLeading * (ceil(this.sketch.textWidth(talkTurn) / textBox.width));
-        textBox.xPos = constrain(this.sketch.mouseX - textBox.width / 2, textBox.boxSpacing, this.sketch.width - textBox.width - (2 * textBox.boxSpacing));
+        textBox.height = textBox.textLeading * (Math.ceil(this.sketch.textWidth(talkTurn) / textBox.width));
+        textBox.xPos = this.sketch.constrain(this.sketch.mouseX - textBox.width / 2, textBox.boxSpacing, this.sketch.width - textBox.width - (2 * textBox.boxSpacing));
         if (this.sketch.mouseY < this.sketch.height / 2) { //if top half of screen, text box below rectangle
             textBox.yPos = this.sketch.mouseY + textBox.rectSpacing;
             textBox.yDif = -textBox.boxSpacing;

@@ -141,9 +141,9 @@ class SketchController {
         const scaledXPos = point.xPos * this.sketch.keys.floorPlan.width / this.sketch.core.floorPlan.inputPixelWidth;
         const scaledYPos = point.yPos * this.sketch.keys.floorPlan.height / this.sketch.core.floorPlan.inputPixelHeight;
         let scaledSpaceTimeXPos;
-        if (view === PLAN) scaledSpaceTimeXPos = scaledXPos;
-        else if (view === SPACETIME) scaledSpaceTimeXPos = scaledTime;
-        else scaledSpaceTimeXPos = NO_DATA;
+        if (view === this.sketch.PLAN) scaledSpaceTimeXPos = scaledXPos;
+        else if (view === this.sketch.SPACETIME) scaledSpaceTimeXPos = scaledTime;
+        else scaledSpaceTimeXPos = this.sketch.NO_DATA;
         return {
             pixelTime,
             scaledTime,

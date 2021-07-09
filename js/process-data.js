@@ -20,7 +20,7 @@ class ProcessData {
     processMovementFile(results, file, fileNum) {
         console.log("Parsing complete:", results, file);
         if (testData.movementResults(results)) {
-            const [movement, conversation] = this.createMovementConversationArrays(results);
+            const [movement, conversation] = this.createMovementConversationArrays(results, this.sketch.core.conversationFileResults);
             this.sketch.core.updateMovement(fileNum, results, file, movement, conversation);
         } else alert("Error loading movement file. Please make sure your file is a .CSV file formatted with column headers: " + testData.CSVHEADERS_MOVEMENT.toString());
     }

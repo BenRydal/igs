@@ -194,17 +194,17 @@ class Keys {
     handleTimeline() {
         if (this.timeline.isLockedLeft || (!this.timeline.isLockedRight && this.overSelector(this.timeline.selectStart))) {
             this.timeline.isLockedLeft = true;
-            this.timeline.selectStart = constrain(this.sketch.mouseX, this.timeline.start, this.timeline.end);
+            this.timeline.selectStart = this.sketch.constrain(this.sketch.mouseX, this.timeline.start, this.timeline.end);
             if (this.timeline.selectStart > this.timeline.selectEnd - this.timeline.doublePadding) this.timeline.selectStart = this.timeline.selectEnd - this.timeline.doublePadding; // prevents overstriking
         } else if (this.timeline.isLockedRight || this.overSelector(this.timeline.selectEnd)) {
             this.timeline.isLockedRight = true;
-            this.timeline.selectEnd = constrain(this.sketch.mouseX, this.timeline.start, this.timeline.end);
+            this.timeline.selectEnd = this.sketch.constrain(this.sketch.mouseX, this.timeline.start, this.timeline.end);
             if (this.timeline.selectEnd < this.timeline.selectStart + this.timeline.doublePadding) this.timeline.selectEnd = this.timeline.selectStart + this.timeline.doublePadding; // prevents overstriking
         }
     }
 
     overCircle(x, y, diameter) {
-        return sqrt(sq(x - this.sketch.mouseX) + sq(y - this.sketch.mouseY)) < diameter / 2;
+        return this.sketch.sqrt(this.sketch.sq(x - this.sketch.mouseX) + this.sketch.sq(y - this.sketch.mouseY)) < diameter / 2;
     }
 
     overRect(x, y, boxWidth, boxHeight) {

@@ -45,7 +45,7 @@ let igs = new p5((sketch) => {
         if (testData.dataIsLoaded(sketch.core.floorPlan.img)) sketch.image(sketch.core.floorPlan.img, 0, 0, sketch.keys.floorPlan.width, sketch.keys.floorPlan.height);
         if (testData.arrayIsLoaded(sketch.core.paths)) {
             if (testData.arrayIsLoaded(sketch.core.speakerList)) sketch.setMovementAndConversation();
-            else setMovement();
+            else sketch.setMovement();
         }
         if (testData.dataIsLoaded(sketch.core.videoPlayer)) sketch.sketchController.updateVideoDisplay();
         sketch.keys.drawKeys(sketch.core.paths, sketch.core.speakerList); // draw keys last
