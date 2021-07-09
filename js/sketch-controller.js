@@ -28,11 +28,11 @@ class SketchController {
     }
 
     overLoadMovementButton(fileList) {
-        this.sketch.processData.parseMovementFiles(fileList);
+        this.sketch.processData.handleMovementFiles(fileList);
     }
 
     overLoadConversationButton(file) {
-        this.sketch.processData.parseConversationFile(file); // parse converted file
+        this.sketch.processData.handleConversationFile(file);
     }
 
     overLoadVideoButton(fileLocation) {
@@ -132,7 +132,8 @@ class SketchController {
         this.setIntro(false); // Hide intro msg if showing
         this.sketch.core.updateVideo(params[4], params[5]);
         this.sketch.core.updateFloorPlan(params[0] + params[1]);
-        this.sketch.processData.parseExampleData(params);
+        this.sketch.processData.handleExampleConversationFile(params[0], params[2]);
+        this.sketch.processData.handleExampleMovementFiles(params[0], params[3]);
     }
 
     getScaledPointValues(point, view) {

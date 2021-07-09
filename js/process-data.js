@@ -3,14 +3,78 @@ class ProcessData {
     constructor(sketch) {
         this.sketch = sketch;
     }
+
+    /**
+     * Prepare for parsing. Important for binding this to callback
+     * @param  {.CSV File[]} fileList
+     */
+    handleMovementFiles(fileList) {
+        this.parseMovementFiles(fileList, this.processMovementFile.bind(this));
+    }
+
+    /**
+     * Prepare for parsing. Important for binding this to callback
+     * @param  {.CSV File} file
+     */
+    handleConversationFiles(file) {
+        this.parseConversationFile(file, this.processConversationFile.bind(this));
+
+    }
+
+    /**
+     * Handles async loading of conversation file. NOTE: folder and filename are separated for convenience later in program
+     * @param  {String} folder
+     * @param  {String} fileName
+     */
+    async handleExampleConversationFile(folder, fileName) {
+        try {
+            const response = await fetch(new Request(folder + fileName));
+            const buffer = await response.arrayBuffer();
+            const file = new File([buffer], fileName, {
+                type: "text/csv",
+            });
+            // parse file after retrieval, maintain correct this context on callback with bind
+            this.parseConversationFile(file, this.processConversationFile.bind(this));
+        } catch (error) {
+            alert("Error loading example conversation data. Please make sure you have a good internet connection")
+            console.log(error);
+        }
+    }
+    /**
+     * Handles async loading of movement files. NOTE: folder and filename are separated for convenience later in program
+     * @param  {String} folder
+     * @param  {String} fileNames
+     */
+    async handleExampleMovementFiles(folder, fileNames) {
+        try {
+            let fileList = [];
+            for (const name of fileNames) {
+                const response = await fetch(new Request(folder + name));
+                const buffer = await response.arrayBuffer();
+                fileList.push(new File([buffer], name, {
+                    type: "text/csv",
+                }));
+            }
+            // parse file after retrieval, maintain correct this context on callback with bind
+            this.parseMovementFiles(fileList, this.processMovementFile.bind(this));
+        } catch (error) {
+            alert("Error loading example movement data. Please make sure you have a good internet connection")
+            console.log(error);
+        }
+    }
+
     /**
      * Parse input files and send to processData method
      * @param  {.CSV File[]} fileList
      */
-    parseMovementFiles(fileList) {
+    parseMovementFiles(fileList, callback) {
         for (let fileNum = 0; fileNum < fileList.length; fileNum++) {
             Papa.parse(fileList[fileNum], {
-                complete: (results, file) => igs.processData.processMovementFile(results, file, fileNum),
+                complete: (results, file) => callback(results, file, fileNum),
+                error: (error, file) => {
+                    alert("Parsing error with your movement file. Please make sure your file is formatted correctly as a .CSV");
+                    console.log(error, file);
+                },
                 header: true,
                 dynamicTyping: true,
             });
@@ -29,9 +93,13 @@ class ProcessData {
      * Parse input files and send to processData method
      * @param  {.CSV File} file
      */
-    parseConversationFile(file) {
+    parseConversationFile(file, callback) {
         Papa.parse(file, {
-            complete: (results, parsedFile) => igs.processData.processConversationFile(results, parsedFile),
+            complete: (results, parsedFile) => callback(results, parsedFile),
+            error: (error, parsedFile) => {
+                alert("Parsing error with your conversation file. Please make sure your file is formatted correctly as a .CSV");
+                console.log(error, parsedFile);
+            },
             header: true,
             dynamicTyping: true,
         });
@@ -81,75 +149,26 @@ class ProcessData {
     }
 
     /**
-     * Object constructed from .CSV movement file representing a location in space and time along a path
-     * @param  {Number} xPos // x and y pixel positions on floor plan
-     * @param  {Number} time // time value in seconds
+     * Represents a location in space and time along a path
      */
     createMovementPoint(xPos, yPos, time) {
         return {
-            xPos,
+            xPos, // Float x and y pixel positions on floor plan
             yPos,
-            time
+            time // Float time value in seconds
         }
     }
 
     /**
-     * Object constructed from .CSV movement AND conversation files representing a location
-     * in space and time and String values of a single conversation turn
-     * @param  {Number} xPos // x and y pixel positions on floor plan
-     * @param  {Number} yPos
-     * @param  {Number} time // Time value in seconds
-     * @param  {String} speaker // Name of speaker
-     * @param  {String} talkTurn // Text of conversation turn
+     * Represents a single conversation turn with a location in space and time, text values, name of a speaker, and what they said
      */
     createConversationPoint(xPos, yPos, time, speaker, talkTurn) {
         return {
-            xPos,
+            xPos, // Float x and y pixel positions on floor plan
             yPos,
-            time,
-            speaker,
-            talkTurn
+            time, // Float Time value in seconds
+            speaker, // String name of speaker
+            talkTurn // String text of conversation turn
         }
-    }
-
-    /**
-     * Handles asynchronous loading of example data from a selected example array of data
-     * Process conversation then movement files
-     * @param  {[String directory, String floorPlan image file, String conversation File, String movement File[], String video platform, video params (see Video Player Interface)]} params
-     */
-    async parseExampleData(params) {
-        await this.getExampleConversationFile(params[0], params[2]).then(this.parseConversationFile);
-        await this.getExampleMovementFiles(params[0], params[3]).then(this.parseMovementFiles);
-    }
-
-    /**
-     * Handles async loading of conversation file
-     * NOTE: folder and filename are separated for convenience later in program
-     * @param  {String} folder
-     * @param  {String} fileName
-     */
-    async getExampleConversationFile(folder, fileName) {
-        const response = await fetch(new Request(folder + fileName));
-        const buffer = await response.arrayBuffer();
-        return new File([buffer], fileName, {
-            type: "text/csv",
-        });
-    }
-    /**
-     * Handles async loading of movement file
-     * NOTE: folder and filename are separated for convenience later in program
-     * @param  {String} folder
-     * @param  {String} fileNames
-     */
-    async getExampleMovementFiles(folder, fileNames) {
-        let fileList = [];
-        for (const name of fileNames) {
-            const response = await fetch(new Request(folder + name));
-            const buffer = await response.arrayBuffer();
-            fileList.push(new File([buffer], name, {
-                type: "text/csv",
-            }));
-        }
-        return fileList;
     }
 }
