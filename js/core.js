@@ -40,7 +40,7 @@ class Core {
      * @param  {VideoPlayer Specific Params} params
      */
     updateVideo(platform, params) {
-        if (testData.dataIsLoaded(this.videoPlayer)) this.clearVideo();
+        if (this.sk.testData.dataIsLoaded(this.videoPlayer)) this.clearVideo();
         const videoWidth = this.sk.width / 5;
         const videoHeight = this.sk.width / 6;
         switch (platform) {
@@ -78,7 +78,7 @@ class Core {
      */
     updatePaths(letterName, movement, conversation) {
         let curPathColor;
-        if (testData.arrayIsLoaded(this.speakerList)) curPathColor = this.setPathColorBySpeaker(letterName); // if conversation file loaded, send to method to calculate color
+        if (this.sk.testData.arrayIsLoaded(this.speakerList)) curPathColor = this.setPathColorBySpeaker(letterName); // if conversation file loaded, send to method to calculate color
         else curPathColor = this.COLOR_LIST[this.paths.length % this.COLOR_LIST.length]; // if no conversation file loaded path color is next in Color list
         this.paths.push(this.createPath(letterName, movement, conversation, curPathColor, true));
         this.paths.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching core.speakerList array
@@ -133,8 +133,8 @@ class Core {
             let tempSpeakerList = []; // create/populate temp list to store strings to test from global core.speakerList
             for (const tempSpeaker of this.speakerList) tempSpeakerList.push(tempSpeaker.name);
             // If row is good data, test if core.speakerList already has speaker and if not add speaker 
-            if (testData.conversationLengthAndRowForType(this.conversationFileResults, i)) {
-                const speaker = this.cleanSpeaker(this.conversationFileResults[i][testData.CSVHEADERS_CONVERSATION[1]]); // get cleaned speaker character
+            if (this.sk.testData.conversationLengthAndRowForType(this.conversationFileResults, i)) {
+                const speaker = this.cleanSpeaker(this.conversationFileResults[i][this.sk.testData.CSVHEADERS_CONVERSATION[1]]); // get cleaned speaker character
                 if (!tempSpeakerList.includes(speaker)) this.addSpeakerToSpeakerList(speaker);
             }
         }
@@ -192,7 +192,7 @@ class Core {
     }
 
     clearAllData() {
-        if (testData.dataIsLoaded(this.videoPlayer)) this.clearVideo();
+        if (this.sk.testData.dataIsLoaded(this.videoPlayer)) this.clearVideo();
         this.clearFloorPlan();
         this.clearConversationData();
         this.clearMovementData();

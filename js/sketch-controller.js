@@ -133,7 +133,7 @@ class SketchController {
     }
 
     testVideoToPlay() {
-        return testData.dataIsLoaded(this.sk.core.videoPlayer) && this.mode.isVideoShow && !this.mode.isAnimate && this.sk.keys.overSpaceTimeView(this.sk.mouseX, this.sk.mouseY);
+        return this.sk.testData.dataIsLoaded(this.sk.core.videoPlayer) && this.mode.isVideoShow && !this.mode.isAnimate && this.sk.keys.overSpaceTimeView(this.sk.mouseX, this.sk.mouseY);
     }
 
     // map to inverse, values constrained between 10 and 1 (pixels)

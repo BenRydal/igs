@@ -61,7 +61,7 @@ class DomController {
     }
 
     handleVideoButton() {
-        if (testData.dataIsLoaded(this.sk.core.videoPlayer)) this.sk.sketchController.toggleVideoShowHide();
+        if (this.sk.testData.dataIsLoaded(this.sk.core.videoPlayer)) this.sk.sketchController.toggleVideoShowHide();
     }
 
     handleHowToButton() {

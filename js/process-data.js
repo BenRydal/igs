@@ -84,10 +84,10 @@ class ProcessData {
 
     processMovementFile(results, file, fileNum) {
         console.log("Parsing complete:", results, file);
-        if (testData.movementResults(results)) {
+        if (this.sk.testData.movementResults(results)) {
             const [movement, conversation] = this.createMovementConversationArrays(results, this.sk.core.conversationFileResults);
             this.sk.core.updateMovement(fileNum, results, file, movement, conversation);
-        } else alert("Error loading movement file. Please make sure your file is a .CSV file formatted with column headers: " + testData.CSVHEADERS_MOVEMENT.toString());
+        } else alert("Error loading movement file. Please make sure your file is a .CSV file formatted with column headers: " + this.sk.testData.CSVHEADERS_MOVEMENT.toString());
     }
 
     /**
@@ -108,10 +108,10 @@ class ProcessData {
 
     processConversationFile(results, file) {
         console.log("Parsing complete:", results, file);
-        if (testData.conversationResults(results)) {
+        if (this.sk.testData.conversationResults(results)) {
             this.sk.core.updateConversation(results);
             this.reProcessMovementFiles(this.sk.core.movementFileResults); // must reprocess movement
-        } else alert("Error loading conversation file. Please make sure your file is a .CSV file formatted with column headers: " + testData.CSVHEADERS_CONVERSATION.toString());
+        } else alert("Error loading conversation file. Please make sure your file is a .CSV file formatted with column headers: " + this.sk.testData.CSVHEADERS_CONVERSATION.toString());
 
     }
 
@@ -133,17 +133,17 @@ class ProcessData {
         let conversationCounter = 0; // Current row count of conversation file for comparison
         for (let i = 0; i < results.data.length; i++) {
             // Sample current movement row and test if row is good data
-            if (testData.sampleMovementData(results.data, i) && testData.movementRowForType(results.data, i)) {
-                const m = this.createMovementPoint(results.data[i][testData.CSVHEADERS_MOVEMENT[1]], results.data[i][testData.CSVHEADERS_MOVEMENT[2]], results.data[i][testData.CSVHEADERS_MOVEMENT[0]]);
+            if (this.sk.testData.sampleMovementData(results.data, i) && this.sk.testData.movementRowForType(results.data, i)) {
+                const m = this.createMovementPoint(results.data[i][this.sk.testData.CSVHEADERS_MOVEMENT[1]], results.data[i][this.sk.testData.CSVHEADERS_MOVEMENT[2]], results.data[i][this.sk.testData.CSVHEADERS_MOVEMENT[0]]);
                 movement.push(m); // add good data to movement []
                 // Test conversation data row for quality first and then compare movement and conversation times to see if closest movement data to conversation time
-                if (testData.conversationLengthAndRowForType(conversationFileResults, conversationCounter) && m.time >= conversationFileResults[conversationCounter][testData.CSVHEADERS_CONVERSATION[0]]) {
-                    const curTalkTimePos = conversationFileResults[conversationCounter][testData.CSVHEADERS_CONVERSATION[0]];
-                    const curSpeaker = this.sk.core.cleanSpeaker(conversationFileResults[conversationCounter][testData.CSVHEADERS_CONVERSATION[1]]);
-                    const curTalkTurn = conversationFileResults[conversationCounter][testData.CSVHEADERS_CONVERSATION[2]];
+                if (this.sk.testData.conversationLengthAndRowForType(conversationFileResults, conversationCounter) && m.time >= conversationFileResults[conversationCounter][this.sk.testData.CSVHEADERS_CONVERSATION[0]]) {
+                    const curTalkTimePos = conversationFileResults[conversationCounter][this.sk.testData.CSVHEADERS_CONVERSATION[0]];
+                    const curSpeaker = this.sk.core.cleanSpeaker(conversationFileResults[conversationCounter][this.sk.testData.CSVHEADERS_CONVERSATION[1]]);
+                    const curTalkTurn = conversationFileResults[conversationCounter][this.sk.testData.CSVHEADERS_CONVERSATION[2]];
                     conversation.push(this.createConversationPoint(m.xPos, m.yPos, curTalkTimePos, curSpeaker, curTalkTurn));
                     conversationCounter++;
-                } else if (!testData.conversationLengthAndRowForType(conversationFileResults, conversationCounter)) conversationCounter++; // make sure to increment counter if bad data to skip row in next iteration of loop
+                } else if (!this.sk.testData.conversationLengthAndRowForType(conversationFileResults, conversationCounter)) conversationCounter++; // make sure to increment counter if bad data to skip row in next iteration of loop
             }
         }
         return [movement, conversation];

@@ -13,7 +13,6 @@ To reference or read more about this work please see:
 https://etd.library.vanderbilt.edu/available/etd-03212018-140140/unrestricted/Shapiro_Dissertation.pdf
 */
 
-const testData = new TestData();
 const igs = new p5((sk) => {
 
     sk.preload = function () {
@@ -22,14 +21,15 @@ const igs = new p5((sk) => {
 
     sk.setup = function () {
         sk.canvas = sk.createCanvas(window.innerWidth, window.innerHeight, sk.P2D);
-        // **** SKETCH SINGLETONS **** //
+        // SKETCH SINGLETONS
         sk.core = new Core(sk); // core program variables and update methods
+        sk.testData = new TestData(); // holds tests for core data and CSV files. Does not need sketch reference
         sk.keys = new Keys(sk); // GUI vars and methods
         sk.domController = new DomController(sk); // handles DOM/buttons user interaction
         sk.sketchController = new SketchController(sk); // coordinates calls across classes and updates state variables
         sk.processData = new ProcessData(sk); // handles all data processing
         sk.textFont(sk.font_Lato);
-        // **** CONSTANTS **** //
+        // CONSTANTS
         sk.PLAN = 0; // two drawing modes
         sk.SPACETIME = 1;
         sk.NO_DATA = -1;
@@ -37,12 +37,12 @@ const igs = new p5((sk) => {
 
     sk.draw = function () {
         sk.background(255);
-        if (testData.dataIsLoaded(sk.core.floorPlan.img)) sk.image(sk.core.floorPlan.img, 0, 0, sk.keys.floorPlan.width, sk.keys.floorPlan.height);
-        if (testData.arrayIsLoaded(sk.core.paths)) {
-            if (testData.arrayIsLoaded(sk.core.speakerList)) sk.setMovementAndConversation();
+        if (sk.testData.dataIsLoaded(sk.core.floorPlan.img)) sk.image(sk.core.floorPlan.img, 0, 0, sk.keys.floorPlan.width, sk.keys.floorPlan.height);
+        if (sk.testData.arrayIsLoaded(sk.core.paths)) {
+            if (sk.testData.arrayIsLoaded(sk.core.speakerList)) sk.setMovementAndConversation();
             else sk.setMovement();
         }
-        if (testData.dataIsLoaded(sk.core.videoPlayer)) sk.sketchController.updateVideoDisplay();
+        if (sk.testData.dataIsLoaded(sk.core.videoPlayer)) sk.sketchController.updateVideoDisplay();
         sk.keys.drawKeys(sk.core.paths, sk.core.speakerList); // draw keys last
         sk.sketchController.updateAnimation();
         sk.sketchController.updateLoop();
