@@ -61,13 +61,13 @@ class Core {
      * @param {[]]} MovementPoints
      * @param {[]]} ConversationPoints
      */
-    updateMovement(fileNum, parsedDataArray, file, movement, conversation) {
+    updateMovement(fileNum, movementDataArray, file, movement, conversation) {
         if (fileNum === 0) this.clearMovementData(); // clear existing movement data for first new file only
         const pathName = file.name.charAt(0).toUpperCase(); // get name of path, also used to test if associated speaker in conversation file
         this.updatePaths(pathName, movement, conversation);
         this.updateTotalTime(movement);
         this.movementFileResults.push({
-            resultsDataArray: parsedDataArray,
+            resultsDataArray: movementDataArray,
             filenameChars: pathName
         }); // add results and pathName to core []
         this.sk.sketchController.startLoop(); // rerun P5 draw loop
