@@ -2,7 +2,7 @@ class Core {
 
     constructor(sketch) {
         this.sk = sketch;
-        this.movementFileResults = []; // List that holds a results array and character letter indicating path name from a parsed movement .CSV file
+        this.movementFileResults = []; // List that holds objects containing a parsed results.data array and character letter indicating path name from Papa Parsed file
         this.conversationFileResults = []; // List that holds a results array and file data from a parsed conversation .CSV file
         this.speakerList = []; // List that holds Speaker objects parsed from conversation file
         this.paths = []; // List that holds path objects for each unique set of movement and conversation points constructed from parsed conversation and movement .CSV files
@@ -61,12 +61,15 @@ class Core {
      * @param {[]]} MovementPoints
      * @param {[]]} ConversationPoints
      */
-    updateMovement(fileNum, results, file, movement, conversation) {
+    updateMovement(fileNum, parsedDataArray, file, movement, conversation) {
         if (fileNum === 0) this.clearMovementData(); // clear existing movement data for first new file only
         const pathName = file.name.charAt(0).toUpperCase(); // get name of path, also used to test if associated speaker in conversation file
         this.updatePaths(pathName, movement, conversation);
         this.updateTotalTime(movement);
-        this.movementFileResults.push([results, pathName]); // add results and pathName to core []
+        this.movementFileResults.push({
+            resultsDataArray: parsedDataArray,
+            filenameChars: pathName
+        }); // add results and pathName to core []
         this.sk.sketchController.startLoop(); // rerun P5 draw loop
     }
 

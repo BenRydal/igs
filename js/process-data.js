@@ -85,8 +85,8 @@ class ProcessData {
     processMovementFile(results, file, fileNum) {
         console.log("Parsing complete:", results, file);
         if (this.sk.testData.movementResults(results)) {
-            const [movement, conversation] = this.createMovementConversationArrays(results, this.sk.core.conversationFileResults);
-            this.sk.core.updateMovement(fileNum, results, file, movement, conversation);
+            const [movement, conversation] = this.createMovementConversationArrays(results.data, this.sk.core.conversationFileResults);
+            this.sk.core.updateMovement(fileNum, results.data, file, movement, conversation);
         } else alert("Error loading movement file. Please make sure your file is a .CSV file formatted with column headers: " + this.sk.testData.CSVHEADERS_MOVEMENT.toString());
     }
 
@@ -116,9 +116,9 @@ class ProcessData {
     }
 
     reProcessMovementFiles(movementFileResults) {
-        for (const results of movementFileResults) {
-            const [movement, conversation] = this.createMovementConversationArrays(results[0], this.sk.core.conversationFileResults);
-            this.sk.core.updatePaths(results[1], movement, conversation);
+        for (const index of movementFileResults) {
+            const [movement, conversation] = this.createMovementConversationArrays(index.resultsDataArray, this.sk.core.conversationFileResults);
+            this.sk.core.updatePaths(index.filenameChars, movement, conversation);
         }
     }
 
@@ -127,14 +127,14 @@ class ProcessData {
      * Location data for conversation array is drawn from comparison to movement file/results data
      *  @param  {PapaParse Results []} results
      */
-    createMovementConversationArrays(results, conversationFileResults) {
+    createMovementConversationArrays(parsedDataArray, conversationFileResults) {
         let movement = []; // Create empty arrays to hold MovementPoint and ConversationPoint objects
         let conversation = [];
         let conversationCounter = 0; // Current row count of conversation file for comparison
-        for (let i = 0; i < results.data.length; i++) {
+        for (let i = 0; i < parsedDataArray.length; i++) {
             // Sample current movement row and test if row is good data
-            if (this.sk.testData.sampleMovementData(results.data, i) && this.sk.testData.movementRowForType(results.data, i)) {
-                const m = this.createMovementPoint(results.data[i][this.sk.testData.CSVHEADERS_MOVEMENT[1]], results.data[i][this.sk.testData.CSVHEADERS_MOVEMENT[2]], results.data[i][this.sk.testData.CSVHEADERS_MOVEMENT[0]]);
+            if (this.sk.testData.sampleMovementData(parsedDataArray, i) && this.sk.testData.movementRowForType(parsedDataArray, i)) {
+                const m = this.createMovementPoint(parsedDataArray[i][this.sk.testData.CSVHEADERS_MOVEMENT[1]], parsedDataArray[i][this.sk.testData.CSVHEADERS_MOVEMENT[2]], parsedDataArray[i][this.sk.testData.CSVHEADERS_MOVEMENT[0]]);
                 movement.push(m); // add good data to movement []
                 // Test conversation data row for quality first and then compare movement and conversation times to see if closest movement data to conversation time
                 if (this.sk.testData.conversationLengthAndRowForType(conversationFileResults, conversationCounter) && m.time >= conversationFileResults[conversationCounter][this.sk.testData.CSVHEADERS_CONVERSATION[0]]) {
