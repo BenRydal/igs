@@ -14,73 +14,73 @@ https://etd.library.vanderbilt.edu/available/etd-03212018-140140/unrestricted/Sh
 */
 
 const testData = new TestData();
-const igs = new p5((sketch) => {
+const igs = new p5((sk) => {
 
-    sketch.preload = function () {
-        sketch.font_Lato = sketch.loadFont("data/fonts/Lato-Light.ttf");
+    sk.preload = function () {
+        sk.font_Lato = sk.loadFont("data/fonts/Lato-Light.ttf");
     }
 
-    sketch.setup = function () {
-        sketch.canvas = sketch.createCanvas(window.innerWidth, window.innerHeight, sketch.P2D);
+    sk.setup = function () {
+        sk.canvas = sk.createCanvas(window.innerWidth, window.innerHeight, sk.P2D);
         // **** SKETCH SINGLETONS **** //
-        sketch.core = new Core(sketch); // core program variables and update methods
-        sketch.keys = new Keys(sketch); // GUI vars and methods
-        sketch.domController = new DomController(sketch); // handles DOM/buttons user interaction
-        sketch.sketchController = new SketchController(sketch); // coordinates calls across classes and updates state variables
-        sketch.processData = new ProcessData(sketch); // handles all data processing
-        sketch.textFont(sketch.font_Lato);
+        sk.core = new Core(sk); // core program variables and update methods
+        sk.keys = new Keys(sk); // GUI vars and methods
+        sk.domController = new DomController(sk); // handles DOM/buttons user interaction
+        sk.sketchController = new SketchController(sk); // coordinates calls across classes and updates state variables
+        sk.processData = new ProcessData(sk); // handles all data processing
+        sk.textFont(sk.font_Lato);
         // **** CONSTANTS **** //
-        sketch.PLAN = 0; // two drawing modes
-        sketch.SPACETIME = 1;
-        sketch.NO_DATA = -1;
+        sk.PLAN = 0; // two drawing modes
+        sk.SPACETIME = 1;
+        sk.NO_DATA = -1;
     }
 
-    sketch.draw = function () {
-        sketch.background(255);
-        if (testData.dataIsLoaded(sketch.core.floorPlan.img)) sketch.image(sketch.core.floorPlan.img, 0, 0, sketch.keys.floorPlan.width, sketch.keys.floorPlan.height);
-        if (testData.arrayIsLoaded(sketch.core.paths)) {
-            if (testData.arrayIsLoaded(sketch.core.speakerList)) sketch.setMovementAndConversation();
-            else sketch.setMovement();
+    sk.draw = function () {
+        sk.background(255);
+        if (testData.dataIsLoaded(sk.core.floorPlan.img)) sk.image(sk.core.floorPlan.img, 0, 0, sk.keys.floorPlan.width, sk.keys.floorPlan.height);
+        if (testData.arrayIsLoaded(sk.core.paths)) {
+            if (testData.arrayIsLoaded(sk.core.speakerList)) sk.setMovementAndConversation();
+            else sk.setMovement();
         }
-        if (testData.dataIsLoaded(sketch.core.videoPlayer)) sketch.sketchController.updateVideoDisplay();
-        sketch.keys.drawKeys(sketch.core.paths, sketch.core.speakerList); // draw keys last
-        sketch.sketchController.updateAnimation();
-        sketch.sketchController.updateLoop();
+        if (testData.dataIsLoaded(sk.core.videoPlayer)) sk.sketchController.updateVideoDisplay();
+        sk.keys.drawKeys(sk.core.paths, sk.core.speakerList); // draw keys last
+        sk.sketchController.updateAnimation();
+        sk.sketchController.updateLoop();
     }
 
-    sketch.setMovementAndConversation = function () {
-        const drawConversationData = new DrawDataConversation(sketch);
-        const drawMovementData = new DrawDataMovement(sketch);
-        for (const path of sketch.core.paths) {
+    sk.setMovementAndConversation = function () {
+        const drawConversationData = new DrawDataConversation(sk);
+        const drawMovementData = new DrawDataMovement(sk);
+        for (const path of sk.core.paths) {
             if (path.isShowing) {
-                drawConversationData.setData(path, sketch.core.speakerList);
+                drawConversationData.setData(path, sk.core.speakerList);
                 drawMovementData.setData(path); // draw after conversation so bug displays on top
             }
         }
         drawConversationData.setConversationBubble(); // draw conversation text last so it displays on top
     }
 
-    sketch.setMovement = function () {
-        const drawMovementData = new DrawDataMovement(sketch);
-        for (const path of sketch.core.paths) {
+    sk.setMovement = function () {
+        const drawMovementData = new DrawDataMovement(sk);
+        for (const path of sk.core.paths) {
             if (path.isShowing) drawMovementData.setData(path); // draw after conversation so bug displays on top
         }
     }
 
-    sketch.mousePressed = function () {
-        sketch.sketchController.handleMousePressed();
-        sketch.sketchController.startLoop();
+    sk.mousePressed = function () {
+        sk.sketchController.handleMousePressed();
+        sk.sketchController.startLoop();
     }
 
-    sketch.mouseDragged = function () {
-        sketch.sketchController.handleMouseDragged();
-        sketch.sketchController.startLoop();
+    sk.mouseDragged = function () {
+        sk.sketchController.handleMouseDragged();
+        sk.sketchController.startLoop();
     }
-    sketch.mouseReleased = function () {
-        sketch.sketchController.handleMouseReleased();
-        sketch.sketchController.startLoop();
+    sk.mouseReleased = function () {
+        sk.sketchController.handleMouseReleased();
+        sk.sketchController.startLoop();
     }
-    sketch.mouseMoved = function () {
-        sketch.sketchController.startLoop();
+    sk.mouseMoved = function () {
+        sk.sketchController.startLoop();
     }
 });

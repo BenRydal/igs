@@ -1,7 +1,7 @@
 class ProcessData {
 
     constructor(sketch) {
-        this.sketch = sketch;
+        this.sk = sketch;
     }
 
     /**
@@ -85,8 +85,8 @@ class ProcessData {
     processMovementFile(results, file, fileNum) {
         console.log("Parsing complete:", results, file);
         if (testData.movementResults(results)) {
-            const [movement, conversation] = this.createMovementConversationArrays(results, this.sketch.core.conversationFileResults);
-            this.sketch.core.updateMovement(fileNum, results, file, movement, conversation);
+            const [movement, conversation] = this.createMovementConversationArrays(results, this.sk.core.conversationFileResults);
+            this.sk.core.updateMovement(fileNum, results, file, movement, conversation);
         } else alert("Error loading movement file. Please make sure your file is a .CSV file formatted with column headers: " + testData.CSVHEADERS_MOVEMENT.toString());
     }
 
@@ -109,16 +109,16 @@ class ProcessData {
     processConversationFile(results, file) {
         console.log("Parsing complete:", results, file);
         if (testData.conversationResults(results)) {
-            this.sketch.core.updateConversation(results);
-            this.reProcessMovementFiles(this.sketch.core.movementFileResults); // must reprocess movement
+            this.sk.core.updateConversation(results);
+            this.reProcessMovementFiles(this.sk.core.movementFileResults); // must reprocess movement
         } else alert("Error loading conversation file. Please make sure your file is a .CSV file formatted with column headers: " + testData.CSVHEADERS_CONVERSATION.toString());
 
     }
 
     reProcessMovementFiles(movementFileResults) {
         for (const results of movementFileResults) {
-            const [movement, conversation] = this.createMovementConversationArrays(results[0], this.sketch.core.conversationFileResults);
-            this.sketch.core.updatePaths(movementFileResults[1], movement, conversation);
+            const [movement, conversation] = this.createMovementConversationArrays(results[0], this.sk.core.conversationFileResults);
+            this.sk.core.updatePaths(movementFileResults[1], movement, conversation);
         }
     }
 
@@ -139,7 +139,7 @@ class ProcessData {
                 // Test conversation data row for quality first and then compare movement and conversation times to see if closest movement data to conversation time
                 if (testData.conversationLengthAndRowForType(conversationFileResults, conversationCounter) && m.time >= conversationFileResults[conversationCounter][testData.CSVHEADERS_CONVERSATION[0]]) {
                     const curTalkTimePos = conversationFileResults[conversationCounter][testData.CSVHEADERS_CONVERSATION[0]];
-                    const curSpeaker = this.sketch.core.cleanSpeaker(conversationFileResults[conversationCounter][testData.CSVHEADERS_CONVERSATION[1]]);
+                    const curSpeaker = this.sk.core.cleanSpeaker(conversationFileResults[conversationCounter][testData.CSVHEADERS_CONVERSATION[1]]);
                     const curTalkTurn = conversationFileResults[conversationCounter][testData.CSVHEADERS_CONVERSATION[2]];
                     conversation.push(this.createConversationPoint(m.xPos, m.yPos, curTalkTimePos, curSpeaker, curTalkTurn));
                     conversationCounter++;
