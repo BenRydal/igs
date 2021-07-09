@@ -56,7 +56,7 @@ class SketchController {
     }
 
     handleMousePressed() {
-        if (this.testVideoToPlay()) this.playPauseMovie();
+        if (this.testVideoToPlay() && this.sketch.keys.overSpaceTimeView(this.sketch.mouseX, this.sketch.mouseY)) this.playPauseMovie();
         this.sketch.keys.handleKeys(this.sketch.core.paths, this.sketch.core.speakerList);
     }
 

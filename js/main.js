@@ -14,8 +14,7 @@ https://etd.library.vanderbilt.edu/available/etd-03212018-140140/unrestricted/Sh
 */
 
 const testData = new TestData();
-
-let igs = new p5((sketch) => {
+const igs = new p5((sketch) => {
 
     sketch.preload = function () {
         sketch.font_Lato = sketch.loadFont("data/fonts/Lato-Light.ttf");
@@ -23,18 +22,14 @@ let igs = new p5((sketch) => {
 
     sketch.setup = function () {
         sketch.canvas = sketch.createCanvas(window.innerWidth, window.innerHeight, sketch.P2D);
-        /**
-         * SINGLETONS with respective .js file/module
-         */
+        // **** SKETCH SINGLETONS **** //
         sketch.core = new Core(sketch); // core program variables and update methods
         sketch.keys = new Keys(sketch); // GUI vars and methods
         sketch.domController = new DomController(sketch); // handles DOM/buttons user interaction
         sketch.sketchController = new SketchController(sketch); // coordinates calls across classes and updates state variables
         sketch.processData = new ProcessData(sketch); // handles all data processing
         sketch.textFont(sketch.font_Lato);
-        /**
-         * CONSTANTS
-         */
+        // **** CONSTANTS **** //
         sketch.PLAN = 0; // two drawing modes
         sketch.SPACETIME = 1;
         sketch.NO_DATA = -1;

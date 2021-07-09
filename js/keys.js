@@ -212,7 +212,7 @@ class Keys {
     }
 
     overSpaceTimeView(xPos, yPos) {
-        return (xPos >= this.timeline.start && xPos <= this.timeline.end) && (yPos >= 0 && yPos <= this.timeline.height);
+        return (xPos >= this.timeline.start && xPos <= this.timeline.end) && (yPos >= 0 && yPos <= this.timeline.top);
     }
 
     overFloorPlan(xPos, yPos) {

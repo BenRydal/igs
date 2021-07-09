@@ -34,16 +34,13 @@ class YoutubePlayer {
                 disablekb: 1, // disables keyboard controls on the video
             },
             events: {
-                'onReady': this.onPlayerReady,
+                'onReady': () => {
+                    console.log("YT player ready: ");
+                    this.sketch.sketchController.toggleVideoShowHide(); // Show video once loaded
+                    this.sketch.sketchController.startLoop(); // rerun P5 draw loop after loading image
+                }
             }
         });
-    }
-
-    // The API will call this function when the video player is ready.
-    onPlayerReady() {
-        console.log("YT player ready: ");
-        igs.sketchController.toggleVideoShowHide(); // Show video once loaded
-        igs.sketchController.startLoop(); // rerun P5 draw loop after loading image
     }
 
     show() {
@@ -103,12 +100,11 @@ class P5FilePlayer {
         this.sketch = sketch;
         this.videoWidth = videoWidth;
         this.videoHeight = videoHeight;
-        //this.movieDiv = sketch.createVideo(fileLocation, () => {
         this.movie = this.sketch.createVideo(params['fileName'], () => {
+            console.log("File Player Ready:");
             this.movie.onload = () => URL.revokeObjectURL(this.src);
             this.setMovieDiv();
             this.sketch.sketchController.toggleVideoShowHide(); // Show video once it has been loaded
-            console.log("File Player Ready:");
             this.sketch.sketchController.startLoop(); // rerun P5 draw loop after loading image
         });
     }

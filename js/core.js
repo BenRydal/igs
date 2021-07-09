@@ -1,7 +1,6 @@
 class Core {
 
     constructor(sketch) {
-        // CORE DATA VARIABLES
         this.sketch = sketch;
         this.movementFileResults = []; // List that holds a results array and character letter indicating path name from a parsed movement .CSV file
         this.conversationFileResults = []; // List that holds a results array and file data from a parsed conversation .CSV file
