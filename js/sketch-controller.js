@@ -103,7 +103,7 @@ class SketchController {
         let scaledSpaceTimeXPos;
         if (view === this.sk.PLAN) scaledSpaceTimeXPos = scaledXPos;
         else if (view === this.sk.SPACETIME) scaledSpaceTimeXPos = scaledTime;
-        else scaledSpaceTimeXPos = this.sk.NO_DATA;
+        else scaledSpaceTimeXPos = null;
         return {
             pixelTime,
             scaledTime,

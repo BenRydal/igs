@@ -3,9 +3,9 @@ class DrawDataMovement {
     constructor(sketch) {
         this.sk = sketch;
         this.bug = { // represents user selection dot drawn in both floor plan and space-time views
-            xPos: this.sk.NO_DATA, // number/float values
-            yPos: this.sk.NO_DATA,
-            timePos: this.sk.NO_DATA,
+            xPos: null, // number/float values
+            yPos: null,
+            timePos: null,
             size: this.sk.width / 50,
             lengthToCompare: this.sk.keys.timeline.length // used to compare data points to find closest bug value
         };
@@ -23,7 +23,7 @@ class DrawDataMovement {
             this.draw(this.sk.PLAN, path.movement, path.color);
             this.draw(this.sk.SPACETIME, path.movement, path.color);
         }
-        if (this.bug.xPos != this.sk.NO_DATA) this.drawBug(path.color); // if selected, draw bug
+        if (this.bug.xPos != null) this.drawBug(path.color); // if selected, draw bug
     }
 
     /**
@@ -126,7 +126,7 @@ class DrawDataMovement {
     }
 
     testPointForBug(scaledTimeToTest, xPos, yPos) {
-        if (this.sk.sketchController.mode.isAnimate) this.recordBug(scaledTimeToTest, xPos, yPos, this.sk.NO_DATA); // always return true to set last/most recent point as the bug
+        if (this.sk.sketchController.mode.isAnimate) this.recordBug(scaledTimeToTest, xPos, yPos, null); // always return true to set last/most recent point as the bug
         else if (this.sk.sketchController.mode.isVideoPlay) {
             const selTime = this.sk.sketchController.mapFromVideoToSelectedTime();
             if (this.compareValuesBySpacing(selTime, scaledTimeToTest, this.bug.lengthToCompare)) this.recordBug(scaledTimeToTest, xPos, yPos, Math.abs(selTime - scaledTimeToTest));
@@ -138,9 +138,9 @@ class DrawDataMovement {
     }
 
     resetBug() {
-        this.bug.xPos = this.sk.NO_DATA;
-        this.bug.yPos = this.sk.NO_DATA;
-        this.bug.timePos = this.sk.NO_DATA;
+        this.bug.xPos = null;
+        this.bug.yPos = null;
+        this.bug.timePos = null;
         this.bug.lengthToCompare = this.sk.keys.timeline.length;
     }
 
@@ -167,7 +167,7 @@ class DrawDataConversation {
         this.sk = sketch;
         this.conversationBubble = { // represents user selected conversation
             isSelected: false,
-            point: this.sk.NO_DATA, // stores one ConversationPoint object for selected conversation turn
+            point: null, // stores one ConversationPoint object for selected conversation turn
             view: this.sk.PLAN // view indicating if user selected conversation in floor plan or space-time views
         };
         this.rect = { // Rect represents key parameters used in drawRects method to scale rectangles
@@ -184,7 +184,7 @@ class DrawDataConversation {
      */
     setData(path, speakerList) {
         for (const point of path.conversation) {
-            const curPoint = this.sk.sketchController.getScaledPointValues(point, this.sk.NO_DATA);
+            const curPoint = this.sk.sketchController.getScaledPointValues(point, null);
             if (this.sk.sketchController.testConversationPointToDraw(curPoint)) {
                 const curSpeaker = this.getSpeakerFromSpeakerList(point.speaker, speakerList); // get speaker object from global list equivalent to the current speaker of point
                 if (this.testSpeakerToDraw(curSpeaker, path.name)) this.drawRects(point, curSpeaker.color); // draws all rects
@@ -234,7 +234,7 @@ class DrawDataConversation {
         const rectWidth = this.sk.map(this.sk.keys.timeline.selectEnd - this.sk.keys.timeline.selectStart, 0, this.sk.keys.timeline.length, this.rect.maxPixelWidth, this.rect.minPixelWidth); // map to inverse of min/max to set rectWidth based on amount of pixel time selected
         let rectLength = this.sk.textWidth(point.talkTurn);
         if (rectLength < this.rect.minPixelHeight) rectLength = this.rect.minPixelHeight; // if current turn is small set it to the minimum height
-        const curPoint = this.sk.sketchController.getScaledPointValues(point, this.sk.NO_DATA);
+        const curPoint = this.sk.sketchController.getScaledPointValues(point, null);
         let yPos;
         if (this.sk.sketchController.mode.isAlignTalk) yPos = 0; // if conversation turn positioning is at top of screen
         else yPos = curPoint.scaledYPos - rectLength;

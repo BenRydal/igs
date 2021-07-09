@@ -21,6 +21,7 @@ const igs = new p5((sk) => {
 
     sk.setup = function () {
         sk.canvas = sk.createCanvas(window.innerWidth, window.innerHeight, sk.P2D);
+        sk.textFont(sk.font_Lato);
         // SKETCH SINGLETONS
         sk.core = new Core(sk); // core program variables and update methods
         sk.testData = new TestData(); // holds tests for core data and CSV files. Does not need sketch reference
@@ -28,11 +29,9 @@ const igs = new p5((sk) => {
         sk.domController = new DomController(sk); // handles DOM/buttons user interaction
         sk.sketchController = new SketchController(sk); // coordinates calls across classes and updates state variables
         sk.processData = new ProcessData(sk); // handles all data processing
-        sk.textFont(sk.font_Lato);
         // CONSTANTS
         sk.PLAN = 0; // two drawing modes
         sk.SPACETIME = 1;
-        sk.NO_DATA = -1;
     }
 
     sk.draw = function () {
