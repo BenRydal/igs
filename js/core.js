@@ -1,7 +1,8 @@
 class Core {
 
-    constructor() {
+    constructor(sketch) {
         // CORE DATA VARIABLES
+        this.sketch = sketch;
         this.movementFileResults = []; // List that holds a results array and character letter indicating path name from a parsed movement .CSV file
         this.conversationFileResults = []; // List that holds a results array and file data from a parsed conversation .CSV file
         this.speakerList = []; // List that holds Speaker objects parsed from conversation file
@@ -21,10 +22,10 @@ class Core {
      * @param  {String} filePath
      */
     updateFloorPlan(filePath) {
-        loadImage(filePath, img => {
+        this.sketch.loadImage(filePath, img => {
             console.log("Floor Plan Image Loaded");
             img.onload = () => URL.revokeObjectURL(this.src);
-            sketchController.startLoop(); // rerun P5 draw loop after loading image
+            this.sketch.sketchController.startLoop(); // rerun P5 draw loop after loading image
             this.floorPlan.img = img;
             this.floorPlan.inputPixelWidth = img.width;
             this.floorPlan.inputPixelHeight = img.height;
@@ -41,14 +42,14 @@ class Core {
      */
     updateVideo(platform, params) {
         if (testData.dataIsLoaded(this.videoPlayer)) this.clearVideo();
-        const videoWidth = width / 5;
-        const videoHeight = width / 6;
+        const videoWidth = this.sketch.width / 5;
+        const videoHeight = this.sketch.width / 6;
         switch (platform) {
             case "Youtube":
-                this.videoPlayer = new YoutubePlayer(params, videoWidth, videoHeight);
+                this.videoPlayer = new YoutubePlayer(this.sketch, params, videoWidth, videoHeight);
                 break;
             case "File":
-                this.videoPlayer = new P5FilePlayer(params, videoWidth, videoHeight);
+                this.videoPlayer = new P5FilePlayer(this.sketch, params, videoWidth, videoHeight);
                 break;
         }
     }
@@ -67,7 +68,7 @@ class Core {
         this.updatePaths(pathName, movement, conversation);
         this.updateTotalTime(movement);
         this.movementFileResults.push([results, pathName]); // add results and pathName to core []
-        sketchController.startLoop(); // rerun P5 draw loop
+        this.sketch.sketchController.startLoop(); // rerun P5 draw loop
     }
 
     /**
@@ -122,7 +123,7 @@ class Core {
         this.conversationFileResults = results.data; // set to new array of keyed values
         this.updateSpeakerList();
         this.speakerList.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching core.paths array
-        sketchController.startLoop(); // rerun P5 draw loop
+        this.sketch.sketchController.startLoop(); // rerun P5 draw loop
     }
 
     /**
@@ -134,7 +135,7 @@ class Core {
             for (const tempSpeaker of this.speakerList) tempSpeakerList.push(tempSpeaker.name);
             // If row is good data, test if core.speakerList already has speaker and if not add speaker 
             if (testData.conversationLengthAndRowForType(this.conversationFileResults, i)) {
-                const speaker = this.cleanSpeaker(this.conversationFileResults[i][CSVHEADERS_CONVERSATION[1]]); // get cleaned speaker character
+                const speaker = this.cleanSpeaker(this.conversationFileResults[i][testData.CSVHEADERS_CONVERSATION[1]]); // get cleaned speaker character
                 if (!tempSpeakerList.includes(speaker)) this.addSpeakerToSpeakerList(speaker);
             }
         }
@@ -196,14 +197,14 @@ class Core {
         this.clearFloorPlan();
         this.clearConversationData();
         this.clearMovementData();
-        sketchController.startLoop(); // rerun P5 draw loop
+        this.sketch.sketchController.startLoop(); // rerun P5 draw loop
     }
 
     clearVideo() {
         this.videoPlayer.destroy(); // if there is a video, destroy it
         this.videoPlayer = null;
-        sketchController.setVideoPlay(false);
-        sketchController.setVideoShow(false);
+        this.sketch.sketchController.setVideoPlay(false);
+        this.sketch.sketchController.setVideoShow(false);
     }
 
     clearFloorPlan() {

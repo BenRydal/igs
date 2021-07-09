@@ -1,5 +1,8 @@
 class ProcessData {
 
+    constructor(sketch) {
+        this.sketch = sketch;
+    }
     /**
      * Parse input files and send to processData method
      * @param  {.CSV File[]} fileList
@@ -7,7 +10,7 @@ class ProcessData {
     parseMovementFiles(fileList) {
         for (let fileNum = 0; fileNum < fileList.length; fileNum++) {
             Papa.parse(fileList[fileNum], {
-                complete: (results, file) => processData.processMovementFile(results, file, fileNum),
+                complete: (results, file) => igs.processData.processMovementFile(results, file, fileNum),
                 header: true,
                 dynamicTyping: true,
             });
@@ -18,8 +21,8 @@ class ProcessData {
         console.log("Parsing complete:", results, file);
         if (testData.movementResults(results)) {
             const [movement, conversation] = this.createMovementConversationArrays(results);
-            core.updateMovement(fileNum, results, file, movement, conversation);
-        } else alert("Error loading movement file. Please make sure your file is a .CSV file formatted with column headers: " + CSVHEADERS_MOVEMENT.toString());
+            this.sketch.core.updateMovement(fileNum, results, file, movement, conversation);
+        } else alert("Error loading movement file. Please make sure your file is a .CSV file formatted with column headers: " + testData.CSVHEADERS_MOVEMENT.toString());
     }
 
     /**
@@ -28,7 +31,7 @@ class ProcessData {
      */
     parseConversationFile(file) {
         Papa.parse(file, {
-            complete: (results, parsedFile) => processData.processConversationFile(results, parsedFile),
+            complete: (results, parsedFile) => igs.processData.processConversationFile(results, parsedFile),
             header: true,
             dynamicTyping: true,
         });
@@ -37,16 +40,16 @@ class ProcessData {
     processConversationFile(results, file) {
         console.log("Parsing complete:", results, file);
         if (testData.conversationResults(results)) {
-            core.updateConversation(results);
-            this.reProcessMovementFiles(core.movementFileResults); // must reprocess movement
-        } else alert("Error loading conversation file. Please make sure your file is a .CSV file formatted with column headers: " + CSVHEADERS_CONVERSATION.toString());
+            this.sketch.core.updateConversation(results);
+            this.reProcessMovementFiles(this.sketch.core.movementFileResults); // must reprocess movement
+        } else alert("Error loading conversation file. Please make sure your file is a .CSV file formatted with column headers: " + testData.CSVHEADERS_CONVERSATION.toString());
 
     }
 
     reProcessMovementFiles(movementFileResults) {
         for (const results of movementFileResults) {
-            const [movement, conversation] = this.createMovementConversationArrays(results[0]);
-            core.updatePaths(results[1], movement, conversation);
+            const [movement, conversation] = this.createMovementConversationArrays(results, this.sketch.core.conversationFileResults);
+            this.sketch.core.updatePaths(results, movement, conversation);
         }
     }
 
@@ -55,23 +58,23 @@ class ProcessData {
      * Location data for conversation array is drawn from comparison to movement file/results data
      *  @param  {PapaParse Results []} results
      */
-    createMovementConversationArrays(results) {
+    createMovementConversationArrays(results, conversationFileResults) {
         let movement = []; // Create empty arrays to hold MovementPoint and ConversationPoint objects
         let conversation = [];
         let conversationCounter = 0; // Current row count of conversation file for comparison
         for (let i = 0; i < results.data.length; i++) {
             // Sample current movement row and test if row is good data
             if (testData.sampleMovementData(results.data, i) && testData.movementRowForType(results.data, i)) {
-                const m = this.createMovementPoint(results.data[i][CSVHEADERS_MOVEMENT[1]], results.data[i][CSVHEADERS_MOVEMENT[2]], results.data[i][CSVHEADERS_MOVEMENT[0]]);
+                const m = this.createMovementPoint(results.data[i][testData.CSVHEADERS_MOVEMENT[1]], results.data[i][testData.CSVHEADERS_MOVEMENT[2]], results.data[i][testData.CSVHEADERS_MOVEMENT[0]]);
                 movement.push(m); // add good data to movement []
                 // Test conversation data row for quality first and then compare movement and conversation times to see if closest movement data to conversation time
-                if (testData.conversationLengthAndRowForType(core.conversationFileResults, conversationCounter) && m.time >= core.conversationFileResults[conversationCounter][CSVHEADERS_CONVERSATION[0]]) {
-                    const curTalkTimePos = core.conversationFileResults[conversationCounter][CSVHEADERS_CONVERSATION[0]];
-                    const curSpeaker = core.cleanSpeaker(core.conversationFileResults[conversationCounter][CSVHEADERS_CONVERSATION[1]]);
-                    const curTalkTurn = core.conversationFileResults[conversationCounter][CSVHEADERS_CONVERSATION[2]];
+                if (testData.conversationLengthAndRowForType(conversationFileResults, conversationCounter) && m.time >= conversationFileResults[conversationCounter][testData.CSVHEADERS_CONVERSATION[0]]) {
+                    const curTalkTimePos = conversationFileResults[conversationCounter][testData.CSVHEADERS_CONVERSATION[0]];
+                    const curSpeaker = this.sketch.core.cleanSpeaker(conversationFileResults[conversationCounter][testData.CSVHEADERS_CONVERSATION[1]]);
+                    const curTalkTurn = conversationFileResults[conversationCounter][testData.CSVHEADERS_CONVERSATION[2]];
                     conversation.push(this.createConversationPoint(m.xPos, m.yPos, curTalkTimePos, curSpeaker, curTalkTurn));
                     conversationCounter++;
-                } else if (!testData.conversationLengthAndRowForType(core.conversationFileResults, conversationCounter)) conversationCounter++; // make sure to increment counter if bad data to skip row in next iteration of loop
+                } else if (!testData.conversationLengthAndRowForType(conversationFileResults, conversationCounter)) conversationCounter++; // make sure to increment counter if bad data to skip row in next iteration of loop
             }
         }
         return [movement, conversation];

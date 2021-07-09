@@ -13,6 +13,8 @@ To reference or read more about this work please see:
 https://etd.library.vanderbilt.edu/available/etd-03212018-140140/unrestricted/Shapiro_Dissertation.pdf
 */
 
+const testData = new TestData();
+
 let igs = new p5((sketch) => {
 
     sketch.preload = function () {
@@ -29,13 +31,10 @@ let igs = new p5((sketch) => {
         sketch.domController = new DomController(sketch); // handles DOM/buttons user interaction
         sketch.sketchController = new SketchController(sketch); // coordinates calls across classes and updates state variables
         sketch.processData = new ProcessData(sketch); // handles all data processing
-        sketch.testData = new TestData(sketch);
-        sketch.textFont(font_Lato);
+        sketch.textFont(sketch.font_Lato);
         /**
          * CONSTANTS
          */
-        sketch.CSVHEADERS_MOVEMENT = ['time', 'x', 'y']; // String array indicating movement movement file headers, data in each column should be of type number or it won't process
-        sketch.CSVHEADERS_CONVERSATION = ['time', 'speaker', 'talk']; // String array indicating conversation file headers, data in time column shout be of type number, speaker column should be of type String, talk column should be not null or undefined
         sketch.PLAN = 0; // two drawing modes
         sketch.SPACETIME = 1;
         sketch.NO_DATA = -1;
@@ -43,12 +42,12 @@ let igs = new p5((sketch) => {
 
     sketch.draw = function () {
         sketch.background(255);
-        if (sketch.testData.dataIsLoaded(core.floorPlan.img)) this.image(sketch.core.floorPlan.img, 0, 0, sketch.keys.floorPlan.width, sketch.keys.floorPlan.height);
-        if (sketch.testData.arrayIsLoaded(sketch.core.paths)) {
-            if (sketch.testData.arrayIsLoaded(sketch.core.speakerList)) sketch.setMovementAndConversation();
-            else sketch.setMovement();
+        if (testData.dataIsLoaded(sketch.core.floorPlan.img)) sketch.image(sketch.core.floorPlan.img, 0, 0, sketch.keys.floorPlan.width, sketch.keys.floorPlan.height);
+        if (testData.arrayIsLoaded(sketch.core.paths)) {
+            if (testData.arrayIsLoaded(sketch.core.speakerList)) sketch.setMovementAndConversation();
+            else setMovement();
         }
-        if (sketch.testData.dataIsLoaded(sketch.core.videoPlayer)) sketch.sketchController.updateVideoDisplay();
+        if (testData.dataIsLoaded(sketch.core.videoPlayer)) sketch.sketchController.updateVideoDisplay();
         sketch.keys.drawKeys(sketch.core.paths, sketch.core.speakerList); // draw keys last
         sketch.sketchController.updateAnimation();
         sketch.sketchController.updateLoop();

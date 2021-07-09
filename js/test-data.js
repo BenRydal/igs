@@ -1,5 +1,10 @@
 class TestData {
 
+    constructor() {
+        this.CSVHEADERS_MOVEMENT = ['time', 'x', 'y']; // String array indicating movement movement file headers, data in each column should be of type number or it won't process
+        this.CSVHEADERS_CONVERSATION = ['time', 'speaker', 'talk']; // String array indicating conversation file headers, data in time column shout be of type number, speaker column should be of type String, talk column should be not null or undefined
+    }
+
     /**
      * Returns false if parameter is undefined or null
      * @param  {Any Type} data
@@ -37,7 +42,7 @@ class TestData {
      * @param  {PapaParse results.meta.fields} meta
      */
     movementHeaders(meta) {
-        return meta.includes(CSVHEADERS_MOVEMENT[0]) && meta.includes(CSVHEADERS_MOVEMENT[1]) && meta.includes(CSVHEADERS_MOVEMENT[2]);
+        return meta.includes(this.CSVHEADERS_MOVEMENT[0]) && meta.includes(this.CSVHEADERS_MOVEMENT[1]) && meta.includes(this.CSVHEADERS_MOVEMENT[2]);
     }
 
     /**
@@ -45,7 +50,7 @@ class TestData {
      * @param  {PapaParse results.meta.fields} meta
      */
     conversationHeaders(meta) {
-        return meta.includes(CSVHEADERS_CONVERSATION[0]) && meta.includes(CSVHEADERS_CONVERSATION[1]) && meta.includes(CSVHEADERS_CONVERSATION[2]);
+        return meta.includes(this.CSVHEADERS_CONVERSATION[0]) && meta.includes(this.CSVHEADERS_CONVERSATION[1]) && meta.includes(this.CSVHEADERS_CONVERSATION[2]);
     }
 
     /**
@@ -54,7 +59,7 @@ class TestData {
      * @param  {Integer} curRow
      */
     movementRowForType(data, curRow) {
-        return typeof data[curRow][CSVHEADERS_MOVEMENT[0]] === 'number' && typeof data[curRow][CSVHEADERS_MOVEMENT[1]] === 'number' && typeof data[curRow][CSVHEADERS_MOVEMENT[2]] === 'number';
+        return typeof data[curRow][this.CSVHEADERS_MOVEMENT[0]] === 'number' && typeof data[curRow][this.CSVHEADERS_MOVEMENT[1]] === 'number' && typeof data[curRow][this.CSVHEADERS_MOVEMENT[2]] === 'number';
     }
 
     /**
@@ -64,7 +69,7 @@ class TestData {
      */
     movementRowsForType(data) {
         for (const row of data) {
-            if (typeof row[CSVHEADERS_MOVEMENT[0]] === 'number' && typeof row[CSVHEADERS_MOVEMENT[1]] === 'number' && typeof row[CSVHEADERS_MOVEMENT[2]] === 'number') return true;
+            if (typeof row[this.CSVHEADERS_MOVEMENT[0]] === 'number' && typeof row[this.CSVHEADERS_MOVEMENT[1]] === 'number' && typeof row[this.CSVHEADERS_MOVEMENT[2]] === 'number') return true;
         }
         return false;
     }
@@ -76,14 +81,14 @@ class TestData {
      */
     conversationRowsForType(data) {
         for (const row of data) {
-            if (typeof row[CSVHEADERS_CONVERSATION[0]] === 'number' && typeof row[CSVHEADERS_CONVERSATION[1]] === 'string' && row[CSVHEADERS_CONVERSATION[2]] != null) return true;
+            if (typeof row[this.CSVHEADERS_CONVERSATION[0]] === 'number' && typeof row[this.CSVHEADERS_CONVERSATION[1]] === 'string' && row[this.CSVHEADERS_CONVERSATION[2]] != null) return true;
         }
         return false;
     }
 
     // Tests if current conversation row is less than total rows in table and if time is number and speaker is string and talk turn is not null or undefined
     conversationLengthAndRowForType(results, curRow) {
-        return curRow < results.length && typeof results[curRow][CSVHEADERS_CONVERSATION[0]] === 'number' && typeof results[curRow][CSVHEADERS_CONVERSATION[1]] === 'string' && results[curRow][CSVHEADERS_CONVERSATION[2]] != null;
+        return curRow < results.length && typeof results[curRow][this.CSVHEADERS_CONVERSATION[0]] === 'number' && typeof results[curRow][this.CSVHEADERS_CONVERSATION[1]] === 'string' && results[curRow][this.CSVHEADERS_CONVERSATION[2]] != null;
     }
     /**
      * Samples data based on comparing time and x/y positions of two points
@@ -93,6 +98,6 @@ class TestData {
     sampleMovementData(data, curRow) {
         const posChange = 2; // number of pixels to compare change in x/y position
         if (curRow < 3) return true; // always return true for first two rows to set starting point
-        else return (Number.parseFloat(data[curRow][CSVHEADERS_MOVEMENT[0]]).toFixed(1) > Number.parseFloat(data[curRow - 1][CSVHEADERS_MOVEMENT[0]]).toFixed(1)) || (Math.abs(Math.floor(data[curRow][CSVHEADERS_MOVEMENT[1]]) - Math.floor(data[curRow - 1][CSVHEADERS_MOVEMENT[1]])) > posChange) || (Math.abs(Math.floor(data[curRow][CSVHEADERS_MOVEMENT[2]]) - Math.floor(data[curRow - 1][CSVHEADERS_MOVEMENT[2]])) > posChange);
+        else return (Number.parseFloat(data[curRow][this.CSVHEADERS_MOVEMENT[0]]).toFixed(1) > Number.parseFloat(data[curRow - 1][this.CSVHEADERS_MOVEMENT[0]]).toFixed(1)) || (Math.abs(Math.floor(data[curRow][this.CSVHEADERS_MOVEMENT[1]]) - Math.floor(data[curRow - 1][this.CSVHEADERS_MOVEMENT[1]])) > posChange) || (Math.abs(Math.floor(data[curRow][this.CSVHEADERS_MOVEMENT[2]]) - Math.floor(data[curRow - 1][this.CSVHEADERS_MOVEMENT[2]])) > posChange);
     }
 }

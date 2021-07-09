@@ -1,11 +1,14 @@
 class DomController {
 
+    constructor(sketch) {
+        this.sketch = sketch;
+    }
     /**
      * Parses user inputted floor plan image for processing
      * @param  {PNG, JPG, JPEG File} input
      */
     handleFloorPlanFile(input) {
-        sketchController.overLoadFloorPlanButton(URL.createObjectURL(input.files[0]));
+        this.sketch.sketchController.overLoadFloorPlanButton(URL.createObjectURL(input.files[0]));
         input.value = ''; // reset input value so you can load same file again in browser
     }
 
@@ -16,7 +19,7 @@ class DomController {
     handleMovementFiles(input) {
         let fileList = [];
         for (const file of input.files) fileList.push(file);
-        sketchController.overLoadMovementButton(fileList);
+        this.sketch.sketchController.overLoadMovementButton(fileList);
         input.value = ''; // reset input value so you can load same file(s) again in browser
     }
 
@@ -25,7 +28,7 @@ class DomController {
      * @param  {File} input
      */
     handleConversationFile(input) {
-        sketchController.overLoadConversationButton(input.files[0]);
+        this.sketch.sketchController.overLoadConversationButton(input.files[0]);
         input.value = ''; // reset input value so you can load same file again in browser
     }
 
@@ -34,32 +37,32 @@ class DomController {
      * @param  {.MP4 File} input
      */
     handleVideoFile(input) {
-        sketchController.overLoadVideoButton(URL.createObjectURL(input.files[0]))
+        this.sketch.sketchController.overLoadVideoButton(URL.createObjectURL(input.files[0]))
         input.value = ''; // reset input value so you can load same file again in browser
     }
 
     handleClearButton() {
-        sketchController.overClearButton();
+        this.sketch.sketchController.overClearButton();
     }
 
     handleAnimateButton() {
-        sketchController.overAnimateButton();
+        this.sketch.sketchController.overAnimateButton();
     }
 
     handleAlignTalkButton() {
-        sketchController.setAlignTalk(!sketchController.mode.isAlignTalk);
+        this.sketch.sketchController.setAlignTalk(!this.sketch.sketchController.mode.isAlignTalk);
     }
 
     handleAllTalkButton() {
-        sketchController.setAllTalk(!sketchController.mode.isAllTalk);
+        this.sketch.sketchController.setAllTalk(!this.sketch.sketchController.mode.isAllTalk);
     }
 
     handleVideoButton() {
-        sketchController.overVideoButton();
+        this.sketch.sketchController.overVideoButton();
     }
 
     handleHowToButton() {
-        sketchController.setIntro(!sketchController.mode.isIntro);
+        this.sketch.sketchController.setIntro(!this.sketch.sketchController.mode.isIntro);
     }
 
     /**
@@ -71,31 +74,31 @@ class DomController {
         else this.hideInputBar();
         switch (option) {
             case "Load Data":
-                sketchController.loadUserData();
+                this.sketch.sketchController.loadUserData();
                 break;
             case "Example 1":
-                sketchController.loadExampleData(['data/example-1/', 'floorplan.png', 'conversation.csv', ['Teacher.csv'], 'Youtube', {
+                this.sketch.sketchController.loadExampleData(['data/example-1/', 'floorplan.png', 'conversation.csv', ['Teacher.csv'], 'Youtube', {
                     videoId: 'Iu0rxb-xkMk'
                 }]);
-                sketchController.setAllTalk(true); // not essential but setting matches each case differently
+                this.sketch.sketchController.setAllTalk(true); // not essential but setting matches each case differently
                 break;
             case "Example 2":
-                sketchController.loadExampleData(['data/example-2/', 'floorplan.png', 'conversation.csv', ['Teacher.csv', 'Sean.csv', 'Mei.csv', 'Cassandra.csv', 'Nathan.csv'], 'Youtube', {
+                this.sketch.sketchController.loadExampleData(['data/example-2/', 'floorplan.png', 'conversation.csv', ['Teacher.csv', 'Sean.csv', 'Mei.csv', 'Cassandra.csv', 'Nathan.csv'], 'Youtube', {
                     videoId: 'OJSZCK4GPQY'
                 }]);
-                sketchController.setAllTalk(false);
+                this.sketch.sketchController.setAllTalk(false);
                 break;
             case "Example 3":
-                sketchController.loadExampleData(['data/example-3/', 'floorplan.png', 'conversation.csv', ['Jordan.csv'], 'Youtube', {
+                this.sketch.sketchController.loadExampleData(['data/example-3/', 'floorplan.png', 'conversation.csv', ['Jordan.csv'], 'Youtube', {
                     videoId: 'iiMjfVOj8po'
                 }]);
-                sketchController.setAllTalk(false);
+                this.sketch.sketchController.setAllTalk(false);
                 break;
             case "Example 4":
-                sketchController.loadExampleData(['data/example-4/', 'floorplan.png', 'conversation.csv', ['Lily.csv', 'Jeans.csv', 'Adhir.csv', 'Mae.csv', 'Blake.csv'], 'Youtube', {
+                this.sketch.sketchController.loadExampleData(['data/example-4/', 'floorplan.png', 'conversation.csv', ['Lily.csv', 'Jeans.csv', 'Adhir.csv', 'Mae.csv', 'Blake.csv'], 'Youtube', {
                     videoId: 'pWJ3xNk1Zpg'
                 }]);
-                sketchController.setAllTalk(false);
+                this.sketch.sketchController.setAllTalk(false);
                 break;
         }
     }

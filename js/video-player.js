@@ -7,12 +7,13 @@ class YoutubePlayer {
      * Include the following script in head of the format: <script type = "text/javascript" src = "https://www.youtube.com/iframe_api"> < /script>
      * @param  {videoId: 'your_videoId_here'} params
      */
-    constructor(params, videoWidth, videoHeight) {
+    constructor(sketch, params, videoWidth, videoHeight) {
+        this.sketch = sketch;
         this.targetId = 'moviePlayer';
         this.videoId = params['videoId'];
         this.videoWidth = videoWidth;
         this.videoHeight = videoHeight;
-        this.movie = createDiv();
+        this.movie = igs.createDiv();
         this.setMovieDiv();
         this.initializePlayer();
     }
@@ -41,8 +42,8 @@ class YoutubePlayer {
     // The API will call this function when the video player is ready.
     onPlayerReady() {
         console.log("YT player ready: ");
-        sketchController.toggleVideoShowHide(); // Show video once loaded
-        sketchController.startLoop(); // rerun P5 draw loop after loading image
+        igs.sketchController.toggleVideoShowHide(); // Show video once loaded
+        igs.sketchController.startLoop(); // rerun P5 draw loop after loading image
     }
 
     show() {
@@ -84,7 +85,7 @@ class YoutubePlayer {
     }
 
     updatePos(xPos, yPos, offset) {
-        select('#moviePlayer').position(xPos - this.videoWidth, yPos + offset);
+        this.sketch.select('#moviePlayer').position(xPos - this.videoWidth, yPos + offset);
     }
 
     destroy() {
@@ -98,16 +99,17 @@ class P5FilePlayer {
     /**
      * @param  {fileName: 'your_fileLocation_here'} params
      */
-    constructor(params, videoWidth, videoHeight) {
+    constructor(sketch, params, videoWidth, videoHeight) {
+        this.sketch = sketch;
         this.videoWidth = videoWidth;
         this.videoHeight = videoHeight;
         //this.movieDiv = sketch.createVideo(fileLocation, () => {
-        this.movie = createVideo(params['fileName'], () => {
+        this.movie = this.sketch.createVideo(params['fileName'], () => {
             this.movie.onload = () => URL.revokeObjectURL(this.src);
             this.setMovieDiv();
-            sketchController.toggleVideoShowHide(); // Show video once it has been loaded
+            this.sketch.sketchController.toggleVideoShowHide(); // Show video once it has been loaded
             console.log("File Player Ready:");
-            sketchController.startLoop(); // rerun P5 draw loop after loading image
+            this.sketch.sketchController.startLoop(); // rerun P5 draw loop after loading image
         });
     }
 
@@ -157,7 +159,7 @@ class P5FilePlayer {
     }
 
     updatePos(xPos, yPos, offset) {
-        select('#moviePlayer').position(xPos - this.videoWidth, yPos + offset);
+        this.sketch.select('#moviePlayer').position(xPos - this.videoWidth, yPos + offset);
     }
 
     destroy() {

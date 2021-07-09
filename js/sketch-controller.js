@@ -1,6 +1,7 @@
 class SketchController {
 
-    constructor() {
+    constructor(sketch) {
+        this.sketch = sketch;
         this.mode = {
             isAnimate: false,
             isAlignTalk: false,
@@ -14,131 +15,131 @@ class SketchController {
     }
 
     updateLoop() {
-        if (this.mode.isAnimate || this.mode.isVideoPlay) loop();
-        else noLoop();
+        if (this.mode.isAnimate || this.mode.isVideoPlay) this.sketch.loop();
+        else this.sketch.noLoop();
     }
 
     startLoop() {
-        loop();
+        this.sketch.loop();
     }
 
     overLoadFloorPlanButton(fileLocation) {
-        core.updateFloorPlan(fileLocation);
+        this.sketch.core.updateFloorPlan(fileLocation);
     }
 
     overLoadMovementButton(fileList) {
-        processData.parseMovementFiles(fileList);
+        this.sketch.processData.parseMovementFiles(fileList);
     }
 
     overLoadConversationButton(file) {
-        processData.parseConversationFile(file); // parse converted file
+        this.sketch.processData.parseConversationFile(file); // parse converted file
     }
 
     overLoadVideoButton(fileLocation) {
-        core.updateVideo('File', {
+        this.sketch.core.updateVideo('File', {
             fileName: fileLocation
         });
     }
 
     overVideoButton() {
-        if (testData.dataIsLoaded(core.videoPlayer)) this.toggleVideoShowHide();
+        if (testData.dataIsLoaded(this.sketch.core.videoPlayer)) this.toggleVideoShowHide();
     }
 
     overAnimateButton() {
-        if (this.mode.isAnimate) this.animationCounter = this.mapFromPixelToTotalTime(keys.timeline.selectEnd);
-        else this.animationCounter = this.mapFromPixelToTotalTime(keys.timeline.selectStart);
+        if (this.mode.isAnimate) this.animationCounter = this.mapFromPixelToTotalTime(this.sketch.keys.timeline.selectEnd);
+        else this.animationCounter = this.mapFromPixelToTotalTime(this.sketch.keys.timeline.selectStart);
         this.setIsAnimate(!this.mode.isAnimate);
     }
 
     overClearButton() {
-        core.clearAllData();
+        this.sketch.core.clearAllData();
     }
 
     handleMousePressed() {
         if (this.testVideoToPlay()) this.playPauseMovie();
-        keys.handleKeys(core.paths, core.speakerList);
+        this.sketch.keys.handleKeys(this.sketch.core.paths, this.sketch.core.speakerList);
     }
 
     handleMouseDragged() {
-        if (!this.mode.isAnimate && ((keys.timeline.isLockedLeft || keys.timeline.isLockedRight) || keys.overTimelineAxisRegion())) keys.handleTimeline();
+        if (!this.mode.isAnimate && ((this.sketch.keys.timeline.isLockedLeft || this.sketch.keys.timeline.isLockedRight) || this.sketch.keys.overTimelineAxisRegion())) this.sketch.keys.handleTimeline();
     }
 
     handleMouseReleased() {
-        keys.timeline.isLockedLeft = false;
-        keys.timeline.isLockedRight = false;
+        this.sketch.keys.timeline.isLockedLeft = false;
+        this.sketch.keys.timeline.isLockedRight = false;
     }
 
     updateAnimation() {
         if (this.mode.isAnimate) {
             const animationIncrementRateDivisor = 1000; // this divisor seems to work best
-            const curTimeIntervalInSeconds = this.mapFromPixelToTotalTime(keys.timeline.selectEnd) - this.mapFromPixelToTotalTime(keys.timeline.selectStart); // Get amount of time in seconds currently displayed
+            const curTimeIntervalInSeconds = this.mapFromPixelToTotalTime(this.sketch.keys.timeline.selectEnd) - this.mapFromPixelToTotalTime(this.sketch.keys.timeline.selectStart); // Get amount of time in seconds currently displayed
             const animationIncrementValue = curTimeIntervalInSeconds / animationIncrementRateDivisor; // set increment value based on that value/divisor to keep constant sketchController.mode.isAnimate speed regardless of time interval selected
-            if (this.animationCounter < this.mapFromPixelToTotalTime(keys.timeline.selectEnd)) this.animationCounter += animationIncrementValue;
+            if (this.animationCounter < this.mapFromPixelToTotalTime(this.sketch.keys.timeline.selectEnd)) this.animationCounter += animationIncrementValue;
             else this.setIsAnimate(false);
         }
     }
 
     updateVideoDisplay() {
         if (this.mode.isVideoShow) {
-            core.videoPlayer.updatePos(mouseX, mouseY, 100);
+            this.sketch.core.videoPlayer.updatePos(this.sketch.mouseX, this.sketch.mouseY, 100);
             if (!this.mode.isVideoPlay) this.setVideoScrubbing();
         }
     }
 
     setVideoScrubbing() {
         if (this.mode.isAnimate) {
-            const vPos = Math.floor(map(this.bugTimeForVideoScrub, keys.timeline.start, keys.timeline.end, this.mapFromPixelToVideoTime(keys.timeline.selectStart), this.mapFromPixelToVideoTime(keys.timeline.selectEnd)));
-            core.videoPlayer.seekTo(vPos);
-        } else if (keys.overSpaceTimeView(mouseX, mouseY)) {
-            const vPos = Math.floor(this.mapFromPixelToVideoTime(this.mapFromPixelToSelectedTime(mouseX)));
-            core.videoPlayer.seekTo(vPos);
-            core.videoPlayer.pause(); // Add to prevent accidental video playing that seems to occur
+            const vPos = Math.floor(this.sketch.map(this.bugTimeForVideoScrub, this.sketch.keys.timeline.start, this.sketch.keys.timeline.end, this.mapFromPixelToVideoTime(this.sketch.keys.timeline.selectStart), this.mapFromPixelToVideoTime(this.sketch.keys.timeline.selectEnd)));
+            this.sketch.core.videoPlayer.seekTo(vPos);
+        } else if (this.sketch.keys.overSpaceTimeView(this.sketch.mouseX, this.sketch.mouseY)) {
+            const vPos = Math.floor(this.mapFromPixelToVideoTime(this.mapFromPixelToSelectedTime(this.sketch.mouseX)));
+            this.sketch.core.videoPlayer.seekTo(vPos);
+            this.sketch.core.videoPlayer.pause(); // Add to prevent accidental video playing that seems to occur
         }
     }
 
     toggleVideoShowHide() {
         if (this.mode.isVideoShow) {
-            core.videoPlayer.pause();
-            core.videoPlayer.hide();
+            this.sketch.core.videoPlayer.pause();
+            this.sketch.core.videoPlayer.hide();
             this.setVideoPlay(false);
             this.setVideoShow(false);
         } else {
-            core.videoPlayer.show();
+            this.sketch.core.videoPlayer.show();
             this.setVideoShow(true);
         }
     }
 
     playPauseMovie() {
         if (this.mode.isVideoPlay) {
-            core.videoPlayer.pause();
+            this.sketch.core.videoPlayer.pause();
             this.setVideoPlay(false);
         } else {
-            const tPos = this.mapFromPixelToVideoTime(this.mapFromPixelToSelectedTime(mouseX));
-            core.videoPlayer.play();
-            core.videoPlayer.seekTo(tPos);
+            const tPos = this.mapFromPixelToVideoTime(this.mapFromPixelToSelectedTime(this.sketch.mouseX));
+            this.sketch.core.videoPlayer.play();
+            this.sketch.core.videoPlayer.seekTo(tPos);
             this.setVideoPlay(true);
         }
     }
 
     loadUserData() {
         this.setIntro(false); // Hide intro msg if showing
-        core.clearAllData();
+        this.sketch.core.clearAllData();
     }
     /**
      * @param  {[String directory, String floorPlan image file, String conversation File, String movement File[], String video platform, video params (see Video Player Interface)]} params
      */
     loadExampleData(params) {
         this.setIntro(false); // Hide intro msg if showing
-        core.updateVideo(params[4], params[5]);
-        core.updateFloorPlan(params[0] + params[1]);
-        processData.parseExampleData(params);
+        this.sketch.core.updateVideo(params[4], params[5]);
+        this.sketch.core.updateFloorPlan(params[0] + params[1]);
+        this.sketch.processData.parseExampleData(params);
     }
 
     getScaledPointValues(point, view) {
-        const pixelTime = map(point.time, 0, core.totalTimeInSeconds, keys.timeline.start, keys.timeline.end);
-        const scaledTime = map(pixelTime, keys.timeline.selectStart, keys.timeline.selectEnd, keys.timeline.start, keys.timeline.end);
-        const scaledXPos = point.xPos * keys.floorPlan.width / core.floorPlan.inputPixelWidth;
-        const scaledYPos = point.yPos * keys.floorPlan.height / core.floorPlan.inputPixelHeight;
+        const pixelTime = this.sketch.map(point.time, 0, this.sketch.core.totalTimeInSeconds, this.sketch.keys.timeline.start, this.sketch.keys.timeline.end);
+        const scaledTime = this.sketch.map(pixelTime, this.sketch.keys.timeline.selectStart, this.sketch.keys.timeline.selectEnd, this.sketch.keys.timeline.start, this.sketch.keys.timeline.end);
+        const scaledXPos = point.xPos * this.sketch.keys.floorPlan.width / this.sketch.core.floorPlan.inputPixelWidth;
+        const scaledYPos = point.yPos * this.sketch.keys.floorPlan.height / this.sketch.core.floorPlan.inputPixelHeight;
         let scaledSpaceTimeXPos;
         if (view === PLAN) scaledSpaceTimeXPos = scaledXPos;
         else if (view === SPACETIME) scaledSpaceTimeXPos = scaledTime;
@@ -153,14 +154,14 @@ class SketchController {
     }
 
     testMovementPointToDraw(curPoint) {
-        return keys.overTimelineAxis(curPoint.pixelTime) && keys.overFloorPlan(curPoint.scaledXPos, curPoint.scaledYPos) && this.testAnimation(curPoint.pixelTime);
+        return this.sketch.keys.overTimelineAxis(curPoint.pixelTime) && this.sketch.keys.overFloorPlan(curPoint.scaledXPos, curPoint.scaledYPos) && this.testAnimation(curPoint.pixelTime);
     }
     /**
      * Test if point is in user view
      * @param  {ConversationPoint} curPoint
      */
     testConversationPointToDraw(curPoint) {
-        return keys.overTimelineAxis(curPoint.pixelTime) && keys.overFloorPlan(curPoint.scaledXPos, curPoint.scaledYPos) && this.testAnimation(curPoint.pixelTime) && keys.overFloorPlanAndCursor(curPoint.scaledXPos, curPoint.scaledYPos);
+        return this.sketch.keys.overTimelineAxis(curPoint.pixelTime) && this.sketch.keys.overFloorPlan(curPoint.scaledXPos, curPoint.scaledYPos) && this.testAnimation(curPoint.pixelTime) && this.sketch.keys.overFloorPlanAndCursor(curPoint.scaledXPos, curPoint.scaledYPos);
     }
 
     /**
@@ -172,33 +173,33 @@ class SketchController {
     }
 
     testVideoToPlay() {
-        return testData.dataIsLoaded(core.videoPlayer) && this.mode.isVideoShow && !this.mode.isAnimate && keys.overRect(keys.timeline.start, 0, keys.timeline.end, keys.timeline.bottom)
+        return testData.dataIsLoaded(this.sketch.core.videoPlayer) && this.mode.isVideoShow && !this.mode.isAnimate && this.sketch.keys.overSpaceTimeView(this.sketch.mouseX, this.sketch.mouseY);
     }
 
     // map to inverse, values constrained between 10 and 1 (pixels)
     mapConversationRectRange() {
-        return map(core.totalTimeInSeconds, 0, 3600, 10, 1, true)
+        return this.sketch.map(this.sketch.core.totalTimeInSeconds, 0, 3600, 10, 1, true)
     }
 
     mapFromPixelToTotalTime(value) {
-        return map(value, keys.timeline.start, keys.timeline.end, 0, core.totalTimeInSeconds);
+        return this.sketch.map(value, this.sketch.keys.timeline.start, this.sketch.keys.timeline.end, 0, this.sketch.core.totalTimeInSeconds);
     }
 
     mapFromTotalToPixelTime(value) {
-        return map(value, 0, core.totalTimeInSeconds, keys.timeline.start, keys.timeline.end);
+        return this.sketch.map(value, 0, this.sketch.core.totalTimeInSeconds, this.sketch.keys.timeline.start, this.sketch.keys.timeline.end);
     }
 
     mapFromPixelToVideoTime(value) {
-        return Math.floor(map(value, keys.timeline.start, keys.timeline.end, 0, Math.floor(core.videoPlayer.getVideoDuration()))); // must floor vPos to prevent double finite error
+        return Math.floor(this.sketch.map(value, this.sketch.keys.timeline.start, this.sketch.keys.timeline.end, 0, Math.floor(this.sketch.core.videoPlayer.getVideoDuration()))); // must floor vPos to prevent double finite error
     }
 
     mapFromPixelToSelectedTime(value) {
-        return map(value, keys.timeline.start, keys.timeline.end, keys.timeline.selectStart, keys.timeline.selectEnd);
+        return this.sketch.map(value, this.sketch.keys.timeline.start, this.sketch.keys.timeline.end, this.sketch.keys.timeline.selectStart, this.sketch.keys.timeline.selectEnd);
     }
 
     mapFromVideoToSelectedTime() {
-        const timelinePos = map(core.videoPlayer.getCurrentTime(), 0, core.totalTimeInSeconds, keys.timeline.start, keys.timeline.end);
-        return map(timelinePos, keys.timeline.selectStart, keys.timeline.selectEnd, keys.timeline.start, keys.timeline.end);
+        const timelinePos = this.sketch.map(this.sketch.core.videoPlayer.getCurrentTime(), 0, this.sketch.core.totalTimeInSeconds, this.sketch.keys.timeline.start, this.sketch.keys.timeline.end);
+        return this.sketch.map(timelinePos, this.sketch.keys.timeline.selectStart, this.sketch.keys.timeline.selectEnd, this.sketch.keys.timeline.start, this.sketch.keys.timeline.end);
     }
 
     setSpeakerShow(speaker) {

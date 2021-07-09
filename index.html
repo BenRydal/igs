@@ -6,7 +6,6 @@
     <script src="https://cdn.jsdelivr.net/npm/p5@0.10.2/lib/p5.js"></script>
     <script type="text/javascript" src="https://www.youtube.com/iframe_api"></script>
     <script src="libs/papaparse.min.js"></script>
-    <script src="js/main.js"></script>
     <script src="js/core.js"></script>
     <script src="js/dom-controller.js"></script>
     <script src="js/sketch-controller.js"></script>
@@ -28,7 +27,7 @@
 <body>
     <div class="introBar">
         <form action="/action_page.php">
-            <select id="examples" name="examples" onchange="domController.handleExampleDropDown()">
+            <select id="examples" name="examples" onchange="igs.domController.handleExampleDropDown()">
                 <option disabled selected value> -- Select an Option -- </option>
                 <option value="Load Data">LOAD DATA</option>
                 <option value="Example 1">EXAMPLE 1: CLASSROOM SCIENCE LESSON</option>
@@ -38,46 +37,50 @@
             </select>
 
             <button type="button" id="animateButton" class="inputfile"
-                onclick="domController.handleAnimateButton()"></button>
+                onclick="igs.domController.handleAnimateButton()"></button>
             <label for="animateButton">ANIMATE</label>
 
             <button type="button" id="alignButton" class="inputfile"
-                onclick="domController.handleAlignTalkButton()"></button>
+                onclick="igs.domController.handleAlignTalkButton()"></button>
             <label for="alignButton">ALIGN TALK</label>
 
             <button type="button" id="allTalkButton" class="inputfile"
-                onclick="domController.handleAllTalkButton()"></button>
+                onclick="igs.domController.handleAllTalkButton()"></button>
             <label for="allTalkButton">ALL TALK</label>
 
-            <button type="button" id="videoButton" class="inputfile" onclick="domController.handleVideoButton()"></button>
+            <button type="button" id="videoButton" class="inputfile"
+                onclick="igs.domController.handleVideoButton()"></button>
             <label for="videoButton">VIDEO</label>
 
-            <button type="button" id="howToButton" class="inputfile" onclick="domController.handleHowToButton()"></button>
+            <button type="button" id="howToButton" class="inputfile"
+                onclick="igs.domController.handleHowToButton()"></button>
             <label for="howToButton">HOW TO USE</label>
         </form>
     </div>
     <div class="inputBar">
         <form action="/action_page.php">
             <input type="file" name="file" id="inputFloorPlan" name="file" class="inputfile" accept=".png, .jpg, .jpeg"
-                onchange="domController.handleFloorPlanFile(this)">
+                onchange="igs.domController.handleFloorPlanFile(this)">
             <label for="inputFloorPlan">Floor Plan Image (PNG/JPG)</label>
 
             <input type="file" name="file" id="inputMovement" name="file" class="inputfile" multiple accept=".csv"
-                onchange="domController.handleMovementFiles(this)">
+                onchange="igs.domController.handleMovementFiles(this)">
             <label for="inputMovement">Movement Files (CSV)</label>
 
             <input type="file" name="file" id="inputConversation" class="inputfile" accept=".csv"
-                onchange="domController.handleConversationFile(this)">
+                onchange="igs.domController.handleConversationFile(this)">
             <label for="inputConversation">Conversation File (CSV)</label>
 
             <input type="file" name="file" id="inputVideo" class="inputfile" accept=".mp4"
-                onchange="domController.handleVideoFile(this)">
+                onchange="igs.domController.handleVideoFile(this)">
             <label for="inputVideo">Video File (MP4)</label>
 
-            <button type="button" id="clearButton" class="inputfile" onclick="domController.handleClearButton()"></button>
+            <button type="button" id="clearButton" class="inputfile"
+                onclick="igs.domController.handleClearButton()"></button>
             <label for="clearButton">Clear Data</label>
         </form>
     </div>
+    <script src="js/main.js"></script>
 </body>
 
 </html>
