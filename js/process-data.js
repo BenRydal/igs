@@ -8,7 +8,7 @@ class ProcessData {
      * Prepare for parsing. Important for binding this to callback
      * @param  {.CSV File[]} fileList
      */
-    handleMovementFiles(fileList) {
+    prepMovementFiles(fileList) {
         this.parseMovementFiles(fileList, this.processMovementFile.bind(this));
     }
 
@@ -16,36 +16,17 @@ class ProcessData {
      * Prepare for parsing. Important for binding this to callback
      * @param  {.CSV File} file
      */
-    handleConversationFiles(file) {
+    prepConversationFile(file) {
         this.parseConversationFile(file, this.processConversationFile.bind(this));
 
     }
 
     /**
-     * Handles async loading of conversation file. NOTE: folder and filename are separated for convenience later in program
-     * @param  {String} folder
-     * @param  {String} fileName
-     */
-    async handleExampleConversationFile(folder, fileName) {
-        try {
-            const response = await fetch(new Request(folder + fileName));
-            const buffer = await response.arrayBuffer();
-            const file = new File([buffer], fileName, {
-                type: "text/csv",
-            });
-            // parse file after retrieval, maintain correct this context on callback with bind
-            this.parseConversationFile(file, this.processConversationFile.bind(this));
-        } catch (error) {
-            alert("Error loading example conversation data. Please make sure you have a good internet connection")
-            console.log(error);
-        }
-    }
-    /**
      * Handles async loading of movement files. NOTE: folder and filename are separated for convenience later in program
      * @param  {String} folder
      * @param  {String} fileNames
      */
-    async handleExampleMovementFiles(folder, fileNames) {
+    async prepExampleMovementFiles(folder, fileNames) {
         try {
             let fileList = [];
             for (const name of fileNames) {
@@ -59,6 +40,26 @@ class ProcessData {
             this.parseMovementFiles(fileList, this.processMovementFile.bind(this));
         } catch (error) {
             alert("Error loading example movement data. Please make sure you have a good internet connection")
+            console.log(error);
+        }
+    }
+
+    /**
+     * Handles async loading of conversation file. NOTE: folder and filename are separated for convenience later in program
+     * @param  {String} folder
+     * @param  {String} fileName
+     */
+    async prepExampleConversationFile(folder, fileName) {
+        try {
+            const response = await fetch(new Request(folder + fileName));
+            const buffer = await response.arrayBuffer();
+            const file = new File([buffer], fileName, {
+                type: "text/csv",
+            });
+            // parse file after retrieval, maintain correct this context on callback with bind
+            this.parseConversationFile(file, this.processConversationFile.bind(this));
+        } catch (error) {
+            alert("Error loading example conversation data. Please make sure you have a good internet connection")
             console.log(error);
         }
     }
@@ -117,7 +118,7 @@ class ProcessData {
     reProcessMovementFiles(movementFileResults) {
         for (const results of movementFileResults) {
             const [movement, conversation] = this.createMovementConversationArrays(results[0], this.sketch.core.conversationFileResults);
-            this.sketch.core.updatePaths(results, movement, conversation);
+            this.sketch.core.updatePaths(movementFileResults[1], movement, conversation);
         }
     }
 

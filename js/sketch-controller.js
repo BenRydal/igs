@@ -23,38 +23,6 @@ class SketchController {
         this.sketch.loop();
     }
 
-    overLoadFloorPlanButton(fileLocation) {
-        this.sketch.core.updateFloorPlan(fileLocation);
-    }
-
-    overLoadMovementButton(fileList) {
-        this.sketch.processData.handleMovementFiles(fileList);
-    }
-
-    overLoadConversationButton(file) {
-        this.sketch.processData.handleConversationFile(file);
-    }
-
-    overLoadVideoButton(fileLocation) {
-        this.sketch.core.updateVideo('File', {
-            fileName: fileLocation
-        });
-    }
-
-    overVideoButton() {
-        if (testData.dataIsLoaded(this.sketch.core.videoPlayer)) this.toggleVideoShowHide();
-    }
-
-    overAnimateButton() {
-        if (this.mode.isAnimate) this.animationCounter = this.mapFromPixelToTotalTime(this.sketch.keys.timeline.selectEnd);
-        else this.animationCounter = this.mapFromPixelToTotalTime(this.sketch.keys.timeline.selectStart);
-        this.setIsAnimate(!this.mode.isAnimate);
-    }
-
-    overClearButton() {
-        this.sketch.core.clearAllData();
-    }
-
     handleMousePressed() {
         if (this.testVideoToPlay() && this.sketch.keys.overSpaceTimeView(this.sketch.mouseX, this.sketch.mouseY)) this.playPauseMovie();
         this.sketch.keys.handleKeys(this.sketch.core.paths, this.sketch.core.speakerList);
@@ -67,6 +35,12 @@ class SketchController {
     handleMouseReleased() {
         this.sketch.keys.timeline.isLockedLeft = false;
         this.sketch.keys.timeline.isLockedRight = false;
+    }
+
+    updateAnimationCounter() {
+        if (this.mode.isAnimate) this.animationCounter = this.mapFromPixelToTotalTime(this.sketch.keys.timeline.selectEnd);
+        else this.animationCounter = this.mapFromPixelToTotalTime(this.sketch.keys.timeline.selectStart);
+        this.setIsAnimate(!this.mode.isAnimate);
     }
 
     updateAnimation() {
@@ -119,21 +93,6 @@ class SketchController {
             this.sketch.core.videoPlayer.seekTo(tPos);
             this.setVideoPlay(true);
         }
-    }
-
-    loadUserData() {
-        this.setIntro(false); // Hide intro msg if showing
-        this.sketch.core.clearAllData();
-    }
-    /**
-     * @param  {[String directory, String floorPlan image file, String conversation File, String movement File[], String video platform, video params (see Video Player Interface)]} params
-     */
-    loadExampleData(params) {
-        this.setIntro(false); // Hide intro msg if showing
-        this.sketch.core.updateVideo(params[4], params[5]);
-        this.sketch.core.updateFloorPlan(params[0] + params[1]);
-        this.sketch.processData.handleExampleConversationFile(params[0], params[2]);
-        this.sketch.processData.handleExampleMovementFiles(params[0], params[3]);
     }
 
     getScaledPointValues(point, view) {
