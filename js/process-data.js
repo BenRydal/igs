@@ -118,7 +118,7 @@ class ProcessData {
     reProcessMovementFiles(movementFileResults) {
         for (const results of movementFileResults) {
             const [movement, conversation] = this.createMovementConversationArrays(results[0], this.sk.core.conversationFileResults);
-            this.sk.core.updatePaths(movementFileResults[1], movement, conversation);
+            this.sk.core.updatePaths(results[1], movement, conversation);
         }
     }
 
