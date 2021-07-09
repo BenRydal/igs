@@ -3,7 +3,7 @@ class Core {
     constructor(sketch) {
         this.sk = sketch;
         this.movementFileResults = []; // List that holds objects containing a parsed results.data array and character letter indicating path name from Papa Parsed file
-        this.conversationFileResults = []; // List that holds a results array and file data from a parsed conversation .CSV file
+        this.conversationDataArray = []; // List that holds a results array and file data from a parsed conversation .CSV file
         this.speakerList = []; // List that holds Speaker objects parsed from conversation file
         this.paths = []; // List that holds path objects for each unique set of movement and conversation points constructed from parsed conversation and movement .CSV files
         this.floorPlan = {
@@ -122,7 +122,7 @@ class Core {
      */
     updateConversation(results) {
         this.clearConversationData(); // clear existing conversation data
-        this.conversationFileResults = results.data; // set to new array of keyed values
+        this.conversationDataArray = results.data; // set to new array of keyed values
         this.updateSpeakerList();
         this.speakerList.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching core.paths array
         this.sk.sketchController.startLoop(); // rerun P5 draw loop
@@ -132,12 +132,12 @@ class Core {
      * Updates core speaker list from conversation file data/results
      */
     updateSpeakerList() {
-        for (let i = 0; i < this.conversationFileResults.length; i++) {
+        for (let i = 0; i < this.conversationDataArray.length; i++) {
             let tempSpeakerList = []; // create/populate temp list to store strings to test from global core.speakerList
             for (const tempSpeaker of this.speakerList) tempSpeakerList.push(tempSpeaker.name);
             // If row is good data, test if core.speakerList already has speaker and if not add speaker 
-            if (this.sk.testData.conversationLengthAndRowForType(this.conversationFileResults, i)) {
-                const speaker = this.cleanSpeaker(this.conversationFileResults[i][this.sk.testData.CSVHEADERS_CONVERSATION[1]]); // get cleaned speaker character
+            if (this.sk.testData.conversationLengthAndRowForType(this.conversationDataArray, i)) {
+                const speaker = this.cleanSpeaker(this.conversationDataArray[i][this.sk.testData.CSVHEADERS_CONVERSATION[1]]); // get cleaned speaker character
                 if (!tempSpeakerList.includes(speaker)) this.addSpeakerToSpeakerList(speaker);
             }
         }
@@ -216,7 +216,7 @@ class Core {
     }
 
     clearConversationData() {
-        this.conversationFileResults = [];
+        this.conversationDataArray = [];
         this.speakerList = [];
         this.paths = [];
     }
