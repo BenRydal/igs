@@ -2,10 +2,10 @@ class Core {
 
     constructor(sketch) {
         this.sk = sketch;
-        this.parsedMovementFiles = []; // List that holds objects containing a parsed results.data array and character letter indicating path name from Papa Parsed file
-        this.parsedConversationArray = []; // List that holds a results array and file data from a parsed conversation .CSV file
+        this.parsedMovementFiles = []; // List that holds objects containing a parsed results.data array and character letter indicating path name from Papa Parsed CSV file
+        this.parsedConversationArray = []; // List that holds a parsed results.data array from Papa parsed conversation CSV file
         this.speakerList = []; // List that holds Speaker objects parsed from conversation file
-        this.paths = []; // List that holds path objects for each unique set of movement and conversation points constructed from parsed conversation and movement .CSV files
+        this.paths = []; // List of path objects
         this.floorPlan = {
             img: null,
             inputPixelWidth: null,
