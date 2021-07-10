@@ -113,6 +113,10 @@ class SketchController {
         };
     }
 
+    /**
+     * Test if point is in user view
+     * @param  {MovementPoint} curPoint
+     */
     testMovementPointToDraw(curPoint) {
         return this.sk.keys.overTimelineAxis(curPoint.pixelTime) && this.sk.keys.overFloorPlan(curPoint.scaledXPos, curPoint.scaledYPos) && this.testAnimation(curPoint.pixelTime);
     }
@@ -125,7 +129,7 @@ class SketchController {
     }
 
     /**
-     * @param  {Number/Float} timeValue
+     * @param  {Number/Float} value
      */
     testAnimation(value) {
         if (this.mode.isAnimate) return this.animationCounter > this.mapFromPixelToTotalTime(value);
@@ -135,10 +139,11 @@ class SketchController {
     testVideoToPlay() {
         return this.sk.testData.dataIsLoaded(this.sk.core.videoPlayer) && this.mode.isVideoShow && !this.mode.isAnimate && this.sk.keys.overSpaceTimeView(this.sk.mouseX, this.sk.mouseY);
     }
-
-    // map to inverse, values constrained between 10 and 1 (pixels)
+    /**
+     * Sets conversation rectangle scaling range (size of rectangles as timeline is rescaled)
+     */
     mapConversationRectRange() {
-        return this.sk.map(this.sk.core.totalTimeInSeconds, 0, 3600, 10, 1, true)
+        return this.sk.map(this.sk.core.totalTimeInSeconds, 0, 3600, 10, 1, true); // map to inverse, values constrained between 10 and 1 (pixels)
     }
 
     mapFromPixelToTotalTime(value) {
@@ -160,14 +165,6 @@ class SketchController {
     mapFromVideoToSelectedTime() {
         const timelinePos = this.sk.map(this.sk.core.videoPlayer.getCurrentTime(), 0, this.sk.core.totalTimeInSeconds, this.sk.keys.timeline.start, this.sk.keys.timeline.end);
         return this.sk.map(timelinePos, this.sk.keys.timeline.selectStart, this.sk.keys.timeline.selectEnd, this.sk.keys.timeline.start, this.sk.keys.timeline.end);
-    }
-
-    setSpeakerShow(speaker) {
-        speaker.isShowing = !speaker.isShowing;
-    }
-
-    setPathShow(path) {
-        path.isShowing = !path.isShowing;
     }
 
     setIsAnimate(value) {

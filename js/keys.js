@@ -167,25 +167,35 @@ class Keys {
         else if (this.overRect(currXPos + this.sk.textWidth("Movement | "), this.panel.titleHeight, this.panel.spacing + this.sk.textWidth("Conversation"), this.panel.spacing)) this.panel.isMovement = false;
     }
 
+    overPathKeys(pathList) {
+        this.sk.textSize(this.keyTextSize);
+        let currXPos = this.panel.xPos;
+        for (const path of pathList) {
+            const nameWidth = this.sk.textWidth(path.name); // set nameWidth to pixel width of path name
+            if (this.overRect(currXPos, this.panel.keyHeight, this.panel.spacing + nameWidth, this.panel.spacing)) this.setPathShow(path);
+            currXPos += this.panel.spacing + nameWidth + this.panel.spacing;
+        }
+    }
 
     overSpeakerKeys(speakerList) {
         this.sk.textSize(this.keyTextSize);
         let currXPos = this.panel.xPos;
         for (const speaker of speakerList) {
             let nameWidth = this.sk.textWidth(speaker.name); // set nameWidth to pixel width of speaker code
-            if (this.overRect(currXPos, this.panel.keyHeight, this.panel.spacing + nameWidth, this.panel.spacing)) this.sk.sketchController.setSpeakerShow(speaker);
+            if (this.overRect(currXPos, this.panel.keyHeight, this.panel.spacing + nameWidth, this.panel.spacing)) this.setSpeakerShow(speaker);
             currXPos += this.panel.spacing + nameWidth + this.panel.spacing;
         }
     }
 
-    overPathKeys(pathList) {
-        this.sk.textSize(this.keyTextSize);
-        let currXPos = this.panel.xPos;
-        for (const path of pathList) {
-            const nameWidth = this.sk.textWidth(path.name); // set nameWidth to pixel width of path name
-            if (this.overRect(currXPos, this.panel.keyHeight, this.panel.spacing + nameWidth, this.panel.spacing)) this.sk.sketchController.setPathShow(path);
-            currXPos += this.panel.spacing + nameWidth + this.panel.spacing;
-        }
+    /**
+     * NOTE: these setters are modifying core vars but this still seems to be best solution
+     */
+    setSpeakerShow(speaker) {
+        speaker.isShowing = !speaker.isShowing;
+    }
+
+    setPathShow(path) {
+        path.isShowing = !path.isShowing;
     }
 
     /**
