@@ -105,7 +105,6 @@ class Core {
         } else return this.COLOR_LIST[this.speakerList.length + this.getNumPathsWithNoSpeaker() % this.COLOR_LIST.length]; // assign color to path
     }
 
-
     /**
      * Returns number of movement Paths that do not have corresponding speaker
      */
@@ -118,7 +117,7 @@ class Core {
     }
 
     /**
-     *  @param  {PapaParse Results []} results
+     *  @param {PapaParse Results []} results
      */
     updateConversation(parsedConversationArray) {
         this.clearConversationData(); // clear existing conversation data
@@ -143,7 +142,6 @@ class Core {
         }
     }
 
-
     /**
      * From String, trims white space, converts to uppercase and returns sub string of 2 characters
      * @param  {String} s
@@ -153,7 +151,7 @@ class Core {
     }
 
     /**
-     * Adds new speaker object with initial color to global core.speakerList from character
+     * Adds new speaker object with initial color to core.speakerList from character
      * @param  {Char} speaker
      */
     addSpeakerToSpeakerList(name) {
@@ -161,36 +159,23 @@ class Core {
     }
 
     /**
-     * Speaker and Path objects are separate due to how shapes are drawn in browser on Canvas element. Each speaker and path object can match/correspond to the same person but can also vary to allow for different number of movement files and speakers.
-     */
-
-    /**
-     * @param  {char} name // name of speaker
-     * @param  {color} color // color of speaker
-     * @param  {boolean} isShowing // if speaker is showing in GUI
+     * NOTE: Speaker and Path objects are separate due to how shapes are drawn in browser on Canvas element. Each speaker and path object can match/correspond to the same person but can also vary to allow for different number of movement files and speakers.
      */
     createSpeaker(name, color, isShowing) {
         return {
-            name,
-            color,
-            isShowing
+            name, // substring
+            color, // color
+            isShowing // boolean indicating if showing in GUI
         };
     }
 
-    /**
-     * @param  {char} name // Name of Path. Matches 1st letter of CSV file
-     * @param  {MovementPoint []} movement // Path is comprised of 2 arrays of MovementPoint and ConversationPoint objects
-     * @param  {ConversationPoint []} conversation
-     * @param  {color} color // color of Path
-     * @param  {boolean} isShowing // if speaker is showing in GUI
-     */
     createPath(name, movement, conversation, color, isShowing) {
         return {
-            name,
-            movement,
-            conversation,
-            color,
-            isShowing
+            name, // Char matches 1st letter of CSV file
+            movement, // Array of MovementPoint objects
+            conversation, // Array of ConversationPoint objects
+            color, // color
+            isShowing // boolean used to indicate if speaker showing in GUI
         }
     }
 
