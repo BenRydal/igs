@@ -2,7 +2,7 @@ class Core {
 
     constructor(sketch) {
         this.sk = sketch;
-        this.parsedMovementFiles = []; // List that holds objects containing a parsed results.data array and character letter indicating path name from Papa Parsed CSV file
+        this.parsedMovementFileData = []; // List that holds objects containing a parsed results.data array and character letter indicating path name from Papa Parsed CSV file
         this.parsedConversationArray = []; // List that holds a parsed results.data array from Papa parsed conversation CSV file
         this.speakerList = []; // List that holds Speaker objects parsed from conversation file
         this.paths = []; // List of path objects
@@ -54,7 +54,7 @@ class Core {
     }
 
     /** 
-     * Organizes methods to process and update core parsedMovementFiles []
+     * Organizes methods to process and update core parsedMovementFileData []
      * @param {Integer} fileNum
      * @param {PapaParse Results []} results
      * @param {CSV} file
@@ -66,7 +66,7 @@ class Core {
         const pathName = file.name.charAt(0).toUpperCase(); // get name of path, also used to test if associated speaker in conversation file
         this.updatePaths(pathName, movementPointArray, conversationPointArray);
         this.updateTotalTime(movementPointArray);
-        this.parsedMovementFiles.push({
+        this.parsedMovementFileData.push({
             parsedMovementArray: parsedMovementArray,
             firstCharOfFileName: pathName
         }); // add results and pathName to core []
@@ -207,7 +207,7 @@ class Core {
     }
 
     clearMovementData() {
-        this.parsedMovementFiles = [];
+        this.parsedMovementFileData = [];
         this.paths = [];
         this.totalTimeInSeconds = 0; // reset total time
     }

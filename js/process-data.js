@@ -110,13 +110,13 @@ class ProcessData {
         console.log("Parsing complete:", results, file);
         if (this.sk.testData.conversationResults(results)) {
             this.sk.core.updateConversation(results.data);
-            this.reProcessMovementFiles(this.sk.core.parsedMovementFiles); // must reprocess movement
+            this.reProcessMovementFiles(this.sk.core.parsedMovementFileData); // must reprocess movement
         } else alert("Error loading conversation file. Please make sure your file is a .CSV file formatted with column headers: " + this.sk.testData.CSVHEADERS_CONVERSATION.toString());
 
     }
 
-    reProcessMovementFiles(parsedMovementFiles) {
-        for (const index of parsedMovementFiles) {
+    reProcessMovementFiles(parsedMovementFileData) {
+        for (const index of parsedMovementFileData) {
             const [movementPointArray, conversationPointArray] = this.createPointArrays(index.parsedMovementArray, this.sk.core.parsedConversationArray);
             this.sk.core.updatePaths(index.firstCharOfFileName, movementPointArray, conversationPointArray);
         }
