@@ -2,8 +2,8 @@ class Core {
 
     constructor(sketch) {
         this.sk = sketch;
-        this.movementFileResults = []; // List that holds objects containing a parsed results.data array and character letter indicating path name from Papa Parsed file
-        this.conversationDataArray = []; // List that holds a results array and file data from a parsed conversation .CSV file
+        this.parsedMovementFiles = []; // List that holds objects containing a parsed results.data array and character letter indicating path name from Papa Parsed file
+        this.parsedConversationArray = []; // List that holds a results array and file data from a parsed conversation .CSV file
         this.speakerList = []; // List that holds Speaker objects parsed from conversation file
         this.paths = []; // List that holds path objects for each unique set of movement and conversation points constructed from parsed conversation and movement .CSV files
         this.floorPlan = {
@@ -54,42 +54,42 @@ class Core {
     }
 
     /** 
-     * Organizes methods to process and update core movementFileResults []
+     * Organizes methods to process and update core parsedMovementFiles []
      * @param {Integer} fileNum
      * @param {PapaParse Results []} results
      * @param {CSV} file
      * @param {[]]} MovementPoints
      * @param {[]]} ConversationPoints
      */
-    updateMovement(fileNum, movementDataArray, file, movement, conversation) {
+    updateMovement(fileNum, parsedMovementArray, file, movementPointArray, conversationPointArray) {
         if (fileNum === 0) this.clearMovementData(); // clear existing movement data for first new file only
         const pathName = file.name.charAt(0).toUpperCase(); // get name of path, also used to test if associated speaker in conversation file
-        this.updatePaths(pathName, movement, conversation);
-        this.updateTotalTime(movement);
-        this.movementFileResults.push({
-            resultsDataArray: movementDataArray,
-            filenameChars: pathName
+        this.updatePaths(pathName, movementPointArray, conversationPointArray);
+        this.updateTotalTime(movementPointArray);
+        this.parsedMovementFiles.push({
+            parsedMovementArray: parsedMovementArray,
+            firstCharOfFileName: pathName
         }); // add results and pathName to core []
         this.sk.sketchController.startLoop(); // rerun P5 draw loop
     }
 
     /**
      * Adds new Path object to and sorts core paths []. Also updates time in seconds in program 
-     * @param  {char} letterName
+     * @param  {char} pathName
      * @param  {MovementPoint []} movement
      * @param  {ConversationPoint []} conversation
      */
-    updatePaths(letterName, movement, conversation) {
+    updatePaths(pathName, movementPointArray, conversationPointArray) {
         let curPathColor;
-        if (this.sk.testData.arrayIsLoaded(this.speakerList)) curPathColor = this.setPathColorBySpeaker(letterName); // if conversation file loaded, send to method to calculate color
+        if (this.sk.testData.arrayIsLoaded(this.speakerList)) curPathColor = this.setPathColorBySpeaker(pathName); // if conversation file loaded, send to method to calculate color
         else curPathColor = this.COLOR_LIST[this.paths.length % this.COLOR_LIST.length]; // if no conversation file loaded path color is next in Color list
-        this.paths.push(this.createPath(letterName, movement, conversation, curPathColor, true));
+        this.paths.push(this.createPath(pathName, movementPointArray, conversationPointArray, curPathColor, true));
         this.paths.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching core.speakerList array
     }
 
 
-    updateTotalTime(movement) {
-        const curPathEndTime = Math.floor(movement[movement.length - 1].time);
+    updateTotalTime(movementPointArray) {
+        const curPathEndTime = Math.floor(movementPointArray[movementPointArray.length - 1].time);
         if (this.totalTimeInSeconds < curPathEndTime) this.totalTimeInSeconds = curPathEndTime; // update global total time, make sure to floor value as integer
     }
 
@@ -120,10 +120,10 @@ class Core {
     /**
      *  @param  {PapaParse Results []} results
      */
-    updateConversation(results) {
+    updateConversation(parsedConversationArray) {
         this.clearConversationData(); // clear existing conversation data
-        this.conversationDataArray = results.data; // set to new array of keyed values
-        this.updateSpeakerList();
+        this.parsedConversationArray = parsedConversationArray; // set to new array of keyed values
+        this.updateSpeakerList(this.parsedConversationArray);
         this.speakerList.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching core.paths array
         this.sk.sketchController.startLoop(); // rerun P5 draw loop
     }
@@ -131,13 +131,13 @@ class Core {
     /**
      * Updates core speaker list from conversation file data/results
      */
-    updateSpeakerList() {
-        for (let i = 0; i < this.conversationDataArray.length; i++) {
+    updateSpeakerList(parsedConversationArray) {
+        for (let i = 0; i < parsedConversationArray.length; i++) {
             let tempSpeakerList = []; // create/populate temp list to store strings to test from global core.speakerList
             for (const tempSpeaker of this.speakerList) tempSpeakerList.push(tempSpeaker.name);
             // If row is good data, test if core.speakerList already has speaker and if not add speaker 
-            if (this.sk.testData.conversationLengthAndRowForType(this.conversationDataArray, i)) {
-                const speaker = this.cleanSpeaker(this.conversationDataArray[i][this.sk.testData.CSVHEADERS_CONVERSATION[1]]); // get cleaned speaker character
+            if (this.sk.testData.conversationLengthAndRowForType(parsedConversationArray, i)) {
+                const speaker = this.cleanSpeaker(parsedConversationArray[i][this.sk.testData.CSVHEADERS_CONVERSATION[1]]); // get cleaned speaker character
                 if (!tempSpeakerList.includes(speaker)) this.addSpeakerToSpeakerList(speaker);
             }
         }
@@ -148,8 +148,8 @@ class Core {
      * From String, trims white space, converts to uppercase and returns sub string of 2 characters
      * @param  {String} s
      */
-    cleanSpeaker(s) {
-        return s.trim().toUpperCase().substring(0, 2);
+    cleanSpeaker(string) {
+        return string.trim().toUpperCase().substring(0, 2);
     }
 
     /**
@@ -216,13 +216,13 @@ class Core {
     }
 
     clearConversationData() {
-        this.conversationDataArray = [];
+        this.parsedConversationArray = [];
         this.speakerList = [];
         this.paths = [];
     }
 
     clearMovementData() {
-        this.movementFileResults = [];
+        this.parsedMovementFiles = [];
         this.paths = [];
         this.totalTimeInSeconds = 0; // reset total time
     }

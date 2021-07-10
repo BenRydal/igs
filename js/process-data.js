@@ -85,8 +85,8 @@ class ProcessData {
     processMovementFile(results, file, fileNum) {
         console.log("Parsing complete:", results, file);
         if (this.sk.testData.movementResults(results)) {
-            const [movement, conversation] = this.createMovementConversationArrays(results.data, this.sk.core.conversationDataArray);
-            this.sk.core.updateMovement(fileNum, results.data, file, movement, conversation);
+            const [movementPointArray, conversationPointArray] = this.createPointArrays(results.data, this.sk.core.parsedConversationArray);
+            this.sk.core.updateMovement(fileNum, results.data, file, movementPointArray, conversationPointArray);
         } else alert("Error loading movement file. Please make sure your file is a .CSV file formatted with column headers: " + this.sk.testData.CSVHEADERS_MOVEMENT.toString());
     }
 
@@ -109,16 +109,16 @@ class ProcessData {
     processConversationFile(results, file) {
         console.log("Parsing complete:", results, file);
         if (this.sk.testData.conversationResults(results)) {
-            this.sk.core.updateConversation(results);
-            this.reProcessMovementFiles(this.sk.core.movementFileResults); // must reprocess movement
+            this.sk.core.updateConversation(results.data);
+            this.reProcessMovementFiles(this.sk.core.parsedMovementFiles); // must reprocess movement
         } else alert("Error loading conversation file. Please make sure your file is a .CSV file formatted with column headers: " + this.sk.testData.CSVHEADERS_CONVERSATION.toString());
 
     }
 
-    reProcessMovementFiles(movementFileResults) {
-        for (const index of movementFileResults) {
-            const [movement, conversation] = this.createMovementConversationArrays(index.resultsDataArray, this.sk.core.conversationDataArray);
-            this.sk.core.updatePaths(index.filenameChars, movement, conversation);
+    reProcessMovementFiles(parsedMovementFiles) {
+        for (const index of parsedMovementFiles) {
+            const [movementPointArray, conversationPointArray] = this.createPointArrays(index.parsedMovementArray, this.sk.core.parsedConversationArray);
+            this.sk.core.updatePaths(index.firstCharOfFileName, movementPointArray, conversationPointArray);
         }
     }
 
@@ -127,26 +127,26 @@ class ProcessData {
      * Location data for conversation array is drawn from comparison to movement file/results data
      *  @param  {PapaParse Results []} results
      */
-    createMovementConversationArrays(movementDataArray, conversationDataArray) {
-        let movement = []; // Create empty arrays to hold MovementPoint and ConversationPoint objects
-        let conversation = [];
+    createPointArrays(parsedMovementArray, parsedConversationArray) {
+        let movementPointArray = []; // Create empty arrays to hold MovementPoint and ConversationPoint objects
+        let conversationPointArray = [];
         let conversationCounter = 0; // Current row count of conversation file for comparison
-        for (let i = 0; i < movementDataArray.length; i++) {
+        for (let i = 0; i < parsedMovementArray.length; i++) {
             // Sample current movement row and test if row is good data
-            if (this.sk.testData.sampleMovementData(movementDataArray, i) && this.sk.testData.movementRowForType(movementDataArray, i)) {
-                const m = this.createMovementPoint(movementDataArray[i][this.sk.testData.CSVHEADERS_MOVEMENT[1]], movementDataArray[i][this.sk.testData.CSVHEADERS_MOVEMENT[2]], movementDataArray[i][this.sk.testData.CSVHEADERS_MOVEMENT[0]]);
-                movement.push(m); // add good data to movement []
+            if (this.sk.testData.sampleMovementData(parsedMovementArray, i) && this.sk.testData.movementRowForType(parsedMovementArray, i)) {
+                const m = this.createMovementPoint(parsedMovementArray[i][this.sk.testData.CSVHEADERS_MOVEMENT[1]], parsedMovementArray[i][this.sk.testData.CSVHEADERS_MOVEMENT[2]], parsedMovementArray[i][this.sk.testData.CSVHEADERS_MOVEMENT[0]]);
+                movementPointArray.push(m); // add good data to movement []
                 // Test conversation data row for quality first and then compare movement and conversation times to see if closest movement data to conversation time
-                if (this.sk.testData.conversationLengthAndRowForType(conversationDataArray, conversationCounter) && m.time >= conversationDataArray[conversationCounter][this.sk.testData.CSVHEADERS_CONVERSATION[0]]) {
-                    const curTalkTimePos = conversationDataArray[conversationCounter][this.sk.testData.CSVHEADERS_CONVERSATION[0]];
-                    const curSpeaker = this.sk.core.cleanSpeaker(conversationDataArray[conversationCounter][this.sk.testData.CSVHEADERS_CONVERSATION[1]]);
-                    const curTalkTurn = conversationDataArray[conversationCounter][this.sk.testData.CSVHEADERS_CONVERSATION[2]];
-                    conversation.push(this.createConversationPoint(m.xPos, m.yPos, curTalkTimePos, curSpeaker, curTalkTurn));
+                if (this.sk.testData.conversationLengthAndRowForType(parsedConversationArray, conversationCounter) && m.time >= parsedConversationArray[conversationCounter][this.sk.testData.CSVHEADERS_CONVERSATION[0]]) {
+                    const curTalkTimePos = parsedConversationArray[conversationCounter][this.sk.testData.CSVHEADERS_CONVERSATION[0]];
+                    const curSpeaker = this.sk.core.cleanSpeaker(parsedConversationArray[conversationCounter][this.sk.testData.CSVHEADERS_CONVERSATION[1]]);
+                    const curTalkTurn = parsedConversationArray[conversationCounter][this.sk.testData.CSVHEADERS_CONVERSATION[2]];
+                    conversationPointArray.push(this.createConversationPoint(m.xPos, m.yPos, curTalkTimePos, curSpeaker, curTalkTurn));
                     conversationCounter++;
-                } else if (!this.sk.testData.conversationLengthAndRowForType(conversationDataArray, conversationCounter)) conversationCounter++; // make sure to increment counter if bad data to skip row in next iteration of loop
+                } else if (!this.sk.testData.conversationLengthAndRowForType(parsedConversationArray, conversationCounter)) conversationCounter++; // make sure to increment counter if bad data to skip row in next iteration of loop
             }
         }
-        return [movement, conversation];
+        return [movementPointArray, conversationPointArray];
     }
 
     /**
