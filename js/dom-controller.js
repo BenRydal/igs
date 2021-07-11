@@ -46,18 +46,24 @@ class DomController {
 
     handleClearButton() {
         this.sk.core.clearAllData();
+        this.sk.sketchController.startLoop(); // rerun P5 draw loop
     }
 
     handleAnimateButton() {
         this.sk.sketchController.updateAnimationCounter();
+        this.sk.sketchController.startLoop();
     }
 
     handleAlignTalkButton() {
         this.sk.sketchController.setAlignTalk(!this.sk.sketchController.mode.isAlignTalk);
+        this.sk.sketchController.startLoop();
+
     }
 
     handleAllTalkButton() {
         this.sk.sketchController.setAllTalk(!this.sk.sketchController.mode.isAllTalk);
+        this.sk.sketchController.startLoop();
+
     }
 
     handleVideoButton() {
@@ -66,6 +72,7 @@ class DomController {
 
     handleHowToButton() {
         this.sk.sketchController.setIntro(!this.sk.sketchController.mode.isIntro);
+        this.sk.sketchController.startLoop();
     }
 
     /**
@@ -119,6 +126,7 @@ class DomController {
     loadUserData() {
         this.sk.sketchController.setIntro(false); // Hide intro msg if showing
         this.sk.core.clearAllData();
+        this.sk.sketchController.startLoop(); // rerun P5 draw loop
     }
 
     /**

@@ -184,7 +184,6 @@ class Core {
         this.clearFloorPlan();
         this.clearConversationData();
         this.clearMovementData();
-        this.sk.sketchController.startLoop(); // rerun P5 draw loop
     }
 
     clearVideo() {
