@@ -7,7 +7,7 @@ class DrawDataMovement {
             yPos: null,
             timePos: null,
             size: this.sk.width / 50,
-            lengthToCompare: this.sk.keys.timeline.length // used to compare data points to find closest bug value
+            lengthToCompare: this.sk.width // used to compare data points to find closest bug value
         };
         this.smallPathWeight = 3;
         this.largePathWeight = 6;
@@ -141,7 +141,7 @@ class DrawDataMovement {
         this.bug.xPos = null;
         this.bug.yPos = null;
         this.bug.timePos = null;
-        this.bug.lengthToCompare = this.sk.keys.timeline.length;
+        this.bug.lengthToCompare = this.sk.width;
     }
 
     recordBug(timePos, xPos, yPos, lengthToCompare) {
@@ -307,32 +307,3 @@ class DrawDataConversation {
         return textBox;
     }
 }
-
-/**
- * Simplest drawing method.
- * Draws movement path with no change in this.sk.stroke color or weight
- * @param  {Integer} view
- * @param  {Path} path
- * @param  {Color} shade
- */
-// draw(view, points, shade) {
-//     this.sk.strokeWeight(pathWeight);
-//     this.sk.stroke(shade);
-//     this.sk.noFill(); // important for curve drawing
-//     this.sk.beginShape();
-//     for (let i = 0; i < points.length; i++) {
-//         let point = points[i];
-//         let pixelTime = map(point.time, 0, core.totalTimeInSeconds, this.sk.keys.timeline.start, this.sk.keys.timeline.end);
-//         let scaledTime = map(pixelTime, this.sk.keys.timeline.selectStart, this.sk.keys.timeline.selectEnd, this.sk.keys.timeline.start, this.sk.keys.timeline.end);
-//         let scaledXPos = point.xPos * this.sk.keys.floorPlan.width / core.inputFloorPlanPixelWidth; // scale to floor plan image file
-//         let scaledYPos = point.yPos * this.sk.keys.floorPlan.height / core.inputFloorPlanPixelHeight; // scale to floor plan image file
-//         if (this.sk.keys.overTimelineAxis(pixelTime) && this.sk.keys.overFloorPlan(scaledXPos, scaledYPos) && this.sk.keys.testAnimation(pixelTime)) {
-//             if (view == this.sk.PLAN) this.sk.curveVertex(scaledXPos, scaledYPos);
-//             else if (view == this.sk.SPACETIME) {
-//                 this.sk.curveVertex(scaledTime, scaledYPos);
-//                 this.testPointForBug(scaledTime, scaledXPos, scaledYPos);
-//             }
-//         }
-//     }
-//     this.sk.endShape();
-// }
