@@ -25,7 +25,7 @@
     background-color: white;
     display: inline-block;
     border: 1px solid black;
-    padding: 2px;
+    padding: 5px;
 }
 
 .inputfile:focus+label,

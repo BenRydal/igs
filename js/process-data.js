@@ -1,52 +1,125 @@
 class ProcessData {
 
-    /**
-     * Creates P5 image file from path and updates core floorPlan image and input width/heights to properly scale and display data
-     * @param  {String} filePath
-     */
-    processFloorPlan(filePath) {
-        loadImage(filePath, img => {
-            console.log("Floor Plan Image Loaded");
-            loop(); // rerun P5 draw loop after loading image
-            core.floorPlan = img;
-            core.inputFloorPlanPixelWidth = core.floorPlan.width;
-            core.inputFloorPlanPixelHeight = core.floorPlan.height;
-            img.onload = function () {
-                URL.revokeObjectURL(this.src);
-            }
-        }, e => {
-            alert("Error loading floor plan image file. Please make sure it is correctly formatted as a PNG or JPG image file.")
-            console.log(e);
-        });
+    constructor(sketch) {
+        this.sk = sketch;
     }
 
     /**
-     * Replaces existing videoPlayer object with new VideoPlayer object (YouTube or P5FilePlayer)
-     * @param  {String} platform
-     * @param  {VideoPlayer Specific Params} params
+     * Prepare for parsing. Important for binding this to callback
+     * @param  {.CSV File[]} fileList
      */
-    processVideo(platform, params) {
-        if (testData.dataIsLoaded(videoPlayer)) videoPlayer.destroy();
-        switch (platform) {
-            case "Youtube":
-                videoPlayer = new YoutubePlayer(params);
-                break;
-            case "File":
-                videoPlayer = new P5FilePlayer(params);
-                break;
+    prepMovementFiles(fileList) {
+        this.parseMovementFiles(fileList, this.processMovementFile.bind(this));
+    }
+
+    /**
+     * Prepare for parsing. Important for binding this to callback
+     * @param  {.CSV File} file
+     */
+    prepConversationFile(file) {
+        this.parseConversationFile(file, this.processConversationFile.bind(this));
+
+    }
+
+    /**
+     * Handles async loading of movement files. NOTE: folder and filename are separated for convenience later in program
+     * @param  {String} folder
+     * @param  {String} fileNames
+     */
+    async prepExampleMovementFiles(folder, fileNames) {
+        try {
+            let fileList = [];
+            for (const name of fileNames) {
+                const response = await fetch(new Request(folder + name));
+                const buffer = await response.arrayBuffer();
+                fileList.push(new File([buffer], name, {
+                    type: "text/csv",
+                }));
+            }
+            // parse file after retrieval, maintain correct this context on callback with bind
+            this.parseMovementFiles(fileList, this.processMovementFile.bind(this));
+        } catch (error) {
+            alert("Error loading example movement data. Please make sure you have a good internet connection")
+            console.log(error);
         }
     }
 
-    /** 
-     * Organizes methods to process and update core movementFileResults []
-     * @param  {PapaParse Results []} results
-     * @param {CSV} file
+    /**
+     * Handles async loading of conversation file. NOTE: folder and filename are separated for convenience later in program
+     * @param  {String} folder
+     * @param  {String} fileName
      */
-    processMovement(results, file) {
-        const pathName = file.name.charAt(0).toUpperCase(); // get name of path, also used to test if associated speaker in conversation file
-        const [movement, conversation] = this.createMovementConversationArrays(results); //
-        this.updatePaths(pathName, movement, conversation);
-        core.movementFileResults.push([results, pathName]); // add results and pathName to core []
+    async prepExampleConversationFile(folder, fileName) {
+        try {
+            const response = await fetch(new Request(folder + fileName));
+            const buffer = await response.arrayBuffer();
+            const file = new File([buffer], fileName, {
+                type: "text/csv",
+            });
+            // parse file after retrieval, maintain correct this context on callback with bind
+            this.parseConversationFile(file, this.processConversationFile.bind(this));
+        } catch (error) {
+            alert("Error loading example conversation data. Please make sure you have a good internet connection")
+            console.log(error);
+        }
+    }
+
+    /**
+     * Parse input files and send to processData method
+     * @param  {.CSV File[]} fileList
+     */
+    parseMovementFiles(fileList, callback) {
+        for (let fileNum = 0; fileNum < fileList.length; fileNum++) {
+            Papa.parse(fileList[fileNum], {
+                complete: (results, file) => callback(results, file, fileNum),
+                error: (error, file) => {
+                    alert("Parsing error with your movement file. Please make sure your file is formatted correctly as a .CSV");
+                    console.log(error, file);
+                },
+                header: true,
+                dynamicTyping: true,
+            });
+        }
+    }
+
+    processMovementFile(results, file, fileNum) {
+        console.log("Parsing complete:", results, file);
+        if (this.sk.testData.movementResults(results)) {
+            const [movementPointArray, conversationPointArray] = this.createPointArrays(results.data, this.sk.core.parsedConversationArray);
+            this.sk.core.updateMovement(fileNum, results.data, file, movementPointArray, conversationPointArray);
+        } else alert("Error loading movement file. Please make sure your file is a .CSV file formatted with column headers: " + this.sk.testData.CSVHEADERS_MOVEMENT.toString());
+    }
+
+    /**
+     * Parse input files and send to processData method
+     * @param  {.CSV File} file
+     */
+    parseConversationFile(file, callback) {
+        Papa.parse(file, {
+            complete: (results, parsedFile) => callback(results, parsedFile),
+            error: (error, parsedFile) => {
+                alert("Parsing error with your conversation file. Please make sure your file is formatted correctly as a .CSV");
+                console.log(error, parsedFile);
+            },
+            header: true,
+            dynamicTyping: true,
+        });
+    }
+
+    processConversationFile(results, file) {
+        console.log("Parsing complete:", results, file);
+        if (this.sk.testData.conversationResults(results)) {
+            this.sk.core.updateConversation(results.data);
+            this.reProcessMovementFiles(this.sk.core.parsedMovementFileData); // must reprocess movement
+        } else alert("Error loading conversation file. Please make sure your file is a .CSV file formatted with column headers: " + this.sk.testData.CSVHEADERS_CONVERSATION.toString());
+
+    }
+
+    reProcessMovementFiles(parsedMovementFileData) {
+        for (const index of parsedMovementFileData) {
+            const [movementPointArray, conversationPointArray] = this.createPointArrays(index.parsedMovementArray, this.sk.core.parsedConversationArray);
+            this.sk.core.updatePaths(index.firstCharOfFileName, movementPointArray, conversationPointArray);
+        }
     }
 
     /**
@@ -54,110 +127,49 @@ class ProcessData {
      * Location data for conversation array is drawn from comparison to movement file/results data
      *  @param  {PapaParse Results []} results
      */
-    createMovementConversationArrays(results) {
-        let movement = []; // Create empty arrays to hold MovementPoint and ConversationPoint objects
-        let conversation = [];
+    createPointArrays(parsedMovementArray, parsedConversationArray) {
+        let movementPointArray = []; // Create empty arrays to hold MovementPoint and ConversationPoint objects
+        let conversationPointArray = [];
         let conversationCounter = 0; // Current row count of conversation file for comparison
-        for (let i = 0; i < results.data.length; i++) {
+        for (let i = 0; i < parsedMovementArray.length; i++) {
             // Sample current movement row and test if row is good data
-            if (testData.sampleMovementData(results.data, i) && testData.movementRowForType(results.data, i)) {
-                const m = core.createMovementPoint(results.data[i][CSVHEADERS_MOVEMENT[1]], results.data[i][CSVHEADERS_MOVEMENT[2]], results.data[i][CSVHEADERS_MOVEMENT[0]]);
-                movement.push(m); // add good data to movement []
+            if (this.sk.testData.sampleMovementData(parsedMovementArray, i) && this.sk.testData.movementRowForType(parsedMovementArray, i)) {
+                const m = this.createMovementPoint(parsedMovementArray[i][this.sk.testData.CSVHEADERS_MOVEMENT[1]], parsedMovementArray[i][this.sk.testData.CSVHEADERS_MOVEMENT[2]], parsedMovementArray[i][this.sk.testData.CSVHEADERS_MOVEMENT[0]]);
+                movementPointArray.push(m); // add good data to movement []
                 // Test conversation data row for quality first and then compare movement and conversation times to see if closest movement data to conversation time
-                if (testData.conversationLengthAndRowForType(conversationCounter) && m.time >= core.conversationFileResults[conversationCounter][CSVHEADERS_CONVERSATION[0]]) {
-                    const curTalkTimePos = core.conversationFileResults[conversationCounter][CSVHEADERS_CONVERSATION[0]];
-                    const curSpeaker = this.cleanSpeaker(core.conversationFileResults[conversationCounter][CSVHEADERS_CONVERSATION[1]]);
-                    const curTalkTurn = core.conversationFileResults[conversationCounter][CSVHEADERS_CONVERSATION[2]];
-                    conversation.push(core.createConversationPoint(m.xPos, m.yPos, curTalkTimePos, curSpeaker, curTalkTurn));
+                if (this.sk.testData.conversationLengthAndRowForType(parsedConversationArray, conversationCounter) && m.time >= parsedConversationArray[conversationCounter][this.sk.testData.CSVHEADERS_CONVERSATION[0]]) {
+                    const curTalkTimePos = parsedConversationArray[conversationCounter][this.sk.testData.CSVHEADERS_CONVERSATION[0]];
+                    const curSpeaker = this.sk.core.cleanSpeaker(parsedConversationArray[conversationCounter][this.sk.testData.CSVHEADERS_CONVERSATION[1]]);
+                    const curTalkTurn = parsedConversationArray[conversationCounter][this.sk.testData.CSVHEADERS_CONVERSATION[2]];
+                    conversationPointArray.push(this.createConversationPoint(m.xPos, m.yPos, curTalkTimePos, curSpeaker, curTalkTurn));
                     conversationCounter++;
-                } else if (!testData.conversationLengthAndRowForType(conversationCounter)) conversationCounter++; // make sure to increment counter if bad data to skip row in next iteration of loop
+                } else if (!this.sk.testData.conversationLengthAndRowForType(parsedConversationArray, conversationCounter)) conversationCounter++; // make sure to increment counter if bad data to skip row in next iteration of loop
             }
         }
-        return [movement, conversation];
+        return [movementPointArray, conversationPointArray];
     }
 
     /**
-     * Adds new Path object to and sorts core paths []. Also updates time in seconds in program 
-     * @param  {char} letterName
-     * @param  {MovementPoint []} movement
-     * @param  {ConversationPoint []} conversation
+     * Represents a location in space and time along a path
      */
-    updatePaths(letterName, movement, conversation) {
-        let curPathColor;
-        if (testData.dataIsLoaded(core.speakerList)) curPathColor = this.setPathColorBySpeaker(letterName); // if conversation file loaded, send to method to calculate color
-        else curPathColor = COLOR_LIST[core.paths.length % COLOR_LIST.length]; // if no conversation file loaded path color is next in Color list
-        let p = core.createPath(letterName, movement, conversation, curPathColor, true); // initialize with name, movement [] and conversation []
-        core.paths.push(p);
-        core.paths.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching core.speakerList array
-        const curPathEndTime = Math.floor(movement[movement.length - 1].time);
-        if (core.totalTimeInSeconds < curPathEndTime) core.totalTimeInSeconds = curPathEndTime; // update global total time, make sure to floor value as integer
-    }
-
-    /**
-     * If path has corresponding speaker, returns color that matches speaker
-     * Otherwise returns color from global COLOR_LIST based on num of speakers + numOfPaths that do not have corresponding speaker
-     * @param  {char} pathName
-     */
-    setPathColorBySpeaker(pathName) {
-        if (core.speakerList.some(e => e.name === pathName)) {
-            const hasSameName = (element) => element.name === pathName; // condition to satisfy/does it have pathName
-            return core.speakerList[core.speakerList.findIndex(hasSameName)].color; // returns first index that satisfies condition/index of speaker that matches pathName
-        } else return COLOR_LIST[core.speakerList.length + this.getNumPathsWithNoSpeaker() % COLOR_LIST.length]; // assign color to path
-    }
-
-    /**
-     * Returns number of movement Paths that do not have corresponding speaker
-     */
-    getNumPathsWithNoSpeaker() {
-        let count = 0;
-        for (let i = 0; i < core.paths.length; i++) {
-            if (!core.speakerList.some(e => e.name === core.paths[i].name)) count++;
-        }
-        return count;
-    }
-
-    /** 
-     * Organizes methods to process and update conversationFileResults
-     * @param  {PapaParse Results []} results
-     */
-    processConversation(results) {
-        core.conversationFileResults = results.data; // set to new array of keyed values
-        this.updateSpeakerList();
-        core.speakerList.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching core.paths array
-        // Reprocess existing movement files
-        for (let i = 0; i < core.movementFileResults.length; i++) {
-            const [movement, conversation] = this.createMovementConversationArrays(core.movementFileResults[i][0]); // Reprocess movement file results
-            this.updatePaths(core.movementFileResults[i][1], movement, conversation); // Pass movement file pathname and reprocessed movement file results to updatepaths
+    createMovementPoint(xPos, yPos, time) {
+        return {
+            xPos, // Float x and y pixel positions on floor plan
+            yPos,
+            time // Float time value in seconds
         }
     }
 
     /**
-     * Updates core speaker list from conversation file data/results
+     * Represents a single conversation turn with a location in space and time, text values, name of a speaker, and what they said
      */
-    updateSpeakerList() {
-        for (let i = 0; i < core.conversationFileResults.length; i++) {
-            let tempSpeakerList = []; // create/populate temp list to store strings to test from global core.speakerList
-            for (let j = 0; j < core.speakerList.length; j++) tempSpeakerList.push(core.speakerList[j].name);
-            // If row is good data, test if core.speakerList already has speaker and if not add speaker 
-            if (testData.conversationLengthAndRowForType(i)) {
-                const speaker = this.cleanSpeaker(core.conversationFileResults[i][CSVHEADERS_CONVERSATION[1]]); // get cleaned speaker character
-                if (!tempSpeakerList.includes(speaker)) this.addSpeakerToSpeakerList(speaker);
-            }
+    createConversationPoint(xPos, yPos, time, speaker, talkTurn) {
+        return {
+            xPos, // Float x and y pixel positions on floor plan
+            yPos,
+            time, // Float Time value in seconds
+            speaker, // String name of speaker
+            talkTurn // String text of conversation turn
         }
-    }
-    /**
-     * From String, trims white space, converts to uppercase and returns sub string of 2 characters
-     * @param  {String} s
-     */
-    cleanSpeaker(s) {
-        return s.trim().toUpperCase().substring(0, 2);
-    }
-
-    /**
-     * Adds new speaker object with initial color to global core.speakerList from character
-     * @param  {Char} speaker
-     */
-    addSpeakerToSpeakerList(name) {
-        core.speakerList.push(core.createSpeaker(name, COLOR_LIST[core.speakerList.length % COLOR_LIST.length], true));
     }
 }

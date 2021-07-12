@@ -1,183 +1,251 @@
 class Keys {
 
-    constructor() {
-        this.timelineStart = width * 0.4638;
-        this.timelineEnd = width * 0.9638;
-        this.tickHeight = 25;
-        this.curPixelTimeMin = this.timelineStart; // adjustable timeline values
-        this.curPixelTimeMax = this.timelineEnd;
-        this.timelineLength = this.timelineEnd - this.timelineStart;
-        this.timelineHeight = height * .81;
-        this.displayFloorPlanWidth = this.timelineStart - (width - this.timelineEnd);
-        this.displayFloorPlanHeight = this.timelineHeight;
-        this.yPosTimelineTop = this.timelineHeight - this.tickHeight;
-        this.yPosTimelineBottom = this.timelineHeight + this.tickHeight;
-        this.timelineThickness = this.yPosTimelineBottom - this.yPosTimelineTop;
-        this.buttonSpacing = width / 71;
-        this.buttonWidth = this.buttonSpacing;
-        this.speakerKeysHeight = this.timelineHeight + (height - this.timelineHeight) / 4;
-        this.buttonsHeight = this.timelineHeight + (height - this.timelineHeight) / 1.8;
-        this.keyTextSize = width / 70;
-        this.floorPlanCursorSelectSize = 100;
-        this.font_PlayfairReg = loadFont("data/fonts/PlayfairDisplay-Regular.ttf");
-        this.font_PlayfairItalic = loadFont("data/fonts/PlayfairDisplay-Italic.ttf");
+    constructor(sketch) {
+        this.sk = sketch;
+        this.timeline = {
+            start: this.sk.width * 0.4638,
+            end: this.sk.width * 0.9638,
+            selectStart: this.sk.width * 0.4638,
+            selectEnd: this.sk.width * 0.9638,
+            spacing: 25,
+            padding: 20,
+            doublePadding: 40,
+            length: this.sk.width * 0.9638 - this.sk.width * 0.4638,
+            height: this.sk.height * .81,
+            top: this.sk.height * .81 - 25,
+            bottom: this.sk.height * .81 + 25,
+            thickness: 50,
+            isLockedLeft: false,
+            isLockedRight: false
+        }
+        this.floorPlan = {
+            width: this.timeline.start - (this.sk.width - this.timeline.end),
+            height: this.timeline.height,
+            selectorSize: 100
+        }
+        this.panel = {
+            titleHeight: this.timeline.bottom + (this.timeline.height / 40),
+            keyHeight: this.timeline.bottom + (this.timeline.height / 12),
+            xPos: this.timeline.start,
+            spacing: this.sk.width / 71,
+            isMovement: true // toggle between showing movement/conversation keys
+        }
+        this.keyTextSize = this.sk.width / 70;
+        this.introMsg = "INTERACTION GEOGRAPHY SLICER (IGS)\n\nby Ben Rydal Shapiro & contributors\nbuilt with p5.js & JavaScript\n\nHi There! This is a tool to visualize movement, conversation, and video data over space and time. Data are displayed over a floor plan view (left) and a space-time view (right), where the vertical axis corresponds to the vertical dimension of the floor plan. Use the top menu to visualize different sample datasets or upload your own data. Hover over the floor plan and use the timeline to selectively study displayed data. Use the top buttons to animate data, visualize conversation in different ways, and interact with video data by clicking anywhere in the space-time view to play & pause video. For more information see: benrydal.com/software/igs";
     }
 
-    drawKeys() {
-        textAlign(LEFT, TOP);
-        textFont(this.font_PlayfairReg, this.keyTextSize);
-        this.drawPathSpeakerTitle();
-        if (core.isModeMovement) this.drawPathSpeakerKeys(core.paths);
-        else this.drawPathSpeakerKeys(core.speakerList);
+    drawKeys(pathList, speakerList) {
+        this.sk.textAlign(this.sk.LEFT, this.sk.TOP);
+        this.sk.textSize(this.keyTextSize);
+        this.drawPanelTitles();
+        if (this.panel.isMovement) this.drawPanelKeys(pathList);
+        else this.drawPanelKeys(speakerList);
         this.drawTimeline();
-        this.drawButtons();
-        if (handlers.overRect(0, 0, this.displayFloorPlanWidth, this.displayFloorPlanHeight)) this.drawFloorPlanSelector();
-        if (core.isModeIntro) this.drawIntroMsg(); // draw intro message on program start up until mouse is pressed
+        if (this.overFloorPlan(this.sk.mouseX, this.sk.mouseY)) this.drawFloorPlanSelector();
+        if (this.overSpaceTimeView(this.sk.mouseX, this.sk.mouseY)) this.drawSlicer();
+        if (this.sk.sketchController.mode.isIntro) this.drawIntroMsg();
     }
 
-    drawPathSpeakerTitle() {
-        let currXPos = this.timelineStart;
-        let yPos = this.speakerKeysHeight - this.buttonWidth / 5;
-        noStroke();
-        fill(core.isModeMovement ? 0 : 150);
-        text("Movement", currXPos, yPos);
-        fill(0);
-        text(" | ", currXPos + textWidth("Movement"), yPos);
-        fill(!core.isModeMovement ? 0 : 150);
-        text("Conversation", currXPos + textWidth("Movement | "), yPos);
+    drawPanelTitles() {
+        this.sk.noStroke();
+        this.sk.fill(this.panel.isMovement ? 0 : 150);
+        this.sk.text("Movement", this.timeline.start, this.panel.titleHeight);
+        this.sk.fill(0);
+        this.sk.text(" | ", this.timeline.start + this.sk.textWidth("Movement"), this.panel.titleHeight);
+        this.sk.fill(!this.panel.isMovement ? 0 : 150);
+        this.sk.text("Conversation", this.timeline.start + this.sk.textWidth("Movement | "), this.panel.titleHeight);
     }
 
-    // Loop through speakers and set fill/stroke in keys for all if showing/not showing
-    drawPathSpeakerKeys(list) {
-        let currXPos = this.timelineStart + textWidth("Movement | Conversation") + this.buttonWidth;
-        let yPos = this.speakerKeysHeight - this.buttonWidth / 5;
-        strokeWeight(5);
-        for (let i = 0; i < list.length; i++) {
-            let curObject = list[i];
-            stroke(curObject.color);
-            noFill();
-            rect(currXPos, this.speakerKeysHeight, this.buttonWidth, this.buttonWidth);
-            if (curObject.show) {
-                fill(curObject.color);
-                rect(currXPos, this.speakerKeysHeight, this.buttonWidth, this.buttonWidth);
+    // Loop through speakers and set fill/stroke in this for all if showing/not showing
+    drawPanelKeys(list) {
+        let currXPos = this.panel.xPos;
+        this.sk.strokeWeight(5);
+        for (const person of list) {
+            this.sk.stroke(person.color);
+            this.sk.noFill();
+            this.sk.rect(currXPos, this.panel.keyHeight, this.panel.spacing, this.panel.spacing);
+            if (person.isShowing) {
+                this.sk.fill(person.color);
+                this.sk.rect(currXPos, this.panel.keyHeight, this.panel.spacing, this.panel.spacing);
             }
-            fill(0);
-            noStroke();
-            text(curObject.name, currXPos + 1.3 * this.buttonWidth, yPos);
-            currXPos += this.buttonWidth + textWidth(curObject.name) + this.buttonSpacing;
+            this.sk.fill(0);
+            this.sk.noStroke();
+            this.sk.text(person.name, currXPos + 1.3 * this.panel.spacing, this.panel.keyHeight);
+            currXPos += (2 * this.panel.spacing) + this.sk.textWidth(person.name);
         }
     }
 
-    drawButtons() {
-        let currXPos = this.timelineStart + this.buttonSpacing / 2;
-        fill(core.isModeAnimate ? 0 : 150);
-        // Button 1
-        text(BUTTON_NAMES[0], currXPos, this.buttonsHeight);
-        noFill();
-        stroke(core.isModeAnimate ? 0 : 150);
-        strokeWeight(1);
-        rect(currXPos - this.buttonSpacing / 2, this.buttonsHeight, textWidth(BUTTON_NAMES[0]) + this.buttonSpacing, this.buttonSpacing * 1.5);
-        noStroke();
-        currXPos += textWidth(BUTTON_NAMES[0]) + this.buttonSpacing * 2;
-        // Button 2
-        fill(core.isModeAlignTalkTop ? 0 : 150);
-        text(BUTTON_NAMES[1], currXPos, this.buttonsHeight);
-        noFill();
-        stroke(core.isModeAlignTalkTop ? 0 : 150);
-        strokeWeight(1);
-        rect(currXPos - this.buttonSpacing / 2, this.buttonsHeight, textWidth(BUTTON_NAMES[1]) + this.buttonSpacing, this.buttonSpacing * 1.5);
-        noStroke();
-        currXPos += textWidth(BUTTON_NAMES[1]) + this.buttonSpacing * 2;
-        // Button 3
-        fill(core.isModeAllTalkOnPath ? 0 : 150);
-        text(BUTTON_NAMES[2], currXPos, this.buttonsHeight);
-        noFill();
-        stroke(core.isModeAllTalkOnPath ? 0 : 150);
-        strokeWeight(1);
-        rect(currXPos - this.buttonSpacing / 2, this.buttonsHeight, textWidth(BUTTON_NAMES[2]) + this.buttonSpacing, this.buttonSpacing * 1.5);
-        noStroke();
-        currXPos += textWidth(BUTTON_NAMES[2]) + this.buttonSpacing * 2;
-        // Button 4
-        fill(core.isModeVideoShowing ? 0 : 150);
-        text(BUTTON_NAMES[3], currXPos, this.buttonsHeight);
-        noFill();
-        stroke(core.isModeVideoShowing ? 0 : 150);
-        strokeWeight(1);
-        rect(currXPos - this.buttonSpacing / 2, this.buttonsHeight, textWidth(BUTTON_NAMES[3]) + this.buttonSpacing, this.buttonSpacing * 1.5);
-        noStroke();
-        currXPos += textWidth(BUTTON_NAMES[3]) + this.buttonSpacing * 2;
-        // Button 5
-        textFont(this.font_PlayfairItalic, this.keyTextSize);
-        fill(core.isModeIntro ? 0 : 150);
-        text(BUTTON_NAMES[4], currXPos, this.buttonsHeight);
-        noFill();
-        stroke(core.isModeIntro ? 0 : 150);
-        strokeWeight(1);
-        rect(currXPos - this.buttonSpacing / 2, this.buttonsHeight, textWidth(BUTTON_NAMES[4]) + this.buttonSpacing, this.buttonSpacing * 1.5);
-        noStroke();
+    drawTimeline() {
+        this.drawSelectionRect();
+        this.drawAxis();
+        this.drawSelectors();
+        this.drawEndLabels();
+        this.drawCenterLabel();
     }
 
-    drawTimeline() {
-        // timeline selection rectangle
-        fill(150, 150);
-        noStroke();
-        if (core.isModeAnimate) rect(this.curPixelTimeMin, this.timelineHeight - this.tickHeight, map(core.animationCounter, 0, core.totalTimeInSeconds, this.timelineStart, this.timelineEnd) - this.curPixelTimeMin, 2 * (this.tickHeight));
-        else rect(this.curPixelTimeMin, this.timelineHeight - this.tickHeight, this.curPixelTimeMax - this.curPixelTimeMin, 2 * (this.tickHeight));
-        // timeline
-        stroke(0);
-        strokeWeight(1);
-        line(this.timelineStart, this.timelineHeight, this.timelineEnd, this.timelineHeight); // horizontal
-        // Selector lines
-        strokeWeight(4);
-        line(this.curPixelTimeMin, this.timelineHeight - this.tickHeight, this.curPixelTimeMin, this.timelineHeight + this.tickHeight);
-        line(this.curPixelTimeMax, this.timelineHeight - this.tickHeight, this.curPixelTimeMax, this.timelineHeight + this.tickHeight);
+    drawSelectionRect() {
+        this.sk.fill(150, 150);
+        this.sk.noStroke();
+        if (this.sk.sketchController.mode.isAnimate) this.drawRect(this.timeline.selectStart, this.timeline.top, this.sk.sketchController.mapFromTotalToPixelTime(this.sk.sketchController.animationCounter), this.timeline.bottom);
+        else this.drawRect(this.timeline.selectStart, this.timeline.top, this.timeline.selectEnd, this.timeline.bottom);
+    }
 
-        // Text for minutes at start/end of timeline
-        noStroke();
-        fill(0);
-        let startValue = floor(map(this.curPixelTimeMin, this.timelineStart, this.timelineEnd, 0, core.totalTimeInSeconds));
-        let endValue = ceil(map(this.curPixelTimeMax, this.timelineStart, this.timelineEnd, 0, core.totalTimeInSeconds));
-        text(floor(startValue / 60), this.timelineStart + this.tickHeight / 2, this.timelineHeight);
-        text(ceil(endValue / 60), this.timelineEnd - this.tickHeight, this.timelineHeight);
-        // Text for timeline label
-        let mapMouseX = map(mouseX, this.timelineStart, this.timelineEnd, this.curPixelTimeMin, this.curPixelTimeMax);
-        let videoTimeInSeconds = map(mapMouseX, this.timelineStart, this.timelineEnd, 0, core.totalTimeInSeconds); // remap to get seconds in video from remapped mouse position   
-        let videoTimeInMinutes = videoTimeInSeconds / 60; // float value of minutes and seconds
-        let minutesValue = floor(videoTimeInMinutes); // floor to get minutes
-        let decimalSeconds = videoTimeInMinutes - minutesValue; //  Subtract minutes to get decimal seconds---e.g., 14.28571429 - 14... returns (.28571429)
-        let secondsValue = floor((decimalSeconds * 60).toFixed(2)); // Converts number into a String and keeps only the specified number of decimals
-        let label_1 = minutesValue + " minutes  " + secondsValue + " seconds";
-        let label_2 = "MINUTES";
-        textAlign(CENTER);
-        if (handlers.overRect(this.timelineStart, 0, this.timelineLength, this.timelineHeight)) text(label_1, this.timelineStart + this.timelineLength / 2, this.timelineHeight);
-        else text(label_2, this.timelineStart + this.timelineLength / 2, this.timelineHeight);
-        textAlign(LEFT); // reset
+    drawAxis() {
+        this.sk.stroke(0);
+        this.sk.strokeWeight(1);
+        this.sk.line(this.timeline.start, this.timeline.height, this.timeline.end, this.timeline.height);
+    }
 
+    drawSelectors() {
+        this.sk.strokeWeight(4);
+        this.sk.line(this.timeline.selectStart, this.timeline.top, this.timeline.selectStart, this.timeline.bottom);
+        this.sk.line(this.timeline.selectEnd, this.timeline.top, this.timeline.selectEnd, this.timeline.bottom);
+    }
+
+    drawEndLabels() {
+        this.sk.noStroke();
+        this.sk.fill(0);
+        const leftLabel = Math.floor(this.sk.sketchController.mapFromPixelToTotalTime(this.timeline.selectStart) / 60);
+        const rightLabel = Math.ceil(this.sk.sketchController.mapFromPixelToTotalTime(this.timeline.selectEnd) / 60);
+        this.sk.text(leftLabel, this.timeline.start + this.timeline.spacing, this.timeline.height);
+        this.sk.text(rightLabel, this.timeline.end - this.timeline.spacing - this.sk.textWidth(rightLabel), this.timeline.height);
+    }
+
+    drawCenterLabel() {
+        this.sk.textAlign(this.sk.CENTER);
+        if (this.overSpaceTimeView(this.sk.mouseX, this.sk.mouseY)) {
+            const mapMouseX = this.sk.sketchController.mapFromPixelToSelectedTime(this.sk.mouseX);
+            const timeInSeconds = this.sk.sketchController.mapFromPixelToTotalTime(mapMouseX);
+            const minutes = Math.floor(timeInSeconds / 60);
+            const seconds = Math.floor(timeInSeconds - minutes * 60);
+            const label = minutes + " minutes  " + seconds + " seconds";
+            this.sk.text(label, this.timeline.start + this.timeline.length / 2, this.timeline.height);
+        } else this.sk.text("MINUTES", this.timeline.start + this.timeline.length / 2, this.timeline.height);
+        this.sk.textAlign(this.sk.LEFT); // reset
     }
 
     drawFloorPlanSelector() {
-        noFill();
-        strokeWeight(3);
-        stroke(0);
-        circle(mouseX, mouseY, this.floorPlanCursorSelectSize);
+        this.sk.noFill();
+        this.sk.strokeWeight(3);
+        this.sk.stroke(0);
+        this.sk.circle(this.sk.mouseX, this.sk.mouseY, this.floorPlan.selectorSize);
     }
 
     drawSlicer() {
-        fill(0);
-        stroke(0);
-        strokeWeight(2);
-        line(mouseX, 0, mouseX, this.timelineHeight);
+        this.sk.fill(0);
+        this.sk.stroke(0);
+        this.sk.strokeWeight(2);
+        this.sk.line(this.sk.mouseX, 0, this.sk.mouseX, this.timeline.height);
     }
 
     drawIntroMsg() {
-        rectMode(CENTER);
-        stroke(0);
-        strokeWeight(1);
-        fill(255, 240);
-        rect(width / 2, height / 2.5, width / 1.75 + 50, height / 1.75 + 50);
-        fill(0);
-        textFont(font_Lato, this.keyTextSize);
-        text(INTROMSG, width / 2, height / 2.5, width / 1.75, height / 1.75);
-        rectMode(CORNER);
+        this.sk.rectMode(this.sk.CENTER);
+        this.sk.stroke(0);
+        this.sk.strokeWeight(1);
+        this.sk.fill(255, 240);
+        this.sk.rect(this.sk.width / 2, this.sk.height / 2.5, this.sk.width / 1.75 + 50, this.sk.height / 1.75 + 50);
+        this.sk.fill(0);
+        this.sk.textSize(this.keyTextSize);
+        this.sk.text(this.introMsg, this.sk.width / 2, this.sk.height / 2.5, this.sk.width / 1.75, this.sk.height / 1.75);
+        this.sk.rectMode(this.sk.CORNER);
+    }
+
+    drawRect(xPos, yPos, width, height) {
+        this.sk.rect(xPos, yPos, width - xPos, height - yPos);
+    }
+
+    handleKeys(paths, speakerList) {
+        this.overMovementConversationButtons();
+        if (this.panel.isMovement) this.overPathKeys(paths);
+        else this.overSpeakerKeys(speakerList);
+    }
+
+    overMovementConversationButtons() {
+        this.sk.textSize(this.keyTextSize);
+        let currXPos = this.timeline.start;
+        if (this.overRect(currXPos, this.panel.titleHeight, this.panel.spacing + this.sk.textWidth("Movement"), this.panel.spacing)) this.panel.isMovement = true;
+        else if (this.overRect(currXPos + this.sk.textWidth("Movement | "), this.panel.titleHeight, this.panel.spacing + this.sk.textWidth("Conversation"), this.panel.spacing)) this.panel.isMovement = false;
+    }
+
+    overPathKeys(pathList) {
+        this.sk.textSize(this.keyTextSize);
+        let currXPos = this.panel.xPos;
+        for (const path of pathList) {
+            const nameWidth = this.sk.textWidth(path.name); // set nameWidth to pixel width of path name
+            if (this.overRect(currXPos, this.panel.keyHeight, this.panel.spacing + nameWidth, this.panel.spacing)) this.setPathShow(path);
+            currXPos += this.panel.spacing + nameWidth + this.panel.spacing;
+        }
+    }
+
+    overSpeakerKeys(speakerList) {
+        this.sk.textSize(this.keyTextSize);
+        let currXPos = this.panel.xPos;
+        for (const speaker of speakerList) {
+            let nameWidth = this.sk.textWidth(speaker.name); // set nameWidth to pixel width of speaker code
+            if (this.overRect(currXPos, this.panel.keyHeight, this.panel.spacing + nameWidth, this.panel.spacing)) this.setSpeakerShow(speaker);
+            currXPos += this.panel.spacing + nameWidth + this.panel.spacing;
+        }
+    }
+
+    /**
+     * NOTE: these setters are modifying core vars but this still seems to be best solution
+     */
+    setSpeakerShow(speaker) {
+        speaker.isShowing = !speaker.isShowing;
+    }
+
+    setPathShow(path) {
+        path.isShowing = !path.isShowing;
+    }
+
+    /**
+     * updates selectStart/end vars and is triggered if user already dragging or begins dragging
+     */
+    handleTimeline() {
+        if (this.timeline.isLockedLeft || (!this.timeline.isLockedRight && this.overSelector(this.timeline.selectStart))) {
+            this.timeline.isLockedLeft = true;
+            this.timeline.selectStart = this.sk.constrain(this.sk.mouseX, this.timeline.start, this.timeline.end);
+            if (this.timeline.selectStart > this.timeline.selectEnd - this.timeline.doublePadding) this.timeline.selectStart = this.timeline.selectEnd - this.timeline.doublePadding; // prevents overstriking
+        } else if (this.timeline.isLockedRight || this.overSelector(this.timeline.selectEnd)) {
+            this.timeline.isLockedRight = true;
+            this.timeline.selectEnd = this.sk.constrain(this.sk.mouseX, this.timeline.start, this.timeline.end);
+            if (this.timeline.selectEnd < this.timeline.selectStart + this.timeline.doublePadding) this.timeline.selectEnd = this.timeline.selectStart + this.timeline.doublePadding; // prevents overstriking
+        }
+    }
+
+    overCircle(x, y, diameter) {
+        return this.sk.sqrt(this.sk.sq(x - this.sk.mouseX) + this.sk.sq(y - this.sk.mouseY)) < diameter / 2;
+    }
+
+    overRect(x, y, boxWidth, boxHeight) {
+        return this.sk.mouseX >= x && this.sk.mouseX <= x + boxWidth && this.sk.mouseY >= y && this.sk.mouseY <= y + boxHeight;
+    }
+
+    overSpaceTimeView(xPos, yPos) {
+        return (xPos >= this.timeline.start && xPos <= this.timeline.end) && (yPos >= 0 && yPos <= this.timeline.top);
+    }
+
+    overFloorPlan(xPos, yPos) {
+        return (xPos >= 0 && xPos <= this.floorPlan.width) && (yPos >= 0 && yPos <= this.floorPlan.height);
+    }
+
+    overCursor(xPos, yPos) {
+        return this.overCircle(xPos, yPos, this.floorPlan.selectorSize);
+    }
+
+    overFloorPlanAndCursor(xPos, yPos) {
+        return !this.overFloorPlan(this.sk.mouseX, this.sk.mouseY) || (this.overFloorPlan(this.sk.mouseX, this.sk.mouseY) && this.overCursor(xPos, yPos));
+    }
+
+    overTimelineAxis(pixelValue) {
+        return pixelValue >= this.timeline.selectStart && pixelValue <= this.timeline.selectEnd;
+    }
+
+    overSelector(selector) {
+        return this.overRect(selector - this.timeline.padding, this.timeline.top, this.timeline.doublePadding, this.timeline.thickness);
+    }
+
+    overTimelineAxisRegion() {
+        return this.overRect(this.timeline.start - this.timeline.doublePadding, this.timeline.top, this.timeline.length + this.timeline.doublePadding, this.timeline.thickness);
     }
 }

@@ -13,92 +13,73 @@ To reference or read more about this work please see:
 https://etd.library.vanderbilt.edu/available/etd-03212018-140140/unrestricted/Shapiro_Dissertation.pdf
 */
 
-/**
- * CLASSES/MODULES
- * Each class is currently treated as a singleton with respective .js file/module
- */
-let core;
-let setData;
-let exampleData;
-let parseData;
-let processData;
-let testData;
-let keys;
-let handlers;
+const igs = new p5((sk) => {
 
-/**
- * videoPlayer acts like an abstract class for different Player Classes (see video-player.js)
- * videoPlayer is instantiated/updated in processVideo method
- * movie holds the "Div" created/destroyed by different video classes
- */
-let videoPlayer;
-let movie;
+    sk.preload = function () {
+        sk.font_Lato = sk.loadFont("data/fonts/Lato-Light.ttf");
+    }
 
-/**
- * CONSTANTS
- */
-const CSVHEADERS_MOVEMENT = ['time', 'x', 'y']; // String array indicating movement movement file headers, data in each column should be of type number or it won't process
-const CSVHEADERS_CONVERSATION = ['time', 'speaker', 'talk']; // String array indicating conversation file headers, data in time column shout be of type number, speaker column should be of type String, talk column should be not null or undefined
-const PLAN = 0; // Number constants plan and spacetime indicate two drawing modes
-const SPACETIME = 1;
-const NO_DATA = -1;
-const INTROMSG = "INTERACTION GEOGRAPHY SLICER (IGS)\n\nby Ben Rydal Shapiro & contributors\nbuilt with p5.js & JavaScript\n\nHi There! This is a tool to visualize movement, conversation, and video data over space and time. Data are displayed over a floor plan view (left) and a space-time view (right), where the vertical axis corresponds to the vertical dimension of the floor plan. Use the top menu to visualize different sample datasets or upload your own data. Hover over the floor plan and use the timeline to selectively study displayed data. Use the bottom buttons to animate data, visualize conversation in different ways, and interact with video data by clicking the timeline to play & pause video. For more information see: benrydal.com/software/igs";
-const BUTTON_NAMES = ["Animate", "Align Talk", "All Talk", "Video", "How to Use"];
-const COLOR_LIST = ['#6a3d9a', '#ff7f00', '#33a02c', '#1f78b4', '#e31a1c', '#ffff99', '#b15928', '#cab2d6', '#fdbf6f', '#b2df8a', '#a6cee3', '#fb9a99']; // 12 Class Paired: (Dark) purple, orange, green, blue, red, yellow, brown, (Light) lPurple, lOrange, lGreen, lBlue, lRed
-let font_Lato; // primary font used across program
+    sk.setup = function () {
+        sk.canvas = sk.createCanvas(window.innerWidth, window.innerHeight, sk.P2D);
+        sk.textFont(sk.font_Lato);
+        // SKETCH SINGLETONS
+        sk.core = new Core(sk); // core program variables and update methods
+        sk.testData = new TestData(); // holds tests for core data and CSV files. Does not need sketch reference
+        sk.keys = new Keys(sk); // GUI vars and methods
+        sk.domController = new DomController(sk); // handles DOM/buttons user interaction
+        sk.sketchController = new SketchController(sk); // coordinates calls across classes and updates state variables
+        sk.processData = new ProcessData(sk); // handles all data processing
+        // CONSTANTS
+        sk.PLAN = 0; // two drawing modes
+        sk.SPACETIME = 1;
+    }
 
-/**
- * Optional P5.js method, here used to load fonts prior to page load
- */
-function preload() {
-    font_Lato = loadFont("data/fonts/Lato-Light.ttf");
-}
+    sk.draw = function () {
+        sk.background(255);
+        if (sk.testData.dataIsLoaded(sk.core.floorPlan.img)) sk.image(sk.core.floorPlan.img, 0, 0, sk.keys.floorPlan.width, sk.keys.floorPlan.height);
+        if (sk.testData.arrayIsLoaded(sk.core.paths)) {
+            if (sk.testData.arrayIsLoaded(sk.core.speakerList)) sk.setMovementAndConversation();
+            else sk.setMovement();
+        }
+        if (sk.testData.dataIsLoaded(sk.core.videoPlayer)) sk.sketchController.updateVideoDisplay();
+        sk.keys.drawKeys(sk.core.paths, sk.core.speakerList); // draw keys last
+        sk.sketchController.updateAnimation();
+        sk.sketchController.updateLoop();
+    }
 
-/**
- * Required P5.js method, used to setup GUI
- */
-function setup() {
-    canvas = createCanvas(window.innerWidth, window.innerHeight, P2D);
-    core = new Core();
-    keys = new Keys();
-    setData = new SetData();
-    parseData = new ParseData();
-    exampleData = new ExampleData();
-    processData = new ProcessData();
-    testData = new TestData();
-    handlers = new Handlers();
-}
+    sk.setMovementAndConversation = function () {
+        const drawConversationData = new DrawDataConversation(sk);
+        const drawMovementData = new DrawDataMovement(sk);
+        for (const path of sk.core.paths) {
+            if (path.isShowing) {
+                drawConversationData.setData(path, sk.core.speakerList);
+                drawMovementData.setData(path); // draw after conversation so bug displays on top
+            }
+        }
+        drawConversationData.setConversationBubble(); // draw conversation text last so it displays on top
+    }
 
-/**
- * Required P5.js draw loop method, draws background, keys and organizes drawing of different data sources if loaded
- * Continues looping if animate or videoPlaying mode is true
- */
-function draw() {
-    background(255);
-    if (testData.dataIsLoaded(core.floorPlan)) image(core.floorPlan, 0, 0, keys.displayFloorPlanWidth, keys.displayFloorPlanHeight);
-    if (testData.dataIsLoaded(core.paths) && testData.dataIsLoaded(core.speakerList)) setData.setMovementAndConversationData();
-    else if (testData.dataIsLoaded(core.paths)) setData.setMovementData();
-    if (testData.dataIsLoaded(videoPlayer) && core.isModeVideoShowing) setData.setVideoPosition();
-    keys.drawKeys(); // draw keys last
-    if (core.isModeAnimate || core.isModeVideoPlaying) loop();
-    else noLoop();
-}
+    sk.setMovement = function () {
+        const drawMovementData = new DrawDataMovement(sk);
+        for (const path of sk.core.paths) {
+            if (path.isShowing) drawMovementData.setData(path); // draw after conversation so bug displays on top
+        }
+    }
 
-function mousePressed() {
-    handlers.handleMousePressed();
-    loop(); // Update all drawing if mouse pressed
-}
+    sk.mousePressed = function () {
+        sk.sketchController.handleMousePressed();
+        sk.sketchController.startLoop();
+    }
 
-function mouseDragged() {
-    handlers.handleMouseDragged();
-    loop(); // Update all drawing if mouse dragged
-}
-
-function mouseReleased() {
-    handlers.handleMouseReleased();
-    loop(); // Update all drawing if mouse released
-}
-
-function mouseMoved() {
-    loop(); // Update all drawing if mouse moves
-}
+    sk.mouseDragged = function () {
+        sk.sketchController.handleMouseDragged();
+        sk.sketchController.startLoop();
+    }
+    sk.mouseReleased = function () {
+        sk.sketchController.handleMouseReleased();
+        sk.sketchController.startLoop();
+    }
+    sk.mouseMoved = function () {
+        sk.sketchController.startLoop();
+    }
+});
