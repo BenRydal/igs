@@ -36,7 +36,7 @@ const igs = new p5((sk) => {
 
     sk.draw = function () {
         sk.background(255);
-        if (sk.testData.dataIsLoaded(sk.core.floorPlan.img)) sk.image(sk.core.floorPlan.img, 0, 0, sk.keys.floorPlan.width, sk.keys.floorPlan.height);
+        if (sk.testData.dataIsLoaded(sk.core.floorPlan.img)) sk.setFloorPlan();
         if (sk.testData.arrayIsLoaded(sk.core.paths)) {
             if (sk.testData.arrayIsLoaded(sk.core.speakerList)) sk.setMovementAndConversation();
             else sk.setMovement();
@@ -45,6 +45,34 @@ const igs = new p5((sk) => {
         sk.keys.drawKeys(sk.core.paths, sk.core.speakerList); // draw keys last
         sk.sketchController.updateAnimation();
         sk.sketchController.updateLoop();
+    }
+
+    sk.setFloorPlan = function () {
+        if (sk.sketchController.testNoRotation()) sk.image(sk.core.floorPlan.img, 0, 0, sk.keys.floorPlan.width, sk.keys.floorPlan.height);
+        else this.setRotatedFloorPlan(sk.sketchController.getRotationMode());
+    }
+
+    sk.setRotatedFloorPlan = function (mode) {
+        sk.push();
+        sk.imageMode(sk.CENTER);
+        sk.translate(sk.keys.floorPlan.width / 2, sk.keys.floorPlan.height / 2);
+        switch (mode) {
+            case sk.sketchController.rotation.modeList[1]:
+                sk.rotate(sk.HALF_PI);
+                sk.image(sk.core.floorPlan.img, 0, 0, sk.keys.floorPlan.height, sk.keys.floorPlan.width);
+                sk.pop();
+                break;
+            case sk.sketchController.rotation.modeList[2]:
+                sk.rotate(sk.PI);
+                sk.image(sk.core.floorPlan.img, 0, 0, sk.keys.floorPlan.width, sk.keys.floorPlan.height);
+                sk.pop();
+                break;
+            case sk.sketchController.rotation.modeList[3]:
+                sk.rotate(-sk.HALF_PI);
+                sk.image(sk.core.floorPlan.img, 0, 0, sk.keys.floorPlan.height, sk.keys.floorPlan.width);
+                sk.pop();
+                break;
+        }
     }
 
     sk.setMovementAndConversation = function () {

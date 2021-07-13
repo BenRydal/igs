@@ -10,10 +10,15 @@ class SketchController {
             isVideoPlay: false,
             isVideoShow: false
         }
+        this.rotation = {
+            curMode: 0,
+            modeList: ["none", "mode_90", "mode_180", "mode_270"],
+        }
         this.animationCounter = 0; // counter to synchronize animation across all data
         this.bugTimeForVideoScrub = null; // Set in draw movement data and used to display correct video frame when scrubbing video
     }
 
+    // ****** P5 HANDLERS ****** //
     updateLoop() {
         if (this.mode.isAnimate || this.mode.isVideoPlay) this.sk.loop();
         else this.sk.noLoop();
@@ -37,6 +42,7 @@ class SketchController {
         this.sk.keys.timeline.isLockedRight = false;
     }
 
+    // ****** UPDATE METHODS ****** //
     updateAnimationCounter() {
         if (this.mode.isAnimate) this.animationCounter = this.mapFromPixelToTotalTime(this.sk.keys.timeline.selectEnd);
         else this.animationCounter = this.mapFromPixelToTotalTime(this.sk.keys.timeline.selectStart);
@@ -95,11 +101,35 @@ class SketchController {
         }
     }
 
+    // ****** ROTATION METHODS ****** //
+    testNoRotation() {
+        return this.getRotationMode() === this.rotation.modeList[0];
+    }
+
+    getRotationMode() {
+        return this.rotation.modeList[this.rotation.curMode];
+    }
+
+    updateRotationModeRight() {
+        this.rotation.curMode++;
+        if (this.rotation.curMode > 3) this.rotation.curMode = 0;
+    }
+
+    updateRotationModeLeft() {
+        this.rotation.curMode--;
+        if (this.rotation.curMode < 0) this.rotation.curMode = 3;
+    }
+
+    // ****** DRAW HELPER METHODS ****** //
+    /**
+     * Returns properly scaled pixel values to GUI from data points
+     * @param  {Movement Or Conversation Point} point
+     * @param  {Integer} view
+     */
     getScaledPointValues(point, view) {
         const pixelTime = this.sk.map(point.time, 0, this.sk.core.totalTimeInSeconds, this.sk.keys.timeline.start, this.sk.keys.timeline.end);
         const scaledTime = this.sk.map(pixelTime, this.sk.keys.timeline.selectStart, this.sk.keys.timeline.selectEnd, this.sk.keys.timeline.start, this.sk.keys.timeline.end);
-        const scaledXPos = point.xPos * this.sk.keys.floorPlan.width / this.sk.core.floorPlan.inputPixelWidth;
-        const scaledYPos = point.yPos * this.sk.keys.floorPlan.height / this.sk.core.floorPlan.inputPixelHeight;
+        const [scaledXPos, scaledYPos] = this.getScaledXYPos(point.xPos, point.yPos);
         let scaledSpaceTimeXPos;
         if (view === this.sk.PLAN) scaledSpaceTimeXPos = scaledXPos;
         else if (view === this.sk.SPACETIME) scaledSpaceTimeXPos = scaledTime;
@@ -111,6 +141,33 @@ class SketchController {
             scaledYPos,
             scaledSpaceTimeXPos
         };
+    }
+
+    /**
+     * Converts x/y pixel positions from data point to floor plan and current floor plan rotation angle
+     * @param  {Float} xPos
+     * @param  {Float} yPos
+     */
+    getScaledXYPos(xPos, yPos) {
+        let scaledXPos, scaledYPos;
+        switch (this.getRotationMode()) {
+            case this.rotation.modeList[0]:
+                scaledXPos = xPos * this.sk.keys.floorPlan.width / this.sk.core.floorPlan.inputPixelWidth;
+                scaledYPos = yPos * this.sk.keys.floorPlan.height / this.sk.core.floorPlan.inputPixelHeight;
+                return [scaledXPos, scaledYPos];
+            case this.rotation.modeList[1]:
+                scaledXPos = this.sk.keys.floorPlan.width - (yPos * this.sk.keys.floorPlan.width / this.sk.core.floorPlan.inputPixelHeight);
+                scaledYPos = xPos * this.sk.keys.floorPlan.height / this.sk.core.floorPlan.inputPixelWidth;
+                return [scaledXPos, scaledYPos];
+            case this.rotation.modeList[2]:
+                scaledXPos = this.sk.keys.floorPlan.width - (xPos * this.sk.keys.floorPlan.width / this.sk.core.floorPlan.inputPixelWidth);
+                scaledYPos = this.sk.keys.floorPlan.height - (yPos * this.sk.keys.floorPlan.height / this.sk.core.floorPlan.inputPixelHeight);
+                return [scaledXPos, scaledYPos];
+            case this.rotation.modeList[3]:
+                scaledXPos = yPos * this.sk.keys.floorPlan.width / this.sk.core.floorPlan.inputPixelHeight;
+                scaledYPos = this.sk.keys.floorPlan.height - xPos * this.sk.keys.floorPlan.height / this.sk.core.floorPlan.inputPixelWidth;
+                return [scaledXPos, scaledYPos];
+        }
     }
 
     /**
@@ -139,6 +196,8 @@ class SketchController {
     testVideoToPlay() {
         return this.sk.testData.dataIsLoaded(this.sk.core.videoPlayer) && this.mode.isVideoShow && !this.mode.isAnimate && this.sk.keys.overSpaceTimeView(this.sk.mouseX, this.sk.mouseY);
     }
+
+    // ****** MAP DATA METHODS ****** //
     /**
      * Sets conversation rectangle scaling range (size of rectangles as timeline is rescaled)
      */
@@ -166,6 +225,8 @@ class SketchController {
         const timelinePos = this.sk.map(this.sk.core.videoPlayer.getCurrentTime(), 0, this.sk.core.totalTimeInSeconds, this.sk.keys.timeline.start, this.sk.keys.timeline.end);
         return this.sk.map(timelinePos, this.sk.keys.timeline.selectStart, this.sk.keys.timeline.selectEnd, this.sk.keys.timeline.start, this.sk.keys.timeline.end);
     }
+
+    // ****** SETTERS ****** //
 
     setIsAnimate(value) {
         this.mode.isAnimate = value;
