@@ -87,26 +87,26 @@ class DomController {
                 this.loadUserData();
                 break;
             case "Example 1":
-                this.loadExampleData(['data/example-1/', 'floorplan.png', 'conversation.csv', ['Teacher.csv'], 'Youtube', {
-                    videoId: 'Iu0rxb-xkMk'
-                }]);
-                this.sk.sketchController.setAllTalk(true); // not essential but setting matches each case differently
-                break;
-            case "Example 2":
-                this.loadExampleData(['data/example-2/', 'floorplan.png', 'conversation.csv', ['Teacher.csv', 'Sean.csv', 'Mei.csv', 'Cassandra.csv', 'Nathan.csv'], 'Youtube', {
-                    videoId: 'OJSZCK4GPQY'
-                }]);
-                this.sk.sketchController.setAllTalk(false);
-                break;
-            case "Example 3":
-                this.loadExampleData(['data/example-3/', 'floorplan.png', 'conversation.csv', ['Jordan.csv'], 'Youtube', {
+                this.loadExampleData(['data/example-1/', 'floorplan.png', 'conversation.csv', ['Jordan.csv'], 'Youtube', {
                     videoId: 'iiMjfVOj8po'
                 }]);
                 this.sk.sketchController.setAllTalk(false);
                 break;
-            case "Example 4":
-                this.loadExampleData(['data/example-4/', 'floorplan.png', 'conversation.csv', ['Lily.csv', 'Jeans.csv', 'Adhir.csv', 'Mae.csv', 'Blake.csv'], 'Youtube', {
+            case "Example 2":
+                this.loadExampleData(['data/example-2/', 'floorplan.png', 'conversation.csv', ['Lily.csv', 'Jeans.csv', 'Adhir.csv', 'Mae.csv', 'Blake.csv'], 'Youtube', {
                     videoId: 'pWJ3xNk1Zpg'
+                }]);
+                this.sk.sketchController.setAllTalk(false);
+                break;
+            case "Example 3":
+                this.loadExampleData(['data/example-3/', 'floorplan.png', 'conversation.csv', ['Teacher.csv'], 'Youtube', {
+                    videoId: 'Iu0rxb-xkMk'
+                }]);
+                this.sk.sketchController.setAllTalk(true); // not essential but setting matches each case differently
+                break;
+            case "Example 4":
+                this.loadExampleData(['data/example-4/', 'floorplan.png', 'conversation.csv', ['Teacher.csv', 'Sean.csv', 'Mei.csv', 'Cassandra.csv', 'Nathan.csv'], 'Youtube', {
+                    videoId: 'OJSZCK4GPQY'
                 }]);
                 this.sk.sketchController.setAllTalk(false);
                 break;
