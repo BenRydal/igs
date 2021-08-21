@@ -9,8 +9,8 @@ class DrawDataMovement {
             size: this.sk.width / 50,
             lengthToCompare: this.sk.width // used to compare data points to find closest bug value
         };
-        this.smallPathWeight = 3;
-        this.largePathWeight = 6;
+        this.smallPathWeight = 1;
+        this.largePathWeight = 10;
         this.colorGray = 150;
     }
 
