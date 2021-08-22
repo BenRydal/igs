@@ -23,18 +23,7 @@ class Keys {
             height: this.timeline.height,
             selectorSize: 100
         }
-        this.dataPanel = {
-            titleHeight: this.timeline.bottom + (this.timeline.height / 40),
-            keyHeight: this.timeline.bottom + (this.timeline.height / 12),
-            xPos: this.timeline.start,
-            spacing: this.sk.width / 71,
-            isMovement: true // toggle between showing movement/conversation keys
-        }
-        this.rotatePanel = {
-            height: this.timeline.bottom + (this.timeline.height / 40),
-            xPos: this.floorPlan.width / 2 - this.sk.textWidth("rotate left  rotate right"),
-            spacing: this.sk.width / 30
-        }
+        this.dataPanel = new DataPanel(this, 0, this.timeline.bottom); // pass the keys which includes sketch reference
         this.keyTextSize = this.sk.width / 70;
         this.introMsg = "INTERACTION GEOGRAPHY SLICER (IGS)\n\nby Ben Rydal Shapiro & contributors\nbuilt with p5.js & JavaScript\n\nHi There! This is a tool to visualize movement, conversation, and video data over space and time. Data are displayed over a floor plan view (left) and a space-time view (right), where the vertical axis corresponds to the vertical dimension of the floor plan. Use the top menu to visualize different sample datasets or upload your own data. Hover over the floor plan and use the timeline to selectively study displayed data. Use the top buttons to animate data, visualize conversation in different ways, and interact with video data by clicking anywhere in the space-time view to play & pause video. For more information see: benrydal.com/software/igs";
     }
@@ -43,51 +32,14 @@ class Keys {
     drawKeys(pathList, speakerList) {
         this.sk.textAlign(this.sk.LEFT, this.sk.TOP);
         this.sk.textSize(this.keyTextSize);
-        this.drawRotatePanel();
-        this.drawPanelTitles();
-        if (this.dataPanel.isMovement) this.drawPanelKeys(pathList);
-        else this.drawPanelKeys(speakerList);
+        this.dataPanel.draw(pathList, speakerList); // pass these to dynamically update
+
         this.drawTimeline();
         if (this.overFloorPlan(this.sk.mouseX, this.sk.mouseY)) this.drawFloorPlanSelector();
         if (this.overSpaceTimeView(this.sk.mouseX, this.sk.mouseY)) this.drawSlicer();
         if (this.sk.sketchController.mode.isIntro) this.drawIntroMsg();
     }
 
-    drawPanelTitles() {
-        this.sk.noStroke();
-        this.sk.fill(this.dataPanel.isMovement ? 0 : 150);
-        this.sk.text("Movement", this.timeline.start, this.dataPanel.titleHeight);
-        this.sk.fill(0);
-        this.sk.text(" | ", this.timeline.start + this.sk.textWidth("Movement"), this.dataPanel.titleHeight);
-        this.sk.fill(!this.dataPanel.isMovement ? 0 : 150);
-        this.sk.text("Conversation", this.timeline.start + this.sk.textWidth("Movement | "), this.dataPanel.titleHeight);
-    }
-
-    drawRotatePanel() {
-        this.sk.textSize(this.keyTextSize);
-        this.sk.noStroke();
-        this.sk.fill(150);
-        this.sk.text("rotate left    rotate right", this.rotatePanel.xPos, this.rotatePanel.height);
-    }
-
-    // Loop through speakers and set fill/stroke in this for all if showing/not showing
-    drawPanelKeys(list) {
-        let currXPos = this.dataPanel.xPos;
-        this.sk.strokeWeight(5);
-        for (const person of list) {
-            this.sk.stroke(person.color);
-            this.sk.noFill();
-            this.sk.rect(currXPos, this.dataPanel.keyHeight, this.dataPanel.spacing, this.dataPanel.spacing);
-            if (person.isShowing) {
-                this.sk.fill(person.color);
-                this.sk.rect(currXPos, this.dataPanel.keyHeight, this.dataPanel.spacing, this.dataPanel.spacing);
-            }
-            this.sk.fill(0);
-            this.sk.noStroke();
-            this.sk.text(person.name, currXPos + 1.3 * this.dataPanel.spacing, this.dataPanel.keyHeight);
-            currXPos += (2 * this.dataPanel.spacing) + this.sk.textWidth(person.name);
-        }
-    }
 
     drawTimeline() {
         this.drawSelectionRect();
@@ -169,54 +121,11 @@ class Keys {
     }
 
     // ****** HANDLERS ****** //
-    handleKeys(paths, speakerList) {
-        this.overMovementConversationButtons();
-        this.overRotatePanelKeys();
-        if (this.dataPanel.isMovement) this.overPathKeys(paths);
-        else this.overSpeakerKeys(speakerList);
-    }
-
-    overRotatePanelKeys() {
+    handleKeys(pathList, speakerList) {
+        // TODO: update, add over titles vs over keys distinction?
         this.sk.textSize(this.keyTextSize);
-        if (this.overRect(this.rotatePanel.xPos, this.rotatePanel.height, this.sk.textWidth("rotate left  "), this.rotatePanel.spacing)) this.sk.sketchController.updateRotationModeLeft();
-        else if (this.overRect(this.rotatePanel.xPos + this.sk.textWidth("rotate left  "), this.rotatePanel.height, this.sk.textWidth("rotate right  "), this.rotatePanel.spacing)) this.sk.sketchController.updateRotationModeRight();
-    }
-
-    overMovementConversationButtons() {
-        this.sk.textSize(this.keyTextSize);
-        if (this.overRect(this.dataPanel.xPos, this.dataPanel.titleHeight, this.sk.textWidth("Movement  | "), this.dataPanel.spacing)) this.dataPanel.isMovement = true;
-        else if (this.overRect(this.dataPanel.xPos + this.sk.textWidth("Movement | "), this.dataPanel.titleHeight, this.sk.textWidth("Conversation  "), this.dataPanel.spacing)) this.dataPanel.isMovement = false;
-    }
-
-    overPathKeys(pathList) {
-        this.sk.textSize(this.keyTextSize);
-        let currXPos = this.dataPanel.xPos;
-        for (const path of pathList) {
-            const nameWidth = this.sk.textWidth(path.name); // set nameWidth to pixel width of path name
-            if (this.overRect(currXPos, this.dataPanel.keyHeight, this.dataPanel.spacing + nameWidth, this.dataPanel.spacing)) this.setPathShow(path);
-            currXPos += this.dataPanel.spacing + nameWidth + this.dataPanel.spacing;
-        }
-    }
-
-    overSpeakerKeys(speakerList) {
-        this.sk.textSize(this.keyTextSize);
-        let currXPos = this.dataPanel.xPos;
-        for (const speaker of speakerList) {
-            let nameWidth = this.sk.textWidth(speaker.name); // set nameWidth to pixel width of speaker code
-            if (this.overRect(currXPos, this.dataPanel.keyHeight, this.dataPanel.spacing + nameWidth, this.dataPanel.spacing)) this.setSpeakerShow(speaker);
-            currXPos += this.dataPanel.spacing + nameWidth + this.dataPanel.spacing;
-        }
-    }
-
-    /**
-     * NOTE: these setters are modifying core vars but this still seems to be best solution
-     */
-    setSpeakerShow(speaker) {
-        speaker.isShowing = !speaker.isShowing;
-    }
-
-    setPathShow(path) {
-        path.isShowing = !path.isShowing;
+        this.dataPanel.handleHeaders();
+        this.dataPanel.handleData(pathList, speakerList);
     }
 
     /**
@@ -232,6 +141,13 @@ class Keys {
             this.timeline.selectEnd = this.sk.constrain(this.sk.mouseX, this.timeline.start, this.timeline.end);
             if (this.timeline.selectEnd < this.timeline.selectStart + this.timeline.doublePadding) this.timeline.selectEnd = this.timeline.selectStart + this.timeline.doublePadding; // prevents overstriking
         }
+    }
+
+    /**
+     * NOTE: this setter is modifying core vars but this still seems to be best solution
+     */
+    setCoreData(personFromList) {
+        personFromList.isShowing = !personFromList.isShowing;
     }
 
     // ****** MOUSE/DATA POSITIONING TESTS ****** //
