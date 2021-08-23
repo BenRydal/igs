@@ -23,21 +23,26 @@ class Keys {
             height: this.timeline.height,
             selectorSize: 100
         }
-        this.dataPanel = new DataPanel(this, 0, this.timeline.bottom); // pass the keys which includes sketch reference
+        this.dataPanel = new DataPanel(this, 10, this.timeline.bottom); // pass the keys which includes sketch reference
         this.keyTextSize = this.sk.width / 70;
         this.introMsg = "INTERACTION GEOGRAPHY SLICER (IGS)\n\nby Ben Rydal Shapiro & contributors\nbuilt with p5.js & JavaScript\n\nHi There! This is a tool to visualize movement, conversation, and video data over space and time. Data are displayed over a floor plan view (left) and a space-time view (right), where the vertical axis corresponds to the vertical dimension of the floor plan. Use the top menu to visualize different sample datasets or upload your own data. Hover over the floor plan and use the timeline to selectively study displayed data. Use the top buttons to animate data, visualize conversation in different ways, and interact with video data by clicking anywhere in the space-time view to play & pause video. For more information see: benrydal.com/software/igs";
     }
 
     // ****** DRAW METHODS ****** //
-    drawKeys(pathList, speakerList) {
+    drawKeys(pathList, speakerList, selectMode) {
         this.sk.textAlign(this.sk.LEFT, this.sk.TOP);
         this.sk.textSize(this.keyTextSize);
-        this.dataPanel.draw(pathList, speakerList); // pass these to dynamically update
+        this.dataPanel.draw(pathList, speakerList, selectMode); // pass these to dynamically update
 
         this.drawTimeline();
         if (this.overFloorPlan(this.sk.mouseX, this.sk.mouseY)) this.drawFloorPlanSelector();
         if (this.overSpaceTimeView(this.sk.mouseX, this.sk.mouseY)) this.drawSlicer();
         if (this.sk.sketchController.mode.isIntro) this.drawIntroMsg();
+    }
+
+    // TODO:
+    setSelectMode(value) {
+        this.sk.sketchController.setSelectMode(value);
     }
 
 

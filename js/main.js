@@ -42,7 +42,7 @@ const igs = new p5((sk) => {
             else sk.setMovement();
         }
         if (sk.testData.dataIsLoaded(sk.core.videoPlayer)) sk.sketchController.updateVideoDisplay();
-        sk.keys.drawKeys(sk.core.paths, sk.core.speakerList); // draw keys last
+        sk.keys.drawKeys(sk.core.paths, sk.core.speakerList, sk.sketchController.getSelectMode()); // draw keys last
         sk.sketchController.updateAnimation();
         sk.sketchController.updateLoop();
     }

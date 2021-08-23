@@ -14,6 +14,9 @@ class SketchController {
             curMode: 0,
             modeList: ["none", "mode_90", "mode_180", "mode_270"],
         }
+        this.select = {
+            curMode: 0
+        }
         this.animationCounter = 0; // counter to synchronize animation across all data
         this.bugTimeForVideoScrub = null; // Set in draw movement data and used to display correct video frame when scrubbing video
     }
@@ -100,6 +103,15 @@ class SketchController {
             this.sk.core.videoPlayer.seekTo(tPos);
             this.setVideoPlay(true);
         }
+    }
+
+    // TODO:
+    getSelectMode() {
+        return this.select.curMode;
+    }
+
+    setSelectMode(value) {
+        this.select.curMode = value;
     }
 
     // ****** ROTATION METHODS ****** //

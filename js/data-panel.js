@@ -11,13 +11,12 @@ class DataPanel {
         }
         this.data = {
             height: yPos + 50,
-            selectMode: ["off", "region", "slice", "movement", "stops"],
-            curSelectMode: 0,
+            selectMode: ["none", "region", "slice", "moving", "stopped"]
         }
     }
 
     // DRAW METHODS
-    draw(pathList, speakerList) {
+    draw(pathList, speakerList, selectMode) {
         this.drawHeaders();
         switch (this.headers.curMode) {
             case 0:
@@ -27,7 +26,7 @@ class DataPanel {
                 this.drawDataKeys(speakerList);
                 break;
             case 2:
-                this.drawSelectKeys();
+                this.drawSelectKeys(selectMode);
                 break;
         }
     }
@@ -63,11 +62,11 @@ class DataPanel {
         }
     }
 
-    drawSelectKeys() {
+    drawSelectKeys(selectMode) {
         this.keys.sk.noStroke();
         let curXPos = this.xPos;
         for (let i = 0; i < this.data.selectMode.length; i++) {
-            if (this.data.curSelectMode === i) this.keys.sk.fill(0);
+            if (selectMode === i) this.keys.sk.fill(0);
             else this.keys.sk.fill(150);
             this.keys.sk.text(this.data.selectMode[i], curXPos, this.data.height);
             curXPos += this.keys.sk.textWidth(this.data.selectMode[i]) + this.spacing;
@@ -106,9 +105,16 @@ class DataPanel {
         }
     }
 
-    overSelectKeys() {}
-
+    overSelectKeys() {
+        let curXPos = this.xPos;
+        for (let i = 0; i < this.data.selectMode.length; i++) {
+            const pixelWidth = this.keys.sk.textWidth(this.data.selectMode[i]) + this.spacing;
+            if (this.keys.overRect(curXPos, this.data.height, curXPos + pixelWidth, this.spacing)) this.keys.setSelectMode(i);
+            curXPos += pixelWidth;
+        }
+    }
 }
+
 
 // drawRotateKeys() {
 //     this.keys.sk.noStroke();
