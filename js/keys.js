@@ -45,6 +45,11 @@ class Keys {
         this.sk.sketchController.setSelectMode(value);
     }
 
+    updateRotateMode(value) {
+        if (value === 0) this.sk.sketchController.setRotateLeft();
+        else this.sk.sketchController.setRotateRight();
+    }
+
 
     drawTimeline() {
         this.drawSelectionRect();

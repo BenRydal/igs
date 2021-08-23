@@ -15,6 +15,8 @@ class DrawDataMovement {
     }
 
     setData(path) {
+        // TODO:
+        // test selectCurMode
         this.resetBug(); // always reset bug values
         if (this.sk.keys.overFloorPlan(this.sk.mouseX, this.sk.mouseY)) {
             this.drawWithCursorHighlight(this.sk.PLAN, path.movement, path.color);

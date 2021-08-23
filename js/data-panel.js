@@ -5,13 +5,15 @@ class DataPanel {
         this.xPos = xPos;
         this.spacing = 25;
         this.headers = {
-            mode: ["Movement", "Conversation", "Select"],
+            mode: ["Movement", "Conversation", "Select", "Rotate"],
             curMode: 0,
             height: yPos,
         }
         this.data = {
             height: yPos + 50,
-            selectMode: ["none", "region", "slice", "moving", "stopped"] // add more modes/tabs here
+            selectMode: ["none", "region", "slice", "moving", "stopped"],
+            rotateMode: ["left", "right"]
+            // add more modes/tabs here
         }
     }
 
@@ -27,6 +29,9 @@ class DataPanel {
                 break;
             case 2:
                 this.drawSelectKeys(selectMode);
+                break;
+            case 3:
+                this.drawRotateKeys();
                 break;
         }
     }
@@ -73,6 +78,16 @@ class DataPanel {
         }
     }
 
+    drawRotateKeys() {
+        this.keys.sk.noStroke();
+        this.keys.sk.fill(0);
+        let curXPos = this.xPos;
+        for (const s of this.data.rotateMode) {
+            this.keys.sk.text(s, curXPos, this.data.height);
+            curXPos += this.keys.sk.textWidth(s) + this.spacing;
+        }
+    }
+
     handleHeaders() {
         let curXPos = this.xPos;
         for (let i = 0; i < this.headers.mode.length; i++) {
@@ -91,7 +106,10 @@ class DataPanel {
                 this.overDataKeys(speakerList);
                 break;
             case 2:
-                this.overSelectKeys(); // give it "left and right"
+                this.overSelectKeys();
+                break;
+            case 3:
+                this.overRotateKeys();
                 break;
         }
     }
@@ -110,6 +128,15 @@ class DataPanel {
         for (let i = 0; i < this.data.selectMode.length; i++) {
             const pixelWidth = this.keys.sk.textWidth(this.data.selectMode[i]) + this.spacing;
             if (this.keys.overRect(curXPos, this.data.height, curXPos + pixelWidth, this.spacing)) this.keys.setSelectMode(i);
+            curXPos += pixelWidth;
+        }
+    }
+
+    overRotateKeys() {
+        let curXPos = this.xPos;
+        for (let i = 0; i < this.data.rotateMode.length; i++) {
+            const pixelWidth = this.keys.sk.textWidth(this.data.rotateMode[i]) + this.spacing;
+            if (this.keys.overRect(curXPos, this.data.height, curXPos + pixelWidth, this.spacing)) this.keys.updateRotateMode(i);
             curXPos += pixelWidth;
         }
     }

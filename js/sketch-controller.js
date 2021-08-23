@@ -123,12 +123,12 @@ class SketchController {
         return this.rotation.modeList[this.rotation.curMode];
     }
 
-    updateRotationModeRight() {
+    setRotateRight() {
         this.rotation.curMode++;
         if (this.rotation.curMode > 3) this.rotation.curMode = 0;
     }
 
-    updateRotationModeLeft() {
+    setRotateLeft() {
         this.rotation.curMode--;
         if (this.rotation.curMode < 0) this.rotation.curMode = 3;
     }
