@@ -11,7 +11,7 @@ class DataPanel {
         }
         this.data = {
             height: yPos + 50,
-            selectMode: ["none", "region", "slice", "moving", "stopped"]
+            selectMode: ["none", "region", "slice", "moving", "stopped"] // add more modes/tabs here
         }
     }
 
@@ -114,16 +114,3 @@ class DataPanel {
         }
     }
 }
-
-
-// drawRotateKeys() {
-//     this.keys.sk.noStroke();
-//     this.keys.sk.fill(150);
-//     // TODO: update below
-//     this.sk.text(this.data.rotate[0] + this.data.rotate[1], this.xPos, this.data.height);
-// }
-
-// overRotateKeys() {
-//     //if (this.keys.overRect(this.xPos, this.data.height, this.keys.sk.textWidth("rotate left  "), this.rotatePanel.spacing)) this.sk.sketchController.updateRotationModeLeft();
-//     //else if (this.keys.overRect(this.xPos + this.sk.textWidth("rotate left  "), this.rotatePanel.height, this.sk.textWidth("rotate right  "), this.rotatePanel.spacing)) this.sk.sketchController.updateRotationModeRight();
-// }
