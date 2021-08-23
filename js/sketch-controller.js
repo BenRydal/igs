@@ -114,6 +114,12 @@ class SketchController {
         this.select.curMode = value;
     }
 
+    getWeightsFromSelectMode() {
+        if (this.select.curMode === 3) return [1, 0];
+        else if (this.select.curMode === 4) return [0, 10];
+        else return [1, 10];
+    }
+
     // ****** ROTATION METHODS ****** //
     testNoRotation() {
         return this.getRotationMode() === this.rotation.modeList[0];

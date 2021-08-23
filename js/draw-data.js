@@ -9,14 +9,13 @@ class DrawDataMovement {
             size: this.sk.width / 50,
             lengthToCompare: this.sk.width // used to compare data points to find closest bug value
         };
-        this.smallPathWeight = 1;
-        this.largePathWeight = 10;
+        this.smallPathWeight = null;
+        this.largePathWeight = null;
         this.colorGray = 150;
     }
 
     setData(path) {
-        // TODO:
-        // test selectCurMode
+        [this.smallPathWeight, this.largePathWeight] = this.sk.sketchController.getWeightsFromSelectMode(); // update pathWeights
         this.resetBug(); // always reset bug values
         if (this.sk.keys.overFloorPlan(this.sk.mouseX, this.sk.mouseY)) {
             this.drawWithCursorHighlight(this.sk.PLAN, path.movement, path.color);
