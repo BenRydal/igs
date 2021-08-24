@@ -5,7 +5,7 @@ class DataPanel {
         this.xPos = xPos;
         this.spacing = 25;
         this.headers = {
-            mode: ["Movement", "Conversation", "Select", "Rotate"],
+            mode: ["Movement", "Talk", "Select", "Rotate"],
             curMode: 0,
             height: yPos,
         }

@@ -120,6 +120,11 @@ class SketchController {
         else return [1, 10];
     }
 
+    testSelectModeForRegion() {
+        return this.select.curMode === 1;
+    }
+
+
     // ****** ROTATION METHODS ****** //
     testNoRotation() {
         return this.getRotationMode() === this.rotation.modeList[0];
@@ -201,7 +206,13 @@ class SketchController {
      * @param  {ConversationPoint} curPoint
      */
     testConversationPointToDraw(curPoint) {
-        return this.sk.keys.overTimelineAxis(curPoint.pixelTime) && this.sk.keys.overFloorPlan(curPoint.scaledXPos, curPoint.scaledYPos) && this.testAnimation(curPoint.pixelTime) && this.sk.keys.overFloorPlanAndCursor(curPoint.scaledXPos, curPoint.scaledYPos);
+        return this.sk.keys.overTimelineAxis(curPoint.pixelTime) && this.sk.keys.overFloorPlan(curPoint.scaledXPos, curPoint.scaledYPos) && this.testAnimation(curPoint.pixelTime) && this.testSelectMode(curPoint.scaledXPos, curPoint.scaledYPos);
+    }
+
+    // TODO:
+    testSelectMode(xPos, yPos) {
+        if (this.testSelectModeForRegion()) return this.sk.keys.overCursor(xPos, yPos);
+        else return true;
     }
 
     /**

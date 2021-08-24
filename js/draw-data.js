@@ -17,7 +17,7 @@ class DrawDataMovement {
     setData(path) {
         [this.smallPathWeight, this.largePathWeight] = this.sk.sketchController.getWeightsFromSelectMode(); // update pathWeights
         this.resetBug(); // always reset bug values
-        if (this.sk.keys.overFloorPlan(this.sk.mouseX, this.sk.mouseY)) {
+        if (this.sk.sketchController.testSelectModeForRegion()) {
             this.drawWithCursorHighlight(this.sk.PLAN, path.movement, path.color);
             this.drawWithCursorHighlight(this.sk.SPACETIME, path.movement, path.color);
         } else {
