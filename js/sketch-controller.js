@@ -42,8 +42,7 @@ class SketchController {
     }
 
     handleMouseReleased() {
-        this.sk.keys.timeline.isLockedLeft = false;
-        this.sk.keys.timeline.isLockedRight = false;
+        this.sk.keys.resetTimelineLock();
     }
 
     // ****** UPDATE METHODS ****** //
@@ -108,6 +107,10 @@ class SketchController {
     // TODO:
     getSelectMode() {
         return this.select.curMode;
+    }
+
+    testSelectModeRegion() {
+        return this.select.curMode === 1;
     }
 
     setSelectMode(value) {
