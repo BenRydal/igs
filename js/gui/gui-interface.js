@@ -20,8 +20,7 @@ class Keys {
             yPos: this.timelineContainer.bottom
         }
         this.timeline = new TimelinePanel(this.sk, this.timelineContainer);
-        // TODO: pass container
-        this.dataPanel = new DataPanel(this, this.dataPanelContainer.xPos, this.dataPanelContainer.yPos);
+        this.dataPanel = new DataPanel(this.sk, this.dataPanelContainer);
         this.keyTextSize = this.sk.width / 70;
         this.introMsg = "INTERACTION GEOGRAPHY SLICER (IGS)\n\nby Ben Rydal Shapiro & contributors\nbuilt with p5.js & JavaScript\n\nHi There! This is a tool to visualize movement, conversation, and video data over space and time. Data are displayed over a floor plan view (left) and a space-time view (right), where the vertical axis corresponds to the vertical dimension of the floor plan. Use the top menu to visualize different sample datasets or upload your own data. Hover over the floor plan and use the timeline to selectively study displayed data. Use the top buttons to animate data, visualize conversation in different ways, and interact with video data by clicking anywhere in the space-time view to play & pause video. For more information see: benrydal.com/software/igs";
     }
