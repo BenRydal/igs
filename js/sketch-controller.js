@@ -42,7 +42,7 @@ class SketchController {
     }
 
     handleMouseReleased() {
-        this.sk.keys.resetTimelineLock();
+        this.sk.keys.handleResetTimelineLock();
     }
 
     // ****** UPDATE METHODS ****** //
