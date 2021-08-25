@@ -19,7 +19,8 @@ class Keys {
         }
         this.dataPanelContainer = {
             xPos: 10,
-            yPos: this.timelineContainer.bottom
+            headerYPos: this.timelineContainer.bottom,
+            dataYPos: this.timelineContainer.bottom + 50
         }
         this.timeline = new TimelinePanel(this.sk, this.timelineContainer);
         this.dataPanel = new DataPanel(this.sk, this.dataPanelContainer);
