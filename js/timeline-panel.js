@@ -2,18 +2,20 @@ class TimelinePanel {
 
     constructor(sketch) {
         this.sk = sketch;
-        this.start = this.sk.width * 0.4638;
-        this.end = this.sk.width * 0.9638;
-        this.selectStart = this.sk.width * 0.4638;
-        this.selectEnd = this.sk.width * 0.9638;
-        this.spacing = 25;
+        this.start = this.sk.width * 0.5;
+        this.end = this.sk.width * 0.975;
+        this.selectStart = this.start;
+        this.selectEnd = this.end;
+        this.length = this.end - this.start;
+
         this.padding = 20;
         this.doublePadding = 40;
-        this.length = this.sk.width * 0.9638 - this.sk.width * 0.4638;
-        this.height = this.sk.height * .81;
-        this.top = this.sk.height * .81 - 25;
-        this.bottom = this.sk.height * .81 + 25;
-        this.thickness = 50;
+
+        this.height = this.sk.height * .8;
+        this.top = this.height - this.doublePadding;
+        this.bottom = this.height + this.doublePadding;
+        this.thickness = this.bottom - this.top;
+
         this.isLockedLeft = false;
         this.isLockedRight = false;
     }
@@ -55,8 +57,8 @@ class TimelinePanel {
         this.sk.fill(0);
         const leftLabel = Math.floor(this.sk.sketchController.mapFromPixelToTotalTime(this.selectStart) / 60);
         const rightLabel = Math.ceil(this.sk.sketchController.mapFromPixelToTotalTime(this.selectEnd) / 60);
-        this.sk.text(leftLabel, this.start + this.spacing, this.height);
-        this.sk.text(rightLabel, this.end - this.spacing - this.sk.textWidth(rightLabel), this.height);
+        this.sk.text(leftLabel, this.start + this.padding, this.height);
+        this.sk.text(rightLabel, this.end - this.padding - this.sk.textWidth(rightLabel), this.height);
     }
 
     drawCenterLabel() {

@@ -2,17 +2,24 @@ class Keys {
 
     constructor(sketch) {
         this.sk = sketch;
+        // // TODO: this is really a containter, SO SET CONTAINER VARS IN HERE THEN PASS TO TIMELINE ETC.
+        this.timelineContainer = {
+            start: this.sk.width * 0.5,
+            end: this.sk.width * 0.975,
+            height: this.sk.height * .8,
+            top: this.height - this.doublePadding,
+            bottom: this.height + this.doublePadding
+        }
         this.timeline = new TimelinePanel(this.sk);
         this.dataPanel = new DataPanel(this, 10, this.timeline.bottom);
-        // TODO: this is really a containter, SO SET CONTAINER VARS IN HERE THEN PASS TO TIMELINE ETC.
-        // this.timelineContainer = {
-        //     start: value,
-        //     end: value
-        // }
         this.floorPlan = {
             width: this.timeline.start - (this.sk.width - this.timeline.end),
             height: this.timeline.height,
             selectorSize: 100
+        }
+        this.dataPanelContainer = {
+            xPos: 10,
+            yPos: this.timeline.bottom
         }
         this.keyTextSize = this.sk.width / 70;
         this.introMsg = "INTERACTION GEOGRAPHY SLICER (IGS)\n\nby Ben Rydal Shapiro & contributors\nbuilt with p5.js & JavaScript\n\nHi There! This is a tool to visualize movement, conversation, and video data over space and time. Data are displayed over a floor plan view (left) and a space-time view (right), where the vertical axis corresponds to the vertical dimension of the floor plan. Use the top menu to visualize different sample datasets or upload your own data. Hover over the floor plan and use the timeline to selectively study displayed data. Use the top buttons to animate data, visualize conversation in different ways, and interact with video data by clicking anywhere in the space-time view to play & pause video. For more information see: benrydal.com/software/igs";
@@ -28,25 +35,6 @@ class Keys {
         if (this.sk.sketchController.mode.isIntro) this.drawIntroMsg();
     }
 
-    drawFloorPlanSelector() {
-        this.sk.noFill();
-        this.sk.strokeWeight(3);
-        this.sk.stroke(0);
-        this.sk.circle(this.sk.mouseX, this.sk.mouseY, this.floorPlan.selectorSize);
-    }
-
-    drawIntroMsg() {
-        this.sk.rectMode(this.sk.CENTER);
-        this.sk.stroke(0);
-        this.sk.strokeWeight(1);
-        this.sk.fill(255, 240);
-        this.sk.rect(this.sk.width / 2, this.sk.height / 2.5, this.sk.width / 1.75 + 50, this.sk.height / 1.75 + 50);
-        this.sk.fill(0);
-        this.sk.textSize(this.keyTextSize);
-        this.sk.text(this.introMsg, this.sk.width / 2, this.sk.height / 2.5, this.sk.width / 1.75, this.sk.height / 1.75);
-        this.sk.rectMode(this.sk.CORNER);
-    }
-
     // ****** HANDLERS ****** //
     handleKeys(pathList, speakerList) {
         // TODO: update, add over titles vs over keys distinction?
@@ -55,6 +43,7 @@ class Keys {
         this.dataPanel.handleData(pathList, speakerList);
     }
 
+    // HANDLE CALLS FROM OTHER CLASSES
     /**
      * Updates user select start/end vars and is triggered if user already dragging or begins dragging
      */
@@ -66,6 +55,8 @@ class Keys {
         this.timeline.resetTimelineLock();
     }
 
+
+    // HANDLE CALLS TO OTHER CLASSES
     // TODO:
     setSelectMode(value) {
         this.sk.sketchController.setSelectMode(value);
@@ -81,6 +72,7 @@ class Keys {
     setCoreData(personFromList) {
         personFromList.isShowing = !personFromList.isShowing;
     }
+
 
     // ****** MOUSE/DATA POSITIONING TESTS ****** //
     overCircle(x, y, diameter) {
@@ -109,5 +101,25 @@ class Keys {
 
     overTimelineAxisRegion() {
         return this.timeline.overTimelineAxisRegion();
+    }
+
+    // TODO: possibly move to own class?
+    drawFloorPlanSelector() {
+        this.sk.noFill();
+        this.sk.strokeWeight(3);
+        this.sk.stroke(0);
+        this.sk.circle(this.sk.mouseX, this.sk.mouseY, this.floorPlan.selectorSize);
+    }
+
+    drawIntroMsg() {
+        this.sk.rectMode(this.sk.CENTER);
+        this.sk.stroke(0);
+        this.sk.strokeWeight(1);
+        this.sk.fill(255, 240);
+        this.sk.rect(this.sk.width / 2, this.sk.height / 2.5, this.sk.width / 1.75 + 50, this.sk.height / 1.75 + 50);
+        this.sk.fill(0);
+        this.sk.textSize(this.keyTextSize);
+        this.sk.text(this.introMsg, this.sk.width / 2, this.sk.height / 2.5, this.sk.width / 1.75, this.sk.height / 1.75);
+        this.sk.rectMode(this.sk.CORNER);
     }
 }
