@@ -5,14 +5,14 @@ class DataPanel {
         this.xPos = dataPanelContainer.xPos;
         this.spacing = 25;
         this.headers = {
-            mode: ["Movement", "Talk", "Select", "Rotate"],
+            mode: ["Movement", "Talk", "Floor Plan", "Select"],
             curMode: 0,
             height: dataPanelContainer.headerYPos,
         }
         this.data = {
             height: dataPanelContainer.dataYPos,
             selectMode: ["none", "region", "slice", "moving", "stopped"],
-            rotateMode: ["left", "right"]
+            rotateMode: ["rotate left", "rotate right"]
             // add more modes/tabs here
         }
     }
@@ -27,10 +27,10 @@ class DataPanel {
                 this.organizePerson(mode, speakerList);
                 break;
             case 2:
-                this.organizeSelectors(mode, curSelectMode);
+                this.organizeRotateKeys(mode);
                 break;
             case 3:
-                this.organizeRotateKeys(mode);
+                this.organizeSelectors(mode, curSelectMode);
                 break;
         }
     }
