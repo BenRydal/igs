@@ -232,7 +232,7 @@ class DrawDataConversation {
     drawRects(point, curColor) {
         this.sk.noStroke(); // reset if setDrawText is called previously in loop
         this.sk.textSize(1); // Controls measurement of pixels in a string that corredponds to vertical pixel height of rectangle.
-        const rectWidth = this.sk.map(this.sk.keys.timeline.selectEnd - this.sk.keys.timeline.selectStart, 0, this.sk.keys.timeline.length, this.rect.maxPixelWidth, this.rect.minPixelWidth); // map to inverse of min/max to set rectWidth based on amount of pixel time selected
+        const rectWidth = this.sk.sketchController.mapRectInverse(this.rect.maxPixelWidth, this.rect.minPixelWidth); // map to inverse of min/max to set rectWidth based on amount of pixel time selected
         let rectLength = this.sk.textWidth(point.talkTurn);
         if (rectLength < this.rect.minPixelHeight) rectLength = this.rect.minPixelHeight; // if current turn is small set it to the minimum height
         const curPoint = this.sk.sketchController.getScaledPointValues(point, null);

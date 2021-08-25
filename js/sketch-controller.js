@@ -38,7 +38,7 @@ class SketchController {
     }
 
     handleMouseDragged() {
-        if (!this.mode.isAnimate && ((this.sk.keys.timeline.isLockedLeft || this.sk.keys.timeline.isLockedRight) || this.sk.keys.overTimelineAxisRegion())) this.sk.keys.handleTimeline();
+        if (!this.mode.isAnimate) this.sk.keys.handleTimeline();
     }
 
     handleMouseReleased() {
@@ -47,17 +47,17 @@ class SketchController {
 
     // ****** UPDATE METHODS ****** //
     updateAnimationCounter() {
-        if (this.mode.isAnimate) this.animationCounter = this.mapFromPixelToTotalTime(this.sk.keys.timeline.selectEnd);
-        else this.animationCounter = this.mapFromPixelToTotalTime(this.sk.keys.timeline.selectStart);
+        if (this.mode.isAnimate) this.animationCounter = this.mapFromPixelToTotalTime(this.sk.keys.getCurTimelineSelectEnd());
+        else this.animationCounter = this.mapFromPixelToTotalTime(this.sk.keys.getCurTimelineSelectStart());
         this.setIsAnimate(!this.mode.isAnimate);
     }
 
     updateAnimation() {
         if (this.mode.isAnimate) {
             const animationIncrementRateDivisor = 1000; // this divisor seems to work best
-            const curTimeIntervalInSeconds = this.mapFromPixelToTotalTime(this.sk.keys.timeline.selectEnd) - this.mapFromPixelToTotalTime(this.sk.keys.timeline.selectStart); // Get amount of time in seconds currently displayed
+            const curTimeIntervalInSeconds = this.mapFromPixelToTotalTime(this.sk.keys.getCurTimelineSelectEnd()) - this.mapFromPixelToTotalTime(this.sk.keys.getCurTimelineSelectStart()); // Get amount of time in seconds currently displayed
             const animationIncrementValue = curTimeIntervalInSeconds / animationIncrementRateDivisor; // set increment value based on that value/divisor to keep constant sketchController.mode.isAnimate speed regardless of time interval selected
-            if (this.animationCounter < this.mapFromPixelToTotalTime(this.sk.keys.timeline.selectEnd)) this.animationCounter += animationIncrementValue;
+            if (this.animationCounter < this.mapFromPixelToTotalTime(this.sk.keys.getCurTimelineSelectEnd())) this.animationCounter += animationIncrementValue;
             else this.setIsAnimate(false);
         }
     }
@@ -71,7 +71,7 @@ class SketchController {
 
     setVideoScrubbing() {
         if (this.mode.isAnimate) {
-            const vPos = Math.floor(this.sk.map(this.bugTimeForVideoScrub, this.sk.keys.timeline.start, this.sk.keys.timeline.end, this.mapFromPixelToVideoTime(this.sk.keys.timeline.selectStart), this.mapFromPixelToVideoTime(this.sk.keys.timeline.selectEnd)));
+            const vPos = Math.floor(this.sk.map(this.bugTimeForVideoScrub, this.sk.keys.getTimelineStart(), this.sk.keys.getTimelineEnd(), this.mapFromPixelToVideoTime(this.sk.keys.getCurTimelineSelectStart()), this.mapFromPixelToVideoTime(this.sk.keys.getCurTimelineSelectEnd())));
             this.sk.core.videoPlayer.seekTo(vPos);
         } else if (this.sk.keys.overSpaceTimeView(this.sk.mouseX, this.sk.mouseY)) {
             const vPos = Math.floor(this.mapFromPixelToVideoTime(this.mapFromPixelToSelectedTime(this.sk.mouseX)));
@@ -154,8 +154,8 @@ class SketchController {
      * @param  {Integer} view
      */
     getScaledPointValues(point, view) {
-        const pixelTime = this.sk.map(point.time, 0, this.sk.core.totalTimeInSeconds, this.sk.keys.timeline.start, this.sk.keys.timeline.end);
-        const scaledTime = this.sk.map(pixelTime, this.sk.keys.timeline.selectStart, this.sk.keys.timeline.selectEnd, this.sk.keys.timeline.start, this.sk.keys.timeline.end);
+        const pixelTime = this.sk.map(point.time, 0, this.sk.core.totalTimeInSeconds, this.sk.keys.getTimelineStart(), this.sk.keys.getTimelineEnd());
+        const scaledTime = this.sk.map(pixelTime, this.sk.keys.getCurTimelineSelectStart(), this.sk.keys.getCurTimelineSelectEnd(), this.sk.keys.getTimelineStart(), this.sk.keys.getTimelineEnd());
         const [scaledXPos, scaledYPos] = this.getScaledXYPos(point.xPos, point.yPos);
         let scaledSpaceTimeXPos;
         if (view === this.sk.PLAN) scaledSpaceTimeXPos = scaledXPos;
@@ -238,25 +238,34 @@ class SketchController {
         return this.sk.map(this.sk.core.totalTimeInSeconds, 0, 3600, 10, 1, true); // map to inverse, values constrained between 10 and 1 (pixels)
     }
 
-    mapFromPixelToTotalTime(value) {
-        return this.sk.map(value, this.sk.keys.timeline.start, this.sk.keys.timeline.end, 0, this.sk.core.totalTimeInSeconds);
-    }
-
-    mapFromTotalToPixelTime(value) {
-        return this.sk.map(value, 0, this.sk.core.totalTimeInSeconds, this.sk.keys.timeline.start, this.sk.keys.timeline.end);
-    }
-
-    mapFromPixelToVideoTime(value) {
-        return Math.floor(this.sk.map(value, this.sk.keys.timeline.start, this.sk.keys.timeline.end, 0, Math.floor(this.sk.core.videoPlayer.getVideoDuration()))); // must floor vPos to prevent double finite error
-    }
-
-    mapFromPixelToSelectedTime(value) {
-        return this.sk.map(value, this.sk.keys.timeline.start, this.sk.keys.timeline.end, this.sk.keys.timeline.selectStart, this.sk.keys.timeline.selectEnd);
+    // map to inverse of min/max to set rectWidth based on amount of pixel time selected
+    mapRectInverse(rectMaxPixelWidth, rectMinPixelWidth) {
+        return this.sk.map(this.sk.keys.getCurTimelineSelectEnd() - this.sk.keys.getCurTimelineSelectStart(), 0, this.sk.keys.getTimelineEnd() - this.sk.keys.getTimelineStart(), rectMaxPixelWidth, rectMinPixelWidth);
     }
 
     mapFromVideoToSelectedTime() {
-        const timelinePos = this.sk.map(this.sk.core.videoPlayer.getCurrentTime(), 0, this.sk.core.totalTimeInSeconds, this.sk.keys.timeline.start, this.sk.keys.timeline.end);
-        return this.sk.map(timelinePos, this.sk.keys.timeline.selectStart, this.sk.keys.timeline.selectEnd, this.sk.keys.timeline.start, this.sk.keys.timeline.end);
+        const timelinePos = this.mapFromTotalToPixelTime(this.sk.core.videoPlayer.getCurrentTime());
+        return this.mapFromSelectPixelToTimeline(timelinePos);
+    }
+
+    mapFromPixelToTotalTime(value) {
+        return this.sk.map(value, this.sk.keys.getTimelineStart(), this.sk.keys.getTimelineEnd(), 0, this.sk.core.totalTimeInSeconds);
+    }
+
+    mapFromSelectPixelToTimeline(value) {
+        return this.sk.map(value, this.sk.keys.getCurTimelineSelectStart(), this.sk.keys.getCurTimelineSelectEnd(), this.sk.keys.getTimelineStart(), this.sk.keys.getTimelineEnd());
+    }
+
+    mapFromTotalToPixelTime(value) {
+        return this.sk.map(value, 0, this.sk.core.totalTimeInSeconds, this.sk.keys.getTimelineStart(), this.sk.keys.getTimelineEnd());
+    }
+
+    mapFromPixelToVideoTime(value) {
+        return Math.floor(this.sk.map(value, this.sk.keys.getTimelineStart(), this.sk.keys.getTimelineEnd(), 0, Math.floor(this.sk.core.videoPlayer.getVideoDuration()))); // must floor vPos to prevent double finite error
+    }
+
+    mapFromPixelToSelectedTime(value) {
+        return this.sk.map(value, this.sk.keys.getTimelineStart(), this.sk.keys.getTimelineEnd(), this.sk.keys.getCurTimelineSelectStart(), this.sk.keys.getCurTimelineSelectEnd());
     }
 
     // ****** SETTERS ****** //
