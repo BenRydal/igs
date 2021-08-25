@@ -45,23 +45,18 @@ class Keys {
         return this.timeline.getCurTimelineSelectEnd();
     }
 
-
-    // ****** DRAW METHODS ****** //
-    drawKeys(pathList, speakerList, selectMode) {
+    drawKeys(pathList, speakerList, curSelectMode) {
         this.sk.textAlign(this.sk.LEFT, this.sk.TOP);
         this.sk.textSize(this.keyTextSize);
-        this.dataPanel.draw(pathList, speakerList, selectMode); // pass these to dynamically update
+        this.dataPanel.organize("draw", pathList, speakerList, curSelectMode); // pass these to dynamically update
         this.timeline.draw();
         if (this.sk.sketchController.testSelectModeRegion() && this.overFloorPlan(this.sk.mouseX, this.sk.mouseY)) this.drawFloorPlanSelector();
         if (this.sk.sketchController.mode.isIntro) this.drawIntroMsg();
     }
 
-    // ****** HANDLERS ****** //
-    handleKeys(pathList, speakerList) {
-        // TODO: update, add over titles vs over keys distinction?
+    handleKeys(pathList, speakerList, curSelectMode) {
         this.sk.textSize(this.keyTextSize);
-        this.dataPanel.handleHeaders();
-        this.dataPanel.handleData(pathList, speakerList);
+        this.dataPanel.organize("handle", pathList, speakerList, curSelectMode);
     }
 
     // HANDLE CALLS FROM OTHER CLASSES
@@ -83,9 +78,12 @@ class Keys {
         this.sk.sketchController.setSelectMode(value);
     }
 
-    updateRotateMode(value) {
-        if (value === 0) this.sk.sketchController.setRotateLeft();
-        else this.sk.sketchController.setRotateRight();
+    setRotateLeft() {
+        this.sk.sketchController.setRotateLeft();
+    }
+
+    setRotateRight() {
+        this.sk.sketchController.setRotateRight();
     }
     /**
      * NOTE: this setter is modifying core vars but this still seems to be best solution

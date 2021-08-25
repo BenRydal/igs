@@ -34,7 +34,7 @@ class SketchController {
     // TODO: add test to keys class that tests whether mouse is below timeline?
     handleMousePressed() {
         if (this.testVideoToPlay() && this.sk.keys.overSpaceTimeView(this.sk.mouseX, this.sk.mouseY)) this.playPauseMovie();
-        this.sk.keys.handleKeys(this.sk.core.paths, this.sk.core.speakerList);
+        this.sk.keys.handleKeys(this.sk.core.paths, this.sk.core.speakerList, this.select.curMode);
     }
 
     handleMouseDragged() {
