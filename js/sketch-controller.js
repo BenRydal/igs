@@ -31,10 +31,9 @@ class SketchController {
         this.sk.loop();
     }
 
-    // TODO: add test to keys class that tests whether mouse is below timeline?
     handleMousePressed() {
         if (this.testVideoToPlay() && this.sk.keys.overSpaceTimeView(this.sk.mouseX, this.sk.mouseY)) this.playPauseMovie();
-        this.sk.keys.handleKeys(this.sk.core.paths, this.sk.core.speakerList, this.select.curMode);
+        else this.sk.keys.handleKeys(this.sk.core.paths, this.sk.core.speakerList, this.select.curMode);
     }
 
     handleMouseDragged() {
@@ -112,7 +111,10 @@ class SketchController {
     setSelectMode(value) {
         this.select.curMode = value;
     }
-
+    /**
+     * Sets drawing strokeWeights for movement data depending on current selection mode
+     */
+    // TODO: address use of numbers for comparison
     getWeightsFromSelectMode() {
         if (this.select.curMode === 3) return [1, 0];
         else if (this.select.curMode === 4) return [0, 10];
