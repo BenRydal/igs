@@ -32,7 +32,7 @@ class Keys {
         this.sk.textSize(this.keyTextSize);
         this.dataPanel.organize("draw", pathList, speakerList, curSelectMode); // pass these to dynamically update
         this.timeline.draw();
-        if (this.sk.sketchController.testSelectModeRegion() && this.overFloorPlan(this.sk.mouseX, this.sk.mouseY)) this.drawFloorPlanSelector();
+        if (this.sk.sketchController.testSelectModeForRegion() && this.overFloorPlan(this.sk.mouseX, this.sk.mouseY)) this.drawFloorPlanSelector();
         if (this.sk.sketchController.mode.isIntro) this.drawIntroMsg();
     }
 
@@ -110,6 +110,7 @@ class Keys {
 
 
     // ****** MOUSE/DATA POSITIONING TESTS ****** //
+    // TODO: consider moving overCircle and Rect to main??
     overCircle(x, y, diameter) {
         return this.sk.sqrt(this.sk.sq(x - this.sk.mouseX) + this.sk.sq(y - this.sk.mouseY)) < diameter / 2;
     }
@@ -131,6 +132,6 @@ class Keys {
     }
 
     overTimelineAxis(pixelValue) {
-        return this.timeline.overTimelineAxis(pixelValue);
+        return pixelValue >= this.getCurTimelineSelectStart() && pixelValue <= this.getCurTimelineSelectEnd();
     }
 }

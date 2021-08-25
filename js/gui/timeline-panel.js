@@ -109,10 +109,6 @@ class TimelinePanel {
         return this.overRect(this.tc.start - this.doublePadding, this.tc.top, this.length + this.doublePadding, this.tc.thickness);
     }
 
-    overTimelineAxis(pixelValue) {
-        return pixelValue >= this.selectStart && pixelValue <= this.selectEnd;
-    }
-
     overSpaceTimeView(xPos, yPos) {
         return (xPos >= this.tc.start && xPos <= this.tc.end) && (yPos >= 0 && yPos <= this.tc.top);
     }

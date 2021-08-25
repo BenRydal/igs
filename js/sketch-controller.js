@@ -109,10 +109,6 @@ class SketchController {
         return this.select.curMode;
     }
 
-    testSelectModeRegion() {
-        return this.select.curMode === 1;
-    }
-
     setSelectMode(value) {
         this.select.curMode = value;
     }
