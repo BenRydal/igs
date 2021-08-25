@@ -49,28 +49,28 @@ const igs = new p5((sk) => {
     }
 
     sk.setFloorPlan = function () {
-        if (sk.sketchController.testNoRotation()) sk.image(sk.core.floorPlan.img, 0, 0, sk.keys.floorPlan.width, sk.keys.floorPlan.height);
+        if (sk.sketchController.testNoRotation()) sk.image(sk.core.floorPlan.img, 0, 0, sk.keys.floorPlanContainer.width, sk.keys.floorPlanContainer.height);
         else this.setRotatedFloorPlan(sk.sketchController.getRotationMode());
     }
 
     sk.setRotatedFloorPlan = function (mode) {
         sk.push();
         sk.imageMode(sk.CENTER);
-        sk.translate(sk.keys.floorPlan.width / 2, sk.keys.floorPlan.height / 2);
+        sk.translate(sk.keys.floorPlanContainer.width / 2, sk.keys.floorPlanContainer.height / 2);
         switch (mode) {
             case sk.sketchController.rotation.modeList[1]:
                 sk.rotate(sk.HALF_PI);
-                sk.image(sk.core.floorPlan.img, 0, 0, sk.keys.floorPlan.height, sk.keys.floorPlan.width);
+                sk.image(sk.core.floorPlan.img, 0, 0, sk.keys.floorPlanContainer.height, sk.keys.floorPlanContainer.width);
                 sk.pop();
                 break;
             case sk.sketchController.rotation.modeList[2]:
                 sk.rotate(sk.PI);
-                sk.image(sk.core.floorPlan.img, 0, 0, sk.keys.floorPlan.width, sk.keys.floorPlan.height);
+                sk.image(sk.core.floorPlan.img, 0, 0, sk.keys.floorPlanContainer.width, sk.keys.floorPlanContainer.height);
                 sk.pop();
                 break;
             case sk.sketchController.rotation.modeList[3]:
                 sk.rotate(-sk.HALF_PI);
-                sk.image(sk.core.floorPlan.img, 0, 0, sk.keys.floorPlan.height, sk.keys.floorPlan.width);
+                sk.image(sk.core.floorPlan.img, 0, 0, sk.keys.floorPlanContainer.height, sk.keys.floorPlanContainer.width);
                 sk.pop();
                 break;
         }

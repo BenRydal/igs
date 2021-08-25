@@ -12,7 +12,7 @@ class Keys {
             top: this.timelineHeight - this.timelineThickness / 2,
             bottom: this.timelineHeight + this.timelineThickness / 2
         }
-        this.floorPlan = {
+        this.floorPlanContainer = {
             width: this.timelineContainer.start - (this.sk.width - this.timelineContainer.end),
             height: this.timelineContainer.height,
             selectorSize: 100
@@ -40,7 +40,7 @@ class Keys {
         this.sk.noFill();
         this.sk.strokeWeight(3);
         this.sk.stroke(0);
-        this.sk.circle(this.sk.mouseX, this.sk.mouseY, this.floorPlan.selectorSize);
+        this.sk.circle(this.sk.mouseX, this.sk.mouseY, this.floorPlanContainer.selectorSize);
     }
 
     drawIntroMsg() {
@@ -124,11 +124,11 @@ class Keys {
     }
 
     overFloorPlan(xPos, yPos) {
-        return (xPos >= 0 && xPos <= this.floorPlan.width) && (yPos >= 0 && yPos <= this.floorPlan.height);
+        return (xPos >= 0 && xPos <= this.floorPlanContainer.width) && (yPos >= 0 && yPos <= this.floorPlanContainer.height);
     }
 
     overCursor(xPos, yPos) {
-        return this.overCircle(xPos, yPos, this.floorPlan.selectorSize);
+        return this.overCircle(xPos, yPos, this.floorPlanContainer.selectorSize);
     }
 
     overTimelineAxis(pixelValue) {

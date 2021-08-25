@@ -177,20 +177,20 @@ class SketchController {
         let scaledXPos, scaledYPos;
         switch (this.getRotationMode()) {
             case this.rotation.modeList[0]:
-                scaledXPos = xPos * this.sk.keys.floorPlan.width / this.sk.core.floorPlan.inputPixelWidth;
-                scaledYPos = yPos * this.sk.keys.floorPlan.height / this.sk.core.floorPlan.inputPixelHeight;
+                scaledXPos = xPos * this.sk.keys.floorPlanContainer.width / this.sk.core.floorPlan.inputPixelWidth;
+                scaledYPos = yPos * this.sk.keys.floorPlanContainer.height / this.sk.core.floorPlan.inputPixelHeight;
                 return [scaledXPos, scaledYPos];
             case this.rotation.modeList[1]:
-                scaledXPos = this.sk.keys.floorPlan.width - (yPos * this.sk.keys.floorPlan.width / this.sk.core.floorPlan.inputPixelHeight);
-                scaledYPos = xPos * this.sk.keys.floorPlan.height / this.sk.core.floorPlan.inputPixelWidth;
+                scaledXPos = this.sk.keys.floorPlanContainer.width - (yPos * this.sk.keys.floorPlanContainer.width / this.sk.core.floorPlan.inputPixelHeight);
+                scaledYPos = xPos * this.sk.keys.floorPlanContainer.height / this.sk.core.floorPlan.inputPixelWidth;
                 return [scaledXPos, scaledYPos];
             case this.rotation.modeList[2]:
-                scaledXPos = this.sk.keys.floorPlan.width - (xPos * this.sk.keys.floorPlan.width / this.sk.core.floorPlan.inputPixelWidth);
-                scaledYPos = this.sk.keys.floorPlan.height - (yPos * this.sk.keys.floorPlan.height / this.sk.core.floorPlan.inputPixelHeight);
+                scaledXPos = this.sk.keys.floorPlanContainer.width - (xPos * this.sk.keys.floorPlanContainer.width / this.sk.core.floorPlan.inputPixelWidth);
+                scaledYPos = this.sk.keys.floorPlanContainer.height - (yPos * this.sk.keys.floorPlanContainer.height / this.sk.core.floorPlan.inputPixelHeight);
                 return [scaledXPos, scaledYPos];
             case this.rotation.modeList[3]:
-                scaledXPos = yPos * this.sk.keys.floorPlan.width / this.sk.core.floorPlan.inputPixelHeight;
-                scaledYPos = this.sk.keys.floorPlan.height - xPos * this.sk.keys.floorPlan.height / this.sk.core.floorPlan.inputPixelWidth;
+                scaledXPos = yPos * this.sk.keys.floorPlanContainer.width / this.sk.core.floorPlan.inputPixelHeight;
+                scaledYPos = this.sk.keys.floorPlanContainer.height - xPos * this.sk.keys.floorPlanContainer.height / this.sk.core.floorPlan.inputPixelWidth;
                 return [scaledXPos, scaledYPos];
         }
     }
