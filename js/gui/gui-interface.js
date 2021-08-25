@@ -7,11 +7,14 @@ class Keys {
             start: this.sk.width * 0.5,
             end: this.sk.width * 0.975,
             height: this.sk.height * .8,
-            top: this.height - this.doublePadding,
-            bottom: this.height + this.doublePadding
+            thickness: 80,
+            top: this.height - (this.thickness / 2),
+            bottom: this.height + (this.thickness / 2)
         }
         this.timeline = new TimelinePanel(this.sk);
+
         this.dataPanel = new DataPanel(this, 10, this.timeline.bottom);
+
         this.floorPlan = {
             width: this.timeline.start - (this.sk.width - this.timeline.end),
             height: this.timeline.height,
