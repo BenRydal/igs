@@ -37,7 +37,7 @@ const igs = new p5((sk) => {
 
     sk.draw = function () {
         sk.background(255);
-        if (sk.testData.dataIsLoaded(sk.core.floorPlan.img)) sk.setFloorPlan();
+        if (sk.testData.dataIsLoaded(sk.core.inputFloorPlan.img)) sk.setFloorPlan();
         if (sk.testData.arrayIsLoaded(sk.core.paths)) {
             if (sk.testData.arrayIsLoaded(sk.core.speakerList)) sk.setMovementAndConversation();
             else sk.setMovement();
@@ -49,7 +49,7 @@ const igs = new p5((sk) => {
     }
 
     sk.setFloorPlan = function () {
-        if (sk.sketchController.testNoRotation()) sk.image(sk.core.floorPlan.img, 0, 0, sk.keys.floorPlanContainer.width, sk.keys.floorPlanContainer.height);
+        if (sk.sketchController.testNoRotation()) sk.image(sk.core.inputFloorPlan.img, 0, 0, sk.keys.floorPlanContainer.width, sk.keys.floorPlanContainer.height);
         else this.setRotatedFloorPlan(sk.sketchController.getRotationMode());
     }
 
@@ -60,17 +60,17 @@ const igs = new p5((sk) => {
         switch (mode) {
             case sk.sketchController.rotation.modeList[1]:
                 sk.rotate(sk.HALF_PI);
-                sk.image(sk.core.floorPlan.img, 0, 0, sk.keys.floorPlanContainer.height, sk.keys.floorPlanContainer.width);
+                sk.image(sk.core.inputFloorPlan.img, 0, 0, sk.keys.floorPlanContainer.height, sk.keys.floorPlanContainer.width);
                 sk.pop();
                 break;
             case sk.sketchController.rotation.modeList[2]:
                 sk.rotate(sk.PI);
-                sk.image(sk.core.floorPlan.img, 0, 0, sk.keys.floorPlanContainer.width, sk.keys.floorPlanContainer.height);
+                sk.image(sk.core.inputFloorPlan.img, 0, 0, sk.keys.floorPlanContainer.width, sk.keys.floorPlanContainer.height);
                 sk.pop();
                 break;
             case sk.sketchController.rotation.modeList[3]:
                 sk.rotate(-sk.HALF_PI);
-                sk.image(sk.core.floorPlan.img, 0, 0, sk.keys.floorPlanContainer.height, sk.keys.floorPlanContainer.width);
+                sk.image(sk.core.inputFloorPlan.img, 0, 0, sk.keys.floorPlanContainer.height, sk.keys.floorPlanContainer.width);
                 sk.pop();
                 break;
         }
