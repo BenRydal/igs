@@ -150,8 +150,8 @@ class SketchController {
      * @param  {Integer} view
      */
     getScaledPointValues(point, view) {
-        const pixelTime = this.sk.map(point.time, 0, this.sk.core.totalTimeInSeconds, this.sk.keys.getTimelineStart(), this.sk.keys.getTimelineEnd());
-        const scaledTime = this.sk.map(pixelTime, this.sk.keys.getCurTimelineSelectStart(), this.sk.keys.getCurTimelineSelectEnd(), this.sk.keys.getTimelineStart(), this.sk.keys.getTimelineEnd());
+        const pixelTime = this.mapFromTotalToPixelTime(point.time);
+        const scaledTime = this.mapFromSelectPixelToTimeline(pixelTime);
         const [scaledXPos, scaledYPos] = this.getScaledXYPos(point.xPos, point.yPos);
         let scaledSpaceTimeXPos;
         if (view === this.sk.PLAN) scaledSpaceTimeXPos = scaledXPos;
