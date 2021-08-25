@@ -74,7 +74,7 @@ class TimelinePanel {
     }
 
     handleTimeline() {
-        if ((this.isLockedLeft || this.isLockedRight) || this.overTimelineAxisRegion()) {
+        if (this.updateTimeline()) {
             if (this.isLockedLeft || (!this.isLockedRight && this.overSelector(this.selectStart))) {
                 this.isLockedLeft = true;
                 this.selectStart = this.sk.constrain(this.sk.mouseX, this.tc.start, this.tc.end);
@@ -85,6 +85,10 @@ class TimelinePanel {
                 if (this.selectEnd < this.selectStart + this.doublePadding) this.selectEnd = this.selectStart + this.doublePadding; // prevents overstriking
             }
         }
+    }
+
+    updateTimeline() {
+        return ((this.isLockedLeft || this.isLockedRight) || this.overTimelineAxisRegion());
     }
 
     resetTimelineLock() {

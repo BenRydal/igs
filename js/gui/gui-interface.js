@@ -2,13 +2,15 @@ class Keys {
 
     constructor(sketch) {
         this.sk = sketch;
+        this.timelineHeight = this.sk.height * .8;
+        this.timelineThickness = 70;
         this.timelineContainer = {
             start: this.sk.width * 0.5,
             end: this.sk.width * 0.975,
-            height: this.sk.height * .8,
-            thickness: 80,
-            top: this.sk.height * .8 - 40,
-            bottom: this.sk.height * .8 + 40
+            height: this.timelineHeight,
+            thickness: this.timelineThickness,
+            top: this.timelineHeight - this.timelineThickness / 2,
+            bottom: this.timelineHeight + this.timelineThickness / 2
         }
         this.floorPlan = {
             width: this.timelineContainer.start - (this.sk.width - this.timelineContainer.end),
