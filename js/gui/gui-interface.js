@@ -2,7 +2,7 @@ class Keys {
 
     constructor(sketch) {
         this.sk = sketch;
-        this.timelineHeight = this.sk.height * .8;
+        this.timelineHeight = this.sk.height * .85;
         this.timelineThickness = 70;
         this.timelineContainer = {
             start: this.sk.width * 0.5,
@@ -20,7 +20,7 @@ class Keys {
         this.dataPanelContainer = {
             xPos: 10,
             headerYPos: this.timelineContainer.bottom,
-            dataYPos: this.timelineContainer.bottom + 50
+            dataYPos: this.timelineContainer.bottom + 60
         }
         this.timeline = new TimelinePanel(this.sk, this.timelineContainer);
         this.dataPanel = new DataPanel(this.sk, this.dataPanelContainer);
@@ -47,7 +47,6 @@ class Keys {
     }
 
     drawKeys(pathList, speakerList, curSelectMode) {
-        this.sk.textAlign(this.sk.LEFT, this.sk.TOP);
         this.sk.textSize(this.keyTextSize);
         this.dataPanel.organize("draw", pathList, speakerList, curSelectMode); // pass these to dynamically update
         this.timeline.draw();

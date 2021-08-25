@@ -22,6 +22,7 @@ const igs = new p5((sk) => {
     sk.setup = function () {
         sk.canvas = sk.createCanvas(window.innerWidth, window.innerHeight, sk.P2D);
         sk.textFont(sk.font_Lato);
+        sk.textAlign(sk.LEFT, sk.TOP);
         // SKETCH SINGLETONS
         sk.core = new Core(sk); // core program variables and update methods
         sk.testData = new TestData(); // holds tests for core data and CSV files. Does not need sketch reference

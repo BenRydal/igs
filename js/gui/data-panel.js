@@ -92,7 +92,7 @@ class DataPanel {
         }
         this.sk.fill(0);
         this.sk.noStroke();
-        this.sk.text(person.name, curXPos + 1.3 * this.spacing, this.data.height);
+        this.sk.text(person.name, curXPos + 1.3 * this.spacing, this.data.height - 5);
     }
 
     drawSelector(curXPos, curSelectMode, i) {
@@ -112,8 +112,7 @@ class DataPanel {
     }
 
     overPerson(person, curXPos) {
-        const nameWidth = this.sk.textWidth(person.name); // set nameWidth to pixel width of path name
-        if (this.sk.keys.overRect(curXPos, this.data.height, this.spacing + nameWidth, this.spacing)) this.sk.keys.setCoreData(person);
+        if (this.sk.keys.overRect(curXPos, this.data.height, this.spacing, this.spacing)) this.sk.keys.setCoreData(person);
     }
 
     overSelector(curXPos, pixelWidth, i) {
