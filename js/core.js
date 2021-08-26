@@ -53,6 +53,32 @@ class Core {
         }
     }
 
+    updateVideoScrubAnimate(timeInSeconds) {
+        this.videoPlayer.seekTo(timeInSeconds);
+    }
+    updateVideoScrub(timeInSeconds) {
+        this.videoPlayer.seekTo(timeInSeconds);
+        this.videoPlayer.pause(); // Add to prevent accidental video playing that seems to occur
+    }
+
+    hideVideo() {
+        this.videoPlayer.pause();
+        this.videoPlayer.hide();
+    }
+
+    showVideo() {
+        this.videoPlayer.show();
+    }
+
+    pauseVideo() {
+        this.videoPlayer.pause();
+    }
+
+    playVideo(timeInSeconds) {
+        this.videoPlayer.play();
+        this.sk.core.videoPlayer.seekTo(timeInSeconds);
+    }
+
     /** 
      * Organizes methods to process and update core parsedMovementFileData []
      * @param {Integer} fileNum

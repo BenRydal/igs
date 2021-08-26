@@ -63,36 +63,27 @@ class SketchController {
     }
 
     setVideoScrubbing() {
-        if (this.mode.isAnimate) {
-            const vPos = Math.floor(this.sk.map(this.bugTimeForVideoScrub, this.sk.gui.getTimelineStart(), this.sk.gui.getTimelineEnd(), this.mapFromPixelToVideoTime(this.sk.gui.getCurTimelineSelectStart()), this.mapFromPixelToVideoTime(this.sk.gui.getCurTimelineSelectEnd())));
-            this.sk.core.videoPlayer.seekTo(vPos);
-        } else if (this.sk.gui.overSpaceTimeView(this.sk.mouseX, this.sk.mouseY)) {
-            const vPos = Math.floor(this.mapFromPixelToVideoTime(this.mapFromPixelToSelectedTime(this.sk.mouseX)));
-            this.sk.core.videoPlayer.seekTo(vPos);
-            this.sk.core.videoPlayer.pause(); // Add to prevent accidental video playing that seems to occur
-        }
+        if (this.mode.isAnimate) this.sk.core.updateVideoScrubAnimate(Math.floor(this.sk.map(this.bugTimeForVideoScrub, this.sk.gui.getTimelineStart(), this.sk.gui.getTimelineEnd(), this.mapFromPixelToVideoTime(this.sk.gui.getCurTimelineSelectStart()), this.mapFromPixelToVideoTime(this.sk.gui.getCurTimelineSelectEnd()))));
+        else if (this.sk.gui.overSpaceTimeView(this.sk.mouseX, this.sk.mouseY)) this.sk.core.updateVideoScrub(Math.floor(this.mapFromPixelToVideoTime(this.mapFromPixelToSelectedTime(this.sk.mouseX))));
     }
 
     toggleVideoShowHide() {
         if (this.mode.isVideoShow) {
-            this.sk.core.videoPlayer.pause();
-            this.sk.core.videoPlayer.hide();
+            this.sk.core.hideVideo();
             this.setVideoPlay(false);
             this.setVideoShow(false);
         } else {
-            this.sk.core.videoPlayer.show();
+            this.sk.core.showVideo();
             this.setVideoShow(true);
         }
     }
 
     playPauseMovie() {
         if (this.mode.isVideoPlay) {
-            this.sk.core.videoPlayer.pause();
+            this.sk.core.pauseVideo();
             this.setVideoPlay(false);
         } else {
-            const tPos = this.mapFromPixelToVideoTime(this.mapFromPixelToSelectedTime(this.sk.mouseX));
-            this.sk.core.videoPlayer.play();
-            this.sk.core.videoPlayer.seekTo(tPos);
+            this.sk.core.playVideo(this.mapFromPixelToVideoTime(this.mapFromPixelToSelectedTime(this.sk.mouseX)));
             this.setVideoPlay(true);
         }
     }
