@@ -70,21 +70,21 @@ class SketchController {
     toggleVideoShowHide() {
         if (this.mode.isVideoShow) {
             this.sk.core.hideVideo();
-            this.setVideoPlay(false);
-            this.setVideoShow(false);
+            this.setIsVideoPlay(false);
+            this.setIsVideoShow(false);
         } else {
             this.sk.core.showVideo();
-            this.setVideoShow(true);
+            this.setIsVideoShow(true);
         }
     }
 
     playPauseMovie() {
         if (this.mode.isVideoPlay) {
             this.sk.core.pauseVideo();
-            this.setVideoPlay(false);
+            this.setIsVideoPlay(false);
         } else {
             this.sk.core.playVideo(this.mapFromPixelToVideoTime(this.mapFromPixelToSelectedTime(this.sk.mouseX)));
-            this.setVideoPlay(true);
+            this.setIsVideoPlay(true);
         }
     }
 
@@ -243,23 +243,23 @@ class SketchController {
         this.mode.isAnimate = value;
     }
 
-    setAlignTalk(value) {
+    setIsAlignTalk(value) {
         this.mode.isAlignTalk = value;
     }
 
-    setAllTalk(value) {
+    setIsAllTalk(value) {
         this.mode.isAllTalk = value;
     }
 
-    setIntro(value) {
+    setIsIntro(value) {
         this.mode.isIntro = value;
     }
 
-    setVideoPlay(value) {
+    setIsVideoPlay(value) {
         this.mode.isVideoPlay = value;
     }
 
-    setVideoShow(value) {
+    setIsVideoShow(value) {
         this.mode.isVideoShow = value;
     }
 

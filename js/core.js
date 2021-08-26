@@ -215,8 +215,8 @@ class Core {
     clearVideo() {
         this.videoPlayer.destroy(); // if there is a video, destroy it
         this.videoPlayer = null;
-        this.sk.sketchController.setVideoPlay(false);
-        this.sk.sketchController.setVideoShow(false);
+        this.sk.sketchController.setIsVideoPlay(false);
+        this.sk.sketchController.setIsVideoShow(false);
     }
 
     clearFloorPlan() {
