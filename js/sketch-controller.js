@@ -8,9 +8,9 @@ class SketchController {
             isAllTalk: true,
             isIntro: true,
             isVideoPlay: false,
-            isVideoShow: false,
-            curRotation: 0, // [0-3] 4 rotation modes none, 90, 180, 270
+            isVideoShow: false
         }
+        this.curFloorPlanRotation = 0; // [0-3] 4 rotation modes none, 90, 180, 270
         this.animationCounter = 0; // counter to synchronize animation across all data
         this.bugTimeForVideoScrub = null; // Set in draw movement data and used to display correct video frame when scrubbing video
     }
@@ -278,16 +278,16 @@ class SketchController {
     }
 
     getRotationMode() {
-        return this.mode.curRotation;
+        return this.curFloorPlanRotation;
     }
 
     setRotateRight() {
-        this.mode.curRotation++;
-        if (this.mode.curRotation > 3) this.mode.curRotation = 0;
+        this.curFloorPlanRotation++;
+        if (this.curFloorPlanRotation > 3) this.curFloorPlanRotation = 0;
     }
 
     setRotateLeft() {
-        this.mode.curRotation--;
-        if (this.mode.curRotation < 0) this.mode.curRotation = 3;
+        this.curFloorPlanRotation--;
+        if (this.curFloorPlanRotation < 0) this.curFloorPlanRotation = 3;
     }
 }
