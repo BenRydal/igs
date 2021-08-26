@@ -20,7 +20,7 @@ class Keys {
         this.dataPanelContainer = {
             xPos: 10,
             headerYPos: this.timelineContainer.bottom,
-            dataYPos: this.timelineContainer.bottom + 60
+            tabsYPos: this.timelineContainer.bottom + 60
         }
         this.timeline = new TimelinePanel(this.sk, this.timelineContainer);
         this.dataPanel = new DataPanel(this.sk, this.dataPanelContainer);
@@ -30,7 +30,7 @@ class Keys {
 
     drawKeys(pathList, speakerList, curSelectMode) {
         this.sk.textSize(this.keyTextSize);
-        this.dataPanel.organize("draw", pathList, speakerList, curSelectMode); // pass these to dynamically update
+        this.dataPanel.organize(this.sk.DRAWGUI, pathList, speakerList, curSelectMode); // pass these to dynamically update
         this.timeline.draw();
         if (this.sk.sketchController.testSelectModeForRegion() && this.overFloorPlan(this.sk.mouseX, this.sk.mouseY)) this.drawFloorPlanSelector();
         if (this.sk.sketchController.mode.isIntro) this.drawIntroMsg();
@@ -57,7 +57,7 @@ class Keys {
 
     handleKeys(pathList, speakerList, curSelectMode) {
         this.sk.textSize(this.keyTextSize);
-        this.dataPanel.organize("handle", pathList, speakerList, curSelectMode);
+        this.dataPanel.organize(this.sk.HANDLEGUI, pathList, speakerList, curSelectMode);
     }
 
     getTimelineStart() {

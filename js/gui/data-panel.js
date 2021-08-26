@@ -1,5 +1,9 @@
 class DataPanel {
-
+    /**
+     * Data panel consists of a header object and associated tabs object that holds all data/labels for each header
+     * Each header/tab has an organize method that handles drawing and mouse handlers/over methods
+     * To add another header/tab, update string lists and add organize/draw/over methods
+     */
     constructor(sketch, dataPanelContainer) {
         this.sk = sketch;
         this.xPos = dataPanelContainer.xPos;
@@ -9,14 +13,15 @@ class DataPanel {
             curMode: 0,
             height: dataPanelContainer.headerYPos,
         }
-        this.data = {
-            height: dataPanelContainer.dataYPos,
+        this.tabs = {
+            height: dataPanelContainer.tabsYPos,
             selectMode: ["none", "region", "slice", "moving", "stopped"],
             rotateMode: ["rotate left", "rotate right"]
-            // add more modes/tabs here
         }
     }
-
+    /**
+     * Passed values allow for dynamic display/updating
+     */
     organize(mode, pathList, speakerList, curSelectMode) {
         this.organizeHeaders(mode);
         switch (this.headers.curMode) {
@@ -39,7 +44,7 @@ class DataPanel {
         let curXPos = this.xPos;
         for (let i = 0; i < this.headers.mode.length; i++) {
             const pixelWidth = this.sk.textWidth(this.headers.mode[i]) + this.spacing;
-            if (mode === "draw") this.drawHeader(curXPos, i);
+            if (mode === this.sk.DRAWGUI) this.drawHeader(curXPos, i);
             else this.overHeader(curXPos, pixelWidth, i);
             curXPos += pixelWidth;
         }
@@ -48,7 +53,7 @@ class DataPanel {
     organizePerson(mode, list) {
         let curXPos = this.xPos;
         for (const person of list) {
-            if (mode === "draw") this.drawPerson(person, curXPos);
+            if (mode === this.sk.DRAWGUI) this.drawPerson(person, curXPos);
             else this.overPerson(person, curXPos);;
             curXPos += (2 * this.spacing) + this.sk.textWidth(person.name);
         }
@@ -56,9 +61,9 @@ class DataPanel {
 
     organizeSelectors(mode, curSelectMode) {
         let curXPos = this.xPos;
-        for (let i = 0; i < this.data.selectMode.length; i++) {
-            const pixelWidth = this.sk.textWidth(this.data.selectMode[i]) + this.spacing;
-            if (mode === "draw") this.drawSelector(curXPos, curSelectMode, i);
+        for (let i = 0; i < this.tabs.selectMode.length; i++) {
+            const pixelWidth = this.sk.textWidth(this.tabs.selectMode[i]) + this.spacing;
+            if (mode === this.sk.DRAWGUI) this.drawSelector(curXPos, curSelectMode, i);
             else this.overSelector(curXPos, pixelWidth, i);
             curXPos += pixelWidth;
         }
@@ -66,9 +71,9 @@ class DataPanel {
 
     organizeRotateKeys(mode) {
         let curXPos = this.xPos;
-        for (const angle of this.data.rotateMode) {
+        for (const angle of this.tabs.rotateMode) {
             const pixelWidth = this.sk.textWidth(angle) + this.spacing;
-            if (mode === "draw") this.drawRotateKey(angle, curXPos);
+            if (mode === this.sk.DRAWGUI) this.drawRotateKey(angle, curXPos);
             else this.overRotateKey(angle, curXPos, pixelWidth);
             curXPos += pixelWidth;
         }
@@ -85,26 +90,26 @@ class DataPanel {
         this.sk.strokeWeight(5);
         this.sk.stroke(person.color);
         this.sk.noFill();
-        this.sk.rect(curXPos, this.data.height, this.spacing, this.spacing);
+        this.sk.rect(curXPos, this.tabs.height, this.spacing, this.spacing);
         if (person.isShowing) {
             this.sk.fill(person.color);
-            this.sk.rect(curXPos, this.data.height, this.spacing, this.spacing);
+            this.sk.rect(curXPos, this.tabs.height, this.spacing, this.spacing);
         }
         this.sk.fill(0);
         this.sk.noStroke();
-        this.sk.text(person.name, curXPos + 1.3 * this.spacing, this.data.height - 5);
+        this.sk.text(person.name, curXPos + 1.3 * this.spacing, this.tabs.height - 5);
     }
 
     drawSelector(curXPos, curSelectMode, i) {
         if (curSelectMode === i) this.sk.fill(0);
         else this.sk.fill(150);
-        this.sk.text(this.data.selectMode[i], curXPos, this.data.height);
+        this.sk.text(this.tabs.selectMode[i], curXPos, this.tabs.height);
     }
 
     drawRotateKey(angle, curXPos) {
         this.sk.noStroke();
         this.sk.fill(0);
-        this.sk.text(angle, curXPos, this.data.height);
+        this.sk.text(angle, curXPos, this.tabs.height);
     }
 
     overHeader(xPos, pixelWidth, header) {
@@ -112,16 +117,16 @@ class DataPanel {
     }
 
     overPerson(person, curXPos) {
-        if (this.sk.overRect(curXPos, this.data.height, this.spacing, this.spacing)) this.sk.keys.setCoreData(person);
+        if (this.sk.overRect(curXPos, this.tabs.height, this.spacing, this.spacing)) this.sk.keys.setCoreData(person);
     }
 
     overSelector(curXPos, pixelWidth, i) {
-        if (this.sk.overRect(curXPos, this.data.height, curXPos + pixelWidth, this.spacing)) this.sk.keys.setSelectMode(i);
+        if (this.sk.overRect(curXPos, this.tabs.height, curXPos + pixelWidth, this.spacing)) this.sk.keys.setSelectMode(i);
     }
 
     overRotateKey(angle, curXPos, pixelWidth) {
-        if (this.sk.overRect(curXPos, this.data.height, curXPos + pixelWidth, this.spacing)) {
-            if (angle === this.data.rotateMode[0]) this.sk.keys.setRotateLeft();
+        if (this.sk.overRect(curXPos, this.tabs.height, curXPos + pixelWidth, this.spacing)) {
+            if (angle === this.tabs.rotateMode[0]) this.sk.keys.setRotateLeft();
             else this.sk.keys.setRotateRight();
         }
     }
