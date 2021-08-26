@@ -37,7 +37,7 @@ const igs = new p5((sk) => {
 
     sk.draw = function () {
         sk.background(255);
-        if (sk.testData.dataIsLoaded(sk.core.inputFloorPlan.img)) sk.setFloorPlan();
+        if (sk.testData.dataIsLoaded(sk.core.inputFloorPlan.img)) sk.setFloorPlan(sk.sketchController.getRotationMode());
         if (sk.testData.arrayIsLoaded(sk.core.paths)) {
             if (sk.testData.arrayIsLoaded(sk.core.speakerList)) sk.setMovementAndConversation();
             else sk.setMovement();
@@ -48,27 +48,26 @@ const igs = new p5((sk) => {
         sk.sketchController.updateLoop();
     }
 
-    sk.setFloorPlan = function () {
-        if (sk.sketchController.testNoRotation()) sk.image(sk.core.inputFloorPlan.img, 0, 0, sk.keys.floorPlanContainer.width, sk.keys.floorPlanContainer.height);
-        else this.setRotatedFloorPlan(sk.sketchController.getRotationMode());
-    }
-
-    sk.setRotatedFloorPlan = function (mode) {
+    sk.setFloorPlan = function (mode) {
         sk.push();
-        sk.imageMode(sk.CENTER);
+        sk.imageMode(sk.CENTER); // important method to include here
         sk.translate(sk.keys.floorPlanContainer.width / 2, sk.keys.floorPlanContainer.height / 2);
         switch (mode) {
-            case sk.sketchController.rotation.modeList[1]:
+            case 0:
+                sk.pop(); // no rotation so end translation before drawing
+                sk.image(sk.core.inputFloorPlan.img, 0, 0, sk.keys.floorPlanContainer.width, sk.keys.floorPlanContainer.height);
+                break;
+            case 1:
                 sk.rotate(sk.HALF_PI);
                 sk.image(sk.core.inputFloorPlan.img, 0, 0, sk.keys.floorPlanContainer.height, sk.keys.floorPlanContainer.width);
                 sk.pop();
                 break;
-            case sk.sketchController.rotation.modeList[2]:
+            case 2:
                 sk.rotate(sk.PI);
                 sk.image(sk.core.inputFloorPlan.img, 0, 0, sk.keys.floorPlanContainer.width, sk.keys.floorPlanContainer.height);
                 sk.pop();
                 break;
-            case sk.sketchController.rotation.modeList[3]:
+            case 3:
                 sk.rotate(-sk.HALF_PI);
                 sk.image(sk.core.inputFloorPlan.img, 0, 0, sk.keys.floorPlanContainer.height, sk.keys.floorPlanContainer.width);
                 sk.pop();

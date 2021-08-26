@@ -76,7 +76,6 @@ class Keys {
         return this.timeline.getCurTimelineSelectEnd();
     }
 
-    // HANDLE CALLS FROM OTHER CLASSES
     /**
      * Updates user select start/end vars and is triggered if user already dragging or begins dragging
      */
@@ -88,7 +87,6 @@ class Keys {
         this.timeline.resetTimelineLock();
     }
 
-    // HANDLE CALLS TO OTHER CLASSES
     // TODO:
     setSelectMode(value) {
         this.sk.sketchController.setSelectMode(value);
@@ -108,8 +106,6 @@ class Keys {
         personFromList.isShowing = !personFromList.isShowing;
     }
 
-
-    // ****** MOUSE/DATA POSITIONING TESTS ****** //
     // TODO: consider moving overCircle and Rect to main??
     overCircle(x, y, diameter) {
         return this.sk.sqrt(this.sk.sq(x - this.sk.mouseX) + this.sk.sq(y - this.sk.mouseY)) < diameter / 2;

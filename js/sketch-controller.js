@@ -8,14 +8,9 @@ class SketchController {
             isAllTalk: true,
             isIntro: true,
             isVideoPlay: false,
-            isVideoShow: false
-        }
-        this.rotation = {
-            curMode: 0,
-            modeList: ["none", "mode_90", "mode_180", "mode_270"],
-        }
-        this.select = {
-            curMode: 0
+            isVideoShow: false,
+            curRotation: 0, // [0-3] 4 rotation modes none, 90, 180, 270
+            curSelect: 0 // [0-4] 5 select modes none, region, slice, moving, stopped
         }
         this.animationCounter = 0; // counter to synchronize animation across all data
         this.bugTimeForVideoScrub = null; // Set in draw movement data and used to display correct video frame when scrubbing video
@@ -33,7 +28,7 @@ class SketchController {
 
     handleMousePressed() {
         if (this.testVideoToPlay() && this.sk.keys.overSpaceTimeView(this.sk.mouseX, this.sk.mouseY)) this.playPauseMovie();
-        else this.sk.keys.handleKeys(this.sk.core.paths, this.sk.core.speakerList, this.select.curMode);
+        else this.sk.keys.handleKeys(this.sk.core.paths, this.sk.core.speakerList, this.mode.curSelect);
     }
 
     handleMouseDragged() {
@@ -103,48 +98,6 @@ class SketchController {
         }
     }
 
-    // TODO:
-    getSelectMode() {
-        return this.select.curMode;
-    }
-
-    setSelectMode(value) {
-        this.select.curMode = value;
-    }
-    /**
-     * Sets drawing strokeWeights for movement data depending on current selection mode
-     */
-    // TODO: address use of numbers for comparison
-    getWeightsFromSelectMode() {
-        if (this.select.curMode === 3) return [1, 0];
-        else if (this.select.curMode === 4) return [0, 10];
-        else return [1, 10];
-    }
-
-    testSelectModeForRegion() {
-        return this.select.curMode === 1;
-    }
-
-
-    // ****** ROTATION METHODS ****** //
-    testNoRotation() {
-        return this.getRotationMode() === this.rotation.modeList[0];
-    }
-
-    getRotationMode() {
-        return this.rotation.modeList[this.rotation.curMode];
-    }
-
-    setRotateRight() {
-        this.rotation.curMode++;
-        if (this.rotation.curMode > 3) this.rotation.curMode = 0;
-    }
-
-    setRotateLeft() {
-        this.rotation.curMode--;
-        if (this.rotation.curMode < 0) this.rotation.curMode = 3;
-    }
-
     // ****** DRAW HELPER METHODS ****** //
     /**
      * Returns properly scaled pixel values to GUI from data points
@@ -176,19 +129,19 @@ class SketchController {
     getScaledXYPos(xPos, yPos) {
         let scaledXPos, scaledYPos;
         switch (this.getRotationMode()) {
-            case this.rotation.modeList[0]:
+            case 0:
                 scaledXPos = xPos * this.sk.keys.floorPlanContainer.width / this.sk.core.inputFloorPlan.width;
                 scaledYPos = yPos * this.sk.keys.floorPlanContainer.height / this.sk.core.inputFloorPlan.height;
                 return [scaledXPos, scaledYPos];
-            case this.rotation.modeList[1]:
+            case 1:
                 scaledXPos = this.sk.keys.floorPlanContainer.width - (yPos * this.sk.keys.floorPlanContainer.width / this.sk.core.inputFloorPlan.height);
                 scaledYPos = xPos * this.sk.keys.floorPlanContainer.height / this.sk.core.inputFloorPlan.width;
                 return [scaledXPos, scaledYPos];
-            case this.rotation.modeList[2]:
+            case 2:
                 scaledXPos = this.sk.keys.floorPlanContainer.width - (xPos * this.sk.keys.floorPlanContainer.width / this.sk.core.inputFloorPlan.width);
                 scaledYPos = this.sk.keys.floorPlanContainer.height - (yPos * this.sk.keys.floorPlanContainer.height / this.sk.core.inputFloorPlan.height);
                 return [scaledXPos, scaledYPos];
-            case this.rotation.modeList[3]:
+            case 3:
                 scaledXPos = yPos * this.sk.keys.floorPlanContainer.width / this.sk.core.inputFloorPlan.height;
                 scaledYPos = this.sk.keys.floorPlanContainer.height - xPos * this.sk.keys.floorPlanContainer.height / this.sk.core.inputFloorPlan.width;
                 return [scaledXPos, scaledYPos];
@@ -266,8 +219,7 @@ class SketchController {
         return this.sk.map(value, this.sk.keys.getTimelineStart(), this.sk.keys.getTimelineEnd(), this.sk.keys.getCurTimelineSelectStart(), this.sk.keys.getCurTimelineSelectEnd());
     }
 
-    // ****** SETTERS ****** //
-
+    // ****** MODE GETTERS/SETTERS ****** //
     setIsAnimate(value) {
         this.mode.isAnimate = value;
     }
@@ -290,5 +242,47 @@ class SketchController {
 
     setVideoShow(value) {
         this.mode.isVideoShow = value;
+    }
+
+    // ****** ROTATION METHODS ****** //
+    testNoRotation() {
+        return this.getRotationMode() === 0;
+    }
+
+    getRotationMode() {
+        return this.mode.curRotation;
+    }
+
+    setRotateRight() {
+        this.mode.curRotation++;
+        if (this.mode.curRotation > 3) this.mode.curRotation = 0;
+    }
+
+    setRotateLeft() {
+        this.mode.curRotation--;
+        if (this.mode.curRotation < 0) this.mode.curRotation = 3;
+    }
+
+    // ****** SELECT METHODS ****** //
+    // TODO:
+    getSelectMode() {
+        return this.mode.curSelect;
+    }
+
+    setSelectMode(value) {
+        this.mode.curSelect = value;
+    }
+    /**
+     * Sets drawing strokeWeights for movement data depending on current selection mode
+     */
+    // TODO: address use of numbers for comparison
+    getWeightsFromSelectMode() {
+        if (this.mode.curSelect === 3) return [1, 0];
+        else if (this.mode.curSelect === 4) return [0, 10];
+        else return [1, 10];
+    }
+
+    testSelectModeForRegion() {
+        return this.mode.curSelect === 1;
     }
 }
