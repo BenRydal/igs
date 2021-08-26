@@ -96,17 +96,12 @@ class TimelinePanel {
         this.isLockedRight = false;
     }
 
-    // TODO: move to main.js?
-    overRect(x, y, boxWidth, boxHeight) {
-        return this.sk.mouseX >= x && this.sk.mouseX <= x + boxWidth && this.sk.mouseY >= y && this.sk.mouseY <= y + boxHeight;
-    }
-
     overSelector(selector) {
-        return this.overRect(selector - this.padding, this.tc.top, this.doublePadding, this.tc.thickness);
+        return this.sk.overRect(selector - this.padding, this.tc.top, this.doublePadding, this.tc.thickness);
     }
 
     overTimelineAxisRegion() {
-        return this.overRect(this.tc.start - this.doublePadding, this.tc.top, this.length + this.doublePadding, this.tc.thickness);
+        return this.sk.overRect(this.tc.start - this.doublePadding, this.tc.top, this.length + this.doublePadding, this.tc.thickness);
     }
 
     overSpaceTimeView(xPos, yPos) {

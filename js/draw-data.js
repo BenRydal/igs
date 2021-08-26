@@ -240,8 +240,8 @@ class DrawDataConversation {
         if (this.sk.sketchController.mode.isAlignTalk) yPos = 0; // if conversation turn positioning is at top of screen
         else yPos = curPoint.scaledYPos - rectLength;
         // ***** TEST SET TEXT
-        if (this.sk.keys.overRect(curPoint.scaledXPos, yPos, rectWidth, rectLength)) this.recordConversationBubble(point, this.sk.PLAN); // if over plan
-        else if (this.sk.keys.overRect(curPoint.scaledTime, yPos, rectWidth, rectLength)) this.recordConversationBubble(point, this.sk.SPACETIME); // if over spacetime
+        if (this.sk.overRect(curPoint.scaledXPos, yPos, rectWidth, rectLength)) this.recordConversationBubble(point, this.sk.PLAN); // if over plan
+        else if (this.sk.overRect(curPoint.scaledTime, yPos, rectWidth, rectLength)) this.recordConversationBubble(point, this.sk.SPACETIME); // if over spacetime
         // ***** DRAW CUR RECT
         this.sk.fill(curColor);
         this.sk.rect(curPoint.scaledXPos, yPos, rectWidth, rectLength); // this.sk.PLAN VIEW

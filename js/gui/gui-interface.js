@@ -106,15 +106,6 @@ class Keys {
         personFromList.isShowing = !personFromList.isShowing;
     }
 
-    // TODO: consider moving overCircle and Rect to main??
-    overCircle(x, y, diameter) {
-        return this.sk.sqrt(this.sk.sq(x - this.sk.mouseX) + this.sk.sq(y - this.sk.mouseY)) < diameter / 2;
-    }
-
-    overRect(x, y, boxWidth, boxHeight) {
-        return this.sk.mouseX >= x && this.sk.mouseX <= x + boxWidth && this.sk.mouseY >= y && this.sk.mouseY <= y + boxHeight;
-    }
-
     overSpaceTimeView(xPos, yPos) {
         return this.timeline.overSpaceTimeView(xPos, yPos);
     }
@@ -124,7 +115,7 @@ class Keys {
     }
 
     overCursor(xPos, yPos) {
-        return this.overCircle(xPos, yPos, this.floorPlanContainer.selectorSize);
+        return this.sk.overCircle(xPos, yPos, this.floorPlanContainer.selectorSize);
     }
 
     overTimelineAxis(pixelValue) {

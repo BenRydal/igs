@@ -108,19 +108,19 @@ class DataPanel {
     }
 
     overHeader(xPos, pixelWidth, header) {
-        if (this.sk.keys.overRect(xPos, this.headers.height, xPos + pixelWidth, this.spacing)) this.headers.curMode = header;
+        if (this.sk.overRect(xPos, this.headers.height, xPos + pixelWidth, this.spacing)) this.headers.curMode = header;
     }
 
     overPerson(person, curXPos) {
-        if (this.sk.keys.overRect(curXPos, this.data.height, this.spacing, this.spacing)) this.sk.keys.setCoreData(person);
+        if (this.sk.overRect(curXPos, this.data.height, this.spacing, this.spacing)) this.sk.keys.setCoreData(person);
     }
 
     overSelector(curXPos, pixelWidth, i) {
-        if (this.sk.keys.overRect(curXPos, this.data.height, curXPos + pixelWidth, this.spacing)) this.sk.keys.setSelectMode(i);
+        if (this.sk.overRect(curXPos, this.data.height, curXPos + pixelWidth, this.spacing)) this.sk.keys.setSelectMode(i);
     }
 
     overRotateKey(angle, curXPos, pixelWidth) {
-        if (this.sk.keys.overRect(curXPos, this.data.height, curXPos + pixelWidth, this.spacing)) {
+        if (this.sk.overRect(curXPos, this.data.height, curXPos + pixelWidth, this.spacing)) {
             if (angle === this.data.rotateMode[0]) this.sk.keys.setRotateLeft();
             else this.sk.keys.setRotateRight();
         }

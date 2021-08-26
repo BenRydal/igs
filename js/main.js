@@ -110,4 +110,12 @@ const igs = new p5((sk) => {
     sk.mouseMoved = function () {
         sk.sketchController.startLoop();
     }
+
+    sk.overCircle = function (x, y, diameter) {
+        return sk.sqrt(sk.sq(x - sk.mouseX) + sk.sq(y - sk.mouseY)) < diameter / 2;
+    }
+
+    sk.overRect = function (x, y, boxWidth, boxHeight) {
+        return sk.mouseX >= x && sk.mouseX <= x + boxWidth && sk.mouseY >= y && sk.mouseY <= y + boxHeight;
+    }
 });
