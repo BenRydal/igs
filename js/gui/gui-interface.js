@@ -60,22 +60,6 @@ class Keys {
         this.dataPanel.organize(this.sk.HANDLEGUI, pathList, speakerList, curSelectMode);
     }
 
-    getTimelineStart() {
-        return this.timelineContainer.start;
-    }
-
-    getTimelineEnd() {
-        return this.timelineContainer.end;
-    }
-
-    getCurTimelineSelectStart() {
-        return this.timeline.getCurTimelineSelectStart();
-    }
-
-    getCurTimelineSelectEnd() {
-        return this.timeline.getCurTimelineSelectEnd();
-    }
-
     /**
      * Updates user select start/end vars and is triggered if user already dragging or begins dragging
      */
@@ -104,6 +88,22 @@ class Keys {
      */
     setCoreData(personFromList) {
         personFromList.isShowing = !personFromList.isShowing;
+    }
+
+    getTimelineStart() {
+        return this.timelineContainer.start;
+    }
+
+    getTimelineEnd() {
+        return this.timelineContainer.end;
+    }
+
+    getCurTimelineSelectStart() {
+        return this.timeline.getCurTimelineSelectStart();
+    }
+
+    getCurTimelineSelectEnd() {
+        return this.timeline.getCurTimelineSelectEnd();
     }
 
     overSpaceTimeView(xPos, yPos) {

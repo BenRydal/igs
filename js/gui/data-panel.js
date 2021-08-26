@@ -54,7 +54,7 @@ class DataPanel {
         let curXPos = this.xPos;
         for (const person of list) {
             if (mode === this.sk.DRAWGUI) this.drawPerson(person, curXPos);
-            else this.overPerson(person, curXPos);;
+            else this.overPerson(person, curXPos);
             curXPos += (2 * this.spacing) + this.sk.textWidth(person.name);
         }
     }
@@ -71,10 +71,10 @@ class DataPanel {
 
     organizeRotateKeys(mode) {
         let curXPos = this.xPos;
-        for (const angle of this.tabs.rotateMode) {
-            const pixelWidth = this.sk.textWidth(angle) + this.spacing;
-            if (mode === this.sk.DRAWGUI) this.drawRotateKey(angle, curXPos);
-            else this.overRotateKey(angle, curXPos, pixelWidth);
+        for (const direction of this.tabs.rotateMode) {
+            const pixelWidth = this.sk.textWidth(direction) + this.spacing;
+            if (mode === this.sk.DRAWGUI) this.drawRotateKey(direction, curXPos);
+            else this.overRotateKey(direction, curXPos, pixelWidth);
             curXPos += pixelWidth;
         }
     }
@@ -100,16 +100,16 @@ class DataPanel {
         this.sk.text(person.name, curXPos + 1.3 * this.spacing, this.tabs.height - 5);
     }
 
-    drawSelector(curXPos, curSelectMode, i) {
-        if (curSelectMode === i) this.sk.fill(0);
+    drawSelector(curXPos, curSelectMode, tab) {
+        if (curSelectMode === tab) this.sk.fill(0);
         else this.sk.fill(150);
-        this.sk.text(this.tabs.selectMode[i], curXPos, this.tabs.height);
+        this.sk.text(this.tabs.selectMode[tab], curXPos, this.tabs.height);
     }
 
-    drawRotateKey(angle, curXPos) {
+    drawRotateKey(direction, curXPos) {
         this.sk.noStroke();
         this.sk.fill(0);
-        this.sk.text(angle, curXPos, this.tabs.height);
+        this.sk.text(direction, curXPos, this.tabs.height);
     }
 
     overHeader(xPos, pixelWidth, header) {
@@ -120,13 +120,13 @@ class DataPanel {
         if (this.sk.overRect(curXPos, this.tabs.height, this.spacing, this.spacing)) this.sk.keys.setCoreData(person);
     }
 
-    overSelector(curXPos, pixelWidth, i) {
-        if (this.sk.overRect(curXPos, this.tabs.height, curXPos + pixelWidth, this.spacing)) this.sk.keys.setSelectMode(i);
+    overSelector(curXPos, pixelWidth, tab) {
+        if (this.sk.overRect(curXPos, this.tabs.height, curXPos + pixelWidth, this.spacing)) this.sk.keys.setSelectMode(tab);
     }
 
-    overRotateKey(angle, curXPos, pixelWidth) {
+    overRotateKey(direction, curXPos, pixelWidth) {
         if (this.sk.overRect(curXPos, this.tabs.height, curXPos + pixelWidth, this.spacing)) {
-            if (angle === this.tabs.rotateMode[0]) this.sk.keys.setRotateLeft();
+            if (direction === this.tabs.rotateMode[0]) this.sk.keys.setRotateLeft();
             else this.sk.keys.setRotateRight();
         }
     }
