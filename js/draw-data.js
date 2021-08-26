@@ -81,7 +81,7 @@ class DrawDataMovement {
             const curPoint = this.sk.sketchController.getScaledPointValues(point, view);
             if (this.sk.sketchController.testMovementPointToDraw(curPoint)) {
                 if (view === this.sk.SPACETIME) this.testPointForBug(curPoint.scaledTime, curPoint.scaledXPos, curPoint.scaledYPos);
-                if (this.sk.keys.overCursor(curPoint.scaledXPos, curPoint.scaledYPos)) {
+                if (this.sk.gui.overCursor(curPoint.scaledXPos, curPoint.scaledYPos)) {
                     if (over_Cursor_Mode) { // if already drawing in cursor mode, continue it
                         this.sk.curveVertex(curPoint.scaledSpaceTimeXPos, curPoint.scaledYPos);
                     } else { // if not in drawing cursor mode, begin it
@@ -131,7 +131,7 @@ class DrawDataMovement {
         else if (this.sk.sketchController.mode.isVideoPlay) {
             const selTime = this.sk.sketchController.mapFromVideoToSelectedTime();
             if (this.compareValuesBySpacing(selTime, scaledTimeToTest, this.bug.lengthToCompare)) this.recordBug(scaledTimeToTest, xPos, yPos, Math.abs(selTime - scaledTimeToTest));
-        } else if (this.sk.keys.overSpaceTimeView(this.sk.mouseX, this.sk.mouseY) && this.compareValuesBySpacing(this.sk.mouseX, scaledTimeToTest, this.bug.lengthToCompare)) this.recordBug(this.sk.mouseX, xPos, yPos, Math.abs(this.sk.mouseX - scaledTimeToTest));
+        } else if (this.sk.gui.overSpaceTimeView(this.sk.mouseX, this.sk.mouseY) && this.compareValuesBySpacing(this.sk.mouseX, scaledTimeToTest, this.bug.lengthToCompare)) this.recordBug(this.sk.mouseX, xPos, yPos, Math.abs(this.sk.mouseX - scaledTimeToTest));
     }
 
     compareValuesBySpacing(value1, value2, spacing) {
@@ -246,7 +246,7 @@ class DrawDataConversation {
         this.sk.fill(curColor);
         this.sk.rect(curPoint.scaledXPos, yPos, rectWidth, rectLength); // this.sk.PLAN VIEW
         this.sk.rect(curPoint.scaledTime, yPos, rectWidth, rectLength); // this.sk.SPACETIME VIEW
-        this.sk.textSize(this.sk.keys.keyTextSize); // reset
+        this.sk.textSize(this.sk.gui.keyTextSize); // reset
     }
 
     /**
@@ -268,7 +268,7 @@ class DrawDataConversation {
      * Sets box dimensions based on size of conversation turn/text
      */
     drawTextBox(point) {
-        this.sk.textSize(this.sk.keys.keyTextSize);
+        this.sk.textSize(this.sk.gui.keyTextSize);
         const textBox = this.addTextBoxParams(this.getTextBoxParams(), point.talkTurn);
         this.sk.stroke(0);
         this.sk.strokeWeight(1);

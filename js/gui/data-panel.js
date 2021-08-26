@@ -117,17 +117,17 @@ class DataPanel {
     }
 
     overPerson(person, curXPos) {
-        if (this.sk.overRect(curXPos, this.tabs.height, this.spacing, this.spacing)) this.sk.keys.setCoreData(person);
+        if (this.sk.overRect(curXPos, this.tabs.height, this.spacing, this.spacing)) this.sk.gui.setCoreData(person);
     }
 
     overSelector(curXPos, pixelWidth, tab) {
-        if (this.sk.overRect(curXPos, this.tabs.height, curXPos + pixelWidth, this.spacing)) this.sk.keys.setSelectMode(tab);
+        if (this.sk.overRect(curXPos, this.tabs.height, curXPos + pixelWidth, this.spacing)) this.sk.gui.setSelectMode(tab);
     }
 
     overRotateKey(direction, curXPos, pixelWidth) {
         if (this.sk.overRect(curXPos, this.tabs.height, curXPos + pixelWidth, this.spacing)) {
-            if (direction === this.tabs.rotateMode[0]) this.sk.keys.setRotateLeft();
-            else this.sk.keys.setRotateRight();
+            if (direction === this.tabs.rotateMode[0]) this.sk.gui.setRotateLeft();
+            else this.sk.gui.setRotateRight();
         }
     }
 }

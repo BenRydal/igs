@@ -26,7 +26,7 @@ const igs = new p5((sk) => {
         // SKETCH SINGLETONS
         sk.core = new Core(sk); // core program variables and update methods
         sk.testData = new TestData(); // holds tests for core data and CSV files. Does not need sketch reference
-        sk.keys = new Keys(sk); // GUI vars and methods
+        sk.gui = new GUI(sk); // GUI vars and methods
         sk.domController = new DomController(sk); // handles DOM/buttons user interaction
         sk.sketchController = new SketchController(sk); // coordinates calls across classes and updates state variables
         sk.processData = new ProcessData(sk); // handles all data processing
@@ -45,7 +45,7 @@ const igs = new p5((sk) => {
             else sk.setMovement();
         }
         if (sk.testData.dataIsLoaded(sk.core.videoPlayer)) sk.sketchController.updateVideoDisplay();
-        sk.keys.drawKeys(sk.core.paths, sk.core.speakerList, sk.sketchController.getSelectMode()); // draw keys last
+        sk.gui.drawKeys(sk.core.paths, sk.core.speakerList, sk.sketchController.getSelectMode()); // draw keys last
         sk.sketchController.updateAnimation();
         sk.sketchController.updateLoop();
     }
@@ -53,25 +53,25 @@ const igs = new p5((sk) => {
     sk.setFloorPlan = function (mode) {
         sk.push();
         sk.imageMode(sk.CENTER); // important method to include here
-        sk.translate(sk.keys.floorPlanContainer.width / 2, sk.keys.floorPlanContainer.height / 2);
+        sk.translate(sk.gui.floorPlanContainer.width / 2, sk.gui.floorPlanContainer.height / 2);
         switch (mode) {
             case 0:
                 sk.pop(); // no rotation so end translation before drawing
-                sk.image(sk.core.inputFloorPlan.img, 0, 0, sk.keys.floorPlanContainer.width, sk.keys.floorPlanContainer.height);
+                sk.image(sk.core.inputFloorPlan.img, 0, 0, sk.gui.floorPlanContainer.width, sk.gui.floorPlanContainer.height);
                 break;
             case 1:
                 sk.rotate(sk.HALF_PI);
-                sk.image(sk.core.inputFloorPlan.img, 0, 0, sk.keys.floorPlanContainer.height, sk.keys.floorPlanContainer.width);
+                sk.image(sk.core.inputFloorPlan.img, 0, 0, sk.gui.floorPlanContainer.height, sk.gui.floorPlanContainer.width);
                 sk.pop();
                 break;
             case 2:
                 sk.rotate(sk.PI);
-                sk.image(sk.core.inputFloorPlan.img, 0, 0, sk.keys.floorPlanContainer.width, sk.keys.floorPlanContainer.height);
+                sk.image(sk.core.inputFloorPlan.img, 0, 0, sk.gui.floorPlanContainer.width, sk.gui.floorPlanContainer.height);
                 sk.pop();
                 break;
             case 3:
                 sk.rotate(-sk.HALF_PI);
-                sk.image(sk.core.inputFloorPlan.img, 0, 0, sk.keys.floorPlanContainer.height, sk.keys.floorPlanContainer.width);
+                sk.image(sk.core.inputFloorPlan.img, 0, 0, sk.gui.floorPlanContainer.height, sk.gui.floorPlanContainer.width);
                 sk.pop();
                 break;
         }

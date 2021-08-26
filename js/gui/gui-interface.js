@@ -1,4 +1,4 @@
-class Keys {
+class GUI {
 
     constructor(sketch) {
         this.sk = sketch;
