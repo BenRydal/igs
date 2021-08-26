@@ -10,7 +10,6 @@ class SketchController {
             isVideoPlay: false,
             isVideoShow: false,
             curRotation: 0, // [0-3] 4 rotation modes none, 90, 180, 270
-            curSelect: 0 // [0-4] 5 select modes none, region, slice, moving, stopped
         }
         this.animationCounter = 0; // counter to synchronize animation across all data
         this.bugTimeForVideoScrub = null; // Set in draw movement data and used to display correct video frame when scrubbing video
@@ -28,7 +27,7 @@ class SketchController {
 
     handleMousePressed() {
         if (this.testVideoToPlay() && this.sk.gui.overSpaceTimeView(this.sk.mouseX, this.sk.mouseY)) this.playPauseMovie();
-        else this.sk.gui.handleKeys(this.sk.core.paths, this.sk.core.speakerList, this.mode.curSelect);
+        else this.sk.gui.handleKeys(this.sk.core.paths, this.sk.core.speakerList);
     }
 
     handleMouseDragged() {
@@ -192,6 +191,14 @@ class SketchController {
         else return true;
     }
 
+    testSelectModeForRegion() {
+        return this.sk.gui.testSelectModeForRegion();
+    }
+
+    getWeightsFromSelectMode() {
+        return this.sk.gui.getWeightsFromSelectMode();
+    }
+
     /**
      * @param  {Number/Float} value
      */
@@ -282,26 +289,5 @@ class SketchController {
     setRotateLeft() {
         this.mode.curRotation--;
         if (this.mode.curRotation < 0) this.mode.curRotation = 3;
-    }
-
-    // ****** SELECT METHODS ****** //
-    getSelectMode() {
-        return this.mode.curSelect;
-    }
-
-    setSelectMode(value) {
-        this.mode.curSelect = value;
-    }
-    /**
-     * Sets drawing strokeWeights for movement data depending on current selection mode
-     */
-    getWeightsFromSelectMode() {
-        if (this.mode.curSelect === 3) return [1, 0];
-        else if (this.mode.curSelect === 4) return [0, 10];
-        else return [1, 10];
-    }
-
-    testSelectModeForRegion() {
-        return this.mode.curSelect === 1;
     }
 }

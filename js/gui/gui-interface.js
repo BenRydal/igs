@@ -28,9 +28,9 @@ class GUI {
         this.introMsg = "INTERACTION GEOGRAPHY SLICER (IGS)\n\nby Ben Rydal Shapiro & contributors\nbuilt with p5.js & JavaScript\n\nHi There! This is a tool to visualize movement, conversation, and video data over space and time. Data are displayed over a floor plan view (left) and a space-time view (right), where the vertical axis corresponds to the vertical dimension of the floor plan. Use the top menu to visualize different sample datasets or upload your own data. Hover over the floor plan and use the timeline to selectively study displayed data. Use the top buttons to animate data, visualize conversation in different ways, and interact with video data by clicking anywhere in the space-time view to play & pause video. For more information see: benrydal.com/software/igs";
     }
 
-    drawKeys(pathList, speakerList, curSelectMode) {
+    drawKeys(pathList, speakerList) {
         this.sk.textSize(this.keyTextSize);
-        this.dataPanel.organize(this.sk.DRAWGUI, pathList, speakerList, curSelectMode); // pass these to dynamically update
+        this.dataPanel.organize(this.sk.DRAWGUI, pathList, speakerList); // pass these to dynamically update
         this.timeline.draw();
         if (this.sk.sketchController.testSelectModeForRegion() && this.overFloorPlan(this.sk.mouseX, this.sk.mouseY)) this.drawFloorPlanSelector();
         if (this.sk.sketchController.mode.isIntro) this.drawIntroMsg();
@@ -55,9 +55,9 @@ class GUI {
         this.sk.rectMode(this.sk.CORNER);
     }
 
-    handleKeys(pathList, speakerList, curSelectMode) {
+    handleKeys(pathList, speakerList) {
         this.sk.textSize(this.keyTextSize);
-        this.dataPanel.organize(this.sk.HANDLEGUI, pathList, speakerList, curSelectMode);
+        this.dataPanel.organize(this.sk.HANDLEGUI, pathList, speakerList);
     }
 
     /**
@@ -69,11 +69,6 @@ class GUI {
 
     handleResetTimelineLock() {
         this.timeline.resetTimelineLock();
-    }
-
-    // TODO:
-    setSelectMode(value) {
-        this.sk.sketchController.setSelectMode(value);
     }
 
     setRotateLeft() {
@@ -88,6 +83,17 @@ class GUI {
      */
     setCoreData(personFromList) {
         personFromList.isShowing = !personFromList.isShowing;
+    }
+
+    testSelectModeForRegion() {
+        return this.dataPanel.testSelectModeForRegion();
+    }
+
+    /**
+     * Sets drawing strokeWeights for movement data depending on current selection mode
+     */
+    getWeightsFromSelectMode() {
+        return this.dataPanel.getWeightsFromSelectMode();
     }
 
     getTimelineStart() {
