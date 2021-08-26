@@ -122,7 +122,7 @@ class SketchController {
     }
 
     /**
-     * Converts x/y pixel positions from data point to floor plan and current floor plan rotation angle
+     * Converts x/y pixel positions from data point to floor plan depending on floor plan rotation mode
      * @param  {Float} xPos
      * @param  {Float} yPos
      */
@@ -149,12 +149,36 @@ class SketchController {
     }
 
     /**
+     * Organizes floor plan drawing methods depending on floor plan rotaiton mode
+     */
+    setFloorPlan() {
+        switch (this.getRotationMode()) {
+            case 0:
+                this.sk.drawFloorPlanNoRotate();
+                break;
+            case 1:
+                this.sk.setFloorPlanTranslation();
+                this.sk.drawFloorPlan90Rotate();
+                break;
+            case 2:
+                this.sk.setFloorPlanTranslation();
+                this.sk.drawFloorPlan180Rotate();
+                break;
+            case 3:
+                this.sk.setFloorPlanTranslation();
+                this.sk.drawFloorPlan270Rotate();
+                break;
+        }
+    }
+
+    /**
      * Test if point is in user view
      * @param  {MovementPoint} curPoint
      */
     testMovementPointToDraw(curPoint) {
         return this.sk.gui.overTimelineAxis(curPoint.pixelTime) && this.sk.gui.overFloorPlan(curPoint.scaledXPos, curPoint.scaledYPos) && this.testAnimation(curPoint.pixelTime);
     }
+
     /**
      * Test if point is in user view
      * @param  {ConversationPoint} curPoint
@@ -163,7 +187,6 @@ class SketchController {
         return this.sk.gui.overTimelineAxis(curPoint.pixelTime) && this.sk.gui.overFloorPlan(curPoint.scaledXPos, curPoint.scaledYPos) && this.testAnimation(curPoint.pixelTime) && this.testSelectMode(curPoint.scaledXPos, curPoint.scaledYPos);
     }
 
-    // TODO:
     testSelectMode(xPos, yPos) {
         if (this.testSelectModeForRegion()) return this.sk.gui.overCursor(xPos, yPos);
         else return true;
@@ -181,7 +204,6 @@ class SketchController {
         return this.sk.testData.dataIsLoaded(this.sk.core.videoPlayer) && this.mode.isVideoShow && !this.mode.isAnimate && this.sk.gui.overSpaceTimeView(this.sk.mouseX, this.sk.mouseY);
     }
 
-    // ****** MAP DATA METHODS ****** //
     /**
      * Sets conversation rectangle scaling range (size of rectangles as timeline is rescaled)
      */
@@ -219,7 +241,6 @@ class SketchController {
         return this.sk.map(value, this.sk.gui.getTimelineStart(), this.sk.gui.getTimelineEnd(), this.sk.gui.getCurTimelineSelectStart(), this.sk.gui.getCurTimelineSelectEnd());
     }
 
-    // ****** MODE GETTERS/SETTERS ****** //
     setIsAnimate(value) {
         this.mode.isAnimate = value;
     }
@@ -264,7 +285,6 @@ class SketchController {
     }
 
     // ****** SELECT METHODS ****** //
-    // TODO:
     getSelectMode() {
         return this.mode.curSelect;
     }
@@ -275,7 +295,6 @@ class SketchController {
     /**
      * Sets drawing strokeWeights for movement data depending on current selection mode
      */
-    // TODO: address use of numbers for comparison
     getWeightsFromSelectMode() {
         if (this.mode.curSelect === 3) return [1, 0];
         else if (this.mode.curSelect === 4) return [0, 10];

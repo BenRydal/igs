@@ -39,7 +39,7 @@ const igs = new p5((sk) => {
 
     sk.draw = function () {
         sk.background(255);
-        if (sk.testData.dataIsLoaded(sk.core.inputFloorPlan.img)) sk.setFloorPlan(sk.sketchController.getRotationMode());
+        if (sk.testData.dataIsLoaded(sk.core.inputFloorPlan.img)) sk.sketchController.setFloorPlan();
         if (sk.testData.arrayIsLoaded(sk.core.paths)) {
             if (sk.testData.arrayIsLoaded(sk.core.speakerList)) sk.setMovementAndConversation();
             else sk.setMovement();
@@ -50,31 +50,32 @@ const igs = new p5((sk) => {
         sk.sketchController.updateLoop();
     }
 
-    sk.setFloorPlan = function (mode) {
+    sk.setFloorPlanTranslation = function () {
         sk.push();
         sk.imageMode(sk.CENTER); // important method to include here
         sk.translate(sk.gui.floorPlanContainer.width / 2, sk.gui.floorPlanContainer.height / 2);
-        switch (mode) {
-            case 0:
-                sk.pop(); // no rotation so end translation before drawing
-                sk.image(sk.core.inputFloorPlan.img, 0, 0, sk.gui.floorPlanContainer.width, sk.gui.floorPlanContainer.height);
-                break;
-            case 1:
-                sk.rotate(sk.HALF_PI);
-                sk.image(sk.core.inputFloorPlan.img, 0, 0, sk.gui.floorPlanContainer.height, sk.gui.floorPlanContainer.width);
-                sk.pop();
-                break;
-            case 2:
-                sk.rotate(sk.PI);
-                sk.image(sk.core.inputFloorPlan.img, 0, 0, sk.gui.floorPlanContainer.width, sk.gui.floorPlanContainer.height);
-                sk.pop();
-                break;
-            case 3:
-                sk.rotate(-sk.HALF_PI);
-                sk.image(sk.core.inputFloorPlan.img, 0, 0, sk.gui.floorPlanContainer.height, sk.gui.floorPlanContainer.width);
-                sk.pop();
-                break;
-        }
+    }
+
+    sk.drawFloorPlanNoRotate = function () {
+        sk.image(sk.core.inputFloorPlan.img, 0, 0, sk.gui.floorPlanContainer.width, sk.gui.floorPlanContainer.height);
+    }
+
+    sk.drawFloorPlan90Rotate = function () {
+        sk.rotate(sk.HALF_PI);
+        sk.image(sk.core.inputFloorPlan.img, 0, 0, sk.gui.floorPlanContainer.height, sk.gui.floorPlanContainer.width);
+        sk.pop();
+    }
+
+    sk.drawFloorPlan180Rotate = function () {
+        sk.rotate(sk.PI);
+        sk.image(sk.core.inputFloorPlan.img, 0, 0, sk.gui.floorPlanContainer.width, sk.gui.floorPlanContainer.height);
+        sk.pop();
+    }
+
+    sk.drawFloorPlan270Rotate = function () {
+        sk.rotate(-sk.HALF_PI);
+        sk.image(sk.core.inputFloorPlan.img, 0, 0, sk.gui.floorPlanContainer.height, sk.gui.floorPlanContainer.width);
+        sk.pop();
     }
 
     sk.setMovementAndConversation = function () {
