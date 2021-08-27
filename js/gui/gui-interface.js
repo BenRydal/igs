@@ -15,6 +15,7 @@ class GUI {
         this.floorPlanContainer = {
             width: this.timelineContainer.start - (this.sk.width - this.timelineContainer.end),
             height: this.timelineContainer.height,
+            slicerSize: 50,
             selectorSize: 100
         }
         this.dataPanelContainer = {
@@ -122,6 +123,10 @@ class GUI {
 
     overCursor(xPos, yPos) {
         return this.sk.overCircle(xPos, yPos, this.floorPlanContainer.selectorSize);
+    }
+
+    overSlicer(xPos) {
+        return this.sk.overRect(xPos - this.floorPlanContainer.slicerSize, 0, this.floorPlanContainer.slicerSize, this.timelineContainer.height);
     }
 
     overTimelineAxis(pixelValue) {

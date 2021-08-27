@@ -81,7 +81,8 @@ class DrawDataMovement {
             const curPoint = this.sk.sketchController.getScaledPointValues(point, view);
             if (this.sk.sketchController.testMovementPointToDraw(curPoint)) {
                 if (view === this.sk.SPACETIME) this.testPointForBug(curPoint.scaledTime, curPoint.scaledXPos, curPoint.scaledYPos);
-                if (this.sk.gui.overCursor(curPoint.scaledXPos, curPoint.scaledYPos)) {
+                //if (this.sk.gui.overCursor(curPoint.scaledXPos, curPoint.scaledYPos)) {
+                if (this.sk.gui.overSlicer(curPoint.scaledXPos, curPoint.scaledYPos)) {
                     if (over_Cursor_Mode) { // if already drawing in cursor mode, continue it
                         this.sk.curveVertex(curPoint.scaledSpaceTimeXPos, curPoint.scaledYPos);
                     } else { // if not in drawing cursor mode, begin it
