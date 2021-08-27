@@ -33,11 +33,13 @@ class GUI {
         this.sk.textSize(this.keyTextSize);
         this.dataPanel.organize(this.sk.DRAWGUI, pathList, speakerList); // pass these to dynamically update
         this.timeline.draw();
-
-        if (this.testSelectModeForRegion() && this.overFloorPlan(this.sk.mouseX, this.sk.mouseY)) this.drawFloorPlanCursorSelector();
-        else if (this.testSelectModeForSlice() && this.overFloorPlan(this.sk.mouseX, this.sk.mouseY)) this.drawFloorPlanSlicerSelector();
-
+        if (this.overFloorPlan(this.sk.mouseX, this.sk.mouseY)) this.drawHighlightSelectors();
         if (this.sk.sketchController.mode.isIntro) this.drawIntroMsg();
+    }
+
+    drawHighlightSelectors() {
+        if (this.dataPanel.testSelectModeForRegion()) this.drawFloorPlanCursorSelector();
+        else if (this.dataPanel.testSelectModeForSlice()) this.drawFloorPlanSlicerSelector();
     }
 
     setSelectorStroke() {
@@ -101,7 +103,11 @@ class GUI {
 
 
 
+    getCurSelectTab() {
+        return this.dataPanel.getCurSelectTab();
+    }
 
+    // TODO: consider moving to drawData? deal with selectorSize constants maybe?
     overCursor(xPos, yPos) {
         return this.sk.overCircle(xPos, yPos, this.floorPlanContainer.selectorSize);
     }
@@ -110,21 +116,6 @@ class GUI {
         return this.sk.overRect(xPos - this.floorPlanContainer.slicerSize, 0, (2 * this.floorPlanContainer.slicerSize), this.timelineContainer.height);
     }
 
-
-    testSelectModeForRegion() {
-        return this.dataPanel.testSelectModeForRegion();
-    }
-
-    testSelectModeForSlice() {
-        return this.dataPanel.testSelectModeForSlice();
-    }
-
-    /**
-     * Sets drawing strokeWeights for movement data depending on current selection mode
-     */
-    getWeightsFromSelectMode() {
-        return this.dataPanel.getWeightsFromSelectMode();
-    }
 
 
 

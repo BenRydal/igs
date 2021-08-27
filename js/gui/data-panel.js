@@ -132,22 +132,12 @@ class DataPanel {
         }
     }
 
-
     testSelectModeForSlice() {
         return this.tabs.curSelectTab === 2;
     }
 
     testSelectModeForRegion() {
         return this.tabs.curSelectTab === 1;
-    }
-
-    /**
-     * Sets drawing strokeWeights for movement data depending on current selection mode
-     */
-    getWeightsFromSelectMode() {
-        if (this.tabs.curSelectTab === 3) return [1, 0];
-        else if (this.tabs.curSelectTab === 4) return [0, 10];
-        else return [1, 10];
     }
 
     getCurSelectTab() {

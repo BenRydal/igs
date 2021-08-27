@@ -177,9 +177,6 @@ class SketchController {
         return this.sk.gui.overTimelineAxis(curPoint.pixelTime) && this.sk.gui.overFloorPlan(curPoint.scaledXPos, curPoint.scaledYPos) && this.testAnimation(curPoint.pixelTime);
     }
 
-
-
-
     /**
      * @param  {Number/Float} value
      */
