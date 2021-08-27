@@ -81,8 +81,8 @@ class YoutubePlayer {
         return this.player.getDuration();
     }
 
-    updatePos(xPos, yPos, offset) {
-        this.sk.select('#moviePlayer').position(xPos - this.videoWidth, yPos + offset);
+    updatePos(xPos, yPos) {
+        this.sk.select('#moviePlayer').position(xPos - this.videoWidth, yPos + 100); // can adjust pixel offset to yPos
     }
 
     destroy() {

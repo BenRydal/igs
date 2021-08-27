@@ -76,7 +76,11 @@ class Core {
 
     playVideo(timeInSeconds) {
         this.videoPlayer.play();
-        this.sk.core.videoPlayer.seekTo(timeInSeconds);
+        this.videoPlayer.seekTo(timeInSeconds);
+    }
+
+    updateVideoPosition(xPos, yPos) {
+        this.videoPlayer.updatePos(xPos, yPos);
     }
 
     /** 

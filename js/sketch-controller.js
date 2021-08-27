@@ -57,7 +57,7 @@ class SketchController {
 
     updateVideoDisplay() {
         if (this.mode.isVideoShow) {
-            this.sk.core.videoPlayer.updatePos(this.sk.mouseX, this.sk.mouseY, 100);
+            this.sk.core.updateVideoPosition(this.sk.mouseX, this.sk.mouseY);
             if (!this.mode.isVideoPlay) this.setVideoScrubbing();
         }
     }
