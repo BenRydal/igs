@@ -174,21 +174,11 @@ class SketchController {
      * @param  {ConversationPoint} curPoint
      */
     testConversationPointToDraw(curPoint) {
-        return this.sk.gui.overTimelineAxis(curPoint.pixelTime) && this.sk.gui.overFloorPlan(curPoint.scaledXPos, curPoint.scaledYPos) && this.testAnimation(curPoint.pixelTime) && this.testSelectMode(curPoint.scaledXPos, curPoint.scaledYPos);
+        return this.sk.gui.overTimelineAxis(curPoint.pixelTime) && this.sk.gui.overFloorPlan(curPoint.scaledXPos, curPoint.scaledYPos) && this.testAnimation(curPoint.pixelTime);
     }
 
-    testSelectMode(xPos, yPos) {
-        if (this.testSelectModeForRegion()) return this.sk.gui.overCursor(xPos, yPos);
-        else return true;
-    }
 
-    testSelectModeForRegion() {
-        return this.sk.gui.testSelectModeForRegion();
-    }
 
-    getWeightsFromSelectMode() {
-        return this.sk.gui.getWeightsFromSelectMode();
-    }
 
     /**
      * @param  {Number/Float} value

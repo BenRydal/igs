@@ -33,15 +33,28 @@ class GUI {
         this.sk.textSize(this.keyTextSize);
         this.dataPanel.organize(this.sk.DRAWGUI, pathList, speakerList); // pass these to dynamically update
         this.timeline.draw();
-        if (this.sk.sketchController.testSelectModeForRegion() && this.overFloorPlan(this.sk.mouseX, this.sk.mouseY)) this.drawFloorPlanSelector();
+
+        if (this.testSelectModeForRegion() && this.overFloorPlan(this.sk.mouseX, this.sk.mouseY)) this.drawFloorPlanCursorSelector();
+        else if (this.testSelectModeForSlice() && this.overFloorPlan(this.sk.mouseX, this.sk.mouseY)) this.drawFloorPlanSlicerSelector();
+
         if (this.sk.sketchController.mode.isIntro) this.drawIntroMsg();
     }
 
-    drawFloorPlanSelector() {
+    setSelectorStroke() {
         this.sk.noFill();
         this.sk.strokeWeight(3);
         this.sk.stroke(0);
+    }
+
+    drawFloorPlanCursorSelector() {
+        this.setSelectorStroke();
         this.sk.circle(this.sk.mouseX, this.sk.mouseY, this.floorPlanContainer.selectorSize);
+    }
+
+    drawFloorPlanSlicerSelector() {
+        this.setSelectorStroke();
+        this.sk.line(this.sk.mouseX - this.floorPlanContainer.slicerSize, 0, this.sk.mouseX - this.floorPlanContainer.slicerSize, this.floorPlanContainer.height);
+        this.sk.line(this.sk.mouseX + this.floorPlanContainer.slicerSize, 0, this.sk.mouseX + this.floorPlanContainer.slicerSize, this.floorPlanContainer.height);
     }
 
     drawIntroMsg() {
@@ -86,8 +99,24 @@ class GUI {
         personFromList.isShowing = !personFromList.isShowing;
     }
 
+
+
+
+    overCursor(xPos, yPos) {
+        return this.sk.overCircle(xPos, yPos, this.floorPlanContainer.selectorSize);
+    }
+
+    overSlicer(xPos, yPos) {
+        return this.sk.overRect(xPos - this.floorPlanContainer.slicerSize, 0, (2 * this.floorPlanContainer.slicerSize), this.timelineContainer.height);
+    }
+
+
     testSelectModeForRegion() {
         return this.dataPanel.testSelectModeForRegion();
+    }
+
+    testSelectModeForSlice() {
+        return this.dataPanel.testSelectModeForSlice();
     }
 
     /**
@@ -96,6 +125,10 @@ class GUI {
     getWeightsFromSelectMode() {
         return this.dataPanel.getWeightsFromSelectMode();
     }
+
+
+
+
 
     getTimelineStart() {
         return this.timelineContainer.start;
@@ -119,14 +152,6 @@ class GUI {
 
     overFloorPlan(xPos, yPos) {
         return (xPos >= 0 && xPos <= this.floorPlanContainer.width) && (yPos >= 0 && yPos <= this.floorPlanContainer.height);
-    }
-
-    overCursor(xPos, yPos) {
-        return this.sk.overCircle(xPos, yPos, this.floorPlanContainer.selectorSize);
-    }
-
-    overSlicer(xPos) {
-        return this.sk.overRect(xPos - this.floorPlanContainer.slicerSize, 0, this.floorPlanContainer.slicerSize, this.timelineContainer.height);
     }
 
     overTimelineAxis(pixelValue) {

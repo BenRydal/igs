@@ -15,15 +15,20 @@ class DrawDataMovement {
     }
 
     setData(path) {
-        [this.smallPathWeight, this.largePathWeight] = this.sk.sketchController.getWeightsFromSelectMode(); // update pathWeights
+        [this.smallPathWeight, this.largePathWeight] = this.sk.gui.getWeightsFromSelectMode(); // update pathWeights
         this.resetBug(); // always reset bug values
-        if (this.sk.sketchController.testSelectModeForRegion()) {
-            this.drawWithCursorHighlight(this.sk.PLAN, path.movement, path.color);
-            this.drawWithCursorHighlight(this.sk.SPACETIME, path.movement, path.color);
+
+        if (this.sk.gui.testSelectModeForRegion()) {
+            this.drawWithCursorHighlight(this.sk.PLAN, path.movement, path.color, this.sk.gui.overCursor.bind(this.sk.gui));
+            this.drawWithCursorHighlight(this.sk.SPACETIME, path.movement, path.color, this.sk.gui.overCursor.bind(this.sk.gui));
+        } else if (this.sk.gui.testSelectModeForSlice()) {
+            this.drawWithCursorHighlight(this.sk.PLAN, path.movement, path.color, this.sk.gui.overSlicer.bind(this.sk.gui));
+            this.drawWithCursorHighlight(this.sk.SPACETIME, path.movement, path.color, this.sk.gui.overSlicer.bind(this.sk.gui));
         } else {
             this.draw(this.sk.PLAN, path.movement, path.color);
             this.draw(this.sk.SPACETIME, path.movement, path.color);
         }
+
         if (this.bug.xPos != null) this.drawBug(path.color); // if selected, draw bug
     }
 
@@ -73,7 +78,7 @@ class DrawDataMovement {
      * @param  {Path} path
      * @param  {Color} shade
      */
-    drawWithCursorHighlight(view, path, shade) {
+    drawWithCursorHighlight(view, path, shade, highlightMethod) {
         this.setLineStyle(this.colorGray);
         let over_Cursor_Mode = false;
         this.sk.beginShape();
@@ -81,8 +86,7 @@ class DrawDataMovement {
             const curPoint = this.sk.sketchController.getScaledPointValues(point, view);
             if (this.sk.sketchController.testMovementPointToDraw(curPoint)) {
                 if (view === this.sk.SPACETIME) this.testPointForBug(curPoint.scaledTime, curPoint.scaledXPos, curPoint.scaledYPos);
-                //if (this.sk.gui.overCursor(curPoint.scaledXPos, curPoint.scaledYPos)) {
-                if (this.sk.gui.overSlicer(curPoint.scaledXPos, curPoint.scaledYPos)) {
+                if (highlightMethod(curPoint.scaledXPos, curPoint.scaledYPos)) {
                     if (over_Cursor_Mode) { // if already drawing in cursor mode, continue it
                         this.sk.curveVertex(curPoint.scaledSpaceTimeXPos, curPoint.scaledYPos);
                     } else { // if not in drawing cursor mode, begin it
