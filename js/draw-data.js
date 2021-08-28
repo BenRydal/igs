@@ -24,23 +24,23 @@ class DrawDataMovement {
         switch (this.sk.gui.getCurSelectTab()) {
             case 0:
                 this.setPathStrokeWeights(1, 10);
-                this.setDraw(path, this.testIsStopped);
+                this.setDraw(path, "testForStops");
                 break;
             case 1:
                 this.setPathStrokeWeights(1, 10);
-                this.setDraw(path, this.sk.gui.overCursor.bind(this.sk.gui));
+                this.setDraw(path, "testCursor");
                 break;
             case 2:
                 this.setPathStrokeWeights(1, 10);
-                this.setDraw(path, this.sk.gui.overSlicer.bind(this.sk.gui));
+                this.setDraw(path, "testSlicer");
                 break;
             case 3:
                 this.setPathStrokeWeights(1, 0);
-                this.setDraw(path, this.testIsStopped);
+                this.setDraw(path, "testForStops");
                 break;
             case 4:
                 this.setPathStrokeWeights(0, 10);
-                this.setDraw(path, this.testIsStopped);
+                this.setDraw(path, "testForStops");
                 break;
         }
     }
@@ -56,7 +56,7 @@ class DrawDataMovement {
     }
 
 
-    // TODO: 1) path variable , 2) parameters for highlightMethod are uneven, 3) how do you compare highlight mehtods to draw cur or priorpoint for startEndShape
+    // TODO: 1) path variable 
 
     /**
      * Draws path in floor plan OR space-time view
@@ -66,7 +66,7 @@ class DrawDataMovement {
      * @param  {Path} path
      * @param  {Color} shade
      */
-    draw(view, path, shade, highlightMethod) {
+    draw(view, path, shade, test) {
         this.setLineStyle(shade);
         let isHighlightMode = false; // mode indicating if stopped or moving measured by change from last point
         this.sk.beginShape();
@@ -76,28 +76,37 @@ class DrawDataMovement {
             const priorPoint = this.sk.sketchController.getScaledPointValues(path[i - 1], view);
             if (this.sk.sketchController.testMovementPointToDraw(curPoint)) {
                 if (view === this.sk.SPACETIME) this.testPointForBug(curPoint.scaledTime, curPoint.scaledXPos, curPoint.scaledYPos);
-                if (highlightMethod(curPoint.scaledXPos, curPoint.scaledYPos, path[i])) {
-                    if (isHighlightMode) { // if already drawing in highlight mode, continue it
-                        this.sk.curveVertex(curPoint.scaledSpaceTimeXPos, curPoint.scaledYPos);
-                    } else { // if not drawing in highlight mode, begin it
-                        this.startEndShape(priorPoint, this.largePathWeight, shade);
-                        isHighlightMode = true;
-                    }
+                if (this.highlightTestMethod(test, curPoint, path[i])) {
+                    this.highlightTestPassed(isHighlightMode, curPoint, priorPoint, shade);
+                    isHighlightMode = true;
                 } else {
-                    if (isHighlightMode) { // if drawing in highlight mode, end it
-                        this.startEndShape(priorPoint, this.smallPathWeight, shade);
-                        isHighlightMode = false;
-                    } else {
-                        this.sk.curveVertex(curPoint.scaledSpaceTimeXPos, curPoint.scaledYPos);
-                    }
+                    this.highlightTestFailed(isHighlightMode, curPoint, priorPoint, shade);
+                    isHighlightMode = false;
                 }
             }
         }
         this.sk.endShape(); // end shape in case still drawing
     }
 
-    testIsStopped(xPos, yPos, p) {
-        return p.isStopped;
+    // TODO: Please update the var name for scaledSpaceTimexpOS!!!
+    highlightTestPassed(isHighlightMode, curPoint, priorPoint, shade) {
+        if (isHighlightMode) this.sk.curveVertex(curPoint.scaledSpaceTimeXPos, curPoint.scaledYPos); // if already drawing in highlight mode, continue it
+        else this.startEndShape(priorPoint, this.largePathWeight, shade); // if not drawing in highlight mode, begin it
+    }
+
+    highlightTestFailed(isHighlightMode, curPoint, priorPoint, shade) {
+        if (isHighlightMode) this.startEndShape(priorPoint, this.smallPathWeight, shade); // if drawing in highlight mode, end it
+        else this.sk.curveVertex(curPoint.scaledSpaceTimeXPos, curPoint.scaledYPos);
+    }
+
+    highlightTestMethod(test, curPoint, point) {
+        if (test === "testCursor") return this.sk.gui.overCursor(curPoint.scaledXPos, curPoint.scaledYPos);
+        else if (test === "testSlicer") return this.sk.gui.overSlicer(curPoint.scaledXPos, curPoint.scaledYPos);
+        else return this.testIsStopped(point);
+    }
+
+    testIsStopped(point) {
+        return point.isStopped;
     }
 
     setLineStyle(lineColor) {
@@ -178,7 +187,6 @@ class DrawDataConversation {
     }
 
 
-    // TODO: figure out way to draw "first or lsat" conversation rect for each stop/move test
     // TODO: test conversation/movement methods in sk controller--move here?
     // TODO: testRegion/Slice methods--remove eventually?
     /**
@@ -210,8 +218,6 @@ class DrawDataConversation {
                 return point.isStopped;
         }
     }
-
-
 
     /**
      * Organizes drawing of single text/textbox for a selected conversation
