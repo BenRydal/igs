@@ -15,7 +15,7 @@ class GUI {
         this.floorPlanContainer = {
             width: this.timelineContainer.start - (this.sk.width - this.timelineContainer.end),
             height: this.timelineContainer.height,
-            slicerSize: 50,
+            slicerSize: 25,
             selectorSize: 100
         }
         this.dataPanelContainer = {

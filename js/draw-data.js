@@ -59,16 +59,17 @@ class DrawDataMovement {
     // TODO: 1) path variable 
 
     /**
-     * Draws path in floor plan OR space-time view
-     * Path is separated into segments of stops with thick line thickness and moving of thinner line thickness
-     * Due to drawing methods in browsers, paths must be separated/segmented to draw different thicknesses or strokes
+     * Organizes path drawing depending on view (floor plan or space-time)
+     * Path is separated into segments depending on test/highlight method (e.g., stops, cursor, slicer)
+     * NOTE: Due to browser drawing methods, paths must be separated/segmented to change thickness or stroke
      * @param  {Integer} view
      * @param  {Path} path
      * @param  {Color} shade
+     * @param  {string} test
      */
     draw(view, path, shade, test) {
         this.setLineStyle(shade);
-        let isHighlightMode = false; // mode indicating if stopped or moving measured by change from last point
+        let isHighlightMode = false; // mode controls how paths are segmented (begun/ended)
         this.sk.beginShape();
         // Start at 1 to test current and prior points for drawing
         for (let i = 1; i < path.length; i++) {
@@ -77,32 +78,32 @@ class DrawDataMovement {
             if (this.sk.sketchController.testMovementPointToDraw(curPoint)) {
                 if (view === this.sk.SPACETIME) this.testPointForBug(curPoint.scaledTime, curPoint.scaledXPos, curPoint.scaledYPos);
                 if (this.highlightTestMethod(test, curPoint, path[i])) {
-                    this.highlightTestPassed(isHighlightMode, curPoint, priorPoint, shade);
-                    isHighlightMode = true;
+                    isHighlightMode = this.highlightTestPassed(isHighlightMode, curPoint, priorPoint, shade);
                 } else {
-                    this.highlightTestFailed(isHighlightMode, curPoint, priorPoint, shade);
-                    isHighlightMode = false;
+                    isHighlightMode = this.highlightTestFailed(isHighlightMode, curPoint, priorPoint, shade);
                 }
             }
         }
         this.sk.endShape(); // end shape in case still drawing
     }
 
+    highlightTestMethod(test, curPoint, point) {
+        if (test === "testCursor") return this.sk.gui.overCursor(curPoint.scaledXPos, curPoint.scaledYPos);
+        else if (test === "testSlicer") return this.sk.gui.overSlicer(curPoint.scaledXPos, curPoint.scaledYPos);
+        else return this.testIsStopped(point);
+    }
+
     // TODO: Please update the var name for scaledSpaceTimexpOS!!!
     highlightTestPassed(isHighlightMode, curPoint, priorPoint, shade) {
         if (isHighlightMode) this.sk.curveVertex(curPoint.scaledSpaceTimeXPos, curPoint.scaledYPos); // if already drawing in highlight mode, continue it
         else this.startEndShape(priorPoint, this.largePathWeight, shade); // if not drawing in highlight mode, begin it
+        return true;
     }
 
     highlightTestFailed(isHighlightMode, curPoint, priorPoint, shade) {
         if (isHighlightMode) this.startEndShape(priorPoint, this.smallPathWeight, shade); // if drawing in highlight mode, end it
         else this.sk.curveVertex(curPoint.scaledSpaceTimeXPos, curPoint.scaledYPos);
-    }
-
-    highlightTestMethod(test, curPoint, point) {
-        if (test === "testCursor") return this.sk.gui.overCursor(curPoint.scaledXPos, curPoint.scaledYPos);
-        else if (test === "testSlicer") return this.sk.gui.overSlicer(curPoint.scaledXPos, curPoint.scaledYPos);
-        else return this.testIsStopped(point);
+        return false;
     }
 
     testIsStopped(point) {
