@@ -38,8 +38,16 @@ class GUI {
     }
 
     drawHighlightSelectors() {
-        if (this.dataPanel.testSelectModeForRegion()) this.drawFloorPlanCursorSelector();
-        else if (this.dataPanel.testSelectModeForSlice()) this.drawFloorPlanSlicerSelector();
+        if (this.testSelectModeForRegion()) this.drawFloorPlanCursorSelector();
+        else if (this.testSelectModeForSlice()) this.drawFloorPlanSlicerSelector();
+    }
+
+    testSelectModeForRegion() {
+        return this.getCurSelectTab() === 1;
+    }
+
+    testSelectModeForSlice() {
+        return this.getCurSelectTab() === 2;
     }
 
     setSelectorStroke() {

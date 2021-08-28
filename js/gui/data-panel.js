@@ -132,14 +132,6 @@ class DataPanel {
         }
     }
 
-    testSelectModeForSlice() {
-        return this.tabs.curSelectTab === 2;
-    }
-
-    testSelectModeForRegion() {
-        return this.tabs.curSelectTab === 1;
-    }
-
     getCurSelectTab() {
         return this.tabs.curSelectTab;
     }

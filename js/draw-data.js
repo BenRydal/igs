@@ -214,20 +214,50 @@ class DrawDataConversation {
         };
     }
 
+
+    // TODO: figure out way to draw "first or lsat" conversation rect for each stop/move test
+    // TODO: test conversation/movement methods in sk controller--move here?
+    // TODO: testRegion/Slice methods--remove eventually?
     /**
      * Organizes drawing of conversation rects
      * @param  {Path} path
      * @param  {[Speaker]} speakerList
      */
     setData(path, speakerList) {
-        for (const point of path.conversation) {
-            const curPoint = this.sk.sketchController.getScaledPointValues(point, null);
-            if (this.sk.sketchController.testConversationPointToDraw(curPoint)) {
-                const curSpeaker = this.getSpeakerFromSpeakerList(point.speaker, speakerList); // get speaker object from global list equivalent to the current speaker of point
-                if (this.testSpeakerToDraw(curSpeaker, path.name)) this.drawRects(point, curSpeaker.color); // draws all rects
+        for (let i = 0; i < path.conversation.length - 1; i++) {
+            const curPoint = this.sk.sketchController.getScaledPointValues(path.conversation[i], null);
+            const nextPoint = this.sk.sketchController.getScaledPointValues(path.conversation[i + 1], null);
+            if (this.sk.sketchController.testConversationPointToDraw(curPoint) && this.testSelectMode(curPoint, nextPoint)) {
+                const curSpeaker = this.getSpeakerFromSpeakerList(path.conversation[i].speaker, speakerList); // get speaker object from global list equivalent to the current speaker of point
+                if (this.testSpeakerToDraw(curSpeaker, path.name)) this.drawRects(path.conversation[i], curSpeaker.color); // draws all rects
+                // TODO: add if i === 0 to draw first talk turn
             }
         }
     }
+
+    testSelectMode(curPoint, priorPoint) {
+        switch (this.sk.gui.getCurSelectTab()) {
+            case 0:
+                return true;
+            case 1:
+                return this.sk.gui.overCursor(curPoint.scaledXPos, curPoint.scaledYPos);
+            case 2:
+                return this.sk.gui.overSlicer(curPoint.scaledXPos, curPoint.scaledYPos);
+            case 3:
+                return !this.pointsHaveSamePosition(curPoint, priorPoint);
+            case 4:
+                return this.pointsHaveSamePosition(curPoint, priorPoint);
+        }
+    }
+
+    pointsHaveSamePosition(curPoint, priorPoint) {
+        return (curPoint.scaledXPos === priorPoint.scaledXPos && curPoint.scaledYPos === priorPoint.scaledYPos);
+    }
+
+
+
+
+
     /**
      * Organizes drawing of single text/textbox for a selected conversation
      * NOTE: this is called after all conversation rects are drawn so it is displayed on top visually
