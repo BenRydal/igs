@@ -135,8 +135,7 @@ class ProcessData {
             // Sample current movement row and test if row is good data
             if (this.sk.testData.sampleMovementData(parsedMovementArray, i) && this.sk.testData.movementRowForType(parsedMovementArray, i)) {
                 const m = this.createMovementPoint(parsedMovementArray[i][this.sk.testData.CSVHEADERS_MOVEMENT[1]], parsedMovementArray[i][this.sk.testData.CSVHEADERS_MOVEMENT[2]], parsedMovementArray[i][this.sk.testData.CSVHEADERS_MOVEMENT[0]]);
-                // set isStopped value based on comparison to prior point unless it is 1st point
-                if (movementPointArray.length === 0) m.isStopped = true;
+                if (movementPointArray.length === 0) m.isStopped = true; // set isStopped value based on comparison to prior point unless it is 1st point
                 else m.isStopped = this.pointsHaveSamePosition(m, movementPointArray[movementPointArray.length - 1]);
                 movementPointArray.push(m); // add good data to movement []
                 // Test conversation data row for quality first and then compare movement and conversation times to see if closest movement data to conversation time

@@ -55,6 +55,9 @@ class DrawDataMovement {
         this.draw(this.sk.SPACETIME, path.movement, path.color, highlightMethod);
     }
 
+
+    // TODO: 1) path variable , 2) parameters for highlightMethod are uneven, 3) how do you compare highlight mehtods to draw cur or priorpoint for startEndShape
+
     /**
      * Draws path in floor plan OR space-time view
      * Path is separated into segments of stops with thick line thickness and moving of thinner line thickness
