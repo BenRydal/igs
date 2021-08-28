@@ -224,18 +224,16 @@ class DrawDataConversation {
      * @param  {[Speaker]} speakerList
      */
     setData(path, speakerList) {
-        for (let i = 0; i < path.conversation.length - 1; i++) {
-            const curPoint = this.sk.sketchController.getScaledPointValues(path.conversation[i], null);
-            const nextPoint = this.sk.sketchController.getScaledPointValues(path.conversation[i + 1], null);
-            if (this.sk.sketchController.testConversationPointToDraw(curPoint) && this.testSelectMode(curPoint, nextPoint)) {
-                const curSpeaker = this.getSpeakerFromSpeakerList(path.conversation[i].speaker, speakerList); // get speaker object from global list equivalent to the current speaker of point
-                if (this.testSpeakerToDraw(curSpeaker, path.name)) this.drawRects(path.conversation[i], curSpeaker.color); // draws all rects
-                // TODO: add if i === 0 to draw first talk turn
+        for (const point of path.conversation) {
+            const curPoint = this.sk.sketchController.getScaledPointValues(point, null);
+            if (this.sk.sketchController.testConversationPointToDraw(curPoint) && this.testSelectMode(curPoint, point)) {
+                const curSpeaker = this.getSpeakerFromSpeakerList(point.speaker, speakerList); // get speaker object from global list equivalent to the current speaker of point
+                if (this.testSpeakerToDraw(curSpeaker, path.name)) this.drawRects(point, curSpeaker.color); // draws all rects
             }
         }
     }
 
-    testSelectMode(curPoint, priorPoint) {
+    testSelectMode(curPoint, point) {
         switch (this.sk.gui.getCurSelectTab()) {
             case 0:
                 return true;
@@ -244,17 +242,11 @@ class DrawDataConversation {
             case 2:
                 return this.sk.gui.overSlicer(curPoint.scaledXPos, curPoint.scaledYPos);
             case 3:
-                return !this.pointsHaveSamePosition(curPoint, priorPoint);
+                return !point.isStopped;
             case 4:
-                return this.pointsHaveSamePosition(curPoint, priorPoint);
+                return point.isStopped;
         }
     }
-
-    pointsHaveSamePosition(curPoint, priorPoint) {
-        return (curPoint.scaledXPos === priorPoint.scaledXPos && curPoint.scaledYPos === priorPoint.scaledYPos);
-    }
-
-
 
 
 

@@ -135,18 +135,26 @@ class ProcessData {
             // Sample current movement row and test if row is good data
             if (this.sk.testData.sampleMovementData(parsedMovementArray, i) && this.sk.testData.movementRowForType(parsedMovementArray, i)) {
                 const m = this.createMovementPoint(parsedMovementArray[i][this.sk.testData.CSVHEADERS_MOVEMENT[1]], parsedMovementArray[i][this.sk.testData.CSVHEADERS_MOVEMENT[2]], parsedMovementArray[i][this.sk.testData.CSVHEADERS_MOVEMENT[0]]);
+
+                if (movementPointArray.length === 0) m.isStopped = true;
+                else m.isStopped = this.pointsHaveSamePosition(m, movementPointArray[movementPointArray.length - 1]);
+
                 movementPointArray.push(m); // add good data to movement []
                 // Test conversation data row for quality first and then compare movement and conversation times to see if closest movement data to conversation time
                 if (this.sk.testData.conversationLengthAndRowForType(parsedConversationArray, conversationCounter) && m.time >= parsedConversationArray[conversationCounter][this.sk.testData.CSVHEADERS_CONVERSATION[0]]) {
                     const curTalkTimePos = parsedConversationArray[conversationCounter][this.sk.testData.CSVHEADERS_CONVERSATION[0]];
                     const curSpeaker = this.sk.core.cleanSpeaker(parsedConversationArray[conversationCounter][this.sk.testData.CSVHEADERS_CONVERSATION[1]]);
                     const curTalkTurn = parsedConversationArray[conversationCounter][this.sk.testData.CSVHEADERS_CONVERSATION[2]];
-                    conversationPointArray.push(this.createConversationPoint(m.xPos, m.yPos, curTalkTimePos, curSpeaker, curTalkTurn));
+                    conversationPointArray.push(this.createConversationPoint(m, curTalkTimePos, curSpeaker, curTalkTurn));
                     conversationCounter++;
                 } else if (!this.sk.testData.conversationLengthAndRowForType(parsedConversationArray, conversationCounter)) conversationCounter++; // make sure to increment counter if bad data to skip row in next iteration of loop
             }
         }
         return [movementPointArray, conversationPointArray];
+    }
+
+    pointsHaveSamePosition(curPoint, priorPoint) {
+        return (curPoint.xPos === priorPoint.xPos && curPoint.yPos === priorPoint.yPos);
     }
 
     /**
@@ -156,17 +164,19 @@ class ProcessData {
         return {
             xPos, // Float x and y pixel positions on floor plan
             yPos,
-            time // Float time value in seconds
+            time, // Float time value in seconds
+            isStopped: null
         }
     }
 
     /**
      * Represents a single conversation turn with a location in space and time, text values, name of a speaker, and what they said
      */
-    createConversationPoint(xPos, yPos, time, speaker, talkTurn) {
+    createConversationPoint(m, time, speaker, talkTurn) {
         return {
-            xPos, // Float x and y pixel positions on floor plan
-            yPos,
+            xPos: m.xPos, // Float x and y pixel positions on floor plan
+            yPos: m.yPos,
+            isStopped: m.isStopped,
             time, // Float Time value in seconds
             speaker, // String name of speaker
             talkTurn // String text of conversation turn
