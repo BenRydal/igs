@@ -98,16 +98,16 @@ class SketchController {
         const pixelTime = this.mapFromTotalToPixelTime(point.time);
         const scaledTime = this.mapFromSelectPixelToTimeline(pixelTime);
         const [scaledXPos, scaledYPos] = this.getScaledXYPos(point.xPos, point.yPos);
-        let scaledSpaceTimeXPos;
-        if (view === this.sk.PLAN) scaledSpaceTimeXPos = scaledXPos;
-        else if (view === this.sk.SPACETIME) scaledSpaceTimeXPos = scaledTime;
-        else scaledSpaceTimeXPos = null;
+        let scaledPlanOrTimeXPos;
+        if (view === this.sk.PLAN) scaledPlanOrTimeXPos = scaledXPos;
+        else if (view === this.sk.SPACETIME) scaledPlanOrTimeXPos = scaledTime;
+        else scaledPlanOrTimeXPos = null;
         return {
             pixelTime,
             scaledTime,
             scaledXPos,
             scaledYPos,
-            scaledSpaceTimeXPos
+            scaledPlanOrTimeXPos
         };
     }
 

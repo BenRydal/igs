@@ -55,9 +55,6 @@ class DrawDataMovement {
         this.draw(this.sk.SPACETIME, path.movement, path.color, highlightMethod);
     }
 
-
-    // TODO: 1) path variable 
-
     /**
      * Organizes path drawing depending on view (floor plan or space-time)
      * Path is separated into segments depending on test/highlight method (e.g., stops, cursor, slicer)
@@ -95,14 +92,14 @@ class DrawDataMovement {
 
     // TODO: Please update the var name for scaledSpaceTimexpOS!!!
     highlightTestPassed(isHighlightMode, curPoint, priorPoint, shade) {
-        if (isHighlightMode) this.sk.curveVertex(curPoint.scaledSpaceTimeXPos, curPoint.scaledYPos); // if already drawing in highlight mode, continue it
+        if (isHighlightMode) this.sk.curveVertex(curPoint.scaledPlanOrTimeXPos, curPoint.scaledYPos); // if already drawing in highlight mode, continue it
         else this.startEndShape(priorPoint, this.largePathWeight, shade); // if not drawing in highlight mode, begin it
         return true;
     }
 
     highlightTestFailed(isHighlightMode, curPoint, priorPoint, shade) {
         if (isHighlightMode) this.startEndShape(priorPoint, this.smallPathWeight, shade); // if drawing in highlight mode, end it
-        else this.sk.curveVertex(curPoint.scaledSpaceTimeXPos, curPoint.scaledYPos);
+        else this.sk.curveVertex(curPoint.scaledPlanOrTimeXPos, curPoint.scaledYPos);
         return false;
     }
 
@@ -125,14 +122,14 @@ class DrawDataMovement {
      * @param  {Color} shade
      */
     startEndShape(scaledPoint, weight, shade) {
-        this.sk.curveVertex(scaledPoint.scaledSpaceTimeXPos, scaledPoint.scaledYPos); // draw cur point twice to mark end point
-        this.sk.curveVertex(scaledPoint.scaledSpaceTimeXPos, scaledPoint.scaledYPos);
+        this.sk.curveVertex(scaledPoint.scaledPlanOrTimeXPos, scaledPoint.scaledYPos); // draw cur point twice to mark end point
+        this.sk.curveVertex(scaledPoint.scaledPlanOrTimeXPos, scaledPoint.scaledYPos);
         this.sk.endShape();
         this.sk.strokeWeight(weight);
         this.sk.stroke(shade);
         this.sk.beginShape();
-        this.sk.curveVertex(scaledPoint.scaledSpaceTimeXPos, scaledPoint.scaledYPos); // draw cur point twice to mark starting point
-        this.sk.curveVertex(scaledPoint.scaledSpaceTimeXPos, scaledPoint.scaledYPos);
+        this.sk.curveVertex(scaledPoint.scaledPlanOrTimeXPos, scaledPoint.scaledYPos); // draw cur point twice to mark starting point
+        this.sk.curveVertex(scaledPoint.scaledPlanOrTimeXPos, scaledPoint.scaledYPos);
     }
 
     testPointForBug(scaledTimeToTest, xPos, yPos) {
