@@ -67,17 +67,17 @@ class DrawDataMovement {
      * @param  {Color} shade
      * @param  {string} test
      */
-    draw(view, path, shade, test) {
+    draw(view, movementArray, shade, test) {
         this.setLineStyle(shade);
         let isHighlightMode = false; // mode controls how paths are segmented (begun/ended)
         this.sk.beginShape();
         // Start at 1 to test current and prior points for drawing
-        for (let i = 1; i < path.length; i++) {
-            const curPoint = this.sk.sketchController.getScaledPointValues(path[i], view); // get current and prior points for comparison
-            const priorPoint = this.sk.sketchController.getScaledPointValues(path[i - 1], view);
+        for (let i = 1; i < movementArray.length; i++) {
+            const curPoint = this.sk.sketchController.getScaledPointValues(movementArray[i], view); // get current and prior points for comparison
+            const priorPoint = this.sk.sketchController.getScaledPointValues(movementArray[i - 1], view);
             if (this.sk.sketchController.testPointIsShowing(curPoint)) {
                 if (view === this.sk.SPACETIME) this.testPointForBug(curPoint.scaledTime, curPoint.scaledXPos, curPoint.scaledYPos);
-                if (this.highlightTestMethod(test, curPoint, path[i])) {
+                if (this.highlightTestMethod(test, curPoint, movementArray[i])) {
                     isHighlightMode = this.highlightTestPassed(isHighlightMode, curPoint, priorPoint, shade);
                 } else {
                     isHighlightMode = this.highlightTestFailed(isHighlightMode, curPoint, priorPoint, shade);
