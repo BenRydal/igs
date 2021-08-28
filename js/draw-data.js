@@ -24,23 +24,23 @@ class DrawDataMovement {
         switch (this.sk.gui.getCurSelectTab()) {
             case 0:
                 this.setPathStrokeWeights(1, 10);
-                this.setNormalDrawing(path);
+                this.setDraw(path, this.testIsStopped);
                 break;
             case 1:
                 this.setPathStrokeWeights(1, 10);
-                this.setHighlightDrawing(path, this.sk.gui.overCursor.bind(this.sk.gui));
+                this.setDraw(path, this.sk.gui.overCursor.bind(this.sk.gui));
                 break;
             case 2:
                 this.setPathStrokeWeights(1, 10);
-                this.setHighlightDrawing(path, this.sk.gui.overSlicer.bind(this.sk.gui));
+                this.setDraw(path, this.sk.gui.overSlicer.bind(this.sk.gui));
                 break;
             case 3:
                 this.setPathStrokeWeights(1, 0);
-                this.setNormalDrawing(path);
+                this.setDraw(path, this.testIsStopped);
                 break;
             case 4:
                 this.setPathStrokeWeights(0, 10);
-                this.setNormalDrawing(path);
+                this.setDraw(path, this.testIsStopped);
                 break;
         }
     }
@@ -50,14 +50,9 @@ class DrawDataMovement {
         this.largePathWeight = large;
     }
 
-    setNormalDrawing(path) {
-        this.draw(this.sk.PLAN, path.movement, path.color);
-        this.draw(this.sk.SPACETIME, path.movement, path.color);
-    }
-
-    setHighlightDrawing(path, highlightMethod) {
-        this.drawWithCursorHighlight(this.sk.PLAN, path.movement, path.color, highlightMethod);
-        this.drawWithCursorHighlight(this.sk.SPACETIME, path.movement, path.color, highlightMethod);
+    setDraw(path, highlightMethod) {
+        this.draw(this.sk.PLAN, path.movement, path.color, highlightMethod);
+        this.draw(this.sk.SPACETIME, path.movement, path.color, highlightMethod);
     }
 
     /**
@@ -68,9 +63,9 @@ class DrawDataMovement {
      * @param  {Path} path
      * @param  {Color} shade
      */
-    draw(view, path, shade) {
+    draw(view, path, shade, highlightMethod) {
         this.setLineStyle(shade);
-        let isStopMode = false; // mode indicating if stopped or moving measured by change from last point
+        let isHighlightMode = false; // mode indicating if stopped or moving measured by change from last point
         this.sk.beginShape();
         // Start at 1 to test current and prior points for drawing
         for (let i = 1; i < path.length; i++) {
@@ -78,17 +73,17 @@ class DrawDataMovement {
             const priorPoint = this.sk.sketchController.getScaledPointValues(path[i - 1], view);
             if (this.sk.sketchController.testMovementPointToDraw(curPoint)) {
                 if (view === this.sk.SPACETIME) this.testPointForBug(curPoint.scaledTime, curPoint.scaledXPos, curPoint.scaledYPos);
-                if (this.pointsHaveSamePosition(curPoint, priorPoint)) {
-                    if (isStopMode) { // if already drawing in stop mode, continue it
+                if (highlightMethod(curPoint.scaledXPos, curPoint.scaledYPos, path[i])) {
+                    if (isHighlightMode) { // if already drawing in highlight mode, continue it
                         this.sk.curveVertex(curPoint.scaledSpaceTimeXPos, curPoint.scaledYPos);
-                    } else { // if not in drawing stop mode, begin it
+                    } else { // if not drawing in highlight mode, begin it
                         this.startEndShape(priorPoint, this.largePathWeight, shade);
-                        isStopMode = true;
+                        isHighlightMode = true;
                     }
                 } else {
-                    if (isStopMode) { // if drawing in stop mode, end it
+                    if (isHighlightMode) { // if drawing in highlight mode, end it
                         this.startEndShape(priorPoint, this.smallPathWeight, shade);
-                        isStopMode = false;
+                        isHighlightMode = false;
                     } else {
                         this.sk.curveVertex(curPoint.scaledSpaceTimeXPos, curPoint.scaledYPos);
                     }
@@ -98,43 +93,8 @@ class DrawDataMovement {
         this.sk.endShape(); // end shape in case still drawing
     }
 
-    pointsHaveSamePosition(curPoint, priorPoint) {
-        return (curPoint.scaledXPos === priorPoint.scaledXPos && curPoint.scaledYPos === priorPoint.scaledYPos);
-    }
-    /**
-     * Draws path in floor plan OR space-time view
-     * Path is separated into segments over cursor with thick line/highlight and not over cursor with thin line and grey color
-     * Due to drawing methods in browsers, paths must be separated/segmented to draw different thicknesses or strokes
-     * @param  {Integer} view
-     * @param  {Path} path
-     * @param  {Color} shade
-     */
-    drawWithCursorHighlight(view, path, shade, highlightMethod) {
-        this.setLineStyle(this.colorGray);
-        let isHighlightMode = false;
-        this.sk.beginShape();
-        for (const point of path) {
-            const curPoint = this.sk.sketchController.getScaledPointValues(point, view);
-            if (this.sk.sketchController.testMovementPointToDraw(curPoint)) {
-                if (view === this.sk.SPACETIME) this.testPointForBug(curPoint.scaledTime, curPoint.scaledXPos, curPoint.scaledYPos);
-                if (highlightMethod(curPoint.scaledXPos, curPoint.scaledYPos)) {
-                    if (isHighlightMode) { // if already drawing in cursor mode, continue it
-                        this.sk.curveVertex(curPoint.scaledSpaceTimeXPos, curPoint.scaledYPos);
-                    } else { // if not in drawing cursor mode, begin it
-                        this.startEndShape(curPoint, this.largePathWeight, shade);
-                        isHighlightMode = true;
-                    }
-                } else {
-                    if (isHighlightMode) { // if drawing in cursor mode, end it
-                        this.startEndShape(curPoint, this.smallPathWeight, this.colorGray);
-                        isHighlightMode = false;
-                    } else {
-                        this.sk.curveVertex(curPoint.scaledSpaceTimeXPos, curPoint.scaledYPos);
-                    }
-                }
-            }
-        }
-        this.sk.endShape();
+    testIsStopped(xPos, yPos, p) {
+        return p.isStopped;
     }
 
     setLineStyle(lineColor) {

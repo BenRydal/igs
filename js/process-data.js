@@ -135,10 +135,9 @@ class ProcessData {
             // Sample current movement row and test if row is good data
             if (this.sk.testData.sampleMovementData(parsedMovementArray, i) && this.sk.testData.movementRowForType(parsedMovementArray, i)) {
                 const m = this.createMovementPoint(parsedMovementArray[i][this.sk.testData.CSVHEADERS_MOVEMENT[1]], parsedMovementArray[i][this.sk.testData.CSVHEADERS_MOVEMENT[2]], parsedMovementArray[i][this.sk.testData.CSVHEADERS_MOVEMENT[0]]);
-
+                // set isStopped value based on comparison to prior point unless it is 1st point
                 if (movementPointArray.length === 0) m.isStopped = true;
                 else m.isStopped = this.pointsHaveSamePosition(m, movementPointArray[movementPointArray.length - 1]);
-
                 movementPointArray.push(m); // add good data to movement []
                 // Test conversation data row for quality first and then compare movement and conversation times to see if closest movement data to conversation time
                 if (this.sk.testData.conversationLengthAndRowForType(parsedConversationArray, conversationCounter) && m.time >= parsedConversationArray[conversationCounter][this.sk.testData.CSVHEADERS_CONVERSATION[0]]) {
@@ -165,7 +164,7 @@ class ProcessData {
             xPos, // Float x and y pixel positions on floor plan
             yPos,
             time, // Float time value in seconds
-            isStopped: null
+            isStopped: null // value set after comparing to previous point in createPointArrays
         }
     }
 
