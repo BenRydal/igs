@@ -165,15 +165,7 @@ class SketchController {
      * Test if point is in user view
      * @param  {MovementPoint} curPoint
      */
-    testMovementPointToDraw(curPoint) {
-        return this.sk.gui.overTimelineAxis(curPoint.pixelTime) && this.sk.gui.overFloorPlan(curPoint.scaledXPos, curPoint.scaledYPos) && this.testAnimation(curPoint.pixelTime);
-    }
-
-    /**
-     * Test if point is in user view
-     * @param  {ConversationPoint} curPoint
-     */
-    testConversationPointToDraw(curPoint) {
+    testPointIsShowing(curPoint) {
         return this.sk.gui.overTimelineAxis(curPoint.pixelTime) && this.sk.gui.overFloorPlan(curPoint.scaledXPos, curPoint.scaledYPos) && this.testAnimation(curPoint.pixelTime);
     }
 

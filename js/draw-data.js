@@ -24,7 +24,7 @@ class DrawDataMovement {
         switch (this.sk.gui.getCurSelectTab()) {
             case 0:
                 this.setPathStrokeWeights(1, 10);
-                this.setDraw(path, "testForStops");
+                this.setDraw(path, "testStops");
                 break;
             case 1:
                 this.setPathStrokeWeights(1, 10);
@@ -36,11 +36,11 @@ class DrawDataMovement {
                 break;
             case 3:
                 this.setPathStrokeWeights(1, 0);
-                this.setDraw(path, "testForStops");
+                this.setDraw(path, "testStops");
                 break;
             case 4:
                 this.setPathStrokeWeights(0, 10);
-                this.setDraw(path, "testForStops");
+                this.setDraw(path, "testStops");
                 break;
         }
     }
@@ -75,7 +75,7 @@ class DrawDataMovement {
         for (let i = 1; i < path.length; i++) {
             const curPoint = this.sk.sketchController.getScaledPointValues(path[i], view); // get current and prior points for comparison
             const priorPoint = this.sk.sketchController.getScaledPointValues(path[i - 1], view);
-            if (this.sk.sketchController.testMovementPointToDraw(curPoint)) {
+            if (this.sk.sketchController.testPointIsShowing(curPoint)) {
                 if (view === this.sk.SPACETIME) this.testPointForBug(curPoint.scaledTime, curPoint.scaledXPos, curPoint.scaledYPos);
                 if (this.highlightTestMethod(test, curPoint, path[i])) {
                     isHighlightMode = this.highlightTestPassed(isHighlightMode, curPoint, priorPoint, shade);
@@ -188,7 +188,6 @@ class DrawDataConversation {
     }
 
 
-    // TODO: test conversation/movement methods in sk controller--move here?
     // TODO: testRegion/Slice methods--remove eventually?
     /**
      * Organizes drawing of conversation rects
@@ -198,7 +197,7 @@ class DrawDataConversation {
     setData(path, speakerList) {
         for (const point of path.conversation) {
             const curPoint = this.sk.sketchController.getScaledPointValues(point, null);
-            if (this.sk.sketchController.testConversationPointToDraw(curPoint) && this.testSelectMode(curPoint, point)) {
+            if (this.sk.sketchController.testPointIsShowing(curPoint) && this.testSelectMode(curPoint, point)) {
                 const curSpeaker = this.getSpeakerFromSpeakerList(point.speaker, speakerList); // get speaker object from global list equivalent to the current speaker of point
                 if (this.testSpeakerToDraw(curSpeaker, path.name)) this.drawRects(point, curSpeaker.color); // draws all rects
             }
