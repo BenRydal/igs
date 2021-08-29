@@ -38,22 +38,8 @@ class GUI {
     }
 
     drawHighlightSelectors() {
-        if (this.testSelectModeForRegion()) this.drawFloorPlanCursorSelector();
-        else if (this.testSelectModeForSlice()) this.drawFloorPlanSlicerSelector();
-    }
-
-    testSelectModeForRegion() {
-        return this.getCurSelectTab() === 1;
-    }
-
-    testSelectModeForSlice() {
-        return this.getCurSelectTab() === 2;
-    }
-
-    setSelectorStroke() {
-        this.sk.noFill();
-        this.sk.strokeWeight(3);
-        this.sk.stroke(0);
+        if (this.getCurSelectTab() === 1) this.drawFloorPlanCursorSelector();
+        else if (this.getCurSelectTab() === 2) this.drawFloorPlanSlicerSelector();
     }
 
     drawFloorPlanCursorSelector() {
@@ -65,6 +51,12 @@ class GUI {
         this.setSelectorStroke();
         this.sk.line(this.sk.mouseX - this.floorPlanContainer.slicerSize, 0, this.sk.mouseX - this.floorPlanContainer.slicerSize, this.floorPlanContainer.height);
         this.sk.line(this.sk.mouseX + this.floorPlanContainer.slicerSize, 0, this.sk.mouseX + this.floorPlanContainer.slicerSize, this.floorPlanContainer.height);
+    }
+
+    setSelectorStroke() {
+        this.sk.noFill();
+        this.sk.strokeWeight(3);
+        this.sk.stroke(0);
     }
 
     drawIntroMsg() {

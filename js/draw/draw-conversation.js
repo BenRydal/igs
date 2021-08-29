@@ -14,8 +14,6 @@ class DrawDataConversation {
         };
     }
 
-
-    // TODO: testRegion/Slice methods--remove eventually?
     /**
      * Organizes drawing of conversation rects
      * @param  {Path} path
