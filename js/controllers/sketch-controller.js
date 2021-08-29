@@ -175,7 +175,11 @@ class SketchController {
     }
 
     testVideoToPlay() {
-        return this.sk.testData.dataIsLoaded(this.sk.core.videoPlayer) && this.mode.isVideoShow && !this.mode.isAnimate && this.sk.gui.overSpaceTimeView(this.sk.mouseX, this.sk.mouseY);
+        return this.testVideoAndDivAreLoaded() && this.mode.isVideoShow && !this.mode.isAnimate && this.sk.gui.overSpaceTimeView(this.sk.mouseX, this.sk.mouseY);
+    }
+
+    testVideoAndDivAreLoaded() {
+        return (this.sk.testData.dataIsLoaded(this.sk.core.videoPlayer) && this.sk.core.videoDivIsLoaded());
     }
 
     // Sets conversation rectangle scaling range (size of rectangles as timeline is rescaled)

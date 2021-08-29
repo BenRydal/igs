@@ -80,7 +80,11 @@ class Core {
     }
 
     updateVideoPosition(xPos, yPos) {
-        this.videoPlayer.updatePos(xPos, yPos);
+        this.videoPlayer.updatePos(xPos, yPos, 100); // third parameter if offset value
+    }
+
+    videoDivIsLoaded() {
+        return this.videoPlayer.getIsLoaded();
     }
 
     /** 
