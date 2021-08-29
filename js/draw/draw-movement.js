@@ -90,7 +90,6 @@ class DrawDataMovement {
         else return this.testIsStopped(point);
     }
 
-    // TODO: Please update the var name for scaledSpaceTimexpOS!!!
     highlightTestPassed(isHighlightMode, curPoint, priorPoint, shade) {
         if (isHighlightMode) this.sk.curveVertex(curPoint.scaledPlanOrTimeXPos, curPoint.scaledYPos); // if already drawing in highlight mode, continue it
         else this.startEndShape(priorPoint, this.largePathWeight, shade); // if not drawing in highlight mode, begin it

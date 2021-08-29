@@ -76,9 +76,7 @@ class GUI {
         this.dataPanel.organize(this.sk.HANDLEGUI, pathList, speakerList);
     }
 
-    /**
-     * Updates user select start/end vars and is triggered if user already dragging or begins dragging
-     */
+    // Updates user select start/end vars and is triggered if user already dragging or begins dragging
     handleTimeline() {
         this.timeline.handleTimeline();
     }
@@ -94,32 +92,15 @@ class GUI {
     setRotateRight() {
         this.sk.sketchController.setRotateRight();
     }
-    /**
-     * NOTE: this setter is modifying core vars but this still seems to be best solution
-     */
+
+    // NOTE: this setter is modifying core vars but this still seems to be best solution
     setCoreData(personFromList) {
         personFromList.isShowing = !personFromList.isShowing;
     }
 
-
-
     getCurSelectTab() {
         return this.dataPanel.getCurSelectTab();
     }
-
-    // TODO: consider moving to drawData? deal with selectorSize constants maybe?
-    overCursor(xPos, yPos) {
-        return this.sk.overCircle(xPos, yPos, this.floorPlanContainer.selectorSize);
-    }
-
-    overSlicer(xPos, yPos) {
-        return this.sk.overRect(xPos - this.floorPlanContainer.slicerSize, 0, (2 * this.floorPlanContainer.slicerSize), this.timelineContainer.height);
-    }
-
-
-
-
-
 
     getTimelineStart() {
         return this.timelineContainer.start;
@@ -147,5 +128,13 @@ class GUI {
 
     overTimelineAxis(pixelValue) {
         return pixelValue >= this.getCurTimelineSelectStart() && pixelValue <= this.getCurTimelineSelectEnd();
+    }
+
+    overCursor(xPos, yPos) {
+        return this.sk.overCircle(xPos, yPos, this.floorPlanContainer.selectorSize);
+    }
+
+    overSlicer(xPos, yPos) {
+        return this.sk.overRect(xPos - this.floorPlanContainer.slicerSize, 0, (2 * this.floorPlanContainer.slicerSize), this.timelineContainer.height);
     }
 }
