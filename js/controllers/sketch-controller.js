@@ -139,7 +139,7 @@ class SketchController {
     }
 
     /**
-     * Organizes floor plan drawing methods depending on floor plan rotaiton mode
+     * Organizes floor plan drawing methods with and without rotation
      */
     setFloorPlan() {
         switch (this.getRotationMode()) {
@@ -178,9 +178,7 @@ class SketchController {
         return this.sk.testData.dataIsLoaded(this.sk.core.videoPlayer) && this.mode.isVideoShow && !this.mode.isAnimate && this.sk.gui.overSpaceTimeView(this.sk.mouseX, this.sk.mouseY);
     }
 
-    /**
-     * Sets conversation rectangle scaling range (size of rectangles as timeline is rescaled)
-     */
+    // Sets conversation rectangle scaling range (size of rectangles as timeline is rescaled)
     mapConversationRectRange() {
         return this.sk.map(this.sk.core.totalTimeInSeconds, 0, 3600, 10, 1, true); // map to inverse, values constrained between 10 and 1 (pixels)
     }
@@ -237,11 +235,6 @@ class SketchController {
 
     setIsVideoShow(value) {
         this.mode.isVideoShow = value;
-    }
-
-    // ****** ROTATION METHODS ****** //
-    testNoRotation() {
-        return this.getRotationMode() === 0;
     }
 
     getRotationMode() {
