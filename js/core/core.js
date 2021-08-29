@@ -92,8 +92,8 @@ class Core {
      * @param {Integer} fileNum
      * @param {PapaParse Results []} results
      * @param {CSV} file
-     * @param {[]]} MovementPoints
-     * @param {[]]} ConversationPoints
+     * @param {Array} MovementPoints
+     * @param {Array} ConversationPoints
      */
     updateMovement(fileNum, parsedMovementArray, file, movementPointArray, conversationPointArray) {
         if (fileNum === 0) this.clearMovementData(); // clear existing movement data for first new file only
