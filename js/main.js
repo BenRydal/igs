@@ -50,31 +50,16 @@ const igs = new p5((sk) => {
         sk.sketchController.updateLoop();
     }
 
-    sk.setFloorPlanTranslation = function () {
+    sk.drawFloorPlan = function (width, height) {
+        sk.image(sk.core.inputFloorPlan.img, 0, 0, width, height);
+    }
+
+    sk.drawRotatedFloorPlan = function (angle, width, height) {
         sk.push();
         sk.imageMode(sk.CENTER); // important method to include here
         sk.translate(sk.gui.floorPlanContainer.width / 2, sk.gui.floorPlanContainer.height / 2);
-    }
-
-    sk.drawFloorPlanNoRotate = function () {
-        sk.image(sk.core.inputFloorPlan.img, 0, 0, sk.gui.floorPlanContainer.width, sk.gui.floorPlanContainer.height);
-    }
-
-    sk.drawFloorPlan90Rotate = function () {
-        sk.rotate(sk.HALF_PI);
-        sk.image(sk.core.inputFloorPlan.img, 0, 0, sk.gui.floorPlanContainer.height, sk.gui.floorPlanContainer.width);
-        sk.pop();
-    }
-
-    sk.drawFloorPlan180Rotate = function () {
-        sk.rotate(sk.PI);
-        sk.image(sk.core.inputFloorPlan.img, 0, 0, sk.gui.floorPlanContainer.width, sk.gui.floorPlanContainer.height);
-        sk.pop();
-    }
-
-    sk.drawFloorPlan270Rotate = function () {
-        sk.rotate(-sk.HALF_PI);
-        sk.image(sk.core.inputFloorPlan.img, 0, 0, sk.gui.floorPlanContainer.height, sk.gui.floorPlanContainer.width);
+        sk.rotate(angle);
+        sk.image(sk.core.inputFloorPlan.img, 0, 0, width, height);
         sk.pop();
     }
 

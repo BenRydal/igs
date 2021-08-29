@@ -144,19 +144,16 @@ class SketchController {
     setFloorPlan() {
         switch (this.getRotationMode()) {
             case 0:
-                this.sk.drawFloorPlanNoRotate();
+                this.sk.drawFloorPlan(this.sk.gui.floorPlanContainer.width, this.sk.gui.floorPlanContainer.height);
                 break;
             case 1:
-                this.sk.setFloorPlanTranslation();
-                this.sk.drawFloorPlan90Rotate();
+                this.sk.drawRotatedFloorPlan(this.sk.HALF_PI, this.sk.gui.floorPlanContainer.height, this.sk.gui.floorPlanContainer.width);
                 break;
             case 2:
-                this.sk.setFloorPlanTranslation();
-                this.sk.drawFloorPlan180Rotate();
+                this.sk.drawRotatedFloorPlan(this.sk.PI, this.sk.gui.floorPlanContainer.width, this.sk.gui.floorPlanContainer.height);
                 break;
             case 3:
-                this.sk.setFloorPlanTranslation();
-                this.sk.drawFloorPlan270Rotate();
+                this.sk.drawRotatedFloorPlan(-this.sk.HALF_PI, this.sk.gui.floorPlanContainer.height, this.sk.gui.floorPlanContainer.width);
                 break;
         }
     }
