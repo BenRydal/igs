@@ -64,21 +64,21 @@ const igs = new p5((sk) => {
     }
 
     sk.setMovementAndConversation = function () {
-        const drawConversationData = new DrawDataConversation(sk);
-        const drawMovementData = new DrawDataMovement(sk);
+        const drawConversation = new DrawConversation(sk);
+        const drawMovement = new DrawMovement(sk);
         for (const path of sk.core.paths) {
             if (path.isShowing) {
-                drawConversationData.setData(path, sk.core.speakerList);
-                drawMovementData.setData(path); // draw after conversation so bug displays on top
+                drawConversation.setData(path, sk.core.speakerList);
+                drawMovement.setData(path); // draw after conversation so bug displays on top
             }
         }
-        drawConversationData.setConversationBubble(); // draw conversation text last so it displays on top
+        drawConversation.setConversationBubble(); // draw conversation text last so it displays on top
     }
 
     sk.setMovement = function () {
-        const drawMovementData = new DrawDataMovement(sk);
+        const drawMovement = new DrawMovement(sk);
         for (const path of sk.core.paths) {
-            if (path.isShowing) drawMovementData.setData(path); // draw after conversation so bug displays on top
+            if (path.isShowing) drawMovement.setData(path); // draw after conversation so bug displays on top
         }
     }
 

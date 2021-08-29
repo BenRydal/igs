@@ -1,4 +1,4 @@
-class DrawDataConversation {
+class DrawConversation {
 
     constructor(sketch) {
         this.sk = sketch;

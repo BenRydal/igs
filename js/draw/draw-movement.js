@@ -1,4 +1,4 @@
-class DrawDataMovement {
+class DrawMovement {
 
     constructor(sketch) {
         this.sk = sketch;
