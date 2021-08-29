@@ -55,7 +55,7 @@ class GUI {
 
     setSelectorStroke() {
         this.sk.noFill();
-        this.sk.strokeWeight(3);
+        this.sk.strokeWeight(4);
         this.sk.stroke(0);
     }
 
