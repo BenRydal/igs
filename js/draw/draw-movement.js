@@ -68,14 +68,16 @@ class DrawMovement {
         this.setLineStyle(shade);
         let isHighlightMode = false; // mode controls how paths are segmented (begun/ended)
         this.sk.beginShape();
-        for (const point of movementArray) {
-            const curPoint = this.sk.sketchController.getScaledPointValues(point, view);
+        // Start at 1 to test current and prior points for drawing start/end vertices correctly
+        for (let i = 1; i < movementArray.length; i++) {
+            const curPoint = this.sk.sketchController.getScaledPointValues(movementArray[i], view); // get current and prior points for comparison
+            const priorPoint = this.sk.sketchController.getScaledPointValues(movementArray[i - 1], view);
             if (this.sk.sketchController.testPointIsShowing(curPoint)) {
                 if (view === this.sk.SPACETIME) this.testPointForBug(curPoint.scaledTime, curPoint.scaledXPos, curPoint.scaledYPos);
-                if (this.highlightTestMethod(test, curPoint, point)) {
-                    isHighlightMode = this.highlightTestPassed(isHighlightMode, curPoint, shade);
+                if (this.highlightTestMethod(test, curPoint, movementArray[i])) {
+                    isHighlightMode = this.highlightTestPassed(isHighlightMode, curPoint, priorPoint, shade);
                 } else {
-                    isHighlightMode = this.highlightTestFailed(isHighlightMode, curPoint, shade);
+                    isHighlightMode = this.highlightTestFailed(isHighlightMode, curPoint, priorPoint, shade);
                 }
             }
         }
@@ -88,14 +90,14 @@ class DrawMovement {
         else return this.testIsStopped(point);
     }
 
-    highlightTestPassed(isHighlightMode, curPoint, shade) {
+    highlightTestPassed(isHighlightMode, curPoint, priorPoint, shade) {
         if (isHighlightMode) this.sk.curveVertex(curPoint.scaledPlanOrTimeXPos, curPoint.scaledYPos); // if already drawing in highlight mode, continue it
-        else this.startEndShape(curPoint, this.largePathWeight, shade); // if not drawing in highlight mode, begin it
+        else this.startEndShape(priorPoint, this.largePathWeight, shade); // if not drawing in highlight mode, begin it
         return true;
     }
 
-    highlightTestFailed(isHighlightMode, curPoint, shade) {
-        if (isHighlightMode) this.startEndShape(curPoint, this.smallPathWeight, shade); // if drawing in highlight mode, end it
+    highlightTestFailed(isHighlightMode, curPoint, priorPoint, shade) {
+        if (isHighlightMode) this.startEndShape(priorPoint, this.smallPathWeight, shade); // if drawing in highlight mode, end it
         else this.sk.curveVertex(curPoint.scaledPlanOrTimeXPos, curPoint.scaledYPos);
         return false;
     }
