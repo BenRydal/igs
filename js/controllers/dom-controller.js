@@ -55,23 +55,23 @@ class DomController {
     }
 
     handleAlignTalkButton() {
-        this.sk.sketchController.setAlignTalk(!this.sk.sketchController.mode.isAlignTalk);
+        this.sk.sketchController.setIsAlignTalk(!this.sk.sketchController.mode.isAlignTalk);
         this.sk.sketchController.startLoop();
 
     }
 
     handleAllTalkButton() {
-        this.sk.sketchController.setAllTalk(!this.sk.sketchController.mode.isAllTalk);
+        this.sk.sketchController.setIsAllTalk(!this.sk.sketchController.mode.isAllTalk);
         this.sk.sketchController.startLoop();
 
     }
 
     handleVideoButton() {
-        if (this.sk.testData.dataIsLoaded(this.sk.core.videoPlayer)) this.sk.sketchController.toggleVideoShowHide();
+        if (this.sk.sketchController.testVideoAndDivAreLoaded()) this.sk.sketchController.toggleVideoShowHide();
     }
 
     handleHowToButton() {
-        this.sk.sketchController.setIntro(!this.sk.sketchController.mode.isIntro);
+        this.sk.sketchController.setIsIntro(!this.sk.sketchController.mode.isIntro);
         this.sk.sketchController.startLoop();
     }
 
@@ -90,25 +90,25 @@ class DomController {
                 this.loadExampleData(['data/example-1/', 'floorplan.png', 'conversation.csv', ['Jordan.csv'], 'Youtube', {
                     videoId: 'iiMjfVOj8po'
                 }]);
-                this.sk.sketchController.setAllTalk(false);
+                this.sk.sketchController.setIsAllTalk(false);
                 break;
             case "Example 2":
                 this.loadExampleData(['data/example-2/', 'floorplan.png', 'conversation.csv', ['Lily.csv', 'Jeans.csv', 'Adhir.csv', 'Mae.csv', 'Blake.csv'], 'Youtube', {
                     videoId: 'pWJ3xNk1Zpg'
                 }]);
-                this.sk.sketchController.setAllTalk(false);
+                this.sk.sketchController.setIsAllTalk(false);
                 break;
             case "Example 3":
                 this.loadExampleData(['data/example-3/', 'floorplan.png', 'conversation.csv', ['Teacher.csv'], 'Youtube', {
                     videoId: 'Iu0rxb-xkMk'
                 }]);
-                this.sk.sketchController.setAllTalk(true); // not essential but setting matches each case differently
+                this.sk.sketchController.setIsAllTalk(true); // not essential but setting matches each case differently
                 break;
             case "Example 4":
                 this.loadExampleData(['data/example-4/', 'floorplan.png', 'conversation.csv', ['Teacher.csv', 'Sean.csv', 'Mei.csv', 'Cassandra.csv', 'Nathan.csv'], 'Youtube', {
                     videoId: 'OJSZCK4GPQY'
                 }]);
-                this.sk.sketchController.setAllTalk(false);
+                this.sk.sketchController.setIsAllTalk(false);
                 break;
         }
     }
@@ -124,7 +124,7 @@ class DomController {
     }
 
     loadUserData() {
-        this.sk.sketchController.setIntro(false); // Hide intro msg if showing
+        this.sk.sketchController.setIsIntro(false); // Hide intro msg if showing
         this.sk.core.clearAllData();
         this.sk.sketchController.startLoop(); // rerun P5 draw loop
     }
@@ -133,7 +133,7 @@ class DomController {
      * @param  {[String directory, String floorPlan image file, String conversation File, String movement File[], String video platform, video params (see Video Player Interface)]} params
      */
     loadExampleData(params) {
-        this.sk.sketchController.setIntro(false); // Hide intro msg if showing
+        this.sk.sketchController.setIsIntro(false); // Hide intro msg if showing
         this.sk.core.updateVideo(params[4], params[5]);
         this.sk.core.updateFloorPlan(params[0] + params[1]);
         this.sk.processData.prepExampleConversationFile(params[0], params[2]);

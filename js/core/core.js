@@ -6,10 +6,10 @@ class Core {
         this.parsedConversationArray = []; // List that holds a parsed results.data array from Papa parsed conversation CSV file
         this.speakerList = []; // List that holds Speaker objects parsed from conversation file
         this.paths = []; // List of path objects
-        this.floorPlan = {
+        this.inputFloorPlan = {
             img: null,
-            inputPixelWidth: null,
-            inputPixelHeight: null
+            width: null,
+            height: null
         }
         this.videoPlayer = null; // abstract class for different play classes instantiated/updated in processVideo method (see video-player.js)
         this.totalTimeInSeconds = 0; // Number indicating time value in seconds that all displayed data is set to, set dynamically in processMovement methods
@@ -25,9 +25,9 @@ class Core {
             console.log("Floor Plan Image Loaded");
             img.onload = () => URL.revokeObjectURL(this.src);
             this.sk.sketchController.startLoop(); // rerun P5 draw loop after loading image
-            this.floorPlan.img = img;
-            this.floorPlan.inputPixelWidth = img.width;
-            this.floorPlan.inputPixelHeight = img.height;
+            this.inputFloorPlan.img = img;
+            this.inputFloorPlan.width = img.width;
+            this.inputFloorPlan.height = img.height;
         }, e => {
             alert("Error loading floor plan image file. Please make sure it is correctly formatted as a PNG or JPG image file.")
             console.log(e);
@@ -53,13 +53,47 @@ class Core {
         }
     }
 
+    updateVideoScrubAnimate(timeInSeconds) {
+        this.videoPlayer.seekTo(timeInSeconds);
+    }
+    updateVideoScrub(timeInSeconds) {
+        this.videoPlayer.seekTo(timeInSeconds);
+        this.videoPlayer.pause(); // Add to prevent accidental video playing that seems to occur
+    }
+
+    hideVideo() {
+        this.videoPlayer.pause();
+        this.videoPlayer.hide();
+    }
+
+    showVideo() {
+        this.videoPlayer.show();
+    }
+
+    pauseVideo() {
+        this.videoPlayer.pause();
+    }
+
+    playVideo(timeInSeconds) {
+        this.videoPlayer.play();
+        this.videoPlayer.seekTo(timeInSeconds);
+    }
+
+    updateVideoPosition(xPos, yPos) {
+        this.videoPlayer.updatePos(xPos, yPos, 100); // third parameter if offset value
+    }
+
+    videoDivIsLoaded() {
+        return this.videoPlayer.getIsLoaded();
+    }
+
     /** 
      * Organizes methods to process and update core parsedMovementFileData []
      * @param {Integer} fileNum
      * @param {PapaParse Results []} results
      * @param {CSV} file
-     * @param {[]]} MovementPoints
-     * @param {[]]} ConversationPoints
+     * @param {Array} MovementPoints
+     * @param {Array} ConversationPoints
      */
     updateMovement(fileNum, parsedMovementArray, file, movementPointArray, conversationPointArray) {
         if (fileNum === 0) this.clearMovementData(); // clear existing movement data for first new file only
@@ -189,14 +223,14 @@ class Core {
     clearVideo() {
         this.videoPlayer.destroy(); // if there is a video, destroy it
         this.videoPlayer = null;
-        this.sk.sketchController.setVideoPlay(false);
-        this.sk.sketchController.setVideoShow(false);
+        this.sk.sketchController.setIsVideoPlay(false);
+        this.sk.sketchController.setIsVideoShow(false);
     }
 
     clearFloorPlan() {
-        this.floorPlan.img = null;
-        this.floorPlan.inputPixelWidth = null;
-        this.floorPlan.inputPixelHeight = null;
+        this.inputFloorPlan.img = null;
+        this.inputFloorPlan.width = null;
+        this.inputFloorPlan.height = null;
     }
 
     clearConversationData() {

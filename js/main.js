@@ -22,75 +22,63 @@ const igs = new p5((sk) => {
     sk.setup = function () {
         sk.canvas = sk.createCanvas(window.innerWidth, window.innerHeight, sk.P2D);
         sk.textFont(sk.font_Lato);
+        sk.textAlign(sk.LEFT, sk.TOP);
         // SKETCH SINGLETONS
         sk.core = new Core(sk); // core program variables and update methods
         sk.testData = new TestData(); // holds tests for core data and CSV files. Does not need sketch reference
-        sk.keys = new Keys(sk); // GUI vars and methods
+        sk.gui = new GUI(sk); // GUI vars and methods
         sk.domController = new DomController(sk); // handles DOM/buttons user interaction
         sk.sketchController = new SketchController(sk); // coordinates calls across classes and updates state variables
         sk.processData = new ProcessData(sk); // handles all data processing
         // CONSTANTS
         sk.PLAN = 0; // two drawing modes
         sk.SPACETIME = 1;
+        sk.DRAWGUI = 0;
+        sk.HANDLEGUI = 1;
     }
 
     sk.draw = function () {
         sk.background(255);
-        if (sk.testData.dataIsLoaded(sk.core.floorPlan.img)) sk.setFloorPlan();
+        if (sk.testData.dataIsLoaded(sk.core.inputFloorPlan.img)) sk.sketchController.setFloorPlan();
         if (sk.testData.arrayIsLoaded(sk.core.paths)) {
             if (sk.testData.arrayIsLoaded(sk.core.speakerList)) sk.setMovementAndConversation();
             else sk.setMovement();
         }
-        if (sk.testData.dataIsLoaded(sk.core.videoPlayer)) sk.sketchController.updateVideoDisplay();
-        sk.keys.drawKeys(sk.core.paths, sk.core.speakerList); // draw keys last
+        if (sk.sketchController.testVideoAndDivAreLoaded()) sk.sketchController.updateVideoDisplay();
+        sk.gui.drawKeys(sk.core.paths, sk.core.speakerList); // draw keys last
         sk.sketchController.updateAnimation();
         sk.sketchController.updateLoop();
     }
 
-    sk.setFloorPlan = function () {
-        if (sk.sketchController.testNoRotation()) sk.image(sk.core.floorPlan.img, 0, 0, sk.keys.floorPlan.width, sk.keys.floorPlan.height);
-        else this.setRotatedFloorPlan(sk.sketchController.getRotationMode());
+    sk.drawFloorPlan = function (width, height) {
+        sk.image(sk.core.inputFloorPlan.img, 0, 0, width, height);
     }
 
-    sk.setRotatedFloorPlan = function (mode) {
+    sk.drawRotatedFloorPlan = function (angle, width, height) {
         sk.push();
-        sk.imageMode(sk.CENTER);
-        sk.translate(sk.keys.floorPlan.width / 2, sk.keys.floorPlan.height / 2);
-        switch (mode) {
-            case sk.sketchController.rotation.modeList[1]:
-                sk.rotate(sk.HALF_PI);
-                sk.image(sk.core.floorPlan.img, 0, 0, sk.keys.floorPlan.height, sk.keys.floorPlan.width);
-                sk.pop();
-                break;
-            case sk.sketchController.rotation.modeList[2]:
-                sk.rotate(sk.PI);
-                sk.image(sk.core.floorPlan.img, 0, 0, sk.keys.floorPlan.width, sk.keys.floorPlan.height);
-                sk.pop();
-                break;
-            case sk.sketchController.rotation.modeList[3]:
-                sk.rotate(-sk.HALF_PI);
-                sk.image(sk.core.floorPlan.img, 0, 0, sk.keys.floorPlan.height, sk.keys.floorPlan.width);
-                sk.pop();
-                break;
-        }
+        sk.imageMode(sk.CENTER); // important method to include here
+        sk.translate(sk.gui.floorPlanContainer.width / 2, sk.gui.floorPlanContainer.height / 2);
+        sk.rotate(angle);
+        sk.image(sk.core.inputFloorPlan.img, 0, 0, width, height);
+        sk.pop();
     }
 
     sk.setMovementAndConversation = function () {
-        const drawConversationData = new DrawDataConversation(sk);
-        const drawMovementData = new DrawDataMovement(sk);
+        const drawConversation = new DrawConversation(sk);
+        const drawMovement = new DrawMovement(sk);
         for (const path of sk.core.paths) {
             if (path.isShowing) {
-                drawConversationData.setData(path, sk.core.speakerList);
-                drawMovementData.setData(path); // draw after conversation so bug displays on top
+                drawConversation.setData(path, sk.core.speakerList);
+                drawMovement.setData(path); // draw after conversation so bug displays on top
             }
         }
-        drawConversationData.setConversationBubble(); // draw conversation text last so it displays on top
+        drawConversation.setConversationBubble(); // draw conversation text last so it displays on top
     }
 
     sk.setMovement = function () {
-        const drawMovementData = new DrawDataMovement(sk);
+        const drawMovement = new DrawMovement(sk);
         for (const path of sk.core.paths) {
-            if (path.isShowing) drawMovementData.setData(path); // draw after conversation so bug displays on top
+            if (path.isShowing) drawMovement.setData(path); // draw after conversation so bug displays on top
         }
     }
 
@@ -109,5 +97,13 @@ const igs = new p5((sk) => {
     }
     sk.mouseMoved = function () {
         sk.sketchController.startLoop();
+    }
+
+    sk.overCircle = function (x, y, diameter) {
+        return sk.sqrt(sk.sq(x - sk.mouseX) + sk.sq(y - sk.mouseY)) < diameter / 2;
+    }
+
+    sk.overRect = function (x, y, boxWidth, boxHeight) {
+        return sk.mouseX >= x && sk.mouseX <= x + boxWidth && sk.mouseY >= y && sk.mouseY <= y + boxHeight;
     }
 });

@@ -14,6 +14,7 @@ class YoutubePlayer {
         this.videoWidth = videoWidth;
         this.videoHeight = videoHeight;
         this.movie = this.sk.createDiv();
+        this.isLoaded = false;
         this.setMovieDiv();
         this.initializePlayer();
     }
@@ -36,11 +37,16 @@ class YoutubePlayer {
             events: {
                 'onReady': () => {
                     console.log("YT player ready: ");
+                    this.isLoaded = true;
                     this.sk.sketchController.toggleVideoShowHide(); // Show video once loaded
                     this.sk.sketchController.startLoop(); // rerun P5 draw loop after loading image
                 }
             }
         });
+    }
+
+    getIsLoaded() {
+        return this.isLoaded;
     }
 
     show() {
@@ -100,10 +106,12 @@ class P5FilePlayer {
         this.sk = sketch;
         this.videoWidth = videoWidth;
         this.videoHeight = videoHeight;
+        this.isLoaded = false;
         this.movie = this.sk.createVideo(params['fileName'], () => {
             console.log("File Player Ready:");
             this.movie.onload = () => URL.revokeObjectURL(this.src);
             this.setMovieDiv();
+            this.isLoaded = true;
             this.sk.sketchController.toggleVideoShowHide(); // Show video once it has been loaded
             this.sk.sketchController.startLoop(); // rerun P5 draw loop after loading image
         });
@@ -114,6 +122,10 @@ class P5FilePlayer {
         this.movie.size(this.videoWidth, this.videoHeight);
         this.movie.hide();
         this.movie.position(0, 0);
+    }
+
+    getIsLoaded() {
+        return this.isLoaded;
     }
 
     show() {
