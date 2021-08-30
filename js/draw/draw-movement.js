@@ -23,15 +23,15 @@ class DrawMovement {
     setPaths(path) {
         switch (this.sk.gui.getCurSelectTab()) {
             case 0:
-                this.setPathStrokeWeights(1, 10);
+                this.setPathStrokeWeights(1, 9);
                 this.setDraw(path, "testStops");
                 break;
             case 1:
-                this.setPathStrokeWeights(1, 10);
+                this.setPathStrokeWeights(1, 9);
                 this.setDraw(path, "testCursor");
                 break;
             case 2:
-                this.setPathStrokeWeights(1, 10);
+                this.setPathStrokeWeights(1, 9);
                 this.setDraw(path, "testSlicer");
                 break;
             case 3:
@@ -39,7 +39,7 @@ class DrawMovement {
                 this.setDraw(path, "testStops");
                 break;
             case 4:
-                this.setPathStrokeWeights(0, 10);
+                this.setPathStrokeWeights(0, 9);
                 this.setDraw(path, "testStops");
                 break;
         }
@@ -91,14 +91,14 @@ class DrawMovement {
     }
 
     highlightTestPassed(isHighlightMode, curPoint, priorPoint, shade) {
-        if (isHighlightMode) this.sk.curveVertex(curPoint.scaledPlanOrTimeXPos, curPoint.scaledYPos); // if already drawing in highlight mode, continue it
+        if (isHighlightMode) this.sk.vertex(curPoint.scaledPlanOrTimeXPos, curPoint.scaledYPos); // if already drawing in highlight mode, continue it
         else this.startEndShape(priorPoint, this.largePathWeight, shade); // if not drawing in highlight mode, begin it
         return true;
     }
 
     highlightTestFailed(isHighlightMode, curPoint, priorPoint, shade) {
         if (isHighlightMode) this.startEndShape(priorPoint, this.smallPathWeight, shade); // if drawing in highlight mode, end it
-        else this.sk.curveVertex(curPoint.scaledPlanOrTimeXPos, curPoint.scaledYPos);
+        else this.sk.vertex(curPoint.scaledPlanOrTimeXPos, curPoint.scaledYPos);
         return false;
     }
 
@@ -121,14 +121,14 @@ class DrawMovement {
      * @param  {Color} shade
      */
     startEndShape(scaledPoint, weight, shade) {
-        this.sk.curveVertex(scaledPoint.scaledPlanOrTimeXPos, scaledPoint.scaledYPos); // draw cur point twice to mark end point
-        this.sk.curveVertex(scaledPoint.scaledPlanOrTimeXPos, scaledPoint.scaledYPos);
+        this.sk.vertex(scaledPoint.scaledPlanOrTimeXPos, scaledPoint.scaledYPos); // draw cur point twice to mark end point
+        this.sk.vertex(scaledPoint.scaledPlanOrTimeXPos, scaledPoint.scaledYPos);
         this.sk.endShape();
         this.sk.strokeWeight(weight);
         this.sk.stroke(shade);
         this.sk.beginShape();
-        this.sk.curveVertex(scaledPoint.scaledPlanOrTimeXPos, scaledPoint.scaledYPos); // draw cur point twice to mark starting point
-        this.sk.curveVertex(scaledPoint.scaledPlanOrTimeXPos, scaledPoint.scaledYPos);
+        this.sk.vertex(scaledPoint.scaledPlanOrTimeXPos, scaledPoint.scaledYPos); // draw cur point twice to mark starting point
+        this.sk.vertex(scaledPoint.scaledPlanOrTimeXPos, scaledPoint.scaledYPos);
     }
 
     testPointForBug(scaledTimeToTest, xPos, yPos) {
