@@ -77,7 +77,7 @@ class DrawMovement {
                 if (this.highlightTestMethod(test, curPoint, movementArray[i])) {
                     isHighlightMode = this.highlightTestPassed(isHighlightMode, curPoint, priorPoint, shade);
                 } else {
-                    isHighlightMode = this.highlightTestFailed(isHighlightMode, curPoint, priorPoint, shade);
+                    isHighlightMode = this.highlightTestFailed(view, isHighlightMode, curPoint, priorPoint, shade);
                 }
             }
         }
@@ -96,9 +96,12 @@ class DrawMovement {
         return true;
     }
 
-    highlightTestFailed(isHighlightMode, curPoint, priorPoint, shade) {
-        if (isHighlightMode) this.startEndShape(priorPoint, this.smallPathWeight, shade); // if drawing in highlight mode, end it
-        else this.sk.vertex(curPoint.scaledPlanOrTimeXPos, curPoint.scaledYPos);
+    highlightTestFailed(view, isHighlightMode, curPoint, priorPoint, shade) {
+        if (isHighlightMode) {
+            // this conditional fixes safari bug when drawing stops/curves with same x/y positions in the floor plan view
+            if (view === this.sk.PLAN) this.startEndShape(curPoint, this.smallPathWeight, shade); // if drawing in highlight mode, end it
+            else this.startEndShape(priorPoint, this.smallPathWeight, shade); // if drawing in highlight mode, end it
+        } else this.sk.vertex(curPoint.scaledPlanOrTimeXPos, curPoint.scaledYPos);
         return false;
     }
 
