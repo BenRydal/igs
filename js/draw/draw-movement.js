@@ -36,7 +36,7 @@ class DrawMovement {
                 break;
             case 3:
                 this.setPathStrokeWeights(1, 0);
-                this.setDraw(path, "testStops");
+                this.setDraw(path, "testMoving");
                 break;
             case 4:
                 this.setPathStrokeWeights(0, 9);
@@ -64,9 +64,12 @@ class DrawMovement {
      * @param  {Color} shade
      * @param  {string} test
      */
+
+    // TODO: 1) change testCursor to cursorMode..., 2) create object to pass vars?
     draw(view, movementArray, shade, test) {
         this.setLineStyle(shade);
-        let isHighlightMode = false; // mode controls how paths are segmented (begun/ended)
+        let isHighlighted = false; // mode controls how paths are segmented (begun/ended)
+        let isStopDrawn = false;
         this.sk.beginShape();
         // Start at 1 to test current and prior points for drawing start/end vertices correctly
         for (let i = 1; i < movementArray.length; i++) {
@@ -74,14 +77,37 @@ class DrawMovement {
             const priorPoint = this.sk.sketchController.getScaledPointValues(movementArray[i - 1], view);
             if (this.sk.sketchController.testPointIsShowing(curPoint)) {
                 if (view === this.sk.SPACETIME) this.testPointForBug(curPoint.scaledTime, curPoint.scaledXPos, curPoint.scaledYPos);
-                if (this.highlightTestMethod(test, curPoint, movementArray[i])) {
-                    isHighlightMode = this.highlightTestPassed(isHighlightMode, curPoint, priorPoint, shade);
+                if (this.testFloorPlanStops(view, movementArray[i], test)) {
+                    if (this.testIsStopDrawn(isHighlighted, test, isStopDrawn)) {
+                        this.drawFloorPlanStops(curPoint, shade);
+                        isStopDrawn = true;
+                    }
+                    isHighlighted = true;
                 } else {
-                    isHighlightMode = this.highlightTestFailed(view, isHighlightMode, curPoint, priorPoint, shade);
+                    isStopDrawn = false;
+                    if (this.highlightTestMethod(test, curPoint, movementArray[i])) {
+                        isHighlighted = this.highlightTestPassed(isHighlighted, curPoint, priorPoint, shade);
+                    } else {
+                        isHighlighted = this.highlightTestFailed(isHighlighted, curPoint, priorPoint, shade);
+                    }
                 }
             }
         }
         this.sk.endShape(); // end shape in case still drawing
+    }
+
+    testIsStopDrawn(isHighlighted, test, isStopDrawn) {
+        return !isHighlighted || ((test === "testCursor" || test === "testSlicer") && !isStopDrawn)
+    }
+
+    testFloorPlanStops(view, point, test) {
+        return view === this.sk.PLAN && point.isStopped && test !== "testMoving";
+    }
+
+    drawFloorPlanStops(curPoint, shade) {
+        this.sk.fill(shade);
+        this.sk.circle(curPoint.scaledPlanOrTimeXPos, curPoint.scaledYPos, 9);
+        this.sk.noFill();
     }
 
     highlightTestMethod(test, curPoint, point) {
@@ -90,18 +116,15 @@ class DrawMovement {
         else return this.testIsStopped(point);
     }
 
-    highlightTestPassed(isHighlightMode, curPoint, priorPoint, shade) {
-        if (isHighlightMode) this.sk.vertex(curPoint.scaledPlanOrTimeXPos, curPoint.scaledYPos); // if already drawing in highlight mode, continue it
+    highlightTestPassed(isHighlighted, curPoint, priorPoint, shade) {
+        if (isHighlighted) this.sk.vertex(curPoint.scaledPlanOrTimeXPos, curPoint.scaledYPos); // if already drawing in highlight mode, continue it
         else this.startEndShape(priorPoint, this.largePathWeight, shade); // if not drawing in highlight mode, begin it
         return true;
     }
 
-    highlightTestFailed(view, isHighlightMode, curPoint, priorPoint, shade) {
-        if (isHighlightMode) {
-            // this conditional fixes safari bug when drawing stops/curves with same x/y positions in the floor plan view
-            if (view === this.sk.PLAN) this.startEndShape(curPoint, this.smallPathWeight, shade); // if drawing in highlight mode, end it
-            else this.startEndShape(priorPoint, this.smallPathWeight, shade); // if drawing in highlight mode, end it
-        } else this.sk.vertex(curPoint.scaledPlanOrTimeXPos, curPoint.scaledYPos);
+    highlightTestFailed(isHighlighted, curPoint, priorPoint, shade) {
+        if (isHighlighted) this.startEndShape(priorPoint, this.smallPathWeight, shade); // if drawing in highlight mode, end it
+        else this.sk.vertex(curPoint.scaledPlanOrTimeXPos, curPoint.scaledYPos);
         return false;
     }
 
