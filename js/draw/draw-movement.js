@@ -55,22 +55,25 @@ class DrawMovement {
         this.sk.beginShape();
         for (let i = 1; i < movementArray.length; i++) { // Start at 1 to test cur and prior points
             const p = this.createComparePoint(view, movementArray[i], movementArray[i - 1]);
-            if (this.sk.sketchController.testPointIsShowing(p.curPos)) {
-                if (view === this.sk.SPACETIME) this.testPointForBug(p.curPoint);
-                if (this.testDrawStops(view, p.curPoint)) {
-                    if (!p.priorPoint.isStopped) this.drawStopCircle(p.curPos, shade); // only draw stopped point once
-                } else {
-                    if (this.testSelectMethod(p)) {
-                        this.drawFatLine(isFatLine, p, shade);
-                        isFatLine = true;
-                    } else {
-                        this.drawThinLine(isFatLine, p, shade);
-                        isFatLine = false;
-                    }
-                }
-            }
+            if (this.sk.sketchController.testPointIsShowing(p.curPos)) isFatLine = testComparePoint(isFatLine, p, view, shade);
         }
         this.sk.endShape(); // end shape in case still drawing
+    }
+
+    testComparePoint(isFatLine, p, view, shade) {
+        if (view === this.sk.SPACETIME) this.testPointForBug(p.curPoint);
+        if (this.testDrawStops(view, p.curPoint)) {
+            if (!p.priorPoint.isStopped) this.drawStopCircle(p.curPos, shade); // only draw stopped point once
+        } else {
+            if (this.testSelectMethod(p)) {
+                this.drawFatLine(isFatLine, p, shade);
+                isFatLine = true;
+            } else {
+                this.drawThinLine(isFatLine, p, shade);
+                isFatLine = false;
+            }
+        }
+        return isFatLine;
     }
 
     setLineStyle(lineColor) {
