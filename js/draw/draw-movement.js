@@ -64,8 +64,8 @@ class DrawMovement {
         this.sk.beginShape();
         // Start at 1 to test current and prior points for drawing start/end vertices correctly
         for (let i = 1; i < movementArray.length; i++) {
-            const curPoint = this.sk.sketchController.getScaledPointValues(movementArray[i], view); // get current and prior points for comparison
-            const priorPoint = this.sk.sketchController.getScaledPointValues(movementArray[i - 1], view);
+            const curPoint = this.sk.sketchController.getScaledPos(movementArray[i], view); // get current and prior points for comparison
+            const priorPoint = this.sk.sketchController.getScaledPos(movementArray[i - 1], view);
             if (this.sk.sketchController.testPointIsShowing(curPoint)) {
                 if (this.testFloorPlanStops(view, movementArray[i])) {
                     if (!movementArray[i - 1].isStopped) this.drawStopCircle(curPoint, shade); // only draw stopped point once
@@ -78,7 +78,7 @@ class DrawMovement {
                         isThickLine = false;
                     }
                 }
-                if (view === this.sk.SPACETIME) this.testPointForBug(curPoint.scaledTime, curPoint.scaledXPos, curPoint.scaledYPos);
+                if (view === this.sk.SPACETIME) this.testPointForBug(curPoint.selTimelineXPos, curPoint.floorPlanXPos, curPoint.floorPlanYPos);
             }
         }
         this.sk.endShape(); // end shape in case still drawing
@@ -90,24 +90,24 @@ class DrawMovement {
 
     drawStopCircle(curPoint, shade) {
         this.sk.fill(shade);
-        this.sk.circle(curPoint.scaledPlanOrTimeXPos, curPoint.scaledYPos, 9);
+        this.sk.circle(curPoint.viewXPos, curPoint.floorPlanYPos, 9);
         this.sk.noFill();
     }
 
     testSelectMethod(curPoint, point) {
-        if (this.sk.gui.getCurSelectTab() === 1) return this.sk.gui.overCursor(curPoint.scaledXPos, curPoint.scaledYPos);
-        else if (this.sk.gui.getCurSelectTab() === 2) return this.sk.gui.overSlicer(curPoint.scaledXPos, curPoint.scaledYPos);
+        if (this.sk.gui.getCurSelectTab() === 1) return this.sk.gui.overCursor(curPoint.floorPlanXPos, curPoint.floorPlanYPos);
+        else if (this.sk.gui.getCurSelectTab() === 2) return this.sk.gui.overSlicer(curPoint.floorPlanXPos, curPoint.floorPlanYPos);
         else return point.isStopped;
     }
 
     drawThickLine(isThickLine, curPoint, priorPoint, shade) {
-        if (isThickLine) this.sk.vertex(curPoint.scaledPlanOrTimeXPos, curPoint.scaledYPos); // if already drawing in highlight mode, continue it
+        if (isThickLine) this.sk.vertex(curPoint.viewXPos, curPoint.floorPlanYPos); // if already drawing in highlight mode, continue it
         else this.startNewLine(priorPoint, this.largePathWeight, shade); // if not drawing in highlight mode, begin it
     }
 
     drawThinLine(isThickLine, curPoint, priorPoint, shade) {
         if (isThickLine) this.startNewLine(priorPoint, this.smallPathWeight, shade); // if drawing in highlight mode, end it
-        else this.sk.vertex(curPoint.scaledPlanOrTimeXPos, curPoint.scaledYPos);
+        else this.sk.vertex(curPoint.viewXPos, curPoint.floorPlanYPos);
     }
 
 
@@ -121,19 +121,19 @@ class DrawMovement {
      * Ends and begins a new drawing shape
      * Draws two vertices to indicate starting and ending points
      * Sets correct strokeweight and this.sk.stroke depending on parameters for new shape
-     * @param  {Object returned from getScaledPointValues} scaledPoint
+     * @param  {Object returned from getScaledPos} scaledPoint
      * @param  {Integer} weight
      * @param  {Color} shade
      */
     startNewLine(scaledPoint, weight, shade) {
-        this.sk.vertex(scaledPoint.scaledPlanOrTimeXPos, scaledPoint.scaledYPos); // draw cur point twice to mark end point
-        this.sk.vertex(scaledPoint.scaledPlanOrTimeXPos, scaledPoint.scaledYPos);
+        this.sk.vertex(scaledPoint.viewXPos, scaledPoint.floorPlanYPos); // draw cur point twice to mark end point
+        this.sk.vertex(scaledPoint.viewXPos, scaledPoint.floorPlanYPos);
         this.sk.endShape();
         this.sk.strokeWeight(weight);
         this.sk.stroke(shade);
         this.sk.beginShape();
-        this.sk.vertex(scaledPoint.scaledPlanOrTimeXPos, scaledPoint.scaledYPos); // draw cur point twice to mark starting point
-        this.sk.vertex(scaledPoint.scaledPlanOrTimeXPos, scaledPoint.scaledYPos);
+        this.sk.vertex(scaledPoint.viewXPos, scaledPoint.floorPlanYPos); // draw cur point twice to mark starting point
+        this.sk.vertex(scaledPoint.viewXPos, scaledPoint.floorPlanYPos);
     }
 
     testPointForBug(scaledTimeToTest, xPos, yPos) {
