@@ -61,8 +61,8 @@ class DrawMovement {
         this.resetLineStyles();
         this.sk.beginShape();
         for (let i = 1; i < movementArray.length; i++) { // Start at 1 to test cur and prior points
-            const p = this.createComparePoint(view, movementArray[i], movementArray[i - 1]);
-            if (this.sk.sketchController.testPointIsShowing(p.curPos)) isFatLine = this.testComparePoint(isFatLine, p, view);
+            const p = this.createComparePoint(view, movementArray[i], movementArray[i - 1]); // create object to hold current and prior points as well as pixel positions
+            if (this.sk.sketchController.testPointIsShowing(p.curPos)) isFatLine = this.testComparePoint(isFatLine, p, view); // test and draw point and return updated isFatLine var
         }
         this.sk.endShape(); // end shape in case still drawing
     }
@@ -76,10 +76,10 @@ class DrawMovement {
      */
     testComparePoint(isFatLine, p, view) {
         if (view === this.sk.SPACETIME) this.testPointForBug(p.curPos);
-        if (this.testDrawStops(view, p.curPoint)) {
+        if (this.testDrawFloorPlanStops(view, p.curPoint)) {
             if (!p.priorPoint.isStopped) this.drawStopCircle(p.curPos); // only draw stopped point once
         } else {
-            if (this.testSelectMethod(p)) {
+            if (this.testDrawFatLine(p)) {
                 this.drawFatLine(isFatLine, p);
                 isFatLine = true;
             } else {
@@ -89,7 +89,12 @@ class DrawMovement {
         }
         return isFatLine;
     }
-
+    /**
+     * Holds current and prior MovementPoint objects and also pixel position objects for each point
+     * @param  {Integer} view
+     * @param  {MovementPoint} curPoint 
+     * @param  {MovementPoint} priorPoint 
+     */
     createComparePoint(view, curPoint, priorPoint) {
         return {
             curPoint,
@@ -101,16 +106,16 @@ class DrawMovement {
     /**
      * Holds logic for testing whether to draw stops on the floor plan
      * @param  {Integer} view
-     * @param  {PointMovement} curPoint
+     * @param  {MovementPoint} curPoint
      */
-    testDrawStops(view, curPoint) {
+    testDrawFloorPlanStops(view, curPoint) {
         return (view === this.sk.PLAN && curPoint.isStopped && this.sk.gui.getCurSelectTab() !== 3);
     }
     /**
      * Holds logic for testing current point based on selectMode
      * @param  {ComparePoint} p
      */
-    testSelectMethod(p) {
+    testDrawFatLine(p) {
         if (this.sk.gui.getCurSelectTab() === 1) return this.sk.gui.overCursor(p.curPos.floorPlanXPos, p.curPos.floorPlanYPos);
         else if (this.sk.gui.getCurSelectTab() === 2) return this.sk.gui.overSlicer(p.curPos.floorPlanXPos, p.curPos.floorPlanYPos);
         else return p.curPoint.isStopped;
