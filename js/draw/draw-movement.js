@@ -9,20 +9,23 @@ class DrawMovement {
             size: this.sk.width / 50,
             lengthToCompare: this.sk.width // used to compare data points to find closest bug value
         };
-        this.smallPathWeight = null;
-        this.largePathWeight = null;
-        this.colorGray = 150;
+        this.style = {
+            shade: null,
+            thinStroke: null,
+            fatStroke: null
+        }
     }
 
     setData(path) {
         this.resetBug(); // always reset bug values
-        this.setPathStyles();
-        this.setDraw(this.sk.PLAN, path.movement, path.color);
-        this.setDraw(this.sk.SPACETIME, path.movement, path.color);
-        if (this.bug.xPos != null) this.drawBug(path.color); // if selected, draw bug
+        this.setPathStyles(path.color);
+        this.setDraw(this.sk.PLAN, path.movement);
+        this.setDraw(this.sk.SPACETIME, path.movement);
+        if (this.bug.xPos != null) this.drawBug(); // if selected, draw bug
     }
 
-    setPathStyles() {
+    setPathStyles(color) {
+        this.style.shade = color;
         switch (this.sk.gui.getCurSelectTab()) {
             case 3:
                 this.setPathStrokeWeights(1, 0);
@@ -36,9 +39,9 @@ class DrawMovement {
         }
     }
 
-    setPathStrokeWeights(small, large) {
-        this.smallPathWeight = small;
-        this.largePathWeight = large;
+    setPathStrokeWeights(thin, fat) {
+        this.style.thinStroke = thin;
+        this.style.fatStroke = fat;
     }
 
     /**
@@ -47,38 +50,37 @@ class DrawMovement {
      * NOTE: Due to browser drawing methods, paths must be separated/segmented to change thickness or stroke
      * @param  {Integer} view
      * @param  {MovementPoint []} movementArray
-     * @param  {Color} shade
      */
-    setDraw(view, movementArray, shade) {
-        let isFatLine = false; // controls how line segmentation
-        this.setLineStyle(shade);
+    setDraw(view, movementArray) {
+        let isFatLine = false; // controls how lines are segmented to draw different strokeWeights
+        this.resetLineStyles();
         this.sk.beginShape();
         for (let i = 1; i < movementArray.length; i++) { // Start at 1 to test cur and prior points
             const p = this.createComparePoint(view, movementArray[i], movementArray[i - 1]);
-            if (this.sk.sketchController.testPointIsShowing(p.curPos)) isFatLine = testComparePoint(isFatLine, p, view, shade);
+            if (this.sk.sketchController.testPointIsShowing(p.curPos)) isFatLine = this.testComparePoint(isFatLine, p, view);
         }
         this.sk.endShape(); // end shape in case still drawing
     }
 
-    testComparePoint(isFatLine, p, view, shade) {
-        if (view === this.sk.SPACETIME) this.testPointForBug(p.curPoint);
+    testComparePoint(isFatLine, p, view) {
+        if (view === this.sk.SPACETIME) this.testPointForBug(p.curPos);
         if (this.testDrawStops(view, p.curPoint)) {
-            if (!p.priorPoint.isStopped) this.drawStopCircle(p.curPos, shade); // only draw stopped point once
+            if (!p.priorPoint.isStopped) this.drawStopCircle(p.curPos); // only draw stopped point once
         } else {
             if (this.testSelectMethod(p)) {
-                this.drawFatLine(isFatLine, p, shade);
+                this.drawFatLine(isFatLine, p);
                 isFatLine = true;
             } else {
-                this.drawThinLine(isFatLine, p, shade);
+                this.drawThinLine(isFatLine, p);
                 isFatLine = false;
             }
         }
         return isFatLine;
     }
 
-    setLineStyle(lineColor) {
-        this.sk.strokeWeight(this.smallPathWeight);
-        this.sk.stroke(lineColor);
+    resetLineStyles() {
+        this.sk.strokeWeight(this.style.thinStroke);
+        this.sk.stroke(this.style.shade);
         this.sk.noFill(); // important for curve drawing
     }
 
@@ -101,36 +103,33 @@ class DrawMovement {
         else return p.curPoint.isStopped;
     }
 
-    drawStopCircle(curPos, shade) {
-        this.sk.fill(shade);
+    drawStopCircle(curPos) {
+        this.sk.fill(this.style.shade);
         this.sk.circle(curPos.viewXPos, curPos.floorPlanYPos, 9);
         this.sk.noFill();
     }
 
-    drawFatLine(isFatLine, p, shade) {
+    drawFatLine(isFatLine, p) {
         if (isFatLine) this.sk.vertex(p.curPos.viewXPos, p.curPos.floorPlanYPos); // if already drawing in highlight mode, continue it
-        else this.startNewLine(p.priorPoint, this.largePathWeight, shade); // if not drawing in highlight mode, begin it
+        else this.startNewLine(p.priorPos, this.style.fatStroke); // if not drawing in highlight mode, begin it
     }
 
-    drawThinLine(isFatLine, p, shade) {
-        if (isFatLine) this.startNewLine(p.priorPoint, this.smallPathWeight, shade); // if drawing in highlight mode, end it
+    drawThinLine(isFatLine, p) {
+        if (isFatLine) this.startNewLine(p.priorPos, this.style.thinStroke); // if drawing in highlight mode, end it
         else this.sk.vertex(p.curPos.viewXPos, p.curPos.floorPlanYPos);
     }
 
     /**
-     * Ends and begins a new drawing shape
-     * Draws two vertices to indicate starting and ending points
-     * Sets correct strokeweight and this.sk.stroke depending on parameters for new shape
-     * @param  {Object returned from getScaledPos} scaledPoint
+     * Ends and begins a new line with styles, NOTE: draws two vertices to indicate starting and ending points
+     * @param  {Object from getScaledPos} pos
      * @param  {Integer} weight
-     * @param  {Color} shade
      */
-    startNewLine(pos, weight, shade) {
+    startNewLine(pos, weight) {
         this.sk.vertex(pos.viewXPos, pos.floorPlanYPos); // draw cur point twice to mark end point
         this.sk.vertex(pos.viewXPos, pos.floorPlanYPos);
         this.sk.endShape();
         this.sk.strokeWeight(weight);
-        this.sk.stroke(shade);
+        this.sk.stroke(this.style.shade);
         this.sk.beginShape();
         this.sk.vertex(pos.viewXPos, pos.floorPlanYPos); // draw cur point twice to mark starting point
         this.sk.vertex(pos.viewXPos, pos.floorPlanYPos);
@@ -164,10 +163,10 @@ class DrawMovement {
         this.sk.sketchController.bugTimeForVideoScrub = timePos;
     }
 
-    drawBug(shade) {
+    drawBug() {
         this.sk.stroke(0);
         this.sk.strokeWeight(5);
-        this.sk.fill(shade);
+        this.sk.fill(this.style.shade);
         this.sk.ellipse(this.bug.xPos, this.bug.yPos, this.bug.size, this.bug.size);
         this.sk.ellipse(this.bug.timePos, this.bug.yPos, this.bug.size, this.bug.size);
     }
