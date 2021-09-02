@@ -16,31 +16,28 @@ class DrawMovement {
 
     setData(path) {
         this.resetBug(); // always reset bug values
-        this.setPaths(path);
+        this.setPathStyles();
+        this.draw(this.sk.PLAN, path.movement, path.color);
+        this.draw(this.sk.SPACETIME, path.movement, path.color);
         if (this.bug.xPos != null) this.drawBug(path.color); // if selected, draw bug
     }
 
-    setPaths(path) {
+    setPathStyles() {
         switch (this.sk.gui.getCurSelectTab()) {
             case 0:
                 this.setPathStrokeWeights(1, 9);
-                this.setDraw(path, "testStops");
                 break;
             case 1:
                 this.setPathStrokeWeights(1, 9);
-                this.setDraw(path, "testCursor");
                 break;
             case 2:
                 this.setPathStrokeWeights(1, 9);
-                this.setDraw(path, "testSlicer");
                 break;
             case 3:
                 this.setPathStrokeWeights(1, 0);
-                this.setDraw(path, "testMoving");
                 break;
             case 4:
                 this.setPathStrokeWeights(0, 9);
-                this.setDraw(path, "testStops");
                 break;
         }
     }
@@ -48,11 +45,6 @@ class DrawMovement {
     setPathStrokeWeights(small, large) {
         this.smallPathWeight = small;
         this.largePathWeight = large;
-    }
-
-    setDraw(path, highlightMethod) {
-        this.draw(this.sk.PLAN, path.movement, path.color, highlightMethod);
-        this.draw(this.sk.SPACETIME, path.movement, path.color, highlightMethod);
     }
 
     /**
@@ -66,24 +58,24 @@ class DrawMovement {
      */
 
     // TODO: 1) change testCursor to cursorMode..., 2) create object to pass vars?
-    draw(view, movementArray, shade, test) {
+    draw(view, movementArray, shade) {
         this.setLineStyle(shade);
-        let isHighlighted = false; // mode controls how paths are segmented (begun/ended)
+        let isThickLine = false; // mode controls how paths are segmented (begun/ended)
         this.sk.beginShape();
         // Start at 1 to test current and prior points for drawing start/end vertices correctly
         for (let i = 1; i < movementArray.length; i++) {
             const curPoint = this.sk.sketchController.getScaledPointValues(movementArray[i], view); // get current and prior points for comparison
             const priorPoint = this.sk.sketchController.getScaledPointValues(movementArray[i - 1], view);
             if (this.sk.sketchController.testPointIsShowing(curPoint)) {
-                if (this.testFloorPlanStops(view, movementArray[i], test)) {
-                    if (!movementArray[i - 1].isStopped) this.drawFloorPlanStops(curPoint, shade); // only draw stopped point once
+                if (this.testFloorPlanStops(view, movementArray[i])) {
+                    if (!movementArray[i - 1].isStopped) this.drawStopCircle(curPoint, shade); // only draw stopped point once
                 } else {
-                    if (this.testSelectMethod(test, curPoint, movementArray[i])) {
-                        this.drawThickLine(isHighlighted, curPoint, priorPoint, shade);
-                        isHighlighted = true;
+                    if (this.testSelectMethod(curPoint, movementArray[i])) {
+                        this.drawThickLine(isThickLine, curPoint, priorPoint, shade);
+                        isThickLine = true;
                     } else {
-                        this.drawThinLine(isHighlighted, curPoint, priorPoint, shade);
-                        isHighlighted = false;
+                        this.drawThinLine(isThickLine, curPoint, priorPoint, shade);
+                        isThickLine = false;
                     }
                 }
                 if (view === this.sk.SPACETIME) this.testPointForBug(curPoint.scaledTime, curPoint.scaledXPos, curPoint.scaledYPos);
@@ -92,29 +84,29 @@ class DrawMovement {
         this.sk.endShape(); // end shape in case still drawing
     }
 
-    testFloorPlanStops(view, point, test) {
-        return view === this.sk.PLAN && point.isStopped && test !== "testMoving";
+    testFloorPlanStops(view, point) {
+        return view === this.sk.PLAN && point.isStopped && this.sk.gui.getCurSelectTab() !== 3;
     }
 
-    drawFloorPlanStops(curPoint, shade) {
+    drawStopCircle(curPoint, shade) {
         this.sk.fill(shade);
         this.sk.circle(curPoint.scaledPlanOrTimeXPos, curPoint.scaledYPos, 9);
         this.sk.noFill();
     }
 
-    testSelectMethod(test, curPoint, point) {
-        if (test === "testCursor") return this.sk.gui.overCursor(curPoint.scaledXPos, curPoint.scaledYPos);
-        else if (test === "testSlicer") return this.sk.gui.overSlicer(curPoint.scaledXPos, curPoint.scaledYPos);
+    testSelectMethod(curPoint, point) {
+        if (this.sk.gui.getCurSelectTab() === 1) return this.sk.gui.overCursor(curPoint.scaledXPos, curPoint.scaledYPos);
+        else if (this.sk.gui.getCurSelectTab() === 2) return this.sk.gui.overSlicer(curPoint.scaledXPos, curPoint.scaledYPos);
         else return point.isStopped;
     }
 
-    drawThickLine(isHighlighted, curPoint, priorPoint, shade) {
-        if (isHighlighted) this.sk.vertex(curPoint.scaledPlanOrTimeXPos, curPoint.scaledYPos); // if already drawing in highlight mode, continue it
+    drawThickLine(isThickLine, curPoint, priorPoint, shade) {
+        if (isThickLine) this.sk.vertex(curPoint.scaledPlanOrTimeXPos, curPoint.scaledYPos); // if already drawing in highlight mode, continue it
         else this.startNewLine(priorPoint, this.largePathWeight, shade); // if not drawing in highlight mode, begin it
     }
 
-    drawThinLine(isHighlighted, curPoint, priorPoint, shade) {
-        if (isHighlighted) this.startNewLine(priorPoint, this.smallPathWeight, shade); // if drawing in highlight mode, end it
+    drawThinLine(isThickLine, curPoint, priorPoint, shade) {
+        if (isThickLine) this.startNewLine(priorPoint, this.smallPathWeight, shade); // if drawing in highlight mode, end it
         else this.sk.vertex(curPoint.scaledPlanOrTimeXPos, curPoint.scaledYPos);
     }
 
