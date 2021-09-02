@@ -7,7 +7,8 @@ class DrawMovement {
             yPos: null,
             timePos: null,
             size: this.sk.width / 50,
-            lengthToCompare: this.sk.width // used to compare data points to find closest bug value
+            lengthToCompare: this.sk.width, // used to compare data points to find closest bug value
+            isSelected: false
         };
         this.style = {
             shade: null,
@@ -17,11 +18,11 @@ class DrawMovement {
     }
 
     setData(path) {
-        this.resetBug(); // always reset bug values
+        this.resetBug();
         this.setPathStyles(path.color);
         this.setDraw(this.sk.PLAN, path.movement);
         this.setDraw(this.sk.SPACETIME, path.movement);
-        if (this.bug.xPos != null) this.drawBug(); // if selected, draw bug
+        if (this.bug.isSelected) this.drawBug();
     }
 
     setPathStyles(color) {
@@ -44,10 +45,14 @@ class DrawMovement {
         this.style.fatStroke = fat;
     }
 
+    resetLineStyles() {
+        this.sk.strokeWeight(this.style.thinStroke);
+        this.sk.stroke(this.style.shade);
+        this.sk.noFill(); // important for curve drawing
+    }
+
     /**
-     * Organizes path drawing depending on view (floor plan or space-time)
-     * Path is separated into segments depending on test/highlight method (e.g., stops, cursor, slicer)
-     * NOTE: Due to browser drawing methods, paths must be separated/segmented to change thickness or stroke
+     * Loops through movement points and sends to helper methods to draw each point
      * @param  {Integer} view
      * @param  {MovementPoint []} movementArray
      */
@@ -62,6 +67,13 @@ class DrawMovement {
         this.sk.endShape(); // end shape in case still drawing
     }
 
+    /**
+     * Holds logic for testing each compare point object that organizes drawing methods and updating isFatLine var
+     * NOTE: In web browsers lines must be segmented/ended to change thickness or stroke
+     * @param  {boolean} isFatLine
+     * @param  {ComparePoint} p
+     * @param  {integer} view
+     */
     testComparePoint(isFatLine, p, view) {
         if (view === this.sk.SPACETIME) this.testPointForBug(p.curPos);
         if (this.testDrawStops(view, p.curPoint)) {
@@ -78,25 +90,26 @@ class DrawMovement {
         return isFatLine;
     }
 
-    resetLineStyles() {
-        this.sk.strokeWeight(this.style.thinStroke);
-        this.sk.stroke(this.style.shade);
-        this.sk.noFill(); // important for curve drawing
-    }
-
     createComparePoint(view, curPoint, priorPoint) {
         return {
             curPoint,
-            curPos: this.sk.sketchController.getScaledPos(curPoint, view), // get current and prior points for comparison
+            curPos: this.sk.sketchController.getScaledPos(curPoint, view),
             priorPoint,
             priorPos: this.sk.sketchController.getScaledPos(priorPoint, view)
         }
     }
-
+    /**
+     * Holds logic for testing whether to draw stops on the floor plan
+     * @param  {Integer} view
+     * @param  {PointMovement} curPoint
+     */
     testDrawStops(view, curPoint) {
         return (view === this.sk.PLAN && curPoint.isStopped && this.sk.gui.getCurSelectTab() !== 3);
     }
-
+    /**
+     * Holds logic for testing current point based on selectMode
+     * @param  {ComparePoint} p
+     */
     testSelectMethod(p) {
         if (this.sk.gui.getCurSelectTab() === 1) return this.sk.gui.overCursor(p.curPos.floorPlanXPos, p.curPos.floorPlanYPos);
         else if (this.sk.gui.getCurSelectTab() === 2) return this.sk.gui.overSlicer(p.curPos.floorPlanXPos, p.curPos.floorPlanYPos);
@@ -121,7 +134,7 @@ class DrawMovement {
 
     /**
      * Ends and begins a new line with styles, NOTE: draws two vertices to indicate starting and ending points
-     * @param  {Object from getScaledPos} pos
+     * @param  {curPos Object from getScaledPos} pos
      * @param  {Integer} weight
      */
     startNewLine(pos, weight) {
@@ -153,6 +166,7 @@ class DrawMovement {
         this.bug.yPos = null;
         this.bug.timePos = null;
         this.bug.lengthToCompare = this.sk.width;
+        this.bug.isSelected = false;
     }
 
     recordBug(timePos, xPos, yPos, lengthToCompare) {
@@ -160,6 +174,7 @@ class DrawMovement {
         this.bug.yPos = yPos;
         this.bug.timePos = timePos;
         this.bug.lengthToCompare = lengthToCompare;
+        this.bug.isSelected = true;
         this.sk.sketchController.bugTimeForVideoScrub = timePos;
     }
 
