@@ -24,20 +24,14 @@ class DrawMovement {
 
     setPathStyles() {
         switch (this.sk.gui.getCurSelectTab()) {
-            case 0:
-                this.setPathStrokeWeights(1, 9);
-                break;
-            case 1:
-                this.setPathStrokeWeights(1, 9);
-                break;
-            case 2:
-                this.setPathStrokeWeights(1, 9);
-                break;
             case 3:
                 this.setPathStrokeWeights(1, 0);
                 break;
             case 4:
                 this.setPathStrokeWeights(0, 9);
+                break;
+            default:
+                this.setPathStrokeWeights(1, 9);
                 break;
         }
     }
