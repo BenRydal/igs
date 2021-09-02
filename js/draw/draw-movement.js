@@ -7,136 +7,159 @@ class DrawMovement {
             yPos: null,
             timePos: null,
             size: this.sk.width / 50,
-            lengthToCompare: this.sk.width // used to compare data points to find closest bug value
+            lengthToCompare: this.sk.width, // used to compare data points to find closest bug value
+            isSelected: false
         };
-        this.smallPathWeight = null;
-        this.largePathWeight = null;
-        this.colorGray = 150;
+        this.style = {
+            shade: null,
+            thinStroke: null,
+            fatStroke: null
+        }
     }
 
     setData(path) {
-        this.resetBug(); // always reset bug values
-        this.setPaths(path);
-        if (this.bug.xPos != null) this.drawBug(path.color); // if selected, draw bug
+        this.resetBug();
+        this.setPathStyles(path.color);
+        this.setDraw(this.sk.PLAN, path.movement);
+        this.setDraw(this.sk.SPACETIME, path.movement);
+        if (this.bug.isSelected) this.drawBug();
     }
 
-    setPaths(path) {
+    setPathStyles(color) {
+        this.style.shade = color;
         switch (this.sk.gui.getCurSelectTab()) {
-            case 0:
-                this.setPathStrokeWeights(1, 9);
-                this.setDraw(path, "testStops");
-                break;
-            case 1:
-                this.setPathStrokeWeights(1, 9);
-                this.setDraw(path, "testCursor");
-                break;
-            case 2:
-                this.setPathStrokeWeights(1, 9);
-                this.setDraw(path, "testSlicer");
-                break;
             case 3:
                 this.setPathStrokeWeights(1, 0);
-                this.setDraw(path, "testStops");
                 break;
             case 4:
                 this.setPathStrokeWeights(0, 9);
-                this.setDraw(path, "testStops");
+                break;
+            default:
+                this.setPathStrokeWeights(1, 9);
                 break;
         }
     }
 
-    setPathStrokeWeights(small, large) {
-        this.smallPathWeight = small;
-        this.largePathWeight = large;
+    setPathStrokeWeights(thin, fat) {
+        this.style.thinStroke = thin;
+        this.style.fatStroke = fat;
     }
 
-    setDraw(path, highlightMethod) {
-        this.draw(this.sk.PLAN, path.movement, path.color, highlightMethod);
-        this.draw(this.sk.SPACETIME, path.movement, path.color, highlightMethod);
-    }
-
-    /**
-     * Organizes path drawing depending on view (floor plan or space-time)
-     * Path is separated into segments depending on test/highlight method (e.g., stops, cursor, slicer)
-     * NOTE: Due to browser drawing methods, paths must be separated/segmented to change thickness or stroke
-     * @param  {Integer} view
-     * @param  {Path} path
-     * @param  {Color} shade
-     * @param  {string} test
-     */
-    draw(view, movementArray, shade, test) {
-        this.setLineStyle(shade);
-        let isHighlightMode = false; // mode controls how paths are segmented (begun/ended)
-        this.sk.beginShape();
-        // Start at 1 to test current and prior points for drawing start/end vertices correctly
-        for (let i = 1; i < movementArray.length; i++) {
-            const curPoint = this.sk.sketchController.getScaledPointValues(movementArray[i], view); // get current and prior points for comparison
-            const priorPoint = this.sk.sketchController.getScaledPointValues(movementArray[i - 1], view);
-            if (this.sk.sketchController.testPointIsShowing(curPoint)) {
-                if (view === this.sk.SPACETIME) this.testPointForBug(curPoint.scaledTime, curPoint.scaledXPos, curPoint.scaledYPos);
-                if (this.highlightTestMethod(test, curPoint, movementArray[i])) {
-                    isHighlightMode = this.highlightTestPassed(isHighlightMode, curPoint, priorPoint, shade);
-                } else {
-                    isHighlightMode = this.highlightTestFailed(isHighlightMode, curPoint, priorPoint, shade);
-                }
-            }
-        }
-        this.sk.endShape(); // end shape in case still drawing
-    }
-
-    highlightTestMethod(test, curPoint, point) {
-        if (test === "testCursor") return this.sk.gui.overCursor(curPoint.scaledXPos, curPoint.scaledYPos);
-        else if (test === "testSlicer") return this.sk.gui.overSlicer(curPoint.scaledXPos, curPoint.scaledYPos);
-        else return this.testIsStopped(point);
-    }
-
-    highlightTestPassed(isHighlightMode, curPoint, priorPoint, shade) {
-        if (isHighlightMode) this.sk.vertex(curPoint.scaledPlanOrTimeXPos, curPoint.scaledYPos); // if already drawing in highlight mode, continue it
-        else this.startEndShape(priorPoint, this.largePathWeight, shade); // if not drawing in highlight mode, begin it
-        return true;
-    }
-
-    highlightTestFailed(isHighlightMode, curPoint, priorPoint, shade) {
-        if (isHighlightMode) this.startEndShape(priorPoint, this.smallPathWeight, shade); // if drawing in highlight mode, end it
-        else this.sk.vertex(curPoint.scaledPlanOrTimeXPos, curPoint.scaledYPos);
-        return false;
-    }
-
-    testIsStopped(point) {
-        return point.isStopped;
-    }
-
-    setLineStyle(lineColor) {
-        this.sk.strokeWeight(this.smallPathWeight);
-        this.sk.stroke(lineColor);
+    resetLineStyles() {
+        this.sk.strokeWeight(this.style.thinStroke);
+        this.sk.stroke(this.style.shade);
         this.sk.noFill(); // important for curve drawing
     }
 
     /**
-     * Ends and begins a new drawing shape
-     * Draws two vertices to indicate starting and ending points
-     * Sets correct strokeweight and this.sk.stroke depending on parameters for new shape
-     * @param  {Object returned from getScaledPointValues} scaledPoint
-     * @param  {Integer} weight
-     * @param  {Color} shade
+     * Loops through movement points and sends to helper methods to draw each point
+     * @param  {Integer} view
+     * @param  {MovementPoint []} movementArray
      */
-    startEndShape(scaledPoint, weight, shade) {
-        this.sk.vertex(scaledPoint.scaledPlanOrTimeXPos, scaledPoint.scaledYPos); // draw cur point twice to mark end point
-        this.sk.vertex(scaledPoint.scaledPlanOrTimeXPos, scaledPoint.scaledYPos);
-        this.sk.endShape();
-        this.sk.strokeWeight(weight);
-        this.sk.stroke(shade);
+    setDraw(view, movementArray) {
+        let isFatLine = false; // controls how lines are segmented to draw different strokeWeights
+        this.resetLineStyles();
         this.sk.beginShape();
-        this.sk.vertex(scaledPoint.scaledPlanOrTimeXPos, scaledPoint.scaledYPos); // draw cur point twice to mark starting point
-        this.sk.vertex(scaledPoint.scaledPlanOrTimeXPos, scaledPoint.scaledYPos);
+        for (let i = 1; i < movementArray.length; i++) { // Start at 1 to test cur and prior points
+            const p = this.createComparePoint(view, movementArray[i], movementArray[i - 1]); // create object to hold current and prior points as well as pixel positions
+            if (this.sk.sketchController.testPointIsShowing(p.curPos)) isFatLine = this.testComparePoint(isFatLine, p, view); // test and draw point and return updated isFatLine var
+        }
+        this.sk.endShape(); // end shape in case still drawing
     }
 
-    testPointForBug(scaledTimeToTest, xPos, yPos) {
-        if (this.sk.sketchController.mode.isAnimate) this.recordBug(scaledTimeToTest, xPos, yPos, null); // always return true to set last/most recent point as the bug
+    /**
+     * Holds logic for testing each compare point object that organizes drawing methods and updating isFatLine var
+     * NOTE: In web browsers lines must be segmented/ended to change thickness or stroke
+     * @param  {boolean} isFatLine
+     * @param  {ComparePoint} p
+     * @param  {integer} view
+     */
+    testComparePoint(isFatLine, p, view) {
+        if (view === this.sk.SPACETIME) this.testPointForBug(p.curPos);
+        if (this.testDrawFloorPlanStops(view, p.curPoint)) {
+            if (!p.priorPoint.isStopped) this.drawStopCircle(p.curPos); // only draw stopped point once
+        } else {
+            if (this.testDrawFatLine(p)) {
+                this.drawFatLine(isFatLine, p);
+                isFatLine = true;
+            } else {
+                this.drawThinLine(isFatLine, p);
+                isFatLine = false;
+            }
+        }
+        return isFatLine;
+    }
+    /**
+     * Holds current and prior MovementPoint objects and also pixel position objects for each point
+     * @param  {Integer} view
+     * @param  {MovementPoint} curPoint 
+     * @param  {MovementPoint} priorPoint 
+     */
+    createComparePoint(view, curPoint, priorPoint) {
+        return {
+            curPoint,
+            curPos: this.sk.sketchController.getScaledPos(curPoint, view),
+            priorPoint,
+            priorPos: this.sk.sketchController.getScaledPos(priorPoint, view)
+        }
+    }
+    /**
+     * Holds logic for testing whether to draw stops on the floor plan
+     * @param  {Integer} view
+     * @param  {MovementPoint} curPoint
+     */
+    testDrawFloorPlanStops(view, curPoint) {
+        return (view === this.sk.PLAN && curPoint.isStopped && this.sk.gui.getCurSelectTab() !== 3);
+    }
+    /**
+     * Holds logic for testing current point based on selectMode
+     * @param  {ComparePoint} p
+     */
+    testDrawFatLine(p) {
+        if (this.sk.gui.getCurSelectTab() === 1) return this.sk.gui.overCursor(p.curPos.floorPlanXPos, p.curPos.floorPlanYPos);
+        else if (this.sk.gui.getCurSelectTab() === 2) return this.sk.gui.overSlicer(p.curPos.floorPlanXPos, p.curPos.floorPlanYPos);
+        else return p.curPoint.isStopped;
+    }
+
+    drawStopCircle(curPos) {
+        this.sk.fill(this.style.shade);
+        this.sk.circle(curPos.viewXPos, curPos.floorPlanYPos, 9);
+        this.sk.noFill();
+    }
+
+    drawFatLine(isFatLine, p) {
+        if (isFatLine) this.sk.vertex(p.curPos.viewXPos, p.curPos.floorPlanYPos); // if already drawing in highlight mode, continue it
+        else this.startNewLine(p.priorPos, this.style.fatStroke); // if not drawing in highlight mode, begin it
+    }
+
+    drawThinLine(isFatLine, p) {
+        if (isFatLine) this.startNewLine(p.priorPos, this.style.thinStroke); // if drawing in highlight mode, end it
+        else this.sk.vertex(p.curPos.viewXPos, p.curPos.floorPlanYPos);
+    }
+
+    /**
+     * Ends and begins a new line with styles, NOTE: draws two vertices to indicate starting and ending points
+     * @param  {curPos Object from getScaledPos} pos
+     * @param  {Integer} weight
+     */
+    startNewLine(pos, weight) {
+        this.sk.vertex(pos.viewXPos, pos.floorPlanYPos); // draw cur point twice to mark end point
+        this.sk.vertex(pos.viewXPos, pos.floorPlanYPos);
+        this.sk.endShape();
+        this.sk.strokeWeight(weight);
+        this.sk.stroke(this.style.shade);
+        this.sk.beginShape();
+        this.sk.vertex(pos.viewXPos, pos.floorPlanYPos); // draw cur point twice to mark starting point
+        this.sk.vertex(pos.viewXPos, pos.floorPlanYPos);
+    }
+
+    testPointForBug(curPos) {
+        const [timePos, xPos, yPos] = [curPos.selTimelineXPos, curPos.floorPlanXPos, curPos.floorPlanYPos];
+        if (this.sk.sketchController.mode.isAnimate) this.recordBug(timePos, xPos, yPos, null); // always return true to set last/most recent point as the bug
         else if (this.sk.sketchController.mode.isVideoPlay) {
             const selTime = this.sk.sketchController.mapFromVideoToSelectedTime();
-            if (this.compareValuesBySpacing(selTime, scaledTimeToTest, this.bug.lengthToCompare)) this.recordBug(scaledTimeToTest, xPos, yPos, Math.abs(selTime - scaledTimeToTest));
-        } else if (this.sk.gui.overSpaceTimeView(this.sk.mouseX, this.sk.mouseY) && this.compareValuesBySpacing(this.sk.mouseX, scaledTimeToTest, this.bug.lengthToCompare)) this.recordBug(this.sk.mouseX, xPos, yPos, Math.abs(this.sk.mouseX - scaledTimeToTest));
+            if (this.compareValuesBySpacing(selTime, timePos, this.bug.lengthToCompare)) this.recordBug(timePos, xPos, yPos, Math.abs(selTime - timePos));
+        } else if (this.sk.gui.overSpaceTimeView(this.sk.mouseX, this.sk.mouseY) && this.compareValuesBySpacing(this.sk.mouseX, timePos, this.bug.lengthToCompare)) this.recordBug(this.sk.mouseX, xPos, yPos, Math.abs(this.sk.mouseX - timePos));
     }
 
     compareValuesBySpacing(value1, value2, spacing) {
@@ -148,6 +171,7 @@ class DrawMovement {
         this.bug.yPos = null;
         this.bug.timePos = null;
         this.bug.lengthToCompare = this.sk.width;
+        this.bug.isSelected = false;
     }
 
     recordBug(timePos, xPos, yPos, lengthToCompare) {
@@ -155,13 +179,14 @@ class DrawMovement {
         this.bug.yPos = yPos;
         this.bug.timePos = timePos;
         this.bug.lengthToCompare = lengthToCompare;
+        this.bug.isSelected = true;
         this.sk.sketchController.bugTimeForVideoScrub = timePos;
     }
 
-    drawBug(shade) {
+    drawBug() {
         this.sk.stroke(0);
         this.sk.strokeWeight(5);
-        this.sk.fill(shade);
+        this.sk.fill(this.style.shade);
         this.sk.ellipse(this.bug.xPos, this.bug.yPos, this.bug.size, this.bug.size);
         this.sk.ellipse(this.bug.timePos, this.bug.yPos, this.bug.size, this.bug.size);
     }

@@ -21,7 +21,7 @@ class GUI {
         this.dataPanelContainer = {
             xPos: 10,
             headerYPos: this.timelineContainer.bottom,
-            tabsYPos: this.timelineContainer.bottom + 60
+            tabsYPos: this.timelineContainer.bottom + 45
         }
         this.timeline = new TimelinePanel(this.sk, this.timelineContainer);
         this.dataPanel = new DataPanel(this.sk, this.dataPanelContainer);

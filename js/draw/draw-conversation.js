@@ -21,7 +21,7 @@ class DrawConversation {
      */
     setData(path, speakerList) {
         for (const point of path.conversation) {
-            const curPoint = this.sk.sketchController.getScaledPointValues(point, null);
+            const curPoint = this.sk.sketchController.getScaledPos(point, null);
             if (this.sk.sketchController.testPointIsShowing(curPoint) && this.testSelectMode(curPoint, point)) {
                 const curSpeaker = this.getSpeakerFromSpeakerList(point.speaker, speakerList); // get speaker object from global list equivalent to the current speaker of point
                 if (this.testSpeakerToDraw(curSpeaker, path.name)) this.drawRects(point, curSpeaker.color); // draws all rects
@@ -34,9 +34,9 @@ class DrawConversation {
             case 0:
                 return true;
             case 1:
-                return this.sk.gui.overCursor(curPoint.scaledXPos, curPoint.scaledYPos);
+                return this.sk.gui.overCursor(curPoint.floorPlanXPos, curPoint.floorPlanYPos);
             case 2:
-                return this.sk.gui.overSlicer(curPoint.scaledXPos, curPoint.scaledYPos);
+                return this.sk.gui.overSlicer(curPoint.floorPlanXPos, curPoint.floorPlanYPos);
             case 3:
                 return !point.isStopped;
             case 4:
@@ -87,17 +87,17 @@ class DrawConversation {
         const rectWidth = this.sk.sketchController.mapRectInverse(this.rect.maxPixelWidth, this.rect.minPixelWidth); // map to inverse of min/max to set rectWidth based on amount of pixel time selected
         let rectLength = this.sk.textWidth(point.talkTurn);
         if (rectLength < this.rect.minPixelHeight) rectLength = this.rect.minPixelHeight; // if current turn is small set it to the minimum height
-        const curPoint = this.sk.sketchController.getScaledPointValues(point, null);
+        const curPoint = this.sk.sketchController.getScaledPos(point, null);
         let yPos;
         if (this.sk.sketchController.mode.isAlignTalk) yPos = 0; // if conversation turn positioning is at top of screen
-        else yPos = curPoint.scaledYPos - rectLength;
+        else yPos = curPoint.floorPlanYPos - rectLength;
         // ***** TEST SET TEXT
-        if (this.sk.overRect(curPoint.scaledXPos, yPos, rectWidth, rectLength)) this.recordConversationBubble(point, this.sk.PLAN); // if over plan
-        else if (this.sk.overRect(curPoint.scaledTime, yPos, rectWidth, rectLength)) this.recordConversationBubble(point, this.sk.SPACETIME); // if over spacetime
+        if (this.sk.overRect(curPoint.floorPlanXPos, yPos, rectWidth, rectLength)) this.recordConversationBubble(point, this.sk.PLAN); // if over plan
+        else if (this.sk.overRect(curPoint.selTimelineXPos, yPos, rectWidth, rectLength)) this.recordConversationBubble(point, this.sk.SPACETIME); // if over spacetime
         // ***** DRAW CUR RECT
         this.sk.fill(curColor);
-        this.sk.rect(curPoint.scaledXPos, yPos, rectWidth, rectLength); // this.sk.PLAN VIEW
-        this.sk.rect(curPoint.scaledTime, yPos, rectWidth, rectLength); // this.sk.SPACETIME VIEW
+        this.sk.rect(curPoint.floorPlanXPos, yPos, rectWidth, rectLength); // this.sk.PLAN VIEW
+        this.sk.rect(curPoint.selTimelineXPos, yPos, rectWidth, rectLength); // this.sk.SPACETIME VIEW
         this.sk.textSize(this.sk.gui.keyTextSize); // reset
     }
 

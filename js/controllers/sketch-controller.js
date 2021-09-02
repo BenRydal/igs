@@ -94,20 +94,20 @@ class SketchController {
      * @param  {Movement Or Conversation Point} point
      * @param  {Integer} view
      */
-    getScaledPointValues(point, view) {
-        const pixelTime = this.mapFromTotalToPixelTime(point.time);
-        const scaledTime = this.mapFromSelectPixelToTimeline(pixelTime);
-        const [scaledXPos, scaledYPos] = this.getScaledXYPos(point.xPos, point.yPos);
-        let scaledPlanOrTimeXPos;
-        if (view === this.sk.PLAN) scaledPlanOrTimeXPos = scaledXPos;
-        else if (view === this.sk.SPACETIME) scaledPlanOrTimeXPos = scaledTime;
-        else scaledPlanOrTimeXPos = null;
+    getScaledPos(point, view) {
+        const timelineXPos = this.mapFromTotalToPixelTime(point.time);
+        const selTimelineXPos = this.mapFromSelectPixelToTimeline(timelineXPos);
+        const [floorPlanXPos, floorPlanYPos] = this.getScaledXYPos(point.xPos, point.yPos);
+        let viewXPos;
+        if (view === this.sk.PLAN) viewXPos = floorPlanXPos;
+        else if (view === this.sk.SPACETIME) viewXPos = selTimelineXPos;
+        else viewXPos = null;
         return {
-            pixelTime,
-            scaledTime,
-            scaledXPos,
-            scaledYPos,
-            scaledPlanOrTimeXPos
+            timelineXPos,
+            selTimelineXPos,
+            floorPlanXPos,
+            floorPlanYPos,
+            viewXPos
         };
     }
 
@@ -163,7 +163,7 @@ class SketchController {
      * @param  {MovementPoint} curPoint
      */
     testPointIsShowing(curPoint) {
-        return this.sk.gui.overTimelineAxis(curPoint.pixelTime) && this.sk.gui.overFloorPlan(curPoint.scaledXPos, curPoint.scaledYPos) && this.testAnimation(curPoint.pixelTime);
+        return this.sk.gui.overTimelineAxis(curPoint.timelineXPos) && this.sk.gui.overFloorPlan(curPoint.floorPlanXPos, curPoint.floorPlanYPos) && this.testAnimation(curPoint.timelineXPos);
     }
 
     /**
