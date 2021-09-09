@@ -24,7 +24,7 @@ class DrawConversation {
             const curPoint = this.sk.sketchController.getScaledPos(point, null);
             if (this.sk.sketchController.testPointIsShowing(curPoint) && this.testSelectMode(curPoint, point)) {
                 const curSpeaker = this.getSpeakerFromSpeakerList(point.speaker, speakerList); // get speaker object from global list equivalent to the current speaker of point
-                if (this.testSpeakerToDraw(curSpeaker, path.name)) this.drawRects(point, curSpeaker.color); // draws all rects
+                if (this.testSpeakerToDraw(curSpeaker, path.name)) this.drawRects(point, curPoint, curSpeaker.color); // draws all rects
             }
         }
     }
@@ -46,10 +46,11 @@ class DrawConversation {
 
     /**
      * Organizes drawing of single text/textbox for a selected conversation
+     * Must be translated to show above all other visual elements with WEBGL renderer
      * NOTE: this is called after all conversation rects are drawn so it is displayed on top visually
      */
     setConversationBubble() {
-        if (this.conversationBubble.isSelected) this.drawTextBox(this.conversationBubble.point);
+        if (this.conversationBubble.isSelected) this.sk.translateFor2DText(this.drawTextBox.bind(this, this.conversationBubble.point));
     }
 
     /**
@@ -81,23 +82,26 @@ class DrawConversation {
      * @param  {ConversationPoint} point
      * @param  {Color} curColor
      */
-    drawRects(point, curColor) {
+    drawRects(point, curPoint, curColor) {
         this.sk.noStroke(); // reset if setDrawText is called previously in loop
         this.sk.textSize(1); // Controls measurement of pixels in a string that corredponds to vertical pixel height of rectangle.
         const rectWidth = this.sk.sketchController.mapRectInverse(this.rect.maxPixelWidth, this.rect.minPixelWidth); // map to inverse of min/max to set rectWidth based on amount of pixel time selected
         let rectLength = this.sk.textWidth(point.talkTurn);
         if (rectLength < this.rect.minPixelHeight) rectLength = this.rect.minPixelHeight; // if current turn is small set it to the minimum height
-        const curPoint = this.sk.sketchController.getScaledPos(point, null);
         let yPos;
         if (this.sk.sketchController.mode.isAlignTalk) yPos = 0; // if conversation turn positioning is at top of screen
         else yPos = curPoint.floorPlanYPos - rectLength;
         // ***** TEST SET TEXT
         if (this.sk.overRect(curPoint.floorPlanXPos, yPos, rectWidth, rectLength)) this.recordConversationBubble(point, this.sk.PLAN); // if over plan
         else if (this.sk.overRect(curPoint.selTimelineXPos, yPos, rectWidth, rectLength)) this.recordConversationBubble(point, this.sk.SPACETIME); // if over spacetime
+
         // ***** DRAW CUR RECT
         this.sk.fill(curColor);
         this.sk.rect(curPoint.floorPlanXPos, yPos, rectWidth, rectLength); // this.sk.PLAN VIEW
-        this.sk.rect(curPoint.selTimelineXPos, yPos, rectWidth, rectLength); // this.sk.SPACETIME VIEW
+
+        if (this.sk.sketchController.view3D.isShowing) this.sk.quad(curPoint.floorPlanXPos, yPos, curPoint.zPos, curPoint.floorPlanXPos + rectLength, yPos, curPoint.zPos, curPoint.floorPlanXPos + rectLength, yPos, curPoint.zPos + rectWidth, curPoint.floorPlanXPos, yPos, curPoint.zPos + rectWidth);
+        else this.sk.rect(curPoint.selTimelineXPos, yPos, rectWidth, rectLength); // this.sk.SPACETIME VIEW
+
         this.sk.textSize(this.sk.gui.keyTextSize); // reset
     }
 
@@ -125,9 +129,18 @@ class DrawConversation {
         this.sk.stroke(0);
         this.sk.strokeWeight(1);
         this.sk.fill(255, 200);
-        this.sk.rect(textBox.xPos - textBox.boxSpacing, textBox.yPos - textBox.boxSpacing, textBox.width + 2 * textBox.boxSpacing, textBox.height + (2 * textBox.boxSpacing));
+        //this.sk.rect(textBox.xPos - textBox.boxSpacing, textBox.yPos - textBox.boxSpacing, textBox.width + 2 * textBox.boxSpacing, textBox.height + (2 * textBox.boxSpacing));
+
+        const tX1 = textBox.xPos - textBox.boxSpacing;
+        const tY1 = textBox.yPos - textBox.boxSpacing;
+        const tX2 = tX1 + textBox.width + 2 * textBox.boxSpacing;
+        const tY2 = tY1 + textBox.height + (2 * textBox.boxSpacing);
+        this.sk.quad(tX1, tY1, 0, tX2, tY1, 0, tX2, tY2, 0, tX1, tY2, 0);
+
+
         this.sk.fill(0);
         this.sk.text(point.speaker + ": " + point.talkTurn, textBox.xPos, textBox.yPos, textBox.width, textBox.height); // text
+
         // Cartoon bubble lines
         this.sk.stroke(255);
         this.sk.strokeWeight(2);

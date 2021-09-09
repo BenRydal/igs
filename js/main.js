@@ -20,10 +20,11 @@ const igs = new p5((sk) => {
     }
 
     sk.setup = function () {
-        sk.canvas = sk.createCanvas(window.innerWidth, window.innerHeight, sk.P2D);
+        sk.canvas = sk.createCanvas(window.innerWidth, window.innerHeight, sk.WEBGL);
+        sk.smooth();
         sk.textFont(sk.font_Lato);
         sk.textAlign(sk.LEFT, sk.TOP);
-        // SKETCH SINGLETONS
+        // SINGLETONS
         sk.core = new Core(sk); // core program variables and update methods
         sk.testData = new TestData(); // holds tests for core data and CSV files. Does not need sketch reference
         sk.gui = new GUI(sk); // GUI vars and methods
@@ -38,6 +39,8 @@ const igs = new p5((sk) => {
     }
 
     sk.draw = function () {
+        sk.translate(-sk.width / 2, -sk.height / 2, 0); // always recenter canvas to top left when using WEBGL renderer
+        sk.sketchController.update3DTranslation();
         sk.background(255);
         if (sk.testData.dataIsLoaded(sk.core.inputFloorPlan.img)) sk.sketchController.setFloorPlan();
         if (sk.testData.arrayIsLoaded(sk.core.paths)) {
@@ -45,9 +48,28 @@ const igs = new p5((sk) => {
             else sk.setMovement();
         }
         if (sk.sketchController.testVideoAndDivAreLoaded()) sk.sketchController.updateVideoDisplay();
+        if (sk.sketchController.view3D.isShowing || sk.sketchController.view3D.isTransitioning) sk.pop();
         sk.gui.drawKeys(sk.core.paths, sk.core.speakerList); // draw keys last
         sk.sketchController.updateAnimation();
         sk.sketchController.updateLoop();
+    }
+
+    // For text in 2D, must translate 1 pixel so text is readable when using WebGL renderer
+    sk.translateFor2DText = function (callback) {
+        sk.push();
+        sk.translate(0, 0, 1);
+        callback();
+        sk.pop();
+    }
+
+    sk.set3DCanvas = function (xPos, yPos, curZoom, curRotateX) {
+        sk.push();
+        sk.translate(xPos, yPos, curZoom);
+        sk.rotateX(curRotateX);
+    }
+
+    sk.keyPressed = function () {
+        sk.sketchController.handleView3D();
     }
 
     sk.drawFloorPlan = function (width, height) {

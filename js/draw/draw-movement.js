@@ -5,6 +5,7 @@ class DrawMovement {
         this.bug = { // represents user selection dot drawn in both floor plan and space-time views
             xPos: null, // number/float values
             yPos: null,
+            zPos: null,
             timePos: null,
             size: this.sk.width / 50,
             lengthToCompare: this.sk.width, // used to compare data points to find closest bug value
@@ -128,13 +129,13 @@ class DrawMovement {
     }
 
     drawFatLine(isFatLine, p) {
-        if (isFatLine) this.sk.vertex(p.curPos.viewXPos, p.curPos.floorPlanYPos); // if already drawing in highlight mode, continue it
+        if (isFatLine) this.sk.vertex(p.curPos.viewXPos, p.curPos.floorPlanYPos, p.curPos.zPos); // if already drawing in highlight mode, continue it
         else this.startNewLine(p.priorPos, this.style.fatStroke); // if not drawing in highlight mode, begin it
     }
 
     drawThinLine(isFatLine, p) {
         if (isFatLine) this.startNewLine(p.priorPos, this.style.thinStroke); // if drawing in highlight mode, end it
-        else this.sk.vertex(p.curPos.viewXPos, p.curPos.floorPlanYPos);
+        else this.sk.vertex(p.curPos.viewXPos, p.curPos.floorPlanYPos, p.curPos.zPos);
     }
 
     /**
@@ -143,23 +144,24 @@ class DrawMovement {
      * @param  {Integer} weight
      */
     startNewLine(pos, weight) {
-        this.sk.vertex(pos.viewXPos, pos.floorPlanYPos); // draw cur point twice to mark end point
-        this.sk.vertex(pos.viewXPos, pos.floorPlanYPos);
+        this.sk.vertex(pos.viewXPos, pos.floorPlanYPos, pos.zPos); // draw cur point twice to mark end point
+        this.sk.vertex(pos.viewXPos, pos.floorPlanYPos, pos.zPos);
         this.sk.endShape();
         this.sk.strokeWeight(weight);
         this.sk.stroke(this.style.shade);
         this.sk.beginShape();
-        this.sk.vertex(pos.viewXPos, pos.floorPlanYPos); // draw cur point twice to mark starting point
-        this.sk.vertex(pos.viewXPos, pos.floorPlanYPos);
+        this.sk.vertex(pos.viewXPos, pos.floorPlanYPos, pos.zPos); // draw cur point twice to mark starting point
+        this.sk.vertex(pos.viewXPos, pos.floorPlanYPos, pos.zPos);
     }
 
     testPointForBug(curPos) {
-        const [timePos, xPos, yPos] = [curPos.selTimelineXPos, curPos.floorPlanXPos, curPos.floorPlanYPos];
-        if (this.sk.sketchController.mode.isAnimate) this.recordBug(timePos, xPos, yPos, null); // always return true to set last/most recent point as the bug
+        const [timePos, xPos, yPos, zPos] = [curPos.selTimelineXPos, curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.zPos];
+        const map3DMouse = this.sk.sketchController.zzzNewMapFromSelectPixelToTimeline(this.sk.mouseX);
+        if (this.sk.sketchController.mode.isAnimate) this.recordBug(timePos, xPos, yPos, zPos, null); // always return true to set last/most recent point as the bug
         else if (this.sk.sketchController.mode.isVideoPlay) {
             const selTime = this.sk.sketchController.mapFromVideoToSelectedTime();
-            if (this.compareValuesBySpacing(selTime, timePos, this.bug.lengthToCompare)) this.recordBug(timePos, xPos, yPos, Math.abs(selTime - timePos));
-        } else if (this.sk.gui.overSpaceTimeView(this.sk.mouseX, this.sk.mouseY) && this.compareValuesBySpacing(this.sk.mouseX, timePos, this.bug.lengthToCompare)) this.recordBug(this.sk.mouseX, xPos, yPos, Math.abs(this.sk.mouseX - timePos));
+            if (this.compareValuesBySpacing(selTime, timePos, this.bug.lengthToCompare)) this.recordBug(timePos, xPos, yPos, zPos, Math.abs(selTime - timePos));
+        } else if (this.sk.gui.overSpaceTimeView(this.sk.mouseX, this.sk.mouseY) && this.compareValuesBySpacing(map3DMouse, timePos, this.bug.lengthToCompare)) this.recordBug(map3DMouse, xPos, yPos, zPos, Math.abs(map3DMouse - timePos));
     }
 
     compareValuesBySpacing(value1, value2, spacing) {
@@ -169,14 +171,16 @@ class DrawMovement {
     resetBug() {
         this.bug.xPos = null;
         this.bug.yPos = null;
+        this.bug.zPos = null;
         this.bug.timePos = null;
         this.bug.lengthToCompare = this.sk.width;
         this.bug.isSelected = false;
     }
 
-    recordBug(timePos, xPos, yPos, lengthToCompare) {
+    recordBug(timePos, xPos, yPos, zPos, lengthToCompare) {
         this.bug.xPos = xPos;
         this.bug.yPos = yPos;
+        this.bug.zPos = zPos;
         this.bug.timePos = timePos;
         this.bug.lengthToCompare = lengthToCompare;
         this.bug.isSelected = true;
@@ -188,6 +192,12 @@ class DrawMovement {
         this.sk.strokeWeight(5);
         this.sk.fill(this.style.shade);
         this.sk.ellipse(this.bug.xPos, this.bug.yPos, this.bug.size, this.bug.size);
-        this.sk.ellipse(this.bug.timePos, this.bug.yPos, this.bug.size, this.bug.size);
+        if (this.sk.sketchController.view3D.isShowing) {
+            this.sk.stroke(this.style.shade);
+            this.sk.strokeWeight(25);
+            this.sk.point(this.bug.xPos, this.bug.yPos, this.bug.zPos);
+            this.sk.strokeWeight(2);
+            this.sk.line(this.bug.xPos, this.bug.yPos, 0, this.bug.xPos, this.bug.yPos, this.bug.zPos);
+        } else this.sk.ellipse(this.bug.timePos, this.bug.yPos, this.bug.size, this.bug.size);
     }
 }

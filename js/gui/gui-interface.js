@@ -34,7 +34,7 @@ class GUI {
         this.dataPanel.organize(this.sk.DRAWGUI, pathList, speakerList); // pass these to dynamically update
         this.timeline.draw();
         if (this.overFloorPlan(this.sk.mouseX, this.sk.mouseY)) this.drawHighlightSelectors();
-        if (this.sk.sketchController.mode.isIntro) this.drawIntroMsg();
+        if (this.sk.sketchController.mode.isIntro) this.sk.translateFor2DText(this.drawIntroMsg.bind(this));
     }
 
     drawHighlightSelectors() {
@@ -60,6 +60,8 @@ class GUI {
     }
 
     drawIntroMsg() {
+        // this.sk.push();
+        // this.sk.translate(0, 0, 1); // must translate 1 pixel so text is readable when using WebGL renderer
         this.sk.rectMode(this.sk.CENTER);
         this.sk.stroke(0);
         this.sk.strokeWeight(1);
@@ -69,6 +71,7 @@ class GUI {
         this.sk.textSize(this.keyTextSize);
         this.sk.text(this.introMsg, this.sk.width / 2, this.sk.height / 2.5, this.sk.width / 1.75, this.sk.height / 1.75);
         this.sk.rectMode(this.sk.CORNER);
+        //this.sk.pop(); // remember to pop after push
     }
 
     handleKeys(pathList, speakerList) {

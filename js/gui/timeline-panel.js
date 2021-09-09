@@ -18,7 +18,10 @@ class TimelinePanel {
         this.drawSelectors();
         this.drawEndLabels();
         this.drawCenterLabel();
-        if (this.overSpaceTimeView(this.sk.mouseX, this.sk.mouseY)) this.drawSlicer();
+        if (this.overSpaceTimeView(this.sk.mouseX, this.sk.mouseY)) {
+            if (this.sk.sketchController.view3D.isShowing) this.draw3DSlicer();
+            else this.drawSlicer();
+        }
     }
 
     drawSelectionRect() {
@@ -71,6 +74,18 @@ class TimelinePanel {
         this.sk.stroke(0);
         this.sk.strokeWeight(2);
         this.sk.line(this.sk.mouseX, 0, this.sk.mouseX, this.tc.height);
+    }
+
+    draw3DSlicer() {
+        this.sk.fill(0);
+        this.sk.stroke(0);
+        this.sk.strokeWeight(2);
+        this.sk.line(this.sk.mouseX, this.tc.top, this.sk.mouseX, this.tc.height);
+        this.sk.sketchController.update3DCanvas();
+        this.sk.fill(255, 50);
+        const zzzPos = this.sk.sketchController.zzzNewMapFromSelectPixelToTimeline(this.sk.mouseX);
+        this.sk.quad(0, 0, zzzPos, this.sk.gui.floorPlanContainer.width, 0, zzzPos, this.sk.gui.floorPlanContainer.width, this.sk.gui.floorPlanContainer.height, zzzPos, 0, this.sk.gui.floorPlanContainer.height, zzzPos);
+        this.sk.pop();
     }
 
     handleTimeline() {
