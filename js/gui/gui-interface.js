@@ -2,29 +2,14 @@ class GUI {
 
     constructor(sketch) {
         this.sk = sketch;
-        this.timelineHeight = this.sk.height * .85;
-        this.timelineThickness = 70;
-        this.timelineContainer = {
-            start: this.sk.width * 0.5,
-            end: this.sk.width * 0.975,
-            height: this.timelineHeight,
-            thickness: this.timelineThickness,
-            top: this.timelineHeight - this.timelineThickness / 2,
-            bottom: this.timelineHeight + this.timelineThickness / 2
-        }
+        this.timelinePanel = new TimelinePanel(this.sk);
+        this.dataPanel = new DataPanel(this.sk, this.timelinePanel.getBottom());
         this.floorPlanContainer = {
-            width: this.timelineContainer.start - (this.sk.width - this.timelineContainer.end),
-            height: this.timelineContainer.height,
+            width: this.getTimelineStart() - (this.sk.width - this.getTimelineEnd()),
+            height: this.getTimelineHeight(),
             slicerSize: 25,
             selectorSize: 100
         }
-        this.dataPanelContainer = {
-            xPos: 10,
-            headerYPos: this.timelineContainer.bottom,
-            tabsYPos: this.timelineContainer.bottom + 45
-        }
-        this.timeline = new TimelinePanel(this.sk, this.timelineContainer);
-        this.dataPanel = new DataPanel(this.sk, this.dataPanelContainer);
         this.keyTextSize = this.sk.width / 70;
         this.introMsg = "INTERACTION GEOGRAPHY SLICER (IGS)\n\nby Ben Rydal Shapiro & contributors\nbuilt with p5.js & JavaScript\n\nHi There! This is a tool to visualize movement, conversation, and video data over space and time. Data are displayed over a floor plan view (left) and a space-time view (right), where the vertical axis corresponds to the vertical dimension of the floor plan. Use the top menu to visualize different sample datasets or upload your own data. Use the top and bottom left buttons as well as the timeline to selectively study displayed data. For example, you can animate data, visualize conversation in different ways, and interact with video data by clicking anywhere in the space-time view to play & pause video. For more information see: benrydal.com/software/igs";
     }
@@ -32,14 +17,25 @@ class GUI {
     drawKeys(pathList, speakerList) {
         this.sk.textSize(this.keyTextSize);
         this.dataPanel.organize(this.sk.DRAWGUI, pathList, speakerList); // pass these to dynamically update
-        this.timeline.draw();
-        if (this.overFloorPlan(this.sk.mouseX, this.sk.mouseY)) this.drawHighlightSelectors();
+        this.timelinePanel.draw();
+        if (this.overFloorPlan(this.sk.mouseX, this.sk.mouseY)) this.updateFloorPlanSelector();
+        if (this.overSpaceTimeView(this.sk.mouseX, this.sk.mouseY)) this.updateTimelineSlicer();
         if (this.sk.sketchController.mode.isIntro) this.sk.translateFor2DText(this.drawIntroMsg.bind(this));
     }
 
-    drawHighlightSelectors() {
+    updateFloorPlanSelector() {
         if (this.getCurSelectTab() === 1) this.drawFloorPlanCursorSelector();
         else if (this.getCurSelectTab() === 2) this.drawFloorPlanSlicerSelector();
+    }
+
+    updateTimelineSlicer() {
+        if (this.sk.sketchController.view3D.isShowing) {
+            this.timelinePanel.draw3DSlicerLine();
+            this.sk.sketchController.update3DCanvas(); // must translate canvas to draw slicer in 3D properly
+            this.timelinePanel.draw3DSlicerRect(this.floorPlanContainer.width, this.floorPlanContainer.height, this.sk.sketchController.zzzNewMapFromSelectPixelToTimeline(this.sk.mouseX)); // pass zPos
+            this.sk.pop(); // reset translation
+        } else this.timelinePanel.drawSlicer();
+
     }
 
     drawFloorPlanCursorSelector() {
@@ -60,8 +56,6 @@ class GUI {
     }
 
     drawIntroMsg() {
-        // this.sk.push();
-        // this.sk.translate(0, 0, 1); // must translate 1 pixel so text is readable when using WebGL renderer
         this.sk.rectMode(this.sk.CENTER);
         this.sk.stroke(0);
         this.sk.strokeWeight(1);
@@ -71,7 +65,6 @@ class GUI {
         this.sk.textSize(this.keyTextSize);
         this.sk.text(this.introMsg, this.sk.width / 2, this.sk.height / 2.5, this.sk.width / 1.75, this.sk.height / 1.75);
         this.sk.rectMode(this.sk.CORNER);
-        //this.sk.pop(); // remember to pop after push
     }
 
     handleKeys(pathList, speakerList) {
@@ -81,11 +74,11 @@ class GUI {
 
     // Updates user select start/end vars and is triggered if user already dragging or begins dragging
     handleTimeline() {
-        this.timeline.handleTimeline();
+        this.timelinePanel.handleTimeline();
     }
 
     handleResetTimelineLock() {
-        this.timeline.resetTimelineLock();
+        this.timelinePanel.resetTimelineLock();
     }
 
     setRotateLeft() {
@@ -106,23 +99,27 @@ class GUI {
     }
 
     getTimelineStart() {
-        return this.timelineContainer.start;
+        return this.timelinePanel.getStart();
     }
 
     getTimelineEnd() {
-        return this.timelineContainer.end;
+        return this.timelinePanel.getEnd();
     }
 
     getCurTimelineSelectStart() {
-        return this.timeline.getCurTimelineSelectStart();
+        return this.timelinePanel.getSelectStart();
     }
 
     getCurTimelineSelectEnd() {
-        return this.timeline.getCurTimelineSelectEnd();
+        return this.timelinePanel.getSelectEnd();
+    }
+
+    getTimelineHeight() {
+        return this.timelinePanel.getHeight();
     }
 
     overSpaceTimeView(xPos, yPos) {
-        return this.timeline.overSpaceTimeView(xPos, yPos);
+        return this.timelinePanel.overSpaceTimeView(xPos, yPos);
     }
 
     overFloorPlan(xPos, yPos) {
@@ -138,6 +135,6 @@ class GUI {
     }
 
     overSlicer(xPos, yPos) {
-        return this.sk.overRect(xPos - this.floorPlanContainer.slicerSize, 0, (2 * this.floorPlanContainer.slicerSize), this.timelineContainer.height);
+        return this.sk.overRect(xPos - this.floorPlanContainer.slicerSize, 0, (2 * this.floorPlanContainer.slicerSize), this.getTimelineHeight());
     }
 }
