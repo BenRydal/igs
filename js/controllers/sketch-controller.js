@@ -12,11 +12,11 @@ class SketchController {
         }
         this.view3D = {
             isShowing: false,
-            isTransitioning: false,
-            zoom: -700,
+            zoom: -(this.sk.height / 1.5),
             curZoom: 0,
-            xPosTranslate: 500,
-            yPosTranslate: 650,
+            isTransitioning: false,
+            xPosTranslate: this.sk.width / 4,
+            yPosTranslate: this.sk.height / 1.75,
             curXPos: 0,
             curYPos: 0,
             rotateX: this.sk.PI / 2.3,
