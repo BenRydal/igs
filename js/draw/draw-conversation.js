@@ -9,7 +9,7 @@ class DrawConversation {
         };
         this.rect = { // represents rectangles drawn for conversation turns
             minPixelLength: 3, // set minimum pixel length for really short conversation turns
-            pixelWidth: this.sk.sketchController.getCurConversationRectWidth()
+            pixelWidth: this.sk.sketchController.getCurConversationRectWidth() // width needs to be dynamically updated when new data is loaded and timeline scaling is changed by user
         };
     }
 
@@ -89,17 +89,16 @@ class DrawConversation {
         let yPos;
         if (this.sk.sketchController.mode.isAlignTalk) yPos = 0; // if conversation turn positioning is at top of screen
         else yPos = curPoint.floorPlanYPos - rectLength;
-        // ***** TEST SET TEXT
-        if (this.sk.overRect(curPoint.floorPlanXPos, yPos, this.rect.pixelWidth, rectLength)) this.recordConversationBubble(point, this.sk.PLAN); // if over plan
-        else if (this.sk.overRect(curPoint.selTimelineXPos, yPos, this.rect.pixelWidth, rectLength)) this.recordConversationBubble(point, this.sk.SPACETIME); // if over spacetime
-
-        // ***** DRAW CUR RECT
+        // Test if user has selected a conversation
+        if (this.sk.overRect(curPoint.floorPlanXPos, yPos, this.rect.pixelWidth, rectLength)) this.recordConversationBubble(point, this.sk.PLAN);
+        else if (this.sk.overRect(curPoint.selTimelineXPos, yPos, this.rect.pixelWidth, rectLength)) this.recordConversationBubble(point, this.sk.SPACETIME);
+        // Draw Rects
         this.sk.fill(curColor);
-        this.sk.rect(curPoint.floorPlanXPos, yPos, this.rect.pixelWidth, rectLength); // this.sk.PLAN VIEW
-
+        // Draw FloorPlan Rect
+        this.sk.rect(curPoint.floorPlanXPos, yPos, this.rect.pixelWidth, rectLength);
+        // Draw Space-Time Rect
         if (this.sk.sketchController.view3D.isShowing) this.sk.quad(curPoint.floorPlanXPos, yPos, curPoint.zPos, curPoint.floorPlanXPos + rectLength, yPos, curPoint.zPos, curPoint.floorPlanXPos + rectLength, yPos, curPoint.zPos + this.rect.pixelWidth, curPoint.floorPlanXPos, yPos, curPoint.zPos + this.rect.pixelWidth);
-        else this.sk.rect(curPoint.selTimelineXPos, yPos, this.rect.pixelWidth, rectLength); // this.sk.SPACETIME VIEW
-
+        else this.sk.rect(curPoint.selTimelineXPos, yPos, this.rect.pixelWidth, rectLength);
         this.sk.textSize(this.sk.gui.keyTextSize); // reset
     }
 
@@ -127,18 +126,10 @@ class DrawConversation {
         this.sk.stroke(0);
         this.sk.strokeWeight(1);
         this.sk.fill(255, 200);
-        //this.sk.rect(textBox.xPos - textBox.boxSpacing, textBox.yPos - textBox.boxSpacing, textBox.width + 2 * textBox.boxSpacing, textBox.height + (2 * textBox.boxSpacing));
-
-        const tX1 = textBox.xPos - textBox.boxSpacing;
-        const tY1 = textBox.yPos - textBox.boxSpacing;
-        const tX2 = tX1 + textBox.width + 2 * textBox.boxSpacing;
-        const tY2 = tY1 + textBox.height + (2 * textBox.boxSpacing);
-        this.sk.quad(tX1, tY1, 0, tX2, tY1, 0, tX2, tY2, 0, tX1, tY2, 0);
-
-
+        this.sk.rect(textBox.xPos - textBox.boxSpacing, textBox.yPos - textBox.boxSpacing, textBox.width + 2 * textBox.boxSpacing, textBox.height + (2 * textBox.boxSpacing));
+        // Draw Text
         this.sk.fill(0);
-        this.sk.text(point.speaker + ": " + point.talkTurn, textBox.xPos, textBox.yPos, textBox.width, textBox.height); // text
-
+        this.sk.text(point.speaker + ": " + point.talkTurn, textBox.xPos, textBox.yPos, textBox.width, textBox.height);
         // Cartoon bubble lines
         this.sk.stroke(255);
         this.sk.strokeWeight(2);
