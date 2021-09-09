@@ -44,6 +44,10 @@ class SketchController {
         }
     }
 
+    translationComplete() {
+        return this.view3D.isShowing || this.view3D.isTransitioning;
+    }
+
     update3DCanvas() {
         this.sk.set3DCanvas(this.view3D.curXPos, this.view3D.curYPos, this.view3D.curZoom, this.view3D.curRotateX);
     }

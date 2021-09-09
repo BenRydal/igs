@@ -48,7 +48,7 @@ const igs = new p5((sk) => {
             else sk.setMovement();
         }
         if (sk.sketchController.testVideoAndDivAreLoaded()) sk.sketchController.updateVideoDisplay();
-        if (sk.sketchController.view3D.isShowing || sk.sketchController.view3D.isTransitioning) sk.pop();
+        if (sk.sketchController.translationComplete()) sk.pop();
         sk.gui.drawKeys(sk.core.paths, sk.core.speakerList); // draw keys last
         sk.sketchController.updateAnimation();
         sk.sketchController.updateLoop();
