@@ -160,33 +160,35 @@ class SketchController {
      * @param  {Movement Or Conversation Point} point
      * @param  {Integer} view
      */
+
     getScaledPos(point, view) {
         const timelineXPos = this.mapFromTotalToPixelTime(point.time);
         const selTimelineXPos = this.zzzNewMapFromSelectPixelToTimeline(timelineXPos);
         const [floorPlanXPos, floorPlanYPos] = this.getScaledXYPos(point.xPos, point.yPos);
-        let viewXPos;
-        // this would be changed to if 2D/3D...
-        if (view === this.sk.PLAN) viewXPos = floorPlanXPos;
-        else if (view === this.sk.SPACETIME) {
-            if (this.view3D.isShowing === true) viewXPos = floorPlanXPos;
-            else viewXPos = selTimelineXPos;
-        } else viewXPos = null;
-
-        let zPos;
-        if (view === this.sk.PLAN) zPos = 0;
-        else {
-            if (this.view3D.isShowing) zPos = selTimelineXPos;
-            else zPos = 0;
-        }
-
         return {
             timelineXPos,
             selTimelineXPos,
             floorPlanXPos,
             floorPlanYPos,
-            viewXPos,
-            zPos
+            viewXPos: this.getViewXPos(view, floorPlanXPos, selTimelineXPos),
+            zPos: this.getZPos(view, selTimelineXPos)
         };
+    }
+
+    getViewXPos(view, floorPlanXPos, selTimelineXPos) {
+        if (view === this.sk.PLAN) return floorPlanXPos;
+        else if (view === this.sk.SPACETIME) {
+            if (this.view3D.isShowing === true) return floorPlanXPos;
+            else return selTimelineXPos;
+        } else return null;
+    }
+
+    getZPos(view, selTimelineXPos) {
+        if (view === this.sk.PLAN) return 0;
+        else {
+            if (this.view3D.isShowing) return selTimelineXPos;
+            else return 0;
+        }
     }
 
     // mapFromSelectPixelToTimeline(value) {
@@ -194,7 +196,7 @@ class SketchController {
     // }
 
     zzzNewMapFromSelectPixelToTimeline(value) {
-        if (this.view3D.isShowing) return this.sk.map(value, this.sk.gui.getCurTimelineSelectStart(), this.sk.gui.getCurTimelineSelectEnd(), this.sk.gui.getTimelineStart() - 800, this.sk.gui.getTimelineEnd() - 1150);
+        if (this.view3D.isShowing) return this.sk.map(value, this.sk.gui.getCurTimelineSelectStart(), this.sk.gui.getCurTimelineSelectEnd(), this.sk.height / 10, this.sk.height / 1.6);
         else return this.sk.map(value, this.sk.gui.getCurTimelineSelectStart(), this.sk.gui.getCurTimelineSelectEnd(), this.sk.gui.getTimelineStart(), this.sk.gui.getTimelineEnd());
     }
 
