@@ -32,7 +32,7 @@ class GUI {
         if (this.sk.sketchController.view3D.isShowing) {
             this.timelinePanel.draw3DSlicerLine();
             this.sk.sketchController.update3DCanvas(); // must translate canvas to draw slicer in 3D properly
-            this.timelinePanel.draw3DSlicerRect(this.floorPlanContainer.width, this.floorPlanContainer.height, this.sk.sketchController.zzzNewMapFromSelectPixelToTimeline(this.sk.mouseX)); // pass zPos
+            this.timelinePanel.draw3DSlicerRect(this.floorPlanContainer.width, this.floorPlanContainer.height, this.sk.sketchController.mapToSelectTimeThenPixelTime(this.sk.mouseX)); // pass zPos
             this.sk.pop(); // reset translation
         } else this.timelinePanel.drawSlicer();
 
@@ -104,6 +104,10 @@ class GUI {
 
     getTimelineEnd() {
         return this.timelinePanel.getEnd();
+    }
+
+    getTimelineLength() {
+        return this.timelinePanel.getLength();
     }
 
     getCurTimelineSelectStart() {

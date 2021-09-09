@@ -106,17 +106,17 @@ class SketchController {
 
     // ****** UPDATE METHODS ****** //
     updateAnimationCounter() {
-        if (this.mode.isAnimate) this.animationCounter = this.mapFromPixelToTotalTime(this.sk.gui.getCurTimelineSelectEnd());
-        else this.animationCounter = this.mapFromPixelToTotalTime(this.sk.gui.getCurTimelineSelectStart());
+        if (this.mode.isAnimate) this.animationCounter = this.mapPixelTimeToTotalTime(this.sk.gui.getCurTimelineSelectEnd());
+        else this.animationCounter = this.mapPixelTimeToTotalTime(this.sk.gui.getCurTimelineSelectStart());
         this.setIsAnimate(!this.mode.isAnimate);
     }
 
     updateAnimation() {
         if (this.mode.isAnimate) {
             const animationIncrementRateDivisor = 1000; // this divisor seems to work best
-            const curTimeIntervalInSeconds = this.mapFromPixelToTotalTime(this.sk.gui.getCurTimelineSelectEnd()) - this.mapFromPixelToTotalTime(this.sk.gui.getCurTimelineSelectStart()); // Get amount of time in seconds currently displayed
+            const curTimeIntervalInSeconds = this.mapPixelTimeToTotalTime(this.sk.gui.getCurTimelineSelectEnd()) - this.mapPixelTimeToTotalTime(this.sk.gui.getCurTimelineSelectStart()); // Get amount of time in seconds currently displayed
             const animationIncrementValue = curTimeIntervalInSeconds / animationIncrementRateDivisor; // set increment value based on that value/divisor to keep constant sketchController.mode.isAnimate speed regardless of time interval selected
-            if (this.animationCounter < this.mapFromPixelToTotalTime(this.sk.gui.getCurTimelineSelectEnd())) this.animationCounter += animationIncrementValue;
+            if (this.animationCounter < this.mapPixelTimeToTotalTime(this.sk.gui.getCurTimelineSelectEnd())) this.animationCounter += animationIncrementValue;
             else this.setIsAnimate(false);
         }
     }
@@ -129,8 +129,8 @@ class SketchController {
     }
 
     setVideoScrubbing() {
-        if (this.mode.isAnimate) this.sk.core.updateVideoScrubAnimate(Math.floor(this.sk.map(this.bugTimeForVideoScrub, this.sk.gui.getTimelineStart(), this.sk.gui.getTimelineEnd(), this.mapFromPixelToVideoTime(this.sk.gui.getCurTimelineSelectStart()), this.mapFromPixelToVideoTime(this.sk.gui.getCurTimelineSelectEnd()))));
-        else if (this.sk.gui.overSpaceTimeView(this.sk.mouseX, this.sk.mouseY)) this.sk.core.updateVideoScrub(Math.floor(this.mapFromPixelToVideoTime(this.mapFromPixelToSelectedTime(this.sk.mouseX))));
+        if (this.mode.isAnimate) this.sk.core.updateVideoScrubAnimate(Math.floor(this.sk.map(this.bugTimeForVideoScrub, this.sk.gui.getTimelineStart(), this.sk.gui.getTimelineEnd(), this.mapPixelTimeToVideoTime(this.sk.gui.getCurTimelineSelectStart()), this.mapPixelTimeToVideoTime(this.sk.gui.getCurTimelineSelectEnd()))));
+        else if (this.sk.gui.overSpaceTimeView(this.sk.mouseX, this.sk.mouseY)) this.sk.core.updateVideoScrub(Math.floor(this.mapPixelTimeToVideoTime(this.mapPixelTimeToSelectTime(this.sk.mouseX))));
     }
 
     toggleVideoShowHide() {
@@ -149,7 +149,7 @@ class SketchController {
             this.sk.core.pauseVideo();
             this.setIsVideoPlay(false);
         } else {
-            this.sk.core.playVideo(this.mapFromPixelToVideoTime(this.mapFromPixelToSelectedTime(this.sk.mouseX)));
+            this.sk.core.playVideo(this.mapPixelTimeToVideoTime(this.mapPixelTimeToSelectTime(this.sk.mouseX)));
             this.setIsVideoPlay(true);
         }
     }
@@ -162,8 +162,8 @@ class SketchController {
      */
 
     getScaledPos(point, view) {
-        const timelineXPos = this.mapFromTotalToPixelTime(point.time);
-        const selTimelineXPos = this.zzzNewMapFromSelectPixelToTimeline(timelineXPos);
+        const timelineXPos = this.mapTotalTimeToPixelTime(point.time);
+        const selTimelineXPos = this.mapSelectTimeToPixelTime(timelineXPos);
         const [floorPlanXPos, floorPlanYPos] = this.getScaledXYPos(point.xPos, point.yPos);
         return {
             timelineXPos,
@@ -189,19 +189,6 @@ class SketchController {
             if (this.view3D.isShowing) return selTimelineXPos;
             else return 0;
         }
-    }
-
-    // mapFromSelectPixelToTimeline(value) {
-    //     return this.sk.map(value, this.sk.gui.getCurTimelineSelectStart(), this.sk.gui.getCurTimelineSelectEnd(), this.sk.gui.getTimelineStart(), this.sk.gui.getTimelineEnd());
-    // }
-
-    zzzNewMapFromSelectPixelToTimeline(value) {
-        if (this.view3D.isShowing) return this.sk.map(value, this.sk.gui.getCurTimelineSelectStart(), this.sk.gui.getCurTimelineSelectEnd(), this.sk.height / 10, this.sk.height / 1.6);
-        else return this.sk.map(value, this.sk.gui.getCurTimelineSelectStart(), this.sk.gui.getCurTimelineSelectEnd(), this.sk.gui.getTimelineStart(), this.sk.gui.getTimelineEnd());
-    }
-
-    mapFromTotalToPixelTime(value) {
-        return this.sk.map(value, 0, this.sk.core.totalTimeInSeconds, this.sk.gui.getTimelineStart(), this.sk.gui.getTimelineEnd());
     }
 
     /**
@@ -263,7 +250,7 @@ class SketchController {
      * @param  {Number/Float} value
      */
     testAnimation(value) {
-        if (this.mode.isAnimate) return this.animationCounter > this.mapFromPixelToTotalTime(value);
+        if (this.mode.isAnimate) return this.animationCounter > this.mapPixelTimeToTotalTime(value);
         else return true;
     }
 
@@ -275,31 +262,45 @@ class SketchController {
         return (this.sk.testData.dataIsLoaded(this.sk.core.videoPlayer) && this.sk.core.videoDivIsLoaded());
     }
 
-    // Sets conversation rectangle scaling range (size of rectangles as timeline is rescaled)
-    mapConversationRectRange() {
-        return this.sk.map(this.sk.core.totalTimeInSeconds, 0, 3600, 10, 1, true); // map to inverse, values constrained between 10 and 1 (pixels)
+    /**
+     * Returns pixel width for drawing conversation rectangles based on curTotalTime of data, user timeline selection, and maxRectWidth
+     * NOTE: curScaledRectWidth parameters 0-3600 scale pixels to 1 hour which works well 
+     * and the map method maps to the inverse of 1 and maxRectWidth to properly adjust scaling/thickness of rects when user interacts with timeline
+     */
+    getCurConversationRectWidth() {
+        const maxRectWidth = 10;
+        const curScaledRectWidth = this.sk.map(this.sk.core.totalTimeInSeconds, 0, 3600, maxRectWidth, 1, true);
+        return this.sk.map(this.sk.gui.getCurTimelineSelectEnd() - this.sk.gui.getCurTimelineSelectStart(), 0, this.sk.gui.getTimelineLength(), maxRectWidth, curScaledRectWidth);
     }
 
-    // map to inverse of min/max to set rectWidth based on amount of pixel time selected
-    mapRectInverse(rectMaxPixelWidth, rectMinPixelWidth) {
-        return this.sk.map(this.sk.gui.getCurTimelineSelectEnd() - this.sk.gui.getCurTimelineSelectStart(), 0, this.sk.gui.getTimelineEnd() - this.sk.gui.getTimelineStart(), rectMaxPixelWidth, rectMinPixelWidth);
+    mapVideoTimeToSelectedTime() {
+        const timelinePos = this.mapTotalTimeToPixelTime(this.sk.core.videoPlayer.getCurrentTime());
+        return this.mapSelectTimeToPixelTime(timelinePos);
     }
 
-    mapFromVideoToSelectedTime() {
-        const timelinePos = this.mapFromTotalToPixelTime(this.sk.core.videoPlayer.getCurrentTime());
-        return this.zzzNewMapFromSelectPixelToTimeline(timelinePos);
-    }
-
-    mapFromPixelToTotalTime(value) {
+    mapPixelTimeToTotalTime(value) {
         return this.sk.map(value, this.sk.gui.getTimelineStart(), this.sk.gui.getTimelineEnd(), 0, this.sk.core.totalTimeInSeconds);
     }
 
-    mapFromPixelToVideoTime(value) {
+    mapPixelTimeToVideoTime(value) {
         return Math.floor(this.sk.map(value, this.sk.gui.getTimelineStart(), this.sk.gui.getTimelineEnd(), 0, Math.floor(this.sk.core.videoPlayer.getVideoDuration()))); // must floor vPos to prevent double finite error
     }
 
-    mapFromPixelToSelectedTime(value) {
+    mapPixelTimeToSelectTime(value) {
         return this.sk.map(value, this.sk.gui.getTimelineStart(), this.sk.gui.getTimelineEnd(), this.sk.gui.getCurTimelineSelectStart(), this.sk.gui.getCurTimelineSelectEnd());
+    }
+
+    mapToSelectTimeThenPixelTime(value) {
+        return this.mapSelectTimeToPixelTime(this.mapPixelTimeToSelectTime(value));
+    }
+
+    mapSelectTimeToPixelTime(value) {
+        if (this.view3D.isShowing) return this.sk.map(value, this.sk.gui.getCurTimelineSelectStart(), this.sk.gui.getCurTimelineSelectEnd(), this.sk.height / 10, this.sk.height / 1.6);
+        else return this.sk.map(value, this.sk.gui.getCurTimelineSelectStart(), this.sk.gui.getCurTimelineSelectEnd(), this.sk.gui.getTimelineStart(), this.sk.gui.getTimelineEnd());
+    }
+
+    mapTotalTimeToPixelTime(value) {
+        return this.sk.map(value, 0, this.sk.core.totalTimeInSeconds, this.sk.gui.getTimelineStart(), this.sk.gui.getTimelineEnd());
     }
 
     setIsAnimate(value) {

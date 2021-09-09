@@ -7,10 +7,9 @@ class DrawConversation {
             point: null, // stores one ConversationPoint object for selected conversation turn
             view: this.sk.PLAN // view indicating if user selected conversation in floor plan or space-time views
         };
-        this.rect = { // Rect represents key parameters used in drawRects method to scale rectangles
-            minPixelHeight: 3, // for really short conversation turns set a minimum pixel height
-            minPixelWidth: this.sk.sketchController.mapConversationRectRange(),
-            maxPixelWidth: 10
+        this.rect = { // represents rectangles drawn for conversation turns
+            minPixelLength: 3, // set minimum pixel length for really short conversation turns
+            pixelWidth: this.sk.sketchController.getCurConversationRectWidth()
         };
     }
 
@@ -85,22 +84,21 @@ class DrawConversation {
     drawRects(point, curPoint, curColor) {
         this.sk.noStroke(); // reset if setDrawText is called previously in loop
         this.sk.textSize(1); // Controls measurement of pixels in a string that corredponds to vertical pixel height of rectangle.
-        const rectWidth = this.sk.sketchController.mapRectInverse(this.rect.maxPixelWidth, this.rect.minPixelWidth); // map to inverse of min/max to set rectWidth based on amount of pixel time selected
         let rectLength = this.sk.textWidth(point.talkTurn);
-        if (rectLength < this.rect.minPixelHeight) rectLength = this.rect.minPixelHeight; // if current turn is small set it to the minimum height
+        if (rectLength < this.rect.minPixelLength) rectLength = this.rect.minPixelLength; // if current turn is small set it to the minimum height
         let yPos;
         if (this.sk.sketchController.mode.isAlignTalk) yPos = 0; // if conversation turn positioning is at top of screen
         else yPos = curPoint.floorPlanYPos - rectLength;
         // ***** TEST SET TEXT
-        if (this.sk.overRect(curPoint.floorPlanXPos, yPos, rectWidth, rectLength)) this.recordConversationBubble(point, this.sk.PLAN); // if over plan
-        else if (this.sk.overRect(curPoint.selTimelineXPos, yPos, rectWidth, rectLength)) this.recordConversationBubble(point, this.sk.SPACETIME); // if over spacetime
+        if (this.sk.overRect(curPoint.floorPlanXPos, yPos, this.rect.pixelWidth, rectLength)) this.recordConversationBubble(point, this.sk.PLAN); // if over plan
+        else if (this.sk.overRect(curPoint.selTimelineXPos, yPos, this.rect.pixelWidth, rectLength)) this.recordConversationBubble(point, this.sk.SPACETIME); // if over spacetime
 
         // ***** DRAW CUR RECT
         this.sk.fill(curColor);
-        this.sk.rect(curPoint.floorPlanXPos, yPos, rectWidth, rectLength); // this.sk.PLAN VIEW
+        this.sk.rect(curPoint.floorPlanXPos, yPos, this.rect.pixelWidth, rectLength); // this.sk.PLAN VIEW
 
-        if (this.sk.sketchController.view3D.isShowing) this.sk.quad(curPoint.floorPlanXPos, yPos, curPoint.zPos, curPoint.floorPlanXPos + rectLength, yPos, curPoint.zPos, curPoint.floorPlanXPos + rectLength, yPos, curPoint.zPos + rectWidth, curPoint.floorPlanXPos, yPos, curPoint.zPos + rectWidth);
-        else this.sk.rect(curPoint.selTimelineXPos, yPos, rectWidth, rectLength); // this.sk.SPACETIME VIEW
+        if (this.sk.sketchController.view3D.isShowing) this.sk.quad(curPoint.floorPlanXPos, yPos, curPoint.zPos, curPoint.floorPlanXPos + rectLength, yPos, curPoint.zPos, curPoint.floorPlanXPos + rectLength, yPos, curPoint.zPos + this.rect.pixelWidth, curPoint.floorPlanXPos, yPos, curPoint.zPos + this.rect.pixelWidth);
+        else this.sk.rect(curPoint.selTimelineXPos, yPos, this.rect.pixelWidth, rectLength); // this.sk.SPACETIME VIEW
 
         this.sk.textSize(this.sk.gui.keyTextSize); // reset
     }

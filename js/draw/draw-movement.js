@@ -156,10 +156,10 @@ class DrawMovement {
 
     testPointForBug(curPos) {
         const [timePos, xPos, yPos, zPos] = [curPos.selTimelineXPos, curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.zPos];
-        const map3DMouse = this.sk.sketchController.zzzNewMapFromSelectPixelToTimeline(this.sk.mouseX);
+        const map3DMouse = this.sk.sketchController.mapToSelectTimeThenPixelTime(this.sk.mouseX);
         if (this.sk.sketchController.mode.isAnimate) this.recordBug(timePos, xPos, yPos, zPos, null); // always return true to set last/most recent point as the bug
         else if (this.sk.sketchController.mode.isVideoPlay) {
-            const selTime = this.sk.sketchController.mapFromVideoToSelectedTime();
+            const selTime = this.sk.sketchController.mapVideoTimeToSelectedTime();
             if (this.compareValuesBySpacing(selTime, timePos, this.bug.lengthToCompare)) this.recordBug(timePos, xPos, yPos, zPos, Math.abs(selTime - timePos));
         } else if (this.sk.gui.overSpaceTimeView(this.sk.mouseX, this.sk.mouseY) && this.compareValuesBySpacing(map3DMouse, timePos, this.bug.lengthToCompare)) this.recordBug(map3DMouse, xPos, yPos, zPos, Math.abs(map3DMouse - timePos));
     }

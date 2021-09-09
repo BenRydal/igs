@@ -28,7 +28,7 @@ class TimelinePanel {
     drawSelectionRect() {
         this.sk.fill(150, 150);
         this.sk.noStroke();
-        if (this.sk.sketchController.mode.isAnimate) this.drawRect(this.selectStart, this.top, this.sk.sketchController.mapFromTotalToPixelTime(this.sk.sketchController.animationCounter), this.bottom);
+        if (this.sk.sketchController.mode.isAnimate) this.drawRect(this.selectStart, this.top, this.sk.sketchController.mapTotalTimeToPixelTime(this.sk.sketchController.animationCounter), this.bottom);
         else this.drawRect(this.selectStart, this.top, this.selectEnd, this.bottom);
     }
 
@@ -51,8 +51,8 @@ class TimelinePanel {
     drawEndLabels() {
         this.sk.noStroke();
         this.sk.fill(0);
-        const leftLabel = Math.floor(this.sk.sketchController.mapFromPixelToTotalTime(this.selectStart) / 60);
-        const rightLabel = Math.ceil(this.sk.sketchController.mapFromPixelToTotalTime(this.selectEnd) / 60);
+        const leftLabel = Math.floor(this.sk.sketchController.mapPixelTimeToTotalTime(this.selectStart) / 60);
+        const rightLabel = Math.ceil(this.sk.sketchController.mapPixelTimeToTotalTime(this.selectEnd) / 60);
         this.sk.text(leftLabel, this.start + this.padding, this.height);
         this.sk.text(rightLabel, this.end - this.padding - this.sk.textWidth(rightLabel), this.height);
     }
@@ -60,8 +60,8 @@ class TimelinePanel {
     drawCenterLabel() {
         this.sk.textAlign(this.sk.CENTER);
         if (this.overSpaceTimeView(this.sk.mouseX, this.sk.mouseY)) {
-            const mapMouseX = this.sk.sketchController.mapFromPixelToSelectedTime(this.sk.mouseX);
-            const timeInSeconds = this.sk.sketchController.mapFromPixelToTotalTime(mapMouseX);
+            const mapMouseX = this.sk.sketchController.mapPixelTimeToSelectTime(this.sk.mouseX);
+            const timeInSeconds = this.sk.sketchController.mapPixelTimeToTotalTime(mapMouseX);
             const minutes = Math.floor(timeInSeconds / 60);
             const seconds = Math.floor(timeInSeconds - minutes * 60);
             const label = minutes + " minutes  " + seconds + " seconds";
@@ -147,5 +147,9 @@ class TimelinePanel {
 
     getSelectEnd() {
         return this.selectEnd;
+    }
+
+    getLength() {
+        return this.length;
     }
 }
