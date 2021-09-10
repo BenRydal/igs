@@ -92,6 +92,7 @@ class DrawConversation {
         // Test if user has selected a conversation
         if (this.sk.overRect(curPoint.floorPlanXPos, yPos, this.rect.pixelWidth, rectLength)) this.recordConversationBubble(point, this.sk.PLAN);
         else if (this.sk.overRect(curPoint.selTimelineXPos, yPos, this.rect.pixelWidth, rectLength)) this.recordConversationBubble(point, this.sk.SPACETIME);
+
         // Draw Rects
         this.sk.fill(curColor);
         // Draw FloorPlan Rect
@@ -99,7 +100,7 @@ class DrawConversation {
         // Draw Space-Time Rect
         if (this.sk.sketchController.view3D.isShowing) {
             const tempX = 0;
-            const tempY = 0;
+            const tempY = Math.abs(this.sk.sketchController.view3D.zoom);
             if (this.sk.sketchController.mode.isAlignTalk) this.sk.quad(tempX, tempY, curPoint.zPos, tempX + rectLength, tempY, curPoint.zPos, tempX + rectLength, tempY, curPoint.zPos + this.rect.pixelWidth, tempX, tempY, curPoint.zPos + this.rect.pixelWidth);
             else this.sk.quad(curPoint.floorPlanXPos, yPos, curPoint.zPos, curPoint.floorPlanXPos + rectLength, yPos, curPoint.zPos, curPoint.floorPlanXPos + rectLength, yPos, curPoint.zPos + this.rect.pixelWidth, curPoint.floorPlanXPos, yPos, curPoint.zPos + this.rect.pixelWidth);
         } else this.sk.rect(curPoint.selTimelineXPos, yPos, this.rect.pixelWidth, rectLength);
