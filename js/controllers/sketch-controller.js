@@ -16,28 +16,6 @@ class SketchController {
         this.bugTimeForVideoScrub = null; // Set in draw movement data and used to display correct video frame when scrubbing video
     }
 
-    handleView3D() {
-        this.view3D.toggleIsShowing();
-        this.view3D.setIsTransitioning(true);
-        if (this.view3D.getIsShowing) this.setRotateLeft(); // must rotate floor plan to make matching space-time view appear in both 2D and 3D
-        else this.setRotateRight();
-    }
-
-    update3DTranslation() {
-        this.view3D.update3DTranslation();
-    }
-
-    update3DCanvas() {
-        this.sk.set3DCanvas(this.view3D.getCurPositions());
-    }
-
-    translationComplete() {
-        return this.view3D.getIsShowing() || this.view3D.getIsTransitioning();
-    }
-
-
-
-
     // ****** P5 HANDLERS ****** //
     updateLoop() {
         if (this.mode.isAnimate || this.mode.isVideoPlay || this.view3D.isTransitioning) this.sk.loop();
@@ -61,7 +39,14 @@ class SketchController {
         this.sk.gui.handleResetTimelineLock();
     }
 
-    // ****** UPDATE METHODS ****** //
+    handleView3D() {
+        this.view3D.toggleIsShowing();
+        this.view3D.setIsTransitioning(true);
+        if (this.view3D.getIsShowing) this.setRotateLeft(); // must rotate floor plan to make matching space-time view appear in both 2D and 3D
+        else this.setRotateRight();
+    }
+
+    // ****** ANIMATION/VIDEO/3D VIEW UPDATE METHODS ****** //
     updateAnimationCounter() {
         if (this.mode.isAnimate) this.animationCounter = this.mapPixelTimeToTotalTime(this.sk.gui.getCurTimelineSelectEnd());
         else this.animationCounter = this.mapPixelTimeToTotalTime(this.sk.gui.getCurTimelineSelectStart());
@@ -80,35 +65,52 @@ class SketchController {
 
     updateVideoDisplay() {
         if (this.mode.isVideoShow) {
-            this.sk.core.updateVideoPosition(this.sk.mouseX, this.sk.mouseY);
+            this.sk.videoPlayer.updatePos(this.sk.mouseX, this.sk.mouseY, 100); // third parameter is offset value
             if (!this.mode.isVideoPlay) this.setVideoScrubbing();
         }
     }
 
     setVideoScrubbing() {
-        if (this.mode.isAnimate) this.sk.core.updateVideoScrubAnimate(Math.floor(this.sk.map(this.bugTimeForVideoScrub, this.sk.gui.getTimelineStart(), this.sk.gui.getTimelineEnd(), this.mapPixelTimeToVideoTime(this.sk.gui.getCurTimelineSelectStart()), this.mapPixelTimeToVideoTime(this.sk.gui.getCurTimelineSelectEnd()))));
-        else if (this.sk.gui.overSpaceTimeView(this.sk.mouseX, this.sk.mouseY)) this.sk.core.updateVideoScrub(Math.floor(this.mapPixelTimeToVideoTime(this.mapPixelTimeToSelectTime(this.sk.mouseX))));
+        if (this.mode.isAnimate) this.sk.videoPlayer.seekTo(Math.floor(this.sk.map(this.bugTimeForVideoScrub, this.sk.gui.getTimelineStart(), this.sk.gui.getTimelineEnd(), this.mapPixelTimeToVideoTime(this.sk.gui.getCurTimelineSelectStart()), this.mapPixelTimeToVideoTime(this.sk.gui.getCurTimelineSelectEnd()))));
+        else if (this.sk.gui.overSpaceTimeView(this.sk.mouseX, this.sk.mouseY)) {
+            this.sk.videoPlayer.seekTo(Math.floor(this.mapPixelTimeToVideoTime(this.mapPixelTimeToSelectTime(this.sk.mouseX))));
+            this.sk.videoPlayer.pause(); // Add to prevent accidental video playing that seems to occur
+        }
     }
 
     toggleVideoShowHide() {
         if (this.mode.isVideoShow) {
-            this.sk.core.hideVideo();
+            this.sk.videoPlayer.pause();
+            this.sk.videoPlayer.hide();
             this.setIsVideoPlay(false);
             this.setIsVideoShow(false);
         } else {
-            this.sk.core.showVideo();
+            this.sk.videoPlayer.show();
             this.setIsVideoShow(true);
         }
     }
 
     playPauseMovie() {
         if (this.mode.isVideoPlay) {
-            this.sk.core.pauseVideo();
+            this.sk.videoPlayer.pause();
             this.setIsVideoPlay(false);
         } else {
-            this.sk.core.playVideo(this.mapPixelTimeToVideoTime(this.mapPixelTimeToSelectTime(this.sk.mouseX)));
+            this.sk.videoPlayer.play();
+            this.sk.videoPlayer.seekTo(this.mapPixelTimeToVideoTime(this.mapPixelTimeToSelectTime(this.sk.mouseX)));
             this.setIsVideoPlay(true);
         }
+    }
+
+    update3DTranslation() {
+        this.view3D.update3DTranslation();
+    }
+
+    update3DCanvas() {
+        this.sk.set3DCanvas(this.view3D.getCurPositions());
+    }
+
+    translationComplete() {
+        return this.view3D.getIsShowing() || this.view3D.getIsTransitioning();
     }
 
     // ****** DRAW HELPER METHODS ****** //
@@ -216,7 +218,7 @@ class SketchController {
     }
 
     testVideoAndDivAreLoaded() {
-        return (this.sk.testData.dataIsLoaded(this.sk.core.videoPlayer) && this.sk.core.videoDivIsLoaded());
+        return (this.sk.testData.dataIsLoaded(this.sk.videoPlayer) && this.sk.videoPlayer.getIsLoaded());
     }
 
     /**
@@ -231,7 +233,7 @@ class SketchController {
     }
 
     mapVideoTimeToSelectedTime() {
-        const timelinePos = this.mapTotalTimeToPixelTime(this.sk.core.videoPlayer.getCurrentTime());
+        const timelinePos = this.mapTotalTimeToPixelTime(this.sk.videoPlayer.getCurrentTime());
         return this.mapSelectTimeToPixelTime(timelinePos);
     }
 
@@ -240,7 +242,7 @@ class SketchController {
     }
 
     mapPixelTimeToVideoTime(value) {
-        return Math.floor(this.sk.map(value, this.sk.gui.getTimelineStart(), this.sk.gui.getTimelineEnd(), 0, Math.floor(this.sk.core.videoPlayer.getVideoDuration()))); // must floor vPos to prevent double finite error
+        return Math.floor(this.sk.map(value, this.sk.gui.getTimelineStart(), this.sk.gui.getTimelineEnd(), 0, Math.floor(this.sk.videoPlayer.getVideoDuration()))); // must floor vPos to prevent double finite error
     }
 
     mapPixelTimeToSelectTime(value) {

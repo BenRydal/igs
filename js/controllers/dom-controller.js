@@ -38,7 +38,7 @@ class DomController {
      */
     handleVideoFile(input) {
         const fileLocation = URL.createObjectURL(input.files[0]);
-        this.sk.core.updateVideo('File', {
+        this.updateVideo('File', {
             fileName: fileLocation
         });
         input.value = ''; // reset input value so you can load same file again in browser
@@ -46,6 +46,7 @@ class DomController {
 
     handleClearButton() {
         this.sk.core.clearAllData();
+        this.clearCurVideo();
         this.sk.sketchController.startLoop(); // rerun P5 draw loop
     }
 
@@ -126,6 +127,7 @@ class DomController {
     loadUserData() {
         this.sk.sketchController.setIsIntro(false); // Hide intro msg if showing
         this.sk.core.clearAllData();
+        this.clearCurVideo();
         this.sk.sketchController.startLoop(); // rerun P5 draw loop
     }
 
@@ -134,9 +136,37 @@ class DomController {
      */
     loadExampleData(params) {
         this.sk.sketchController.setIsIntro(false); // Hide intro msg if showing
-        this.sk.core.updateVideo(params[4], params[5]);
+        this.updateVideo(params[4], params[5]);
         this.sk.core.updateFloorPlan(params[0] + params[1]);
         this.sk.processData.prepExampleConversationFile(params[0], params[2]);
         this.sk.processData.prepExampleMovementFiles(params[0], params[3]);
+    }
+
+    /**
+     * Replaces existing videoPlayer object with new VideoPlayer object (YouTube or P5FilePlayer)
+     * @param  {String} platform
+     * @param  {VideoPlayer Specific Params} params
+     */
+    updateVideo(platform, params) {
+        this.clearCurVideo();
+        const videoWidth = this.sk.width / 5;
+        const videoHeight = this.sk.width / 6;
+        switch (platform) {
+            case "Youtube":
+                this.sk.videoPlayer = new YoutubePlayer(this.sk, params, videoWidth, videoHeight);
+                break;
+            case "File":
+                this.sk.videoPlayer = new P5FilePlayer(this.sk, params, videoWidth, videoHeight);
+                break;
+        }
+    }
+
+    clearCurVideo() {
+        if (this.sk.testData.dataIsLoaded(this.sk.videoPlayer)) { // if there is a video, destroy it
+            this.sk.videoPlayer.destroy();
+            this.sk.videoPlayer = null;
+            this.sk.sketchController.setIsVideoPlay(false);
+            this.sk.sketchController.setIsVideoShow(false);
+        }
     }
 }

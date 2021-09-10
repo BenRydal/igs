@@ -31,6 +31,8 @@ const igs = new p5((sk) => {
         sk.domController = new DomController(sk); // handles DOM/buttons user interaction
         sk.sketchController = new SketchController(sk); // coordinates calls across classes and updates state variables
         sk.processData = new ProcessData(sk); // handles all data processing
+        sk.videoPlayer = null; // abstract class for different video classes instantiated/updated in processVideo method (see video-player.js)
+
         // CONSTANTS
         sk.PLAN = 0; // two drawing modes
         sk.SPACETIME = 1;
