@@ -97,8 +97,12 @@ class DrawConversation {
         // Draw FloorPlan Rect
         this.sk.rect(curPoint.floorPlanXPos, yPos, this.rect.pixelWidth, rectLength);
         // Draw Space-Time Rect
-        if (this.sk.sketchController.view3D.isShowing) this.sk.quad(curPoint.floorPlanXPos, yPos, curPoint.zPos, curPoint.floorPlanXPos + rectLength, yPos, curPoint.zPos, curPoint.floorPlanXPos + rectLength, yPos, curPoint.zPos + this.rect.pixelWidth, curPoint.floorPlanXPos, yPos, curPoint.zPos + this.rect.pixelWidth);
-        else this.sk.rect(curPoint.selTimelineXPos, yPos, this.rect.pixelWidth, rectLength);
+        if (this.sk.sketchController.view3D.isShowing) {
+            const tempX = 0;
+            const tempY = 0;
+            if (this.sk.sketchController.mode.isAlignTalk) this.sk.quad(tempX, tempY, curPoint.zPos, tempX + rectLength, tempY, curPoint.zPos, tempX + rectLength, tempY, curPoint.zPos + this.rect.pixelWidth, tempX, tempY, curPoint.zPos + this.rect.pixelWidth);
+            else this.sk.quad(curPoint.floorPlanXPos, yPos, curPoint.zPos, curPoint.floorPlanXPos + rectLength, yPos, curPoint.zPos, curPoint.floorPlanXPos + rectLength, yPos, curPoint.zPos + this.rect.pixelWidth, curPoint.floorPlanXPos, yPos, curPoint.zPos + this.rect.pixelWidth);
+        } else this.sk.rect(curPoint.selTimelineXPos, yPos, this.rect.pixelWidth, rectLength);
         this.sk.textSize(this.sk.gui.keyTextSize); // reset
     }
 
