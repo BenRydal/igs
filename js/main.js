@@ -62,10 +62,10 @@ const igs = new p5((sk) => {
         sk.pop();
     }
 
-    sk.set3DCanvas = function (xPos, yPos, curZoom, curRotateX) {
+    sk.set3DCanvas = function (curPos) {
         sk.push();
-        sk.translate(xPos, yPos, curZoom);
-        sk.rotateX(curRotateX);
+        sk.translate(curPos.xPos, curPos.yPos, curPos.zoom);
+        sk.rotateX(curPos.rotateX);
     }
 
     sk.keyPressed = function () {

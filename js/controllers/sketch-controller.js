@@ -10,72 +10,29 @@ class SketchController {
             isVideoPlay: false,
             isVideoShow: false
         }
-        this.view3D = {
-            isShowing: false,
-            zoom: -(this.sk.height / 1.5),
-            curZoom: 0,
-            isTransitioning: false,
-            xPosTranslate: this.sk.width / 4,
-            yPosTranslate: this.sk.height / 1.75,
-            curXPos: 0,
-            curYPos: 0,
-            rotateX: this.sk.PI / 2.3,
-            curRotateX: 0
-        }
+        this.view3D = new View3D(this.sk);
         this.curFloorPlanRotation = 0; // [0-3] 4 rotation modes none, 90, 180, 270
         this.animationCounter = 0; // counter to synchronize animation across all data
         this.bugTimeForVideoScrub = null; // Set in draw movement data and used to display correct video frame when scrubbing video
     }
 
     handleView3D() {
-        this.view3D.isShowing = !this.view3D.isShowing;
-        this.view3D.isTransitioning = true;
-        if (this.view3D.isShowing) this.setRotateLeft(); // must rotate floor plan to make matching space-time view appear in both 2D and 3D
+        this.view3D.toggleIsShowing();
+        this.view3D.setIsTransitioning(true);
+        if (this.view3D.getIsShowing) this.setRotateLeft(); // must rotate floor plan to make matching space-time view appear in both 2D and 3D
         else this.setRotateRight();
     }
 
     update3DTranslation() {
-        if (this.view3D.isTransitioning) {
-            if (this.view3D.isShowing) this.view3D.isTransitioning = this.transition3D();
-            else this.view3D.isTransitioning = this.resetTranslation();
-            this.update3DCanvas();
-        } else {
-            if (this.view3D.isShowing) this.update3DCanvas();
-        }
-    }
-
-    translationComplete() {
-        return this.view3D.isShowing || this.view3D.isTransitioning;
+        this.view3D.update3DTranslation();
     }
 
     update3DCanvas() {
-        this.sk.set3DCanvas(this.view3D.curXPos, this.view3D.curYPos, this.view3D.curZoom, this.view3D.curRotateX);
+        this.sk.set3DCanvas(this.view3D.getCurPositions());
     }
 
-    transition3D() {
-        let isRunning = false;
-        this.view3D.curZoom = this.view3D.zoom;
-        if (this.view3D.curRotateX < this.view3D.rotateX) {
-            this.view3D.curRotateX += .03;
-            isRunning = true;
-        }
-        if (this.view3D.curXPos < this.view3D.xPosTranslate) {
-            this.view3D.curXPos += 10;
-            isRunning = true;
-        }
-        if (this.view3D.curYPos < this.view3D.yPosTranslate) {
-            this.view3D.curYPos += 10;
-            isRunning = true;
-        }
-        return isRunning;
-    }
-
-    resetTranslation() {
-        this.view3D.curRotateX = 0;
-        this.view3D.curXPos = 0;
-        this.view3D.curYPos = 0;
-        this.view3D.curZoom = 0;
-        return false;
+    translationComplete() {
+        return this.view3D.getIsShowing() || this.view3D.getIsTransitioning();
     }
 
 
