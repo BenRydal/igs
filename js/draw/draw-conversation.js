@@ -23,7 +23,7 @@ class DrawConversation {
             const curPoint = this.sk.sketchController.getScaledPos(point, null);
             if (this.sk.sketchController.testPointIsShowing(curPoint) && this.testSelectMode(curPoint, point)) {
                 const curSpeaker = this.getSpeakerFromSpeakerList(point.speaker, speakerList); // get speaker object from global list equivalent to the current speaker of point
-                if (this.testSpeakerToDraw(curSpeaker, path.name)) this.drawRects(point, curPoint, curSpeaker.color); // draws all rects
+                if (this.testSpeakerToDraw(curSpeaker, path.name)) this.organizeRectDrawing(point, curPoint, curSpeaker.color); // draws all rects
             }
         }
     }
@@ -75,36 +75,62 @@ class DrawConversation {
     }
 
     /**
-     * Draws properly scaled and colored rectangled for conversation turn of a ConversationPoint
-     * Also tests if conversation turn has been selected by user and sends to recordConversationBubble if so
-     * NOTE: A call to recordConversationBubble also results in highlighting current rect this.sk.stroke in this method
+     * Organizes drawing of properly scaled and colored rectangles for conversation turn of a ConversationPoint
      * @param  {ConversationPoint} point
+     * @param  {CurPoint} curPoint
      * @param  {Color} curColor
      */
-    drawRects(point, curPoint, curColor) {
-        this.sk.noStroke(); // reset if setDrawText is called previously in loop
+    organizeRectDrawing(point, curPoint, curColor) {
+        const curRect = this.getCurRectPos(point, curPoint);
+        this.sk.noStroke(); // reset if recordConversationBubble is called previously over2DRects
+        this.sk.fill(curColor);
+        if (this.sk.sketchController.view3D.isShowing) {
+            this.drawFloorPlanRects(curRect);
+            this.drawSpaceTime3DRects(curRect);
+        } else {
+            this.over2DRects(curRect, point);
+            this.drawFloorPlanRects(curRect);
+            this.drawSpaceTime2DRects(curRect);
+        }
+    }
+
+    getCurRectPos(point, curPoint) {
         this.sk.textSize(1); // Controls measurement of pixels in a string that corredponds to vertical pixel height of rectangle.
         let rectLength = this.sk.textWidth(point.talkTurn);
         if (rectLength < this.rect.minPixelLength) rectLength = this.rect.minPixelLength; // if current turn is small set it to the minimum height
         let yPos;
-        if (this.sk.sketchController.mode.isAlignTalk) yPos = 0; // if conversation turn positioning is at top of screen
+        if (this.sk.sketchController.mode.isAlignTalk) yPos = 0;
         else yPos = curPoint.floorPlanYPos - rectLength;
-        // Test if user has selected a conversation
-        if (this.sk.overRect(curPoint.floorPlanXPos, yPos, this.rect.pixelWidth, rectLength)) this.recordConversationBubble(point, this.sk.PLAN);
-        else if (this.sk.overRect(curPoint.selTimelineXPos, yPos, this.rect.pixelWidth, rectLength)) this.recordConversationBubble(point, this.sk.SPACETIME);
+        this.sk.textSize(this.sk.gui.keyTextSize); // reset text size
+        return {
+            length: rectLength,
+            yPos: yPos,
+            xPosFloorPlan: curPoint.floorPlanXPos,
+            xPosTimeline: curPoint.selTimelineXPos,
+            zPos: curPoint.zPos
+        }
+    }
+    /**
+     * NOTE: if recordConversationBubble is called, that method also sets new strokeWeight to highlight the curRect
+     */
+    over2DRects(curRect, point) {
+        if (this.sk.overRect(curRect.xPosFloorPlan, curRect.yPos, this.rect.pixelWidth, curRect.length)) this.recordConversationBubble(point, this.sk.PLAN);
+        else if (this.sk.overRect(curRect.xPosTimeline, curRect.yPos, this.rect.pixelWidth, curRect.length)) this.recordConversationBubble(point, this.sk.SPACETIME);
+    }
 
-        // Draw Rects
-        this.sk.fill(curColor);
-        // Draw FloorPlan Rect
-        this.sk.rect(curPoint.floorPlanXPos, yPos, this.rect.pixelWidth, rectLength);
-        // Draw Space-Time Rect
-        if (this.sk.sketchController.view3D.isShowing) {
-            const tempX = 0;
-            const tempY = Math.abs(this.sk.sketchController.view3D.zoom);
-            if (this.sk.sketchController.mode.isAlignTalk) this.sk.quad(tempX, tempY, curPoint.zPos, tempX + rectLength, tempY, curPoint.zPos, tempX + rectLength, tempY, curPoint.zPos + this.rect.pixelWidth, tempX, tempY, curPoint.zPos + this.rect.pixelWidth);
-            else this.sk.quad(curPoint.floorPlanXPos, yPos, curPoint.zPos, curPoint.floorPlanXPos + rectLength, yPos, curPoint.zPos, curPoint.floorPlanXPos + rectLength, yPos, curPoint.zPos + this.rect.pixelWidth, curPoint.floorPlanXPos, yPos, curPoint.zPos + this.rect.pixelWidth);
-        } else this.sk.rect(curPoint.selTimelineXPos, yPos, this.rect.pixelWidth, rectLength);
-        this.sk.textSize(this.sk.gui.keyTextSize); // reset
+    drawFloorPlanRects(curRect) {
+        this.sk.rect(curRect.xPosFloorPlan, curRect.yPos, this.rect.pixelWidth, curRect.length);
+    }
+
+    drawSpaceTime2DRects(curRect) {
+        this.sk.rect(curRect.xPosTimeline, curRect.yPos, this.rect.pixelWidth, curRect.length);
+    }
+
+    drawSpaceTime3DRects(curRect) {
+        const tempX = 0;
+        const tempY = Math.abs(this.sk.sketchController.view3D.zoom);
+        if (this.sk.sketchController.mode.isAlignTalk) this.sk.quad(tempX, tempY, curRect.zPos, tempX + curRect.length, tempY, curRect.zPos, tempX + curRect.length, tempY, curRect.zPos + this.rect.pixelWidth, tempX, tempY, curRect.zPos + this.rect.pixelWidth);
+        else this.sk.quad(curRect.xPosFloorPlan, yPos, curRect.zPos, curRect.xPosFloorPlan + curRect.length, yPos, curRect.zPos, curRect.xPosFloorPlan + curRect.length, yPos, curRect.zPos + this.rect.pixelWidth, curRect.xPosFloorPlan, yPos, curRect.zPos + this.rect.pixelWidth);
     }
 
     /**
@@ -147,8 +173,8 @@ class DrawConversation {
 
     getTextBoxParams() {
         return {
-            width: this.sk.width / 3, // width of text and textbox drawn
-            textLeading: this.sk.width / 57, // textbox leading
+            width: this.sk.width / 3,
+            textLeading: this.sk.width / 57,
             boxSpacing: this.sk.width / 141, // general textBox spacing variable
             rectSpacing: this.sk.width / 28.2, // distance from text rectangle of textbox
         }
