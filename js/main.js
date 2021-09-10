@@ -70,10 +70,6 @@ const igs = new p5((sk) => {
         sk.rotateX(curPos.rotateX);
     }
 
-    sk.keyPressed = function () {
-        sk.sketchController.handleView3D();
-    }
-
     sk.drawFloorPlan = function (width, height) {
         sk.image(sk.core.inputFloorPlan.img, 0, 0, width, height);
     }

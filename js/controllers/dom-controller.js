@@ -55,6 +55,10 @@ class DomController {
         this.sk.sketchController.startLoop();
     }
 
+    handleToggle3DButton() {
+        this.sk.sketchController.handleToggle3D();
+    }
+
     handleAlignTalkButton() {
         this.sk.sketchController.setIsAlignTalk(!this.sk.sketchController.mode.isAlignTalk);
         this.sk.sketchController.startLoop();
