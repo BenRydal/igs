@@ -7,14 +7,14 @@ class DataPanel {
     constructor(sketch, timelineBottom) {
         this.sk = sketch;
         this.xPos = 10;
-        this.spacing = 25;
+        this.spacing = this.sk.height / 50;
         this.headers = {
             mode: ["Movement Paths", "Speakers", "Floor Plan", "Select"],
             curMode: 0,
             height: timelineBottom,
         }
         this.tabs = {
-            height: timelineBottom + 45,
+            height: timelineBottom + this.spacing * 2,
             selectTabs: ["none", "region", "slice", "moving", "stopped"],
             curSelectTab: 0, // matches selectTabs list
             rotateTabs: ["rotate left", "rotate right"]

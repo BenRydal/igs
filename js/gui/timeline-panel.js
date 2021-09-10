@@ -5,7 +5,7 @@ class TimelinePanel {
         this.start = this.sk.width * 0.5;
         this.end = this.sk.width * 0.975;
         this.height = this.sk.height * .85;
-        this.thickness = 70;
+        this.thickness = this.sk.height / 15;
         this.top = this.height - this.thickness / 2;
         this.bottom = this.height + this.thickness / 2;
         this.selectStart = this.start;
