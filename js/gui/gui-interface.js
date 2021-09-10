@@ -20,7 +20,7 @@ class GUI {
         this.timelinePanel.draw();
         if (this.overFloorPlan(this.sk.mouseX, this.sk.mouseY)) this.updateFloorPlanSelector();
         if (this.overSpaceTimeView(this.sk.mouseX, this.sk.mouseY)) this.updateTimelineSlicer();
-        if (this.sk.sketchController.mode.isIntro) this.sk.translateFor2DText(this.drawIntroMsg.bind(this));
+        if (this.sk.sketchController.mode.isIntro) this.sk.translateCanvasForText(this.drawIntroMsg.bind(this));
     }
 
     updateFloorPlanSelector() {

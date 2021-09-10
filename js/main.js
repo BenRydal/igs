@@ -57,14 +57,14 @@ const igs = new p5((sk) => {
     }
 
     // For text in 2D, must translate 1 pixel so text is readable when using WebGL renderer
-    sk.translateFor2DText = function (callback) {
+    sk.translateCanvasForText = function (callback) {
         sk.push();
         sk.translate(0, 0, 1);
         callback();
         sk.pop();
     }
 
-    sk.set3DCanvas = function (curPos) {
+    sk.translate3DCanvas = function (curPos) {
         sk.push();
         sk.translate(curPos.xPos, curPos.yPos, curPos.zoom);
         sk.rotateX(curPos.rotateX);

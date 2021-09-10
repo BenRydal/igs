@@ -20,9 +20,9 @@ class View3D {
         if (this.isTransitioning) {
             if (this.isShowing) this.isTransitioning = this.updatePositions();
             else this.isTransitioning = this.resetPositions();
-            this.sk.set3DCanvas(this.getCurPositions());
+            this.sk.translate3DCanvas(this.getCurPositions());
         } else {
-            if (this.isShowing) this.sk.set3DCanvas(this.getCurPositions());
+            if (this.isShowing) this.sk.translate3DCanvas(this.getCurPositions());
         }
     }
 

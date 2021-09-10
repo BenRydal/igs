@@ -49,7 +49,7 @@ class DrawConversation {
      * NOTE: this is called after all conversation rects are drawn so it is displayed on top visually
      */
     setConversationBubble() {
-        if (this.conversationBubble.isSelected) this.sk.translateFor2DText(this.drawTextBox.bind(this, this.conversationBubble.point));
+        if (this.conversationBubble.isSelected) this.sk.translateCanvasForText(this.drawTextBox.bind(this, this.conversationBubble.point));
     }
 
     /**

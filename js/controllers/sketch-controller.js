@@ -107,7 +107,7 @@ class SketchController {
     }
 
     update3DCanvas() {
-        this.sk.set3DCanvas(this.view3D.getCurPositions());
+        this.sk.translate3DCanvas(this.view3D.getCurPositions());
     }
 
     translationComplete() {
