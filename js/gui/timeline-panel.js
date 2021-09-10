@@ -1,13 +1,18 @@
 class TimelinePanel {
 
-    constructor(sketch, timelineContainer) {
+    constructor(sketch) {
         this.sk = sketch;
-        this.tc = timelineContainer;
-        this.selectStart = this.tc.start;
-        this.selectEnd = this.tc.end;
-        this.length = this.tc.end - this.tc.start;
-        this.padding = this.tc.thickness / 4;
-        this.doublePadding = this.tc.thickness / 2;
+        this.start = this.sk.width * 0.5;
+        this.end = this.sk.width * 0.975;
+        this.height = this.sk.height * .85;
+        this.thickness = this.sk.height / 15;
+        this.top = this.height - this.thickness / 2;
+        this.bottom = this.height + this.thickness / 2;
+        this.selectStart = this.start;
+        this.selectEnd = this.end;
+        this.length = this.end - this.start;
+        this.padding = this.thickness / 4;
+        this.doublePadding = this.thickness / 2;
         this.isLockedLeft = false;
         this.isLockedRight = false;
     }
@@ -18,14 +23,13 @@ class TimelinePanel {
         this.drawSelectors();
         this.drawEndLabels();
         this.drawCenterLabel();
-        if (this.overSpaceTimeView(this.sk.mouseX, this.sk.mouseY)) this.drawSlicer();
     }
 
     drawSelectionRect() {
-        this.sk.fill(150, 150);
+        this.sk.fill(200);
         this.sk.noStroke();
-        if (this.sk.sketchController.mode.isAnimate) this.drawRect(this.selectStart, this.tc.top, this.sk.sketchController.mapFromTotalToPixelTime(this.sk.sketchController.animationCounter), this.tc.bottom);
-        else this.drawRect(this.selectStart, this.tc.top, this.selectEnd, this.tc.bottom);
+        if (this.sk.sketchController.mode.isAnimate) this.drawRect(this.selectStart, this.top, this.sk.sketchController.mapTotalTimeToPixelTime(this.sk.sketchController.animationCounter), this.bottom);
+        else this.drawRect(this.selectStart, this.top, this.selectEnd, this.bottom);
     }
 
     drawRect(xPos, yPos, width, height) {
@@ -35,34 +39,34 @@ class TimelinePanel {
     drawAxis() {
         this.sk.stroke(0);
         this.sk.strokeWeight(1);
-        this.sk.line(this.tc.start, this.tc.height, this.tc.end, this.tc.height);
+        this.sk.line(this.start, this.height, this.end, this.height);
     }
 
     drawSelectors() {
         this.sk.strokeWeight(4);
-        this.sk.line(this.selectStart, this.tc.top, this.selectStart, this.tc.bottom);
-        this.sk.line(this.selectEnd, this.tc.top, this.selectEnd, this.tc.bottom);
+        this.sk.line(this.selectStart, this.top, this.selectStart, this.bottom);
+        this.sk.line(this.selectEnd, this.top, this.selectEnd, this.bottom);
     }
 
     drawEndLabels() {
         this.sk.noStroke();
         this.sk.fill(0);
-        const leftLabel = Math.floor(this.sk.sketchController.mapFromPixelToTotalTime(this.selectStart) / 60);
-        const rightLabel = Math.ceil(this.sk.sketchController.mapFromPixelToTotalTime(this.selectEnd) / 60);
-        this.sk.text(leftLabel, this.tc.start + this.padding, this.tc.height);
-        this.sk.text(rightLabel, this.tc.end - this.padding - this.sk.textWidth(rightLabel), this.tc.height);
+        const leftLabel = Math.floor(this.sk.sketchController.mapPixelTimeToTotalTime(this.selectStart) / 60);
+        const rightLabel = Math.ceil(this.sk.sketchController.mapPixelTimeToTotalTime(this.selectEnd) / 60);
+        this.sk.text(leftLabel, this.start + this.padding, this.height);
+        this.sk.text(rightLabel, this.end - this.padding - this.sk.textWidth(rightLabel), this.height);
     }
 
     drawCenterLabel() {
         this.sk.textAlign(this.sk.CENTER);
         if (this.overSpaceTimeView(this.sk.mouseX, this.sk.mouseY)) {
-            const mapMouseX = this.sk.sketchController.mapFromPixelToSelectedTime(this.sk.mouseX);
-            const timeInSeconds = this.sk.sketchController.mapFromPixelToTotalTime(mapMouseX);
+            const mapMouseX = this.sk.sketchController.mapPixelTimeToSelectTime(this.sk.mouseX);
+            const timeInSeconds = this.sk.sketchController.mapPixelTimeToTotalTime(mapMouseX);
             const minutes = Math.floor(timeInSeconds / 60);
             const seconds = Math.floor(timeInSeconds - minutes * 60);
             const label = minutes + " minutes  " + seconds + " seconds";
-            this.sk.text(label, this.tc.start + this.length / 2, this.tc.height);
-        } else this.sk.text("MINUTES", this.tc.start + this.length / 2, this.tc.height);
+            this.sk.text(label, this.start + this.length / 2, this.height);
+        } else this.sk.text("MINUTES", this.start + this.length / 2, this.height);
         this.sk.textAlign(this.sk.LEFT); // reset
     }
 
@@ -70,18 +74,31 @@ class TimelinePanel {
         this.sk.fill(0);
         this.sk.stroke(0);
         this.sk.strokeWeight(2);
-        this.sk.line(this.sk.mouseX, 0, this.sk.mouseX, this.tc.height);
+        this.sk.line(this.sk.mouseX, 0, this.sk.mouseX, this.height);
+    }
+
+    draw3DSlicerLine() {
+        this.sk.fill(0);
+        this.sk.stroke(0);
+        this.sk.strokeWeight(2);
+        this.sk.line(this.sk.mouseX, this.top, this.sk.mouseX, this.bottom);
+    }
+
+    draw3DSlicerRect(fpWidth, fpHeight, zPos) {
+        this.sk.fill(255, 50);
+        this.sk.strokeWeight(1);
+        this.sk.quad(0, 0, zPos, fpWidth, 0, zPos, fpWidth, fpHeight, zPos, 0, fpHeight, zPos);
     }
 
     handleTimeline() {
         if (this.updateTimeline()) {
             if (this.isLockedLeft || (!this.isLockedRight && this.overSelector(this.selectStart))) {
                 this.isLockedLeft = true;
-                this.selectStart = this.sk.constrain(this.sk.mouseX, this.tc.start, this.tc.end);
+                this.selectStart = this.sk.constrain(this.sk.mouseX, this.start, this.end);
                 if (this.selectStart > this.selectEnd - this.doublePadding) this.selectStart = this.selectEnd - this.doublePadding; // prevents overstriking
             } else if (this.isLockedRight || this.overSelector(this.selectEnd)) {
                 this.isLockedRight = true;
-                this.selectEnd = this.sk.constrain(this.sk.mouseX, this.tc.start, this.tc.end);
+                this.selectEnd = this.sk.constrain(this.sk.mouseX, this.start, this.end);
                 if (this.selectEnd < this.selectStart + this.doublePadding) this.selectEnd = this.selectStart + this.doublePadding; // prevents overstriking
             }
         }
@@ -97,22 +114,42 @@ class TimelinePanel {
     }
 
     overSelector(selector) {
-        return this.sk.overRect(selector - this.padding, this.tc.top, this.doublePadding, this.tc.thickness);
+        return this.sk.overRect(selector - this.padding, this.top, this.doublePadding, this.thickness);
     }
 
     overTimelineAxisRegion() {
-        return this.sk.overRect(this.tc.start - this.doublePadding, this.tc.top, this.length + this.doublePadding, this.tc.thickness);
+        return this.sk.overRect(this.start - this.doublePadding, this.top, this.length + this.doublePadding, this.thickness);
     }
 
     overSpaceTimeView(xPos, yPos) {
-        return (xPos >= this.tc.start && xPos <= this.tc.end) && (yPos >= 0 && yPos <= this.tc.top);
+        return (xPos >= this.start && xPos <= this.end) && (yPos >= 0 && yPos <= this.top);
     }
 
-    getCurTimelineSelectStart() {
+    getBottom() {
+        return this.bottom;
+    }
+
+    getHeight() {
+        return this.height;
+    }
+
+    getStart() {
+        return this.start;
+    }
+
+    getEnd() {
+        return this.end;
+    }
+
+    getSelectStart() {
         return this.selectStart;
     }
 
-    getCurTimelineSelectEnd() {
+    getSelectEnd() {
         return this.selectEnd;
+    }
+
+    getLength() {
+        return this.length;
     }
 }

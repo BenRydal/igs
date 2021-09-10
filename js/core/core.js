@@ -11,7 +11,6 @@ class Core {
             width: null,
             height: null
         }
-        this.videoPlayer = null; // abstract class for different play classes instantiated/updated in processVideo method (see video-player.js)
         this.totalTimeInSeconds = 0; // Number indicating time value in seconds that all displayed data is set to, set dynamically in processMovement methods
         this.COLOR_LIST = ['#6a3d9a', '#ff7f00', '#33a02c', '#1f78b4', '#e31a1c', '#ffff99', '#b15928', '#cab2d6', '#fdbf6f', '#b2df8a', '#a6cee3', '#fb9a99']; // 12 Class Paired: (Dark) purple, orange, green, blue, red, yellow, brown, (Light) lPurple, lOrange, lGreen, lBlue, lRed
     }
@@ -32,59 +31,6 @@ class Core {
             alert("Error loading floor plan image file. Please make sure it is correctly formatted as a PNG or JPG image file.")
             console.log(e);
         });
-    }
-
-    /**
-     * Replaces existing videoPlayer object with new VideoPlayer object (YouTube or P5FilePlayer)
-     * @param  {String} platform
-     * @param  {VideoPlayer Specific Params} params
-     */
-    updateVideo(platform, params) {
-        if (this.sk.testData.dataIsLoaded(this.videoPlayer)) this.clearVideo();
-        const videoWidth = this.sk.width / 5;
-        const videoHeight = this.sk.width / 6;
-        switch (platform) {
-            case "Youtube":
-                this.videoPlayer = new YoutubePlayer(this.sk, params, videoWidth, videoHeight);
-                break;
-            case "File":
-                this.videoPlayer = new P5FilePlayer(this.sk, params, videoWidth, videoHeight);
-                break;
-        }
-    }
-
-    updateVideoScrubAnimate(timeInSeconds) {
-        this.videoPlayer.seekTo(timeInSeconds);
-    }
-    updateVideoScrub(timeInSeconds) {
-        this.videoPlayer.seekTo(timeInSeconds);
-        this.videoPlayer.pause(); // Add to prevent accidental video playing that seems to occur
-    }
-
-    hideVideo() {
-        this.videoPlayer.pause();
-        this.videoPlayer.hide();
-    }
-
-    showVideo() {
-        this.videoPlayer.show();
-    }
-
-    pauseVideo() {
-        this.videoPlayer.pause();
-    }
-
-    playVideo(timeInSeconds) {
-        this.videoPlayer.play();
-        this.videoPlayer.seekTo(timeInSeconds);
-    }
-
-    updateVideoPosition(xPos, yPos) {
-        this.videoPlayer.updatePos(xPos, yPos, 100); // third parameter if offset value
-    }
-
-    videoDivIsLoaded() {
-        return this.videoPlayer.getIsLoaded();
     }
 
     /** 
@@ -214,17 +160,9 @@ class Core {
     }
 
     clearAllData() {
-        if (this.sk.testData.dataIsLoaded(this.videoPlayer)) this.clearVideo();
         this.clearFloorPlan();
         this.clearConversationData();
         this.clearMovementData();
-    }
-
-    clearVideo() {
-        this.videoPlayer.destroy(); // if there is a video, destroy it
-        this.videoPlayer = null;
-        this.sk.sketchController.setIsVideoPlay(false);
-        this.sk.sketchController.setIsVideoShow(false);
     }
 
     clearFloorPlan() {

@@ -4,17 +4,17 @@ class DataPanel {
      * Each header/tab has an organize method that handles drawing and mouse handlers/over methods
      * To add another header/tab, update string lists and add organize/draw/over methods
      */
-    constructor(sketch, dataPanelContainer) {
+    constructor(sketch, timelineBottom) {
         this.sk = sketch;
-        this.xPos = dataPanelContainer.xPos;
-        this.spacing = 25;
+        this.xPos = 10;
+        this.spacing = this.sk.height / 50;
         this.headers = {
-            mode: ["Movement", "Talk", "Floor Plan", "Select"],
+            mode: ["Movement", "Speakers", "Floor Plan", "Select"],
             curMode: 0,
-            height: dataPanelContainer.headerYPos,
+            height: timelineBottom,
         }
         this.tabs = {
-            height: dataPanelContainer.tabsYPos,
+            height: timelineBottom + this.spacing * 2,
             selectTabs: ["none", "region", "slice", "moving", "stopped"],
             curSelectTab: 0, // matches selectTabs list
             rotateTabs: ["rotate left", "rotate right"]
