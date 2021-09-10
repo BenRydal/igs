@@ -26,7 +26,7 @@ class TimelinePanel {
     }
 
     drawSelectionRect() {
-        this.sk.fill(150, 150);
+        this.sk.fill(200);
         this.sk.noStroke();
         if (this.sk.sketchController.mode.isAnimate) this.drawRect(this.selectStart, this.top, this.sk.sketchController.mapTotalTimeToPixelTime(this.sk.sketchController.animationCounter), this.bottom);
         else this.drawRect(this.selectStart, this.top, this.selectEnd, this.bottom);
