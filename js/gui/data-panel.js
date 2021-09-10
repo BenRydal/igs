@@ -9,7 +9,7 @@ class DataPanel {
         this.xPos = 10;
         this.spacing = 25;
         this.headers = {
-            mode: ["Movement", "Talk", "Floor Plan", "Select"],
+            mode: ["Movement Paths", "Speakers", "Floor Plan", "Select"],
             curMode: 0,
             height: timelineBottom,
         }
