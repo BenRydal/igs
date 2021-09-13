@@ -59,8 +59,8 @@ class TestData {
      * @param  {PapaParse results.data []} data
      */
     movementRowsForType(parsedMovementArray) {
-        for (const row of parsedMovementArray) {
-            if (typeof row[this.CSVHEADERS_MOVEMENT[0]] === 'number' && typeof row[this.CSVHEADERS_MOVEMENT[1]] === 'number' && typeof row[this.CSVHEADERS_MOVEMENT[2]] === 'number') return true;
+        for (let i = 0; i < parsedMovementArray.length; i++) {
+            if (this.movementRowForType(parsedMovementArray, i)) return true;
         }
         return false;
     }
