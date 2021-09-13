@@ -26,7 +26,7 @@ class TestData {
      * @param  {PapaParse Results []} results
      */
     movementResults(results) {
-        return results.data.length > 1 && this.movementHeaders(results.meta.fields) && this.movementRowsForType(results.data);
+        return results.data.length > 1 && this.includesAllHeaders(results.meta.fields, this.CSVHEADERS_MOVEMENT) && this.movementRowsForType(results.data);
     }
 
     /**
@@ -34,23 +34,14 @@ class TestData {
      * @param  {PapaParse Results []} results
      */
     conversationResults(results) {
-        return results.data.length > 1 && this.conversationHeaders(results.meta.fields) && this.conversationRowsForType(results.data);
+        return results.data.length > 1 && this.includesAllHeaders(results.meta.fields, this.CSVHEADERS_CONVERSATION) && this.conversationRowsForType(results.data);
     }
 
-    /**
-     * Tests if PapaParse meta results array includes correct headers for movement
-     * @param  {PapaParse results.meta.fields} meta
-     */
-    movementHeaders(meta) {
-        return meta.includes(this.CSVHEADERS_MOVEMENT[0]) && meta.includes(this.CSVHEADERS_MOVEMENT[1]) && meta.includes(this.CSVHEADERS_MOVEMENT[2]);
-    }
-
-    /**
-     * Tests if PapaParse meta results array includes correct headers for conversation
-     * @param  {PapaParse results.meta.fields} meta
-     */
-    conversationHeaders(meta) {
-        return meta.includes(this.CSVHEADERS_CONVERSATION[0]) && meta.includes(this.CSVHEADERS_CONVERSATION[1]) && meta.includes(this.CSVHEADERS_CONVERSATION[2]);
+    includesAllHeaders(meta, headers) {
+        for (const header of headers) {
+            if (!meta.includes(header)) return false;
+        }
+        return true;
     }
 
     /**
