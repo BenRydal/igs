@@ -58,7 +58,7 @@ class ParseMovement {
         console.log("Parsing complete:", results, file);
         if (this.sk.testData.movementResults(results)) {
             if (fileNum === 0) this.clear(); // clear existing movement data for first new file only
-            const pathName = file.name.charAt(0).toUpperCase();
+            const pathName = this.sk.core.cleanPathName(file.name);
             this.updateParsedMovementFileData(results.data, pathName);
             this.updatePointArrays(results.data, pathName);
         } else alert("Error loading movement file. Please make sure your file is a .CSV file formatted with column headers: " + this.sk.testData.CSVHEADERS_MOVEMENT.toString());
