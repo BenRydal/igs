@@ -44,13 +44,13 @@ const igs = new p5((sk) => {
         sk.sketchController.update3DTranslation();
         sk.background(255);
         if (sk.testData.dataIsLoaded(sk.core.inputFloorPlan.getImg())) sk.sketchController.setFloorPlan();
-        if (sk.testData.arrayIsLoaded(sk.core.paths)) {
+        if (sk.testData.arrayIsLoaded(sk.core.pathList)) {
             if (sk.testData.arrayIsLoaded(sk.core.speakerList)) sk.setMovementAndConversation();
             else sk.setMovement();
         }
         if (sk.sketchController.testVideoAndDivAreLoaded()) sk.sketchController.updateVideoDisplay();
         if (sk.sketchController.translationComplete()) sk.pop();
-        sk.gui.drawKeys(sk.core.paths, sk.core.speakerList); // draw keys last
+        sk.gui.drawKeys(sk.core.pathList, sk.core.speakerList); // draw keys last
         sk.sketchController.updateAnimation();
         sk.sketchController.updateLoop();
     }
@@ -85,7 +85,7 @@ const igs = new p5((sk) => {
     sk.setMovementAndConversation = function () {
         const drawConversation = new DrawConversation(sk);
         const drawMovement = new DrawMovement(sk);
-        for (const path of sk.core.paths) {
+        for (const path of sk.core.pathList) {
             if (path.isShowing) {
                 drawConversation.setData(path, sk.core.speakerList);
                 drawMovement.setData(path); // draw after conversation so bug displays on top
@@ -96,7 +96,7 @@ const igs = new p5((sk) => {
 
     sk.setMovement = function () {
         const drawMovement = new DrawMovement(sk);
-        for (const path of sk.core.paths) {
+        for (const path of sk.core.pathList) {
             if (path.isShowing) drawMovement.setData(path); // draw after conversation so bug displays on top
         }
     }

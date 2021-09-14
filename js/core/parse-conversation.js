@@ -56,7 +56,6 @@ class ParseConversation {
             this.clear();
             this.zzzParsedConversationArray = results.data; // set to new array of keyed values
             this.sk.core.updateConversation();
-            this.sk.core.parseMovement.reProcessFiles(); // must reprocess movement
         } else alert("Error loading conversation file. Please make sure your file is a .CSV file formatted with column headers: " + this.sk.testData.CSVHEADERS_CONVERSATION.toString());
     }
 

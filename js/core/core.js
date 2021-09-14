@@ -5,7 +5,7 @@ class Core {
         this.parseMovement = new ParseMovement(this.sk);
         this.parseConversation = new ParseConversation(this.sk);
         this.speakerList = []; // List that holds Speaker objects parsed from conversation file
-        this.paths = []; // List of path objects
+        this.pathList = []; // List of path objects
         this.inputFloorPlan = new InputFloorPlan(this.sk);
         this.totalTimeInSeconds = 0; // Number indicating time value in seconds that all displayed data is set to, set dynamically in processMovement methods
         this.COLOR_LIST = ['#6a3d9a', '#ff7f00', '#33a02c', '#1f78b4', '#e31a1c', '#ffff99', '#b15928', '#cab2d6', '#fdbf6f', '#b2df8a', '#a6cee3', '#fb9a99']; // 12 Class Paired: (Dark) purple, orange, green, blue, red, yellow, brown, (Light) lPurple, lOrange, lGreen, lBlue, lRed
@@ -26,7 +26,7 @@ class Core {
     }
 
     /**
-     * Adds new Path object to and sorts core paths []. Also updates time in seconds in program 
+     * Adds new Path object to and sorts core pathList []. Also updates time in seconds in program 
      * @param  {char} pathName
      * @param  {MovementPoint []} movement
      * @param  {ConversationPoint []} conversation
@@ -34,9 +34,9 @@ class Core {
     updatePaths(pathName, movementPointArray, conversationPointArray) {
         let curPathColor;
         if (this.sk.testData.arrayIsLoaded(this.speakerList)) curPathColor = this.setPathColorBySpeaker(pathName); // if conversation file loaded, send to method to calculate color
-        else curPathColor = this.COLOR_LIST[this.paths.length % this.COLOR_LIST.length]; // if no conversation file loaded path color is next in Color list
-        this.paths.push(this.createPath(pathName, movementPointArray, conversationPointArray, curPathColor, true));
-        this.paths.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching core.speakerList array
+        else curPathColor = this.COLOR_LIST[this.pathList.length % this.COLOR_LIST.length]; // if no conversation file loaded path color is next in Color list
+        this.pathList.push(this.createPath(pathName, movementPointArray, conversationPointArray, curPathColor, true));
+        this.pathList.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching core.speakerList array
     }
 
 
@@ -62,7 +62,7 @@ class Core {
      */
     getNumPathsWithNoSpeaker() {
         let count = 0;
-        for (const path of this.paths) {
+        for (const path of this.pathList) {
             if (!this.speakerList.some(e => e.name === path.name)) count++;
         }
         return count;
@@ -73,7 +73,8 @@ class Core {
      */
     updateConversation() {
         this.updateSpeakerList(this.parseConversation.getParsedConversationArray());
-        this.speakerList.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching core.paths array
+        this.speakerList.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching core.pathList array
+        this.parseMovement.reProcessFiles(); // must reprocess movement
         this.sk.sketchController.startLoop(); // rerun P5 draw loop
     }
 
@@ -139,11 +140,11 @@ class Core {
 
     clearConversationData() {
         this.speakerList = [];
-        this.paths = [];
+        this.pathList = [];
     }
 
     clearMovementData() {
-        this.paths = [];
+        this.pathList = [];
         this.totalTimeInSeconds = 0; // reset total time
     }
 }
