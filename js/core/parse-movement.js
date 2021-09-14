@@ -73,7 +73,7 @@ class ParseMovement {
 
     updatePointArrays(resultsArray, pathName) {
         const [movementPointArray, conversationPointArray] = this.createPointArrays(resultsArray, this.sk.core.parseConversation.getParsedConversationArray());
-        this.sk.core.updateMovement(pathName, movementPointArray, conversationPointArray);
+        this.sk.core.updateMovementData(pathName, movementPointArray, conversationPointArray);
     }
 
     reProcessFiles() {

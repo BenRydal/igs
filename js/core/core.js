@@ -12,14 +12,11 @@ class Core {
     }
 
     /** 
-     * Organizes methods to ....
-     * @param {Integer} fileNum
-     * @param {PapaParse Results []} results
-     * @param {CSV} file
-     * @param {Array} MovementPoints
-     * @param {Array} ConversationPoints
+     * @param {Char} pathName
+     * @param {Array} movementPointArray
+     * @param {Array} conversationPointArray
      */
-    updateMovement(pathName, movementPointArray, conversationPointArray) {
+    updateMovementData(pathName, movementPointArray, conversationPointArray) {
         this.updatePaths(pathName, movementPointArray, conversationPointArray);
         this.updateTotalTime(movementPointArray);
         this.sk.sketchController.startLoop(); // rerun P5 draw loop
@@ -68,10 +65,7 @@ class Core {
         return count;
     }
 
-    /**
-     *  @param {PapaParse Results []} results
-     */
-    updateConversation() {
+    updateConversationData() {
         this.updateSpeakerList(this.parseConversation.getParsedConversationArray());
         this.speakerList.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching core.pathList array
         this.parseMovement.reProcessFiles(); // must reprocess movement
