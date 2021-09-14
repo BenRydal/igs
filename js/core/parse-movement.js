@@ -29,8 +29,7 @@ class ParseMovement {
                     type: "text/csv",
                 }));
             }
-            // parse file after retrieval, maintain correct this context on callback with bind
-            this.parseFiles(fileList, this.processFiles.bind(this));
+            this.parseFiles(fileList, this.processFiles.bind(this)); // parse file after retrieval, maintain correct this context on callback with bind
         } catch (error) {
             alert("Error loading example movement data. Please make sure you have a good internet connection")
             console.log(error);
@@ -60,13 +59,21 @@ class ParseMovement {
         if (this.sk.testData.movementResults(results)) {
             if (fileNum === 0) this.clear(); // clear existing movement data for first new file only
             const pathName = file.name.charAt(0).toUpperCase();
-            const [movementPointArray, conversationPointArray] = this.createPointArrays(results.data, this.sk.core.parseConversation.getParsedConversationArray());
-            this.parsedMovementFileData.push({
-                parsedMovementArray: results.data,
-                firstCharOfFileName: pathName // get name of path, also used to test if associated speaker in conversation file
-            });
-            this.sk.core.updateMovement(pathName, movementPointArray, conversationPointArray);
+            this.updateParsedMovementFileData(results.data, pathName);
+            this.updatePointArrays(results.data, pathName);
         } else alert("Error loading movement file. Please make sure your file is a .CSV file formatted with column headers: " + this.sk.testData.CSVHEADERS_MOVEMENT.toString());
+    }
+
+    updateParsedMovementFileData(resultsArray, pathName) {
+        this.parsedMovementFileData.push({
+            parsedMovementArray: resultsArray,
+            firstCharOfFileName: pathName // get name of path, also used to test if associated speaker in conversation file
+        });
+    }
+
+    updatePointArrays(resultsArray, pathName) {
+        const [movementPointArray, conversationPointArray] = this.createPointArrays(resultsArray, this.sk.core.parseConversation.getParsedConversationArray());
+        this.sk.core.updateMovement(pathName, movementPointArray, conversationPointArray);
     }
 
     reProcessFiles() {
