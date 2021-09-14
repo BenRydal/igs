@@ -1,6 +1,6 @@
 class ParseConversation {
 
-    constructor(sk) {
+    constructor(sketch) {
         this.sk = sketch;
         //this.headers = ['time', 'speaker', 'talk'];
         //this.parsedConversationArray = []; // List that holds objects containing a parsed results.data array and character letter indicating path name from Papa Parsed CSV file
@@ -54,7 +54,7 @@ class ParseConversation {
         console.log("Parsing complete:", results, file);
         if (this.sk.testData.conversationResults(results)) {
             this.sk.core.updateConversation(results.data);
-            this.sk.core.parseMovement.reProcessFiles(this.sk.core.parsedMovementFileData); // must reprocess movement
+            this.sk.core.parseMovement.reProcessFiles(); // must reprocess movement
         } else alert("Error loading conversation file. Please make sure your file is a .CSV file formatted with column headers: " + this.sk.testData.CSVHEADERS_CONVERSATION.toString());
 
     }

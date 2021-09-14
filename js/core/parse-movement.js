@@ -3,7 +3,7 @@ class ParseMovement {
     constructor(sketch) {
         this.sk = sketch;
         //this.headers = ['time', 'x', 'y'];
-        //this.parsedMovementFileData = []; // List that holds objects containing a parsed results.data array and character letter indicating path name from Papa Parsed CSV file
+        this.parsedMovementFileData = []; // List that holds objects containing a parsed results.data array and character letter indicating path name from Papa Parsed CSV file
     }
 
     /**
@@ -58,13 +58,18 @@ class ParseMovement {
     processFiles(results, file, fileNum) {
         console.log("Parsing complete:", results, file);
         if (this.sk.testData.movementResults(results)) {
+            const pathName = file.name.charAt(0).toUpperCase();
             const [movementPointArray, conversationPointArray] = this.createPointArrays(results.data, this.sk.core.parsedConversationArray);
-            this.sk.core.updateMovement(fileNum, results.data, file, movementPointArray, conversationPointArray);
+            this.parsedMovementFileData.push({
+                parsedMovementArray: results.data,
+                firstCharOfFileName: pathName // get name of path, also used to test if associated speaker in conversation file
+            });
+            this.sk.core.updateMovement(fileNum, pathName, movementPointArray, conversationPointArray);
         } else alert("Error loading movement file. Please make sure your file is a .CSV file formatted with column headers: " + this.sk.testData.CSVHEADERS_MOVEMENT.toString());
     }
 
-    reProcessFiles(parsedMovementFileData) {
-        for (const index of parsedMovementFileData) {
+    reProcessFiles() {
+        for (const index of this.parsedMovementFileData) {
             const [movementPointArray, conversationPointArray] = this.createPointArrays(index.parsedMovementArray, this.sk.core.parsedConversationArray);
             this.sk.core.updatePaths(index.firstCharOfFileName, movementPointArray, conversationPointArray);
         }
@@ -135,5 +140,9 @@ class ParseMovement {
             speaker: c.speaker, // String name of speaker
             talkTurn: c.talkTurn // String text of conversation turn
         }
+    }
+
+    clear() {
+        this.parsedMovementFileData = [];
     }
 }
