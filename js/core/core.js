@@ -2,7 +2,6 @@ class Core {
 
     constructor(sketch) {
         this.sk = sketch;
-        this.parsedConversationArray = []; // List that holds a parsed results.data array from Papa parsed conversation CSV file
         this.parseMovement = new ParseMovement(this.sk);
         this.parseConversation = new ParseConversation(this.sk);
         this.speakerList = []; // List that holds Speaker objects parsed from conversation file
@@ -20,8 +19,7 @@ class Core {
      * @param {Array} MovementPoints
      * @param {Array} ConversationPoints
      */
-    updateMovement(fileNum, pathName, movementPointArray, conversationPointArray) {
-        if (fileNum === 0) this.clearMovementData(); // clear existing movement data for first new file only
+    updateMovement(pathName, movementPointArray, conversationPointArray) {
         this.updatePaths(pathName, movementPointArray, conversationPointArray);
         this.updateTotalTime(movementPointArray);
         this.sk.sketchController.startLoop(); // rerun P5 draw loop
@@ -73,10 +71,8 @@ class Core {
     /**
      *  @param {PapaParse Results []} results
      */
-    updateConversation(parsedConversationArray) {
-        this.clearConversationData(); // clear existing conversation data
-        this.parsedConversationArray = parsedConversationArray; // set to new array of keyed values
-        this.updateSpeakerList(this.parsedConversationArray);
+    updateConversation() {
+        this.updateSpeakerList(this.parseConversation.getParsedConversationArray());
         this.speakerList.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching core.paths array
         this.sk.sketchController.startLoop(); // rerun P5 draw loop
     }
@@ -136,17 +132,17 @@ class Core {
     clearAllData() {
         this.inputFloorPlan.clear();
         this.clearConversationData();
+        this.parseConversation.clear();
         this.clearMovementData();
+        this.parseMovement.clear();
     }
 
     clearConversationData() {
-        this.parsedConversationArray = [];
         this.speakerList = [];
         this.paths = [];
     }
 
     clearMovementData() {
-        this.parseMovement.clear();
         this.paths = [];
         this.totalTimeInSeconds = 0; // reset total time
     }
