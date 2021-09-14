@@ -141,10 +141,8 @@ class ProcessData {
                 if (this.sk.testData.arrayIsLoaded(parsedConversationArray) && conversationCounter < parsedConversationArray.length) {
                     // Test conversation data row for quality first and then compare movement and conversation times to see if closest movement data to conversation time
                     if (this.sk.testData.conversationRowForType(parsedConversationArray, conversationCounter) && m.time >= parsedConversationArray[conversationCounter][this.sk.testData.CSVHEADERS_CONVERSATION[0]]) {
-                        const curTalkTimePos = parsedConversationArray[conversationCounter][this.sk.testData.CSVHEADERS_CONVERSATION[0]];
-                        const curSpeaker = this.sk.core.cleanSpeaker(parsedConversationArray[conversationCounter][this.sk.testData.CSVHEADERS_CONVERSATION[1]]);
-                        const curTalkTurn = parsedConversationArray[conversationCounter][this.sk.testData.CSVHEADERS_CONVERSATION[2]];
-                        conversationPointArray.push(this.createConversationPoint(m, curTalkTimePos, curSpeaker, curTalkTurn));
+                        const c = this.getCurConversationValues(parsedConversationArray, conversationCounter);
+                        conversationPointArray.push(this.createConversationPoint(m, c));
                         conversationCounter++;
                     } else if (!this.sk.testData.conversationRowForType(parsedConversationArray, conversationCounter)) conversationCounter++; // make sure to increment counter if bad data to skip row in next iteration of loop
                 }
@@ -155,6 +153,14 @@ class ProcessData {
 
     pointsHaveSamePosition(curPoint, priorPoint) {
         return (curPoint.xPos === priorPoint.xPos && curPoint.yPos === priorPoint.yPos);
+    }
+
+    getCurConversationValues(parsedConversationArray, conversationCounter) {
+        return {
+            time: parsedConversationArray[conversationCounter][this.sk.testData.CSVHEADERS_CONVERSATION[0]],
+            speaker: this.sk.core.cleanSpeaker(parsedConversationArray[conversationCounter][this.sk.testData.CSVHEADERS_CONVERSATION[1]]),
+            talkTurn: parsedConversationArray[conversationCounter][this.sk.testData.CSVHEADERS_CONVERSATION[2]]
+        }
     }
 
     /**
@@ -172,14 +178,14 @@ class ProcessData {
     /**
      * Represents a single conversation turn with a location in space and time, text values, name of a speaker, and what they said
      */
-    createConversationPoint(m, time, speaker, talkTurn) {
+    createConversationPoint(m, c) {
         return {
             xPos: m.xPos, // Float x and y pixel positions on floor plan
             yPos: m.yPos,
             isStopped: m.isStopped,
-            time, // Float Time value in seconds
-            speaker, // String name of speaker
-            talkTurn // String text of conversation turn
+            time: c.time, // Float Time value in seconds
+            speaker: c.speaker, // String name of speaker
+            talkTurn: c.talkTurn // String text of conversation turn
         }
     }
 }
