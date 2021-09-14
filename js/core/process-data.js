@@ -138,14 +138,16 @@ class ProcessData {
                 if (movementPointArray.length === 0) m.isStopped = true; // set isStopped value based on comparison to prior point unless it is 1st point
                 else m.isStopped = this.pointsHaveSamePosition(m, movementPointArray[movementPointArray.length - 1]);
                 movementPointArray.push(m); // add good data to movement []
-                // Test conversation data row for quality first and then compare movement and conversation times to see if closest movement data to conversation time
-                if (this.sk.testData.conversationLengthAndRowForType(parsedConversationArray, conversationCounter) && m.time >= parsedConversationArray[conversationCounter][this.sk.testData.CSVHEADERS_CONVERSATION[0]]) {
-                    const curTalkTimePos = parsedConversationArray[conversationCounter][this.sk.testData.CSVHEADERS_CONVERSATION[0]];
-                    const curSpeaker = this.sk.core.cleanSpeaker(parsedConversationArray[conversationCounter][this.sk.testData.CSVHEADERS_CONVERSATION[1]]);
-                    const curTalkTurn = parsedConversationArray[conversationCounter][this.sk.testData.CSVHEADERS_CONVERSATION[2]];
-                    conversationPointArray.push(this.createConversationPoint(m, curTalkTimePos, curSpeaker, curTalkTurn));
-                    conversationCounter++;
-                } else if (!this.sk.testData.conversationLengthAndRowForType(parsedConversationArray, conversationCounter)) conversationCounter++; // make sure to increment counter if bad data to skip row in next iteration of loop
+                if (this.sk.testData.arrayIsLoaded(parsedConversationArray) && conversationCounter < parsedConversationArray.length) {
+                    // Test conversation data row for quality first and then compare movement and conversation times to see if closest movement data to conversation time
+                    if (this.sk.testData.conversationRowForType(parsedConversationArray, conversationCounter) && m.time >= parsedConversationArray[conversationCounter][this.sk.testData.CSVHEADERS_CONVERSATION[0]]) {
+                        const curTalkTimePos = parsedConversationArray[conversationCounter][this.sk.testData.CSVHEADERS_CONVERSATION[0]];
+                        const curSpeaker = this.sk.core.cleanSpeaker(parsedConversationArray[conversationCounter][this.sk.testData.CSVHEADERS_CONVERSATION[1]]);
+                        const curTalkTurn = parsedConversationArray[conversationCounter][this.sk.testData.CSVHEADERS_CONVERSATION[2]];
+                        conversationPointArray.push(this.createConversationPoint(m, curTalkTimePos, curSpeaker, curTalkTurn));
+                        conversationCounter++;
+                    } else if (!this.sk.testData.conversationRowForType(parsedConversationArray, conversationCounter)) conversationCounter++; // make sure to increment counter if bad data to skip row in next iteration of loop
+                }
             }
         }
         return [movementPointArray, conversationPointArray];

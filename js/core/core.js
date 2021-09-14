@@ -115,7 +115,7 @@ class Core {
             let tempSpeakerList = []; // create/populate temp list to store strings to test from global core.speakerList
             for (const tempSpeaker of this.speakerList) tempSpeakerList.push(tempSpeaker.name);
             // If row is good data, test if core.speakerList already has speaker and if not add speaker 
-            if (this.sk.testData.conversationLengthAndRowForType(parsedConversationArray, i)) {
+            if (this.sk.testData.conversationRowForType(parsedConversationArray, i)) {
                 const speaker = this.cleanSpeaker(parsedConversationArray[i][this.sk.testData.CSVHEADERS_CONVERSATION[1]]); // get cleaned speaker character
                 if (!tempSpeakerList.includes(speaker)) this.addSpeakerToSpeakerList(speaker);
             }

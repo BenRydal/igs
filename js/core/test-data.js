@@ -26,7 +26,7 @@ class TestData {
      * @param  {PapaParse Results []} results
      */
     movementResults(results) {
-        return results.data.length > 1 && this.includesAllHeaders(results.meta.fields, this.CSVHEADERS_MOVEMENT) && this.movementRowsForType(results.data);
+        return results.data.length > 1 && this.includesAllHeaders(results.meta.fields, this.CSVHEADERS_MOVEMENT) && this.movementHasOneCleanRow(results.data);
     }
 
     /**
@@ -34,7 +34,7 @@ class TestData {
      * @param  {PapaParse Results []} results
      */
     conversationResults(results) {
-        return results.data.length > 1 && this.includesAllHeaders(results.meta.fields, this.CSVHEADERS_CONVERSATION) && this.conversationRowsForType(results.data);
+        return results.data.length > 1 && this.includesAllHeaders(results.meta.fields, this.CSVHEADERS_CONVERSATION) && this.conversationHasOneCleanRow(results.data);
     }
 
     includesAllHeaders(meta, headers) {
@@ -58,11 +58,16 @@ class TestData {
      * Returns true on first row of PapaParse data array that has all correctly typed data for movement headers
      * @param  {PapaParse results.data []} data
      */
-    movementRowsForType(parsedMovementArray) {
+    movementHasOneCleanRow(parsedMovementArray) {
         for (let i = 0; i < parsedMovementArray.length; i++) {
             if (this.movementRowForType(parsedMovementArray, i)) return true;
         }
         return false;
+    }
+
+    // Tests if current conversation row is less than total rows in table and if time is number and speaker is string and talk turn is not null or undefined
+    conversationRowForType(parsedConversationArray, curRow) {
+        return curRow < parsedConversationArray.length && typeof parsedConversationArray[curRow][this.CSVHEADERS_CONVERSATION[0]] === 'number' && typeof parsedConversationArray[curRow][this.CSVHEADERS_CONVERSATION[1]] === 'string' && parsedConversationArray[curRow][this.CSVHEADERS_CONVERSATION[2]] != null;
     }
 
     /**
@@ -70,17 +75,13 @@ class TestData {
      * Returns true on first row of PapaParse data array that has all correctly typed data for conversation headers
      * @param  {PapaParse results.data []} data
      */
-    conversationRowsForType(parsedConversationArray) {
-        for (const row of parsedConversationArray) {
-            if (typeof row[this.CSVHEADERS_CONVERSATION[0]] === 'number' && typeof row[this.CSVHEADERS_CONVERSATION[1]] === 'string' && row[this.CSVHEADERS_CONVERSATION[2]] != null) return true;
+    conversationHasOneCleanRow(parsedConversationArray) {
+        for (let i = 0; i < parsedConversationArray.length; i++) {
+            if (this.conversationRowForType(parsedConversationArray, i)) return true;
         }
         return false;
     }
 
-    // Tests if current conversation row is less than total rows in table and if time is number and speaker is string and talk turn is not null or undefined
-    conversationLengthAndRowForType(parsedConversationArray, curRow) {
-        return curRow < parsedConversationArray.length && typeof parsedConversationArray[curRow][this.CSVHEADERS_CONVERSATION[0]] === 'number' && typeof parsedConversationArray[curRow][this.CSVHEADERS_CONVERSATION[1]] === 'string' && parsedConversationArray[curRow][this.CSVHEADERS_CONVERSATION[2]] != null;
-    }
     /**
      * Samples data based on comparing time and x/y positions of two points
      * @param  {PapaParse results[]} data
