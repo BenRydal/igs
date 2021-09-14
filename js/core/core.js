@@ -22,12 +22,13 @@ class Core {
         this.sk.sketchController.startLoop(); // rerun P5 draw loop
     }
 
-    /**
-     * Adds new Path object to and sorts core pathList []. Also updates time in seconds in program 
-     * @param  {char} pathName
-     * @param  {MovementPoint []} movement
-     * @param  {ConversationPoint []} conversation
-     */
+    updateConversationData() {
+        this.updateSpeakerList(this.parseConversation.getParsedConversationArray());
+        this.speakerList.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching core.pathList array
+        this.parseMovement.reProcessFiles(); // must reprocess movement
+        this.sk.sketchController.startLoop(); // rerun P5 draw loop
+    }
+
     updatePaths(pathName, movementPointArray, conversationPointArray) {
         let curPathColor;
         if (this.sk.testData.arrayIsLoaded(this.speakerList)) curPathColor = this.setPathColorBySpeaker(pathName); // if conversation file loaded, send to method to calculate color
@@ -40,6 +41,21 @@ class Core {
     updateTotalTime(movementPointArray) {
         const curPathEndTime = Math.floor(movementPointArray[movementPointArray.length - 1].time);
         if (this.totalTimeInSeconds < curPathEndTime) this.totalTimeInSeconds = curPathEndTime; // update global total time, make sure to floor value as integer
+    }
+
+    /**
+     * Updates core speaker list from conversation file data/results
+     */
+    updateSpeakerList(parsedConversationArray) {
+        for (let i = 0; i < parsedConversationArray.length; i++) {
+            let tempSpeakerList = []; // create/populate temp list to store strings to test from global core.speakerList
+            for (const tempSpeaker of this.speakerList) tempSpeakerList.push(tempSpeaker.name);
+            // If row is good data, test if core.speakerList already has speaker and if not add speaker 
+            if (this.sk.testData.conversationRowForType(parsedConversationArray, i)) {
+                const speaker = this.cleanSpeaker(parsedConversationArray[i][this.sk.testData.CSVHEADERS_CONVERSATION[1]]); // get cleaned speaker character
+                if (!tempSpeakerList.includes(speaker)) this.addSpeakerToSpeakerList(speaker);
+            }
+        }
     }
 
     /**
@@ -65,28 +81,6 @@ class Core {
         return count;
     }
 
-    updateConversationData() {
-        this.updateSpeakerList(this.parseConversation.getParsedConversationArray());
-        this.speakerList.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching core.pathList array
-        this.parseMovement.reProcessFiles(); // must reprocess movement
-        this.sk.sketchController.startLoop(); // rerun P5 draw loop
-    }
-
-    /**
-     * Updates core speaker list from conversation file data/results
-     */
-    updateSpeakerList(parsedConversationArray) {
-        for (let i = 0; i < parsedConversationArray.length; i++) {
-            let tempSpeakerList = []; // create/populate temp list to store strings to test from global core.speakerList
-            for (const tempSpeaker of this.speakerList) tempSpeakerList.push(tempSpeaker.name);
-            // If row is good data, test if core.speakerList already has speaker and if not add speaker 
-            if (this.sk.testData.conversationRowForType(parsedConversationArray, i)) {
-                const speaker = this.cleanSpeaker(parsedConversationArray[i][this.sk.testData.CSVHEADERS_CONVERSATION[1]]); // get cleaned speaker character
-                if (!tempSpeakerList.includes(speaker)) this.addSpeakerToSpeakerList(speaker);
-            }
-        }
-    }
-
     /**
      * Used to compare and add new speakers to speakerList
      * @param  {String} s
@@ -105,8 +99,8 @@ class Core {
     }
 
     /**
-     * Adds new speaker object with initial color to core.speakerList from character
-     * @param  {Char} speaker
+     * Adds new speaker object with initial color to core.speakerList from string
+     * @param  {String} speaker
      */
     addSpeakerToSpeakerList(name) {
         this.speakerList.push(this.createSpeaker(name, this.COLOR_LIST[this.speakerList.length % this.COLOR_LIST.length], true));
@@ -117,7 +111,7 @@ class Core {
      */
     createSpeaker(name, color, isShowing) {
         return {
-            name, // substring
+            name, // string
             color, // color
             isShowing // boolean indicating if showing in GUI
         };
@@ -148,6 +142,6 @@ class Core {
 
     clearMovementData() {
         this.pathList = [];
-        this.totalTimeInSeconds = 0; // reset total time
+        this.totalTimeInSeconds = 0;
     }
 }
