@@ -4,6 +4,8 @@ class Core {
         this.sk = sketch;
         this.parsedMovementFileData = []; // List that holds objects containing a parsed results.data array and character letter indicating path name from Papa Parsed CSV file
         this.parsedConversationArray = []; // List that holds a parsed results.data array from Papa parsed conversation CSV file
+        this.parseMovement = new ParseMovement(this.sk);
+        this.parseConversation = new ParseConversation(this.sk);
         this.speakerList = []; // List that holds Speaker objects parsed from conversation file
         this.paths = []; // List of path objects
         this.inputFloorPlan = new InputFloorPlan(this.sk);

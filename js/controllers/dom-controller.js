@@ -19,7 +19,7 @@ class DomController {
     handleMovementFiles(input) {
         let fileList = [];
         for (const file of input.files) fileList.push(file);
-        this.sk.processData.prepMovementFiles(fileList);
+        this.sk.core.parseMovement.prepFiles(fileList);
         input.value = ''; // reset input value so you can load same file(s) again in browser
     }
 
@@ -28,7 +28,7 @@ class DomController {
      * @param  {File} input
      */
     handleConversationFile(input) {
-        this.sk.processData.prepConversationFile(input.files[0]);
+        this.sk.core.parseConversation.prepFile(input.files[0]);
         input.value = ''; // reset input value so you can load same file again in browser
     }
 
@@ -142,8 +142,8 @@ class DomController {
         this.sk.sketchController.setIsIntro(false); // Hide intro msg if showing
         this.updateVideo(params[4], params[5]);
         this.sk.core.inputFloorPlan.update(params[0] + params[1]);
-        this.sk.processData.prepExampleConversationFile(params[0], params[2]);
-        this.sk.processData.prepExampleMovementFiles(params[0], params[3]);
+        this.sk.core.parseConversation.prepExampleFile(params[0], params[2]);
+        this.sk.core.parseMovement.prepExampleFiles(params[0], params[3]);
     }
 
     /**
