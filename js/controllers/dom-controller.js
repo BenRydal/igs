@@ -8,7 +8,7 @@ class DomController {
      * @param  {PNG, JPG, JPEG File} input
      */
     handleFloorPlanFile(input) {
-        this.sk.core.updateFloorPlan(URL.createObjectURL(input.files[0]));
+        this.sk.core.inputFloorPlan.update(URL.createObjectURL(input.files[0]));
         input.value = ''; // reset input value so you can load same file again in browser
     }
 
@@ -141,7 +141,7 @@ class DomController {
     loadExampleData(params) {
         this.sk.sketchController.setIsIntro(false); // Hide intro msg if showing
         this.updateVideo(params[4], params[5]);
-        this.sk.core.updateFloorPlan(params[0] + params[1]);
+        this.sk.core.inputFloorPlan.update(params[0] + params[1]);
         this.sk.processData.prepExampleConversationFile(params[0], params[2]);
         this.sk.processData.prepExampleMovementFiles(params[0], params[3]);
     }

@@ -44,7 +44,7 @@ const igs = new p5((sk) => {
         sk.translate(-sk.width / 2, -sk.height / 2, 0); // always recenter canvas to top left when using WEBGL renderer
         sk.sketchController.update3DTranslation();
         sk.background(255);
-        if (sk.testData.dataIsLoaded(sk.core.inputFloorPlan.img)) sk.sketchController.setFloorPlan();
+        if (sk.testData.dataIsLoaded(sk.core.inputFloorPlan.getImg())) sk.sketchController.setFloorPlan();
         if (sk.testData.arrayIsLoaded(sk.core.paths)) {
             if (sk.testData.arrayIsLoaded(sk.core.speakerList)) sk.setMovementAndConversation();
             else sk.setMovement();
@@ -71,7 +71,7 @@ const igs = new p5((sk) => {
     }
 
     sk.drawFloorPlan = function (width, height) {
-        sk.image(sk.core.inputFloorPlan.img, 0, 0, width, height);
+        sk.image(sk.core.inputFloorPlan.getImg(), 0, 0, width, height);
     }
 
     sk.drawRotatedFloorPlan = function (angle, width, height) {
@@ -79,7 +79,7 @@ const igs = new p5((sk) => {
         sk.imageMode(sk.CENTER); // important method to include here
         sk.translate(sk.gui.floorPlanContainer.width / 2, sk.gui.floorPlanContainer.height / 2);
         sk.rotate(angle);
-        sk.image(sk.core.inputFloorPlan.img, 0, 0, width, height);
+        sk.image(sk.core.inputFloorPlan.getImg(), 0, 0, width, height);
         sk.pop();
     }
 

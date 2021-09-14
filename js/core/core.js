@@ -6,31 +6,9 @@ class Core {
         this.parsedConversationArray = []; // List that holds a parsed results.data array from Papa parsed conversation CSV file
         this.speakerList = []; // List that holds Speaker objects parsed from conversation file
         this.paths = []; // List of path objects
-        this.inputFloorPlan = {
-            img: null,
-            width: null,
-            height: null
-        }
+        this.inputFloorPlan = new InputFloorPlan(this.sk);
         this.totalTimeInSeconds = 0; // Number indicating time value in seconds that all displayed data is set to, set dynamically in processMovement methods
         this.COLOR_LIST = ['#6a3d9a', '#ff7f00', '#33a02c', '#1f78b4', '#e31a1c', '#ffff99', '#b15928', '#cab2d6', '#fdbf6f', '#b2df8a', '#a6cee3', '#fb9a99']; // 12 Class Paired: (Dark) purple, orange, green, blue, red, yellow, brown, (Light) lPurple, lOrange, lGreen, lBlue, lRed
-    }
-
-    /**
-     * Creates P5 image file from path and updates core floorPlan image and input width/heights to properly scale and display data
-     * @param  {String} filePath
-     */
-    updateFloorPlan(filePath) {
-        this.sk.loadImage(filePath, img => {
-            console.log("Floor Plan Image Loaded");
-            img.onload = () => URL.revokeObjectURL(this.src);
-            this.sk.sketchController.startLoop(); // rerun P5 draw loop after loading image
-            this.inputFloorPlan.img = img;
-            this.inputFloorPlan.width = img.width;
-            this.inputFloorPlan.height = img.height;
-        }, e => {
-            alert("Error loading floor plan image file. Please make sure it is correctly formatted as a PNG or JPG image file.")
-            console.log(e);
-        });
     }
 
     /** 
@@ -160,15 +138,9 @@ class Core {
     }
 
     clearAllData() {
-        this.clearFloorPlan();
+        this.inputFloorPlan.clear();
         this.clearConversationData();
         this.clearMovementData();
-    }
-
-    clearFloorPlan() {
-        this.inputFloorPlan.img = null;
-        this.inputFloorPlan.width = null;
-        this.inputFloorPlan.height = null;
     }
 
     clearConversationData() {
