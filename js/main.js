@@ -25,14 +25,13 @@ const igs = new p5((sk) => {
         sk.textFont(sk.font_Lato);
         sk.textAlign(sk.LEFT, sk.TOP);
         // SINGLETONS
-        sk.core = new Core(sk); // core program variables and update methods
-        sk.gui = new GUI(sk); // GUI vars and methods
+        sk.core = new Core(sk);
+        sk.gui = new GUI(sk);
         sk.domController = new DomController(sk); // handles DOM/buttons user interaction
-        sk.sketchController = new SketchController(sk); // coordinates calls across classes and updates state variables
-        sk.videoPlayer = null; // abstract class for different video classes instantiated/updated in processVideo method (see video-player.js)
-
+        sk.sketchController = new SketchController(sk); // coordinates calls across classes
+        sk.videoPlayer = null; // abstract class for different video classes
         // CONSTANTS
-        sk.PLAN = 0; // two drawing modes
+        sk.PLAN = 0;
         sk.SPACETIME = 1;
         sk.DRAWGUI = 0;
         sk.HANDLEGUI = 1;
@@ -81,6 +80,13 @@ const igs = new p5((sk) => {
         sk.pop();
     }
 
+    sk.setMovement = function () {
+        const drawMovement = new DrawMovement(sk);
+        for (const path of sk.core.pathList) {
+            if (path.isShowing) drawMovement.setData(path); // draw after conversation so bug displays on top
+        }
+    }
+
     sk.setMovementAndConversation = function () {
         const drawConversation = new DrawConversation(sk);
         const drawMovement = new DrawMovement(sk);
@@ -91,13 +97,6 @@ const igs = new p5((sk) => {
             }
         }
         drawConversation.setConversationBubble(); // draw conversation text last so it displays on top
-    }
-
-    sk.setMovement = function () {
-        const drawMovement = new DrawMovement(sk);
-        for (const path of sk.core.pathList) {
-            if (path.isShowing) drawMovement.setData(path); // draw after conversation so bug displays on top
-        }
     }
 
     sk.mousePressed = function () {
