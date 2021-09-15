@@ -45,7 +45,7 @@ class TestData {
         return typeof curRow[this.headersConversation[0]] === 'number' && typeof curRow[this.headersConversation[1]] === 'string' && curRow[this.headersConversation[2]] != null;
     }
 
-    compareTimes(rows) {
+    curTimeIsLarger(rows) {
         return Number.parseFloat(rows.curRow[this.headersMovement[0]]).toFixed(1) > Number.parseFloat(rows.priorRow[this.headersMovement[0]]).toFixed(1);
     }
 

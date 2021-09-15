@@ -94,7 +94,7 @@ class ParseMovement {
         let conversationCounter = 0; // Current row count of conversation file for comparison
         for (let i = 1; i < parsedMovementArray.length; i++) {
             const rows = this.createCompareRow(parsedMovementArray[i], parsedMovementArray[i - 1]); // create object to hold current and prior points as well as pixel positions
-            if (this.testData.movementRowForType(rows.curRow) && this.testData.compareTimes(rows)) {
+            if (this.testData.movementRowForType(rows.curRow) && this.testData.curTimeIsLarger(rows)) {
                 const m = this.createMovementPoint(rows.curRow, movementPointArray);
                 movementPointArray.push(m);
                 if (conversationCounter < parsedConversationArray.length) { // this test both makes sure conversationArray is loaded and counter is not great than length
