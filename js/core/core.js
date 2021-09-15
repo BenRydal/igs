@@ -2,8 +2,9 @@ class Core {
 
     constructor(sketch) {
         this.sk = sketch;
-        this.parseMovement = new ParseMovement(this.sk);
-        this.parseConversation = new ParseConversation(this.sk);
+        this.testData = new TestData();
+        this.parseMovement = new ParseMovement(this.sk, this.testData);
+        this.parseConversation = new ParseConversation(this.sk, this.testData);
         this.speakerList = []; // List that holds Speaker objects parsed from conversation file
         this.pathList = []; // List of path objects that hold movement and conversation point arrays
         this.inputFloorPlan = new InputFloorPlan(this.sk);
@@ -48,8 +49,8 @@ class Core {
             let tempSpeakerList = []; // create/populate temp list to store strings to test from global core.speakerList
             for (const tempSpeaker of this.speakerList) tempSpeakerList.push(tempSpeaker.name);
             // If row is good data, test if core.speakerList already has speaker and if not add speaker 
-            if (this.sk.testData.conversationRowForType(curRow)) {
-                const speaker = this.cleanSpeaker(curRow[this.sk.testData.headersConversation[1]]); // get cleaned speaker character
+            if (this.testData.conversationRowForType(curRow)) {
+                const speaker = this.cleanSpeaker(curRow[this.testData.headersConversation[1]]); // get cleaned speaker character
                 if (!tempSpeakerList.includes(speaker)) this.addSpeakerToSpeakerList(speaker);
             }
         }

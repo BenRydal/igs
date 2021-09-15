@@ -26,7 +26,6 @@ const igs = new p5((sk) => {
         sk.textAlign(sk.LEFT, sk.TOP);
         // SINGLETONS
         sk.core = new Core(sk); // core program variables and update methods
-        sk.testData = new TestData(); // holds tests for core data and CSV files. Does not need sketch reference
         sk.gui = new GUI(sk); // GUI vars and methods
         sk.domController = new DomController(sk); // handles DOM/buttons user interaction
         sk.sketchController = new SketchController(sk); // coordinates calls across classes and updates state variables

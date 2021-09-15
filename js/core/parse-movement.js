@@ -1,7 +1,8 @@
 class ParseMovement {
 
-    constructor(sketch) {
+    constructor(sketch, testData) {
         this.sk = sketch;
+        this.testData = testData;
         this.parsedMovementFileData = []; // List that holds objects containing a parsed results.data array and character letter indicating path name from Papa Parsed CSV file
     }
 
@@ -55,7 +56,7 @@ class ParseMovement {
 
     processFiles(results, file, fileNum) {
         console.log("Parsing complete:", results, file);
-        if (this.sk.testData.testParsedMovementResults(results)) {
+        if (this.testData.testParsedMovementResults(results)) {
             if (fileNum === 0) this.clear(); // clear existing movement data for first new file only
             const pathName = this.sk.core.cleanPathName(file.name);
             this.updateParsedMovementFileData(results.data, pathName);
@@ -93,15 +94,15 @@ class ParseMovement {
         let conversationCounter = 0; // Current row count of conversation file for comparison
         for (let i = 1; i < parsedMovementArray.length; i++) {
             const rows = this.createCompareRow(parsedMovementArray[i], parsedMovementArray[i - 1]); // create object to hold current and prior points as well as pixel positions
-            if (this.sk.testData.movementRowForType(rows.curRow) && this.sk.testData.compareTimes(rows)) {
+            if (this.testData.movementRowForType(rows.curRow) && this.testData.compareTimes(rows)) {
                 const m = this.createMovementPoint(rows.curRow, movementPointArray);
                 movementPointArray.push(m);
                 if (conversationCounter < parsedConversationArray.length) { // this test both makes sure conversationArray is loaded and counter is not great than length
                     const curConversationRow = parsedConversationArray[conversationCounter];
-                    if (this.sk.testData.conversationRowForType(curConversationRow) && m.time >= curConversationRow[this.sk.testData.headersConversation[0]]) {
+                    if (this.testData.conversationRowForType(curConversationRow) && m.time >= curConversationRow[this.testData.headersConversation[0]]) {
                         conversationPointArray.push(this.createConversationPoint(m, curConversationRow));
                         conversationCounter++;
-                    } else if (!this.sk.testData.conversationRowForType(curConversationRow)) conversationCounter++; // make sure to increment counter if bad data to skip row in next iteration of loop
+                    } else if (!this.testData.conversationRowForType(curConversationRow)) conversationCounter++; // make sure to increment counter if bad data to skip row in next iteration of loop
                 }
             }
         }
@@ -120,10 +121,10 @@ class ParseMovement {
      */
     createMovementPoint(curRow, movementPointArray) {
         return {
-            time: curRow[this.sk.testData.headersMovement[0]],
-            xPos: curRow[this.sk.testData.headersMovement[1]],
-            yPos: curRow[this.sk.testData.headersMovement[2]],
-            isStopped: this.sk.testData.isStopped(curRow, movementPointArray)
+            time: curRow[this.testData.headersMovement[0]],
+            xPos: curRow[this.testData.headersMovement[1]],
+            yPos: curRow[this.testData.headersMovement[2]],
+            isStopped: this.testData.isStopped(curRow, movementPointArray)
         }
     }
 
@@ -135,9 +136,9 @@ class ParseMovement {
             xPos: movementPoint.xPos, // Float x and y pixel positions on floor plan
             yPos: movementPoint.yPos,
             isStopped: movementPoint.isStopped,
-            time: curConversationRow[this.sk.testData.headersConversation[0]], // Float Time value in seconds
-            speaker: this.sk.core.cleanSpeaker(curConversationRow[this.sk.testData.headersConversation[1]]), // String name of speaker
-            talkTurn: curConversationRow[this.sk.testData.headersConversation[2]] // String text of conversation turn
+            time: curConversationRow[this.testData.headersConversation[0]], // Float Time value in seconds
+            speaker: this.sk.core.cleanSpeaker(curConversationRow[this.testData.headersConversation[1]]), // String name of speaker
+            talkTurn: curConversationRow[this.testData.headersConversation[2]] // String text of conversation turn
         }
     }
 
