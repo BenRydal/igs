@@ -2,7 +2,6 @@ class ParseConversation {
 
     constructor(sketch) {
         this.sk = sketch;
-        //this.headers = ['time', 'speaker', 'talk'];
         this.parsedFileArray = []; // List that holds objects containing a parsed results.data array and character letter indicating path name from Papa Parsed CSV file
     }
 
@@ -52,11 +51,11 @@ class ParseConversation {
 
     processFile(results, file) {
         console.log("Parsing complete:", results, file);
-        if (this.sk.testData.conversationResults(results)) {
+        if (this.sk.testData.testParsedConversationResults(results)) {
             this.clear();
             this.parsedFileArray = results.data; // set to new array of keyed values
             this.sk.core.updateConversationData();
-        } else alert("Error loading conversation file. Please make sure your file is a .CSV file formatted with column headers: " + this.sk.testData.CSVHEADERS_CONVERSATION.toString());
+        } else alert("Error loading conversation file. Please make sure your file is a .CSV file formatted with column headers: " + this.sk.testData.headersConversation.toString());
     }
 
     getParsedConversationArray() {

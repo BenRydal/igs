@@ -1,8 +1,8 @@
 class TestData {
 
     constructor() {
-        //this.CSVHEADERS_MOVEMENT = ['time', 'x', 'y']; // String array indicating movement movement file headers, data in each column should be of type number or it won't process
-        this.CSVHEADERS_CONVERSATION = ['time', 'speaker', 'talk']; // String array indicating conversation file headers, data in time column shout be of type number, speaker column should be of type String, talk column should be not null or undefined
+        this.headersMovement = ['time', 'x', 'y']; // String array indicating movement movement file headers, data in each column should be of type number or it won't process
+        this.headersConversation = ['time', 'speaker', 'talk']; // String array indicating conversation file headers, data in time column shout be of type number, speaker column should be of type String, talk column should be not null or undefined
     }
 
     /**
@@ -21,13 +21,15 @@ class TestData {
         return Array.isArray(data) && data.length;
     }
 
-
     /**
-     * Test if results array has data, correct file headers, and at least one row of correctly typed data
      * @param  {PapaParse Results []} results
      */
-    conversationResults(results) {
-        return results.data.length > 1 && this.includesAllHeaders(results.meta.fields, this.CSVHEADERS_CONVERSATION) && this.conversationHasOneCleanRow(results.data);
+    testParsedMovementResults(results) {
+        return results.data.length > 1 && this.includesAllHeaders(results.meta.fields, this.headersMovement) && this.movementHasOneCleanRow(results.data);
+    }
+
+    testParsedConversationResults(results) {
+        return results.data.length > 1 && this.includesAllHeaders(results.meta.fields, this.headersConversation) && this.conversationHasOneCleanRow(results.data);
     }
 
     includesAllHeaders(meta, headers) {
@@ -37,22 +39,38 @@ class TestData {
         return true;
     }
 
-
-
-    // Tests if current conversation row is less than total rows in table and if time is number and speaker is string and talk turn is not null or undefined
-    conversationRowForType(parsedConversationArray, curRow) {
-        return typeof parsedConversationArray[curRow][this.CSVHEADERS_CONVERSATION[0]] === 'number' && typeof parsedConversationArray[curRow][this.CSVHEADERS_CONVERSATION[1]] === 'string' && parsedConversationArray[curRow][this.CSVHEADERS_CONVERSATION[2]] != null;
-    }
-
-    /**
-     * Tests if at least one row of correctly typed data in PapaParse data array
-     * Returns true on first row of PapaParse data array that has all correctly typed data for conversation headers
-     * @param  {PapaParse results.data []} data
-     */
-    conversationHasOneCleanRow(parsedConversationArray) {
-        for (let i = 0; i < parsedConversationArray.length; i++) {
-            if (this.conversationRowForType(parsedConversationArray, i)) return true;
+    movementHasOneCleanRow(parsedMovementArray) {
+        for (const curRow of parsedMovementArray) {
+            if (this.movementRowForType(curRow)) return true;
         }
         return false;
+    }
+
+    movementRowForType(curRow) {
+        return typeof curRow[this.headersMovement[0]] === 'number' && typeof curRow[this.headersMovement[1]] === 'number' && typeof curRow[this.headersMovement[2]] === 'number';
+    }
+
+    conversationHasOneCleanRow(parsedConversationArray) {
+        for (const curRow of parsedConversationArray) {
+            if (this.conversationRowForType(curRow)) return true;
+        }
+        return false;
+    }
+
+    conversationRowForType(curRow) {
+        return typeof curRow[this.headersConversation[0]] === 'number' && typeof curRow[this.headersConversation[1]] === 'string' && curRow[this.headersConversation[2]] != null;
+    }
+
+    compareTimes(rows) {
+        return Number.parseFloat(rows.curRow[this.headersMovement[0]]).toFixed(1) > Number.parseFloat(rows.priorRow[this.headersMovement[0]]).toFixed(1);
+    }
+
+    isStopped(curRow, movementPointArray) {
+        if (movementPointArray.length === 0) return true; // if it has not been filled, return true for isStopped value
+        else return this.pointsHaveSamePosition(curRow, movementPointArray[movementPointArray.length - 1]);
+    }
+
+    pointsHaveSamePosition(curRow, lastMovementPoint) {
+        return curRow[this.headersMovement[1]] === lastMovementPoint.xPos && curRow[this.headersMovement[2]] === lastMovementPoint.yPos;
     }
 }

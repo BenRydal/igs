@@ -5,7 +5,7 @@ class Core {
         this.parseMovement = new ParseMovement(this.sk);
         this.parseConversation = new ParseConversation(this.sk);
         this.speakerList = []; // List that holds Speaker objects parsed from conversation file
-        this.pathList = []; // List of path objects
+        this.pathList = []; // List of path objects that hold movement and conversation point arrays
         this.inputFloorPlan = new InputFloorPlan(this.sk);
         this.totalTimeInSeconds = 0; // Number indicating time value in seconds that all displayed data is set to, set dynamically in processMovement methods
         this.COLOR_LIST = ['#6a3d9a', '#ff7f00', '#33a02c', '#1f78b4', '#e31a1c', '#ffff99', '#b15928', '#cab2d6', '#fdbf6f', '#b2df8a', '#a6cee3', '#fb9a99']; // 12 Class Paired: (Dark) purple, orange, green, blue, red, yellow, brown, (Light) lPurple, lOrange, lGreen, lBlue, lRed
@@ -43,16 +43,13 @@ class Core {
         if (this.totalTimeInSeconds < curPathEndTime) this.totalTimeInSeconds = curPathEndTime; // update global total time, make sure to floor value as integer
     }
 
-    /**
-     * Updates core speaker list from conversation file data/results
-     */
     updateSpeakerList(parsedConversationArray) {
-        for (let i = 0; i < parsedConversationArray.length; i++) {
+        for (const curRow of parsedConversationArray) {
             let tempSpeakerList = []; // create/populate temp list to store strings to test from global core.speakerList
             for (const tempSpeaker of this.speakerList) tempSpeakerList.push(tempSpeaker.name);
             // If row is good data, test if core.speakerList already has speaker and if not add speaker 
-            if (this.sk.testData.conversationRowForType(parsedConversationArray, i)) {
-                const speaker = this.cleanSpeaker(parsedConversationArray[i][this.sk.testData.CSVHEADERS_CONVERSATION[1]]); // get cleaned speaker character
+            if (this.sk.testData.conversationRowForType(curRow)) {
+                const speaker = this.cleanSpeaker(curRow[this.sk.testData.headersConversation[1]]); // get cleaned speaker character
                 if (!tempSpeakerList.includes(speaker)) this.addSpeakerToSpeakerList(speaker);
             }
         }
