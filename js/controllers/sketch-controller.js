@@ -28,7 +28,7 @@ class SketchController {
 
     handleMousePressed() {
         if (this.testVideoToPlay()) this.playPauseMovie();
-        else this.sk.gui.handleKeys(this.sk.core.paths, this.sk.core.speakerList);
+        else this.sk.gui.handleKeys(this.sk.core.pathList, this.sk.core.speakerList);
     }
 
     handleMouseDragged() {
@@ -124,7 +124,7 @@ class SketchController {
     getScaledPos(point, view) {
         const timelineXPos = this.mapTotalTimeToPixelTime(point.time);
         const selTimelineXPos = this.mapSelectTimeToPixelTime(timelineXPos);
-        const [floorPlanXPos, floorPlanYPos] = this.getScaledXYPos(point.xPos, point.yPos);
+        const [floorPlanXPos, floorPlanYPos] = this.sk.core.inputFloorPlan.getScaledXYPos(point.xPos, point.yPos, this.sk.gui.floorPlanContainer, this.getRotationMode());
         return {
             timelineXPos,
             selTimelineXPos,
@@ -148,33 +148,6 @@ class SketchController {
         else {
             if (this.view3D.isShowing) return selTimelineXPos;
             else return 0;
-        }
-    }
-
-    /**
-     * Converts x/y pixel positions from data point to floor plan depending on floor plan rotation mode
-     * @param  {Float} xPos
-     * @param  {Float} yPos
-     */
-    getScaledXYPos(xPos, yPos) {
-        let scaledXPos, scaledYPos;
-        switch (this.getRotationMode()) {
-            case 0:
-                scaledXPos = xPos * this.sk.gui.floorPlanContainer.width / this.sk.core.inputFloorPlan.width;
-                scaledYPos = yPos * this.sk.gui.floorPlanContainer.height / this.sk.core.inputFloorPlan.height;
-                return [scaledXPos, scaledYPos];
-            case 1:
-                scaledXPos = this.sk.gui.floorPlanContainer.width - (yPos * this.sk.gui.floorPlanContainer.width / this.sk.core.inputFloorPlan.height);
-                scaledYPos = xPos * this.sk.gui.floorPlanContainer.height / this.sk.core.inputFloorPlan.width;
-                return [scaledXPos, scaledYPos];
-            case 2:
-                scaledXPos = this.sk.gui.floorPlanContainer.width - (xPos * this.sk.gui.floorPlanContainer.width / this.sk.core.inputFloorPlan.width);
-                scaledYPos = this.sk.gui.floorPlanContainer.height - (yPos * this.sk.gui.floorPlanContainer.height / this.sk.core.inputFloorPlan.height);
-                return [scaledXPos, scaledYPos];
-            case 3:
-                scaledXPos = yPos * this.sk.gui.floorPlanContainer.width / this.sk.core.inputFloorPlan.height;
-                scaledYPos = this.sk.gui.floorPlanContainer.height - xPos * this.sk.gui.floorPlanContainer.height / this.sk.core.inputFloorPlan.width;
-                return [scaledXPos, scaledYPos];
         }
     }
 
@@ -219,7 +192,7 @@ class SketchController {
     }
 
     testVideoAndDivAreLoaded() {
-        return (this.sk.testData.dataIsLoaded(this.sk.videoPlayer) && this.sk.videoPlayer.getIsLoaded());
+        return (this.sk.dataIsLoaded(this.sk.videoPlayer) && this.sk.videoPlayer.getIsLoaded());
     }
 
     /**

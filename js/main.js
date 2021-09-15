@@ -25,16 +25,13 @@ const igs = new p5((sk) => {
         sk.textFont(sk.font_Lato);
         sk.textAlign(sk.LEFT, sk.TOP);
         // SINGLETONS
-        sk.core = new Core(sk); // core program variables and update methods
-        sk.testData = new TestData(); // holds tests for core data and CSV files. Does not need sketch reference
-        sk.gui = new GUI(sk); // GUI vars and methods
+        sk.core = new Core(sk);
+        sk.gui = new GUI(sk);
         sk.domController = new DomController(sk); // handles DOM/buttons user interaction
-        sk.sketchController = new SketchController(sk); // coordinates calls across classes and updates state variables
-        sk.processData = new ProcessData(sk); // handles all data processing
-        sk.videoPlayer = null; // abstract class for different video classes instantiated/updated in processVideo method (see video-player.js)
-
+        sk.sketchController = new SketchController(sk); // coordinates calls across classes
+        sk.videoPlayer = null; // abstract class for different video classes
         // CONSTANTS
-        sk.PLAN = 0; // two drawing modes
+        sk.PLAN = 0;
         sk.SPACETIME = 1;
         sk.DRAWGUI = 0;
         sk.HANDLEGUI = 1;
@@ -44,14 +41,14 @@ const igs = new p5((sk) => {
         sk.translate(-sk.width / 2, -sk.height / 2, 0); // always recenter canvas to top left when using WEBGL renderer
         sk.sketchController.update3DTranslation();
         sk.background(255);
-        if (sk.testData.dataIsLoaded(sk.core.inputFloorPlan.img)) sk.sketchController.setFloorPlan();
-        if (sk.testData.arrayIsLoaded(sk.core.paths)) {
-            if (sk.testData.arrayIsLoaded(sk.core.speakerList)) sk.setMovementAndConversation();
+        if (sk.dataIsLoaded(sk.core.inputFloorPlan.getImg())) sk.sketchController.setFloorPlan();
+        if (sk.arrayIsLoaded(sk.core.pathList)) {
+            if (sk.arrayIsLoaded(sk.core.speakerList)) sk.setMovementAndConversation();
             else sk.setMovement();
         }
         if (sk.sketchController.testVideoAndDivAreLoaded()) sk.sketchController.updateVideoDisplay();
         if (sk.sketchController.translationComplete()) sk.pop();
-        sk.gui.drawKeys(sk.core.paths, sk.core.speakerList); // draw keys last
+        sk.gui.drawKeys(sk.core.pathList, sk.core.speakerList); // draw keys last
         sk.sketchController.updateAnimation();
         sk.sketchController.updateLoop();
     }
@@ -71,7 +68,7 @@ const igs = new p5((sk) => {
     }
 
     sk.drawFloorPlan = function (width, height) {
-        sk.image(sk.core.inputFloorPlan.img, 0, 0, width, height);
+        sk.image(sk.core.inputFloorPlan.getImg(), 0, 0, width, height);
     }
 
     sk.drawRotatedFloorPlan = function (angle, width, height) {
@@ -79,27 +76,27 @@ const igs = new p5((sk) => {
         sk.imageMode(sk.CENTER); // important method to include here
         sk.translate(sk.gui.floorPlanContainer.width / 2, sk.gui.floorPlanContainer.height / 2);
         sk.rotate(angle);
-        sk.image(sk.core.inputFloorPlan.img, 0, 0, width, height);
+        sk.image(sk.core.inputFloorPlan.getImg(), 0, 0, width, height);
         sk.pop();
+    }
+
+    sk.setMovement = function () {
+        const drawMovement = new DrawMovement(sk);
+        for (const path of sk.core.pathList) {
+            if (path.isShowing) drawMovement.setData(path); // draw after conversation so bug displays on top
+        }
     }
 
     sk.setMovementAndConversation = function () {
         const drawConversation = new DrawConversation(sk);
         const drawMovement = new DrawMovement(sk);
-        for (const path of sk.core.paths) {
+        for (const path of sk.core.pathList) {
             if (path.isShowing) {
                 drawConversation.setData(path, sk.core.speakerList);
                 drawMovement.setData(path); // draw after conversation so bug displays on top
             }
         }
         drawConversation.setConversationBubble(); // draw conversation text last so it displays on top
-    }
-
-    sk.setMovement = function () {
-        const drawMovement = new DrawMovement(sk);
-        for (const path of sk.core.paths) {
-            if (path.isShowing) drawMovement.setData(path); // draw after conversation so bug displays on top
-        }
     }
 
     sk.mousePressed = function () {
@@ -125,5 +122,19 @@ const igs = new p5((sk) => {
 
     sk.overRect = function (x, y, boxWidth, boxHeight) {
         return sk.mouseX >= x && sk.mouseX <= x + boxWidth && sk.mouseY >= y && sk.mouseY <= y + boxHeight;
+    }
+
+    /**
+     * @param  {Any Type} data
+     */
+    sk.dataIsLoaded = function (data) {
+        return data != null; // in javascript this tests for both undefined and null values
+    }
+
+    /**
+     * @param  {Any Type} data
+     */
+    sk.arrayIsLoaded = function (data) {
+        return Array.isArray(data) && data.length;
     }
 });
