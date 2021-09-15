@@ -152,26 +152,6 @@ class SketchController {
     }
 
     /**
-     * Organizes floor plan drawing methods with and without rotation
-     */
-    setFloorPlan() {
-        switch (this.getRotationMode()) {
-            case 0:
-                this.sk.drawFloorPlan(this.sk.gui.floorPlanContainer.width, this.sk.gui.floorPlanContainer.height);
-                break;
-            case 1:
-                this.sk.drawRotatedFloorPlan(this.sk.HALF_PI, this.sk.gui.floorPlanContainer.height, this.sk.gui.floorPlanContainer.width);
-                break;
-            case 2:
-                this.sk.drawRotatedFloorPlan(this.sk.PI, this.sk.gui.floorPlanContainer.width, this.sk.gui.floorPlanContainer.height);
-                break;
-            case 3:
-                this.sk.drawRotatedFloorPlan(-this.sk.HALF_PI, this.sk.gui.floorPlanContainer.height, this.sk.gui.floorPlanContainer.width);
-                break;
-        }
-    }
-
-    /**
      * Test if point is in user view
      * @param  {MovementPoint} curPoint
      */
@@ -197,8 +177,7 @@ class SketchController {
 
     /**
      * Returns pixel width for drawing conversation rectangles based on curTotalTime of data, user timeline selection, and maxRectWidth
-     * NOTE: curScaledRectWidth parameters 0-3600 scale pixels to 1 hour which works well 
-     * and the map method maps to the inverse of 1 and maxRectWidth to properly adjust scaling/thickness of rects when user interacts with timeline
+     * NOTE: curScaledRectWidth parameters 0-3600 scale pixels to 1 hour which works well and the map method maps to the inverse of 1 and maxRectWidth to properly adjust scaling/thickness of rects when user interacts with timeline
      */
     getCurConversationRectWidth() {
         const maxRectWidth = 10;
