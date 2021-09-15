@@ -57,4 +57,21 @@ class TestData {
     pointsHaveSamePosition(curRow, lastMovementPoint) {
         return curRow[this.headersMovement[1]] === lastMovementPoint.xPos && curRow[this.headersMovement[2]] === lastMovementPoint.yPos;
     }
+
+    /**
+     * Used to compare and add new speakers to speakerList
+     * @param  {String} s
+     */
+    cleanSpeaker(string) {
+        return string.trim().toUpperCase().substring(0, 2);
+    }
+
+    /**
+     * Used to compare and add new paths to pathList
+     * NOTE: this may need to match cleanSpeaker in the future
+     * @param  {String} s
+     */
+    cleanPathName(string) {
+        return string.charAt(0).toUpperCase();
+    }
 }

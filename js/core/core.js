@@ -50,7 +50,7 @@ class Core {
             for (const tempSpeaker of this.speakerList) tempSpeakerList.push(tempSpeaker.name);
             // If row is good data, test if core.speakerList already has speaker and if not add speaker 
             if (this.testData.conversationRowForType(curRow)) {
-                const speaker = this.cleanSpeaker(curRow[this.testData.headersConversation[1]]); // get cleaned speaker character
+                const speaker = this.testData.cleanSpeaker(curRow[this.testData.headersConversation[1]]); // get cleaned speaker character
                 if (!tempSpeakerList.includes(speaker)) this.addSpeakerToSpeakerList(speaker);
             }
         }
@@ -77,23 +77,6 @@ class Core {
             if (!this.speakerList.some(e => e.name === path.name)) count++;
         }
         return count;
-    }
-
-    /**
-     * Used to compare and add new speakers to speakerList
-     * @param  {String} s
-     */
-    cleanSpeaker(string) {
-        return string.trim().toUpperCase().substring(0, 2);
-    }
-
-    /**
-     * Used to compare and add new paths to pathList
-     * NOTE: this may need to match cleanSpeaker in the future
-     * @param  {String} s
-     */
-    cleanPathName(string) {
-        return string.charAt(0).toUpperCase();
     }
 
     /**

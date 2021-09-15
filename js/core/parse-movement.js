@@ -58,7 +58,7 @@ class ParseMovement {
         console.log("Parsing complete:", results, file);
         if (this.testData.testParsedMovementResults(results)) {
             if (fileNum === 0) this.clear(); // clear existing movement data for first new file only
-            const pathName = this.sk.core.cleanPathName(file.name);
+            const pathName = this.testData.cleanPathName(file.name);
             this.updateParsedMovementFileData(results.data, pathName);
             this.updatePointArrays(results.data, pathName);
         } else alert("Error loading movement file. Please make sure your file is a .CSV file formatted with column headers: " + this.headersMovement.toString());
@@ -137,7 +137,7 @@ class ParseMovement {
             yPos: movementPoint.yPos,
             isStopped: movementPoint.isStopped,
             time: curConversationRow[this.testData.headersConversation[0]], // Float Time value in seconds
-            speaker: this.sk.core.cleanSpeaker(curConversationRow[this.testData.headersConversation[1]]), // String name of speaker
+            speaker: this.testData.cleanSpeaker(curConversationRow[this.testData.headersConversation[1]]), // String name of speaker
             talkTurn: curConversationRow[this.testData.headersConversation[2]] // String text of conversation turn
         }
     }
