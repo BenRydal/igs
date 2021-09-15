@@ -192,7 +192,7 @@ class SketchController {
     }
 
     testVideoAndDivAreLoaded() {
-        return (this.sk.testData.dataIsLoaded(this.sk.videoPlayer) && this.sk.videoPlayer.getIsLoaded());
+        return (this.sk.dataIsLoaded(this.sk.videoPlayer) && this.sk.videoPlayer.getIsLoaded());
     }
 
     /**

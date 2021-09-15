@@ -31,7 +31,7 @@ class Core {
 
     updatePaths(pathName, movementPointArray, conversationPointArray) {
         let curPathColor;
-        if (this.sk.testData.arrayIsLoaded(this.speakerList)) curPathColor = this.setPathColorBySpeaker(pathName); // if conversation file loaded, send to method to calculate color
+        if (this.sk.arrayIsLoaded(this.speakerList)) curPathColor = this.setPathColorBySpeaker(pathName); // if conversation file loaded, send to method to calculate color
         else curPathColor = this.COLOR_LIST[this.pathList.length % this.COLOR_LIST.length]; // if no conversation file loaded path color is next in Color list
         this.pathList.push(this.createPath(pathName, movementPointArray, conversationPointArray, curPathColor, true));
         this.pathList.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching core.speakerList array

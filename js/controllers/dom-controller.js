@@ -166,7 +166,7 @@ class DomController {
     }
 
     clearCurVideo() {
-        if (this.sk.testData.dataIsLoaded(this.sk.videoPlayer)) { // if there is a video, destroy it
+        if (this.sk.dataIsLoaded(this.sk.videoPlayer)) { // if there is a video, destroy it
             this.sk.videoPlayer.destroy();
             this.sk.videoPlayer = null;
             this.sk.sketchController.setIsVideoPlay(false);

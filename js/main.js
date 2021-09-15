@@ -43,9 +43,9 @@ const igs = new p5((sk) => {
         sk.translate(-sk.width / 2, -sk.height / 2, 0); // always recenter canvas to top left when using WEBGL renderer
         sk.sketchController.update3DTranslation();
         sk.background(255);
-        if (sk.testData.dataIsLoaded(sk.core.inputFloorPlan.getImg())) sk.sketchController.setFloorPlan();
-        if (sk.testData.arrayIsLoaded(sk.core.pathList)) {
-            if (sk.testData.arrayIsLoaded(sk.core.speakerList)) sk.setMovementAndConversation();
+        if (sk.dataIsLoaded(sk.core.inputFloorPlan.getImg())) sk.sketchController.setFloorPlan();
+        if (sk.arrayIsLoaded(sk.core.pathList)) {
+            if (sk.arrayIsLoaded(sk.core.speakerList)) sk.setMovementAndConversation();
             else sk.setMovement();
         }
         if (sk.sketchController.testVideoAndDivAreLoaded()) sk.sketchController.updateVideoDisplay();
@@ -124,5 +124,19 @@ const igs = new p5((sk) => {
 
     sk.overRect = function (x, y, boxWidth, boxHeight) {
         return sk.mouseX >= x && sk.mouseX <= x + boxWidth && sk.mouseY >= y && sk.mouseY <= y + boxHeight;
+    }
+
+    /**
+     * @param  {Any Type} data
+     */
+    sk.dataIsLoaded = function (data) {
+        return data != null; // in javascript this tests for both undefined and null values
+    }
+
+    /**
+     * @param  {Any Type} data
+     */
+    sk.arrayIsLoaded = function (data) {
+        return Array.isArray(data) && data.length;
     }
 });

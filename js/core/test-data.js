@@ -6,22 +6,6 @@ class TestData {
     }
 
     /**
-     * Returns false if parameter is undefined or null
-     * @param  {Any Type} data
-     */
-    dataIsLoaded(data) {
-        return data != null; // in javascript this tests for both undefined and null values
-    }
-
-    /**
-     * Tests if parameter is an array with length
-     * @param  {Any Type} data
-     */
-    arrayIsLoaded(data) {
-        return Array.isArray(data) && data.length;
-    }
-
-    /**
      * @param  {PapaParse Results []} results
      */
     testParsedMovementResults(results) {
