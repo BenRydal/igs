@@ -25,7 +25,7 @@ class Core {
     updateConversationData() {
         this.updateSpeakerList(this.parseConversation.getParsedConversationArray());
         this.speakerList.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching core.pathList array
-        this.parseMovement.reProcessFiles(); // must reprocess movement
+        this.parseMovement.reProcessPointArrays(); // must reprocess movement
         this.sk.sketchController.startLoop(); // rerun P5 draw loop
     }
 

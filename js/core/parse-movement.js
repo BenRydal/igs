@@ -2,7 +2,7 @@ class ParseMovement {
 
     constructor(sketch) {
         this.sk = sketch;
-        //this.headers = ['time', 'x', 'y'];
+        this.HEADERS = ['time', 'x', 'y'];
         this.parsedMovementFileData = []; // List that holds objects containing a parsed results.data array and character letter indicating path name from Papa Parsed CSV file
     }
 
@@ -56,12 +56,12 @@ class ParseMovement {
 
     processFiles(results, file, fileNum) {
         console.log("Parsing complete:", results, file);
-        if (this.sk.testData.movementResults(results)) {
+        if (this.testParsedResults(results)) {
             if (fileNum === 0) this.clear(); // clear existing movement data for first new file only
             const pathName = this.sk.core.cleanPathName(file.name);
             this.updateParsedMovementFileData(results.data, pathName);
             this.updatePointArrays(results.data, pathName);
-        } else alert("Error loading movement file. Please make sure your file is a .CSV file formatted with column headers: " + this.sk.testData.CSVHEADERS_MOVEMENT.toString());
+        } else alert("Error loading movement file. Please make sure your file is a .CSV file formatted with column headers: " + this.HEADERS.toString());
     }
 
     updateParsedMovementFileData(resultsArray, pathName) {
@@ -76,7 +76,7 @@ class ParseMovement {
         this.sk.core.updateMovementData(pathName, movementPointArray, conversationPointArray);
     }
 
-    reProcessFiles() {
+    reProcessPointArrays() {
         for (const index of this.parsedMovementFileData) {
             const [movementPointArray, conversationPointArray] = this.createPointArrays(index.parsedMovementArray, this.sk.core.parseConversation.getParsedConversationArray());
             this.sk.core.updatePaths(index.firstCharOfFileName, movementPointArray, conversationPointArray);
@@ -89,64 +89,108 @@ class ParseMovement {
      *  @param  {PapaParse Results []} results
      */
     createPointArrays(parsedMovementArray, parsedConversationArray) {
-        let movementPointArray = []; // Create empty arrays to hold MovementPoint and ConversationPoint objects
+        let movementPointArray = [];
         let conversationPointArray = [];
         let conversationCounter = 0; // Current row count of conversation file for comparison
-        for (let i = 0; i < parsedMovementArray.length; i++) {
-            // Sample current movement row and test if row is good data
-            if (this.sk.testData.sampleMovementData(parsedMovementArray, i) && this.sk.testData.movementRowForType(parsedMovementArray, i)) {
-                const m = this.createMovementPoint(parsedMovementArray[i][this.sk.testData.CSVHEADERS_MOVEMENT[1]], parsedMovementArray[i][this.sk.testData.CSVHEADERS_MOVEMENT[2]], parsedMovementArray[i][this.sk.testData.CSVHEADERS_MOVEMENT[0]]);
-                if (movementPointArray.length === 0) m.isStopped = true; // set isStopped value based on comparison to prior point unless it is 1st point
-                else m.isStopped = this.pointsHaveSamePosition(m, movementPointArray[movementPointArray.length - 1]);
-                movementPointArray.push(m); // add good data to movement []
-                if (this.sk.testData.arrayIsLoaded(parsedConversationArray) && conversationCounter < parsedConversationArray.length) {
-                    // Test conversation data row for quality first and then compare movement and conversation times to see if closest movement data to conversation time
-                    if (this.sk.testData.conversationRowForType(parsedConversationArray, conversationCounter) && m.time >= parsedConversationArray[conversationCounter][this.sk.testData.CSVHEADERS_CONVERSATION[0]]) {
-                        const c = this.getCurConversationValues(parsedConversationArray, conversationCounter);
-                        conversationPointArray.push(this.createConversationPoint(m, c));
+        for (let i = 1; i < parsedMovementArray.length; i++) {
+            const rows = this.createCompareRow(parsedMovementArray[i], parsedMovementArray[i - 1]); // create object to hold current and prior points as well as pixel positions
+            if (this.movementRowForType(rows.curRow) && this.compareCurAndPriorTime(rows)) {
+                const m = this.createMovementPoint(rows.curRow, movementPointArray);
+                movementPointArray.push(m);
+                if (this.testIsLoadedAndCounter(parsedConversationArray, conversationCounter)) {
+                    const curConversationRow = parsedConversationArray[conversationCounter];
+                    if (this.typeTestAndCompareMovementTime(curConversationRow, m.time)) {
+                        conversationPointArray.push(this.createConversationPoint(m, curConversationRow));
                         conversationCounter++;
-                    } else if (!this.sk.testData.conversationRowForType(parsedConversationArray, conversationCounter)) conversationCounter++; // make sure to increment counter if bad data to skip row in next iteration of loop
+                    } else if (!this.zzzConversationRowForType(curConversationRow)) conversationCounter++; // make sure to increment counter if bad data to skip row in next iteration of loop
                 }
             }
         }
         return [movementPointArray, conversationPointArray];
     }
 
-    pointsHaveSamePosition(curPoint, priorPoint) {
-        return (curPoint.xPos === priorPoint.xPos && curPoint.yPos === priorPoint.yPos);
+
+    /**
+     * Test if results array has data, correct file headers, and at least one row of correctly typed data
+     * @param  {PapaParse Results []} results
+     */
+    testParsedResults(results) {
+        return results.data.length > 1 && this.sk.testData.includesAllHeaders(results.meta.fields, this.HEADERS) && this.hasOneCleanRow(results.data);
     }
 
-    getCurConversationValues(parsedConversationArray, conversationCounter) {
+    /**
+     * Tests if at least one row of correctly typed data in PapaParse data array
+     * Returns true on first row of PapaParse data array that has all correctly typed data for movement headers
+     * @param  {PapaParse results.data []} data
+     */
+    hasOneCleanRow(parsedMovementArray) {
+        for (const curRow of parsedMovementArray) {
+            if (this.movementRowForType(curRow)) return true;
+        }
+        return false;
+    }
+
+    compareCurAndPriorTime(rows) {
+        return Number.parseFloat(rows.curRow[this.HEADERS[0]]).toFixed(1) > Number.parseFloat(rows.priorRow[this.HEADERS[0]]).toFixed(1);
+    }
+
+    movementRowForType(curRow) {
+        return typeof curRow[this.HEADERS[0]] === 'number' && typeof curRow[this.HEADERS[1]] === 'number' && typeof curRow[this.HEADERS[2]] === 'number';
+    }
+
+    testIsLoadedAndCounter(parsedConversationArray, conversationCounter) {
+        return this.sk.testData.arrayIsLoaded(parsedConversationArray) && conversationCounter < parsedConversationArray.length;
+    }
+
+    typeTestAndCompareMovementTime(curConversationRow, movementPointTime) {
+        return this.zzzConversationRowForType(curConversationRow) && movementPointTime >= curConversationRow[this.sk.testData.CSVHEADERS_CONVERSATION[0]];
+    }
+
+    // TODO: REMOVE!!!!
+    // Tests if current conversation row is less than total rows in table and if time is number and speaker is string and talk turn is not null or undefined
+    zzzConversationRowForType(curRow) {
+        return typeof curRow[this.sk.testData.CSVHEADERS_CONVERSATION[0]] === 'number' && typeof curRow[this.sk.testData.CSVHEADERS_CONVERSATION[1]] === 'string' && curRow[this.sk.testData.CSVHEADERS_CONVERSATION[2]] != null;
+    }
+
+    createCompareRow(curRow, priorRow) {
         return {
-            time: parsedConversationArray[conversationCounter][this.sk.testData.CSVHEADERS_CONVERSATION[0]],
-            speaker: this.sk.core.cleanSpeaker(parsedConversationArray[conversationCounter][this.sk.testData.CSVHEADERS_CONVERSATION[1]]),
-            talkTurn: parsedConversationArray[conversationCounter][this.sk.testData.CSVHEADERS_CONVERSATION[2]]
+            curRow,
+            priorRow
         }
     }
 
     /**
      * Represents a location in space and time along a path
      */
-    createMovementPoint(xPos, yPos, time) {
+    createMovementPoint(curRow, movementPointArray) {
         return {
-            xPos, // Float x and y pixel positions on floor plan
-            yPos,
-            time, // Float time value in seconds
-            isStopped: null // value set after comparing to previous point in createPointArrays
+            xPos: curRow[this.HEADERS[1]],
+            yPos: curRow[this.HEADERS[2]],
+            time: curRow[this.HEADERS[0]],
+            isStopped: this.testIsStopped(curRow, movementPointArray)
         }
+    }
+
+    testIsStopped(curRow, movementPointArray) {
+        if (movementPointArray.length === 0) return true; // if it has not been filled, return true for isStopped value
+        else return this.pointsHaveSamePosition(curRow, movementPointArray[movementPointArray.length - 1]);
+    }
+
+    pointsHaveSamePosition(curRow, lastMovementPoint) {
+        return curRow[this.HEADERS[1]] === lastMovementPoint.xPos && curRow[this.HEADERS[2]] === lastMovementPoint.yPos;
     }
 
     /**
      * Represents a single conversation turn with a location in space and time, text values, name of a speaker, and what they said
      */
-    createConversationPoint(m, c) {
+    createConversationPoint(movementPoint, curConversationRow) {
         return {
-            xPos: m.xPos, // Float x and y pixel positions on floor plan
-            yPos: m.yPos,
-            isStopped: m.isStopped,
-            time: c.time, // Float Time value in seconds
-            speaker: c.speaker, // String name of speaker
-            talkTurn: c.talkTurn // String text of conversation turn
+            xPos: movementPoint.xPos, // Float x and y pixel positions on floor plan
+            yPos: movementPoint.yPos,
+            isStopped: movementPoint.isStopped,
+            time: curConversationRow[this.sk.testData.CSVHEADERS_CONVERSATION[0]], // Float Time value in seconds
+            speaker: this.sk.core.cleanSpeaker(curConversationRow[this.sk.testData.CSVHEADERS_CONVERSATION[1]]), // String name of speaker
+            talkTurn: curConversationRow[this.sk.testData.CSVHEADERS_CONVERSATION[2]] // String text of conversation turn
         }
     }
 
