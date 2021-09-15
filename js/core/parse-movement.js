@@ -99,7 +99,7 @@ class ParseMovement {
                 movementPointArray.push(m);
                 if (conversationCounter < parsedConversationArray.length) { // this test both makes sure conversationArray is loaded and counter is not great than length
                     const curConversationRow = parsedConversationArray[conversationCounter];
-                    if (this.testData.conversationRowForType(curConversationRow) && m.time >= curConversationRow[this.testData.headersConversation[0]]) {
+                    if (this.testData.conversationRowForType(curConversationRow) && this.testData.movementTimeIsLarger(m.time, curConversationRow)) {
                         conversationPointArray.push(this.createConversationPoint(m, curConversationRow));
                         conversationCounter++;
                     } else if (!this.testData.conversationRowForType(curConversationRow)) conversationCounter++; // make sure to increment counter if bad data to skip row in next iteration of loop

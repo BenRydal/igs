@@ -49,6 +49,10 @@ class TestData {
         return Number.parseFloat(rows.curRow[this.headersMovement[0]]).toFixed(1) > Number.parseFloat(rows.priorRow[this.headersMovement[0]]).toFixed(1);
     }
 
+    movementTimeIsLarger(movementTime, curRow) {
+        return movementTime >= curRow[this.headersConversation[0]];
+    }
+
     isStopped(curRow, movementPointArray) {
         if (movementPointArray.length === 0) return true; // if it has not been filled, return true for isStopped value
         else return this.pointsHaveSamePosition(curRow, movementPointArray[movementPointArray.length - 1]);
