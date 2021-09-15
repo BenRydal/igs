@@ -120,9 +120,9 @@ class ParseMovement {
      */
     createMovementPoint(curRow, movementPointArray) {
         return {
+            time: curRow[this.sk.testData.headersMovement[0]],
             xPos: curRow[this.sk.testData.headersMovement[1]],
             yPos: curRow[this.sk.testData.headersMovement[2]],
-            time: curRow[this.sk.testData.headersMovement[0]],
             isStopped: this.sk.testData.isStopped(curRow, movementPointArray)
         }
     }
