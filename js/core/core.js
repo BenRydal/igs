@@ -2,13 +2,13 @@ class Core {
 
     constructor(sketch) {
         this.sk = sketch;
-        this.testData = new TestData();
-        this.parseMovement = new ParseMovement(this.sk, this.testData);
-        this.parseConversation = new ParseConversation(this.sk, this.testData);
-        this.speakerList = []; // List that holds Speaker objects parsed from conversation file
-        this.pathList = []; // List of path objects that hold movement and conversation point arrays
-        this.inputFloorPlan = new InputFloorPlan(this.sk);
-        this.totalTimeInSeconds = 0; // Number indicating time value in seconds that all displayed data is set to, set dynamically in processMovement methods
+        this.testData = new TestData(); // encapsulates various tests for parsing data
+        this.parseMovement = new ParseMovement(this.sk, this.testData); // holds loaded movement file(s) and parsing methods
+        this.parseConversation = new ParseConversation(this.sk, this.testData); // holds loaded conversation file and parsing methods
+        this.speakerList = []; // List of Speaker objects used in program created from conversation file
+        this.pathList = []; // List of Path objects used in program created from movement file
+        this.inputFloorPlan = new InputFloorPlan(this.sk); // holds floorplan image and associated methods
+        this.totalTimeInSeconds = 0; // Number indicating time value in seconds that all displayed data is set to, set dynamically by parseMovement
         this.COLOR_LIST = ['#6a3d9a', '#ff7f00', '#33a02c', '#1f78b4', '#e31a1c', '#ffff99', '#b15928', '#cab2d6', '#fdbf6f', '#b2df8a', '#a6cee3', '#fb9a99']; // 12 Class Paired: (Dark) purple, orange, green, blue, red, yellow, brown, (Light) lPurple, lOrange, lGreen, lBlue, lRed
     }
 
@@ -58,7 +58,7 @@ class Core {
 
     /**
      * If path has corresponding speaker, returns color that matches speaker
-     * Otherwise returns color from global this.COLOR_LIST based on num of speakers + numOfPaths that do not have corresponding speaker
+     * Otherwise returns color from colorList based on num of speakers + numOfPaths that do not have corresponding speaker
      * @param  {char} pathName
      */
     setPathColorBySpeaker(pathName) {

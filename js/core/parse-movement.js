@@ -2,20 +2,21 @@ class ParseMovement {
 
     constructor(sketch, testData) {
         this.sk = sketch;
-        this.testData = testData;
-        this.parsedMovementFileData = []; // List that holds objects containing a parsed results.data array and character letter indicating path name from Papa Parsed CSV file
+        this.testData = testData; // holds various data tests for parsing and processing
+        this.parsedMovementFileData = []; // List holds objects containing a parsed results.data array and character letter indicating path name from Papa Parsed CSV file
     }
 
     /**
      * Prepare for parsing. Important for binding this to callback
-     * @param  {.CSV File[]} fileList
+     * @param  {CSV File[]} fileList
      */
     prepFiles(fileList) {
         this.parseFiles(fileList, this.processFiles.bind(this));
     }
 
     /**
-     * Handles async loading of movement files. NOTE: folder and filename are separated for convenience later in program
+     * Handles async loading of movement files. 
+     * NOTE: folder and filename are separated for convenience later in program
      * @param  {String} folder
      * @param  {String} fileNames
      */
@@ -37,7 +38,6 @@ class ParseMovement {
     }
 
     /**
-     * Parse input files and send to processData method
      * @param  {.CSV File[]} fileList
      */
     parseFiles(fileList, callback) {
@@ -84,8 +84,8 @@ class ParseMovement {
     }
 
     /**
-     * Returns clean movement and conversation arrays of MovementPoint and ConversationPoint objects
-     * Location data for conversation array is drawn from comparison to movement file/results data
+     * Returns clean arrays of MovementPoint and ConversationPoint objects
+     * Location data for conversation array is drawn from comparison to movementPoint array
      *  @param  {PapaParse Results []} results
      */
     createPointArrays(parsedMovementArray, parsedConversationArray) {
@@ -93,7 +93,7 @@ class ParseMovement {
         let conversationPointArray = [];
         let conversationCounter = 0; // Current row count of conversation file for comparison
         for (let i = 1; i < parsedMovementArray.length; i++) {
-            const rows = this.createCompareRow(parsedMovementArray[i], parsedMovementArray[i - 1]); // create object to hold current and prior points as well as pixel positions
+            const rows = this.createCompareRow(parsedMovementArray[i], parsedMovementArray[i - 1]); // create object to hold current and prior points
             if (this.testData.movementRowForType(rows.curRow) && this.testData.curTimeIsLarger(rows)) {
                 const m = this.createMovementPoint(rows.curRow, movementPointArray);
                 movementPointArray.push(m);
@@ -108,7 +108,9 @@ class ParseMovement {
         }
         return [movementPointArray, conversationPointArray];
     }
-
+    /**
+     * Comparing cur and prior rows important to sample data and evaluate isStopped points
+     */
     createCompareRow(curRow, priorRow) {
         return {
             curRow,
@@ -117,7 +119,7 @@ class ParseMovement {
     }
 
     /**
-     * Represents a location in space and time along a path
+     * Represents a location in space and time along a path with additional attributes
      */
     createMovementPoint(curRow, movementPointArray) {
         return {

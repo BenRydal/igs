@@ -2,8 +2,8 @@ class ParseConversation {
 
     constructor(sketch, testData) {
         this.sk = sketch;
-        this.testData = testData;
-        this.parsedFileArray = []; // List that holds objects containing a parsed results.data array and character letter indicating path name from Papa Parsed CSV file
+        this.testData = testData; // holds various data tests for parsing and processing
+        this.parsedFileArray = []; // List that holds results.data array from Papa Parsed CSV file
     }
 
     /**
@@ -15,7 +15,8 @@ class ParseConversation {
     }
 
     /**
-     * Handles async loading of conversation file. NOTE: folder and filename are separated for convenience later in program
+     * Handles async loading of conversation file. 
+     * NOTE: folder and filename are separated for convenience later in program
      * @param  {String} folder
      * @param  {String} fileName
      */
@@ -35,8 +36,7 @@ class ParseConversation {
     }
 
     /**
-     * Parse input files and send to processData method
-     * @param  {.CSV File} file
+     * @param  {CSV File} file
      */
     parseFile(file, callback) {
         Papa.parse(file, {
