@@ -103,7 +103,7 @@ class SketchController {
      */
     setFloorPlan() {
         const container = this.sk.gui.getFloorPlanContainer();
-        switch (this.getRotationMode()) {
+        switch (this.curFloorPlanRotation) {
             case 0:
                 this.sk.drawFloorPlan(container.width, container.height);
                 break;
@@ -137,7 +137,7 @@ class SketchController {
     getScaledPos(point, view) {
         const timelineXPos = this.mapTotalTimeToPixelTime(point.time);
         const selTimelineXPos = this.mapSelectTimeToPixelTime(timelineXPos);
-        const [floorPlanXPos, floorPlanYPos] = this.sk.core.inputFloorPlan.getScaledXYPos(point.xPos, point.yPos, this.sk.gui.getFloorPlanContainer(), this.getRotationMode());
+        const [floorPlanXPos, floorPlanYPos] = this.sk.core.inputFloorPlan.getScaledXYPos(point.xPos, point.yPos, this.sk.gui.getFloorPlanContainer(), this.curFloorPlanRotation);
         return {
             timelineXPos,
             selTimelineXPos,
@@ -250,10 +250,6 @@ class SketchController {
 
     setIsVideoShow(value) {
         this.mode.isVideoShow = value;
-    }
-
-    getRotationMode() {
-        return this.curFloorPlanRotation;
     }
 
     setRotateRight() {
