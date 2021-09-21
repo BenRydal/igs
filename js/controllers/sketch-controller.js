@@ -106,18 +106,19 @@ class SketchController {
      * Organizes floor plan drawing methods with and without rotation
      */
     setFloorPlan() {
+        const [width, height] = [this.sk.gui.floorPlanContainer.width, this.sk.gui.floorPlanContainer.height];
         switch (this.getRotationMode()) {
             case 0:
-                this.sk.drawFloorPlan(this.sk.gui.floorPlanContainer.width, this.sk.gui.floorPlanContainer.height);
+                this.sk.drawFloorPlan(width, height);
                 break;
             case 1:
-                this.sk.drawRotatedFloorPlan(this.sk.HALF_PI, this.sk.gui.floorPlanContainer.height, this.sk.gui.floorPlanContainer.width);
+                this.sk.drawRotatedFloorPlan(this.sk.HALF_PI, height, width);
                 break;
             case 2:
-                this.sk.drawRotatedFloorPlan(this.sk.PI, this.sk.gui.floorPlanContainer.width, this.sk.gui.floorPlanContainer.height);
+                this.sk.drawRotatedFloorPlan(this.sk.PI, width, height);
                 break;
             case 3:
-                this.sk.drawRotatedFloorPlan(-this.sk.HALF_PI, this.sk.gui.floorPlanContainer.height, this.sk.gui.floorPlanContainer.width);
+                this.sk.drawRotatedFloorPlan(-this.sk.HALF_PI, height, width);
                 break;
         }
     }
