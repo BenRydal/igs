@@ -20,14 +20,14 @@ class Core {
     updateMovementData(pathName, movementPointArray, conversationPointArray) {
         this.updatePaths(pathName, movementPointArray, conversationPointArray);
         this.updateTotalTime(movementPointArray);
-        this.sk.sketchController.startLoop(); // rerun P5 draw loop
+        this.sk.loop(); // rerun P5 draw loop
     }
 
     updateConversationData() {
         this.updateSpeakerList(this.parseConversation.getParsedConversationArray());
         this.speakerList.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching core.pathList array
         this.parseMovement.reProcessPointArrays(); // must reprocess movement
-        this.sk.sketchController.startLoop(); // rerun P5 draw loop
+        this.sk.loop(); // rerun P5 draw loop
     }
 
     updatePaths(pathName, movementPointArray, conversationPointArray) {

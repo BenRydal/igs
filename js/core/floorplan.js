@@ -15,7 +15,7 @@ class InputFloorPlan {
         this.sk.loadImage(filePath, img => {
             console.log("Floor Plan Image Loaded");
             img.onload = () => URL.revokeObjectURL(this.src);
-            this.sk.sketchController.startLoop(); // rerun P5 draw loop after loading image
+            this.sk.loop(); // rerun P5 draw loop after loading image
             this.img = img;
             this.width = img.width;
             this.height = img.height;

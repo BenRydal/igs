@@ -22,10 +22,6 @@ class SketchController {
         else this.sk.noLoop();
     }
 
-    startLoop() {
-        this.sk.loop();
-    }
-
     handleMousePressed() {
         if (this.testVideoToPlay()) this.playPauseMovie();
         else this.sk.gui.handleKeys(this.sk.core.pathList, this.sk.core.speakerList);

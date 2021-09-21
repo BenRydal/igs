@@ -102,19 +102,19 @@ const igs = new p5((sk) => {
 
     sk.mousePressed = function () {
         sk.sketchController.handleMousePressed();
-        sk.sketchController.startLoop();
+        sk.loop();
     }
 
     sk.mouseDragged = function () {
         sk.sketchController.handleMouseDragged();
-        sk.sketchController.startLoop();
+        sk.loop();
     }
     sk.mouseReleased = function () {
         sk.sketchController.handleMouseReleased();
-        sk.sketchController.startLoop();
+        sk.loop();
     }
     sk.mouseMoved = function () {
-        sk.sketchController.startLoop();
+        sk.loop();
     }
 
     sk.overCircle = function (x, y, diameter) {
