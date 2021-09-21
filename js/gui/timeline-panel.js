@@ -70,22 +70,25 @@ class TimelinePanel {
         this.sk.textAlign(this.sk.LEFT); // reset
     }
 
-    drawSlicer() {
+    setSlicerStroke() {
         this.sk.fill(0);
         this.sk.stroke(0);
         this.sk.strokeWeight(2);
+    }
+
+    drawLongSlicer() {
+        this.setSlicerStroke();
         this.sk.line(this.sk.mouseX, 0, this.sk.mouseX, this.height);
     }
 
-    draw3DSlicerLine() {
-        this.sk.fill(0);
-        this.sk.stroke(0);
-        this.sk.strokeWeight(2);
+    drawShortSlicer() {
+        this.setSlicerStroke();
         this.sk.line(this.sk.mouseX, this.top, this.sk.mouseX, this.bottom);
     }
 
     draw3DSlicerRect(fpWidth, fpHeight, zPos) {
         this.sk.fill(255, 50);
+        this.sk.stroke(0);
         this.sk.strokeWeight(1);
         this.sk.quad(0, 0, zPos, fpWidth, 0, zPos, fpWidth, fpHeight, zPos, 0, fpHeight, zPos);
     }

@@ -29,13 +29,12 @@ class GUI {
     }
 
     updateTimelineSlicer() {
-        if (this.sk.sketchController.view3D.getIsShowing()) {
-            this.timelinePanel.draw3DSlicerLine();
-            this.sk.sketchController.update3DCanvas(); // must translate canvas to draw slicer in 3D properly
-            this.timelinePanel.draw3DSlicerRect(this.floorPlanContainer.width, this.floorPlanContainer.height, this.sk.sketchController.mapToSelectTimeThenPixelTime(this.sk.mouseX)); // pass zPos
-            this.sk.pop(); // reset translation
-        } else this.timelinePanel.drawSlicer();
+        if (this.sk.sketchController.view3D.getIsShowing()) this.timelinePanel.drawShortSlicer();
+        else this.timelinePanel.drawLongSlicer();
+    }
 
+    draw3DSlicerRect() {
+        if (this.overSpaceTimeView(this.sk.mouseX, this.sk.mouseY)) this.timelinePanel.draw3DSlicerRect(this.floorPlanContainer.width, this.floorPlanContainer.height, this.sk.sketchController.mapToSelectTimeThenPixelTime(this.sk.mouseX)); // pass mapped mouseX as zPos
     }
 
     drawFloorPlanCursorSelector() {

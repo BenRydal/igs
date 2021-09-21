@@ -127,10 +127,6 @@ class SketchController {
         this.view3D.update3DTranslation();
     }
 
-    update3DCanvas() {
-        this.sk.translate3DCanvas(this.view3D.getCurPositions());
-    }
-
     translationComplete() {
         return this.view3D.getIsShowing() || this.view3D.getIsTransitioning();
     }
