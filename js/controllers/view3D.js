@@ -4,7 +4,7 @@ class View3D {
      */
     constructor(sketch) {
         this.sk = sketch;
-        this.isShowing = false;
+        this.isShowing = true;
         this.isTransitioning = false;
         this.translate = {
             zoom: -(this.sk.height / 1.5),
@@ -13,10 +13,10 @@ class View3D {
             rotateX: this.sk.PI / 2.3
         }
         this.cur = {
-            zoom: 0,
-            xPos: 0,
-            yPos: 0,
-            rotateX: 0
+            zoom: this.translate.zoom,
+            xPos: this.translate.xPos,
+            yPos: this.translate.yPos,
+            rotateX: this.translate.rotateX
         }
     }
 

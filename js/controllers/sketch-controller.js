@@ -11,7 +11,7 @@ class SketchController {
             isVideoShow: false
         }
         this.view3D = new View3D(this.sk);
-        this.curFloorPlanRotation = 0; // [0-3] 4 rotation modes none, 90, 180, 270
+        this.curFloorPlanRotation = 1; // [0-3] 4 rotation modes none, 90, 180, 270
         this.animationCounter = 0; // counter to synchronize animation across all data
         this.bugTimeForVideoScrub = null; // Set in draw movement data and used to display correct video frame when scrubbing video
     }
