@@ -173,7 +173,7 @@ class SketchController {
      * @param  {MovementPoint} curPoint
      */
     testPointIsShowing(curPoint) {
-        return this.sk.gui.overTimelineAxis(curPoint.timelineXPos) && this.sk.gui.overFloorPlan(curPoint.floorPlanXPos, curPoint.floorPlanYPos) && this.testAnimation(curPoint.timelineXPos);
+        return this.sk.gui.overTimelineAxis(curPoint.timelineXPos) && this.testAnimation(curPoint.timelineXPos);
     }
 
     /**
