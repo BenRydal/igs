@@ -41,7 +41,7 @@ const igs = new p5((sk) => {
         sk.translate(-sk.width / 2, -sk.height / 2, 0); // always recenter canvas to top left when using WEBGL renderer
         sk.sketchController.update3DTranslation();
         sk.background(255);
-        if (sk.dataIsLoaded(sk.core.inputFloorPlan.getImg())) sk.setFloorPlan();
+        if (sk.dataIsLoaded(sk.core.inputFloorPlan.getImg())) sk.sketchController.setFloorPlan();
         if (sk.arrayIsLoaded(sk.core.pathList)) {
             if (sk.arrayIsLoaded(sk.core.speakerList)) sk.setMovementAndConversation();
             else sk.setMovement();
@@ -67,26 +67,6 @@ const igs = new p5((sk) => {
         sk.rotateX(curPos.rotateX);
     }
 
-    /**
-     * Organizes floor plan drawing methods with and without rotation
-     */
-    sk.setFloorPlan = function () {
-        switch (sk.sketchController.getRotationMode()) {
-            case 0:
-                sk.drawFloorPlan(sk.gui.floorPlanContainer.width, sk.gui.floorPlanContainer.height);
-                break;
-            case 1:
-                sk.drawRotatedFloorPlan(sk.HALF_PI, sk.gui.floorPlanContainer.height, sk.gui.floorPlanContainer.width);
-                break;
-            case 2:
-                sk.drawRotatedFloorPlan(sk.PI, sk.gui.floorPlanContainer.width, sk.gui.floorPlanContainer.height);
-                break;
-            case 3:
-                sk.drawRotatedFloorPlan(-sk.HALF_PI, sk.gui.floorPlanContainer.height, sk.gui.floorPlanContainer.width);
-                break;
-        }
-    }
-
     sk.drawFloorPlan = function (width, height) {
         sk.image(sk.core.inputFloorPlan.getImg(), 0, 0, width, height);
     }
@@ -96,7 +76,7 @@ const igs = new p5((sk) => {
         sk.imageMode(sk.CENTER); // important method to include here
         sk.translate(sk.gui.floorPlanContainer.width / 2, sk.gui.floorPlanContainer.height / 2);
         sk.rotate(angle);
-        sk.image(sk.core.inputFloorPlan.getImg(), 0, 0, width, height);
+        sk.drawFloorPlan(width, height);
         sk.pop();
     }
 
