@@ -18,7 +18,7 @@ class SketchController {
 
     // ****** P5 HANDLERS ****** //
     updateLoop() {
-        if (this.mode.isAnimate || this.mode.isVideoPlay || this.view3D.isTransitioning) this.sk.loop();
+        if (this.mode.isAnimate || this.mode.isVideoPlay || this.view3D.getIsTransitioning()) this.sk.loop();
         else this.sk.noLoop();
     }
 
@@ -138,7 +138,7 @@ class SketchController {
     getViewXPos(view, floorPlanXPos, selTimelineXPos) {
         if (view === this.sk.PLAN) return floorPlanXPos;
         else if (view === this.sk.SPACETIME) {
-            if (this.view3D.isShowing === true) return floorPlanXPos;
+            if (this.view3D.getIsShowing()) return floorPlanXPos;
             else return selTimelineXPos;
         } else return null;
     }
@@ -146,7 +146,7 @@ class SketchController {
     getZPos(view, selTimelineXPos) {
         if (view === this.sk.PLAN) return 0;
         else {
-            if (this.view3D.isShowing) return selTimelineXPos;
+            if (this.view3D.getIsShowing()) return selTimelineXPos;
             else return 0;
         }
     }
@@ -207,7 +207,7 @@ class SketchController {
     }
 
     mapSelectTimeToPixelTime(value) {
-        if (this.view3D.isShowing) return this.sk.map(value, this.sk.gui.getCurTimelineSelectStart(), this.sk.gui.getCurTimelineSelectEnd(), this.sk.height / 10, this.sk.height / 1.6);
+        if (this.view3D.getIsShowing()) return this.sk.map(value, this.sk.gui.getCurTimelineSelectStart(), this.sk.gui.getCurTimelineSelectEnd(), this.sk.height / 10, this.sk.height / 1.6);
         else return this.sk.map(value, this.sk.gui.getCurTimelineSelectStart(), this.sk.gui.getCurTimelineSelectEnd(), this.sk.gui.getTimelineStart(), this.sk.gui.getTimelineEnd());
     }
 

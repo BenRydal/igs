@@ -30,10 +30,6 @@ class View3D {
         }
     }
 
-    getCurPositions() {
-        return this.cur;
-    }
-
     updatePositions() {
         let isRunning = false;
         this.cur.zoom = this.translate.zoom;
@@ -74,5 +70,9 @@ class View3D {
 
     getIsTransitioning() {
         return this.isTransitioning;
+    }
+
+    getCurPositions() {
+        return this.cur;
     }
 }
