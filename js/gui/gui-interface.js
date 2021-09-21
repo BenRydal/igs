@@ -4,12 +4,7 @@ class GUI {
         this.sk = sketch;
         this.timelinePanel = new TimelinePanel(this.sk);
         this.dataPanel = new DataPanel(this.sk, this.timelinePanel.getBottom());
-        this.floorPlanContainer = {
-            width: this.getTimelineStart() - (this.sk.width - this.getTimelineEnd()),
-            height: this.getTimelineHeight(),
-            slicerSize: 25,
-            selectorSize: 100
-        }
+        this.fpContainer = new FloorPlanContainer(this.sk, this.getTimelineStart(), this.getTimelineEnd(), this.getTimelineHeight());
         this.keyTextSize = this.sk.width / 70;
         this.introMsg = "INTERACTION GEOGRAPHY SLICER (IGS)\n\nby Ben Rydal Shapiro & contributors\nbuilt with p5.js & JavaScript\n\nHi There! This is a tool to visualize movement, conversation, and video data over space and time. Data are displayed over a floor plan and a timeline and can be viewed in 2D or 3D. Use the top menu to visualize different sample datasets or upload your own data. Use the top and bottom left buttons as well as the timeline to selectively study displayed data. For example, you can animate data, visualize conversation in different ways, and interact with video data by clicking anywhere on the timeline to play & pause video. For more information see: benrydal.com/software/igs";
     }
@@ -24,8 +19,8 @@ class GUI {
     }
 
     updateFloorPlanSelector() {
-        if (this.getCurSelectTab() === 1) this.drawFloorPlanCursorSelector();
-        else if (this.getCurSelectTab() === 2) this.drawFloorPlanSlicerSelector();
+        if (this.getCurSelectTab() === 1) this.fpContainer.drawFloorPlanCursorSelector();
+        else if (this.getCurSelectTab() === 2) this.fpContainer.drawFloorPlanSlicerSelector();
     }
 
     updateTimelineSlicer() {
@@ -33,25 +28,8 @@ class GUI {
         else this.timelinePanel.drawLongSlicer();
     }
 
-    draw3DSlicerRect() {
-        if (this.overSpaceTimeView(this.sk.mouseX, this.sk.mouseY)) this.timelinePanel.draw3DSlicerRect(this.floorPlanContainer.width, this.floorPlanContainer.height, this.sk.sketchController.mapToSelectTimeThenPixelTime(this.sk.mouseX)); // pass mapped mouseX as zPos
-    }
-
-    drawFloorPlanCursorSelector() {
-        this.setSelectorStroke();
-        this.sk.circle(this.sk.mouseX, this.sk.mouseY, this.floorPlanContainer.selectorSize);
-    }
-
-    drawFloorPlanSlicerSelector() {
-        this.setSelectorStroke();
-        this.sk.line(this.sk.mouseX - this.floorPlanContainer.slicerSize, 0, this.sk.mouseX - this.floorPlanContainer.slicerSize, this.floorPlanContainer.height);
-        this.sk.line(this.sk.mouseX + this.floorPlanContainer.slicerSize, 0, this.sk.mouseX + this.floorPlanContainer.slicerSize, this.floorPlanContainer.height);
-    }
-
-    setSelectorStroke() {
-        this.sk.noFill();
-        this.sk.strokeWeight(4);
-        this.sk.stroke(0);
+    update3DSlicerRect() {
+        if (this.overSpaceTimeView(this.sk.mouseX, this.sk.mouseY)) this.timelinePanel.draw3DSlicerRect(this.getFloorPlanContainer(), this.sk.sketchController.mapToSelectTimeThenPixelTime(this.sk.mouseX)); // pass mapped mouseX as zPos
     }
 
     drawIntroMsg() {
@@ -71,7 +49,6 @@ class GUI {
         this.dataPanel.organize(this.sk.HANDLEGUI, pathList, speakerList);
     }
 
-    // Updates user select start/end vars and is triggered if user already dragging or begins dragging
     handleTimeline() {
         this.timelinePanel.handleTimeline();
     }
@@ -121,23 +98,27 @@ class GUI {
         return this.timelinePanel.getHeight();
     }
 
+    getFloorPlanContainer() {
+        return this.fpContainer.getContainer();
+    }
+
     overSpaceTimeView(xPos, yPos) {
         return this.timelinePanel.overSpaceTimeView(xPos, yPos);
     }
 
-    overFloorPlan(xPos, yPos) {
-        return (xPos >= 0 && xPos <= this.floorPlanContainer.width) && (yPos >= 0 && yPos <= this.floorPlanContainer.height);
-    }
-
     overTimelineAxis(pixelValue) {
-        return pixelValue >= this.getCurTimelineSelectStart() && pixelValue <= this.getCurTimelineSelectEnd();
+        return this.timelinePanel.overTimelineAxis(pixelValue);
     }
 
     overCursor(xPos, yPos) {
-        return this.sk.overCircle(xPos, yPos, this.floorPlanContainer.selectorSize);
+        return this.fpContainer.overCursor(xPos, yPos);
     }
 
     overSlicer(xPos, yPos) {
-        return this.sk.overRect(xPos - this.floorPlanContainer.slicerSize, 0, (2 * this.floorPlanContainer.slicerSize), this.getTimelineHeight());
+        return this.fpContainer.overSlicer(xPos, yPos);
+    }
+
+    overFloorPlan(xPos, yPos) {
+        return this.fpContainer.overFloorPlan(xPos, yPos);
     }
 }

@@ -103,22 +103,22 @@ class SketchController {
     }
 
     /**
-     * Organizes floor plan drawing methods with and without rotation
+     * Organizes floor plan drawing methods with correct rotation angle and corresponding width/height that vary bsed on rotation angle
      */
     setFloorPlan() {
-        const [width, height] = [this.sk.gui.floorPlanContainer.width, this.sk.gui.floorPlanContainer.height];
+        const container = this.sk.gui.getFloorPlanContainer();
         switch (this.getRotationMode()) {
             case 0:
-                this.sk.drawFloorPlan(width, height);
+                this.sk.drawFloorPlan(container.width, container.height);
                 break;
             case 1:
-                this.sk.drawRotatedFloorPlan(this.sk.HALF_PI, height, width);
+                this.sk.prepRotatedFloorPlan(this.sk.HALF_PI, container.height, container.width, container);
                 break;
             case 2:
-                this.sk.drawRotatedFloorPlan(this.sk.PI, width, height);
+                this.sk.prepRotatedFloorPlan(this.sk.PI, container.width, container.height, container);
                 break;
             case 3:
-                this.sk.drawRotatedFloorPlan(-this.sk.HALF_PI, height, width);
+                this.sk.prepRotatedFloorPlan(-this.sk.HALF_PI, container.height, container.width, container);
                 break;
         }
     }
@@ -141,7 +141,7 @@ class SketchController {
     getScaledPos(point, view) {
         const timelineXPos = this.mapTotalTimeToPixelTime(point.time);
         const selTimelineXPos = this.mapSelectTimeToPixelTime(timelineXPos);
-        const [floorPlanXPos, floorPlanYPos] = this.sk.core.inputFloorPlan.getScaledXYPos(point.xPos, point.yPos, this.sk.gui.floorPlanContainer, this.getRotationMode());
+        const [floorPlanXPos, floorPlanYPos] = this.sk.core.inputFloorPlan.getScaledXYPos(point.xPos, point.yPos, this.sk.gui.getFloorPlanContainer(), this.getRotationMode());
         return {
             timelineXPos,
             selTimelineXPos,

@@ -47,7 +47,7 @@ const igs = new p5((sk) => {
             else sk.setMovement();
         }
         if (sk.sketchController.testVideoAndDivAreLoaded()) sk.sketchController.updateVideoDisplay();
-        if (sk.sketchController.view3D.getIsShowing()) sk.gui.draw3DSlicerRect();
+        if (sk.sketchController.view3D.getIsShowing()) sk.gui.update3DSlicerRect();
         if (sk.sketchController.translationComplete()) sk.pop();
         sk.gui.drawKeys(sk.core.pathList, sk.core.speakerList); // draw keys last
         sk.sketchController.updateAnimation();
@@ -72,10 +72,10 @@ const igs = new p5((sk) => {
         sk.image(sk.core.inputFloorPlan.getImg(), 0, 0, width, height);
     }
 
-    sk.drawRotatedFloorPlan = function (angle, width, height) {
+    sk.prepRotatedFloorPlan = function (angle, width, height, container) {
         sk.push();
         sk.imageMode(sk.CENTER); // important method to include here
-        sk.translate(sk.gui.floorPlanContainer.width / 2, sk.gui.floorPlanContainer.height / 2);
+        sk.translate(container.width / 2, container.height / 2);
         sk.rotate(angle);
         sk.drawFloorPlan(width, height);
         sk.pop();

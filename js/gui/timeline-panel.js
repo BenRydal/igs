@@ -86,11 +86,11 @@ class TimelinePanel {
         this.sk.line(this.sk.mouseX, this.top, this.sk.mouseX, this.bottom);
     }
 
-    draw3DSlicerRect(fpWidth, fpHeight, zPos) {
+    draw3DSlicerRect(container, zPos) {
         this.sk.fill(255, 50);
         this.sk.stroke(0);
         this.sk.strokeWeight(1);
-        this.sk.quad(0, 0, zPos, fpWidth, 0, zPos, fpWidth, fpHeight, zPos, 0, fpHeight, zPos);
+        this.sk.quad(0, 0, zPos, container.width, 0, zPos, container.width, container.height, zPos, 0, container.height, zPos);
     }
 
     handleTimeline() {
@@ -118,6 +118,10 @@ class TimelinePanel {
 
     overSelector(selector) {
         return this.sk.overRect(selector - this.padding, this.top, this.doublePadding, this.thickness);
+    }
+
+    overTimelineAxis(pixelValue) {
+        return pixelValue >= this.selectStart && pixelValue <= this.selectEnd;
     }
 
     overTimelineAxisRegion() {
