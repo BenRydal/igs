@@ -5,15 +5,19 @@ class View3D {
     constructor(sketch) {
         this.sk = sketch;
         this.isShowing = false;
-        this.zoom = -(this.sk.height / 1.5);
-        this.curZoom = 0;
         this.isTransitioning = false;
-        this.xPosTranslate = this.sk.width / 4;
-        this.yPosTranslate = this.sk.height / 1.75;
-        this.curXPos = 0;
-        this.curYPos = 0;
-        this.rotateX = this.sk.PI / 2.3;
-        this.curRotateX = 0;
+        this.translate = {
+            zoom: -(this.sk.height / 1.5),
+            xPos: this.sk.width / 4,
+            yPos: this.sk.height / 1.75,
+            rotateX: this.sk.PI / 2.3
+        }
+        this.cur = {
+            zoom: 0,
+            xPos: 0,
+            yPos: 0,
+            rotateX: 0
+        }
     }
 
     update3DTranslation() {
@@ -27,37 +31,32 @@ class View3D {
     }
 
     getCurPositions() {
-        return {
-            xPos: this.curXPos,
-            yPos: this.curYPos,
-            zoom: this.curZoom,
-            rotateX: this.curRotateX
-        }
+        return this.cur;
     }
 
     updatePositions() {
         let isRunning = false;
-        this.curZoom = this.zoom;
-        if (this.curRotateX < this.rotateX) {
-            this.curRotateX += .03;
+        this.cur.zoom = this.translate.zoom;
+        if (this.cur.rotateX < this.translate.rotateX) {
+            this.cur.rotateX += .03;
             isRunning = true;
         }
-        if (this.curXPos < this.xPosTranslate) {
-            this.curXPos += 10;
+        if (this.cur.xPos < this.translate.xPos) {
+            this.cur.xPos += 10;
             isRunning = true;
         }
-        if (this.curYPos < this.yPosTranslate) {
-            this.curYPos += 10;
+        if (this.cur.yPos < this.translate.yPos) {
+            this.cur.yPos += 10;
             isRunning = true;
         }
         return isRunning;
     }
 
     resetPositions() {
-        this.curRotateX = 0;
-        this.curXPos = 0;
-        this.curYPos = 0;
-        this.curZoom = 0;
+        this.cur.rotateX = 0;
+        this.cur.xPos = 0;
+        this.cur.yPos = 0;
+        this.cur.zoom = 0;
         return false;
     }
 
@@ -65,12 +64,12 @@ class View3D {
         this.isShowing = !this.isShowing;
     }
 
-    getIsShowing() {
-        return this.isShowing;
-    }
-
     setIsTransitioning(value) {
         this.isTransitioning = value;
+    }
+
+    getIsShowing() {
+        return this.isShowing;
     }
 
     getIsTransitioning() {
