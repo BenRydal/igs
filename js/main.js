@@ -62,7 +62,7 @@ const igs = new p5((sk) => {
         sk.pop();
     }
 
-    sk.translate3DCanvas = function (curPos) {
+    sk.translateCanvasTo3D = function (curPos) {
         sk.push();
         sk.translate(curPos.xPos, curPos.yPos, curPos.zoom);
         sk.rotateX(curPos.rotateX);
