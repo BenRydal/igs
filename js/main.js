@@ -72,7 +72,7 @@ const igs = new p5((sk) => {
         sk.image(sk.core.inputFloorPlan.getImg(), 0, 0, width, height);
     }
 
-    sk.prepRotatedFloorPlan = function (angle, width, height, container) {
+    sk.drawRotatedFloorPlan = function (angle, width, height, container) {
         sk.push();
         sk.imageMode(sk.CENTER); // important method to include here
         sk.translate(container.width / 2, container.height / 2);

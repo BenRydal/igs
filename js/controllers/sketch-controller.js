@@ -112,13 +112,13 @@ class SketchController {
                 this.sk.drawFloorPlan(container.width, container.height);
                 break;
             case 1:
-                this.sk.prepRotatedFloorPlan(this.sk.HALF_PI, container.height, container.width, container);
+                this.sk.drawRotatedFloorPlan(this.sk.HALF_PI, container.height, container.width, container);
                 break;
             case 2:
-                this.sk.prepRotatedFloorPlan(this.sk.PI, container.width, container.height, container);
+                this.sk.drawRotatedFloorPlan(this.sk.PI, container.width, container.height, container);
                 break;
             case 3:
-                this.sk.prepRotatedFloorPlan(-this.sk.HALF_PI, container.height, container.width, container);
+                this.sk.drawRotatedFloorPlan(-this.sk.HALF_PI, container.height, container.width, container);
                 break;
         }
     }
