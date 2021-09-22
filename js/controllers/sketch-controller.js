@@ -107,6 +107,10 @@ class SketchController {
         return this.handle3D.getIsShowing() || this.handle3D.getIsTransitioning();
     }
 
+    update3DSlicerRect() {
+        this.sk.gui.timelinePanel.draw3DSlicerRect(this.sk.gui.fpContainer.getContainer(), this.mapToSelectTimeThenPixelTime(this.sk.mouseX)); // pass mapped mouseX as zPos
+    }
+
     setFloorPlan() {
         this.handleRotation.setFloorPlan(this.sk.gui.fpContainer.getContainer());
     }
