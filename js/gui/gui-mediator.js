@@ -12,7 +12,8 @@ class GUI {
         this.sk.textSize(this.keyTextSize);
         this.dataPanel.organize(this.sk.DRAWGUI, pathList, speakerList); // pass these to dynamically update
         this.timelinePanel.draw();
-        if (this.overFloorPlan(this.sk.mouseX, this.sk.mouseY)) this.updateFloorPlanSelector();
+        this.fpContainer.updateSelectors(this.getCurSelectTab());
+
         if (this.overSpaceTimeView(this.sk.mouseX, this.sk.mouseY)) this.updateTimelineSlicer();
         if (this.sk.sketchController.mode.isIntro) this.sk.translateCanvasForText(this.drawIntroMsg.bind(this));
     }
@@ -28,11 +29,6 @@ class GUI {
         this.sk.textSize(this.keyTextSize);
         this.sk.text(introMsg, this.sk.width / 2, this.sk.height / 2.5, this.sk.width / 1.75, this.sk.height / 1.75);
         this.sk.rectMode(this.sk.CORNER);
-    }
-
-    updateFloorPlanSelector() {
-        if (this.getCurSelectTab() === 1) this.fpContainer.drawFloorPlanCursorSelector();
-        else if (this.getCurSelectTab() === 2) this.fpContainer.drawFloorPlanSlicerSelector();
     }
 
     updateTimelineSlicer() {
