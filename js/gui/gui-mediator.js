@@ -44,7 +44,7 @@ class GUI {
         if (this.overSpaceTimeView(this.sk.mouseX, this.sk.mouseY)) this.timelinePanel.draw3DSlicerRect(this.getFloorPlanContainer(), this.sk.sketchController.mapToSelectTimeThenPixelTime(this.sk.mouseX)); // pass mapped mouseX as zPos
     }
 
-    handleGUI(pathList, speakerList) {
+    handleDataPanel(pathList, speakerList) {
         this.sk.textSize(this.keyTextSize);
         this.dataPanel.organize(this.sk.HANDLEGUI, pathList, speakerList);
     }
