@@ -15,12 +15,12 @@ class FloorPlanContainer {
         }
     }
 
-    drawSlicerSelector() {
+    drawRegionSelector() {
         this.setSelectorStroke();
         this.sk.circle(this.sk.mouseX, this.sk.mouseY, this.selectorSize);
     }
 
-    drawFloorPlanSlicerSelector() {
+    drawSlicerSelector() {
         this.setSelectorStroke();
         this.sk.line(this.sk.mouseX - this.slicerSize, 0, this.sk.mouseX - this.slicerSize, this.height);
         this.sk.line(this.sk.mouseX + this.slicerSize, 0, this.sk.mouseX + this.slicerSize, this.height);

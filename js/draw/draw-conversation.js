@@ -29,13 +29,13 @@ class DrawConversation {
     }
 
     testSelectMode(curPoint, point) {
-        switch (this.sk.gui.getCurSelectTab()) {
+        switch (this.sk.gui.dataPanel.getCurSelectTab()) {
             case 0:
                 return true;
             case 1:
-                return this.sk.gui.overCursor(curPoint.floorPlanXPos, curPoint.floorPlanYPos);
+                return this.sk.gui.fpContainer.overCursor(curPoint.floorPlanXPos, curPoint.floorPlanYPos);
             case 2:
-                return this.sk.gui.overSlicer(curPoint.floorPlanXPos, curPoint.floorPlanYPos);
+                return this.sk.gui.fpContainer.overSlicer(curPoint.floorPlanXPos, curPoint.floorPlanYPos);
             case 3:
                 return !point.isStopped;
             case 4:

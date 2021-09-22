@@ -4,7 +4,7 @@ class GUI {
         this.sk = sketch;
         this.timelinePanel = new TimelinePanel(this.sk);
         this.dataPanel = new DataPanel(this.sk, this.timelinePanel.getBottom());
-        this.fpContainer = new FloorPlanContainer(this.sk, this.getTimelineStart(), this.getTimelineEnd(), this.getTimelineHeight());
+        this.fpContainer = new FloorPlanContainer(this.sk, this.timelinePanel.getStart(), this.timelinePanel.getEnd(), this.timelinePanel.getHeight());
         this.keyTextSize = this.sk.width / 70;
     }
 
@@ -12,8 +12,8 @@ class GUI {
         this.sk.textSize(this.keyTextSize);
         this.dataPanel.organize(this.sk.DRAWGUI, pathList, speakerList); // pass these to dynamically update
         this.timelinePanel.draw();
-        this.fpContainer.updateSelectors(this.getCurSelectTab());
-        if (this.overSpaceTimeView(this.sk.mouseX, this.sk.mouseY)) this.timelinePanel.updateSlicer(this.sk.sketchController.handle3D.getIsShowing());
+        this.fpContainer.updateSelectors(this.dataPanel.getCurSelectTab());
+        this.timelinePanel.updateSlicer(this.sk.sketchController.handle3D.getIsShowing());
         if (this.sk.sketchController.getIsIntro()) this.sk.translateCanvasForText(this.drawIntroMsg.bind(this));
     }
 
@@ -31,20 +31,12 @@ class GUI {
     }
 
     update3DSlicerRect() {
-        if (this.overSpaceTimeView(this.sk.mouseX, this.sk.mouseY)) this.timelinePanel.draw3DSlicerRect(this.getFloorPlanContainer(), this.sk.sketchController.mapToSelectTimeThenPixelTime(this.sk.mouseX)); // pass mapped mouseX as zPos
+        this.timelinePanel.draw3DSlicerRect(this.fpContainer.getContainer(), this.sk.sketchController.mapToSelectTimeThenPixelTime(this.sk.mouseX)); // pass mapped mouseX as zPos
     }
 
     handleDataPanel(pathList, speakerList) {
         this.sk.textSize(this.keyTextSize);
         this.dataPanel.organize(this.sk.HANDLEGUI, pathList, speakerList);
-    }
-
-    handleTimeline() {
-        this.timelinePanel.handleTimeline();
-    }
-
-    handleResetTimelineLock() {
-        this.timelinePanel.resetTimelineLock();
     }
 
     setRotateLeft() {
@@ -58,57 +50,5 @@ class GUI {
     // NOTE: this setter is modifying core vars but this still seems to be best solution
     setCoreData(personFromList) {
         personFromList.isShowing = !personFromList.isShowing;
-    }
-
-    getCurSelectTab() {
-        return this.dataPanel.getCurSelectTab();
-    }
-
-    getTimelineStart() {
-        return this.timelinePanel.getStart();
-    }
-
-    getTimelineEnd() {
-        return this.timelinePanel.getEnd();
-    }
-
-    getTimelineLength() {
-        return this.timelinePanel.getLength();
-    }
-
-    getCurTimelineSelectStart() {
-        return this.timelinePanel.getSelectStart();
-    }
-
-    getCurTimelineSelectEnd() {
-        return this.timelinePanel.getSelectEnd();
-    }
-
-    getTimelineHeight() {
-        return this.timelinePanel.getHeight();
-    }
-
-    getFloorPlanContainer() {
-        return this.fpContainer.getContainer();
-    }
-
-    overSpaceTimeView(xPos, yPos) {
-        return this.timelinePanel.overSpaceTimeView(xPos, yPos);
-    }
-
-    overTimelineAxis(pixelValue) {
-        return this.timelinePanel.overTimelineAxis(pixelValue);
-    }
-
-    overCursor(xPos, yPos) {
-        return this.fpContainer.overCursor(xPos, yPos);
-    }
-
-    overSlicer(xPos, yPos) {
-        return this.fpContainer.overSlicer(xPos, yPos);
-    }
-
-    overFloorPlan(xPos, yPos) {
-        return this.fpContainer.overFloorPlan(xPos, yPos);
     }
 }

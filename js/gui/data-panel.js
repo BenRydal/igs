@@ -20,6 +20,7 @@ class DataPanel {
             rotateTabs: ["rotate left", "rotate right"]
         }
     }
+
     /**
      * Passed values allow for dynamic display/updating
      */
