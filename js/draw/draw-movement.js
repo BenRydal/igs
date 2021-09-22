@@ -28,7 +28,7 @@ class DrawMovement {
 
     setPathStyles(color) {
         this.style.shade = color;
-        switch (this.sk.gui.getCurSelectTab()) {
+        switch (this.sk.gui.dataPanel.getCurSelectTab()) {
             case 3:
                 this.setPathStrokeWeights(1, 0);
                 break;
@@ -110,15 +110,15 @@ class DrawMovement {
      * @param  {MovementPoint} curPoint
      */
     testDrawFloorPlanStops(view, curPoint) {
-        return (view === this.sk.PLAN && curPoint.isStopped && this.sk.gui.getCurSelectTab() !== 3);
+        return (view === this.sk.PLAN && curPoint.isStopped && this.sk.gui.dataPanel.getCurSelectTab() !== 3);
     }
     /**
      * Holds logic for testing current point based on selectMode
      * @param  {ComparePoint} p
      */
     testDrawFatLine(p) {
-        if (this.sk.gui.getCurSelectTab() === 1) return this.sk.gui.overCursor(p.curPos.floorPlanXPos, p.curPos.floorPlanYPos);
-        else if (this.sk.gui.getCurSelectTab() === 2) return this.sk.gui.overSlicer(p.curPos.floorPlanXPos, p.curPos.floorPlanYPos);
+        if (this.sk.gui.dataPanel.getCurSelectTab() === 1) return this.sk.gui.fpContainer.overCursor(p.curPos.floorPlanXPos, p.curPos.floorPlanYPos);
+        else if (this.sk.gui.dataPanel.getCurSelectTab() === 2) return this.sk.gui.fpContainer.overSlicer(p.curPos.floorPlanXPos, p.curPos.floorPlanYPos);
         else return p.curPoint.isStopped;
     }
 
@@ -161,7 +161,7 @@ class DrawMovement {
         else if (this.sk.sketchController.mode.isVideoPlay) {
             const selTime = this.sk.sketchController.mapVideoTimeToSelectedTime();
             if (this.compareValuesBySpacing(selTime, timePos, this.bug.lengthToCompare)) this.recordBug(timePos, xPos, yPos, zPos, Math.abs(selTime - timePos));
-        } else if (this.sk.gui.overSpaceTimeView(this.sk.mouseX, this.sk.mouseY) && this.compareValuesBySpacing(map3DMouse, timePos, this.bug.lengthToCompare)) this.recordBug(map3DMouse, xPos, yPos, zPos, Math.abs(map3DMouse - timePos));
+        } else if (this.sk.gui.timelinePanel.aboveTimeline(this.sk.mouseX, this.sk.mouseY) && this.compareValuesBySpacing(map3DMouse, timePos, this.bug.lengthToCompare)) this.recordBug(map3DMouse, xPos, yPos, zPos, Math.abs(map3DMouse - timePos));
     }
 
     compareValuesBySpacing(value1, value2, spacing) {
@@ -192,7 +192,7 @@ class DrawMovement {
         this.sk.strokeWeight(5);
         this.sk.fill(this.style.shade);
         this.sk.ellipse(this.bug.xPos, this.bug.yPos, this.bug.size, this.bug.size);
-        if (this.sk.sketchController.view3D.isShowing) {
+        if (this.sk.sketchController.handle3D.getIsShowing()) {
             this.sk.stroke(this.style.shade);
             this.sk.strokeWeight(25);
             this.sk.point(this.bug.xPos, this.bug.yPos, this.bug.zPos);

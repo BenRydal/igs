@@ -20,6 +20,7 @@ class DataPanel {
             rotateTabs: ["rotate left", "rotate right"]
         }
     }
+
     /**
      * Passed values allow for dynamic display/updating
      */
@@ -118,7 +119,7 @@ class DataPanel {
     }
 
     overPerson(person, curXPos) {
-        if (this.sk.overRect(curXPos, this.tabs.height, this.spacing, this.spacing)) this.sk.gui.setCoreData(person);
+        if (this.sk.overRect(curXPos, this.tabs.height, this.spacing, this.spacing)) this.sk.sketchController.setCoreData(person);
     }
 
     overSelector(curXPos, pixelWidth, tab) {
@@ -127,8 +128,8 @@ class DataPanel {
 
     overRotateKey(direction, curXPos, pixelWidth) {
         if (this.sk.overRect(curXPos, this.tabs.height, curXPos + pixelWidth, this.spacing)) {
-            if (direction === this.tabs.rotateTabs[0]) this.sk.gui.setRotateLeft();
-            else this.sk.gui.setRotateRight();
+            if (direction === this.tabs.rotateTabs[0]) this.sk.sketchController.setRotateLeft();
+            else this.sk.sketchController.setRotateRight();
         }
     }
 

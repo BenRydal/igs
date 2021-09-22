@@ -29,13 +29,13 @@ class DrawConversation {
     }
 
     testSelectMode(curPoint, point) {
-        switch (this.sk.gui.getCurSelectTab()) {
+        switch (this.sk.gui.dataPanel.getCurSelectTab()) {
             case 0:
                 return true;
             case 1:
-                return this.sk.gui.overCursor(curPoint.floorPlanXPos, curPoint.floorPlanYPos);
+                return this.sk.gui.fpContainer.overCursor(curPoint.floorPlanXPos, curPoint.floorPlanYPos);
             case 2:
-                return this.sk.gui.overSlicer(curPoint.floorPlanXPos, curPoint.floorPlanYPos);
+                return this.sk.gui.fpContainer.overSlicer(curPoint.floorPlanXPos, curPoint.floorPlanYPos);
             case 3:
                 return !point.isStopped;
             case 4:
@@ -84,7 +84,7 @@ class DrawConversation {
         const curRect = this.getCurRectPos(point, curPoint);
         this.sk.noStroke(); // reset if recordConversationBubble is called previously over2DRects
         this.sk.fill(curColor);
-        if (this.sk.sketchController.view3D.isShowing) {
+        if (this.sk.sketchController.handle3D.getIsShowing()) {
             this.drawFloorPlanRects(curRect);
             this.drawSpaceTime3DRects(curRect);
         } else {
@@ -101,7 +101,7 @@ class DrawConversation {
         let yPos;
         if (this.sk.sketchController.mode.isAlignTalk) yPos = 0;
         else yPos = curPoint.floorPlanYPos - rectLength;
-        this.sk.textSize(this.sk.gui.keyTextSize); // reset text size
+        this.sk.textSize(this.sk.GUITEXTSIZE); // reset text size
         return {
             length: rectLength,
             yPos: yPos,
@@ -128,7 +128,7 @@ class DrawConversation {
 
     drawSpaceTime3DRects(curRect) {
         const tempX = 0;
-        const tempY = Math.abs(this.sk.sketchController.view3D.zoom);
+        const tempY = Math.abs(this.sk.sketchController.handle3D.getCurPositions().zoom);
         if (this.sk.sketchController.mode.isAlignTalk) this.sk.quad(tempX, tempY, curRect.zPos, tempX + curRect.length, tempY, curRect.zPos, tempX + curRect.length, tempY, curRect.zPos + this.rect.pixelWidth, tempX, tempY, curRect.zPos + this.rect.pixelWidth);
         else this.sk.quad(curRect.xPosFloorPlan, curRect.yPos, curRect.zPos, curRect.xPosFloorPlan + curRect.length, curRect.yPos, curRect.zPos, curRect.xPosFloorPlan + curRect.length, curRect.yPos, curRect.zPos + this.rect.pixelWidth, curRect.xPosFloorPlan, curRect.yPos, curRect.zPos + this.rect.pixelWidth);
     }
@@ -152,7 +152,6 @@ class DrawConversation {
      * Sets box dimensions based on size of conversation turn/text
      */
     drawTextBox(point) {
-        this.sk.textSize(this.sk.gui.keyTextSize);
         const textBox = this.addTextBoxParams(this.getTextBoxParams(), point.talkTurn);
         this.sk.stroke(0);
         this.sk.strokeWeight(1);

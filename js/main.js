@@ -21,12 +21,9 @@ const igs = new p5((sk) => {
 
     sk.setup = function () {
         sk.canvas = sk.createCanvas(window.innerWidth, window.innerHeight, sk.WEBGL);
-        sk.smooth();
-        sk.textFont(sk.font_Lato);
-        sk.textAlign(sk.LEFT, sk.TOP);
         // SINGLETONS
-        sk.core = new Core(sk);
-        sk.gui = new GUI(sk);
+        sk.core = new Core(sk); // holds core data and update/load data methods
+        sk.gui = new GUI(sk); // holds GUI elements/classes
         sk.domController = new DomController(sk); // handles DOM/buttons user interaction
         sk.sketchController = new SketchController(sk); // coordinates calls across classes
         sk.videoPlayer = null; // abstract class for different video classes
@@ -35,20 +32,26 @@ const igs = new p5((sk) => {
         sk.SPACETIME = 1;
         sk.DRAWGUI = 0;
         sk.HANDLEGUI = 1;
+        sk.GUITEXTSIZE = sk.width / 70;
+        sk.textSize(sk.GUITEXTSIZE);
+        sk.textFont(sk.font_Lato);
+        sk.textAlign(sk.LEFT, sk.TOP);
+        sk.smooth();
     }
 
     sk.draw = function () {
         sk.translate(-sk.width / 2, -sk.height / 2, 0); // always recenter canvas to top left when using WEBGL renderer
-        sk.sketchController.update3DTranslation();
+        sk.sketchController.handle3D.update3DTranslation();
         sk.background(255);
-        if (sk.dataIsLoaded(sk.core.inputFloorPlan.getImg())) sk.setFloorPlan();
+        if (sk.dataIsLoaded(sk.core.inputFloorPlan.getImg())) sk.sketchController.setFloorPlan();
         if (sk.arrayIsLoaded(sk.core.pathList)) {
             if (sk.arrayIsLoaded(sk.core.speakerList)) sk.setMovementAndConversation();
             else sk.setMovement();
         }
         if (sk.sketchController.testVideoAndDivAreLoaded()) sk.sketchController.updateVideoDisplay();
+        if (sk.sketchController.handle3D.getIsShowing()) sk.sketchController.update3DSlicerRect();
         if (sk.sketchController.translationComplete()) sk.pop();
-        sk.gui.drawKeys(sk.core.pathList, sk.core.speakerList); // draw keys last
+        sk.gui.updateGUI(sk.core.pathList, sk.core.speakerList); // draw keys last
         sk.sketchController.updateAnimation();
         sk.sketchController.updateLoop();
     }
@@ -61,42 +64,22 @@ const igs = new p5((sk) => {
         sk.pop();
     }
 
-    sk.translate3DCanvas = function (curPos) {
+    sk.translateCanvasTo3D = function (curPos) {
         sk.push();
         sk.translate(curPos.xPos, curPos.yPos, curPos.zoom);
         sk.rotateX(curPos.rotateX);
-    }
-
-    /**
-     * Organizes floor plan drawing methods with and without rotation
-     */
-    sk.setFloorPlan = function () {
-        switch (sk.sketchController.getRotationMode()) {
-            case 0:
-                sk.drawFloorPlan(sk.gui.floorPlanContainer.width, sk.gui.floorPlanContainer.height);
-                break;
-            case 1:
-                sk.drawRotatedFloorPlan(sk.HALF_PI, sk.gui.floorPlanContainer.height, sk.gui.floorPlanContainer.width);
-                break;
-            case 2:
-                sk.drawRotatedFloorPlan(sk.PI, sk.gui.floorPlanContainer.width, sk.gui.floorPlanContainer.height);
-                break;
-            case 3:
-                sk.drawRotatedFloorPlan(-sk.HALF_PI, sk.gui.floorPlanContainer.height, sk.gui.floorPlanContainer.width);
-                break;
-        }
     }
 
     sk.drawFloorPlan = function (width, height) {
         sk.image(sk.core.inputFloorPlan.getImg(), 0, 0, width, height);
     }
 
-    sk.drawRotatedFloorPlan = function (angle, width, height) {
+    sk.drawRotatedFloorPlan = function (angle, width, height, container) {
         sk.push();
         sk.imageMode(sk.CENTER); // important method to include here
-        sk.translate(sk.gui.floorPlanContainer.width / 2, sk.gui.floorPlanContainer.height / 2);
+        sk.translate(container.width / 2, container.height / 2);
         sk.rotate(angle);
-        sk.image(sk.core.inputFloorPlan.getImg(), 0, 0, width, height);
+        sk.drawFloorPlan(width, height);
         sk.pop();
     }
 
@@ -121,19 +104,19 @@ const igs = new p5((sk) => {
 
     sk.mousePressed = function () {
         sk.sketchController.handleMousePressed();
-        sk.sketchController.startLoop();
+        sk.loop();
     }
 
     sk.mouseDragged = function () {
         sk.sketchController.handleMouseDragged();
-        sk.sketchController.startLoop();
+        sk.loop();
     }
     sk.mouseReleased = function () {
         sk.sketchController.handleMouseReleased();
-        sk.sketchController.startLoop();
+        sk.loop();
     }
     sk.mouseMoved = function () {
-        sk.sketchController.startLoop();
+        sk.loop();
     }
 
     sk.overCircle = function (x, y, diameter) {

@@ -15,7 +15,7 @@ class InputFloorPlan {
         this.sk.loadImage(filePath, img => {
             console.log("Floor Plan Image Loaded");
             img.onload = () => URL.revokeObjectURL(this.src);
-            this.sk.sketchController.startLoop(); // rerun P5 draw loop after loading image
+            this.sk.loop(); // rerun P5 draw loop after loading image
             this.img = img;
             this.width = img.width;
             this.height = img.height;
@@ -25,35 +25,15 @@ class InputFloorPlan {
         });
     }
 
-    /**
-     * Converts x/y pixel positions from data point to floor plan depending on floor plan rotation mode
-     * @param  {Float} xPos
-     * @param  {Float} yPos
-     */
-    getScaledXYPos(xPos, yPos, container, rotationMode) {
-        let scaledXPos, scaledYPos;
-        switch (rotationMode) {
-            case 0:
-                scaledXPos = xPos * container.width / this.width;
-                scaledYPos = yPos * container.height / this.height;
-                return [scaledXPos, scaledYPos];
-            case 1:
-                scaledXPos = container.width - (yPos * container.width / this.height);
-                scaledYPos = xPos * container.height / this.width;
-                return [scaledXPos, scaledYPos];
-            case 2:
-                scaledXPos = container.width - (xPos * container.width / this.width);
-                scaledYPos = container.height - (yPos * container.height / this.height);
-                return [scaledXPos, scaledYPos];
-            case 3:
-                scaledXPos = yPos * container.width / this.height;
-                scaledYPos = container.height - xPos * container.height / this.width;
-                return [scaledXPos, scaledYPos];
-        }
-    }
-
     getImg() {
         return this.img;
+    }
+
+    getParams() {
+        return {
+            width: this.width,
+            height: this.height
+        }
     }
 
     clear() {
