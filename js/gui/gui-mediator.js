@@ -14,8 +14,7 @@ class GUI {
         this.timelinePanel.draw();
         this.fpContainer.updateSelectors(this.getCurSelectTab());
         this.timelinePanel.updateSlicer(this.sk.sketchController.handle3D.getIsShowing());
-
-        if (this.sk.sketchController.mode.isIntro) this.sk.translateCanvasForText(this.drawIntroMsg.bind(this));
+        if (this.sk.sketchController.getIsIntro()) this.sk.translateCanvasForText(this.drawIntroMsg.bind(this));
     }
 
     drawIntroMsg() {
