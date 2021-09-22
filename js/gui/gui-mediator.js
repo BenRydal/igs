@@ -13,7 +13,7 @@ class GUI {
         this.dataPanel.organize(this.sk.DRAWGUI, pathList, speakerList); // pass these to dynamically update
         this.timelinePanel.draw();
         this.fpContainer.updateSelectors(this.getCurSelectTab());
-        this.timelinePanel.updateSlicer(this.sk.sketchController.handle3D.getIsShowing());
+        if (this.overSpaceTimeView(this.sk.mouseX, this.sk.mouseY)) this.timelinePanel.updateSlicer(this.sk.sketchController.handle3D.getIsShowing());
         if (this.sk.sketchController.getIsIntro()) this.sk.translateCanvasForText(this.drawIntroMsg.bind(this));
     }
 

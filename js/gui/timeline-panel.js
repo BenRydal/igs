@@ -71,10 +71,8 @@ class TimelinePanel {
     }
 
     updateSlicer(isShowing) {
-        if (this.overSpaceTimeView(this.sk.mouseX, this.sk.mouseY)) {
-            if (isShowing) this.drawShortSlicer();
-            else this.drawLongSlicer();
-        }
+        if (isShowing) this.drawShortSlicer();
+        else this.drawLongSlicer();
     }
 
     setSlicerStroke() {
