@@ -99,10 +99,6 @@ class SketchController {
         }
     }
 
-    update3DTranslation() {
-        this.handle3D.update3DTranslation();
-    }
-
     translationComplete() {
         return this.handle3D.getIsShowing() || this.handle3D.getIsTransitioning();
     }

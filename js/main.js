@@ -41,7 +41,7 @@ const igs = new p5((sk) => {
 
     sk.draw = function () {
         sk.translate(-sk.width / 2, -sk.height / 2, 0); // always recenter canvas to top left when using WEBGL renderer
-        sk.sketchController.update3DTranslation();
+        sk.sketchController.handle3D.update3DTranslation();
         sk.background(255);
         if (sk.dataIsLoaded(sk.core.inputFloorPlan.getImg())) sk.sketchController.setFloorPlan();
         if (sk.arrayIsLoaded(sk.core.pathList)) {
