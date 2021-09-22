@@ -10,15 +10,15 @@ class SketchController {
             isVideoPlay: false,
             isVideoShow: false
         }
-        this.view3D = new View3D(this.sk);
-        this.curFloorPlanRotation = 1; // [0-3] 4 rotation modes none, 90, 180, 270
+        this.handle3D = new Handle3D(this.sk);
+        this.handleRotation = new HandleRotation(this.sk);
         this.animationCounter = 0; // counter to synchronize animation across all data
         this.bugTimeForVideoScrub = null; // Set in draw movement data and used to display correct video frame when scrubbing video
     }
 
     // ****** P5 HANDLERS ****** //
     updateLoop() {
-        if (this.mode.isAnimate || this.mode.isVideoPlay || this.view3D.getIsTransitioning()) this.sk.loop();
+        if (this.mode.isAnimate || this.mode.isVideoPlay || this.handle3D.getIsTransitioning()) this.sk.loop();
         else this.sk.noLoop();
     }
 
@@ -36,9 +36,9 @@ class SketchController {
     }
 
     handleToggle3D() {
-        this.view3D.toggleIsShowing();
-        this.view3D.setIsTransitioning(true);
-        if (this.view3D.getIsShowing()) this.setRotateRight(); // must rotate floor plan to make matching space-time view appear in both 2D and 3D
+        this.handle3D.toggleIsShowing();
+        this.handle3D.setIsTransitioning(true);
+        if (this.handle3D.getIsShowing()) this.setRotateRight(); // must rotate floor plan to make matching space-time view appear in both 2D and 3D
         else this.setRotateLeft();
         this.sk.loop();
     }
@@ -98,33 +98,16 @@ class SketchController {
         }
     }
 
-    /**
-     * Organizes floor plan drawing methods with correct rotation angle and corresponding width/height that vary bsed on rotation angle
-     */
-    setFloorPlan() {
-        const container = this.sk.gui.getFloorPlanContainer();
-        switch (this.curFloorPlanRotation) {
-            case 0:
-                this.sk.drawFloorPlan(container.width, container.height);
-                break;
-            case 1:
-                this.sk.drawRotatedFloorPlan(this.sk.HALF_PI, container.height, container.width, container);
-                break;
-            case 2:
-                this.sk.drawRotatedFloorPlan(this.sk.PI, container.width, container.height, container);
-                break;
-            case 3:
-                this.sk.drawRotatedFloorPlan(-this.sk.HALF_PI, container.height, container.width, container);
-                break;
-        }
-    }
-
     update3DTranslation() {
-        this.view3D.update3DTranslation();
+        this.handle3D.update3DTranslation();
     }
 
     translationComplete() {
-        return this.view3D.getIsShowing() || this.view3D.getIsTransitioning();
+        return this.handle3D.getIsShowing() || this.handle3D.getIsTransitioning();
+    }
+
+    setFloorPlan() {
+        this.handleRotation.setFloorPlan(this.sk.gui.getFloorPlanContainer());
     }
 
     // ****** DRAW HELPER METHODS ****** //
@@ -137,7 +120,7 @@ class SketchController {
     getScaledPos(point, view) {
         const timelineXPos = this.mapTotalTimeToPixelTime(point.time);
         const selTimelineXPos = this.mapSelectTimeToPixelTime(timelineXPos);
-        const [floorPlanXPos, floorPlanYPos] = this.sk.core.inputFloorPlan.getScaledXYPos(point.xPos, point.yPos, this.sk.gui.getFloorPlanContainer(), this.curFloorPlanRotation);
+        const [floorPlanXPos, floorPlanYPos] = this.handleRotation.getScaledXYPos(point.xPos, point.yPos, this.sk.gui.getFloorPlanContainer(), this.sk.core.inputFloorPlan.getParams());
         return {
             timelineXPos,
             selTimelineXPos,
@@ -151,7 +134,7 @@ class SketchController {
     getViewXPos(view, floorPlanXPos, selTimelineXPos) {
         if (view === this.sk.PLAN) return floorPlanXPos;
         else if (view === this.sk.SPACETIME) {
-            if (this.view3D.getIsShowing()) return floorPlanXPos;
+            if (this.handle3D.getIsShowing()) return floorPlanXPos;
             else return selTimelineXPos;
         } else return null;
     }
@@ -159,22 +142,15 @@ class SketchController {
     getZPos(view, selTimelineXPos) {
         if (view === this.sk.PLAN) return 0;
         else {
-            if (this.view3D.getIsShowing()) return selTimelineXPos;
+            if (this.handle3D.getIsShowing()) return selTimelineXPos;
             else return 0;
         }
     }
 
-    /**
-     * Test if point is in user view
-     * @param  {MovementPoint} curPoint
-     */
     testPointIsShowing(curPoint) {
         return this.sk.gui.overTimelineAxis(curPoint.timelineXPos) && this.testAnimation(curPoint.timelineXPos);
     }
 
-    /**
-     * @param  {Number/Float} value
-     */
     testAnimation(value) {
         if (this.mode.isAnimate) return this.animationCounter > this.mapPixelTimeToTotalTime(value);
         else return true;
@@ -220,7 +196,7 @@ class SketchController {
     }
 
     mapSelectTimeToPixelTime(value) {
-        if (this.view3D.getIsShowing()) return this.sk.map(value, this.sk.gui.getCurTimelineSelectStart(), this.sk.gui.getCurTimelineSelectEnd(), this.sk.height / 10, this.sk.height / 1.6);
+        if (this.handle3D.getIsShowing()) return this.sk.map(value, this.sk.gui.getCurTimelineSelectStart(), this.sk.gui.getCurTimelineSelectEnd(), this.sk.height / 10, this.sk.height / 1.6);
         else return this.sk.map(value, this.sk.gui.getCurTimelineSelectStart(), this.sk.gui.getCurTimelineSelectEnd(), this.sk.gui.getTimelineStart(), this.sk.gui.getTimelineEnd());
     }
 
@@ -253,12 +229,10 @@ class SketchController {
     }
 
     setRotateRight() {
-        this.curFloorPlanRotation++;
-        if (this.curFloorPlanRotation > 3) this.curFloorPlanRotation = 0;
+        this.handleRotation.setRotateRight();
     }
 
     setRotateLeft() {
-        this.curFloorPlanRotation--;
-        if (this.curFloorPlanRotation < 0) this.curFloorPlanRotation = 3;
+        this.handleRotation.setRotateLeft();
     }
 }

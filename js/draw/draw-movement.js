@@ -192,7 +192,7 @@ class DrawMovement {
         this.sk.strokeWeight(5);
         this.sk.fill(this.style.shade);
         this.sk.ellipse(this.bug.xPos, this.bug.yPos, this.bug.size, this.bug.size);
-        if (this.sk.sketchController.view3D.getIsShowing()) {
+        if (this.sk.sketchController.handle3D.getIsShowing()) {
             this.sk.stroke(this.style.shade);
             this.sk.strokeWeight(25);
             this.sk.point(this.bug.xPos, this.bug.yPos, this.bug.zPos);

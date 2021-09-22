@@ -1,4 +1,4 @@
-class View3D {
+class Handle3D {
     /**
      * Class holds variables and methods that control 3D view and transitioning between 2D and 3D views
      */
