@@ -51,7 +51,7 @@ const igs = new p5((sk) => {
         if (sk.sketchController.testVideoAndDivAreLoaded()) sk.sketchController.updateVideoDisplay();
         if (sk.sketchController.handle3D.getIsShowing()) sk.sketchController.update3DSlicerRect();
         if (sk.sketchController.translationComplete()) sk.pop();
-        sk.gui.drawGUI(sk.core.pathList, sk.core.speakerList); // draw keys last
+        sk.drawGUI(sk.core.pathList, sk.core.speakerList); // draw keys last
         sk.sketchController.updateAnimation();
         sk.sketchController.updateLoop();
     }
@@ -100,6 +100,26 @@ const igs = new p5((sk) => {
             }
         }
         drawConversation.setConversationBubble(); // draw conversation text last so it displays on top
+    }
+
+    sk.drawGUI = function (pathList, speakerList) {
+        sk.gui.dataPanel.organize(sk.DRAWGUI, pathList, speakerList); // pass these to dynamically update
+        sk.gui.timelinePanel.draw();
+        sk.gui.timelinePanel.updateSlicer(sk.sketchController.handle3D.getIsShowing());
+        sk.gui.fpContainer.updateSelectors(sk.gui.dataPanel.getCurSelectTab());
+        if (sk.sketchController.getIsIntro()) sk.translateCanvasForText(sk.drawIntroMsg);
+    }
+
+    sk.drawIntroMsg = function () {
+        const introMsg = "INTERACTION GEOGRAPHY SLICER (IGS)\n\nby Ben Rydal Shapiro & contributors\nbuilt with p5.js & JavaScript\n\nHi There! This is a tool to visualize movement, conversation, and video data over space and time. Data are displayed over a floor plan and a timeline and can be viewed in 2D or 3D. Use the top menu to visualize different sample datasets or upload your own data. Use the top and bottom left buttons as well as the timeline to selectively study displayed data. For example, you can animate data, visualize conversation in different ways, and interact with video data by clicking anywhere on the timeline to play & pause video. For more information see: benrydal.com/software/igs";
+        sk.rectMode(sk.CENTER);
+        sk.stroke(0);
+        sk.strokeWeight(1);
+        sk.fill(255, 240);
+        sk.rect(sk.width / 2, sk.height / 2.5, sk.width / 1.75 + 50, sk.height / 1.75 + 50);
+        sk.fill(0);
+        sk.text(introMsg, sk.width / 2, sk.height / 2.5, sk.width / 1.75, sk.height / 1.75);
+        sk.rectMode(sk.CORNER);
     }
 
     sk.mousePressed = function () {
