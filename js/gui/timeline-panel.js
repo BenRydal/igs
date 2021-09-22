@@ -70,6 +70,13 @@ class TimelinePanel {
         this.sk.textAlign(this.sk.LEFT); // reset
     }
 
+    updateSlicer(isShowing) {
+        if (this.overSpaceTimeView(this.sk.mouseX, this.sk.mouseY)) {
+            if (isShowing) this.drawShortSlicer();
+            else this.drawLongSlicer();
+        }
+    }
+
     setSlicerStroke() {
         this.sk.fill(0);
         this.sk.stroke(0);

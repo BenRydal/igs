@@ -13,8 +13,8 @@ class GUI {
         this.dataPanel.organize(this.sk.DRAWGUI, pathList, speakerList); // pass these to dynamically update
         this.timelinePanel.draw();
         this.fpContainer.updateSelectors(this.getCurSelectTab());
+        this.timelinePanel.updateSlicer(this.sk.sketchController.handle3D.getIsShowing());
 
-        if (this.overSpaceTimeView(this.sk.mouseX, this.sk.mouseY)) this.updateTimelineSlicer();
         if (this.sk.sketchController.mode.isIntro) this.sk.translateCanvasForText(this.drawIntroMsg.bind(this));
     }
 
@@ -29,11 +29,6 @@ class GUI {
         this.sk.textSize(this.keyTextSize);
         this.sk.text(introMsg, this.sk.width / 2, this.sk.height / 2.5, this.sk.width / 1.75, this.sk.height / 1.75);
         this.sk.rectMode(this.sk.CORNER);
-    }
-
-    updateTimelineSlicer() {
-        if (this.sk.sketchController.handle3D.getIsShowing()) this.timelinePanel.drawShortSlicer();
-        else this.timelinePanel.drawLongSlicer();
     }
 
     update3DSlicerRect() {
