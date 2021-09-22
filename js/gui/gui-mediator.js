@@ -8,7 +8,7 @@ class GUI {
         this.keyTextSize = this.sk.width / 70;
     }
 
-    drawKeys(pathList, speakerList) {
+    drawGUI(pathList, speakerList) {
         this.sk.textSize(this.keyTextSize);
         this.dataPanel.organize(this.sk.DRAWGUI, pathList, speakerList); // pass these to dynamically update
         this.timelinePanel.draw();
@@ -44,7 +44,7 @@ class GUI {
         if (this.overSpaceTimeView(this.sk.mouseX, this.sk.mouseY)) this.timelinePanel.draw3DSlicerRect(this.getFloorPlanContainer(), this.sk.sketchController.mapToSelectTimeThenPixelTime(this.sk.mouseX)); // pass mapped mouseX as zPos
     }
 
-    handleKeys(pathList, speakerList) {
+    handleGUI(pathList, speakerList) {
         this.sk.textSize(this.keyTextSize);
         this.dataPanel.organize(this.sk.HANDLEGUI, pathList, speakerList);
     }
