@@ -101,7 +101,7 @@ class DrawConversation {
         let yPos;
         if (this.sk.sketchController.mode.isAlignTalk) yPos = 0;
         else yPos = curPoint.floorPlanYPos - rectLength;
-        this.sk.textSize(this.sk.gui.keyTextSize); // reset text size
+        this.sk.textSize(this.sk.GUITEXTSIZE); // reset text size
         return {
             length: rectLength,
             yPos: yPos,
@@ -152,7 +152,6 @@ class DrawConversation {
      * Sets box dimensions based on size of conversation turn/text
      */
     drawTextBox(point) {
-        this.sk.textSize(this.sk.gui.keyTextSize);
         const textBox = this.addTextBoxParams(this.getTextBoxParams(), point.talkTurn);
         this.sk.stroke(0);
         this.sk.strokeWeight(1);

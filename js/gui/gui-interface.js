@@ -5,16 +5,9 @@ class GUI {
         this.timelinePanel = new TimelinePanel(this.sk);
         this.dataPanel = new DataPanel(this.sk, this.timelinePanel.getBottom());
         this.fpContainer = new FloorPlanContainer(this.sk, this.timelinePanel.getStart(), this.timelinePanel.getEnd(), this.timelinePanel.getHeight());
-        this.keyTextSize = this.sk.width / 70;
-    }
-
-    handleDataPanel(pathList, speakerList) {
-        this.sk.textSize(this.keyTextSize);
-        this.dataPanel.organize(this.sk.HANDLEGUI, pathList, speakerList);
     }
 
     drawGUI(pathList, speakerList) {
-        this.sk.textSize(this.keyTextSize);
         this.dataPanel.organize(this.sk.DRAWGUI, pathList, speakerList); // pass these to dynamically update
         this.timelinePanel.draw();
         this.fpContainer.updateSelectors(this.dataPanel.getCurSelectTab());
@@ -34,7 +27,6 @@ class GUI {
         this.sk.fill(255, 240);
         this.sk.rect(this.sk.width / 2, this.sk.height / 2.5, this.sk.width / 1.75 + 50, this.sk.height / 1.75 + 50);
         this.sk.fill(0);
-        this.sk.textSize(this.keyTextSize);
         this.sk.text(introMsg, this.sk.width / 2, this.sk.height / 2.5, this.sk.width / 1.75, this.sk.height / 1.75);
         this.sk.rectMode(this.sk.CORNER);
     }

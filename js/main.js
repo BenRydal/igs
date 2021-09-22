@@ -21,12 +21,9 @@ const igs = new p5((sk) => {
 
     sk.setup = function () {
         sk.canvas = sk.createCanvas(window.innerWidth, window.innerHeight, sk.WEBGL);
-        sk.smooth();
-        sk.textFont(sk.font_Lato);
-        sk.textAlign(sk.LEFT, sk.TOP);
         // SINGLETONS
-        sk.core = new Core(sk);
-        sk.gui = new GUI(sk);
+        sk.core = new Core(sk); // holds core data and update/load data methods
+        sk.gui = new GUI(sk); // holds GUI elements/classes
         sk.domController = new DomController(sk); // handles DOM/buttons user interaction
         sk.sketchController = new SketchController(sk); // coordinates calls across classes
         sk.videoPlayer = null; // abstract class for different video classes
@@ -35,6 +32,11 @@ const igs = new p5((sk) => {
         sk.SPACETIME = 1;
         sk.DRAWGUI = 0;
         sk.HANDLEGUI = 1;
+        sk.GUITEXTSIZE = sk.width / 70;
+        sk.textSize(sk.GUITEXTSIZE);
+        sk.textFont(sk.font_Lato);
+        sk.textAlign(sk.LEFT, sk.TOP);
+        sk.smooth();
     }
 
     sk.draw = function () {
