@@ -8,6 +8,11 @@ class GUI {
         this.keyTextSize = this.sk.width / 70;
     }
 
+    handleDataPanel(pathList, speakerList) {
+        this.sk.textSize(this.keyTextSize);
+        this.dataPanel.organize(this.sk.HANDLEGUI, pathList, speakerList);
+    }
+
     drawGUI(pathList, speakerList) {
         this.sk.textSize(this.keyTextSize);
         this.dataPanel.organize(this.sk.DRAWGUI, pathList, speakerList); // pass these to dynamically update
@@ -15,6 +20,10 @@ class GUI {
         this.fpContainer.updateSelectors(this.dataPanel.getCurSelectTab());
         this.timelinePanel.updateSlicer(this.sk.sketchController.handle3D.getIsShowing());
         if (this.sk.sketchController.getIsIntro()) this.sk.translateCanvasForText(this.drawIntroMsg.bind(this));
+    }
+
+    update3DSlicerRect() {
+        this.timelinePanel.draw3DSlicerRect(this.fpContainer.getContainer(), this.sk.sketchController.mapToSelectTimeThenPixelTime(this.sk.mouseX)); // pass mapped mouseX as zPos
     }
 
     drawIntroMsg() {
@@ -28,27 +37,5 @@ class GUI {
         this.sk.textSize(this.keyTextSize);
         this.sk.text(introMsg, this.sk.width / 2, this.sk.height / 2.5, this.sk.width / 1.75, this.sk.height / 1.75);
         this.sk.rectMode(this.sk.CORNER);
-    }
-
-    update3DSlicerRect() {
-        this.timelinePanel.draw3DSlicerRect(this.fpContainer.getContainer(), this.sk.sketchController.mapToSelectTimeThenPixelTime(this.sk.mouseX)); // pass mapped mouseX as zPos
-    }
-
-    handleDataPanel(pathList, speakerList) {
-        this.sk.textSize(this.keyTextSize);
-        this.dataPanel.organize(this.sk.HANDLEGUI, pathList, speakerList);
-    }
-
-    setRotateLeft() {
-        this.sk.sketchController.setRotateLeft();
-    }
-
-    setRotateRight() {
-        this.sk.sketchController.setRotateRight();
-    }
-
-    // NOTE: this setter is modifying core vars but this still seems to be best solution
-    setCoreData(personFromList) {
-        personFromList.isShowing = !personFromList.isShowing;
     }
 }

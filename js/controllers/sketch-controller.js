@@ -232,6 +232,11 @@ class SketchController {
         this.handleRotation.setRotateLeft();
     }
 
+    // NOTE: this setter is modifying core vars but this still seems to be best solution
+    setCoreData(personFromList) {
+        personFromList.isShowing = !personFromList.isShowing;
+    }
+
     getIsIntro() {
         return this.mode.isIntro;
     }
