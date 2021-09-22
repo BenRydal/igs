@@ -43,7 +43,8 @@ class SketchController {
         this.sk.loop();
     }
 
-    // ****** ANIMATION/VIDEO/3D VIEW UPDATE METHODS ****** //
+    // ****** UPDATE METHODS ****** //
+
     updateAnimationCounter() {
         if (this.mode.isAnimate) this.animationCounter = this.mapPixelTimeToTotalTime(this.sk.gui.getCurTimelineSelectEnd());
         else this.animationCounter = this.mapPixelTimeToTotalTime(this.sk.gui.getCurTimelineSelectStart());
@@ -110,7 +111,8 @@ class SketchController {
         this.handleRotation.setFloorPlan(this.sk.gui.getFloorPlanContainer());
     }
 
-    // ****** DRAW HELPER METHODS ****** //
+    // ****** DRAW HELPERS ****** //
+
     /**
      * Returns properly scaled pixel values to GUI from data points
      * @param  {Movement Or Conversation Point} point
@@ -147,6 +149,8 @@ class SketchController {
         }
     }
 
+    // ****** TEST HELPERS ****** //
+
     testPointIsShowing(curPoint) {
         return this.sk.gui.overTimelineAxis(curPoint.timelineXPos) && this.testAnimation(curPoint.timelineXPos);
     }
@@ -164,15 +168,7 @@ class SketchController {
         return (this.sk.dataIsLoaded(this.sk.videoPlayer) && this.sk.videoPlayer.getIsLoaded());
     }
 
-    /**
-     * Returns pixel width for drawing conversation rectangles based on curTotalTime of data, user timeline selection, and maxRectWidth
-     * NOTE: curScaledRectWidth parameters 0-3600 scale pixels to 1 hour which works well and the map method maps to the inverse of 1 and maxRectWidth to properly adjust scaling/thickness of rects when user interacts with timeline
-     */
-    getCurConversationRectWidth() {
-        const maxRectWidth = 10;
-        const curScaledRectWidth = this.sk.map(this.sk.core.totalTimeInSeconds, 0, 3600, maxRectWidth, 1, true);
-        return this.sk.map(this.sk.gui.getCurTimelineSelectEnd() - this.sk.gui.getCurTimelineSelectStart(), 0, this.sk.gui.getTimelineLength(), maxRectWidth, curScaledRectWidth);
-    }
+    // ****** MAP HELPERS ****** //
 
     mapVideoTimeToSelectedTime() {
         const timelinePos = this.mapTotalTimeToPixelTime(this.sk.videoPlayer.getCurrentTime());
@@ -234,5 +230,15 @@ class SketchController {
 
     setRotateLeft() {
         this.handleRotation.setRotateLeft();
+    }
+
+    /**
+     * Returns pixel width for drawing conversation rectangles based on curTotalTime of data, user timeline selection, and maxRectWidth
+     * NOTE: curScaledRectWidth parameters 0-3600 scale pixels to 1 hour which works well and the map method maps to the inverse of 1 and maxRectWidth to properly adjust scaling/thickness of rects when user interacts with timeline
+     */
+    getCurConversationRectWidth() {
+        const maxRectWidth = 10;
+        const curScaledRectWidth = this.sk.map(this.sk.core.totalTimeInSeconds, 0, 3600, maxRectWidth, 1, true);
+        return this.sk.map(this.sk.gui.getCurTimelineSelectEnd() - this.sk.gui.getCurTimelineSelectStart(), 0, this.sk.gui.getTimelineLength(), maxRectWidth, curScaledRectWidth);
     }
 }
