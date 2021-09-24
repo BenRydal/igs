@@ -3,6 +3,7 @@ class TestData {
     constructor() {
         this.headersMovement = ['time', 'x', 'y']; // String array indicating movement movement file headers, data in each column should be of type number or it won't process
         this.headersConversation = ['time', 'speaker', 'talk']; // String array indicating conversation file headers, data in time column shout be of type number, speaker column should be of type String, talk column should be not null or undefined
+        this.headersCodes = ['start', 'end'];
     }
 
     /**
@@ -14,6 +15,10 @@ class TestData {
 
     testParsedConversationResults(results) {
         return results.data.length > 1 && this.includesAllHeaders(results.meta.fields, this.headersConversation) && this.conversationHasOneCleanRow(results.data);
+    }
+
+    testParsedCodeResults(results) {
+        return results.data.length > 1 && this.includesAllHeaders(results.meta.fields, this.headersCodes) && this.codesHaveOneCleanRow(results.data);
     }
 
     includesAllHeaders(meta, headers) {
@@ -43,6 +48,17 @@ class TestData {
 
     conversationRowForType(curRow) {
         return typeof curRow[this.headersConversation[0]] === 'number' && typeof curRow[this.headersConversation[1]] === 'string' && curRow[this.headersConversation[2]] != null;
+    }
+
+    codesHaveOneCleanRow(parsedCodeArray) {
+        for (const curRow of parsedCodeArray) {
+            if (this.codeRowForType(curRow)) return true;
+        }
+        return false;
+    }
+
+    codeRowForType(curRow) {
+        return typeof curRow[this.headersCodes[0]] === 'number' && typeof curRow[this.headersCodes[1]] === 'number';
     }
 
     curTimeIsLarger(rows) {
@@ -75,7 +91,7 @@ class TestData {
      * NOTE: this may need to match cleanSpeaker in the future
      * @param  {String} s
      */
-    cleanPathName(string) {
+    cleanFileName(string) {
         return string.charAt(0).toUpperCase();
     }
 }

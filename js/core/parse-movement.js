@@ -58,10 +58,10 @@ class ParseMovement {
         console.log("Parsing complete:", results, file);
         if (this.testData.testParsedMovementResults(results)) {
             if (fileNum === 0) this.clear(); // clear existing movement data for first new file only
-            const pathName = this.testData.cleanPathName(file.name);
+            const pathName = this.testData.cleanFileName(file.name);
             this.updateParsedMovementFileData(results.data, pathName);
             this.updatePointArrays(results.data, pathName);
-        } else alert("Error loading movement file. Please make sure your file is a .CSV file formatted with column headers: " + this.headersMovement.toString());
+        } else alert("Error loading movement file. Please make sure your file is a .CSV file formatted with column headers: " + this.testData.headersMovement.toString());
     }
 
     updateParsedMovementFileData(resultsArray, pathName) {
@@ -122,11 +122,13 @@ class ParseMovement {
      * Represents a location in space and time along a path with additional attributes
      */
     createMovementPoint(curRow, movementPointArray) {
+        const curTime = curRow[this.testData.headersMovement[0]];
         return {
-            time: curRow[this.testData.headersMovement[0]],
+            time: curTime,
             xPos: curRow[this.testData.headersMovement[1]],
             yPos: curRow[this.testData.headersMovement[2]],
-            isStopped: this.testData.isStopped(curRow, movementPointArray)
+            isStopped: this.testData.isStopped(curRow, movementPointArray),
+            codeArray: this.sk.core.parseCodes.addCodeArray(curTime)
         }
     }
 
@@ -138,6 +140,7 @@ class ParseMovement {
             xPos: movementPoint.xPos, // Float x and y pixel positions on floor plan
             yPos: movementPoint.yPos,
             isStopped: movementPoint.isStopped,
+            codeArray: movementPoint.codeArray,
             time: curConversationRow[this.testData.headersConversation[0]], // Float Time value in seconds
             speaker: this.testData.cleanSpeaker(curConversationRow[this.testData.headersConversation[1]]), // String name of speaker
             talkTurn: curConversationRow[this.testData.headersConversation[2]] // String text of conversation turn

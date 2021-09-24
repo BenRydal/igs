@@ -44,6 +44,17 @@ class DomController {
         input.value = ''; // reset input value so you can load same file again in browser
     }
 
+    /**
+     * Sends user inputted movement files into fileList for processing
+     * @param  {.CSV FileList} input
+     */
+    handleCodeFiles(input) {
+        let fileList = [];
+        for (const file of input.files) fileList.push(file);
+        this.sk.core.parseCodes.prepFiles(fileList);
+        input.value = ''; // reset input value so you can load same file(s) again in browser
+    }
+
     handleClearButton() {
         this.sk.core.clearAllData();
         this.clearCurVideo();

@@ -11,6 +11,7 @@
     <script src="js/core/floorplan.js"></script>
     <script src="js/core/parse-conversation.js"></script>
     <script src="js/core/parse-movement.js"></script>
+    <script src="js/core/parse-codes.js"></script>
     <script src="js/controllers/dom-controller.js"></script>
     <script src="js/controllers/sketch-controller.js"></script>
     <script src="js/controllers/handle-3D.js"></script>
@@ -87,6 +88,10 @@
             <input type="file" name="file" id="inputVideo" class="inputfile" accept=".mp4"
                 onchange="igs.domController.handleVideoFile(this)">
             <label for="inputVideo">Video File (MP4)</label>
+
+            <input type="file" name="file" id="inputCodes" class="inputfile" multiple accept=".csv"
+                onchange="igs.domController.handleCodeFiles(this)">
+            <label for="inputCodes">Code Files (CSV)</label>
 
             <button type="button" id="clearButton" class="inputfile"
                 onclick="igs.domController.handleClearButton()"></button>

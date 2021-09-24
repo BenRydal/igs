@@ -5,6 +5,7 @@ class Core {
         this.testData = new TestData(); // encapsulates various tests for parsing data
         this.parseMovement = new ParseMovement(this.sk, this.testData); // holds loaded movement file(s) and parsing methods
         this.parseConversation = new ParseConversation(this.sk, this.testData); // holds loaded conversation file and parsing methods
+        this.parseCodes = new ParseCodes(this.sk, this.testData);
         this.speakerList = []; // List of Speaker objects used in program created from conversation file
         this.pathList = []; // List of Path objects used in program created from movement file
         this.inputFloorPlan = new InputFloorPlan(this.sk); // holds floorplan image and associated methods
@@ -114,6 +115,8 @@ class Core {
         this.parseConversation.clear();
         this.clearMovementData();
         this.parseMovement.clear();
+        this.clearCodeData();
+        this.parseCodes.clear();
     }
 
     clearConversationData() {
@@ -124,5 +127,9 @@ class Core {
     clearMovementData() {
         this.pathList = [];
         this.totalTimeInSeconds = 0;
+    }
+
+    clearCodeData() {
+        this.pathList = [];
     }
 }

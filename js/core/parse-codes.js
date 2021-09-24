@@ -19,7 +19,7 @@ class ParseCodes {
      * @param  {CSV File[]} fileList
      */
     prepFiles(fileList) {
-        this.parseFiles(fileList, this.processFiles.bind(this));
+        this.parseFiles(fileList, this.processFile.bind(this));
     }
 
     /**
@@ -39,29 +39,33 @@ class ParseCodes {
         }
     }
 
-    processFiles(results, file, fileNum, fileListLength) {
+    processFile(results, file, fileNum, fileListLength) {
         console.log("Parsing complete:", results, file);
-        if (this.testData.testParsedMovementResults(results)) {
+        if (this.testData.testParsedCodeResults(results)) {
             if (fileNum === 0) this.clear(); // clear existing movement data for first new file only
-            const pathName = this.testData.cleanPathName(file.name);
-            this.updateParsedMovementFileData(results.data, pathName, fileNum, fileListLength);
-        } else alert("Error loading movement file. Please make sure your file is a .CSV file formatted with column headers: " + this.headersMovement.toString());
+            const cleanName = this.testData.cleanFileName(file.name);
+            this.updateParsedCodeFileData(results.data, cleanName);
+            if (fileNum === fileListLength) this.sortAndReProcess(); // reprocess files after all code tables loaded
+        } else alert("Error loading code file. Please make sure your file is a .CSV file formatted with column headers: " + this.testData.headersCodes.toString());
     }
 
-    // TODO: maybe this is better for movement to!!?
-    updateParsedCodeFileData(resultsArray, codeName, fileNum, fileListLength) {
-        this.parsedMovementFileData.push({
+    updateParsedCodeFileData(resultsArray, codeName) {
+        this.parsedCodeFileData.push({
             results: resultsArray, // results.data
-            name: codeName, // first 2 letters of filename
+            name: codeName, // first letter of filename
             counter: 0 // current counter being processed
         });
-        if (fileNum === fileListLength) this.updatePointArrays(results.data, pathName);
     }
 
-    // MUST BE SORTED before processing!!!
+    sortAndReProcess() {
+        this.parsedCodeFileData.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort for processing and GUI display
+        this.parseMovement.reProcessPointArrays();
+        this.resetCounters(); // reset all counters for next time processing any data
+    }
+
     addCodeArray(curTime) {
         const codesToAdd = [];
-        for (const codeTable of parsedCodeFileData) {
+        for (const codeTable of this.parsedCodeFileData) {
             if (this.timeIsBetweenCurRow(curTime, codeTable)) codesToAdd.push(true);
             else {
                 if (codeTable.counter < codeTable.results.length && this.timeIsBetweenNextRow(curTime, codeTable)) {
@@ -74,11 +78,11 @@ class ParseCodes {
     }
 
     timeIsBetweenCurRow(curTime, codeTable) {
-        return between(curTime, getStartTime(codeTable.results, codeTable.counter), getEndTime(codeTable.results, codeTable.counter))
+        return this.between(curTime, this.getStartTime(codeTable.results, codeTable.counter), this.getEndTime(codeTable.results, codeTable.counter));
     }
 
     timeIsBetweenNextRow(curTime, codeTable) {
-        return between(curTime, getStartTime(codeTable.results, codeTable.counter + 1), getEndTime(codeTable.results, codeTable.counter + 1))
+        return this.between(curTime, this.getStartTime(codeTable.results, codeTable.counter + 1), this.getEndTime(codeTable.results, codeTable.counter + 1));
     }
 
     getStartTime(results, row) {
@@ -93,8 +97,13 @@ class ParseCodes {
         return x >= min && x <= max;
     }
 
+    clear() {
+        this.parsedCodeFileData = [];
+        this.sk.core.clearCodeData();
+    }
+
     resetCounters() {
-        for (const codeTable of parsedCodeFileData) {
+        for (const codeTable of this.parsedCodeFileData) {
             codeTable.counter = 0;
         }
     }
