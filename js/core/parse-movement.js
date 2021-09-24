@@ -61,7 +61,7 @@ class ParseMovement {
             const pathName = this.testData.cleanPathName(file.name);
             this.updateParsedMovementFileData(results.data, pathName);
             this.updatePointArrays(results.data, pathName);
-        } else alert("Error loading movement file. Please make sure your file is a .CSV file formatted with column headers: " + this.headersMovement.toString());
+        } else alert("Error loading movement file. Please make sure your file is a .CSV file formatted with column headers: " + this.testData.headersMovement.toString());
     }
 
     updateParsedMovementFileData(resultsArray, pathName) {
