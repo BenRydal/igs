@@ -61,6 +61,9 @@ class TestData {
         return typeof curRow[this.headersCodes[0]] === 'number' && typeof curRow[this.headersCodes[1]] === 'number';
     }
 
+
+
+
     curTimeIsLarger(rows) {
         return Number.parseFloat(rows.curRow[this.headersMovement[0]]).toFixed(1) > Number.parseFloat(rows.priorRow[this.headersMovement[0]]).toFixed(1);
     }

@@ -1,21 +1,13 @@
-// 1) test if Code file has correct start and end headers and at least 1 row of number values 
-// AND movement data has been loaded
-// 2) add first letter/s of filename to global codeArray
-// 3) reprocess convo/movement arrays OR have new method to add code values to each array
-// NOTE: each point in each array has a codeArray that corresponds to global codeArray
-// 4) display codes in GUI
-// 5) If global codeArray[index] is true, then show the point if point codeArray[index] is 1
-
 class ParseCodes {
 
     constructor(sketch, testData) {
         this.sk = sketch;
         this.testData = testData; // holds various data tests for parsing and processing
-        this.parsedCodeFileData = []; // array of codeTable objects
+        this.parsedCodeFileData = []; // array of codeTable objects comprised of parsed results data, a charater code name and counter number
     }
 
     /**
-     * Prepare for parsing. Important for binding this to callback
+     * NOTE: This method is necessary to bind the correct "this" context to callback function
      * @param  {CSV File[]} fileList
      */
     prepFiles(fileList) {
@@ -38,14 +30,21 @@ class ParseCodes {
             });
         }
     }
-
+    /**
+     * Organizes updating codeFileData if parsed results from PapaParse passes additional tests
+     * NOTE: fileNum and fileListLength are used to clear current data and reprocess files
+     * @param  {PapaParse results Array} results
+     * @param  {File} file
+     * @param  {Number} fileNum
+     * @param  {Number} fileListLength
+     */
     processFile(results, file, fileNum, fileListLength) {
         console.log("Parsing complete:", results, file);
         if (this.testData.testParsedCodeResults(results)) {
-            if (fileNum === 0) this.clear(); // clear existing movement data for first new file only
+            if (fileNum === 0) this.clear(); // clear existing code data when processing first file
             const cleanName = this.testData.cleanFileName(file.name);
             this.updateParsedCodeFileData(results.data, cleanName);
-            if (fileNum === fileListLength) this.sortAndReProcess(); // reprocess files after all code tables loaded
+            if (fileNum === fileListLength - 1) this.sortAndReProcess(); // reprocess files after all code tables loaded
         } else alert("Error loading code file. Please make sure your file is a .CSV file formatted with column headers: " + this.testData.headersCodes.toString());
     }
 
@@ -56,19 +55,28 @@ class ParseCodes {
             counter: 0 // current counter being processed
         });
     }
-
+    /**
+     * Must sort updated parsedCodeFileData before reprocessing 
+     * Reset all counters for next time processing any data(movement, conversation and codes)
+     */
     sortAndReProcess() {
-        this.parsedCodeFileData.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort for processing and GUI display
-        this.parseMovement.reProcessPointArrays();
-        this.resetCounters(); // reset all counters for next time processing any data
+        this.parsedCodeFileData.sort((a, b) => (a.name > b.name) ? 1 : -1);
+        this.sk.core.parseMovement.reProcessPointArrays();
+        this.resetCounters();
     }
-
+    /** 
+     * Invoked when creating point arrays in parseMovement
+     * Tests if the current time value is between any start/end code times in all loaded codeTables
+     * NOTE: comparing to next row in codeTable and use of codeTable counters tries to do this in a most efficient manner
+     * 
+     * @param  {Number/Float} curTime
+     */
     addCodeArray(curTime) {
-        const codesToAdd = [];
-        for (const codeTable of this.parsedCodeFileData) {
+        let codesToAdd = [];
+        for (let codeTable of this.parsedCodeFileData) {
             if (this.timeIsBetweenCurRow(curTime, codeTable)) codesToAdd.push(true);
             else {
-                if (codeTable.counter < codeTable.results.length && this.timeIsBetweenNextRow(curTime, codeTable)) {
+                if (codeTable.counter < codeTable.results.length - 1 && this.timeIsBetweenNextRow(curTime, codeTable)) {
                     codesToAdd.push(true);
                     codeTable.counter++;
                 } else codesToAdd.push(false);
@@ -86,11 +94,11 @@ class ParseCodes {
     }
 
     getStartTime(results, row) {
-        return results[row]["start"];
+        return results[row][this.testData.headersCodes[0]];
     }
 
     getEndTime(results, row) {
-        return results[row]["end"];
+        return results[row][this.testData.headersCodes[1]];
     }
 
     between(x, min, max) {
