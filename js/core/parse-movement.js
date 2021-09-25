@@ -56,7 +56,7 @@ class ParseMovement {
 
     processFiles(results, file, fileNum) {
         console.log("Parsing complete:", results, file);
-        if (this.testData.testParsedMovementResults(results)) {
+        if (this.testData.parsedResults(results, this.testData.headersMovement, this.testData.movementRowForType)) {
             if (fileNum === 0) this.clear(); // clear existing movement data for first new file only
             const pathName = this.testData.cleanFileName(file.name);
             this.updateParsedMovementFileData(results.data, pathName);

@@ -7,18 +7,13 @@ class TestData {
     }
 
     /**
-     * @param  {PapaParse Results []} results
+     * @param  {Papaparse Results Array} results
+     * @param  {Array} headers
+     * @param  {Function} callbackTypeTest
+     * Note: must bind this to callbackTypeTest to set correct "this" context
      */
-    testParsedMovementResults(results) {
-        return results.data.length > 1 && this.includesAllHeaders(results.meta.fields, this.headersMovement) && this.movementHasOneCleanRow(results.data);
-    }
-
-    testParsedConversationResults(results) {
-        return results.data.length > 1 && this.includesAllHeaders(results.meta.fields, this.headersConversation) && this.conversationHasOneCleanRow(results.data);
-    }
-
-    testParsedCodeResults(results) {
-        return results.data.length > 1 && this.includesAllHeaders(results.meta.fields, this.headersCodes) && this.codesHaveOneCleanRow(results.data);
+    parsedResults(results, headers, callbackTypeTest) {
+        return results.data.length > 1 && this.includesAllHeaders(results.meta.fields, headers) && this.hasOneCleanRow(results.data, callbackTypeTest.bind(this));
     }
 
     includesAllHeaders(meta, headers) {
@@ -28,9 +23,9 @@ class TestData {
         return true;
     }
 
-    movementHasOneCleanRow(parsedMovementArray) {
-        for (const curRow of parsedMovementArray) {
-            if (this.movementRowForType(curRow)) return true;
+    hasOneCleanRow(resultsDataArray, callbackTypeTest) {
+        for (const curRow of resultsDataArray) {
+            if (callbackTypeTest(curRow)) return true;
         }
         return false;
     }
@@ -39,30 +34,13 @@ class TestData {
         return typeof curRow[this.headersMovement[0]] === 'number' && typeof curRow[this.headersMovement[1]] === 'number' && typeof curRow[this.headersMovement[2]] === 'number';
     }
 
-    conversationHasOneCleanRow(parsedConversationArray) {
-        for (const curRow of parsedConversationArray) {
-            if (this.conversationRowForType(curRow)) return true;
-        }
-        return false;
-    }
-
     conversationRowForType(curRow) {
         return typeof curRow[this.headersConversation[0]] === 'number' && typeof curRow[this.headersConversation[1]] === 'string' && curRow[this.headersConversation[2]] != null;
-    }
-
-    codesHaveOneCleanRow(parsedCodeArray) {
-        for (const curRow of parsedCodeArray) {
-            if (this.codeRowForType(curRow)) return true;
-        }
-        return false;
     }
 
     codeRowForType(curRow) {
         return typeof curRow[this.headersCodes[0]] === 'number' && typeof curRow[this.headersCodes[1]] === 'number';
     }
-
-
-
 
     curTimeIsLarger(rows) {
         return Number.parseFloat(rows.curRow[this.headersMovement[0]]).toFixed(1) > Number.parseFloat(rows.priorRow[this.headersMovement[0]]).toFixed(1);

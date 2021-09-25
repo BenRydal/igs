@@ -52,7 +52,7 @@ class ParseConversation {
 
     processFile(results, file) {
         console.log("Parsing complete:", results, file);
-        if (this.testData.testParsedConversationResults(results)) {
+        if (this.testData.parsedResults(results, this.testData.headersConversation, this.testData.conversationRowForType)) {
             this.clear();
             this.parsedFileArray = results.data; // set to new array of keyed values
             this.sk.core.updateConversationData();

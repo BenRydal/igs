@@ -40,7 +40,7 @@ class ParseCodes {
      */
     processFile(results, file, fileNum, fileListLength) {
         console.log("Parsing complete:", results, file);
-        if (this.testData.testParsedCodeResults(results)) {
+        if (this.testData.parsedResults(results, this.testData.headersCodes, this.testData.codeRowForType)) {
             if (fileNum === 0) this.clear(); // clear existing code data when processing first file
             const cleanName = this.testData.cleanFileName(file.name);
             this.updateParsedCodeFileData(results.data, cleanName);
