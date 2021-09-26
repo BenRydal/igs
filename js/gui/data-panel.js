@@ -9,7 +9,7 @@ class DataPanel {
         this.xPos = 10;
         this.spacing = this.sk.height / 50;
         this.headers = {
-            mode: ["Movement", "Speakers", "Floor Plan", "Select"],
+            mode: ["Movement", "Speakers", "Floor Plan", "Select", "Codes"],
             curMode: 0,
             height: timelineBottom,
         }
@@ -25,8 +25,8 @@ class DataPanel {
      * Passed values allow for dynamic display/updating
      */
     organize(mode, pathList, speakerList) {
-        this.organizeHeaders(mode);
-        switch (this.headers.curMode) {
+        this.organizeHeaders(mode); // Draws or tests if over headers
+        switch (this.headers.curMode) { // Draws or tests if over tabs
             case 0:
                 this.organizePerson(mode, pathList);
                 break;
@@ -39,6 +39,8 @@ class DataPanel {
             case 3:
                 this.organizeSelectors(mode, this.tabs.curSelectTab);
                 break;
+            case 4:
+                this.organizePerson(mode, this.sk.core.codeList); // TODO: add getter?
         }
     }
 

@@ -42,28 +42,31 @@ class ParseCodes {
         console.log("Parsing complete:", results, file);
         if (this.testData.parsedResults(results, this.testData.headersCodes, this.testData.codeRowForType)) {
             if (fileNum === 0) this.clear(); // clear existing code data when processing first file
-            const cleanName = this.testData.cleanFileName(file.name);
-            this.updateParsedCodeFileData(results.data, cleanName);
-            if (fileNum === fileListLength - 1) this.sortAndReProcess(); // reprocess files after all code tables loaded
+            const name = this.testData.cleanFileName(file.name);
+            this.updateParsedCodeFileData(name, results.data);
+            this.sk.core.updateCodeData(name, this.parsedCodeFileData);
+            if (fileNum === fileListLength - 1) this.reProcess(); // reprocess files after all code tables loaded
         } else alert("Error loading code file. Please make sure your file is a .CSV file formatted with column headers: " + this.testData.headersCodes.toString());
     }
 
-    updateParsedCodeFileData(resultsArray, codeName) {
-        this.parsedCodeFileData.push({
-            results: resultsArray, // results.data
-            name: codeName, // first letter of filename
-            counter: 0 // current counter being processed
-        });
-    }
     /**
      * Must sort updated parsedCodeFileData before reprocessing 
      * Reset all counters for next time processing any data(movement, conversation and codes)
      */
-    sortAndReProcess() {
-        this.parsedCodeFileData.sort((a, b) => (a.name > b.name) ? 1 : -1);
+    reProcess() {
         this.sk.core.parseMovement.reProcessPointArrays();
         this.resetCounters();
     }
+
+
+    updateParsedCodeFileData(codeName, resultsArray) {
+        this.parsedCodeFileData.push({
+            parsedCodeArray: resultsArray,
+            firstCharOfFileName: codeName,
+            counter: 0
+        });
+    }
+
     /** 
      * Invoked when creating point arrays in parseMovement
      * Tests if the current time value is between any start/end code times in all loaded codeTables
@@ -76,7 +79,7 @@ class ParseCodes {
         for (let codeTable of this.parsedCodeFileData) {
             if (this.timeIsBetweenCurRow(curTime, codeTable)) codesToAdd.push(true);
             else {
-                if (codeTable.counter < codeTable.results.length - 1 && this.timeIsBetweenNextRow(curTime, codeTable)) {
+                if (codeTable.counter < codeTable.parsedCodeArray.length - 1 && this.timeIsBetweenNextRow(curTime, codeTable)) {
                     codesToAdd.push(true);
                     codeTable.counter++;
                 } else codesToAdd.push(false);
@@ -86,11 +89,11 @@ class ParseCodes {
     }
 
     timeIsBetweenCurRow(curTime, codeTable) {
-        return this.between(curTime, this.getStartTime(codeTable.results, codeTable.counter), this.getEndTime(codeTable.results, codeTable.counter));
+        return this.between(curTime, this.getStartTime(codeTable.parsedCodeArray, codeTable.counter), this.getEndTime(codeTable.parsedCodeArray, codeTable.counter));
     }
 
     timeIsBetweenNextRow(curTime, codeTable) {
-        return this.between(curTime, this.getStartTime(codeTable.results, codeTable.counter + 1), this.getEndTime(codeTable.results, codeTable.counter + 1));
+        return this.between(curTime, this.getStartTime(codeTable.parsedCodeArray, codeTable.counter + 1), this.getEndTime(codeTable.parsedCodeArray, codeTable.counter + 1));
     }
 
     getStartTime(results, row) {

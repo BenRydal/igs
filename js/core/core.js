@@ -6,8 +6,11 @@ class Core {
         this.parseMovement = new ParseMovement(this.sk, this.testData); // holds loaded movement file(s) and parsing methods
         this.parseConversation = new ParseConversation(this.sk, this.testData); // holds loaded conversation file and parsing methods
         this.parseCodes = new ParseCodes(this.sk, this.testData);
+
         this.speakerList = []; // List of Speaker objects used in program created from conversation file
         this.pathList = []; // List of Path objects used in program created from movement file
+        this.codeList = [];
+
         this.inputFloorPlan = new InputFloorPlan(this.sk); // holds floorplan image and associated methods
         this.totalTimeInSeconds = 0; // Number indicating time value in seconds that all displayed data is set to, set dynamically by parseMovement
         this.COLOR_LIST = ['#6a3d9a', '#ff7f00', '#33a02c', '#1f78b4', '#e31a1c', '#ffff99', '#b15928', '#cab2d6', '#fdbf6f', '#b2df8a', '#a6cee3', '#fb9a99']; // 12 Class Paired: (Dark) purple, orange, green, blue, red, yellow, brown, (Light) lPurple, lOrange, lGreen, lBlue, lRed
@@ -24,12 +27,26 @@ class Core {
         this.sk.loop(); // rerun P5 draw loop
     }
 
-    updateConversationData() {
+    updateConversationData() { // TODO: PASS THE CONVERSATION ARRAY!
         this.updateSpeakerList(this.parseConversation.getParsedConversationArray());
         this.speakerList.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching core.pathList array
         this.parseMovement.reProcessPointArrays(); // must reprocess movement
         this.sk.loop(); // rerun P5 draw loop
     }
+
+    updateCodeData(name, codeArray) {
+        this.codeList.push(this.createCode(name, codeArray));
+        this.codeList.sort((a, b) => (a.name > b.name) ? 1 : -1); // Must sort updated parsedCodeFileData before reprocessing 
+    }
+
+    createCode(name) {
+        return {
+            name, // first letter of filename
+            color: 150, // color drawn in GUI
+            isShowing: false // if displaying in GUI
+        };
+    }
+
 
     updatePaths(pathName, movementPointArray, conversationPointArray) {
         let curPathColor;
@@ -38,7 +55,6 @@ class Core {
         this.pathList.push(this.createPath(pathName, movementPointArray, conversationPointArray, curPathColor, true));
         this.pathList.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching core.speakerList array
     }
-
 
     updateTotalTime(movementPointArray) {
         const curPathEndTime = Math.floor(movementPointArray[movementPointArray.length - 1].time);
@@ -131,5 +147,6 @@ class Core {
 
     clearCodeData() {
         this.pathList = [];
+        this.codeList = [];
     }
 }
