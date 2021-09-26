@@ -39,15 +39,6 @@ class Core {
         this.codeList.sort((a, b) => (a.name > b.name) ? 1 : -1); // Must sort updated parsedCodeFileData before reprocessing 
     }
 
-    createCode(name) {
-        return {
-            name, // first letter of filename
-            color: 150, // color drawn in GUI
-            isShowing: false // if displaying in GUI
-        };
-    }
-
-
     updatePaths(pathName, movementPointArray, conversationPointArray) {
         let curPathColor;
         if (this.sk.arrayIsLoaded(this.speakerList)) curPathColor = this.setPathColorBySpeaker(pathName); // if conversation file loaded, send to method to calculate color
@@ -123,6 +114,14 @@ class Core {
             color, // color
             isShowing // boolean used to indicate if speaker showing in GUI
         }
+    }
+
+    createCode(name) {
+        return {
+            name, // first letter of filename
+            color: 150, // color drawn in GUI
+            isShowing: false // if displaying in GUI
+        };
     }
 
     clearAllData() {
