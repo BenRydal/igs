@@ -2,8 +2,8 @@ class ParseConversation {
 
     constructor(sketch, testData) {
         this.sk = sketch;
-        this.testData = testData; // holds data tests for parsing and processing
-        this.parsedFileArray = []; // holds a Papaparse results.data array
+        this.testData = testData;
+        this.parsedFileArray = []; // PapaParse results.data Array
     }
 
     /**
