@@ -126,11 +126,8 @@ class Core {
 
     clearAllData() {
         this.inputFloorPlan.clear();
-        this.clearConversationData();
         this.parseConversation.clear();
-        this.clearMovementData();
         this.parseMovement.clear();
-        this.clearCodeData();
         this.parseCodes.clear();
     }
 
