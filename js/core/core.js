@@ -3,15 +3,15 @@ class Core {
     constructor(sketch) {
         this.sk = sketch;
         this.testData = new TestData(); // encapsulates various tests for parsing data
-        // PARSING CLASSES: handle data loading/parsing methods
+        // PARSING CLASSES
         this.parseMovement = new ParseMovement(this.sk, this.testData);
         this.parseConversation = new ParseConversation(this.sk, this.testData);
         this.parseCodes = new ParseCodes(this.sk, this.testData);
-        // PROGRAM DATA: for drawing and GUI
+        // PROGRAM DATA
         this.speakerList = []; // Speaker object Array created from parsed conversation file
         this.pathList = []; // Path object array created from parsed data
         this.codeList = [];
-        this.inputFloorPlan = new InputFloorPlan(this.sk); // class to hold Floorplan image and associated methods
+        this.inputFloorPlan = new InputFloorPlan(this.sk); // class to hold floorplan image and associated methods
         this.totalTimeInSeconds = 0; // Time value in seconds that all displayed data is set to, set dynamically when updating movement data
         this.COLOR_LIST = ['#6a3d9a', '#ff7f00', '#33a02c', '#1f78b4', '#e31a1c', '#ffff99', '#b15928', '#cab2d6', '#fdbf6f', '#b2df8a', '#a6cee3', '#fb9a99']; // 12 Class Paired: (Dark) purple, orange, green, blue, red, yellow, brown, (Light) lPurple, lOrange, lGreen, lBlue, lRed
     }
@@ -128,19 +128,19 @@ class Core {
 
     clearAllData() {
         this.inputFloorPlan.clear();
-        this.parseConversation.clear();
         this.parseMovement.clear();
+        this.parseConversation.clear();
         this.parseCodes.clear();
-    }
-
-    clearConversationData() {
-        this.speakerList = [];
-        this.pathList = [];
     }
 
     clearMovementData() {
         this.pathList = [];
         this.totalTimeInSeconds = 0;
+    }
+
+    clearConversationData() {
+        this.pathList = [];
+        this.speakerList = [];
     }
 
     clearCodeData() {
