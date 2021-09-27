@@ -22,7 +22,7 @@ class Core {
      * @param {Array} conversationPointArray
      */
     updateMovementData(pathName, movementPointArray, conversationPointArray) {
-        this.updatePaths(pathName, movementPointArray, conversationPointArray);
+        this.updatePathList(pathName, movementPointArray, conversationPointArray);
         this.updateTotalTime(movementPointArray);
         this.sk.loop(); // rerun P5 draw loop
     }
@@ -39,7 +39,7 @@ class Core {
         this.codeList.sort((a, b) => (a.name > b.name) ? 1 : -1); // Must sort updated parsedCodeFileData before reprocessing 
     }
 
-    updatePaths(pathName, movementPointArray, conversationPointArray) {
+    updatePathList(pathName, movementPointArray, conversationPointArray) {
         let curPathColor;
         if (this.sk.arrayIsLoaded(this.speakerList)) curPathColor = this.setPathColorBySpeaker(pathName); // if conversation file loaded, send to method to calculate color
         else curPathColor = this.COLOR_LIST[this.pathList.length % this.COLOR_LIST.length]; // if no conversation file loaded path color is next in Color list

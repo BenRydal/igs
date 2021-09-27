@@ -80,21 +80,21 @@ class ParseMovement {
     reProcessPointArrays() {
         for (const index of this.parsedFileArray) {
             const [movementPointArray, conversationPointArray] = this.createPointArrays(index.parsedMovementArray, this.sk.core.parseConversation.getParsedConversationArray());
-            this.sk.core.updatePaths(index.firstCharOfFileName, movementPointArray, conversationPointArray);
+            this.sk.core.updatePathList(index.firstCharOfFileName, movementPointArray, conversationPointArray);
         }
     }
 
     /**
      * Returns clean arrays of MovementPoint and ConversationPoint objects
      * Location attributes for a ConversationPoint are drawn from a MovementPoint with closest time value
-     *  @param  {PapaParse Results []} results
+     *  @param  {PapaParse Results Array} results
      */
     createPointArrays(parsedMovementArray, parsedConversationArray) {
         let movementPointArray = [];
         let conversationPointArray = [];
         let conversationCounter = 0; // Current row count of conversation file for comparison
         for (let i = 1; i < parsedMovementArray.length; i++) {
-            const rows = this.createCompareRow(parsedMovementArray[i], parsedMovementArray[i - 1]); // create object to hold current and prior points
+            const rows = this.createCompareRow(parsedMovementArray[i], parsedMovementArray[i - 1]); // Comparing cur and prior rows is important to sample data and evaluate isStopped points
             if (this.testData.movementRowForType(rows.curRow) && this.testData.curTimeIsLarger(rows)) {
                 const m = this.createMovementPoint(rows.curRow, movementPointArray);
                 movementPointArray.push(m);
@@ -111,7 +111,7 @@ class ParseMovement {
     }
 
     /**
-     * Comparing cur and prior rows is important to sample data and evaluate isStopped points
+     * This object is used to compare values from current and prior points
      */
     createCompareRow(curRow, priorRow) {
         return {
