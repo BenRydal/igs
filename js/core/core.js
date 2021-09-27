@@ -16,21 +16,21 @@ class Core {
         this.COLOR_LIST = ['#6a3d9a', '#ff7f00', '#33a02c', '#1f78b4', '#e31a1c', '#ffff99', '#b15928', '#cab2d6', '#fdbf6f', '#b2df8a', '#a6cee3', '#fb9a99']; // 12 Class Paired: (Dark) purple, orange, green, blue, red, yellow, brown, (Light) lPurple, lOrange, lGreen, lBlue, lRed
     }
 
-    updateMovementData(pathName, movementPointArray, conversationPointArray) {
+    updateMovement(pathName, movementPointArray, conversationPointArray) {
         this.pathList.push(this.createPath(pathName, movementPointArray, conversationPointArray));
         this.pathList = this.sortByName(this.pathList);
         this.updateTotalTime(movementPointArray);
         this.sk.loop(); // rerun P5 draw loop
     }
 
-    updateConversationData(parsedConversationFile) {
+    updateConversation(parsedConversationFile) {
         this.updateSpeakerList(parsedConversationFile);
         this.speakerList = this.sortByName(this.speakerList);
-        this.parseMovement.processPointsForAllPaths(); // must reprocess movement
+        this.parseMovement.reProcessAllPointArrays(); // must reprocess movement
         this.sk.loop(); // rerun P5 draw loop
     }
 
-    updateCodeData(parsedCodeArray, codeName) {
+    updateCodes(parsedCodeArray, codeName) {
         this.codeList.push(this.createCode(codeName, parsedCodeArray));
         this.codeList = this.sortByName(this.codeList);
         this.sk.loop(); // rerun P5 draw loop

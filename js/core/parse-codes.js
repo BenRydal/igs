@@ -45,9 +45,9 @@ class ParseCodes {
             if (fileNum === 0) this.clear(); // clear existing code data when processing first first file
             const codeName = this.testData.cleanFileName(file.name);
             this.parsedCodeFileData.push(createCodeTable(results.data, codeName));
-            this.sk.core.updateCodeData(results.data, codeName);
+            this.sk.core.updateCodes(results.data, codeName);
             if (fileNum === fileListLength - 1) { // reprocess movement and reset all counters after processing last file
-                this.sk.core.parseMovement.processPointsForAllPaths(); // call after sorting data in updateCodeData
+                this.sk.core.parseMovement.reProcessAllPointArrays(); // call after sorting data in updateCodes
                 this.resetCounters();
             }
         } else alert("Error loading code file. Please make sure your file is a .CSV file formatted with column headers: " + this.testData.headersCodes.toString());

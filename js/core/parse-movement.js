@@ -70,18 +70,18 @@ class ParseMovement {
                 parsedMovementArray: results.data,
                 firstCharOfFileName: pathName
             });
-            this.processPointsForPath(results.data, pathName);
+            this.processPointArrays(results.data, pathName);
         } else alert("Error loading movement file. Please make sure your file is a .CSV file formatted with column headers: " + this.testData.headersMovement.toString());
     }
 
-    processPointsForPath(resultsDataArray, pathName) {
+    processPointArrays(resultsDataArray, pathName) {
         const [movementPointArray, conversationPointArray] = this.createPointArrays(resultsDataArray, this.sk.core.parseConversation.getParsedConversationArray());
-        this.sk.core.updateMovementData(pathName, movementPointArray, conversationPointArray);
+        this.sk.core.updateMovement(pathName, movementPointArray, conversationPointArray);
     }
 
-    processPointsForAllPaths() {
+    reProcessAllPointArrays() {
         for (const index of this.parsedFileArray) {
-            this.processPointsForPath(index.parsedMovementArray, index.firstCharOfFileName);
+            this.processPointArrays(index.parsedMovementArray, index.firstCharOfFileName);
         }
     }
 
