@@ -2,13 +2,13 @@ class ParseMovement {
 
     constructor(sketch, testData) {
         this.sk = sketch;
-        this.testData = testData; // holds various data tests for parsing and processing
-        this.parsedFileArray = []; // List holds objects containing a parsed results.data array and character letter indicating path name from Papa Parsed CSV file
+        this.testData = testData; // holds data tests for parsing and processing
+        this.parsedFileArray = []; // Each index of array holds a Papaparse results.data array and string/character for name of path
     }
 
     /**
-     * Prepare for parsing. Important for binding this to callback
-     * @param  {CSV File[]} fileList
+     * This method is mportant for binding this to callback
+     * @param  {CSV File Array} fileList
      */
     prepFiles(fileList) {
         this.parseFiles(fileList, this.processFiles.bind(this));
@@ -38,7 +38,8 @@ class ParseMovement {
     }
 
     /**
-     * @param  {.CSV File[]} fileList
+     * Parses file and sends for further testing/processing
+     * @param  {CSV File Array} fileList
      */
     parseFiles(fileList, callback) {
         for (let fileNum = 0; fileNum < fileList.length; fileNum++) {
@@ -59,20 +60,20 @@ class ParseMovement {
         if (this.testData.parsedResults(results, this.testData.headersMovement, this.testData.movementRowForType)) {
             if (fileNum === 0) this.clear(); // clear existing movement data for first new file only
             const pathName = this.testData.cleanFileName(file.name);
-            this.updateparsedFileArray(results.data, pathName);
+            this.updateParsedFileArray(results.data, pathName);
             this.updatePointArrays(results.data, pathName);
         } else alert("Error loading movement file. Please make sure your file is a .CSV file formatted with column headers: " + this.testData.headersMovement.toString());
     }
 
-    updateparsedFileArray(resultsArray, pathName) {
+    updateParsedFileArray(resultsDataArray, pathName) {
         this.parsedFileArray.push({
-            parsedMovementArray: resultsArray,
-            firstCharOfFileName: pathName // get name of path, also used to test if associated speaker in conversation file
+            parsedMovementArray: resultsDataArray,
+            firstCharOfFileName: pathName
         });
     }
 
-    updatePointArrays(resultsArray, pathName) {
-        const [movementPointArray, conversationPointArray] = this.createPointArrays(resultsArray, this.sk.core.parseConversation.getParsedConversationArray());
+    updatePointArrays(resultsDataArray, pathName) {
+        const [movementPointArray, conversationPointArray] = this.createPointArrays(resultsDataArray, this.sk.core.parseConversation.getParsedConversationArray());
         this.sk.core.updateMovementData(pathName, movementPointArray, conversationPointArray);
     }
 
