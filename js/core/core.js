@@ -26,7 +26,7 @@ class Core {
     updateConversationData(parsedConversationFile) {
         this.updateSpeakerList(parsedConversationFile);
         this.speakerList = this.sortByName(this.speakerList);
-        this.parseMovement.reProcessPointArrays(); // must reprocess movement
+        this.parseMovement.processPointsForAllPaths(); // must reprocess movement
         this.sk.loop(); // rerun P5 draw loop
     }
 

@@ -54,7 +54,7 @@ class ParseCodes {
      * Reset all counters for next time processing any data(movement, conversation and codes)
      */
     reProcess() {
-        this.sk.core.parseMovement.reProcessPointArrays();
+        this.sk.core.parseMovement.processPointsForAllPaths();
         this.resetCounters();
     }
 
