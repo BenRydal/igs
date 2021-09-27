@@ -91,7 +91,7 @@ class ParseMovement {
     reProcessPointArrays() {
         for (const index of this.parsedFileArray) {
             const [movementPointArray, conversationPointArray] = this.createPointArrays(index.parsedMovementArray, this.sk.core.parseConversation.getParsedConversationArray());
-            this.sk.core.updatePathList(index.firstCharOfFileName, movementPointArray, conversationPointArray);
+            this.sk.core.updateMovementData(index.firstCharOfFileName, movementPointArray, conversationPointArray);
         }
     }
 

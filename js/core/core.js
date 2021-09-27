@@ -22,7 +22,8 @@ class Core {
      * @param {Array} conversationPointArray
      */
     updateMovementData(pathName, movementPointArray, conversationPointArray) {
-        this.updatePathList(pathName, movementPointArray, conversationPointArray);
+        this.pathList.push(this.createPath(pathName, movementPointArray, conversationPointArray));
+        this.pathList.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching core.speakerList array
         this.updateTotalTime(movementPointArray);
         this.sk.loop(); // rerun P5 draw loop
     }
@@ -37,26 +38,6 @@ class Core {
     updateCodeData(name, codeArray) {
         this.codeList.push(this.createCode(name, codeArray));
         this.codeList.sort((a, b) => (a.name > b.name) ? 1 : -1); // Must sort updated parsedCodeFileData before reprocessing 
-    }
-
-    updatePathList(pathName, movementPointArray, conversationPointArray) {
-        this.pathList.push(this.createPath(pathName, movementPointArray, conversationPointArray));
-        this.pathList.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching core.speakerList array
-    }
-
-    createPath(name, movement, conversation) {
-        return {
-            name, // Char matches 1st letter of CSV file
-            movement, // Array of MovementPoint objects
-            conversation, // Array of ConversationPoint objects
-            color: this.getCurPathColor(name), // color
-            isShowing: true // boolean used to indicate if speaker showing in GUI
-        }
-    }
-
-    getCurPathColor(name) {
-        if (this.sk.arrayIsLoaded(this.speakerList)) return this.setPathColorBySpeaker(name); // if conversation file loaded, send to method to calculate color
-        else return this.COLOR_LIST[this.pathList.length % this.COLOR_LIST.length]; // if no conversation file loaded path color is next in Color list
     }
 
     updateTotalTime(movementPointArray) {
@@ -74,6 +55,14 @@ class Core {
                 if (!tempSpeakerList.includes(speaker)) this.addSpeakerToSpeakerList(speaker);
             }
         }
+    }
+    /**
+     * Organizes retrieval of path color depending on whether conversation file has been loaded
+     * @param  {Char} name
+     */
+    getCurPathColor(name) {
+        if (this.sk.arrayIsLoaded(this.speakerList)) return this.setPathColorBySpeaker(name);
+        else return this.COLOR_LIST[this.pathList.length % this.COLOR_LIST.length]; // color is next in Color list
     }
 
     /**
@@ -107,8 +96,18 @@ class Core {
         this.speakerList.push(this.createSpeaker(name, this.COLOR_LIST[this.speakerList.length % this.COLOR_LIST.length], true));
     }
 
+    createPath(name, movement, conversation) {
+        return {
+            name, // Char matches 1st letter of CSV file
+            movement, // Array of MovementPoint objects
+            conversation, // Array of ConversationPoint objects
+            color: this.getCurPathColor(name),
+            isShowing: true // boolean used to indicate if speaker showing in GUI
+        }
+    }
+
     /**
-     * NOTE: Speaker and Path objects are separate due to how shapes are drawn in browser on Canvas element. Each speaker and path object can match/correspond to the same person but can also vary to allow for different number of movement files and speakers.
+     * NOTE: Speaker and Path objects are separate so that each speaker and path object can match/correspond to the same person but can also vary to allow for different number of movement files and speakers.
      */
     createSpeaker(name, color, isShowing) {
         return {
