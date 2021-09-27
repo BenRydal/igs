@@ -40,11 +40,23 @@ class Core {
     }
 
     updatePathList(pathName, movementPointArray, conversationPointArray) {
-        let curPathColor;
-        if (this.sk.arrayIsLoaded(this.speakerList)) curPathColor = this.setPathColorBySpeaker(pathName); // if conversation file loaded, send to method to calculate color
-        else curPathColor = this.COLOR_LIST[this.pathList.length % this.COLOR_LIST.length]; // if no conversation file loaded path color is next in Color list
-        this.pathList.push(this.createPath(pathName, movementPointArray, conversationPointArray, curPathColor, true));
+        this.pathList.push(this.createPath(pathName, movementPointArray, conversationPointArray));
         this.pathList.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching core.speakerList array
+    }
+
+    createPath(name, movement, conversation) {
+        return {
+            name, // Char matches 1st letter of CSV file
+            movement, // Array of MovementPoint objects
+            conversation, // Array of ConversationPoint objects
+            color: this.getCurPathColor(name), // color
+            isShowing: true // boolean used to indicate if speaker showing in GUI
+        }
+    }
+
+    getCurPathColor(name) {
+        if (this.sk.arrayIsLoaded(this.speakerList)) return this.setPathColorBySpeaker(name); // if conversation file loaded, send to method to calculate color
+        else return this.COLOR_LIST[this.pathList.length % this.COLOR_LIST.length]; // if no conversation file loaded path color is next in Color list
     }
 
     updateTotalTime(movementPointArray) {
@@ -104,16 +116,6 @@ class Core {
             color, // color
             isShowing // boolean indicating if showing in GUI
         };
-    }
-
-    createPath(name, movement, conversation, color, isShowing) {
-        return {
-            name, // Char matches 1st letter of CSV file
-            movement, // Array of MovementPoint objects
-            conversation, // Array of ConversationPoint objects
-            color, // color
-            isShowing // boolean used to indicate if speaker showing in GUI
-        }
     }
 
     createCode(name) {
