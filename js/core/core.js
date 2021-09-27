@@ -48,17 +48,9 @@ class Core {
             // If row is good data, test if core.speakerList already has speaker and if not add speaker 
             if (this.testData.conversationRowForType(curRow)) {
                 const speaker = this.testData.cleanSpeaker(curRow[this.testData.headersConversation[1]]); // get cleaned speaker character
-                if (!tempSpeakerList.includes(speaker)) this.addSpeakerToSpeakerList(speaker);
+                if (!tempSpeakerList.includes(speaker)) this.speakerList.push(this.createSpeaker(speaker));
             }
         }
-    }
-
-    /**
-     * Adds new speaker object with initial color to core.speakerList from string
-     * @param  {String} speaker
-     */
-    addSpeakerToSpeakerList(name) {
-        this.speakerList.push(this.createSpeaker(name, this.COLOR_LIST[this.speakerList.length % this.COLOR_LIST.length]));
     }
 
     /**
@@ -110,10 +102,10 @@ class Core {
         }
     }
 
-    createSpeaker(name, color) {
+    createSpeaker(name) {
         return {
             name, // string
-            color, // color
+            color: this.COLOR_LIST[this.speakerList.length % this.COLOR_LIST.length],
             isShowing: true // boolean indicating if showing in GUI
         };
     }
