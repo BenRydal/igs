@@ -2,8 +2,8 @@ class ParseCodes {
 
     constructor(sketch, testData) {
         this.sk = sketch;
-        this.testData = testData; // holds various data tests for parsing and processing
-        this.parsedCodeFileData = []; // each index of array holds a CodeTable object that represents results.data array, character name and counter number
+        this.testData = testData;
+        this.parsedFileArray = []; // each index holds a CodeTable object that represents results.data array, character name and counter number
     }
 
     /**
@@ -44,13 +44,21 @@ class ParseCodes {
         if (this.testData.parsedResults(results, this.testData.headersCodes, this.testData.codeRowForType)) {
             if (fileNum === 0) this.clear(); // clear existing code data when processing first first file
             const codeName = this.testData.cleanFileName(file.name);
-            this.parsedCodeFileData.push(createCodeTable(results.data, codeName));
+            this.parsedFileArray.push(this.createCodeTable(results.data, codeName));
             this.sk.core.updateCodes(results.data, codeName);
             if (fileNum === fileListLength - 1) { // reprocess movement and reset all counters after processing last file
                 this.sk.core.parseMovement.reProcessAllPointArrays(); // call after sorting data in updateCodes
                 this.resetCounters();
             }
         } else alert("Error loading code file. Please make sure your file is a .CSV file formatted with column headers: " + this.testData.headersCodes.toString());
+    }
+
+    createCodeTable(resultsDataArray, codeName) {
+        return {
+            parsedCodeArray: resultsDataArray,
+            firstCharOfFileName: codeName,
+            counter: 0
+        }
     }
 
     /** 
@@ -62,7 +70,7 @@ class ParseCodes {
      */
     addCodeArray(curTime) {
         let codesToAdd = [];
-        for (let codeTable of this.parsedCodeFileData) {
+        for (let codeTable of this.parsedFileArray) {
             if (this.timeIsBetweenCurRow(curTime, codeTable)) codesToAdd.push(true);
             else {
                 if (codeTable.counter < codeTable.parsedCodeArray.length - 1 && this.timeIsBetweenNextRow(curTime, codeTable)) {
@@ -94,21 +102,13 @@ class ParseCodes {
         return x >= min && x <= max;
     }
 
-    createCodeTable(resultsDataArray, codeName) {
-        return {
-            parsedCodeArray: resultsDataArray,
-            firstCharOfFileName: codeName,
-            counter: 0
-        }
-    }
-
     clear() {
-        this.parsedCodeFileData = [];
+        this.parsedFileArray = [];
         this.sk.core.clearCodes();
     }
 
     resetCounters() {
-        for (const codeTable of this.parsedCodeFileData) {
+        for (const codeTable of this.parsedFileArray) {
             codeTable.counter = 0;
         }
     }
