@@ -90,7 +90,8 @@ class ParseMovement {
      * ConversationPoint attributes draw from MovementPoint with first time value that is larger that time value at current conversation row in table
      * NOTE: conversationCounter is used/updated to efficiently manage joining of movement/conversationPoint attributes
      * TODO: consider how best to implement movement/curTimeLarger tests in the future
-     *  @param  {PapaParse Results Array} results
+     * @param  {PapaParse results.data Array} parsedMovementArray
+     * @param  {PapaParse results.data Array} parsedConversationArray
      */
     createPointArrays(parsedMovementArray, parsedConversationArray) {
         let movementPointArray = [];
