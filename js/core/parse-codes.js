@@ -30,13 +30,14 @@ class ParseCodes {
             });
         }
     }
+
     /**
      * Organizes updating codeFileData if parsed results from PapaParse passes additional tests
      * NOTE: fileNum and fileListLength are used to clear current data and reprocess files
      * @param  {PapaParse results Array} results
      * @param  {File} file
-     * @param  {Number} fileNum
-     * @param  {Number} fileListLength
+     * @param  {Integer} fileNum
+     * @param  {Integer} fileListLength
      */
     processFile(results, file, fileNum, fileListLength) {
         console.log("Parsing complete:", results, file);
@@ -44,20 +45,13 @@ class ParseCodes {
             if (fileNum === 0) this.clear(); // clear existing code data when processing first first file
             const codeName = this.testData.cleanFileName(file.name);
             this.updateParsedCodeFileData(results.data, codeName);
-            this.sk.core.updateCodeData(this.parsedCodeFileData, codeName);
-            if (fileNum === fileListLength - 1) this.reProcess(); // reprocess files after all code tables loaded
+            this.sk.core.updateCodeData(results.data, codeName);
+            if (fileNum === fileListLength - 1) { // reprocess movement and reset all counters when processing last file
+                this.sk.core.parseMovement.processPointsForAllPaths();
+                this.resetCounters();
+            }
         } else alert("Error loading code file. Please make sure your file is a .CSV file formatted with column headers: " + this.testData.headersCodes.toString());
     }
-
-    /**
-     * Must sort updated parsedCodeFileData before reprocessing 
-     * Reset all counters for next time processing any data(movement, conversation and codes)
-     */
-    reProcess() {
-        this.sk.core.parseMovement.processPointsForAllPaths();
-        this.resetCounters();
-    }
-
 
     updateParsedCodeFileData(resultsDataArray, codeName) {
         this.parsedCodeFileData.push({
