@@ -47,7 +47,7 @@ class TestData {
     }
 
     movementTimeIsLarger(movementTime, curRow) {
-        return movementTime >= curRow[this.headersConversation[0]];
+        return Number.parseFloat(movementTime).toFixed(1) >= Number.parseFloat(curRow[this.headersConversation[0]]).toFixed(1);
     }
 
     isStopped(curRow, movementPointArray) {
