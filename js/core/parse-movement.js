@@ -99,6 +99,7 @@ class ParseMovement {
      * Returns clean arrays of MovementPoint and ConversationPoint objects
      * ConversationPoint attributes draw from MovementPoint with first time value that is larger that time value at current conversation row in table
      * NOTE: conversationCounter is used/updated to efficiently manage joining of movement/conversationPoint attributes
+     * TODO: consider how best to implement movement/curTimeLarger tests in the future
      *  @param  {PapaParse Results Array} results
      */
     createPointArrays(parsedMovementArray, parsedConversationArray) {
@@ -148,14 +149,15 @@ class ParseMovement {
     /**
      * Represents a single conversation turn with a location in space and time
      * NOTE: Movement Point attributes are passed to create some attributes for a Conversation Point
+     * TODO: consider if time should also equal movementPoint.time in future, allowing conversationPoint to hold a movementPoint object
      */
     createConversationPoint(movementPoint, curConversationRow) {
         return {
-            xPos: movementPoint.xPos, // Float x and y pixel positions on floor plan
+            time: curConversationRow[this.testData.headersConversation[0]],
+            xPos: movementPoint.xPos,
             yPos: movementPoint.yPos,
             isStopped: movementPoint.isStopped,
             codeArray: movementPoint.codeArray,
-            time: curConversationRow[this.testData.headersConversation[0]], // Float Time value in seconds
             speaker: this.testData.cleanSpeaker(curConversationRow[this.testData.headersConversation[1]]), // String name of speaker
             talkTurn: curConversationRow[this.testData.headersConversation[2]] // String text of conversation turn
         }
