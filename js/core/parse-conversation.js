@@ -59,6 +59,7 @@ class ParseConversation {
         } else alert("Error loading conversation file. Please make sure your file is a .CSV file formatted with column headers: " + this.testData.headersConversation.toString());
     }
 
+
     getParsedConversationArray() {
         return this.parsedFileArray;
     }

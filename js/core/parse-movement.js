@@ -77,21 +77,15 @@ class ParseMovement {
             firstCharOfFileName: pathName
         });
     }
-    /**
-     * This method is called only when new movement data is loaded, which requires updating pathList and totalTime in program in updateMovementData method call
-     */
+
     updatePointArrays(resultsDataArray, pathName) {
         const [movementPointArray, conversationPointArray] = this.createPointArrays(resultsDataArray, this.sk.core.parseConversation.getParsedConversationArray());
         this.sk.core.updateMovementData(pathName, movementPointArray, conversationPointArray);
     }
 
-    /**
-     * This method is called when other data is loaded (conversation, codes), which requires only reprocessing of existing movement data
-     */
     reProcessPointArrays() {
         for (const index of this.parsedFileArray) {
-            const [movementPointArray, conversationPointArray] = this.createPointArrays(index.parsedMovementArray, this.sk.core.parseConversation.getParsedConversationArray());
-            this.sk.core.updateMovementData(index.firstCharOfFileName, movementPointArray, conversationPointArray);
+            this.updatePointArrays(index.parsedMovementArray, index.firstCharOfFileName);
         }
     }
 
