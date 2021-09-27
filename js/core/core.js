@@ -21,23 +21,24 @@ class Core {
      * @param {Array} movementPointArray
      * @param {Array} conversationPointArray
      */
+
     updateMovementData(pathName, movementPointArray, conversationPointArray) {
         this.pathList.push(this.createPath(pathName, movementPointArray, conversationPointArray));
-        this.pathList.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching core.speakerList array
+        this.pathList = this.sortByName(this.pathList);
         this.updateTotalTime(movementPointArray);
         this.sk.loop(); // rerun P5 draw loop
     }
 
     updateConversationData(parsedConversationFile) {
         this.updateSpeakerList(parsedConversationFile);
-        this.speakerList.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching core.pathList array
+        this.speakerList = this.sortByName(this.speakerList);
         this.parseMovement.reProcessPointArrays(); // must reprocess movement
         this.sk.loop(); // rerun P5 draw loop
     }
 
     updateCodeData(name, codeArray) {
         this.codeList.push(this.createCode(name, codeArray));
-        this.codeList.sort((a, b) => (a.name > b.name) ? 1 : -1); // Must sort updated parsedCodeFileData before reprocessing 
+        this.codeList = this.sortByName(this.codeList);
     }
 
     updateTotalTime(movementPointArray) {
@@ -94,6 +95,10 @@ class Core {
      */
     addSpeakerToSpeakerList(name) {
         this.speakerList.push(this.createSpeaker(name, this.COLOR_LIST[this.speakerList.length % this.COLOR_LIST.length], true));
+    }
+
+    sortByName(list) {
+        return list.sort((a, b) => (a.name > b.name) ? 1 : -1);
     }
 
     createPath(name, movement, conversation) {
