@@ -60,7 +60,7 @@ class ParseConversation {
     }
 
 
-    getParsedConversationArray() {
+    getParsedFileArray() {
         return this.parsedFileArray;
     }
 

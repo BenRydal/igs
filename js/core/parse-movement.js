@@ -7,7 +7,7 @@ class ParseMovement {
     }
 
     /**
-     * This method is mportant for binding this to callback
+     * This method is important for binding this to callback
      * @param  {CSV File Array} fileList
      */
     prepFiles(fileList) {
@@ -75,7 +75,7 @@ class ParseMovement {
     }
 
     processPointArrays(resultsDataArray, pathName) {
-        const [movementPointArray, conversationPointArray] = this.createPointArrays(resultsDataArray, this.sk.core.parseConversation.getParsedConversationArray());
+        const [movementPointArray, conversationPointArray] = this.createPointArrays(resultsDataArray, this.sk.core.parseConversation.getParsedFileArray());
         this.sk.core.updateMovement(pathName, movementPointArray, conversationPointArray);
     }
 
