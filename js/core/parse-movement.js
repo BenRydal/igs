@@ -3,7 +3,7 @@ class ParseMovement {
     constructor(sketch, testData) {
         this.sk = sketch;
         this.testData = testData; // holds various data tests for parsing and processing
-        this.parsedMovementFileData = []; // List holds objects containing a parsed results.data array and character letter indicating path name from Papa Parsed CSV file
+        this.parsedFileArray = []; // List holds objects containing a parsed results.data array and character letter indicating path name from Papa Parsed CSV file
     }
 
     /**
@@ -59,13 +59,13 @@ class ParseMovement {
         if (this.testData.parsedResults(results, this.testData.headersMovement, this.testData.movementRowForType)) {
             if (fileNum === 0) this.clear(); // clear existing movement data for first new file only
             const pathName = this.testData.cleanFileName(file.name);
-            this.updateParsedMovementFileData(results.data, pathName);
+            this.updateparsedFileArray(results.data, pathName);
             this.updatePointArrays(results.data, pathName);
         } else alert("Error loading movement file. Please make sure your file is a .CSV file formatted with column headers: " + this.testData.headersMovement.toString());
     }
 
-    updateParsedMovementFileData(resultsArray, pathName) {
-        this.parsedMovementFileData.push({
+    updateparsedFileArray(resultsArray, pathName) {
+        this.parsedFileArray.push({
             parsedMovementArray: resultsArray,
             firstCharOfFileName: pathName // get name of path, also used to test if associated speaker in conversation file
         });
@@ -77,7 +77,7 @@ class ParseMovement {
     }
 
     reProcessPointArrays() {
-        for (const index of this.parsedMovementFileData) {
+        for (const index of this.parsedFileArray) {
             const [movementPointArray, conversationPointArray] = this.createPointArrays(index.parsedMovementArray, this.sk.core.parseConversation.getParsedConversationArray());
             this.sk.core.updatePaths(index.firstCharOfFileName, movementPointArray, conversationPointArray);
         }
@@ -85,7 +85,7 @@ class ParseMovement {
 
     /**
      * Returns clean arrays of MovementPoint and ConversationPoint objects
-     * Location data for conversation array is drawn from comparison to movementPoint array
+     * Location attributes for a ConversationPoint are drawn from a MovementPoint with closest time value
      *  @param  {PapaParse Results []} results
      */
     createPointArrays(parsedMovementArray, parsedConversationArray) {
@@ -108,8 +108,9 @@ class ParseMovement {
         }
         return [movementPointArray, conversationPointArray];
     }
+
     /**
-     * Comparing cur and prior rows important to sample data and evaluate isStopped points
+     * Comparing cur and prior rows is important to sample data and evaluate isStopped points
      */
     createCompareRow(curRow, priorRow) {
         return {
@@ -119,21 +120,21 @@ class ParseMovement {
     }
 
     /**
-     * Represents a location in space and time along a path with additional attributes
+     * Represents a location in space and time along a path with other attributes
      */
     createMovementPoint(curRow, movementPointArray) {
-        const curTime = curRow[this.testData.headersMovement[0]];
         return {
-            time: curTime,
+            time: curRow[this.testData.headersMovement[0]],
             xPos: curRow[this.testData.headersMovement[1]],
             yPos: curRow[this.testData.headersMovement[2]],
             isStopped: this.testData.isStopped(curRow, movementPointArray),
-            codeArray: this.sk.core.parseCodes.addCodeArray(curTime)
+            codeArray: this.sk.core.parseCodes.addCodeArray(this.testData.headersMovement[0])
         }
     }
 
     /**
-     * Represents a single conversation turn with a location in space and time, text values, name of a speaker, and what they said
+     * Represents a single conversation turn with a location in space and time
+     * NOTE: Movement Point attributes are passed to create some attributes for a Conversation Point
      */
     createConversationPoint(movementPoint, curConversationRow) {
         return {
@@ -148,7 +149,7 @@ class ParseMovement {
     }
 
     clear() {
-        this.parsedMovementFileData = [];
+        this.parsedFileArray = [];
         this.sk.core.clearMovementData();
     }
 }
