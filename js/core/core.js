@@ -19,12 +19,12 @@ class Core {
     updateMovement(pathName, movementPointArray, conversationPointArray) {
         this.pathList.push(this.createPath(pathName, movementPointArray, conversationPointArray));
         this.pathList = this.sortByName(this.pathList);
-        this.updateTotalTime(movementPointArray);
+        this.setTotalTime(movementPointArray);
         this.sk.loop(); // rerun P5 draw loop
     }
 
     updateConversation(parsedConversationFile) {
-        this.updateSpeakerList(parsedConversationFile);
+        this.setSpeakerList(parsedConversationFile);
         this.speakerList = this.sortByName(this.speakerList);
         this.parseMovement.reProcessAllPointArrays(); // must reprocess movement
         this.sk.loop(); // rerun P5 draw loop
@@ -36,12 +36,12 @@ class Core {
         this.sk.loop(); // rerun P5 draw loop
     }
 
-    updateTotalTime(movementPointArray) {
+    setTotalTime(movementPointArray) {
         const curPathEndTime = Math.floor(movementPointArray[movementPointArray.length - 1].time);
         if (this.totalTimeInSeconds < curPathEndTime) this.totalTimeInSeconds = curPathEndTime; // update global total time, make sure to floor value as integer
     }
 
-    updateSpeakerList(parsedConversationArray) {
+    setSpeakerList(parsedConversationArray) {
         for (const curRow of parsedConversationArray) {
             let tempSpeakerList = []; // create/populate temp list to store strings to test from global core.speakerList
             for (const tempSpeaker of this.speakerList) tempSpeakerList.push(tempSpeaker.name);
