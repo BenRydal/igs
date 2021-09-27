@@ -55,6 +55,12 @@ class ParseMovement {
         }
     }
 
+    /**
+     * Organizes custom tests of parsed file, clearing of existing data and updating both parsedFileArray and program data
+     * @param  {Papaparse results Array} results
+     * @param  {File} file
+     * @param  {Integer} fileNum // used to clear existing movement data for first new file only
+     */
     processFiles(results, file, fileNum) {
         console.log("Parsing complete:", results, file);
         if (this.testData.parsedResults(results, this.testData.headersMovement, this.testData.movementRowForType)) {
@@ -95,7 +101,7 @@ class ParseMovement {
         let conversationCounter = 0; // Current row count of conversation file for comparison
         for (let i = 1; i < parsedMovementArray.length; i++) {
             const rows = this.createCompareRow(parsedMovementArray[i], parsedMovementArray[i - 1]); // Comparing cur and prior rows is important to sample data and evaluate isStopped points
-            if (this.testData.movementRowForType(rows.curRow) && this.testData.curTimeIsLarger(rows)) {
+            if (this.testData.movementRowForType(rows.curRow) && this.testData.curTimeIsLarger(rows.curRow, rows.priorRow)) {
                 const m = this.createMovementPoint(rows.curRow, movementPointArray);
                 movementPointArray.push(m);
                 if (conversationCounter < parsedConversationArray.length) { // this test both makes sure conversationArray is loaded and counter is not great than length
