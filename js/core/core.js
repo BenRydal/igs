@@ -27,8 +27,8 @@ class Core {
         this.sk.loop(); // rerun P5 draw loop
     }
 
-    updateConversationData() { // TODO: PASS THE CONVERSATION ARRAY!
-        this.updateSpeakerList(this.parseConversation.getParsedConversationArray());
+    updateConversationData(parsedConversationFile) {
+        this.updateSpeakerList(parsedConversationFile);
         this.speakerList.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching core.pathList array
         this.parseMovement.reProcessPointArrays(); // must reprocess movement
         this.sk.loop(); // rerun P5 draw loop
