@@ -66,16 +66,12 @@ class ParseMovement {
         if (this.testData.parsedResults(results, this.testData.headersMovement, this.testData.movementRowForType)) {
             if (fileNum === 0) this.clear(); // clear existing movement data for first new file only
             const pathName = this.testData.cleanFileName(file.name);
-            this.updateParsedFileArray(results.data, pathName);
+            this.parsedFileArray.push({
+                parsedMovementArray: results.data,
+                firstCharOfFileName: pathName
+            });
             this.processPointsForPath(results.data, pathName);
         } else alert("Error loading movement file. Please make sure your file is a .CSV file formatted with column headers: " + this.testData.headersMovement.toString());
-    }
-
-    updateParsedFileArray(resultsDataArray, pathName) {
-        this.parsedFileArray.push({
-            parsedMovementArray: resultsDataArray,
-            firstCharOfFileName: pathName
-        });
     }
 
     processPointsForPath(resultsDataArray, pathName) {
