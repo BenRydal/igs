@@ -24,14 +24,14 @@ class DataPanel {
     /**
      * Passed values allow for dynamic display/updating
      */
-    organize(mode, pathList, speakerList) {
+    organize(mode, pathList, speakerList, codeList) {
         this.organizeHeaders(mode); // Draws or tests if over headers
         switch (this.headers.curMode) { // Draws or tests if over tabs
             case 0:
-                this.organizePerson(mode, pathList);
+                this.organizeList(mode, pathList);
                 break;
             case 1:
-                this.organizePerson(mode, speakerList);
+                this.organizeList(mode, speakerList);
                 break;
             case 2:
                 this.organizeRotateKeys(mode);
@@ -40,7 +40,7 @@ class DataPanel {
                 this.organizeSelectors(mode, this.tabs.curSelectTab);
                 break;
             case 4:
-                this.organizePerson(mode, this.sk.core.codeList); // TODO: add getter?
+                this.organizeList(mode, codeList);
         }
     }
 
@@ -54,7 +54,7 @@ class DataPanel {
         }
     }
 
-    organizePerson(mode, list) {
+    organizeList(mode, list) {
         let curXPos = this.xPos;
         for (const person of list) {
             if (mode === this.sk.DRAWGUI) this.drawPerson(person, curXPos);
