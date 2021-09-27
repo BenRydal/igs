@@ -3,7 +3,7 @@ class ParseCodes {
     constructor(sketch, testData) {
         this.sk = sketch;
         this.testData = testData; // holds various data tests for parsing and processing
-        this.parsedCodeFileData = []; // array of codeTable objects comprised of parsed results data, a charater code name and counter number
+        this.parsedCodeFileData = []; // each index of array holds a CodeTable object that represents results.data array, character name and counter number
     }
 
     /**
@@ -44,21 +44,13 @@ class ParseCodes {
         if (this.testData.parsedResults(results, this.testData.headersCodes, this.testData.codeRowForType)) {
             if (fileNum === 0) this.clear(); // clear existing code data when processing first first file
             const codeName = this.testData.cleanFileName(file.name);
-            this.updateParsedCodeFileData(results.data, codeName);
+            this.parsedCodeFileData.push(createCodeTable(results.data, codeName));
             this.sk.core.updateCodeData(results.data, codeName);
-            if (fileNum === fileListLength - 1) { // reprocess movement and reset all counters when processing last file
-                this.sk.core.parseMovement.processPointsForAllPaths();
+            if (fileNum === fileListLength - 1) { // reprocess movement and reset all counters after processing last file
+                this.sk.core.parseMovement.processPointsForAllPaths(); // call after sorting data in updateCodeData
                 this.resetCounters();
             }
         } else alert("Error loading code file. Please make sure your file is a .CSV file formatted with column headers: " + this.testData.headersCodes.toString());
-    }
-
-    updateParsedCodeFileData(resultsDataArray, codeName) {
-        this.parsedCodeFileData.push({
-            parsedCodeArray: resultsDataArray,
-            firstCharOfFileName: codeName,
-            counter: 0
-        });
     }
 
     /** 
@@ -100,6 +92,14 @@ class ParseCodes {
 
     between(x, min, max) {
         return x >= min && x <= max;
+    }
+
+    createCodeTable(resultsDataArray, codeName) {
+        return {
+            parsedCodeArray: resultsDataArray,
+            firstCharOfFileName: codeName,
+            counter: 0
+        }
     }
 
     clear() {
