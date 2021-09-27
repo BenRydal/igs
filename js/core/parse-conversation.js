@@ -66,6 +66,6 @@ class ParseConversation {
 
     clear() {
         this.parsedFileArray = [];
-        this.sk.core.clearConversationData();
+        this.sk.core.clearConversation();
     }
 }

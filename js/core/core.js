@@ -126,24 +126,24 @@ class Core {
         };
     }
 
-    clearAllData() {
+    clearAll() {
         this.inputFloorPlan.clear();
         this.parseMovement.clear();
         this.parseConversation.clear();
         this.parseCodes.clear();
     }
 
-    clearMovementData() {
+    clearMovement() {
         this.pathList = [];
         this.totalTimeInSeconds = 0;
     }
 
-    clearConversationData() {
+    clearConversation() {
         this.pathList = [];
         this.speakerList = [];
     }
 
-    clearCodeData() {
+    clearCodes() {
         this.pathList = [];
         this.codeList = [];
     }

@@ -155,6 +155,6 @@ class ParseMovement {
 
     clear() {
         this.parsedFileArray = [];
-        this.sk.core.clearMovementData();
+        this.sk.core.clearMovement();
     }
 }

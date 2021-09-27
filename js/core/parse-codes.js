@@ -104,7 +104,7 @@ class ParseCodes {
 
     clear() {
         this.parsedCodeFileData = [];
-        this.sk.core.clearCodeData();
+        this.sk.core.clearCodes();
     }
 
     resetCounters() {

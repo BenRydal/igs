@@ -56,7 +56,7 @@ class DomController {
     }
 
     handleClearButton() {
-        this.sk.core.clearAllData();
+        this.sk.core.clearAll();
         this.clearCurVideo();
         this.sk.loop(); // rerun P5 draw loop
     }
@@ -141,7 +141,7 @@ class DomController {
 
     loadUserData() {
         this.sk.sketchController.setIsIntro(false); // Hide intro msg if showing
-        this.sk.core.clearAllData();
+        this.sk.core.clearAll();
         this.clearCurVideo();
         this.sk.loop(); // rerun P5 draw loop
     }
