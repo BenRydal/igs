@@ -41,6 +41,7 @@ class DataPanel {
                 break;
             case 4:
                 this.organizeList(mode, codeList);
+                break;
         }
     }
 
