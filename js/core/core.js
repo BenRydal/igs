@@ -30,8 +30,8 @@ class Core {
         this.sk.loop(); // rerun P5 draw loop
     }
 
-    updateCodes(parsedCodeArray, codeName) {
-        this.codeList.push(this.createCode(codeName, parsedCodeArray));
+    updateCodes(codeName) {
+        this.codeList.push(this.createCode(codeName));
         this.codeList = this.sortByName(this.codeList);
         this.sk.loop(); // rerun P5 draw loop
     }

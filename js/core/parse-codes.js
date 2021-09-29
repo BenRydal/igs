@@ -45,7 +45,7 @@ class ParseCodes {
             if (fileNum === 0) this.clear(); // clear existing code data when processing first first file
             const codeName = this.testData.cleanFileName(file.name);
             this.parsedFileArray.push(this.createCodeTable(results.data, codeName));
-            this.sk.core.updateCodes(results.data, codeName);
+            this.sk.core.updateCodes(codeName);
             if (fileNum === fileListLength - 1) { // reprocess movement and reset all counters after processing last file
                 this.sk.core.parseMovement.reProcessAllPointArrays(); // call after sorting data in updateCodes
                 this.resetCounters();
