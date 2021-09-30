@@ -174,9 +174,9 @@ class DrawMovement {
      * @param  {Object returned from getScaledPos} curPos
      */
     recordDot(curPos) {
-        const newDotValue = this.testPoint.setNewDotValue(curPos, this.dot);
-        if (newDotValue !== null) {
-            this.dot = newDotValue;
+        const newDot = this.testPoint.getNewDot(curPos, this.dot);
+        if (newDot !== null) {
+            this.dot = newDot;
             this.sk.sketchController.setDotTimeForVideoScrub(this.dot.timePos);
         }
     }

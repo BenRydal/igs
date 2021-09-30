@@ -112,18 +112,18 @@ class TestPoint {
         }
     }
 
-    setNewDotValue(curPos, curDot) {
-        let newDotValue = null;
+    getNewDot(curPos, curDot) {
+        let newDot = null;
         const [xPos, yPos, zPos, timePos, map3DMouse] = [curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.zPos, curPos.selTimelineXPos, this.sk.sketchController.mapToSelectTimeThenPixelTime(this.sk.mouseX)];
         if (this.sk.sketchController.getIsAnimate()) {
-            newDotValue = this.createDot(xPos, yPos, zPos, timePos, null); // always return true to set last/most recent point as the dot
+            newDot = this.createDot(xPos, yPos, zPos, timePos, null); // always return true to set last/most recent point as the dot
         } else if (this.sk.sketchController.mode.isVideoPlay) {
             const videoToSelectTime = this.sk.sketchController.mapVideoTimeToSelectedTime();
-            if (this.compareToCurDot(videoToSelectTime, timePos, curDot)) newDotValue = this.createDot(xPos, yPos, zPos, timePos, Math.abs(videoToSelectTime - timePos));
+            if (this.compareToCurDot(videoToSelectTime, timePos, curDot)) newDot = this.createDot(xPos, yPos, zPos, timePos, Math.abs(videoToSelectTime - timePos));
         } else if (this.sk.gui.timelinePanel.aboveTimeline(this.sk.mouseX, this.sk.mouseY) && this.compareToCurDot(map3DMouse, timePos, curDot)) {
-            newDotValue = this.createDot(xPos, yPos, zPos, map3DMouse, Math.abs(map3DMouse - timePos));
+            newDot = this.createDot(xPos, yPos, zPos, map3DMouse, Math.abs(map3DMouse - timePos));
         }
-        return newDotValue;
+        return newDot;
     }
 
     compareToCurDot(value1, value2, curDot) {
