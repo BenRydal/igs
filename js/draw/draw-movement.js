@@ -43,7 +43,7 @@ class DrawMovement {
         this.sk.beginShape();
         for (let i = 1; i < movementArray.length; i++) { // start at 1 to allow testing of current and prior indices
             const p = this.createComparePoint(view, movementArray[i], movementArray[i - 1]);
-            if (this.testPoint.isShowing(p.curPos)) {
+            if (this.testPoint.isShowingInGUI(p.curPos)) {
                 if (isFirstPoint) {
                     isFirstPoint = false;
                     if (p.curPoint.isStopped) isFatLine = false;

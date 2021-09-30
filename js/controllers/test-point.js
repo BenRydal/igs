@@ -4,7 +4,7 @@ class TestPoint {
         this.sk = sketch;
     }
 
-    isShowing(curPoint) {
+    isShowingInGUI(curPoint) {
         return this.sk.gui.timelinePanel.overAxis(curPoint.timelineXPos) && this.isShowingInAnimation(curPoint.timelineXPos);
     }
 
