@@ -31,7 +31,7 @@ class DrawMovement {
     }
 
     /**
-     * 
+     * Holds logic for drawing line segments depending on thick vs. thin line drawing and code tests
      * @param  {Integer} view
      * @param  {MovementPoint []} movementArray
      */
@@ -80,7 +80,7 @@ class DrawMovement {
         return isFatLine;
     }
     /**
-     * A compare point holds current and prior points as well as screen pixel positions
+     * A compare point augments current and prior points with screen pixel position variables and boolean indicating if the point passes code tests
      * @param  {Integer} view
      * @param  {MovementPoint} curPoint 
      * @param  {MovementPoint} priorPoint 
@@ -113,28 +113,31 @@ class DrawMovement {
         else this.sk.strokeWeight(this.style.thinStroke);
         return true;
     }
-
+    /**
+     * Continues drawing or begins new line with potential to have fat strokeWeight
+     */
     setFatLine(isFatLine, p) {
         if (isFatLine) this.drawVertexOrNewLine(p, this.style.fatStroke);
         else this.setNewLine(p, this.style.fatStroke);
     }
-
+    /**
+     * Continues drawing or begins new line with potential to have thin strokeWeight
+     */
     setThinLine(isFatLine, p) {
         if (!isFatLine) this.drawVertexOrNewLine(p, this.style.thinStroke);
         else this.setNewLine(p, this.style.thinStroke);
     }
-
+    /**
+     * Determines whether to draw new line with no strokeWeight or provided strokeWeight based on code test
+     */
     setNewLine(p, stroke) {
         if (!p.curCodeIsShowing) this.drawNewLine(p.priorPos, 0);
         else this.drawNewLine(p.priorPos, stroke); // if drawing in highlight mode, end it
     }
 
-    drawStopCircle(curPos) {
-        this.sk.fill(this.style.shade);
-        this.sk.circle(curPos.viewXPos, curPos.floorPlanYPos, 9);
-        this.sk.noFill();
-    }
-
+    /**
+     * Determines whether to continue drawing current line or begin new line with either 0 or provided strokeWeight based on code test
+     */
     drawVertexOrNewLine(p, stroke) {
         if (!p.curCodeIsShowing) {
             if (!p.priorCodeIsShowing) this.sk.vertex(p.curPos.viewXPos, p.curPos.floorPlanYPos, p.curPos.zPos); // if already drawing no line
@@ -145,8 +148,15 @@ class DrawMovement {
         }
     }
 
+    drawStopCircle(curPos) {
+        this.sk.fill(this.style.shade);
+        this.sk.circle(curPos.viewXPos, curPos.floorPlanYPos, 9);
+        this.sk.noFill();
+    }
+
     /**
-     * Ends and begins a new line with styles, NOTE: draws two vertices to indicate starting and ending points
+     * Ends and begins a new line with provided strokeWeight
+     * NOTE: draws two vertices to indicate starting and ending points
      * @param  {Object returned from getScaledPos} pos
      * @param  {Integer} weight
      */
@@ -155,7 +165,6 @@ class DrawMovement {
         this.sk.vertex(pos.viewXPos, pos.floorPlanYPos, pos.zPos);
         this.sk.endShape();
         this.sk.strokeWeight(weight);
-        this.sk.stroke(this.style.shade);
         this.sk.beginShape();
         this.sk.vertex(pos.viewXPos, pos.floorPlanYPos, pos.zPos); // draw cur point twice to mark starting point
         this.sk.vertex(pos.viewXPos, pos.floorPlanYPos, pos.zPos);
