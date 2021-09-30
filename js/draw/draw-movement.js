@@ -173,14 +173,14 @@ class DrawMovement {
         const dotSize = this.sk.width / 50;
         this.drawFloorPlanDot(curDot, dotSize);
         if (this.sk.sketchController.handle3D.getIsShowing()) this.draw3DSpaceTimeDot(curDot);
-        else this.sk.ellipse(curDot.timePos, curDot.yPos, dotSize, dotSize);
+        else this.sk.circle(curDot.timePos, curDot.yPos, dotSize);
     }
 
     drawFloorPlanDot(curDot, dotSize) {
         this.sk.stroke(0);
         this.sk.strokeWeight(5);
         this.sk.fill(this.style.shade);
-        this.sk.ellipse(curDot.xPos, curDot.yPos, dotSize, dotSize);
+        this.sk.circle(curDot.xPos, curDot.yPos, dotSize);
     }
 
     draw3DSpaceTimeDot(curDot) {
