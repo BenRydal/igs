@@ -89,10 +89,10 @@ class DrawMovement {
         return {
             curPoint,
             curPos: this.testPoint.getScaledPos(curPoint, view),
-            curCodeIsShowing: this.testPoint.passCodeTest(curPoint),
+            curCodeIsShowing: this.testPoint.isShowingInCodeList(curPoint),
             priorPoint,
             priorPos: this.testPoint.getScaledPos(priorPoint, view),
-            priorCodeIsShowing: this.testPoint.passCodeTest(priorPoint)
+            priorCodeIsShowing: this.testPoint.isShowingInCodeList(priorPoint)
         }
     }
 

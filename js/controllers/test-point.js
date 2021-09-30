@@ -13,13 +13,16 @@ class TestPoint {
         else return true;
     }
 
-    // Loop through codeList and return false if:
-    // for any of codes that are true in codeList a code at curPoint is false 
-    passCodeTest(curPoint) {
+    /**
+     * This method tests if a point is showing for all selected codes from codeList
+     * IMPLEMENTATION: Iterate through core codeList and return false if: for any of codes that are true in codeList a code at curPoint is false 
+     * @param  {MovementPoint} point
+     */
+    isShowingInCodeList(point) {
         if (this.sk.arrayIsLoaded(this.sk.core.codeList)) {
             for (let j = 0; j < this.sk.core.codeList.length; j++) {
                 if (this.sk.core.codeList[j].isShowing) {
-                    if (curPoint.codeArray[j]) continue;
+                    if (point.codeArray[j]) continue;
                     else return false;
                 }
             }
