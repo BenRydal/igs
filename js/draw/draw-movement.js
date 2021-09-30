@@ -41,7 +41,7 @@ class DrawMovement {
         let isFirstPoint = true; // set to false when first point that is showing is drawn
         this.resetLineStyles();
         this.sk.beginShape();
-        for (let i = 1; i < movementArray.length; i++) { // start at 1 to allow testing of current and prior points
+        for (let i = 1; i < movementArray.length; i++) { // start at 1 to allow testing of current and prior indices
             const p = this.createComparePoint(view, movementArray[i], movementArray[i - 1]);
             if (this.testPoint.isShowing(p.curPos)) {
                 if (isFirstPoint) {
@@ -58,42 +58,20 @@ class DrawMovement {
         }
         this.sk.endShape(); // end shape in case still drawing
     }
-    /**
-     * First return value sets isFatLine and second sets isFirstPoint to false 
-     */
-    setVarsForFirstPoint(curPointIsStopped) {
-        if (curPointIsStopped) return [false, false];
-        else return [true, false];
-    }
-
-    endDrawing() {
-        this.sk.endShape();
-        return false;
-    }
-
-    beginDrawing(isFatLine) {
-        this.sk.beginShape();
-        if (isFatLine) this.sk.strokeWeight(this.style.fatStroke);
-        else this.sk.strokeWeight(this.style.thinStroke);
-        return true;
-    }
 
     /**
      * Holds logic for testing each compare point object that organizes drawing methods and updating isFatLine var
      * NOTE: In web browsers lines must be segmented/ended to change thickness or stroke
-     * @param  {boolean} isFatLine
-     * @param  {ComparePoint} p
-     * @param  {integer} view
      */
     organizeDrawing(isFatLine, p, view) {
         if (this.testPoint.isPlanViewAndStopped(view, p.curPoint)) {
             if (!p.priorPoint.isStopped && p.curCodeIsShowing) this.drawStopCircle(p.curPos); // only draw stopped point once and only draw it if showing in codes
         } else {
             if (this.testPoint.selectModeForFatLine(p)) {
-                this.drawFatLine(isFatLine, p);
+                this.setFatLine(isFatLine, p);
                 isFatLine = true;
             } else {
-                this.drawThinLine(isFatLine, p);
+                this.setThinLine(isFatLine, p);
                 isFatLine = false;
             }
         }
@@ -116,19 +94,39 @@ class DrawMovement {
         }
     }
 
-    drawStopCircle(curPos) {
-        this.sk.fill(this.style.shade);
-        this.sk.circle(curPos.viewXPos, curPos.floorPlanYPos, 9);
-        this.sk.noFill();
+    /**
+     * First return value sets isFatLine and second sets isFirstPoint to false 
+     */
+    setVarsForFirstPoint(curPointIsStopped) {
+        if (curPointIsStopped) return [false, false];
+        else return [true, false];
     }
 
-    drawFatLine(isFatLine, p) {
-        if (isFatLine) this.setVertexOrNewLine(p, this.style.fatStroke);
+    /**
+     * Ends drawing shape if code is not showing and sets isDrawing to false
+     */
+    endDrawing() {
+        this.sk.endShape();
+        return false;
+    }
+
+    /**
+     * Begins drawing shape if code is showing and not already drawing, sets correct strokeweight and sets isDrawing to true
+     */
+    beginDrawing(isFatLine) {
+        this.sk.beginShape();
+        if (isFatLine) this.sk.strokeWeight(this.style.fatStroke);
+        else this.sk.strokeWeight(this.style.thinStroke);
+        return true;
+    }
+
+    setFatLine(isFatLine, p) {
+        if (isFatLine) this.drawVertexOrNewLine(p, this.style.fatStroke);
         else this.setNewLine(p, this.style.fatStroke);
     }
 
-    drawThinLine(isFatLine, p) {
-        if (!isFatLine) this.setVertexOrNewLine(p, this.style.thinStroke);
+    setThinLine(isFatLine, p) {
+        if (!isFatLine) this.drawVertexOrNewLine(p, this.style.thinStroke);
         else this.setNewLine(p, this.style.thinStroke);
     }
 
@@ -137,7 +135,13 @@ class DrawMovement {
         else this.drawNewLine(p.priorPos, stroke); // if drawing in highlight mode, end it
     }
 
-    setVertexOrNewLine(p, stroke) {
+    drawStopCircle(curPos) {
+        this.sk.fill(this.style.shade);
+        this.sk.circle(curPos.viewXPos, curPos.floorPlanYPos, 9);
+        this.sk.noFill();
+    }
+
+    drawVertexOrNewLine(p, stroke) {
         if (!p.curCodeIsShowing) {
             if (!p.priorCodeIsShowing) this.sk.vertex(p.curPos.viewXPos, p.curPos.floorPlanYPos, p.curPos.zPos); // if already drawing no line
             else this.drawNewLine(p.priorPos, 0); // if curPoint has no code and not already drawing no line
@@ -149,7 +153,7 @@ class DrawMovement {
 
     /**
      * Ends and begins a new line with styles, NOTE: draws two vertices to indicate starting and ending points
-     * @param  {curPos Object from getScaledPos} pos
+     * @param  {Object returned from getScaledPos} pos
      * @param  {Integer} weight
      */
     drawNewLine(pos, weight) {
