@@ -20,9 +20,14 @@ const igs = new p5((sk) => {
     }
 
     sk.setup = function () {
+        // CANVAS/STYLES
         sk.canvas = sk.createCanvas(window.innerWidth, window.innerHeight, sk.WEBGL);
+        sk.textSize(sk.GUITEXTSIZE);
+        sk.textFont(sk.font_Lato);
+        sk.textAlign(sk.LEFT, sk.TOP);
+        sk.smooth();
         // SINGLETONS
-        sk.core = new Core(sk); // holds core data and update/load data methods
+        sk.core = new Core(sk); // holds core data, update and parsing methods/classes
         sk.gui = new GUI(sk); // holds GUI elements/classes
         sk.domController = new DomController(sk); // handles DOM/buttons user interaction
         sk.sketchController = new SketchController(sk); // coordinates calls across classes
@@ -33,10 +38,6 @@ const igs = new p5((sk) => {
         sk.DRAWGUI = 0;
         sk.HANDLEGUI = 1;
         sk.GUITEXTSIZE = sk.width / 70;
-        sk.textSize(sk.GUITEXTSIZE);
-        sk.textFont(sk.font_Lato);
-        sk.textAlign(sk.LEFT, sk.TOP);
-        sk.smooth();
     }
 
     sk.draw = function () {
