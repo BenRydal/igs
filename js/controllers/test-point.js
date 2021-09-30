@@ -75,8 +75,9 @@ class TestPoint {
     }
 
     /**
-     * Holds logic for testing point based on selectMode
-     * @param  {ComparePoint} p
+     * Controls fat line drawing/segmentation
+     * @param  {Object returned from getScaledPos} pos
+     * @param  {MovementPoint} point
      */
     selectModeForFatLine(pos, point) {
         switch (this.sk.gui.dataPanel.getCurSelectTab()) {
