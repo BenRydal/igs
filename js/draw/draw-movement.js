@@ -3,15 +3,7 @@ class DrawMovement {
     constructor(sketch) {
         this.sk = sketch;
         this.testPoint = new TestPoint(this.sk);
-        this.bug = { // represents user selection dot drawn in both floor plan and space-time views
-            xPos: null, // number/float values
-            yPos: null,
-            zPos: null,
-            timePos: null,
-            size: this.sk.width / 50,
-            lengthToCompare: this.sk.width, // used to compare data points to find closest bug value
-            isSelected: false
-        };
+        this.bug = null; // represents user selection dot drawn in both floor plan and space-time views
         this.style = {
             shade: null,
             thinStroke: null,
@@ -20,11 +12,11 @@ class DrawMovement {
     }
 
     setData(path) {
-        this.resetBug();
+        this.bug = null; // reset bug
         this.setPathStyles(path.color);
         this.setDraw(this.sk.PLAN, path.movement);
         this.setDraw(this.sk.SPACETIME, path.movement);
-        if (this.bug.isSelected) this.drawBug();
+        if (this.bug !== null) this.drawBug(this.bug);
     }
 
     setPathStyles(color) {
@@ -72,7 +64,7 @@ class DrawMovement {
                 }
                 if (this.testPoint.passCodeTest(p.curPoint)) {
                     if (!isDrawing) isDrawing = this.beginDrawing(isFatLine);
-                    if (view === this.sk.SPACETIME) this.testPointForBug(p.curPos);
+                    if (view === this.sk.SPACETIME) this.recordBug(p.curPos);
                     isFatLine = this.organizeDrawing(isFatLine, p, view);
                 } else {
                     if (isDrawing) isDrawing = this.endDrawing();
@@ -184,50 +176,25 @@ class DrawMovement {
         this.sk.vertex(pos.viewXPos, pos.floorPlanYPos, pos.zPos);
     }
 
-    testPointForBug(curPos) {
-        const [timePos, xPos, yPos, zPos] = [curPos.selTimelineXPos, curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.zPos];
-        const map3DMouse = this.sk.sketchController.mapToSelectTimeThenPixelTime(this.sk.mouseX);
-        if (this.sk.sketchController.mode.isAnimate) this.recordBug(timePos, xPos, yPos, zPos, null); // always return true to set last/most recent point as the bug
-        else if (this.sk.sketchController.mode.isVideoPlay) {
-            const selTime = this.sk.sketchController.mapVideoTimeToSelectedTime();
-            if (this.compareValuesBySpacing(selTime, timePos, this.bug.lengthToCompare)) this.recordBug(timePos, xPos, yPos, zPos, Math.abs(selTime - timePos));
-        } else if (this.sk.gui.timelinePanel.aboveTimeline(this.sk.mouseX, this.sk.mouseY) && this.compareValuesBySpacing(map3DMouse, timePos, this.bug.lengthToCompare)) this.recordBug(map3DMouse, xPos, yPos, zPos, Math.abs(map3DMouse - timePos));
+    recordBug(curPos) {
+        const newBugValue = this.testPoint.setNewBugValue(curPos, this.bug);
+        if (newBugValue !== null) {
+            this.bug = newBugValue;
+            this.sk.sketchController.bugTimeForVideoScrub = this.bug.timePos;
+        }
     }
 
-    compareValuesBySpacing(value1, value2, spacing) {
-        return value1 >= value2 - spacing && value1 <= value2 + spacing;
-    }
-
-    resetBug() {
-        this.bug.xPos = null;
-        this.bug.yPos = null;
-        this.bug.zPos = null;
-        this.bug.timePos = null;
-        this.bug.lengthToCompare = this.sk.width;
-        this.bug.isSelected = false;
-    }
-
-    recordBug(timePos, xPos, yPos, zPos, lengthToCompare) {
-        this.bug.xPos = xPos;
-        this.bug.yPos = yPos;
-        this.bug.zPos = zPos;
-        this.bug.timePos = timePos;
-        this.bug.lengthToCompare = lengthToCompare;
-        this.bug.isSelected = true;
-        this.sk.sketchController.bugTimeForVideoScrub = timePos;
-    }
-
-    drawBug() {
+    drawBug(curBug) {
         this.sk.stroke(0);
         this.sk.strokeWeight(5);
         this.sk.fill(this.style.shade);
-        this.sk.ellipse(this.bug.xPos, this.bug.yPos, this.bug.size, this.bug.size);
+        this.sk.ellipse(curBug.xPos, curBug.yPos, curBug.size, curBug.size);
         if (this.sk.sketchController.handle3D.getIsShowing()) {
             this.sk.stroke(this.style.shade);
             this.sk.strokeWeight(25);
-            this.sk.point(this.bug.xPos, this.bug.yPos, this.bug.zPos);
+            this.sk.point(curBug.xPos, curBug.yPos, curBug.zPos);
             this.sk.strokeWeight(2);
-            this.sk.line(this.bug.xPos, this.bug.yPos, 0, this.bug.xPos, this.bug.yPos, this.bug.zPos);
-        } else this.sk.ellipse(this.bug.timePos, this.bug.yPos, this.bug.size, this.bug.size);
+            this.sk.line(curBug.xPos, curBug.yPos, 0, curBug.xPos, curBug.yPos, curBug.zPos);
+        } else this.sk.ellipse(curBug.timePos, curBug.yPos, curBug.size, curBug.size);
     }
 }
