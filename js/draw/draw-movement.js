@@ -45,7 +45,9 @@ class DrawMovement {
             const p = this.createComparePoint(view, movementArray[i], movementArray[i - 1]);
             if (this.testPoint.isShowing(p.curPos)) {
                 if (isFirstPoint) {
-                    [isFatLine, isFirstPoint] = this.setVarsForFirstPoint(p.curPoint.isStopped);
+                    isFirstPoint = false;
+                    if (p.curPoint.isStopped) isFatLine = false;
+                    else isFatLine = true;
                 }
                 if (p.curCodeIsShowing) {
                     if (!isDrawing) isDrawing = this.beginDrawing(isFatLine);
@@ -92,14 +94,6 @@ class DrawMovement {
             priorPos: this.testPoint.getScaledPos(priorPoint, view),
             priorCodeIsShowing: this.testPoint.passCodeTest(priorPoint)
         }
-    }
-
-    /**
-     * First return value sets isFatLine and second sets isFirstPoint to false 
-     */
-    setVarsForFirstPoint(curPointIsStopped) {
-        if (curPointIsStopped) return [false, false];
-        else return [true, false];
     }
 
     /**
