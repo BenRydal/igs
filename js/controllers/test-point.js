@@ -9,7 +9,7 @@ class TestPoint {
     }
 
     isShowingInAnimation(value) {
-        if (this.sk.sketchController.mode.isAnimate) return this.sk.sketchController.animationCounter > this.sk.sketchController.mapPixelTimeToTotalTime(value);
+        if (this.sk.sketchController.getIsAnimate()) return this.sk.sketchController.animationCounter > this.sk.sketchController.mapPixelTimeToTotalTime(value);
         else return true;
     }
 
@@ -104,7 +104,7 @@ class TestPoint {
     setNewBugValue(curPos, curBug) {
         let newBugValue = null;
         const [xPos, yPos, zPos, timePos, map3DMouse] = [curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.zPos, curPos.selTimelineXPos, this.sk.sketchController.mapToSelectTimeThenPixelTime(this.sk.mouseX)];
-        if (this.sk.sketchController.mode.isAnimate) {
+        if (this.sk.sketchController.getIsAnimate()) {
             newBugValue = this.createBug(xPos, yPos, zPos, timePos, null); // always return true to set last/most recent point as the bug
         } else if (this.sk.sketchController.mode.isVideoPlay) {
             const videoToSelectTime = this.sk.sketchController.mapVideoTimeToSelectedTime();

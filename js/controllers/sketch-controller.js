@@ -193,6 +193,10 @@ class SketchController {
         return this.mode.isIntro;
     }
 
+    getIsAnimate() {
+        return this.mode.isAnimate;
+    }
+
     /**
      * Returns pixel width for drawing conversation rectangles based on curTotalTime of data, user timeline selection, and maxRectWidth
      * NOTE: curScaledRectWidth parameters 0-3600 scale pixels to 1 hour which works well and the map method maps to the inverse of 1 and maxRectWidth to properly adjust scaling/thickness of rects when user interacts with timeline
