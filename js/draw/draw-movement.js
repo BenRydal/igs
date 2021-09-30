@@ -156,7 +156,7 @@ class DrawMovement {
 
     /**
      * Ends and begins a new line with provided strokeWeight
-     * NOTE: draws two vertices to indicate starting and ending points
+     * NOTE: draw two vertices to indicate starting and ending points
      * @param  {Object returned from getScaledPos} pos
      * @param  {Integer} weight
      */
@@ -169,12 +169,15 @@ class DrawMovement {
         this.sk.vertex(pos.viewXPos, pos.floorPlanYPos, pos.zPos); // draw cur point twice to mark starting point
         this.sk.vertex(pos.viewXPos, pos.floorPlanYPos, pos.zPos);
     }
-
+    /**
+     * Tests if newDot has been created and updated current dot value and video scrub variable if so
+     * @param  {Object returned from getScaledPos} curPos
+     */
     recordDot(curPos) {
         const newDotValue = this.testPoint.setNewDotValue(curPos, this.dot);
         if (newDotValue !== null) {
             this.dot = newDotValue;
-            this.sk.sketchController.dotTimeForVideoScrub = this.dot.timePos;
+            this.sk.sketchController.setDotTimeForVideoScrub(this.dot.timePos);
         }
     }
 

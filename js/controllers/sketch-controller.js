@@ -189,6 +189,10 @@ class SketchController {
         personFromList.isShowing = !personFromList.isShowing;
     }
 
+    setDotTimeForVideoScrub(timePos) {
+        this.dotTimeForVideoScrub = timePos;
+    }
+
     getIsIntro() {
         return this.mode.isIntro;
     }
