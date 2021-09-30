@@ -47,7 +47,7 @@ class DrawMovement {
                 if (isFirstPoint) {
                     [isFatLine, isFirstPoint] = this.setVarsForFirstPoint(p.curPoint.isStopped);
                 }
-                if (this.testPoint.passCodeTest(p.curPoint)) {
+                if (p.curCodeIsShowing) {
                     if (!isDrawing) isDrawing = this.beginDrawing(isFatLine);
                     if (view === this.sk.SPACETIME) this.recordDot(p.curPos);
                     isFatLine = this.organizeDrawing(isFatLine, p, view);
@@ -87,7 +87,7 @@ class DrawMovement {
      */
     organizeDrawing(isFatLine, p, view) {
         if (this.testPoint.isPlanViewAndStopped(view, p.curPoint)) {
-            if (!p.priorPoint.isStopped && this.testPoint.passCodeTest(p.curPoint)) this.drawStopCircle(p.curPos); // only draw stopped point once and only draw it if showing in codes
+            if (!p.priorPoint.isStopped && p.curCodeIsShowing) this.drawStopCircle(p.curPos); // only draw stopped point once and only draw it if showing in codes
         } else {
             if (this.testPoint.selectModeForFatLine(p)) {
                 this.drawFatLine(isFatLine, p);
@@ -109,8 +109,10 @@ class DrawMovement {
         return {
             curPoint,
             curPos: this.testPoint.getScaledPos(curPoint, view),
+            curCodeIsShowing: this.testPoint.passCodeTest(curPoint),
             priorPoint,
-            priorPos: this.testPoint.getScaledPos(priorPoint, view)
+            priorPos: this.testPoint.getScaledPos(priorPoint, view),
+            priorCodeIsShowing: this.testPoint.passCodeTest(priorPoint)
         }
     }
 
@@ -131,16 +133,16 @@ class DrawMovement {
     }
 
     setNewLine(p, stroke) {
-        if (!this.testPoint.passCodeTest(p.curPoint)) this.drawNewLine(p.priorPos, 0);
+        if (!p.curCodeIsShowing) this.drawNewLine(p.priorPos, 0);
         else this.drawNewLine(p.priorPos, stroke); // if drawing in highlight mode, end it
     }
 
     setVertexOrNewLine(p, stroke) {
-        if (!this.testPoint.passCodeTest(p.curPoint)) {
-            if (!this.testPoint.passCodeTest(p.priorPoint)) this.sk.vertex(p.curPos.viewXPos, p.curPos.floorPlanYPos, p.curPos.zPos); // if already drawing no line
+        if (!p.curCodeIsShowing) {
+            if (!p.priorCodeIsShowing) this.sk.vertex(p.curPos.viewXPos, p.curPos.floorPlanYPos, p.curPos.zPos); // if already drawing no line
             else this.drawNewLine(p.priorPos, 0); // if curPoint has no code and not already drawing no line
         } else {
-            if (!this.testPoint.passCodeTest(p.priorPoint)) this.drawNewLine(p.priorPos, stroke);
+            if (!p.priorCodeIsShowing) this.drawNewLine(p.priorPos, stroke);
             else this.sk.vertex(p.curPos.viewXPos, p.curPos.floorPlanYPos, p.curPos.zPos); // if already drawing in highlight mode, continue it
         }
     }
