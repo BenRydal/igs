@@ -3,7 +3,7 @@ class DrawMovement {
     constructor(sketch) {
         this.sk = sketch;
         this.testPoint = new TestPoint(this.sk);
-        this.bug = null; // represents user selection dot drawn in both floor plan and space-time views
+        this.dot = null; // represents user selection dot drawn in both floor plan and space-time views
         this.style = {
             shade: null,
             thinStroke: null,
@@ -12,11 +12,11 @@ class DrawMovement {
     }
 
     setData(path) {
-        this.bug = null; // reset bug
+        this.dot = null; // reset dot
         this.setPathStyles(path.color);
         this.setDraw(this.sk.PLAN, path.movement);
         this.setDraw(this.sk.SPACETIME, path.movement);
-        if (this.bug !== null) this.drawBug(this.bug);
+        if (this.dot !== null) this.drawDot(this.dot);
     }
 
     setPathStyles(color) {
@@ -49,7 +49,7 @@ class DrawMovement {
                 }
                 if (this.testPoint.passCodeTest(p.curPoint)) {
                     if (!isDrawing) isDrawing = this.beginDrawing(isFatLine);
-                    if (view === this.sk.SPACETIME) this.recordBug(p.curPos);
+                    if (view === this.sk.SPACETIME) this.recordDot(p.curPos);
                     isFatLine = this.organizeDrawing(isFatLine, p, view);
                 } else {
                     if (isDrawing) isDrawing = this.endDrawing();
@@ -161,25 +161,33 @@ class DrawMovement {
         this.sk.vertex(pos.viewXPos, pos.floorPlanYPos, pos.zPos);
     }
 
-    recordBug(curPos) {
-        const newBugValue = this.testPoint.setNewBugValue(curPos, this.bug);
-        if (newBugValue !== null) {
-            this.bug = newBugValue;
-            this.sk.sketchController.bugTimeForVideoScrub = this.bug.timePos;
+    recordDot(curPos) {
+        const newDotValue = this.testPoint.setNewDotValue(curPos, this.dot);
+        if (newDotValue !== null) {
+            this.dot = newDotValue;
+            this.sk.sketchController.dotTimeForVideoScrub = this.dot.timePos;
         }
     }
 
-    drawBug(curBug) {
+    drawDot(curDot) {
+        const dotSize = this.sk.width / 50;
+        this.drawFloorPlanDot(curDot, dotSize);
+        if (this.sk.sketchController.handle3D.getIsShowing()) this.draw3DSpaceTimeDot(curDot);
+        else this.sk.ellipse(curDot.timePos, curDot.yPos, dotSize, dotSize);
+    }
+
+    drawFloorPlanDot(curDot, dotSize) {
         this.sk.stroke(0);
         this.sk.strokeWeight(5);
         this.sk.fill(this.style.shade);
-        this.sk.ellipse(curBug.xPos, curBug.yPos, curBug.size, curBug.size);
-        if (this.sk.sketchController.handle3D.getIsShowing()) {
-            this.sk.stroke(this.style.shade);
-            this.sk.strokeWeight(25);
-            this.sk.point(curBug.xPos, curBug.yPos, curBug.zPos);
-            this.sk.strokeWeight(2);
-            this.sk.line(curBug.xPos, curBug.yPos, 0, curBug.xPos, curBug.yPos, curBug.zPos);
-        } else this.sk.ellipse(curBug.timePos, curBug.yPos, curBug.size, curBug.size);
+        this.sk.ellipse(curDot.xPos, curDot.yPos, dotSize, dotSize);
+    }
+
+    draw3DSpaceTimeDot(curDot) {
+        this.sk.stroke(this.style.shade);
+        this.sk.strokeWeight(25);
+        this.sk.point(curDot.xPos, curDot.yPos, curDot.zPos);
+        this.sk.strokeWeight(2);
+        this.sk.line(curDot.xPos, curDot.yPos, 0, curDot.xPos, curDot.yPos, curDot.zPos);
     }
 }

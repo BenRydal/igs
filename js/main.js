@@ -86,7 +86,7 @@ const igs = new p5((sk) => {
     sk.setMovement = function () {
         const drawMovement = new DrawMovement(sk);
         for (const path of sk.core.pathList) {
-            if (path.isShowing) drawMovement.setData(path); // draw after conversation so bug displays on top
+            if (path.isShowing) drawMovement.setData(path); // draw after conversation so dot displays on top
         }
     }
 
@@ -96,7 +96,7 @@ const igs = new p5((sk) => {
         for (const path of sk.core.pathList) {
             if (path.isShowing) {
                 drawConversation.setData(path, sk.core.speakerList);
-                drawMovement.setData(path); // draw after conversation so bug displays on top
+                drawMovement.setData(path); // draw after conversation so dot displays on top
             }
         }
         drawConversation.setConversationBubble(); // draw conversation text last so it displays on top
