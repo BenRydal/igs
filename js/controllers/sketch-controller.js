@@ -111,69 +111,7 @@ class SketchController {
         this.handleRotation.setFloorPlan(this.sk.gui.fpContainer.getContainer());
     }
 
-    // ****** DRAW HELPERS ****** //
-
-    /**
-     * Returns properly scaled pixel values to GUI from data points
-     * @param  {Movement Or Conversation Point} point
-     * @param  {Integer} view
-     */
-
-    getScaledPos(point, view) {
-        const timelineXPos = this.mapTotalTimeToPixelTime(point.time);
-        const selTimelineXPos = this.mapSelectTimeToPixelTime(timelineXPos);
-        const [floorPlanXPos, floorPlanYPos] = this.handleRotation.getScaledXYPos(point.xPos, point.yPos, this.sk.gui.fpContainer.getContainer(), this.sk.core.inputFloorPlan.getParams());
-        return {
-            timelineXPos,
-            selTimelineXPos,
-            floorPlanXPos,
-            floorPlanYPos,
-            viewXPos: this.getViewXPos(view, floorPlanXPos, selTimelineXPos),
-            zPos: this.getZPos(view, selTimelineXPos)
-        };
-    }
-
-    getViewXPos(view, floorPlanXPos, selTimelineXPos) {
-        if (view === this.sk.PLAN) return floorPlanXPos;
-        else if (view === this.sk.SPACETIME) {
-            if (this.handle3D.getIsShowing()) return floorPlanXPos;
-            else return selTimelineXPos;
-        } else return null;
-    }
-
-    getZPos(view, selTimelineXPos) {
-        if (view === this.sk.PLAN) return 0;
-        else {
-            if (this.handle3D.getIsShowing()) return selTimelineXPos;
-            else return 0;
-        }
-    }
-
     // ****** TEST HELPERS ****** //
-
-    testPointIsShowing(curPoint) {
-        return this.sk.gui.timelinePanel.overAxis(curPoint.timelineXPos) && this.testAnimation(curPoint.timelineXPos);
-    }
-
-    testAnimation(value) {
-        if (this.mode.isAnimate) return this.animationCounter > this.mapPixelTimeToTotalTime(value);
-        else return true;
-    }
-
-    // Loop through codeList and return false if:
-    // for any of codes that are true in codeList a code at curPoint is false 
-    testPointCodes(curPoint) {
-        if (this.sk.arrayIsLoaded(this.sk.core.codeList)) {
-            for (let j = 0; j < this.sk.core.codeList.length; j++) {
-                if (this.sk.core.codeList[j].isShowing) {
-                    if (curPoint.codeArray[j]) continue;
-                    else return false;
-                }
-            }
-        }
-        return true;
-    }
-
     testVideoToPlay() {
         return this.testVideoAndDivAreLoaded() && this.mode.isVideoShow && !this.mode.isAnimate && this.sk.gui.timelinePanel.aboveTimeline(this.sk.mouseX, this.sk.mouseY);
     }

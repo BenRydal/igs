@@ -2,6 +2,7 @@ class DrawMovement {
 
     constructor(sketch) {
         this.sk = sketch;
+        this.testPoint = new TestPoint(this.sk);
         this.bug = { // represents user selection dot drawn in both floor plan and space-time views
             xPos: null, // number/float values
             yPos: null,
@@ -64,14 +65,15 @@ class DrawMovement {
         this.resetLineStyles();
         this.sk.beginShape();
         for (let i = 1; i < movementArray.length; i++) { // start at 1 to allow testing of current and prior points
-            const p = this.createComparePoint(view, movementArray[i], movementArray[i - 1]); // create object to hold current and prior points as well as screen pixel positions
-            if (this.sk.sketchController.testPointIsShowing(p.curPos)) {
+            const p = this.createComparePoint(view, movementArray[i], movementArray[i - 1]);
+            if (this.testPoint.isShowing(p.curPos)) {
                 if (isFirstPoint) {
                     [isFatLine, isFirstPoint] = this.setVarsForFirstPoint(p.curPoint.isStopped);
                 }
-                if (this.sk.sketchController.testPointCodes(p.curPoint)) {
+                if (this.testPoint.passCodeTest(p.curPoint)) {
                     if (!isDrawing) isDrawing = this.beginDrawing(isFatLine);
-                    isFatLine = this.testComparePoint(isFatLine, p, view); // test and draw point and return updated isFatLine var
+                    if (view === this.sk.SPACETIME) this.testPointForBug(p.curPos);
+                    isFatLine = this.organizeDrawing(isFatLine, p, view);
                 } else {
                     if (isDrawing) isDrawing = this.endDrawing();
                 }
@@ -106,12 +108,11 @@ class DrawMovement {
      * @param  {ComparePoint} p
      * @param  {integer} view
      */
-    testComparePoint(isFatLine, p, view) {
-        if (view === this.sk.SPACETIME && this.sk.sketchController.testPointCodes(p.curPoint)) this.testPointForBug(p.curPos);
-        if (this.isPlanViewAndStopped(view, p.curPoint)) {
-            if (!p.priorPoint.isStopped && this.sk.sketchController.testPointCodes(p.curPoint)) this.drawStopCircle(p.curPos); // only draw stopped point once and only draw it if showing in codes
+    organizeDrawing(isFatLine, p, view) {
+        if (this.testPoint.isPlanViewAndStopped(view, p.curPoint)) {
+            if (!p.priorPoint.isStopped && this.testPoint.passCodeTest(p.curPoint)) this.drawStopCircle(p.curPos); // only draw stopped point once and only draw it if showing in codes
         } else {
-            if (this.testSelectMethodToDrawFatLine(p)) {
+            if (this.testPoint.selectModeForFatLine(p)) {
                 this.drawFatLine(isFatLine, p);
                 isFatLine = true;
             } else {
@@ -122,7 +123,7 @@ class DrawMovement {
         return isFatLine;
     }
     /**
-     * Holds current and prior MovementPoint objects and also pixel position objects for each point
+     * A compare point holds current and prior points as well as screen pixel positions
      * @param  {Integer} view
      * @param  {MovementPoint} curPoint 
      * @param  {MovementPoint} priorPoint 
@@ -130,27 +131,10 @@ class DrawMovement {
     createComparePoint(view, curPoint, priorPoint) {
         return {
             curPoint,
-            curPos: this.sk.sketchController.getScaledPos(curPoint, view),
+            curPos: this.testPoint.getScaledPos(curPoint, view),
             priorPoint,
-            priorPos: this.sk.sketchController.getScaledPos(priorPoint, view)
+            priorPos: this.testPoint.getScaledPos(priorPoint, view)
         }
-    }
-    /**
-     * Holds logic for testing whether to draw stops on the floor plan
-     * @param  {Integer} view
-     * @param  {MovementPoint} curPoint
-     */
-    isPlanViewAndStopped(view, curPoint) {
-        return (view === this.sk.PLAN && curPoint.isStopped && this.sk.gui.dataPanel.getCurSelectTab() !== 3);
-    }
-    /**
-     * Holds logic for testing current point based on selectMode
-     * @param  {ComparePoint} p
-     */
-    testSelectMethodToDrawFatLine(p) {
-        if (this.sk.gui.dataPanel.getCurSelectTab() === 1) return this.sk.gui.fpContainer.overCursor(p.curPos.floorPlanXPos, p.curPos.floorPlanYPos);
-        else if (this.sk.gui.dataPanel.getCurSelectTab() === 2) return this.sk.gui.fpContainer.overSlicer(p.curPos.floorPlanXPos, p.curPos.floorPlanYPos);
-        else return p.curPoint.isStopped; // this always returns false for floorplan view correct?
     }
 
     drawStopCircle(curPos) {
@@ -160,26 +144,26 @@ class DrawMovement {
     }
 
     drawFatLine(isFatLine, p) {
-        if (isFatLine) this.zzzTestVertex(p, this.style.fatStroke);
-        else this.zzzTestNewLine(p, this.style.fatStroke);
+        if (isFatLine) this.setVertexOrNewLine(p, this.style.fatStroke);
+        else this.setNewLine(p, this.style.fatStroke);
     }
 
     drawThinLine(isFatLine, p) {
-        if (!isFatLine) this.zzzTestVertex(p, this.style.thinStroke);
-        else this.zzzTestNewLine(p, this.style.thinStroke);
+        if (!isFatLine) this.setVertexOrNewLine(p, this.style.thinStroke);
+        else this.setNewLine(p, this.style.thinStroke);
     }
 
-    zzzTestNewLine(p, stroke) {
-        if (!this.sk.sketchController.testPointCodes(p.curPoint)) this.startNewLine(p.priorPos, 0);
-        else this.startNewLine(p.priorPos, stroke); // if drawing in highlight mode, end it
+    setNewLine(p, stroke) {
+        if (!this.testPoint.passCodeTest(p.curPoint)) this.drawNewLine(p.priorPos, 0);
+        else this.drawNewLine(p.priorPos, stroke); // if drawing in highlight mode, end it
     }
 
-    zzzTestVertex(p, stroke) {
-        if (!this.sk.sketchController.testPointCodes(p.curPoint)) {
-            if (!this.sk.sketchController.testPointCodes(p.priorPoint)) this.sk.vertex(p.curPos.viewXPos, p.curPos.floorPlanYPos, p.curPos.zPos); // if already drawing no line
-            else this.startNewLine(p.priorPos, 0); // if curPoint has no code and not already drawing no line
+    setVertexOrNewLine(p, stroke) {
+        if (!this.testPoint.passCodeTest(p.curPoint)) {
+            if (!this.testPoint.passCodeTest(p.priorPoint)) this.sk.vertex(p.curPos.viewXPos, p.curPos.floorPlanYPos, p.curPos.zPos); // if already drawing no line
+            else this.drawNewLine(p.priorPos, 0); // if curPoint has no code and not already drawing no line
         } else {
-            if (!this.sk.sketchController.testPointCodes(p.priorPoint)) this.startNewLine(p.priorPos, stroke);
+            if (!this.testPoint.passCodeTest(p.priorPoint)) this.drawNewLine(p.priorPos, stroke);
             else this.sk.vertex(p.curPos.viewXPos, p.curPos.floorPlanYPos, p.curPos.zPos); // if already drawing in highlight mode, continue it
         }
     }
@@ -189,7 +173,7 @@ class DrawMovement {
      * @param  {curPos Object from getScaledPos} pos
      * @param  {Integer} weight
      */
-    startNewLine(pos, weight) {
+    drawNewLine(pos, weight) {
         this.sk.vertex(pos.viewXPos, pos.floorPlanYPos, pos.zPos); // draw cur point twice to mark end point
         this.sk.vertex(pos.viewXPos, pos.floorPlanYPos, pos.zPos);
         this.sk.endShape();

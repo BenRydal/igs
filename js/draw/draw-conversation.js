@@ -2,6 +2,7 @@ class DrawConversation {
 
     constructor(sketch) {
         this.sk = sketch;
+        this.testPoint = new TestPoint(this.sk);
         this.conversationBubble = { // represents user selected conversation
             isSelected: false,
             point: null, // stores one ConversationPoint object for selected conversation turn
@@ -20,26 +21,11 @@ class DrawConversation {
      */
     setData(path, speakerList) {
         for (const point of path.conversation) {
-            const curPoint = this.sk.sketchController.getScaledPos(point, null);
-            if (this.sk.sketchController.testPointIsShowing(curPoint) && this.testSelectMode(curPoint, point) && this.sk.sketchController.testPointCodes(point)) {
+            const curPoint = this.testPoint.getScaledPos(point, null);
+            if (this.testPoint.isShowing(curPoint) && this.testPoint.selectModeForConversation(curPoint, point) && this.testPoint.passCodeTest(point)) {
                 const curSpeaker = this.getSpeakerFromSpeakerList(point.speaker, speakerList); // get speaker object from global list equivalent to the current speaker of point
                 if (this.testSpeakerToDraw(curSpeaker, path.name)) this.organizeRectDrawing(point, curPoint, curSpeaker.color); // draws all rects
             }
-        }
-    }
-
-    testSelectMode(curPoint, point) {
-        switch (this.sk.gui.dataPanel.getCurSelectTab()) {
-            case 0:
-                return true;
-            case 1:
-                return this.sk.gui.fpContainer.overCursor(curPoint.floorPlanXPos, curPoint.floorPlanYPos);
-            case 2:
-                return this.sk.gui.fpContainer.overSlicer(curPoint.floorPlanXPos, curPoint.floorPlanYPos);
-            case 3:
-                return !point.isStopped;
-            case 4:
-                return point.isStopped;
         }
     }
 

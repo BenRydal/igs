@@ -32,7 +32,7 @@ class Core {
 
     updateCodes(codeName) {
         this.codeList.push(this.createCode(codeName));
-        this.codeList = this.sortByName(this.codeList);
+        // this.codeList = this.sortByName(this.codeList);
         this.sk.loop(); // rerun P5 draw loop
     }
 
