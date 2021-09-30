@@ -4,8 +4,8 @@ class TestPoint {
         this.sk = sketch;
     }
 
-    isShowingInGUI(curPoint) {
-        return this.sk.gui.timelinePanel.overAxis(curPoint.timelineXPos) && this.isShowingInAnimation(curPoint.timelineXPos);
+    isShowingInGUI(point) {
+        return this.sk.gui.timelinePanel.overAxis(point.timelineXPos) && this.isShowingInAnimation(point.timelineXPos);
     }
 
     isShowingInAnimation(value) {
@@ -31,7 +31,7 @@ class TestPoint {
     }
 
     /**
-     * Returns properly scaled pixel values to GUI from data points
+     * Returns properly scaled pixel values to GUI
      * @param  {Movement Or Conversation Point} point
      * @param  {Integer} view
      */
@@ -67,25 +67,25 @@ class TestPoint {
     }
 
     /**
-     * Holds logic for testing whether to draw stops on the floor plan
      * @param  {Integer} view
      * @param  {MovementPoint} curPoint
      */
-    isPlanViewAndStopped(view, curPoint) {
-        return (view === this.sk.PLAN && curPoint.isStopped && this.sk.gui.dataPanel.getCurSelectTab() !== 3);
+    isPlanViewAndStopped(view, point) {
+        return (view === this.sk.PLAN && point.isStopped && this.sk.gui.dataPanel.getCurSelectTab() !== 3);
     }
+
     /**
-     * Holds logic for testing current point based on selectMode
+     * Holds logic for testing point based on selectMode
      * @param  {ComparePoint} p
      */
-    selectModeForFatLine(p) {
+    selectModeForFatLine(pos, point) {
         switch (this.sk.gui.dataPanel.getCurSelectTab()) {
             case 1:
-                return this.sk.gui.fpContainer.overCursor(p.curPos.floorPlanXPos, p.curPos.floorPlanYPos);
+                return this.sk.gui.fpContainer.overCursor(pos.floorPlanXPos, pos.floorPlanYPos);
             case 2:
-                return this.sk.gui.fpContainer.overSlicer(p.curPos.floorPlanXPos, p.curPos.floorPlanYPos);
+                return this.sk.gui.fpContainer.overSlicer(pos.floorPlanXPos, pos.floorPlanYPos);
             default:
-                return p.curPoint.isStopped; // this always returns false for floorplan view
+                return point.isStopped; // this always returns false for floorplan view
         }
     }
 
