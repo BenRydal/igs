@@ -50,8 +50,8 @@ class DrawMovement {
                     else isFatLine = true;
                 }
                 if (p.curCodeIsShowing) {
-                    if (!isDrawing) isDrawing = this.beginDrawing(isFatLine);
                     if (view === this.sk.SPACETIME) this.recordDot(p.curPos);
+                    if (!isDrawing) isDrawing = this.beginDrawing(isFatLine);
                     isFatLine = this.organizeDrawing(isFatLine, p, view);
                 } else {
                     if (isDrawing) isDrawing = this.endDrawing();
