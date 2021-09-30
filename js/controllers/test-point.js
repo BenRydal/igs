@@ -1,5 +1,5 @@
 /**
- * This class holds different tests used in draw movement and conversation classes
+ * This class holds different tests and helper methods used in draw movement and conversation classes
  * It centralizes decisions about what points to show and not show and is coupled with the sketchController/gui classes
  */
 
