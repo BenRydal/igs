@@ -21,10 +21,10 @@ class DrawConversation {
      */
     setData(path, speakerList) {
         for (const point of path.conversation) {
-            const curPoint = this.testPoint.getScaledPos(point, null);
-            if (this.testPoint.isShowingInGUI(curPoint) && this.testPoint.selectModeForConversation(curPoint, point) && this.testPoint.isShowingInCodeList(point)) {
+            const curPos = this.testPoint.getScaledPos(point, null);
+            if (this.testPoint.isShowingInGUI(curPos) && this.testPoint.selectModeForConversation(curPos, point) && this.testPoint.isShowingInCodeList(point)) {
                 const curSpeaker = this.getSpeakerFromSpeakerList(point.speaker, speakerList); // get speaker object from global list equivalent to the current speaker of point
-                if (this.testSpeakerToDraw(curSpeaker, path.name)) this.organizeRectDrawing(point, curPoint, curSpeaker.color); // draws all rects
+                if (this.testSpeakerToDraw(curSpeaker, path.name)) this.organizeRectDrawing(point, curPos, curSpeaker.color); // draws all rects
             }
         }
     }
@@ -63,11 +63,11 @@ class DrawConversation {
     /**
      * Organizes drawing of properly scaled and colored rectangles for conversation turn of a ConversationPoint
      * @param  {ConversationPoint} point
-     * @param  {CurPoint} curPoint
+     * @param  {curPos} curPos
      * @param  {Color} curColor
      */
-    organizeRectDrawing(point, curPoint, curColor) {
-        const curRect = this.getCurRectPos(point, curPoint);
+    organizeRectDrawing(point, curPos, curColor) {
+        const curRect = this.getCurRectPos(point, curPos);
         this.sk.noStroke(); // reset if recordConversationBubble is called previously over2DRects
         this.sk.fill(curColor);
         if (this.sk.sketchController.handle3D.getIsShowing()) {
@@ -80,20 +80,20 @@ class DrawConversation {
         }
     }
 
-    getCurRectPos(point, curPoint) {
+    getCurRectPos(point, curPos) {
         this.sk.textSize(1); // Controls measurement of pixels in a string that corredponds to vertical pixel height of rectangle.
         let rectLength = this.sk.textWidth(point.talkTurn);
         if (rectLength < this.rect.minPixelLength) rectLength = this.rect.minPixelLength; // if current turn is small set it to the minimum height
         let yPos;
         if (this.sk.sketchController.mode.isAlignTalk) yPos = 0;
-        else yPos = curPoint.floorPlanYPos - rectLength;
+        else yPos = curPos.floorPlanYPos - rectLength;
         this.sk.textSize(this.sk.GUITEXTSIZE); // reset text size
         return {
             length: rectLength,
             yPos: yPos,
-            xPosFloorPlan: curPoint.floorPlanXPos,
-            xPosTimeline: curPoint.selTimelineXPos,
-            zPos: curPoint.zPos
+            xPosFloorPlan: curPos.floorPlanXPos,
+            xPosTimeline: curPos.selTimelineXPos,
+            zPos: curPos.zPos
         }
     }
     /**
