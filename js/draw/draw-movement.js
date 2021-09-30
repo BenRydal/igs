@@ -21,22 +21,7 @@ class DrawMovement {
 
     setPathStyles(color) {
         this.style.shade = color;
-        switch (this.sk.gui.dataPanel.getCurSelectTab()) {
-            case 3:
-                this.setPathStrokeWeights(1, 0);
-                break;
-            case 4:
-                this.setPathStrokeWeights(0, 9);
-                break;
-            default:
-                this.setPathStrokeWeights(1, 9);
-                break;
-        }
-    }
-
-    setPathStrokeWeights(thin, fat) {
-        this.style.thinStroke = thin;
-        this.style.fatStroke = fat;
+        [this.style.thinStroke, this.style.fatStroke] = this.testPoint.selectModeForStrokeWeights();
     }
 
     resetLineStyles() {

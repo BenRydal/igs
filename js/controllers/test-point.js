@@ -101,6 +101,17 @@ class TestPoint {
         }
     }
 
+    selectModeForStrokeWeights() {
+        switch (this.sk.gui.dataPanel.getCurSelectTab()) {
+            case 3:
+                return [1, 0];
+            case 4:
+                return [0, 9];
+            default:
+                return [1, 9];
+        }
+    }
+
     setNewBugValue(curPos, curBug) {
         let newBugValue = null;
         const [xPos, yPos, zPos, timePos, map3DMouse] = [curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.zPos, curPos.selTimelineXPos, this.sk.sketchController.mapToSelectTimeThenPixelTime(this.sk.mouseX)];
