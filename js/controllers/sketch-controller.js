@@ -160,6 +160,20 @@ class SketchController {
         else return true;
     }
 
+    // Loop through codeList and return false if:
+    // for any of codes that are true in codeList a code at curPoint is false 
+    testPointCodes(curPoint) {
+        if (this.sk.arrayIsLoaded(this.sk.core.codeList)) {
+            for (let j = 0; j < this.sk.core.codeList.length; j++) {
+                if (this.sk.core.codeList[j].isShowing) {
+                    if (curPoint.codeArray[j]) continue;
+                    else return false;
+                }
+            }
+        }
+        return true;
+    }
+
     testVideoToPlay() {
         return this.testVideoAndDivAreLoaded() && this.mode.isVideoShow && !this.mode.isAnimate && this.sk.gui.timelinePanel.aboveTimeline(this.sk.mouseX, this.sk.mouseY);
     }

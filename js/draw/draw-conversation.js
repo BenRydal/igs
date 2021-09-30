@@ -21,7 +21,7 @@ class DrawConversation {
     setData(path, speakerList) {
         for (const point of path.conversation) {
             const curPoint = this.sk.sketchController.getScaledPos(point, null);
-            if (this.sk.sketchController.testPointIsShowing(curPoint) && this.testSelectMode(curPoint, point)) {
+            if (this.sk.sketchController.testPointIsShowing(curPoint) && this.testSelectMode(curPoint, point) && this.sk.sketchController.testPointCodes(point)) {
                 const curSpeaker = this.getSpeakerFromSpeakerList(point.speaker, speakerList); // get speaker object from global list equivalent to the current speaker of point
                 if (this.testSpeakerToDraw(curSpeaker, path.name)) this.organizeRectDrawing(point, curPoint, curSpeaker.color); // draws all rects
             }
