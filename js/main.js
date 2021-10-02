@@ -70,9 +70,16 @@ const igs = new p5((sk) => {
         sk.translate(curPos.xPos, curPos.yPos, curPos.zoom);
         sk.rotateX(curPos.rotateX);
     }
-
+    /**
+     * NOTE: When drawing floor plan, translate down on z axis -1 pixel so shapes are drawn cleanly on top of the floor plan
+     */
     sk.drawFloorPlan = function (width, height) {
-        sk.image(sk.core.inputFloorPlan.getImg(), 0, 0, width, height);
+        if (this.sketchController.handle3D.getIsShowing()) {
+            sk.push();
+            sk.translate(0, 0, -1);
+            sk.image(sk.core.inputFloorPlan.getImg(), 0, 0, width, height);
+            sk.pop();
+        } else sk.image(sk.core.inputFloorPlan.getImg(), 0, 0, width, height);
     }
 
     sk.drawRotatedFloorPlan = function (angle, width, height, container) {
