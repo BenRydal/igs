@@ -144,7 +144,8 @@ class ParseMovement {
      */
     createConversationPoint(movementPoint, curConversationRow) {
         return {
-            time: curConversationRow[this.testData.headersConversation[0]],
+            //time: curConversationRow[this.testData.headersConversation[0]],
+            time: movementPoint.time,
             xPos: movementPoint.xPos,
             yPos: movementPoint.yPos,
             isStopped: movementPoint.isStopped,
