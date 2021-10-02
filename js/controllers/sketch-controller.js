@@ -104,7 +104,9 @@ class SketchController {
     }
 
     update3DSlicerRect() {
-        this.sk.gui.timelinePanel.draw3DSlicerRect(this.sk.gui.fpContainer.getContainer(), this.mapToSelectTimeThenPixelTime(this.sk.mouseX)); // pass mapped mouseX as zPos
+        if (this.sk.gui.timelinePanel.aboveTimeline(this.sk.mouseX, this.sk.mouseY)) {
+            this.sk.gui.timelinePanel.draw3DSlicerRect(this.sk.gui.fpContainer.getContainer(), this.mapToSelectTimeThenPixelTime(this.sk.mouseX)); // pass mapped mouseX as zPos
+        }
     }
 
     setFloorPlan() {

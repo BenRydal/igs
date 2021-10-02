@@ -94,12 +94,10 @@ class TimelinePanel {
     }
 
     draw3DSlicerRect(container, zPos) {
-        if (this.aboveTimeline(this.sk.mouseX, this.sk.mouseY)) {
-            this.sk.fill(255, 50);
-            this.sk.stroke(0);
-            this.sk.strokeWeight(1);
-            this.sk.quad(0, 0, zPos, container.width, 0, zPos, container.width, container.height, zPos, 0, container.height, zPos);
-        }
+        this.sk.fill(255, 50);
+        this.sk.stroke(0);
+        this.sk.strokeWeight(1);
+        this.sk.quad(0, 0, zPos, container.width, 0, zPos, container.width, container.height, zPos, 0, container.height, zPos);
     }
 
     handle() {
