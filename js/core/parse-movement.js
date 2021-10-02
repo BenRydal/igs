@@ -98,9 +98,10 @@ class ParseMovement {
         let conversationPointArray = [];
         let conversationCounter = 0; // Current row count of conversation file for comparison
         for (let i = 1; i < parsedMovementArray.length; i++) {
-            const compareRow = this.createCompareRow(parsedMovementArray[i], parsedMovementArray[i - 1]); // Comparing cur and prior compareRow is important to sample data and evaluate isStopped points
-            if (this.testData.movementRowForType(compareRow.curRow) && this.testData.curTimeIsLarger(compareRow.curRow, compareRow.priorRow)) {
-                const m = this.createMovementPoint(compareRow.curRow, movementPointArray);
+            const curRow = parsedMovementArray[i];
+            const priorRow = parsedMovementArray[i - 1];
+            if (this.testData.movementRowForType(curRow) && this.testData.curTimeIsLarger(curRow, priorRow)) {
+                const m = this.createMovementPoint(curRow, movementPointArray);
                 movementPointArray.push(m);
                 if (conversationCounter < parsedConversationArray.length) { // this test both makes sure conversationArray is loaded and counter is not great than length
                     const curConversationRow = parsedConversationArray[conversationCounter];
@@ -112,16 +113,6 @@ class ParseMovement {
             }
         }
         return [movementPointArray, conversationPointArray];
-    }
-
-    /**
-     * This object is used to compare values from current and prior points
-     */
-    createCompareRow(curRow, priorRow) {
-        return {
-            curRow,
-            priorRow
-        }
     }
 
     /**
