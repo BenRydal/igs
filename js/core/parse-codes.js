@@ -45,11 +45,7 @@ class ParseCodes {
             if (fileNum === 0) this.clear(); // clear existing code data when processing first first file
             const codeName = this.testData.cleanFileName(file.name);
             this.parsedFileArray.push(this.createCodeTable(results.data, codeName));
-            this.sk.core.updateCodes(codeName);
-            if (fileNum === fileListLength - 1) { // reprocess movement and reset all counters after processing last file
-                this.sk.core.parseMovement.reProcessAllPointArrays(); // call after sorting data in updateCodes
-                this.resetCounters();
-            }
+            this.sk.core.updateCodes(codeName, fileNum === fileListLength - 1); // 2nd parameter is test for if it is last file
         } else alert("Error loading code file. Please make sure your file is a .CSV file formatted with column headers: " + this.testData.headersCodes.toString());
     }
 

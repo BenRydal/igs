@@ -19,6 +19,7 @@ class Core {
         this.pathList.push(this.createPath(pathName, movementPointArray, conversationPointArray));
         this.pathList = this.sortByName(this.pathList);
         this.setTotalTime(movementPointArray);
+        this.parseCodes.resetCounters(); // must reset code counters if multiple paths are loaded
         this.sk.loop(); // rerun P5 draw loop
     }
 
@@ -29,8 +30,9 @@ class Core {
         this.sk.loop(); // rerun P5 draw loop
     }
 
-    updateCodes(codeName) {
+    updateCodes(codeName, isLastFile) {
         this.codeList.push(this.createCode(codeName));
+        if (isLastFile) this.parseMovement.reProcessAllPointArrays();
         this.sk.loop(); // rerun P5 draw loop
     }
 
