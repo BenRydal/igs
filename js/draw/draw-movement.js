@@ -67,7 +67,7 @@ class DrawMovement {
      */
     organizeDrawing(isFatLine, p, view) {
         if (this.testPoint.isPlanViewAndStopped(view, p.curPoint)) {
-            if (!p.priorPoint.isStopped && p.curCodeIsShowing) this.drawStopCircle(p.curPos); // only draw stopped point once and only draw it if showing in codes
+            if (!p.priorPoint.isStopped) this.drawStopCircle(p.curPos); // only draw stopped point once and only draw it if showing in codes
         } else {
             if (this.testPoint.selectModeForFatLine(p.curPos, p.curPoint)) {
                 this.setFatLine(isFatLine, p);
