@@ -150,6 +150,7 @@ class DomController {
      * @param  {[String directory, String floorPlan image file, String conversation File, String movement File[], String video platform, video params (see Video Player Interface)]} params
      */
     loadExampleData(params) {
+        this.sk.core.clearAll();
         this.sk.sketchController.setIsIntro(false); // Hide intro msg if showing
         this.updateVideo(params[4], params[5]);
         this.sk.core.inputFloorPlan.update(params[0] + params[1]);
