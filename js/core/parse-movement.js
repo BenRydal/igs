@@ -61,7 +61,7 @@ class ParseMovement {
      * @param  {File} file
      * @param  {Integer} fileNum // used to clear existing movement data for first new file only
      */
-    processFiles(results, file, fileNum) {
+      processFiles(results, file, fileNum) {
         console.log("Parsing complete:", results, file);
         if (this.testData.parsedResults(results, this.testData.headersMovement, this.testData.movementRowForType)) {
             if (fileNum === 0) this.clear(); // clear existing movement data for first new file only
