@@ -44,8 +44,19 @@ class DomController {
         input.value = ''; // reset input value so you can load same file again in browser
     }
 
+    /**
+     * Sends user inputted movement files into fileList for processing
+     * @param  {.CSV FileList} input
+     */
+    handleCodeFiles(input) {
+        let fileList = [];
+        for (const file of input.files) fileList.push(file);
+        this.sk.core.parseCodes.prepFiles(fileList);
+        input.value = ''; // reset input value so you can load same file(s) again in browser
+    }
+
     handleClearButton() {
-        this.sk.core.clearAllData();
+        this.sk.core.clearAll();
         this.clearCurVideo();
         this.sk.loop(); // rerun P5 draw loop
     }
@@ -130,7 +141,7 @@ class DomController {
 
     loadUserData() {
         this.sk.sketchController.setIsIntro(false); // Hide intro msg if showing
-        this.sk.core.clearAllData();
+        this.sk.core.clearAll();
         this.clearCurVideo();
         this.sk.loop(); // rerun P5 draw loop
     }
@@ -139,6 +150,7 @@ class DomController {
      * @param  {[String directory, String floorPlan image file, String conversation File, String movement File[], String video platform, video params (see Video Player Interface)]} params
      */
     loadExampleData(params) {
+        this.sk.core.clearAll();
         this.sk.sketchController.setIsIntro(false); // Hide intro msg if showing
         this.updateVideo(params[4], params[5]);
         this.sk.core.inputFloorPlan.update(params[0] + params[1]);

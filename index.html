@@ -11,6 +11,7 @@
     <script src="js/core/floorplan.js"></script>
     <script src="js/core/parse-conversation.js"></script>
     <script src="js/core/parse-movement.js"></script>
+    <script src="js/core/parse-codes.js"></script>
     <script src="js/controllers/dom-controller.js"></script>
     <script src="js/controllers/sketch-controller.js"></script>
     <script src="js/controllers/handle-3D.js"></script>
@@ -21,6 +22,7 @@
     <script src="js/gui/floorplan-container.js"></script>
     <script src="js/draw/draw-movement.js"></script>
     <script src="js/draw/draw-conversation.js"></script>
+    <script src="js/draw/test-point.js"></script>
     <script src="js/video/video-player.js"></script>
     <link rel="stylesheet" type="text/css" href="css/input.css" />
     <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png">
@@ -74,19 +76,23 @@
         <form action="/action_page.php">
             <input type="file" name="file" id="inputFloorPlan" class="inputfile" accept=".png, .jpg, .jpeg"
                 onchange="igs.domController.handleFloorPlanFile(this)">
-            <label for="inputFloorPlan">Floor Plan Image (PNG/JPG)</label>
+            <label for="inputFloorPlan">Floor Plan (PNG/JPG)</label>
 
             <input type="file" name="file" id="inputMovement" class="inputfile" multiple accept=".csv"
                 onchange="igs.domController.handleMovementFiles(this)">
-            <label for="inputMovement">Movement Files (CSV)</label>
+            <label for="inputMovement">Movement (CSVs)</label>
 
             <input type="file" name="file" id="inputConversation" class="inputfile" accept=".csv"
                 onchange="igs.domController.handleConversationFile(this)">
-            <label for="inputConversation">Conversation File (CSV)</label>
+            <label for="inputConversation">Conversation (CSV)</label>
 
             <input type="file" name="file" id="inputVideo" class="inputfile" accept=".mp4"
                 onchange="igs.domController.handleVideoFile(this)">
-            <label for="inputVideo">Video File (MP4)</label>
+            <label for="inputVideo">Video (MP4)</label>
+
+            <input type="file" name="file" id="inputCodes" class="inputfile" multiple accept=".csv"
+                onchange="igs.domController.handleCodeFiles(this)">
+            <label for="inputCodes">Code (CSVs)</label>
 
             <button type="button" id="clearButton" class="inputfile"
                 onclick="igs.domController.handleClearButton()"></button>

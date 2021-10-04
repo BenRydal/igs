@@ -13,7 +13,7 @@ class SketchController {
         this.handle3D = new Handle3D(this.sk);
         this.handleRotation = new HandleRotation(this.sk);
         this.animationCounter = 0; // counter to synchronize animation across all data
-        this.bugTimeForVideoScrub = null; // Set in draw movement data and used to display correct video frame when scrubbing video
+        this.dotTimeForVideoScrub = null; // Set in draw movement data and used to display correct video frame when scrubbing video
     }
 
     // ****** P5 HANDLERS ****** //
@@ -24,7 +24,7 @@ class SketchController {
 
     handleMousePressed() {
         if (this.testVideoToPlay()) this.playPauseMovie();
-        else this.sk.gui.dataPanel.organize(this.sk.HANDLEGUI, this.sk.core.pathList, this.sk.core.speakerList);
+        else this.sk.gui.dataPanel.organize(this.sk.HANDLEGUI, this.sk.core.pathList, this.sk.core.speakerList, this.sk.core.codeList);
     }
 
     handleMouseDragged() {
@@ -69,7 +69,7 @@ class SketchController {
     }
 
     setVideoScrubbing() {
-        if (this.mode.isAnimate) this.sk.videoPlayer.seekTo(Math.floor(this.sk.map(this.bugTimeForVideoScrub, this.sk.gui.timelinePanel.getStart(), this.sk.gui.timelinePanel.getEnd(), this.mapPixelTimeToVideoTime(this.sk.gui.timelinePanel.getSelectStart()), this.mapPixelTimeToVideoTime(this.sk.gui.timelinePanel.getSelectEnd()))));
+        if (this.mode.isAnimate) this.sk.videoPlayer.seekTo(Math.floor(this.sk.map(this.dotTimeForVideoScrub, this.sk.gui.timelinePanel.getStart(), this.sk.gui.timelinePanel.getEnd(), this.mapPixelTimeToVideoTime(this.sk.gui.timelinePanel.getSelectStart()), this.mapPixelTimeToVideoTime(this.sk.gui.timelinePanel.getSelectEnd()))));
         else if (this.sk.gui.timelinePanel.aboveTimeline(this.sk.mouseX, this.sk.mouseY)) {
             this.sk.videoPlayer.seekTo(Math.floor(this.mapPixelTimeToVideoTime(this.mapPixelTimeToSelectTime(this.sk.mouseX))));
             this.sk.videoPlayer.pause(); // Add to prevent accidental video playing that seems to occur
@@ -104,62 +104,16 @@ class SketchController {
     }
 
     update3DSlicerRect() {
-        this.sk.gui.timelinePanel.draw3DSlicerRect(this.sk.gui.fpContainer.getContainer(), this.mapToSelectTimeThenPixelTime(this.sk.mouseX)); // pass mapped mouseX as zPos
+        if (this.sk.gui.timelinePanel.aboveTimeline(this.sk.mouseX, this.sk.mouseY)) {
+            this.sk.gui.timelinePanel.draw3DSlicerRect(this.sk.gui.fpContainer.getContainer(), this.mapToSelectTimeThenPixelTime(this.sk.mouseX)); // pass mapped mouseX as zPos
+        }
     }
 
     setFloorPlan() {
         this.handleRotation.setFloorPlan(this.sk.gui.fpContainer.getContainer());
     }
 
-    // ****** DRAW HELPERS ****** //
-
-    /**
-     * Returns properly scaled pixel values to GUI from data points
-     * @param  {Movement Or Conversation Point} point
-     * @param  {Integer} view
-     */
-
-    getScaledPos(point, view) {
-        const timelineXPos = this.mapTotalTimeToPixelTime(point.time);
-        const selTimelineXPos = this.mapSelectTimeToPixelTime(timelineXPos);
-        const [floorPlanXPos, floorPlanYPos] = this.handleRotation.getScaledXYPos(point.xPos, point.yPos, this.sk.gui.fpContainer.getContainer(), this.sk.core.inputFloorPlan.getParams());
-        return {
-            timelineXPos,
-            selTimelineXPos,
-            floorPlanXPos,
-            floorPlanYPos,
-            viewXPos: this.getViewXPos(view, floorPlanXPos, selTimelineXPos),
-            zPos: this.getZPos(view, selTimelineXPos)
-        };
-    }
-
-    getViewXPos(view, floorPlanXPos, selTimelineXPos) {
-        if (view === this.sk.PLAN) return floorPlanXPos;
-        else if (view === this.sk.SPACETIME) {
-            if (this.handle3D.getIsShowing()) return floorPlanXPos;
-            else return selTimelineXPos;
-        } else return null;
-    }
-
-    getZPos(view, selTimelineXPos) {
-        if (view === this.sk.PLAN) return 0;
-        else {
-            if (this.handle3D.getIsShowing()) return selTimelineXPos;
-            else return 0;
-        }
-    }
-
     // ****** TEST HELPERS ****** //
-
-    testPointIsShowing(curPoint) {
-        return this.sk.gui.timelinePanel.overAxis(curPoint.timelineXPos) && this.testAnimation(curPoint.timelineXPos);
-    }
-
-    testAnimation(value) {
-        if (this.mode.isAnimate) return this.animationCounter > this.mapPixelTimeToTotalTime(value);
-        else return true;
-    }
-
     testVideoToPlay() {
         return this.testVideoAndDivAreLoaded() && this.mode.isVideoShow && !this.mode.isAnimate && this.sk.gui.timelinePanel.aboveTimeline(this.sk.mouseX, this.sk.mouseY);
     }
@@ -237,8 +191,16 @@ class SketchController {
         personFromList.isShowing = !personFromList.isShowing;
     }
 
+    setDotTimeForVideoScrub(timePos) {
+        this.dotTimeForVideoScrub = timePos;
+    }
+
     getIsIntro() {
         return this.mode.isIntro;
+    }
+
+    getIsAnimate() {
+        return this.mode.isAnimate;
     }
 
     /**

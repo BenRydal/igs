@@ -3,57 +3,63 @@ class Core {
     constructor(sketch) {
         this.sk = sketch;
         this.testData = new TestData(); // encapsulates various tests for parsing data
-        this.parseMovement = new ParseMovement(this.sk, this.testData); // holds loaded movement file(s) and parsing methods
-        this.parseConversation = new ParseConversation(this.sk, this.testData); // holds loaded conversation file and parsing methods
-        this.speakerList = []; // List of Speaker objects used in program created from conversation file
-        this.pathList = []; // List of Path objects used in program created from movement file
-        this.inputFloorPlan = new InputFloorPlan(this.sk); // holds floorplan image and associated methods
-        this.totalTimeInSeconds = 0; // Number indicating time value in seconds that all displayed data is set to, set dynamically by parseMovement
+        this.parseMovement = new ParseMovement(this.sk, this.testData);
+        this.parseConversation = new ParseConversation(this.sk, this.testData);
+        this.parseCodes = new ParseCodes(this.sk, this.testData);
+        // PROGRAM DATA
+        this.speakerList = []; // Holds speaker objects for number of speakers parsed from successfully loaded conversation file
+        this.pathList = []; // Holds path objects for each successfully loaded movement file
+        this.codeList = []; // holds code objects for each successfully loaded code file
+        this.inputFloorPlan = new InputFloorPlan(this.sk); // class to hold floorplan image and associated methods
+        this.totalTimeInSeconds = 0; // Time value in seconds that all displayed data is set to, set dynamically when updating movement data
         this.COLOR_LIST = ['#6a3d9a', '#ff7f00', '#33a02c', '#1f78b4', '#e31a1c', '#ffff99', '#b15928', '#cab2d6', '#fdbf6f', '#b2df8a', '#a6cee3', '#fb9a99']; // 12 Class Paired: (Dark) purple, orange, green, blue, red, yellow, brown, (Light) lPurple, lOrange, lGreen, lBlue, lRed
     }
 
-    /** 
-     * @param {Char} pathName
-     * @param {Array} movementPointArray
-     * @param {Array} conversationPointArray
-     */
-    updateMovementData(pathName, movementPointArray, conversationPointArray) {
-        this.updatePaths(pathName, movementPointArray, conversationPointArray);
-        this.updateTotalTime(movementPointArray);
+    updateMovement(pathName, movementPointArray, conversationPointArray) {
+        this.pathList.push(this.createPath(pathName, movementPointArray, conversationPointArray));
+        this.pathList = this.sortByName(this.pathList);
+        this.setTotalTime(movementPointArray);
+        this.parseCodes.resetCounters(); // must reset code counters if multiple paths are loaded
         this.sk.loop(); // rerun P5 draw loop
     }
 
-    updateConversationData() {
-        this.updateSpeakerList(this.parseConversation.getParsedConversationArray());
-        this.speakerList.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching core.pathList array
-        this.parseMovement.reProcessPointArrays(); // must reprocess movement
+    updateConversation(parsedConversationFile) {
+        this.setSpeakerList(parsedConversationFile);
+        this.speakerList = this.sortByName(this.speakerList);
+        this.parseMovement.reProcessAllPointArrays(); // must reprocess movement
         this.sk.loop(); // rerun P5 draw loop
     }
 
-    updatePaths(pathName, movementPointArray, conversationPointArray) {
-        let curPathColor;
-        if (this.sk.arrayIsLoaded(this.speakerList)) curPathColor = this.setPathColorBySpeaker(pathName); // if conversation file loaded, send to method to calculate color
-        else curPathColor = this.COLOR_LIST[this.pathList.length % this.COLOR_LIST.length]; // if no conversation file loaded path color is next in Color list
-        this.pathList.push(this.createPath(pathName, movementPointArray, conversationPointArray, curPathColor, true));
-        this.pathList.sort((a, b) => (a.name > b.name) ? 1 : -1); // sort list so it appears nicely in GUI matching core.speakerList array
+    updateCodes(codeName, isLastFile) {
+        this.codeList.push(this.createCode(codeName));
+        if (isLastFile) this.parseMovement.reProcessAllPointArrays();
+        this.sk.loop(); // rerun P5 draw loop
     }
 
-
-    updateTotalTime(movementPointArray) {
+    setTotalTime(movementPointArray) {
         const curPathEndTime = Math.floor(movementPointArray[movementPointArray.length - 1].time);
         if (this.totalTimeInSeconds < curPathEndTime) this.totalTimeInSeconds = curPathEndTime; // update global total time, make sure to floor value as integer
     }
 
-    updateSpeakerList(parsedConversationArray) {
+    setSpeakerList(parsedConversationArray) {
         for (const curRow of parsedConversationArray) {
             let tempSpeakerList = []; // create/populate temp list to store strings to test from global core.speakerList
             for (const tempSpeaker of this.speakerList) tempSpeakerList.push(tempSpeaker.name);
             // If row is good data, test if core.speakerList already has speaker and if not add speaker 
             if (this.testData.conversationRowForType(curRow)) {
                 const speaker = this.testData.cleanSpeaker(curRow[this.testData.headersConversation[1]]); // get cleaned speaker character
-                if (!tempSpeakerList.includes(speaker)) this.addSpeakerToSpeakerList(speaker);
+                if (!tempSpeakerList.includes(speaker)) this.speakerList.push(this.createSpeaker(speaker));
             }
         }
+    }
+
+    /**
+     * Organizes retrieval of path color depending on whether conversation file has been loaded
+     * @param  {Char} name
+     */
+    getCurPathColor(name) {
+        if (this.sk.arrayIsLoaded(this.speakerList)) return this.setPathColorBySpeaker(name);
+        else return this.COLOR_LIST[this.pathList.length % this.COLOR_LIST.length]; // color is next in Color list
     }
 
     /**
@@ -79,50 +85,58 @@ class Core {
         return count;
     }
 
-    /**
-     * Adds new speaker object with initial color to core.speakerList from string
-     * @param  {String} speaker
-     */
-    addSpeakerToSpeakerList(name) {
-        this.speakerList.push(this.createSpeaker(name, this.COLOR_LIST[this.speakerList.length % this.COLOR_LIST.length], true));
+    sortByName(list) {
+        return list.sort((a, b) => (a.name > b.name) ? 1 : -1);
     }
 
     /**
-     * NOTE: Speaker and Path objects are separate due to how shapes are drawn in browser on Canvas element. Each speaker and path object can match/correspond to the same person but can also vary to allow for different number of movement files and speakers.
+     * Path and Speaker objects are separate so that each speaker and path object can match or vary for different number of movement files and speakers
      */
-    createSpeaker(name, color, isShowing) {
-        return {
-            name, // string
-            color, // color
-            isShowing // boolean indicating if showing in GUI
-        };
-    }
-
-    createPath(name, movement, conversation, color, isShowing) {
+    createPath(name, movementPointArray, conversationPointArray) {
         return {
             name, // Char matches 1st letter of CSV file
-            movement, // Array of MovementPoint objects
-            conversation, // Array of ConversationPoint objects
-            color, // color
-            isShowing // boolean used to indicate if speaker showing in GUI
+            color: this.getCurPathColor(name),
+            isShowing: true, // boolean used to indicate if speaker showing in GUI
+            movement: movementPointArray,
+            conversation: conversationPointArray
         }
     }
 
-    clearAllData() {
+    createSpeaker(name) {
+        return {
+            name, // string
+            color: this.COLOR_LIST[this.speakerList.length % this.COLOR_LIST.length],
+            isShowing: true // boolean indicating if showing in GUI
+        };
+    }
+
+    createCode(name) {
+        return {
+            name, // first letter of filename
+            color: 150, // color drawn in GUI
+            isShowing: false // if displaying in GUI
+        };
+    }
+
+    clearAll() {
         this.inputFloorPlan.clear();
-        this.clearConversationData();
-        this.parseConversation.clear();
-        this.clearMovementData();
         this.parseMovement.clear();
+        this.parseConversation.clear();
+        this.parseCodes.clear();
     }
 
-    clearConversationData() {
-        this.speakerList = [];
-        this.pathList = [];
-    }
-
-    clearMovementData() {
+    clearMovement() {
         this.pathList = [];
         this.totalTimeInSeconds = 0;
+    }
+
+    clearConversation() {
+        this.pathList = [];
+        this.speakerList = [];
+    }
+
+    clearCodes() {
+        this.pathList = [];
+        this.codeList = [];
     }
 }

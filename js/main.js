@@ -22,7 +22,7 @@ const igs = new p5((sk) => {
     sk.setup = function () {
         sk.canvas = sk.createCanvas(window.innerWidth, window.innerHeight, sk.WEBGL);
         // SINGLETONS
-        sk.core = new Core(sk); // holds core data and update/load data methods
+        sk.core = new Core(sk); // holds core data, update and parsing methods/classes
         sk.gui = new GUI(sk); // holds GUI elements/classes
         sk.domController = new DomController(sk); // handles DOM/buttons user interaction
         sk.sketchController = new SketchController(sk); // coordinates calls across classes
@@ -33,6 +33,7 @@ const igs = new p5((sk) => {
         sk.DRAWGUI = 0;
         sk.HANDLEGUI = 1;
         sk.GUITEXTSIZE = sk.width / 70;
+        // STYLES
         sk.textSize(sk.GUITEXTSIZE);
         sk.textFont(sk.font_Lato);
         sk.textAlign(sk.LEFT, sk.TOP);
@@ -51,7 +52,7 @@ const igs = new p5((sk) => {
         if (sk.sketchController.testVideoAndDivAreLoaded()) sk.sketchController.updateVideoDisplay();
         if (sk.sketchController.handle3D.getIsShowing()) sk.sketchController.update3DSlicerRect();
         if (sk.sketchController.translationComplete()) sk.pop();
-        sk.gui.updateGUI(sk.core.pathList, sk.core.speakerList); // draw keys last
+        sk.gui.updateGUI(sk.core.pathList, sk.core.speakerList, sk.core.codeList); // draw keys last
         sk.sketchController.updateAnimation();
         sk.sketchController.updateLoop();
     }
@@ -69,9 +70,16 @@ const igs = new p5((sk) => {
         sk.translate(curPos.xPos, curPos.yPos, curPos.zoom);
         sk.rotateX(curPos.rotateX);
     }
-
+    /**
+     * NOTE: When drawing floor plan, translate down on z axis -1 pixel so shapes are drawn cleanly on top of the floor plan
+     */
     sk.drawFloorPlan = function (width, height) {
-        sk.image(sk.core.inputFloorPlan.getImg(), 0, 0, width, height);
+        if (this.sketchController.handle3D.getIsShowing()) {
+            sk.push();
+            sk.translate(0, 0, -1);
+            sk.image(sk.core.inputFloorPlan.getImg(), 0, 0, width, height);
+            sk.pop();
+        } else sk.image(sk.core.inputFloorPlan.getImg(), 0, 0, width, height);
     }
 
     sk.drawRotatedFloorPlan = function (angle, width, height, container) {
@@ -86,7 +94,7 @@ const igs = new p5((sk) => {
     sk.setMovement = function () {
         const drawMovement = new DrawMovement(sk);
         for (const path of sk.core.pathList) {
-            if (path.isShowing) drawMovement.setData(path); // draw after conversation so bug displays on top
+            if (path.isShowing) drawMovement.setData(path); // draw after conversation so dot displays on top
         }
     }
 
@@ -96,7 +104,7 @@ const igs = new p5((sk) => {
         for (const path of sk.core.pathList) {
             if (path.isShowing) {
                 drawConversation.setData(path, sk.core.speakerList);
-                drawMovement.setData(path); // draw after conversation so bug displays on top
+                drawMovement.setData(path); // draw after conversation so dot displays on top
             }
         }
         drawConversation.setConversationBubble(); // draw conversation text last so it displays on top

@@ -3,17 +3,17 @@ class TestData {
     constructor() {
         this.headersMovement = ['time', 'x', 'y']; // String array indicating movement movement file headers, data in each column should be of type number or it won't process
         this.headersConversation = ['time', 'speaker', 'talk']; // String array indicating conversation file headers, data in time column shout be of type number, speaker column should be of type String, talk column should be not null or undefined
+        this.headersCodes = ['start', 'end'];
     }
 
     /**
-     * @param  {PapaParse Results []} results
+     * @param  {Papaparse Results Array} results
+     * @param  {Array} headers
+     * @param  {Function} callbackTypeTest
+     * Note: must bind this to callbackTypeTest to set correct "this" context
      */
-    testParsedMovementResults(results) {
-        return results.data.length > 1 && this.includesAllHeaders(results.meta.fields, this.headersMovement) && this.movementHasOneCleanRow(results.data);
-    }
-
-    testParsedConversationResults(results) {
-        return results.data.length > 1 && this.includesAllHeaders(results.meta.fields, this.headersConversation) && this.conversationHasOneCleanRow(results.data);
+    parsedResults(results, headers, callbackTypeTest) {
+        return results.data.length > 1 && this.includesAllHeaders(results.meta.fields, headers) && this.hasOneCleanRow(results.data, callbackTypeTest.bind(this));
     }
 
     includesAllHeaders(meta, headers) {
@@ -23,9 +23,9 @@ class TestData {
         return true;
     }
 
-    movementHasOneCleanRow(parsedMovementArray) {
-        for (const curRow of parsedMovementArray) {
-            if (this.movementRowForType(curRow)) return true;
+    hasOneCleanRow(resultsDataArray, callbackTypeTest) {
+        for (const curRow of resultsDataArray) {
+            if (callbackTypeTest(curRow)) return true;
         }
         return false;
     }
@@ -34,19 +34,16 @@ class TestData {
         return typeof curRow[this.headersMovement[0]] === 'number' && typeof curRow[this.headersMovement[1]] === 'number' && typeof curRow[this.headersMovement[2]] === 'number';
     }
 
-    conversationHasOneCleanRow(parsedConversationArray) {
-        for (const curRow of parsedConversationArray) {
-            if (this.conversationRowForType(curRow)) return true;
-        }
-        return false;
-    }
-
     conversationRowForType(curRow) {
         return typeof curRow[this.headersConversation[0]] === 'number' && typeof curRow[this.headersConversation[1]] === 'string' && curRow[this.headersConversation[2]] != null;
     }
 
-    curTimeIsLarger(rows) {
-        return Number.parseFloat(rows.curRow[this.headersMovement[0]]).toFixed(1) > Number.parseFloat(rows.priorRow[this.headersMovement[0]]).toFixed(1);
+    codeRowForType(curRow) {
+        return typeof curRow[this.headersCodes[0]] === 'number' && typeof curRow[this.headersCodes[1]] === 'number';
+    }
+
+    curTimeIsLarger(curRow, priorRow) {
+        return Number.parseFloat(curRow[this.headersMovement[0]]).toFixed(1) > Number.parseFloat(priorRow[this.headersMovement[0]]).toFixed(1);
     }
 
     movementTimeIsLarger(movementTime, curRow) {
@@ -75,7 +72,7 @@ class TestData {
      * NOTE: this may need to match cleanSpeaker in the future
      * @param  {String} s
      */
-    cleanPathName(string) {
+    cleanFileName(string) {
         return string.charAt(0).toUpperCase();
     }
 }

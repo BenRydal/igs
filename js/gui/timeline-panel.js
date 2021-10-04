@@ -28,7 +28,7 @@ class TimelinePanel {
     drawSelectionRect() {
         this.sk.fill(200);
         this.sk.noStroke();
-        if (this.sk.sketchController.mode.isAnimate) this.drawRect(this.selectStart, this.top, this.sk.sketchController.mapTotalTimeToPixelTime(this.sk.sketchController.animationCounter), this.bottom);
+        if (this.sk.sketchController.getIsAnimate()) this.drawRect(this.selectStart, this.top, this.sk.sketchController.mapTotalTimeToPixelTime(this.sk.sketchController.animationCounter), this.bottom);
         else this.drawRect(this.selectStart, this.top, this.selectEnd, this.bottom);
     }
 
@@ -94,12 +94,10 @@ class TimelinePanel {
     }
 
     draw3DSlicerRect(container, zPos) {
-        if (this.aboveTimeline(this.sk.mouseX, this.sk.mouseY)) {
-            this.sk.fill(255, 50);
-            this.sk.stroke(0);
-            this.sk.strokeWeight(1);
-            this.sk.quad(0, 0, zPos, container.width, 0, zPos, container.width, container.height, zPos, 0, container.height, zPos);
-        }
+        this.sk.fill(255, 50);
+        this.sk.stroke(0);
+        this.sk.strokeWeight(1);
+        this.sk.quad(0, 0, zPos, container.width, 0, zPos, container.width, container.height, zPos, 0, container.height, zPos);
     }
 
     handle() {
