@@ -61,7 +61,7 @@ class ParseMovement {
      * @param  {File} file
      * @param  {Integer} fileNum // used to clear existing movement data for first new file only
      */
-      processFiles(results, file, fileNum) {
+    processFiles(results, file, fileNum) {
         console.log("Parsing complete:", results, file);
         if (this.testData.parsedResults(results, this.testData.headersMovement, this.testData.movementRowForType)) {
             if (fileNum === 0) this.clear(); // clear existing movement data for first new file only
@@ -124,7 +124,7 @@ class ParseMovement {
             xPos: curRow[this.testData.headersMovement[1]],
             yPos: curRow[this.testData.headersMovement[2]],
             isStopped: this.testData.isStopped(curRow, movementPointArray),
-            codeArray: this.sk.core.parseCodes.addCodeArray(curRow[this.testData.headersMovement[0]])
+            codes: this.sk.core.parseCodes.addCodeArray(curRow[this.testData.headersMovement[0]])
         }
     }
 
@@ -140,7 +140,7 @@ class ParseMovement {
             xPos: movementPoint.xPos,
             yPos: movementPoint.yPos,
             isStopped: movementPoint.isStopped,
-            codeArray: movementPoint.codeArray,
+            codes: movementPoint.codes,
             speaker: this.testData.cleanSpeaker(curConversationRow[this.testData.headersConversation[1]]), // String name of speaker
             talkTurn: curConversationRow[this.testData.headersConversation[2]] // String text of conversation turn
         }
