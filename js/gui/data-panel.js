@@ -10,7 +10,7 @@ class DataPanel {
         this.spacing = this.sk.height / 50;
         this.headers = {
             height: timelineBottom,
-            tabs: this.createMultiTab(["Movement", "Speakers", "Floor Plan", "Select", "Codes", "Color By"])
+            tabs: this.createMultiTab(["Movement", "Speakers", "Floor Plan", "Select", "Codes", "Color"])
         }
         this.tabs = {
             height: timelineBottom + this.spacing * 2,
