@@ -42,9 +42,10 @@ class ParseMovement {
      * @param  {CSV File Array} fileList
      */
     parseFiles(fileList, callback) {
-        for (let fileNum = 0; fileNum < fileList.length; fileNum++) {
-            Papa.parse(fileList[fileNum], {
-                complete: (results, file) => callback(results, file, fileNum),
+        this.clear(); // clear existing movement data once before processing files
+        for (const fileToParse of fileList) {
+            Papa.parse(fileToParse, {
+                complete: (results, file) => callback(results, file),
                 error: (error, file) => {
                     alert("Parsing error with your movement file. Please make sure your file is formatted correctly as a .CSV");
                     console.log(error, file);
@@ -61,10 +62,9 @@ class ParseMovement {
      * @param  {File} file
      * @param  {Integer} fileNum // used to clear existing movement data for first new file only
      */
-    processFiles(results, file, fileNum) {
+    processFiles(results, file) {
         console.log("Parsing complete:", results, file);
         if (this.testData.parsedResults(results, this.testData.headersMovement, this.testData.movementRowForType)) {
-            if (fileNum === 0) this.clear(); // clear existing movement data for first new file only
             const pathName = this.testData.cleanFileName(file.name);
             this.parsedFileArray.push({
                 parsedMovementArray: results.data,
