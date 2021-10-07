@@ -19,6 +19,7 @@ class DrawMovement {
     }
 
     setData(path) {
+        this.dot = null; // reset 
         this.setStartingStyles(path.color);
         this.setDraw(this.sk.PLAN, path.movement);
         this.setDraw(this.sk.SPACETIME, path.movement);
