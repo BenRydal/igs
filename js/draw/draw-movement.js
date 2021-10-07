@@ -92,8 +92,6 @@ class DrawMovement {
     }
 
     isNewCode(p) {
-        // if (this.colorByPath) return true;
-        // else 
         return p.cur.point.codes.color !== p.prior.point.codes.color;
     }
 
@@ -113,7 +111,6 @@ class DrawMovement {
 
     drawStopCircle(p) {
         if (!p.prior.point.isStopped) { // only draw stopped point once and only draw it if showing in codes
-            //this.sk.stroke(p.cur.point.codes.color);
             this.setFillStyle(p.cur.point.codes.color);
             this.sk.circle(p.cur.pos.viewXPos, p.cur.pos.floorPlanYPos, 9);
             this.sk.noFill();
@@ -138,8 +135,8 @@ class DrawMovement {
         return {
             point,
             pos,
-            codeIsShowing: this.testPoint.isShowingInCodeList(point),
-            isFatLine: this.testPoint.selectModeForFatLine(pos, point)
+            codeIsShowing: this.testPoint.isShowingInCodeList(point.codes.array),
+            isFatLine: this.testPoint.selectModeForFatLine(pos, point.isStopped)
         }
     }
 

@@ -22,7 +22,7 @@ class DrawConversation {
     setData(path, speakerList) {
         for (const point of path.conversation) {
             const curPos = this.testPoint.getScaledPos(point, null);
-            if (this.testPoint.isShowingInGUI(curPos) && this.testPoint.selectModeForConversation(curPos, point) && this.testPoint.isShowingInCodeList(point)) {
+            if (this.testPoint.isShowingInGUI(curPos) && this.testPoint.selectModeForConversation(curPos, point) && this.testPoint.isShowingInCodeList(point.codes.array)) {
                 const curSpeaker = this.getSpeakerFromSpeakerList(point.speaker, speakerList); // get speaker object from global list equivalent to the current speaker of point
                 if (this.testSpeakerToDraw(curSpeaker, path.name)) this.organizeRectDrawing(point, curPos, curSpeaker.color); // draws all rects
             }
