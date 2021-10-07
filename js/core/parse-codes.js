@@ -66,18 +66,29 @@ class ParseCodes {
      */
     addCodeArray(curTime) {
         let codesToAdd = [];
-        for (let codeTable of this.parsedFileArray) {
-            if (this.timeIsBetweenCurRow(curTime, codeTable)) codesToAdd.push(true);
-            else {
-                if (codeTable.counter < codeTable.parsedCodeArray.length - 1 && this.timeIsBetweenNextRow(curTime, codeTable)) {
+        let color = 150;
+        for (let i = 0; i < this.parsedFileArray.length; i++) {
+            if (this.timeIsBetweenCurRow(curTime, this.parsedFileArray[i])) {
+                codesToAdd.push(true);
+                color = this.getCodeColor(color, i);
+            } else {
+                if (this.parsedFileArray[i].counter < this.parsedFileArray[i].parsedCodeArray.length - 1 && this.timeIsBetweenNextRow(curTime, this.parsedFileArray[i])) {
                     codesToAdd.push(true);
-                    codeTable.counter++;
+                    color = this.getCodeColor(color, i);
+                    this.parsedFileArray[i].counter++;
                 } else codesToAdd.push(false);
             }
         }
-        return codesToAdd;
+        return {
+            array: codesToAdd,
+            color: color
+        }
     }
 
+    getCodeColor(color, index) {
+        if (color === 150) return this.sk.core.COLOR_LIST[index % this.sk.core.COLOR_LIST.length];
+        else return 0; // if color already assigned, make it black because there are multiple true codes for same curTime
+    }
     timeIsBetweenCurRow(curTime, codeTable) {
         return this.between(curTime, this.getStartTime(codeTable.parsedCodeArray, codeTable.counter), this.getEndTime(codeTable.parsedCodeArray, codeTable.counter));
     }
