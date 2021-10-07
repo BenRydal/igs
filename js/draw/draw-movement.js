@@ -9,6 +9,7 @@ class DrawMovement {
             thinStroke: null,
             fatStroke: null
         }
+        this.colorByPath = true;
     }
 
     setData(path) {
@@ -26,8 +27,13 @@ class DrawMovement {
 
     setLineStyle(weight, color) {
         this.sk.strokeWeight(weight);
-        // TODO: set color here?
-        this.sk.stroke(color);
+        if (this.colorByPath) this.sk.stroke(this.style.shade);
+        else this.sk.stroke(color);
+    }
+
+    setFillStyle(color) {
+        if (this.colorByPath) this.sk.fill(this.style.shade);
+        else this.sk.fill(color);
     }
 
     /**
@@ -86,7 +92,8 @@ class DrawMovement {
     }
 
     isNewCode(p) {
-        // if drawing path color, return true else
+        // if (this.colorByPath) return true;
+        // else 
         return p.cur.point.codes.color !== p.prior.point.codes.color;
     }
 
@@ -99,7 +106,6 @@ class DrawMovement {
     endThenBeginNewLine(pos, weight, color) {
         this.sk.vertex(pos.viewXPos, pos.floorPlanYPos, pos.zPos);
         this.sk.endShape();
-        //TODO: add here?
         this.setLineStyle(weight, color);
         this.sk.beginShape();
         this.sk.vertex(pos.viewXPos, pos.floorPlanYPos, pos.zPos);
@@ -107,9 +113,8 @@ class DrawMovement {
 
     drawStopCircle(p) {
         if (!p.prior.point.isStopped) { // only draw stopped point once and only draw it if showing in codes
-            //TODO: updated, add stroke
-            //this.sk.fill(this.style.shade);
-            this.sk.fill(p.cur.point.codes.color);
+            //this.sk.stroke(p.cur.point.codes.color);
+            this.setFillStyle(p.cur.point.codes.color);
             this.sk.circle(p.cur.pos.viewXPos, p.cur.pos.floorPlanYPos, 9);
             this.sk.noFill();
         }
