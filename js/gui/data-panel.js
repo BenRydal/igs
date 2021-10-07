@@ -9,24 +9,44 @@ class DataPanel {
         this.xPos = 10;
         this.spacing = this.sk.height / 50;
         this.headers = {
-            mode: ["Movement", "Speakers", "Floor Plan", "Select", "Codes"],
-            curMode: 0,
             height: timelineBottom,
+            tabs: this.createMultiTab(["Movement", "Speakers", "Floor Plan", "Select", "Codes", "Color By"])
         }
         this.tabs = {
             height: timelineBottom + this.spacing * 2,
-            selectTabs: ["none", "region", "slice", "moving", "stopped"],
-            curSelectTab: 0, // matches selectTabs list
-            rotateTabs: ["rotate left", "rotate right"]
+            select: this.createMultiTab(["none", "region", "slice", "moving", "stopped"]),
+            color: this.createMultiTab(["People", "Codes"]),
+            rotate: this.createSingleTab(["rotate left", "rotate right"])
+        }
+    }
+    /**
+     * A MultiTab is a tab that has a list of different sub tabs where only one sub tab can be selected at once
+     */
+    createMultiTab(nameArray) {
+        return {
+            names: nameArray,
+            curTab: 0
+        }
+    }
+    /**
+     * A single tab is a tab where sub tabs can be toggled simultaneously
+     */
+    createSingleTab(nameArray) {
+        return {
+            names: nameArray
         }
     }
 
     /**
-     * Passed values allow for dynamic display/updating
+     * Organizes whether and which tabs to draw or handle mouse events in data panel
+     * @param  {Integer} mode // program constant for determing gui drawing or handling
+     * @param  {Array} pathList // program data that allows for dynamic GUI display and updating
+     * @param  {Array} speakerList
+     * @param  {Array} codeList
      */
     organize(mode, pathList, speakerList, codeList) {
         this.organizeHeaders(mode); // Draws or tests if over headers
-        switch (this.headers.curMode) { // Draws or tests if over tabs
+        switch (this.headers.tabs.curTab) { // Draws or tests if over tabs
             case 0:
                 this.organizeList(mode, pathList);
                 break;
@@ -37,20 +57,33 @@ class DataPanel {
                 this.organizeRotateKeys(mode);
                 break;
             case 3:
-                this.organizeSelectors(mode, this.tabs.curSelectTab);
+                this.organizeMultiTab(mode, this.tabs.select, 0);
                 break;
             case 4:
                 this.organizeList(mode, codeList);
+                break;
+            case 5:
+                this.organizeMultiTab(mode, this.tabs.color, 1);
                 break;
         }
     }
 
     organizeHeaders(mode) {
         let curXPos = this.xPos;
-        for (let i = 0; i < this.headers.mode.length; i++) {
-            const pixelWidth = this.sk.textWidth(this.headers.mode[i]) + this.spacing;
+        for (let i = 0; i < this.headers.tabs.names.length; i++) {
+            const pixelWidth = this.sk.textWidth(this.headers.tabs.names[i]) + this.spacing;
             if (mode === this.sk.DRAWGUI) this.drawHeader(curXPos, i);
             else this.overHeader(curXPos, pixelWidth, i);
+            curXPos += pixelWidth;
+        }
+    }
+
+    organizeMultiTab(mode, tabs, setMethod) {
+        let curXPos = this.xPos;
+        for (let i = 0; i < tabs.names.length; i++) {
+            const pixelWidth = this.sk.textWidth(tabs.names[i]) + this.spacing;
+            if (mode === this.sk.DRAWGUI) this.drawMultiTab(curXPos, tabs, i);
+            else this.overMultiTab(curXPos, pixelWidth, i, setMethod);
             curXPos += pixelWidth;
         }
     }
@@ -58,25 +91,15 @@ class DataPanel {
     organizeList(mode, list) {
         let curXPos = this.xPos;
         for (const person of list) {
-            if (mode === this.sk.DRAWGUI) this.drawPerson(person, curXPos);
-            else this.overPerson(person, curXPos);
+            if (mode === this.sk.DRAWGUI) this.drawList(person, curXPos);
+            else this.overList(person, curXPos);
             curXPos += (2 * this.spacing) + this.sk.textWidth(person.name);
-        }
-    }
-
-    organizeSelectors(mode) {
-        let curXPos = this.xPos;
-        for (let i = 0; i < this.tabs.selectTabs.length; i++) {
-            const pixelWidth = this.sk.textWidth(this.tabs.selectTabs[i]) + this.spacing;
-            if (mode === this.sk.DRAWGUI) this.drawSelector(curXPos, this.tabs.curSelectTab, i);
-            else this.overSelector(curXPos, pixelWidth, i);
-            curXPos += pixelWidth;
         }
     }
 
     organizeRotateKeys(mode) {
         let curXPos = this.xPos;
-        for (const direction of this.tabs.rotateTabs) {
+        for (const direction of this.tabs.rotate.names) {
             const pixelWidth = this.sk.textWidth(direction) + this.spacing;
             if (mode === this.sk.DRAWGUI) this.drawRotateKey(direction, curXPos);
             else this.overRotateKey(direction, curXPos, pixelWidth);
@@ -86,12 +109,18 @@ class DataPanel {
 
     drawHeader(xPos, header) {
         this.sk.noStroke();
-        if (this.headers.curMode === header) this.sk.fill(0);
+        if (this.headers.tabs.curTab === header) this.sk.fill(0);
         else this.sk.fill(150);
-        this.sk.text(this.headers.mode[header], xPos, this.headers.height);
+        this.sk.text(this.headers.tabs.names[header], xPos, this.headers.height);
     }
 
-    drawPerson(person, curXPos) {
+    drawMultiTab(curXPos, tabs, selectedTab) {
+        if (tabs.curTab === selectedTab) this.sk.fill(0);
+        else this.sk.fill(150);
+        this.sk.text(tabs.names[selectedTab], curXPos, this.tabs.height);
+    }
+
+    drawList(person, curXPos) {
         this.sk.strokeWeight(5);
         this.sk.stroke(person.color);
         this.sk.noFill();
@@ -105,12 +134,6 @@ class DataPanel {
         this.sk.text(person.name, curXPos + 1.3 * this.spacing, this.tabs.height - 5);
     }
 
-    drawSelector(curXPos, curSelectTab, tab) {
-        if (curSelectTab === tab) this.sk.fill(0);
-        else this.sk.fill(150);
-        this.sk.text(this.tabs.selectTabs[tab], curXPos, this.tabs.height);
-    }
-
     drawRotateKey(direction, curXPos) {
         this.sk.noStroke();
         this.sk.fill(0);
@@ -118,25 +141,40 @@ class DataPanel {
     }
 
     overHeader(xPos, pixelWidth, header) {
-        if (this.sk.overRect(xPos, this.headers.height, xPos + pixelWidth, this.spacing)) this.headers.curMode = header;
+        if (this.sk.overRect(xPos, this.headers.height, xPos + pixelWidth, this.spacing)) this.headers.tabs.curTab = header;
     }
 
-    overPerson(person, curXPos) {
+    overMultiTab(curXPos, pixelWidth, selectedTab, setMethod) {
+        if (this.sk.overRect(curXPos, this.tabs.height, curXPos + pixelWidth, this.spacing)) this.setMultiTab(setMethod, selectedTab);
+    }
+
+    overList(person, curXPos) {
         if (this.sk.overRect(curXPos, this.tabs.height, this.spacing, this.spacing)) this.sk.sketchController.setCoreData(person);
-    }
-
-    overSelector(curXPos, pixelWidth, tab) {
-        if (this.sk.overRect(curXPos, this.tabs.height, curXPos + pixelWidth, this.spacing)) this.tabs.curSelectTab = tab;
     }
 
     overRotateKey(direction, curXPos, pixelWidth) {
         if (this.sk.overRect(curXPos, this.tabs.height, curXPos + pixelWidth, this.spacing)) {
-            if (direction === this.tabs.rotateTabs[0]) this.sk.sketchController.setRotateLeft();
+            if (direction === this.tabs.rotate.names[0]) this.sk.sketchController.setRotateLeft();
             else this.sk.sketchController.setRotateRight();
         }
     }
 
     getCurSelectTab() {
-        return this.tabs.curSelectTab;
+        return this.tabs.select.curTab;
+    }
+
+    getCurColorTab() {
+        return this.tabs.color.curTab;
+    }
+
+    setMultiTab(setMethod, newTab) {
+        switch (setMethod) {
+            case 0:
+                this.tabs.select.curTab = newTab;
+                break;
+            case 1:
+                this.tabs.color.curTab = newTab;
+                break;
+        }
     }
 }
