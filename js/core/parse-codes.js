@@ -18,9 +18,10 @@ class ParseCodes {
      * @param  {.CSV File[]} fileList
      */
     parseFiles(fileList, callback) {
-        for (let fileNum = 0; fileNum < fileList.length; fileNum++) {
-            Papa.parse(fileList[fileNum], {
-                complete: (results, file) => callback(results, file, fileNum, fileList.length),
+        this.clear(); // clear existing code data once before processing starts
+        for (const fileToParse of fileList) {
+            Papa.parse(fileToParse, {
+                complete: (results, file) => callback(results, file),
                 error: (error, file) => {
                     alert("Parsing error with your code file. Please make sure your file is formatted correctly as a .CSV");
                     console.log(error, file);
@@ -39,13 +40,12 @@ class ParseCodes {
      * @param  {Integer} fileNum
      * @param  {Integer} fileListLength
      */
-    processFile(results, file, fileNum, fileListLength) {
+    processFile(results, file) {
         console.log("Parsing complete:", results, file);
         if (this.testData.parsedResults(results, this.testData.headersCodes, this.testData.codeRowForType)) {
-            if (fileNum === 0) this.clear(); // clear existing code data when processing first first file
             const codeName = this.testData.cleanFileName(file.name);
             this.parsedFileArray.push(this.createCodeTable(results.data, codeName));
-            this.sk.core.updateCodes(codeName, fileNum === fileListLength - 1); // 2nd parameter is test for if it is last file
+            this.sk.core.updateCodes(codeName); // 2nd parameter is test for if it is last file
         } else alert("Error loading code file. Please make sure your file is a .CSV file formatted with column headers: " + this.testData.headersCodes.toString());
     }
 

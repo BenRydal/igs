@@ -30,9 +30,10 @@ class Core {
         this.sk.loop(); // rerun P5 draw loop
     }
 
-    updateCodes(codeName, isLastFile) {
+    updateCodes(codeName) {
         this.codeList.push(this.createCode(codeName));
-        if (isLastFile) this.parseMovement.reProcessAllPointArrays();
+        this.clearMovement();
+        this.parseMovement.reProcessAllPointArrays();
         this.sk.loop(); // rerun P5 draw loop
     }
 
