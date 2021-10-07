@@ -9,6 +9,13 @@ class TestPoint {
         this.sk = sketch;
     }
 
+    /**
+     * Currently returns whether color by paths/people is selected in GUI
+     */
+    getColorMode() {
+        return this.sk.gui.dataPanel.getCurColorTab() === 0;
+    }
+
     isShowingInGUI(point) {
         return this.sk.gui.timelinePanel.overAxis(point.timelineXPos) && this.isShowingInAnimation(point.timelineXPos);
     }
@@ -23,11 +30,11 @@ class TestPoint {
      * IMPLEMENTATION: Iterate through core codeList and return false if: for any of codes that are true in codeList a code at curPoint is false 
      * @param  {MovementPoint} point
      */
-    isShowingInCodeList(point) {
+    isShowingInCodeList(codesArray) {
         if (this.sk.arrayIsLoaded(this.sk.core.codeList)) {
             for (let j = 0; j < this.sk.core.codeList.length; j++) {
                 if (this.sk.core.codeList[j].isShowing) {
-                    if (point.codeArray[j]) continue;
+                    if (codesArray[j]) continue;
                     else return false;
                 }
             }
@@ -75,8 +82,8 @@ class TestPoint {
      * @param  {Integer} view
      * @param  {MovementPoint} curPoint
      */
-    isPlanViewAndStopped(view, point) {
-        return (view === this.sk.PLAN && point.isStopped && this.sk.gui.dataPanel.getCurSelectTab() !== 3);
+    isPlanViewAndStopped(view, pointIsStopped) {
+        return (view === this.sk.PLAN && pointIsStopped && this.sk.gui.dataPanel.getCurSelectTab() !== 3);
     }
 
     /**
@@ -84,14 +91,14 @@ class TestPoint {
      * @param  {Object returned from getScaledPos} pos
      * @param  {MovementPoint} point
      */
-    selectModeForFatLine(pos, point) {
+    selectModeForFatLine(pos, pointIsStopped) {
         switch (this.sk.gui.dataPanel.getCurSelectTab()) {
             case 1:
                 return this.sk.gui.fpContainer.overCursor(pos.floorPlanXPos, pos.floorPlanYPos);
             case 2:
                 return this.sk.gui.fpContainer.overSlicer(pos.floorPlanXPos, pos.floorPlanYPos);
             default:
-                return point.isStopped; // this always returns false for floorplan view
+                return pointIsStopped; // this always returns false for floorplan view
         }
     }
     /**

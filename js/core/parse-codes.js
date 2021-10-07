@@ -18,9 +18,10 @@ class ParseCodes {
      * @param  {.CSV File[]} fileList
      */
     parseFiles(fileList, callback) {
-        for (let fileNum = 0; fileNum < fileList.length; fileNum++) {
-            Papa.parse(fileList[fileNum], {
-                complete: (results, file) => callback(results, file, fileNum, fileList.length),
+        this.clear(); // clear existing code data once before processing starts
+        for (const fileToParse of fileList) {
+            Papa.parse(fileToParse, {
+                complete: (results, file) => callback(results, file),
                 error: (error, file) => {
                     alert("Parsing error with your code file. Please make sure your file is formatted correctly as a .CSV");
                     console.log(error, file);
@@ -39,13 +40,12 @@ class ParseCodes {
      * @param  {Integer} fileNum
      * @param  {Integer} fileListLength
      */
-    processFile(results, file, fileNum, fileListLength) {
+    processFile(results, file) {
         console.log("Parsing complete:", results, file);
         if (this.testData.parsedResults(results, this.testData.headersCodes, this.testData.codeRowForType)) {
-            if (fileNum === 0) this.clear(); // clear existing code data when processing first first file
             const codeName = this.testData.cleanFileName(file.name);
             this.parsedFileArray.push(this.createCodeTable(results.data, codeName));
-            this.sk.core.updateCodes(codeName, fileNum === fileListLength - 1); // 2nd parameter is test for if it is last file
+            this.sk.core.updateCodes(codeName); // 2nd parameter is test for if it is last file
         } else alert("Error loading code file. Please make sure your file is a .CSV file formatted with column headers: " + this.testData.headersCodes.toString());
     }
 
@@ -66,18 +66,29 @@ class ParseCodes {
      */
     addCodeArray(curTime) {
         let codesToAdd = [];
-        for (let codeTable of this.parsedFileArray) {
-            if (this.timeIsBetweenCurRow(curTime, codeTable)) codesToAdd.push(true);
-            else {
-                if (codeTable.counter < codeTable.parsedCodeArray.length - 1 && this.timeIsBetweenNextRow(curTime, codeTable)) {
+        let color = 150;
+        for (let i = 0; i < this.parsedFileArray.length; i++) {
+            if (this.timeIsBetweenCurRow(curTime, this.parsedFileArray[i])) {
+                codesToAdd.push(true);
+                color = this.getCodeColor(color, i);
+            } else {
+                if (this.parsedFileArray[i].counter < this.parsedFileArray[i].parsedCodeArray.length - 1 && this.timeIsBetweenNextRow(curTime, this.parsedFileArray[i])) {
                     codesToAdd.push(true);
-                    codeTable.counter++;
+                    color = this.getCodeColor(color, i);
+                    this.parsedFileArray[i].counter++;
                 } else codesToAdd.push(false);
             }
         }
-        return codesToAdd;
+        return {
+            array: codesToAdd,
+            color: color
+        }
     }
 
+    getCodeColor(color, index) {
+        if (color === 150) return this.sk.core.COLOR_LIST[index % this.sk.core.COLOR_LIST.length];
+        else return 0; // if color already assigned, make it black because there are multiple true codes for same curTime
+    }
     timeIsBetweenCurRow(curTime, codeTable) {
         return this.between(curTime, this.getStartTime(codeTable.parsedCodeArray, codeTable.counter), this.getEndTime(codeTable.parsedCodeArray, codeTable.counter));
     }

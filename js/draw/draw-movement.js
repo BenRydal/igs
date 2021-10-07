@@ -1,3 +1,9 @@
+/**
+ * This class provides a set of methods to draw highly customized lines in both floor plan and space-time views of the IGS.
+ * Many of the methods address specific browser constraints and balance drawing curves efficiently and aesthetically meaningfully
+ * For example, using the "line" method in a library like P5 is inefficient and curveVertex increases efficiency tremendously but 
+ * the tradeoff is more customized methods and conditional structures to handle starting/begining lines/shapes
+ */
 class DrawMovement {
 
     constructor(sketch) {
@@ -7,54 +13,40 @@ class DrawMovement {
         this.style = {
             shade: null,
             thinStroke: null,
-            fatStroke: null
+            fatStroke: null,
+            colorByPaths: this.testPoint.getColorMode() // boolean indicating whether to color by paths or codes
         }
     }
 
     setData(path) {
-        this.dot = null; // reset dot
-        this.setPathStyles(path.color);
+        this.dot = null; // reset 
+        this.setStartingStyles(path.color);
         this.setDraw(this.sk.PLAN, path.movement);
         this.setDraw(this.sk.SPACETIME, path.movement);
         if (this.dot !== null) this.drawDot(this.dot);
     }
 
-    setPathStyles(color) {
-        this.style.shade = color;
-        [this.style.thinStroke, this.style.fatStroke] = this.testPoint.selectModeForStrokeWeights();
-    }
-
-    resetLineStyles() {
-        this.sk.strokeWeight(this.style.thinStroke);
-        this.sk.stroke(this.style.shade);
-        this.sk.noFill(); // important for curve drawing
-    }
-
     /**
-     * Holds logic for drawing line segments depending on thick vs. thin line drawing and code tests
+     * Organizes segmentation of line drawing based on a variety of conditions
+     * There are 2 primary ways to start/end lines:
+     * 1) User loaded codes are tested to draw distinct line segments that can be separated in space and time
+     * 2) isFatLine boolean is based on what points are either selected by a user in the GUI OR indicate if a 
+     * point is stopped or moving this boolean is tested to draw distinct line segments adjacent in space and time
      * @param  {Integer} view
      * @param  {MovementPoint []} movementArray
      */
     setDraw(view, movementArray) {
-        let isDrawing = true; // controls stopping/ending of curve drawing when codes are loaded by user
-        let isFatLine; // controls how lines are segmented to be able to change strokeWeights within curveVertex
-        let isFirstPoint = true; // set to false when first point that is showing is drawn
-        this.resetLineStyles();
-        this.sk.beginShape();
+        let isDrawingCode = false; // controls beginning/ending lines based on codes that have been loaded
         for (let i = 1; i < movementArray.length; i++) { // start at 1 to allow testing of current and prior indices
-            const p = this.createComparePoint(view, movementArray[i], movementArray[i - 1]);
-            if (this.testPoint.isShowingInGUI(p.curPos)) {
-                if (isFirstPoint) {
-                    isFirstPoint = false;
-                    if (p.curPoint.isStopped) isFatLine = false;
-                    else isFatLine = true;
-                }
-                if (p.curCodeIsShowing) {
-                    if (view === this.sk.SPACETIME) this.recordDot(p.curPos);
-                    if (!isDrawing) isDrawing = this.beginDrawing(isFatLine);
-                    isFatLine = this.organizeDrawing(isFatLine, p, view);
+            const p = this.createComparePoint(view, movementArray[i], movementArray[i - 1]); // a compare point consists of current and prior augmented points
+            if (this.testPoint.isShowingInGUI(p.cur.pos)) {
+                if (p.cur.codeIsShowing) {
+                    if (view === this.sk.SPACETIME) this.recordDot(p.cur.pos);
+                    if (!isDrawingCode) isDrawingCode = this.beginNewCodeDrawing(p.cur.isFatLine, p.cur.point.codes.color);
+                    if (this.testPoint.isPlanViewAndStopped(view, p.cur.point.isStopped)) this.drawStopCircle(p); // you are able to draw circles between begin/end shape
+                    else this.setFatLineDrawing(p);
                 } else {
-                    if (isDrawing) isDrawing = this.endDrawing();
+                    if (isDrawingCode) isDrawingCode = this.endCurCodeDrawing();
                 }
             }
         }
@@ -62,115 +54,93 @@ class DrawMovement {
     }
 
     /**
-     * Holds logic for testing each compare point object that organizes drawing methods and updating isFatLine var
-     * NOTE: In web browsers lines must be segmented/ended to change thickness or stroke
+     * Begins drawing shape based on code segmentation
+     * Sets strokeweight based on current state of isFatLine and returns value to update isDrawingCode
      */
-    organizeDrawing(isFatLine, p, view) {
-        if (this.testPoint.isPlanViewAndStopped(view, p.curPoint)) {
-            if (!p.priorPoint.isStopped) this.drawStopCircle(p.curPos); // only draw stopped point once and only draw it if showing in codes
-        } else {
-            if (this.testPoint.selectModeForFatLine(p.curPos, p.curPoint)) {
-                this.setFatLine(isFatLine, p);
-                isFatLine = true;
-            } else {
-                this.setThinLine(isFatLine, p);
-                isFatLine = false;
-            }
-        }
-        return isFatLine;
-    }
-    /**
-     * A compare point augments current and prior points with screen pixel position variables and boolean indicating if the point passes code tests
-     * @param  {Integer} view
-     * @param  {MovementPoint} curPoint 
-     * @param  {MovementPoint} priorPoint 
-     */
-    createComparePoint(view, curPoint, priorPoint) {
-        return {
-            curPoint,
-            curPos: this.testPoint.getScaledPos(curPoint, view),
-            curCodeIsShowing: this.testPoint.isShowingInCodeList(curPoint),
-            priorPoint,
-            priorPos: this.testPoint.getScaledPos(priorPoint, view),
-            priorCodeIsShowing: this.testPoint.isShowingInCodeList(priorPoint)
-        }
+    beginNewCodeDrawing(isFatLine, color) {
+        if (isFatLine) this.setLineStyle(this.style.fatStroke, color);
+        else this.setLineStyle(this.style.thinStroke, color);
+        this.sk.beginShape();
+        return true;
     }
 
     /**
-     * Ends drawing shape if code is not showing and sets isDrawing to false
+     * Ends drawing shape based on code segmentation and returns value to update isDrawingCode
      */
-    endDrawing() {
+    endCurCodeDrawing() {
         this.sk.endShape();
         return false;
     }
 
     /**
-     * Begins drawing shape if code is showing and not already drawing, sets correct strokeweight and sets isDrawing to true
+     * Organizes start/ending of new line based on changes in isFatLine or codes
      */
-    beginDrawing(isFatLine) {
-        this.sk.beginShape();
-        if (isFatLine) this.sk.strokeWeight(this.style.fatStroke);
-        else this.sk.strokeWeight(this.style.thinStroke);
-        return true;
-    }
-    /**
-     * Continues drawing or begins new line with potential to have fat strokeWeight
-     */
-    setFatLine(isFatLine, p) {
-        if (isFatLine) this.drawVertexOrNewLine(p, this.style.fatStroke);
-        else this.setNewLine(p, this.style.fatStroke);
-    }
-    /**
-     * Continues drawing or begins new line with potential to have thin strokeWeight
-     */
-    setThinLine(isFatLine, p) {
-        if (!isFatLine) this.drawVertexOrNewLine(p, this.style.thinStroke);
-        else this.setNewLine(p, this.style.thinStroke);
-    }
-    /**
-     * Determines whether to draw new line with no strokeWeight or provided strokeWeight based on code test
-     */
-    setNewLine(p, stroke) {
-        if (!p.curCodeIsShowing) this.drawNewLine(p.priorPos, 0);
-        else this.drawNewLine(p.priorPos, stroke); // if drawing in highlight mode, end it
-    }
-
-    /**
-     * Determines whether to continue drawing current line or begin new line with either 0 or provided strokeWeight based on code test
-     */
-    drawVertexOrNewLine(p, stroke) {
-        if (!p.curCodeIsShowing) {
-            if (!p.priorCodeIsShowing) this.sk.vertex(p.curPos.viewXPos, p.curPos.floorPlanYPos, p.curPos.zPos); // if already drawing no line
-            else this.drawNewLine(p.priorPos, 0); // if curPoint has no code and not already drawing no line
+    setFatLineDrawing(p) {
+        if (p.cur.isFatLine) {
+            if (!p.prior.isFatLine || this.isNewCode(p)) this.endThenBeginNewLine(p.prior.pos, this.style.fatStroke, p.cur.point.codes.color);
+            else this.sk.vertex(p.cur.pos.viewXPos, p.cur.pos.floorPlanYPos, p.cur.pos.zPos); // if already drawing fat line, continue it
         } else {
-            if (!p.priorCodeIsShowing) this.drawNewLine(p.priorPos, stroke);
-            else this.sk.vertex(p.curPos.viewXPos, p.curPos.floorPlanYPos, p.curPos.zPos); // if already drawing in highlight mode, continue it
+            if (p.prior.isFatLine || this.isNewCode(p)) this.endThenBeginNewLine(p.prior.pos, this.style.thinStroke, p.cur.point.codes.color);
+            else this.sk.vertex(p.cur.pos.viewXPos, p.cur.pos.floorPlanYPos, p.cur.pos.zPos); // if already drawing thin line, continue it
         }
     }
 
-    drawStopCircle(curPos) {
-        this.sk.fill(this.style.shade);
-        this.sk.circle(curPos.viewXPos, curPos.floorPlanYPos, 9);
-        this.sk.noFill();
+    isNewCode(p) {
+        return p.cur.point.codes.color !== p.prior.point.codes.color;
     }
 
     /**
-     * Ends and begins a new line with provided strokeWeight
-     * NOTE: draw two vertices to indicate starting and ending points
+     * Ends and begins a new line, passes values to set strokeweight and color for new line
      * @param  {Object returned from getScaledPos} pos
      * @param  {Integer} weight
      */
-    drawNewLine(pos, weight) {
-        this.sk.vertex(pos.viewXPos, pos.floorPlanYPos, pos.zPos); // draw cur point twice to mark end point
+    endThenBeginNewLine(pos, weight, color) {
         this.sk.vertex(pos.viewXPos, pos.floorPlanYPos, pos.zPos);
         this.sk.endShape();
-        this.sk.strokeWeight(weight);
+        this.setLineStyle(weight, color);
         this.sk.beginShape();
-        this.sk.vertex(pos.viewXPos, pos.floorPlanYPos, pos.zPos); // draw cur point twice to mark starting point
         this.sk.vertex(pos.viewXPos, pos.floorPlanYPos, pos.zPos);
     }
+
+
     /**
-     * Tests if newDot has been created and updated current dot value and video scrub variable if so
+     * Stops are drawn as circles. These circles can be drawn while also drawing with P5's curveVertex method
+     * Testing if the priorPoit is stopped is to only draw a stop once
+     * @param  {ComparePoint} p
+     */
+    drawStopCircle(p) {
+        if (!p.prior.point.isStopped) {
+            this.setFillStyle(p.cur.point.codes.color);
+            this.sk.circle(p.cur.pos.viewXPos, p.cur.pos.floorPlanYPos, 9);
+            this.sk.noFill();
+        }
+    }
+
+    /**
+     * A compare point augments current and prior points with screen pixel position variables and booleans indicating if the point passes code and selection tests
+     * @param  {Integer} view
+     * @param  {MovementPoint} curIndex 
+     * @param  {MovementPoint} priorIndex 
+     */
+    createComparePoint(view, curIndex, priorIndex) {
+        return {
+            cur: this.augmentPoint(view, curIndex),
+            prior: this.augmentPoint(view, priorIndex)
+        }
+    }
+
+    augmentPoint(view, point) {
+        const pos = this.testPoint.getScaledPos(point, view);
+        return {
+            point,
+            pos,
+            codeIsShowing: this.testPoint.isShowingInCodeList(point.codes.array),
+            isFatLine: this.testPoint.selectModeForFatLine(pos, point.isStopped)
+        }
+    }
+
+    /**
+     * Tests if newDot has been created and updates current dot value and video scrub variable if so
      * @param  {Object returned from getScaledPos} curPos
      */
     recordDot(curPos) {
@@ -191,15 +161,31 @@ class DrawMovement {
     drawFloorPlanDot(curDot, dotSize) {
         this.sk.stroke(0);
         this.sk.strokeWeight(5);
-        this.sk.fill(this.style.shade);
+        this.setFillStyle(150);
         this.sk.circle(curDot.xPos, curDot.yPos, dotSize);
     }
 
     draw3DSpaceTimeDot(curDot) {
-        this.sk.stroke(this.style.shade);
-        this.sk.strokeWeight(25);
+        this.setLineStyle(25, 150);
         this.sk.point(curDot.xPos, curDot.yPos, curDot.zPos);
         this.sk.strokeWeight(2);
         this.sk.line(curDot.xPos, curDot.yPos, 0, curDot.xPos, curDot.yPos, curDot.zPos);
+    }
+
+    setStartingStyles(color) {
+        this.sk.noFill(); // IMPORTANT for curveVertex drawing
+        this.style.shade = color;
+        [this.style.thinStroke, this.style.fatStroke] = this.testPoint.selectModeForStrokeWeights();
+    }
+
+    setLineStyle(weight, color) {
+        this.sk.strokeWeight(weight);
+        if (this.style.colorByPaths) this.sk.stroke(this.style.shade);
+        else this.sk.stroke(color);
+    }
+
+    setFillStyle(color) {
+        if (this.style.colorByPaths) this.sk.fill(this.style.shade);
+        else this.sk.fill(color);
     }
 }
