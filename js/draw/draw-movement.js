@@ -1,3 +1,9 @@
+/**
+ * This class provides a set of methods to draw highly customized lines in both floor plan and space-time views of the IGS.
+ * Many of the methods address specific browser constraints and balance drawing curves efficiently and aesthetically meaningfully
+ * For example, using the "line" method in a library like P5 is inefficient and curveVertex increases efficiency tremendously but 
+ * the tradeoff is more customized methods and conditional structures to handle starting/begining lines/shapes
+ */
 class DrawMovement {
 
     constructor(sketch) {
@@ -13,40 +19,25 @@ class DrawMovement {
     }
 
     setData(path) {
-        this.setPathStyles(path.color);
+        this.setStartingStyles(path.color);
         this.setDraw(this.sk.PLAN, path.movement);
         this.setDraw(this.sk.SPACETIME, path.movement);
         if (this.dot !== null) this.drawDot(this.dot);
     }
 
-    setPathStyles(color) {
-        this.sk.noFill(); // important for curve drawing
-        this.style.shade = color;
-        [this.style.thinStroke, this.style.fatStroke] = this.testPoint.selectModeForStrokeWeights();
-    }
-
-    setLineStyle(weight, color) {
-        this.sk.strokeWeight(weight);
-        if (this.colorByPath) this.sk.stroke(this.style.shade);
-        else this.sk.stroke(color);
-    }
-
-    setFillStyle(color) {
-        if (this.colorByPath) this.sk.fill(this.style.shade);
-        else this.sk.fill(color);
-    }
-
     /**
-     * Two ways to begin/end shapes
-     * ONe is based on codes and allows for very separated shapes
-     * Another is based on highlighting/isFatLine and ends current shape/begins new one immediately
+     * Organizes segmentation of line drawing based on a variety of conditions
+     * There are 2 primary ways to start/end lines:
+     * 1) User loaded codes are tested to draw distinct line segments that can be separated in space and time
+     * 2) isFatLine boolean is based on what points are either selected by a user in the GUI OR indicate if a 
+     * point is stopped or moving this boolean is tested to draw distinct line segments adjacent in space and time
      * @param  {Integer} view
      * @param  {MovementPoint []} movementArray
      */
     setDraw(view, movementArray) {
-        let isDrawingCode = false; // controls stopping/ending of curve drawing when codes are loaded by user
+        let isDrawingCode = false; // controls beginning/ending lines based on codes that have been loaded
         for (let i = 1; i < movementArray.length; i++) { // start at 1 to allow testing of current and prior indices
-            const p = this.createComparePoint(view, movementArray[i], movementArray[i - 1]);
+            const p = this.createComparePoint(view, movementArray[i], movementArray[i - 1]); // a compare point consists of current and prior augmented points
             if (this.testPoint.isShowingInGUI(p.cur.pos)) {
                 if (p.cur.codeIsShowing) {
                     if (view === this.sk.SPACETIME) this.recordDot(p.cur.pos);
@@ -55,7 +46,6 @@ class DrawMovement {
                     else this.setFatLineDrawing(p);
                 } else {
                     if (isDrawingCode) isDrawingCode = this.endCurCodeDrawing();
-
                 }
             }
         }
@@ -63,7 +53,8 @@ class DrawMovement {
     }
 
     /**
-     * Begins drawing shape if code is showing and not already drawing, sets correct strokeweight and sets isDrawingCode to true
+     * Begins drawing shape based on code segmentation
+     * Sets strokeweight based on current state of isFatLine and returns value to update isDrawingCode
      */
     beginNewCodeDrawing(isFatLine, color) {
         if (isFatLine) this.setLineStyle(this.style.fatStroke, color);
@@ -72,14 +63,16 @@ class DrawMovement {
         return true;
     }
 
+    /**
+     * Ends drawing shape based on code segmentation and returns value to update isDrawingCode
+     */
     endCurCodeDrawing() {
         this.sk.endShape();
         return false;
     }
 
     /**
-     * Can start/begin new line based on change in fat line or codes
-     * NOTE: In web browsers lines must be segmented/ended to change thickness or stroke
+     * Organizes start/ending of new line based on changes in isFatLine or codes
      */
     setFatLineDrawing(p) {
         if (p.cur.isFatLine) {
@@ -96,8 +89,7 @@ class DrawMovement {
     }
 
     /**
-     * Ends and begins a new line with provided strokeWeight
-     * NOTE: draw two vertices to indicate starting and ending points
+     * Ends and begins a new line, passes values to set strokeweight and color for new line
      * @param  {Object returned from getScaledPos} pos
      * @param  {Integer} weight
      */
@@ -109,8 +101,14 @@ class DrawMovement {
         this.sk.vertex(pos.viewXPos, pos.floorPlanYPos, pos.zPos);
     }
 
+
+    /**
+     * Stops are drawn as circles. These circles can be drawn while also drawing with P5's curveVertex method
+     * Testing if the priorPoit is stopped is to only draw a stop once
+     * @param  {ComparePoint} p
+     */
     drawStopCircle(p) {
-        if (!p.prior.point.isStopped) { // only draw stopped point once and only draw it if showing in codes
+        if (!p.prior.point.isStopped) {
             this.setFillStyle(p.cur.point.codes.color);
             this.sk.circle(p.cur.pos.viewXPos, p.cur.pos.floorPlanYPos, 9);
             this.sk.noFill();
@@ -118,7 +116,7 @@ class DrawMovement {
     }
 
     /**
-     * A compare point augments current and prior points with screen pixel position variables and boolean indicating if the point passes code tests
+     * A compare point augments current and prior points with screen pixel position variables and booleans indicating if the point passes code and selection tests
      * @param  {Integer} view
      * @param  {MovementPoint} curIndex 
      * @param  {MovementPoint} priorIndex 
@@ -141,7 +139,7 @@ class DrawMovement {
     }
 
     /**
-     * Tests if newDot has been created and updated current dot value and video scrub variable if so
+     * Tests if newDot has been created and updates current dot value and video scrub variable if so
      * @param  {Object returned from getScaledPos} curPos
      */
     recordDot(curPos) {
@@ -171,5 +169,22 @@ class DrawMovement {
         this.sk.point(curDot.xPos, curDot.yPos, curDot.zPos);
         this.sk.strokeWeight(2);
         this.sk.line(curDot.xPos, curDot.yPos, 0, curDot.xPos, curDot.yPos, curDot.zPos);
+    }
+
+    setStartingStyles(color) {
+        this.sk.noFill(); // IMPORTANT for curveVertex drawing
+        this.style.shade = color;
+        [this.style.thinStroke, this.style.fatStroke] = this.testPoint.selectModeForStrokeWeights();
+    }
+
+    setLineStyle(weight, color) {
+        this.sk.strokeWeight(weight);
+        if (this.colorByPath) this.sk.stroke(this.style.shade);
+        else this.sk.stroke(color);
+    }
+
+    setFillStyle(color) {
+        if (this.colorByPath) this.sk.fill(this.style.shade);
+        else this.sk.fill(color);
     }
 }
