@@ -75,8 +75,8 @@ class TestPoint {
      * @param  {Integer} view
      * @param  {MovementPoint} curPoint
      */
-    isPlanViewAndStopped(view, point) {
-        return (view === this.sk.PLAN && point.isStopped && this.sk.gui.dataPanel.getCurSelectTab() !== 3);
+    isPlanViewAndStopped(view, pointIsStopped) {
+        return (view === this.sk.PLAN && pointIsStopped && this.sk.gui.dataPanel.getCurSelectTab() !== 3);
     }
 
     /**

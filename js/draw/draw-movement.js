@@ -45,7 +45,7 @@ class DrawMovement {
                 if (p.cur.codeIsShowing) {
                     if (view === this.sk.SPACETIME) this.recordDot(p.cur.pos);
                     if (!isDrawingCode) isDrawingCode = this.beginNewCodeDrawing(p.cur.isFatLine, p.cur.point.codes.color);
-                    if (this.testPoint.isPlanViewAndStopped(view, p.cur.point)) this.drawStopCircle(p); // you are able to draw circles between begin/end shape
+                    if (this.testPoint.isPlanViewAndStopped(view, p.cur.point.isStopped)) this.drawStopCircle(p); // you are able to draw circles between begin/end shape
                     else this.setFatLineDrawing(p);
                 } else {
                     if (isDrawingCode) isDrawingCode = this.endCurCodeDrawing();
