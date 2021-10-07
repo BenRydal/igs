@@ -9,6 +9,13 @@ class TestPoint {
         this.sk = sketch;
     }
 
+    /**
+     * Currently returns whether color by paths/people is selected in GUI
+     */
+    getColorMode() {
+        return this.sk.gui.dataPanel.getCurColorTab() === 0;
+    }
+
     isShowingInGUI(point) {
         return this.sk.gui.timelinePanel.overAxis(point.timelineXPos) && this.isShowingInAnimation(point.timelineXPos);
     }
