@@ -41,11 +41,11 @@ class DrawMovement {
         let isDrawingCode = false; // controls stopping/ending of curve drawing when codes are loaded by user
         for (let i = 1; i < movementArray.length; i++) { // start at 1 to allow testing of current and prior indices
             const p = this.createComparePoint(view, movementArray[i], movementArray[i - 1]);
-            if (this.testPoint.isShowingInGUI(p.curPos)) {
-                if (p.curCodeIsShowing) {
-                    if (view === this.sk.SPACETIME) this.recordDot(p.curPos);
-                    if (!isDrawingCode) isDrawingCode = this.beginNewCodeDrawing(p.curIsFatLine, p.curPoint.codes.color);
-                    if (this.testPoint.isPlanViewAndStopped(view, p.curPoint)) this.drawStopCircle(p); // you are able to draw circles between begin/end shape
+            if (this.testPoint.isShowingInGUI(p.cur.pos)) {
+                if (p.cur.codeIsShowing) {
+                    if (view === this.sk.SPACETIME) this.recordDot(p.cur.pos);
+                    if (!isDrawingCode) isDrawingCode = this.beginNewCodeDrawing(p.cur.isFatLine, p.cur.point.codes.color);
+                    if (this.testPoint.isPlanViewAndStopped(view, p.cur.point)) this.drawStopCircle(p); // you are able to draw circles between begin/end shape
                     else this.setFatLineDrawing(p);
                 } else {
                     if (isDrawingCode) isDrawingCode = this.endCurCodeDrawing();
@@ -76,18 +76,18 @@ class DrawMovement {
      * NOTE: In web browsers lines must be segmented/ended to change thickness or stroke
      */
     setFatLineDrawing(p) {
-        if (p.curIsFatLine) {
-            if (!p.priorIsFatLine || this.isNewCode(p)) this.endThenBeginNewLine(p.priorPos, this.style.fatStroke, p.curPoint.codes.color);
-            else this.sk.vertex(p.curPos.viewXPos, p.curPos.floorPlanYPos, p.curPos.zPos); // if already drawing in highlight mode, continue it
+        if (p.cur.isFatLine) {
+            if (!p.prior.isFatLine || this.isNewCode(p)) this.endThenBeginNewLine(p.prior.pos, this.style.fatStroke, p.cur.point.codes.color);
+            else this.sk.vertex(p.cur.pos.viewXPos, p.cur.pos.floorPlanYPos, p.cur.pos.zPos); // if already drawing fat line, continue it
         } else {
-            if (p.priorIsFatLine || this.isNewCode(p)) this.endThenBeginNewLine(p.priorPos, this.style.thinStroke, p.curPoint.codes.color);
-            else this.sk.vertex(p.curPos.viewXPos, p.curPos.floorPlanYPos, p.curPos.zPos); // if already drawing in highlight mode, continue it
+            if (p.prior.isFatLine || this.isNewCode(p)) this.endThenBeginNewLine(p.prior.pos, this.style.thinStroke, p.cur.point.codes.color);
+            else this.sk.vertex(p.cur.pos.viewXPos, p.cur.pos.floorPlanYPos, p.cur.pos.zPos); // if already drawing thin line, continue it
         }
     }
 
     isNewCode(p) {
         // if drawing path color, return true else
-        return p.curPoint.codes.color !== p.priorPoint.codes.color;
+        return p.cur.point.codes.color !== p.prior.point.codes.color;
     }
 
     /**
@@ -106,11 +106,11 @@ class DrawMovement {
     }
 
     drawStopCircle(p) {
-        if (!p.priorPoint.isStopped) { // only draw stopped point once and only draw it if showing in codes
+        if (!p.prior.point.isStopped) { // only draw stopped point once and only draw it if showing in codes
             //TODO: updated, add stroke
             //this.sk.fill(this.style.shade);
-            this.sk.fill(p.curPoint.codes.color);
-            this.sk.circle(p.curPos.viewXPos, p.curPos.floorPlanYPos, 9);
+            this.sk.fill(p.cur.point.codes.color);
+            this.sk.circle(p.cur.pos.viewXPos, p.cur.pos.floorPlanYPos, 9);
             this.sk.noFill();
         }
     }
@@ -118,21 +118,23 @@ class DrawMovement {
     /**
      * A compare point augments current and prior points with screen pixel position variables and boolean indicating if the point passes code tests
      * @param  {Integer} view
-     * @param  {MovementPoint} curPoint 
-     * @param  {MovementPoint} priorPoint 
+     * @param  {MovementPoint} curIndex 
+     * @param  {MovementPoint} priorIndex 
      */
-    createComparePoint(view, curPoint, priorPoint) {
-        const curPos = this.testPoint.getScaledPos(curPoint, view);
-        const priorPos = this.testPoint.getScaledPos(priorPoint, view);
+    createComparePoint(view, curIndex, priorIndex) {
         return {
-            curPoint,
-            curPos,
-            curCodeIsShowing: this.testPoint.isShowingInCodeList(curPoint),
-            curIsFatLine: this.testPoint.selectModeForFatLine(curPos, curPoint),
-            priorPoint,
-            priorPos,
-            priorCodeIsShowing: this.testPoint.isShowingInCodeList(priorPoint),
-            priorIsFatLine: this.testPoint.selectModeForFatLine(priorPos, priorPoint)
+            cur: this.augmentPoint(view, curIndex),
+            prior: this.augmentPoint(view, priorIndex)
+        }
+    }
+
+    augmentPoint(view, point) {
+        const pos = this.testPoint.getScaledPos(point, view);
+        return {
+            point,
+            pos,
+            codeIsShowing: this.testPoint.isShowingInCodeList(point),
+            isFatLine: this.testPoint.selectModeForFatLine(pos, point)
         }
     }
 
