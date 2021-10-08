@@ -43,6 +43,7 @@ class TestPoint {
 
     /**
      * Returns scaled pixel values for a point to graphical display
+     * IMPORTANT: currently view parameter can be either one of 2 constants or "null" for conversation drawing
      * @param  {Movement Or Conversation Point} point
      * @param  {Integer} view
      */
@@ -71,7 +72,7 @@ class TestPoint {
 
     getZPos(view, selTimelineXPos) {
         if (view === this.sk.PLAN) return 0;
-        else {
+        else { // NOTE: view can be one of two constants or "null" for conversation drawing
             if (this.sk.sketchController.handle3D.getIsShowing()) return selTimelineXPos;
             else return 0;
         }
