@@ -110,13 +110,13 @@ class DataPanel {
     drawHeader(xPos, header) {
         this.sk.noStroke();
         if (this.headers.tabs.curTab === header) this.sk.fill(0);
-        else this.sk.fill(150);
+        else this.sk.fill(this.sk.COLORGRAY);
         this.sk.text(this.headers.tabs.names[header], xPos, this.headers.height);
     }
 
     drawMultiTab(curXPos, tabs, selectedTab) {
         if (tabs.curTab === selectedTab) this.sk.fill(0);
-        else this.sk.fill(150);
+        else this.sk.fill(this.sk.COLORGRAY);
         this.sk.text(tabs.names[selectedTab], curXPos, this.tabs.height);
     }
 

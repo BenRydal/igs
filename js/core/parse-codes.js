@@ -66,7 +66,7 @@ class ParseCodes {
      */
     addCodeArray(curTime) {
         let codesToAdd = [];
-        let color = 150;
+        let color = this.sk.COLORGRAY;
         for (let i = 0; i < this.parsedFileArray.length; i++) {
             if (this.timeIsBetweenCurRow(curTime, this.parsedFileArray[i])) {
                 codesToAdd.push(true);
@@ -86,7 +86,7 @@ class ParseCodes {
     }
 
     getCodeColor(color, index) {
-        if (color === 150) return this.sk.core.COLOR_LIST[index % this.sk.core.COLOR_LIST.length];
+        if (color === this.sk.COLORGRAY) return this.sk.core.COLOR_LIST[index % this.sk.core.COLOR_LIST.length];
         else return 0; // if color already assigned, make it black because there are multiple true codes for same curTime
     }
     timeIsBetweenCurRow(curTime, codeTable) {

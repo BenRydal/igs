@@ -161,12 +161,12 @@ class DrawMovement {
     drawFloorPlanDot(curDot, dotSize) {
         this.sk.stroke(0);
         this.sk.strokeWeight(5);
-        this.setFillStyle(150);
+        this.setFillStyle(this.sk.COLORGRAY);
         this.sk.circle(curDot.xPos, curDot.yPos, dotSize);
     }
 
     draw3DSpaceTimeDot(curDot) {
-        this.setLineStyle(25, 150);
+        this.setLineStyle(25, this.sk.COLORGRAY);
         this.sk.point(curDot.xPos, curDot.yPos, curDot.zPos);
         this.sk.strokeWeight(2);
         this.sk.line(curDot.xPos, curDot.yPos, 0, curDot.xPos, curDot.yPos, curDot.zPos);
