@@ -2,18 +2,10 @@
  * This class holds different tests and helper methods used in draw movement and conversation classes
  * It centralizes decisions about what points to show and not show and is coupled with the sketchController/gui classes
  */
-
 class TestPoint {
 
     constructor(sketch) {
         this.sk = sketch;
-    }
-
-    /**
-     * Currently returns whether color by paths/people is selected in GUI
-     */
-    getColorMode() {
-        return this.sk.gui.dataPanel.getCurColorTab() === 0;
     }
 
     isShowingInGUI(point) {
@@ -23,6 +15,13 @@ class TestPoint {
     isShowingInAnimation(value) {
         if (this.sk.sketchController.getIsAnimate()) return this.sk.sketchController.animationCounter > this.sk.sketchController.mapPixelTimeToTotalTime(value);
         else return true;
+    }
+
+    /**
+     * Currently returns whether color by paths/people is selected in GUI
+     */
+    getColorMode() {
+        return this.sk.gui.dataPanel.getCurColorTab() === 0;
     }
 
     /**
