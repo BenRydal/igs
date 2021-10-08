@@ -12,7 +12,7 @@ class Handle3D {
             yPos: this.sk.height / 1.75,
             rotateX: this.sk.PI / 2.3
         }
-        this.curTranslate = {
+        this.curTranslatePos = {
             zoom: this.translate.zoom,
             xPos: this.translate.xPos,
             yPos: this.translate.yPos,
@@ -24,35 +24,35 @@ class Handle3D {
         if (this.isTransitioning) {
             if (this.isShowing) this.isTransitioning = this.updatePositions();
             else this.isTransitioning = this.resetPositions();
-            this.sk.translateCanvasTo3D(this.getCurPositions());
+            this.sk.translateCanvasTo3D(this.getCurTranslatePos());
         } else {
-            if (this.isShowing) this.sk.translateCanvasTo3D(this.getCurPositions());
+            if (this.isShowing) this.sk.translateCanvasTo3D(this.getCurTranslatePos());
         }
     }
 
     updatePositions() {
         let isRunning = false;
-        this.curTranslate.zoom = this.translate.zoom;
-        if (this.curTranslate.rotateX < this.translate.rotateX) {
-            this.curTranslate.rotateX += .03;
+        this.curTranslatePos.zoom = this.translate.zoom;
+        if (this.curTranslatePos.rotateX < this.translate.rotateX) {
+            this.curTranslatePos.rotateX += .03;
             isRunning = true;
         }
-        if (this.curTranslate.xPos < this.translate.xPos) {
-            this.curTranslate.xPos += 10;
+        if (this.curTranslatePos.xPos < this.translate.xPos) {
+            this.curTranslatePos.xPos += 10;
             isRunning = true;
         }
-        if (this.curTranslate.yPos < this.translate.yPos) {
-            this.curTranslate.yPos += 10;
+        if (this.curTranslatePos.yPos < this.translate.yPos) {
+            this.curTranslatePos.yPos += 10;
             isRunning = true;
         }
         return isRunning;
     }
 
     resetPositions() {
-        this.curTranslate.rotateX = 0;
-        this.curTranslate.xPos = 0;
-        this.curTranslate.yPos = 0;
-        this.curTranslate.zoom = 0;
+        this.curTranslatePos.rotateX = 0;
+        this.curTranslatePos.xPos = 0;
+        this.curTranslatePos.yPos = 0;
+        this.curTranslatePos.zoom = 0;
         return false;
     }
 
@@ -72,7 +72,7 @@ class Handle3D {
         return this.isTransitioning;
     }
 
-    getCurPositions() {
-        return this.curTranslate;
+    getCurTranslatePos() {
+        return this.curTranslatePos;
     }
 }
