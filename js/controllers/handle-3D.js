@@ -12,7 +12,7 @@ class Handle3D {
             yPos: this.sk.height / 1.75,
             rotateX: this.sk.PI / 2.3
         }
-        this.cur = {
+        this.curTranslate = {
             zoom: this.translate.zoom,
             xPos: this.translate.xPos,
             yPos: this.translate.yPos,
@@ -32,27 +32,27 @@ class Handle3D {
 
     updatePositions() {
         let isRunning = false;
-        this.cur.zoom = this.translate.zoom;
-        if (this.cur.rotateX < this.translate.rotateX) {
-            this.cur.rotateX += .03;
+        this.curTranslate.zoom = this.translate.zoom;
+        if (this.curTranslate.rotateX < this.translate.rotateX) {
+            this.curTranslate.rotateX += .03;
             isRunning = true;
         }
-        if (this.cur.xPos < this.translate.xPos) {
-            this.cur.xPos += 10;
+        if (this.curTranslate.xPos < this.translate.xPos) {
+            this.curTranslate.xPos += 10;
             isRunning = true;
         }
-        if (this.cur.yPos < this.translate.yPos) {
-            this.cur.yPos += 10;
+        if (this.curTranslate.yPos < this.translate.yPos) {
+            this.curTranslate.yPos += 10;
             isRunning = true;
         }
         return isRunning;
     }
 
     resetPositions() {
-        this.cur.rotateX = 0;
-        this.cur.xPos = 0;
-        this.cur.yPos = 0;
-        this.cur.zoom = 0;
+        this.curTranslate.rotateX = 0;
+        this.curTranslate.xPos = 0;
+        this.curTranslate.yPos = 0;
+        this.curTranslate.zoom = 0;
         return false;
     }
 
@@ -73,6 +73,6 @@ class Handle3D {
     }
 
     getCurPositions() {
-        return this.cur;
+        return this.curTranslate;
     }
 }
