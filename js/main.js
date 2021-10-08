@@ -33,7 +33,6 @@ const igs = new p5((sk) => {
         sk.DRAWGUI = 0;
         sk.HANDLEGUI = 1;
         sk.GUITEXTSIZE = sk.width / 70;
-        sk.COLORGRAY = 150;
         // STYLES
         sk.textSize(sk.GUITEXTSIZE);
         sk.textFont(sk.font_Lato);

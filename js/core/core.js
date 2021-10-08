@@ -114,7 +114,7 @@ class Core {
     createCode(name) {
         return {
             name, // first letter of filename
-            color: this.sk.COLORGRAY, // color drawn in GUI
+            color: 150, // color drawn in GUI
             isShowing: false // if displaying in GUI
         };
     }
