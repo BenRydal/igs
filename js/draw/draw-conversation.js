@@ -117,9 +117,8 @@ class DrawConversation {
     }
 
     drawSpaceTime3DRects(curRect) {
-        const tempX = 0;
-        const tempY = Math.abs(this.sk.sketchController.handle3D.getCurTranslatePos().zoom);
-        if (this.sk.sketchController.mode.isAlignTalk) this.sk.quad(tempX, tempY, curRect.zPos, tempX + curRect.length, tempY, curRect.zPos, tempX + curRect.length, tempY, curRect.zPos + this.rect.pixelWidth, tempX, tempY, curRect.zPos + this.rect.pixelWidth);
+        const translateZoom = Math.abs(this.sk.sketchController.handle3D.getCurTranslatePos().zoom);
+        if (this.sk.sketchController.mode.isAlignTalk) this.sk.quad(0, translateZoom, curRect.zPos, curRect.length, translateZoom, curRect.zPos, curRect.length, translateZoom, curRect.zPos + this.rect.pixelWidth, 0, translateZoom, curRect.zPos + this.rect.pixelWidth);
         else this.sk.quad(curRect.xPosFloorPlan, curRect.yPos, curRect.zPos, curRect.xPosFloorPlan + curRect.length, curRect.yPos, curRect.zPos, curRect.xPosFloorPlan + curRect.length, curRect.yPos, curRect.zPos + this.rect.pixelWidth, curRect.xPosFloorPlan, curRect.yPos, curRect.zPos + this.rect.pixelWidth);
     }
 
