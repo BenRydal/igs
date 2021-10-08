@@ -131,11 +131,9 @@ class ParseMovement {
     /**
      * Represents a single conversation turn with a location in space and time
      * NOTE: Movement Point attributes are passed to create some attributes for a Conversation Point
-     * TODO: consider if time should also equal movementPoint.time in future, allowing conversationPoint to hold a movementPoint object
      */
     createConversationPoint(movementPoint, curConversationRow) {
         return {
-            //time: curConversationRow[this.testData.headersConversation[0]],
             time: movementPoint.time,
             xPos: movementPoint.xPos,
             yPos: movementPoint.yPos,
