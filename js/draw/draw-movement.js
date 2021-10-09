@@ -236,11 +236,10 @@ class DrawMovement {
         return null;
     }
 
-    compareToCurDot(value1, value2, curDot) {
-        let spacing;
-        if (curDot === null) spacing = this.sk.width; // if dot has not been set yet, compare to this width
-        else spacing = curDot.lengthToCompare;
-        return value1 >= value2 - spacing && value1 <= value2 + spacing;
+    compareToCurDot(pixelStart, pixelEnd, curDot) {
+        let pixelAmountToCompare = this.sk.width; // if dot has not been set yet, compare to this width
+        if (curDot !== null) pixelAmountToCompare = curDot.lengthToCompare;
+        return pixelStart >= pixelEnd - pixelAmountToCompare && pixelStart <= pixelEnd + pixelAmountToCompare;
     }
 
     createDot(xPos, yPos, zPos, timePos, lengthToCompare) {
