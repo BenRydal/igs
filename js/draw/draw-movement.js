@@ -144,7 +144,7 @@ class DrawMovement {
      * @param  {Object returned from getScaledMovementPos} curPos
      */
     recordDot(curPos) {
-        const newDot = this.testPoint.getNewDot(curPos, this.dot);
+        const newDot = this.getNewDot(curPos, this.dot);
         if (newDot !== null) {
             this.dot = newDot;
             this.sk.sketchController.setDotTimeForVideoScrub(this.dot.timePos);
@@ -214,6 +214,42 @@ class DrawMovement {
         else {
             if (this.sk.sketchController.handle3D.getIsShowing()) return selTimelineXPos;
             else return 0;
+        }
+    }
+
+    /**
+     * Determines whether new dot should be created to display depending on animate, video or mouse position
+     * NOTE: returns null if no newDot is created
+     * @param  {Object returned from getScaledMovementPos} curPos
+     * @param  {Dot} curDot
+     */
+    getNewDot(curPos, curDot) {
+        const [xPos, yPos, zPos, timePos, map3DMouse] = [curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.zPos, curPos.selTimelineXPos, this.sk.sketchController.mapToSelectTimeThenPixelTime(this.sk.mouseX)];
+        if (this.sk.sketchController.getIsAnimate()) {
+            return this.createDot(xPos, yPos, zPos, timePos, null);
+        } else if (this.sk.sketchController.mode.isVideoPlay) {
+            const videoToSelectTime = this.sk.sketchController.mapVideoTimeToSelectedTime();
+            if (this.compareToCurDot(videoToSelectTime, timePos, curDot)) return this.createDot(xPos, yPos, zPos, timePos, Math.abs(videoToSelectTime - timePos));
+        } else if (this.sk.gui.timelinePanel.aboveTimeline(this.sk.mouseX, this.sk.mouseY) && this.compareToCurDot(map3DMouse, timePos, curDot)) {
+            return this.createDot(xPos, yPos, zPos, map3DMouse, Math.abs(map3DMouse - timePos));
+        }
+        return null;
+    }
+
+    compareToCurDot(value1, value2, curDot) {
+        let spacing;
+        if (curDot === null) spacing = this.sk.width; // if dot has not been set yet, compare to this width
+        else spacing = curDot.lengthToCompare;
+        return value1 >= value2 - spacing && value1 <= value2 + spacing;
+    }
+
+    createDot(xPos, yPos, zPos, timePos, lengthToCompare) {
+        return {
+            xPos,
+            yPos,
+            zPos,
+            timePos,
+            lengthToCompare // used to compare data points to find closest dot value
         }
     }
 }
