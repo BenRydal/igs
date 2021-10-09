@@ -65,22 +65,22 @@ class DrawConversation {
      * NOTE: if recordConversationBubble is called, that method also sets new strokeWeight to highlight the curRect
      */
     over2DRects(point, curPos) {
-        if (this.sk.overRect(curPos.floorPlanXPos, curPos.yPos, this.rect.pixelWidth, curPos.rectLength)) this.recordConversationBubble(point, this.sk.PLAN);
-        else if (this.sk.overRect(curPos.selTimelineXPos, curPos.yPos, this.rect.pixelWidth, curPos.rectLength)) this.recordConversationBubble(point, this.sk.SPACETIME);
+        if (this.sk.overRect(curPos.floorPlanXPos, curPos.adjustYPos, this.rect.pixelWidth, curPos.rectLength)) this.recordConversationBubble(point, this.sk.PLAN);
+        else if (this.sk.overRect(curPos.selTimelineXPos, curPos.adjustYPos, this.rect.pixelWidth, curPos.rectLength)) this.recordConversationBubble(point, this.sk.SPACETIME);
     }
 
     drawFloorPlanRects(curPos) {
-        this.sk.rect(curPos.floorPlanXPos, curPos.yPos, this.rect.pixelWidth, curPos.rectLength);
+        this.sk.rect(curPos.floorPlanXPos, curPos.adjustYPos, this.rect.pixelWidth, curPos.rectLength);
     }
 
     drawSpaceTime2DRects(curPos) {
-        this.sk.rect(curPos.selTimelineXPos, curPos.yPos, this.rect.pixelWidth, curPos.rectLength);
+        this.sk.rect(curPos.selTimelineXPos, curPos.adjustYPos, this.rect.pixelWidth, curPos.rectLength);
     }
 
     drawSpaceTime3DRects(curPos) {
         const translateZoom = Math.abs(this.sk.sketchController.handle3D.getCurTranslatePos().zoom);
         if (this.sk.sketchController.mode.isAlignTalk) this.sk.quad(0, translateZoom, curPos.selTimelineXPos, curPos.rectLength, translateZoom, curPos.selTimelineXPos, curPos.rectLength, translateZoom, curPos.selTimelineXPos + this.rect.pixelWidth, 0, translateZoom, curPos.selTimelineXPos + this.rect.pixelWidth);
-        else this.sk.quad(curPos.floorPlanXPos, curPos.yPos, curPos.selTimelineXPos, curPos.floorPlanXPos + curPos.rectLength, curPos.yPos, curPos.selTimelineXPos, curPos.floorPlanXPos + curPos.rectLength, curPos.yPos, curPos.selTimelineXPos + this.rect.pixelWidth, curPos.floorPlanXPos, curPos.yPos, curPos.selTimelineXPos + this.rect.pixelWidth);
+        else this.sk.quad(curPos.floorPlanXPos, curPos.adjustYPos, curPos.selTimelineXPos, curPos.floorPlanXPos + curPos.rectLength, curPos.adjustYPos, curPos.selTimelineXPos, curPos.floorPlanXPos + curPos.rectLength, curPos.adjustYPos, curPos.selTimelineXPos + this.rect.pixelWidth, curPos.floorPlanXPos, curPos.adjustYPos, curPos.selTimelineXPos + this.rect.pixelWidth);
     }
 
     /**
@@ -106,18 +106,18 @@ class DrawConversation {
         this.sk.stroke(0);
         this.sk.strokeWeight(1);
         this.sk.fill(255, 200);
-        this.sk.rect(textBox.xPos - textBox.boxSpacing, textBox.yPos - textBox.boxSpacing, textBox.width + 2 * textBox.boxSpacing, textBox.height + (2 * textBox.boxSpacing));
+        this.sk.rect(textBox.xPos - textBox.boxSpacing, textBox.adjustYPos - textBox.boxSpacing, textBox.width + 2 * textBox.boxSpacing, textBox.height + (2 * textBox.boxSpacing));
         // Draw Text
         this.sk.fill(0);
-        this.sk.text(point.speaker + ": " + point.talkTurn, textBox.xPos, textBox.yPos, textBox.width, textBox.height);
+        this.sk.text(point.speaker + ": " + point.talkTurn, textBox.xPos, textBox.adjustYPos, textBox.width, textBox.height);
         // Cartoon bubble lines
         this.sk.stroke(255);
         this.sk.strokeWeight(2);
-        this.sk.line(this.sk.mouseX - textBox.rectSpacing, textBox.yPos + textBox.yDif, this.sk.mouseX - textBox.rectSpacing / 2, textBox.yPos + textBox.yDif); // white line to hide black rect under cartoon bubble
+        this.sk.line(this.sk.mouseX - textBox.rectSpacing, textBox.adjustYPos + textBox.yDif, this.sk.mouseX - textBox.rectSpacing / 2, textBox.adjustYPos + textBox.yDif); // white line to hide black rect under cartoon bubble
         this.sk.stroke(0);
         this.sk.strokeWeight(1);
-        this.sk.line(this.sk.mouseX, this.sk.mouseY, this.sk.mouseX - textBox.rectSpacing, textBox.yPos + textBox.yDif);
-        this.sk.line(this.sk.mouseX, this.sk.mouseY, this.sk.mouseX - textBox.rectSpacing / 2, textBox.yPos + textBox.yDif);
+        this.sk.line(this.sk.mouseX, this.sk.mouseY, this.sk.mouseX - textBox.rectSpacing, textBox.adjustYPos + textBox.yDif);
+        this.sk.line(this.sk.mouseX, this.sk.mouseY, this.sk.mouseX - textBox.rectSpacing / 2, textBox.adjustYPos + textBox.yDif);
     }
 
     getTextBoxParams() {
@@ -133,10 +133,10 @@ class DrawConversation {
         textBox.height = textBox.textLeading * (Math.ceil(this.sk.textWidth(talkTurn) / textBox.width));
         textBox.xPos = this.sk.constrain(this.sk.mouseX - textBox.width / 2, textBox.boxSpacing, this.sk.width - textBox.width - (2 * textBox.boxSpacing));
         if (this.sk.mouseY < this.sk.height / 2) { //if top half of screen, text box below rectangle
-            textBox.yPos = this.sk.mouseY + textBox.rectSpacing;
+            textBox.adjustYPos = this.sk.mouseY + textBox.rectSpacing;
             textBox.yDif = -textBox.boxSpacing;
         } else { //if bottom half of screen, text box above rectangle
-            textBox.yPos = this.sk.mouseY - textBox.rectSpacing - textBox.height;
+            textBox.adjustYPos = this.sk.mouseY - textBox.rectSpacing - textBox.height;
             textBox.yDif = textBox.height + textBox.boxSpacing;
         }
         return textBox;
@@ -173,7 +173,7 @@ class DrawConversation {
             floorPlanXPos: pos.floorPlanXPos,
             floorPlanYPos: pos.floorPlanYPos,
             rectLength,
-            yPos: this.getYPos(pos.floorPlanYPos, rectLength)
+            adjustYPos: this.getYPos(pos.floorPlanYPos, rectLength)
         };
     }
     /**
