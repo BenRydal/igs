@@ -52,11 +52,11 @@ class DrawConversation {
         this.sk.noStroke(); // reset if recordConversationBubble is called previously over2DRects
         this.sk.fill(curColor);
         if (this.sk.sketchController.handle3D.getIsShowing()) {
-            this.drawFloorPlanRects(curPos);
+            this.drawFloorPlan3DRects(curPos);
             this.drawSpaceTime3DRects(curPos);
         } else {
             this.over2DRects(point, curPos);
-            this.drawFloorPlanRects(curPos);
+            this.drawFloorPlan2DRects(curPos);
             this.drawSpaceTime2DRects(curPos);
         }
     }
@@ -68,11 +68,20 @@ class DrawConversation {
         if (this.sk.overRect(curPos.floorPlanXPos, curPos.adjustYPos, this.rect.pixelWidth, curPos.rectLength)) this.recordConversationBubble(point, this.sk.PLAN);
         else if (this.sk.overRect(curPos.selTimelineXPos, curPos.adjustYPos, this.rect.pixelWidth, curPos.rectLength)) this.recordConversationBubble(point, this.sk.SPACETIME);
     }
-
-    drawFloorPlanRects(curPos) {
+    /**
+     * 2D and 3D floorplan rect drawing differs in the value of adjustYPos and positive/negative value of width/height parameters
+     */
+    drawFloorPlan2DRects(curPos) {
         this.sk.rect(curPos.floorPlanXPos, curPos.adjustYPos, this.rect.pixelWidth, curPos.rectLength);
     }
 
+    drawFloorPlan3DRects(curPos) {
+        this.sk.rect(curPos.floorPlanXPos, curPos.adjustYPos, -this.rect.pixelWidth, -curPos.rectLength);
+    }
+
+    /**
+     * 2D and 3D Spacetime rect drawing differs in drawing of rect or quad shapes and zoom parameter
+     */
     drawSpaceTime2DRects(curPos) {
         this.sk.rect(curPos.selTimelineXPos, curPos.adjustYPos, this.rect.pixelWidth, curPos.rectLength);
     }
@@ -173,7 +182,7 @@ class DrawConversation {
             floorPlanXPos: pos.floorPlanXPos,
             floorPlanYPos: pos.floorPlanYPos,
             rectLength,
-            adjustYPos: this.getYPos(pos.floorPlanYPos, rectLength)
+            adjustYPos: this.testPoint.getConversationAdjustYPos(pos.floorPlanYPos, rectLength)
         };
     }
     /**
@@ -184,14 +193,7 @@ class DrawConversation {
         this.sk.textSize(1); // Controls measurement of pixels in a string that corresponds to vertical pixel height of rectangle.
         let rectLength = this.sk.textWidth(talkTurn);
         if (rectLength < this.rect.minPixelLength) rectLength = this.rect.minPixelLength; // if current turn is small set it to the minimum height
-        this.sk.textSize(this.sk.GUITEXTSIZE); // reset text size
+        this.sk.textSize(this.sk.GUITEXTSIZE); // IMPORTANT: reset text size
         return rectLength;
-    }
-
-    // Adjusts positioning of rects correctly for align and 3D views
-    getYPos(floorPlanYPos, rectLength) {
-        if (this.sk.sketchController.mode.isAlignTalk) return 0;
-        else if (this.sk.sketchController.handle3D.getIsShowing()) return floorPlanYPos; // REMOVED subtract rectLength
-        else return floorPlanYPos - rectLength;
     }
 }

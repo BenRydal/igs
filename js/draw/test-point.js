@@ -68,6 +68,17 @@ class TestPoint {
     }
 
     /**
+     * Adjusts Y positioning of conversation rectangles correctly for align and 3 D views
+     */
+    getConversationAdjustYPos(floorPlanYPos, rectLength) {
+        if (this.sk.sketchController.mode.isAlignTalk) {
+            if (this.sk.sketchController.handle3D.getIsShowing()) return this.sk.gui.fpContainer.getContainer().width;
+            else return 0;
+        } else if (this.sk.sketchController.handle3D.getIsShowing()) return floorPlanYPos;
+        else return floorPlanYPos - rectLength;
+    }
+
+    /**
      * Controls fat line drawing/segmentation
      * @param  {Number} xPos, yPos
      * @param  {boolean} pointIsStopped
