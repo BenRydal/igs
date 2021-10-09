@@ -18,10 +18,11 @@ class TestPoint {
     }
 
     /**
-     * Currently returns whether color by paths/people is selected in GUI
+     * @param  {Integer} view
+     * @param  {MovementPoint} curPoint
      */
-    getColorMode() {
-        return this.sk.gui.dataPanel.getCurColorTab() === 0;
+    isPlanViewAndStopped(view, pointIsStopped) {
+        return (view === this.sk.PLAN && pointIsStopped && this.sk.gui.dataPanel.getCurSelectTab() !== 3);
     }
 
     /**
@@ -42,6 +43,13 @@ class TestPoint {
     }
 
     /**
+     * Currently returns whether color by paths/people is selected in GUI
+     */
+    getColorMode() {
+        return this.sk.gui.dataPanel.getCurColorTab() === 0;
+    }
+
+    /**
      * Returns scaled pixel values for a point to graphical display
      * IMPORTANT: currently view parameter can be either one of 2 constants or "null" for conversation drawing
      * @param  {Movement Or Conversation Point} point
@@ -57,14 +65,6 @@ class TestPoint {
             floorPlanXPos,
             floorPlanYPos,
         };
-    }
-
-    /**
-     * @param  {Integer} view
-     * @param  {MovementPoint} curPoint
-     */
-    isPlanViewAndStopped(view, pointIsStopped) {
-        return (view === this.sk.PLAN && pointIsStopped && this.sk.gui.dataPanel.getCurSelectTab() !== 3);
     }
 
     /**
