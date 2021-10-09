@@ -39,7 +39,7 @@ class DrawMovement {
         let isDrawingCode = false; // controls beginning/ending lines based on codes that have been loaded
         for (let i = 1; i < movementArray.length; i++) { // start at 1 to allow testing of current and prior indices
             const p = this.createComparePoint(view, movementArray[i], movementArray[i - 1]); // a compare point consists of current and prior augmented points
-            if (this.testPoint.isShowingInGUI(p.cur.pos)) {
+            if (this.testPoint.isShowingInGUI(p.cur.pos.timelineXPos)) {
                 if (p.cur.codeIsShowing) {
                     if (view === this.sk.SPACETIME) this.recordDot(p.cur.pos);
                     if (!isDrawingCode) isDrawingCode = this.beginNewCodeDrawing(p.cur.isFatLine, p.cur.point.codes.color);
@@ -74,6 +74,7 @@ class DrawMovement {
 
     /**
      * Organizes start/ending of new line based on changes in isFatLine or codes
+     * @param  {ComparePoint} p
      */
     setFatLineDrawing(p) {
         if (p.cur.isFatLine) {
@@ -84,14 +85,17 @@ class DrawMovement {
             else this.sk.vertex(p.cur.pos.viewXPos, p.cur.pos.floorPlanYPos, p.cur.pos.zPos); // if already drawing thin line, continue it
         }
     }
-
+    /**
+     * Color value is used to determine if curPoint is a new code
+     * @param  {ComparePoint} p
+     */
     isNewCode(p) {
         return p.cur.point.codes.color !== p.prior.point.codes.color;
     }
 
     /**
      * Ends and begins a new line, passes values to set strokeweight and color for new line
-     * @param  {Object returned from getScaledPos} pos
+     * @param  {Object returned from getScaledMovementPos} pos
      * @param  {Integer} weight
      */
     endThenBeginNewLine(pos, weight, color) {
@@ -101,7 +105,6 @@ class DrawMovement {
         this.sk.beginShape();
         this.sk.vertex(pos.viewXPos, pos.floorPlanYPos, pos.zPos);
     }
-
 
     /**
      * Stops are drawn as circles. These circles can be drawn while also drawing with P5's curveVertex method
@@ -130,21 +133,21 @@ class DrawMovement {
     }
 
     augmentPoint(view, point) {
-        const pos = this.testPoint.getScaledPos(point, view);
+        const pos = this.getScaledMovementPos(point, view);
         return {
             point,
             pos,
             codeIsShowing: this.testPoint.isShowingInCodeList(point.codes.array),
-            isFatLine: this.testPoint.selectModeForFatLine(pos, point.isStopped)
+            isFatLine: this.testPoint.selectModeForFatLine(pos.floorPlanXPos, pos.floorPlanYPos, point.isStopped)
         }
     }
 
     /**
      * Tests if newDot has been created and updates current dot value and video scrub variable if so
-     * @param  {Object returned from getScaledPos} curPos
+     * @param  {Object returned from getScaledMovementPos} curPos
      */
     recordDot(curPos) {
-        const newDot = this.testPoint.getNewDot(curPos, this.dot);
+        const newDot = this.getNewDot(curPos, this.dot);
         if (newDot !== null) {
             this.dot = newDot;
             this.sk.sketchController.setDotTimeForVideoScrub(this.dot.timePos);
@@ -187,5 +190,71 @@ class DrawMovement {
     setFillStyle(color) {
         if (this.style.colorByPaths) this.sk.fill(this.style.shade);
         else this.sk.fill(color);
+    }
+    /**
+     * @param  {MovementPoint} point
+     * @param  {Integer} view
+     */
+    getScaledMovementPos(point, view) {
+        const pos = this.testPoint.getSharedPosValues(point);
+        return {
+            timelineXPos: pos.timelineXPos,
+            selTimelineXPos: pos.selTimelineXPos,
+            floorPlanXPos: pos.floorPlanXPos,
+            floorPlanYPos: pos.floorPlanYPos,
+            viewXPos: this.getViewXPos(view, pos.floorPlanXPos, pos.selTimelineXPos),
+            zPos: this.getZPos(view, pos.selTimelineXPos)
+        };
+    }
+
+    getViewXPos(view, floorPlanXPos, selTimelineXPos) {
+        if (view === this.sk.PLAN) return floorPlanXPos;
+        else {
+            if (this.sk.sketchController.handle3D.getIsShowing()) return floorPlanXPos;
+            else return selTimelineXPos;
+        }
+    }
+
+    getZPos(view, selTimelineXPos) {
+        if (view === this.sk.PLAN) return 0;
+        else {
+            if (this.sk.sketchController.handle3D.getIsShowing()) return selTimelineXPos;
+            else return 0;
+        }
+    }
+
+    /**
+     * Determines whether new dot should be created to display depending on animate, video or mouse position
+     * NOTE: returns null if no newDot is created
+     * @param  {Object returned from getScaledMovementPos} curPos
+     * @param  {Dot} curDot
+     */
+    getNewDot(curPos, curDot) {
+        const [xPos, yPos, zPos, timePos, map3DMouse] = [curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.zPos, curPos.selTimelineXPos, this.sk.sketchController.mapToSelectTimeThenPixelTime(this.sk.mouseX)];
+        if (this.sk.sketchController.getIsAnimate()) {
+            return this.createDot(xPos, yPos, zPos, timePos, null); // pass null as this means most recent point will always create Dot object
+        } else if (this.sk.sketchController.mode.isVideoPlay) {
+            const videoToSelectTime = this.sk.sketchController.mapVideoTimeToSelectedTime();
+            if (this.compareToCurDot(videoToSelectTime, timePos, curDot)) return this.createDot(xPos, yPos, zPos, timePos, Math.abs(videoToSelectTime - timePos));
+        } else if (this.sk.gui.timelinePanel.aboveTimeline(this.sk.mouseX, this.sk.mouseY) && this.compareToCurDot(map3DMouse, timePos, curDot)) {
+            return this.createDot(xPos, yPos, zPos, map3DMouse, Math.abs(map3DMouse - timePos));
+        }
+        return null;
+    }
+
+    compareToCurDot(pixelStart, pixelEnd, curDot) {
+        let pixelAmountToCompare = this.sk.width; // if dot has not been set yet, compare to this width
+        if (curDot !== null) pixelAmountToCompare = curDot.lengthToCompare;
+        return pixelStart >= pixelEnd - pixelAmountToCompare && pixelStart <= pixelEnd + pixelAmountToCompare;
+    }
+
+    createDot(xPos, yPos, zPos, timePos, lengthToCompare) {
+        return {
+            xPos,
+            yPos,
+            zPos,
+            timePos,
+            lengthToCompare // used to compare data points to find closest dot value
+        }
     }
 }

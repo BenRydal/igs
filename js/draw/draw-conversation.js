@@ -22,8 +22,8 @@ class DrawConversation {
      */
     setData(path, speakerList) {
         for (const point of path.conversation) {
-            const curPos = this.testPoint.getScaledPos(point, null);
-            if (this.testPoint.isShowingInGUI(curPos) && this.testPoint.selectModeForConversation(curPos, point) && this.testPoint.isShowingInCodeList(point.codes.array)) {
+            const curPos = this.getScaledConversationPos(point);
+            if (this.testPoint.isShowingInGUI(curPos.timelineXPos) && this.testPoint.selectModeForConversation(curPos.floorPlanXPos, curPos.floorPlanYPos, point.isStopped) && this.testPoint.isShowingInCodeList(point.codes.array)) {
                 const curSpeaker = this.getSpeakerFromSpeakerList(point.speaker, speakerList); // get speaker object from global list equivalent to the current speaker of point
                 if (this.testSpeakerToDraw(curSpeaker, path.name)) {
                     if (this.colorByPaths) this.organizeRectDrawing(point, curPos, curSpeaker.color);
@@ -43,84 +43,53 @@ class DrawConversation {
     }
 
     /**
-     * Tests whether to draw selected speaker
-     * Speaker must be showing and either program on all talk mode or speaker matches pathname
-     * @param  {Char} speaker
-     * @param  {Char} pathName
-     */
-    testSpeakerToDraw(speaker, pathName) {
-        return speaker != null && speaker.isShowing && (this.sk.sketchController.mode.isAllTalk || speaker.name === pathName);
-    }
-
-    /**
-     * Returns speaker object based from global speaker list if it matches passed character paramater
-     * Returns null if no match found
-     * @param  {Char} curSpeaker
-     */
-    getSpeakerFromSpeakerList(curSpeaker, speakerList) {
-        for (const speaker of speakerList) {
-            if (speaker.name === curSpeaker) return speaker;
-        }
-        return null;
-    }
-
-    /**
      * Organizes drawing of properly scaled and colored rectangles for conversation turn of a ConversationPoint
      * @param  {ConversationPoint} point
      * @param  {curPos} curPos
      * @param  {Color} curColor
      */
     organizeRectDrawing(point, curPos, curColor) {
-        const curRect = this.getCurRectPos(point, curPos);
         this.sk.noStroke(); // reset if recordConversationBubble is called previously over2DRects
         this.sk.fill(curColor);
         if (this.sk.sketchController.handle3D.getIsShowing()) {
-            this.drawFloorPlanRects(curRect);
-            this.drawSpaceTime3DRects(curRect);
+            this.drawFloorPlan3DRects(curPos);
+            this.drawSpaceTime3DRects(curPos);
         } else {
-            this.over2DRects(curRect, point);
-            this.drawFloorPlanRects(curRect);
-            this.drawSpaceTime2DRects(curRect);
+            this.over2DRects(point, curPos);
+            this.drawFloorPlan2DRects(curPos);
+            this.drawSpaceTime2DRects(curPos);
         }
     }
 
-    getCurRectPos(point, curPos) {
-        this.sk.textSize(1); // Controls measurement of pixels in a string that corredponds to vertical pixel height of rectangle.
-        let rectLength = this.sk.textWidth(point.talkTurn);
-        if (rectLength < this.rect.minPixelLength) rectLength = this.rect.minPixelLength; // if current turn is small set it to the minimum height
-        let yPos;
-        if (this.sk.sketchController.mode.isAlignTalk) yPos = 0;
-        else yPos = curPos.floorPlanYPos - rectLength;
-        this.sk.textSize(this.sk.GUITEXTSIZE); // reset text size
-        return {
-            length: rectLength,
-            yPos: yPos,
-            xPosFloorPlan: curPos.floorPlanXPos,
-            xPosTimeline: curPos.selTimelineXPos,
-            zPos: curPos.zPos
-        }
-    }
     /**
      * NOTE: if recordConversationBubble is called, that method also sets new strokeWeight to highlight the curRect
      */
-    over2DRects(curRect, point) {
-        if (this.sk.overRect(curRect.xPosFloorPlan, curRect.yPos, this.rect.pixelWidth, curRect.length)) this.recordConversationBubble(point, this.sk.PLAN);
-        else if (this.sk.overRect(curRect.xPosTimeline, curRect.yPos, this.rect.pixelWidth, curRect.length)) this.recordConversationBubble(point, this.sk.SPACETIME);
+    over2DRects(point, curPos) {
+        if (this.sk.overRect(curPos.floorPlanXPos, curPos.adjustYPos, this.rect.pixelWidth, curPos.rectLength)) this.recordConversationBubble(point, this.sk.PLAN);
+        else if (this.sk.overRect(curPos.selTimelineXPos, curPos.adjustYPos, this.rect.pixelWidth, curPos.rectLength)) this.recordConversationBubble(point, this.sk.SPACETIME);
+    }
+    /**
+     * 2D and 3D floorplan rect drawing differs in the value of adjustYPos and positive/negative value of width/height parameters
+     */
+    drawFloorPlan2DRects(curPos) {
+        this.sk.rect(curPos.floorPlanXPos, curPos.adjustYPos, this.rect.pixelWidth, curPos.rectLength);
     }
 
-    drawFloorPlanRects(curRect) {
-        this.sk.rect(curRect.xPosFloorPlan, curRect.yPos, this.rect.pixelWidth, curRect.length);
+    drawFloorPlan3DRects(curPos) {
+        this.sk.rect(curPos.floorPlanXPos, curPos.adjustYPos, -this.rect.pixelWidth, -curPos.rectLength);
     }
 
-    drawSpaceTime2DRects(curRect) {
-        this.sk.rect(curRect.xPosTimeline, curRect.yPos, this.rect.pixelWidth, curRect.length);
+    /**
+     * 2D and 3D Spacetime rect drawing differs in drawing of rect or quad shapes and zoom parameter
+     */
+    drawSpaceTime2DRects(curPos) {
+        this.sk.rect(curPos.selTimelineXPos, curPos.adjustYPos, this.rect.pixelWidth, curPos.rectLength);
     }
 
-    drawSpaceTime3DRects(curRect) {
-        const tempX = 0;
-        const tempY = Math.abs(this.sk.sketchController.handle3D.getCurPositions().zoom);
-        if (this.sk.sketchController.mode.isAlignTalk) this.sk.quad(tempX, tempY, curRect.zPos, tempX + curRect.length, tempY, curRect.zPos, tempX + curRect.length, tempY, curRect.zPos + this.rect.pixelWidth, tempX, tempY, curRect.zPos + this.rect.pixelWidth);
-        else this.sk.quad(curRect.xPosFloorPlan, curRect.yPos, curRect.zPos, curRect.xPosFloorPlan + curRect.length, curRect.yPos, curRect.zPos, curRect.xPosFloorPlan + curRect.length, curRect.yPos, curRect.zPos + this.rect.pixelWidth, curRect.xPosFloorPlan, curRect.yPos, curRect.zPos + this.rect.pixelWidth);
+    drawSpaceTime3DRects(curPos) {
+        const translateZoom = Math.abs(this.sk.sketchController.handle3D.getCurTranslatePos().zoom);
+        if (this.sk.sketchController.mode.isAlignTalk) this.sk.quad(0, translateZoom, curPos.selTimelineXPos, curPos.rectLength, translateZoom, curPos.selTimelineXPos, curPos.rectLength, translateZoom, curPos.selTimelineXPos + this.rect.pixelWidth, 0, translateZoom, curPos.selTimelineXPos + this.rect.pixelWidth);
+        else this.sk.quad(curPos.floorPlanXPos, curPos.adjustYPos, curPos.selTimelineXPos, curPos.floorPlanXPos + curPos.rectLength, curPos.adjustYPos, curPos.selTimelineXPos, curPos.floorPlanXPos + curPos.rectLength, curPos.adjustYPos, curPos.selTimelineXPos + this.rect.pixelWidth, curPos.floorPlanXPos, curPos.adjustYPos, curPos.selTimelineXPos + this.rect.pixelWidth);
     }
 
     /**
@@ -146,18 +115,18 @@ class DrawConversation {
         this.sk.stroke(0);
         this.sk.strokeWeight(1);
         this.sk.fill(255, 200);
-        this.sk.rect(textBox.xPos - textBox.boxSpacing, textBox.yPos - textBox.boxSpacing, textBox.width + 2 * textBox.boxSpacing, textBox.height + (2 * textBox.boxSpacing));
+        this.sk.rect(textBox.xPos - textBox.boxSpacing, textBox.adjustYPos - textBox.boxSpacing, textBox.width + 2 * textBox.boxSpacing, textBox.height + (2 * textBox.boxSpacing));
         // Draw Text
         this.sk.fill(0);
-        this.sk.text(point.speaker + ": " + point.talkTurn, textBox.xPos, textBox.yPos, textBox.width, textBox.height);
+        this.sk.text(point.speaker + ": " + point.talkTurn, textBox.xPos, textBox.adjustYPos, textBox.width, textBox.height);
         // Cartoon bubble lines
         this.sk.stroke(255);
         this.sk.strokeWeight(2);
-        this.sk.line(this.sk.mouseX - textBox.rectSpacing, textBox.yPos + textBox.yDif, this.sk.mouseX - textBox.rectSpacing / 2, textBox.yPos + textBox.yDif); // white line to hide black rect under cartoon bubble
+        this.sk.line(this.sk.mouseX - textBox.rectSpacing, textBox.adjustYPos + textBox.yDif, this.sk.mouseX - textBox.rectSpacing / 2, textBox.adjustYPos + textBox.yDif); // white line to hide black rect under cartoon bubble
         this.sk.stroke(0);
         this.sk.strokeWeight(1);
-        this.sk.line(this.sk.mouseX, this.sk.mouseY, this.sk.mouseX - textBox.rectSpacing, textBox.yPos + textBox.yDif);
-        this.sk.line(this.sk.mouseX, this.sk.mouseY, this.sk.mouseX - textBox.rectSpacing / 2, textBox.yPos + textBox.yDif);
+        this.sk.line(this.sk.mouseX, this.sk.mouseY, this.sk.mouseX - textBox.rectSpacing, textBox.adjustYPos + textBox.yDif);
+        this.sk.line(this.sk.mouseX, this.sk.mouseY, this.sk.mouseX - textBox.rectSpacing / 2, textBox.adjustYPos + textBox.yDif);
     }
 
     getTextBoxParams() {
@@ -173,12 +142,58 @@ class DrawConversation {
         textBox.height = textBox.textLeading * (Math.ceil(this.sk.textWidth(talkTurn) / textBox.width));
         textBox.xPos = this.sk.constrain(this.sk.mouseX - textBox.width / 2, textBox.boxSpacing, this.sk.width - textBox.width - (2 * textBox.boxSpacing));
         if (this.sk.mouseY < this.sk.height / 2) { //if top half of screen, text box below rectangle
-            textBox.yPos = this.sk.mouseY + textBox.rectSpacing;
+            textBox.adjustYPos = this.sk.mouseY + textBox.rectSpacing;
             textBox.yDif = -textBox.boxSpacing;
         } else { //if bottom half of screen, text box above rectangle
-            textBox.yPos = this.sk.mouseY - textBox.rectSpacing - textBox.height;
+            textBox.adjustYPos = this.sk.mouseY - textBox.rectSpacing - textBox.height;
             textBox.yDif = textBox.height + textBox.boxSpacing;
         }
         return textBox;
+    }
+
+    /**
+     * Tests whether to draw selected speaker
+     * Speaker must be showing and either program on all talk mode or speaker matches pathname
+     * @param  {Char} speaker
+     * @param  {Char} pathName
+     */
+    testSpeakerToDraw(speaker, pathName) {
+        return speaker != null && speaker.isShowing && (this.sk.sketchController.mode.isAllTalk || speaker.name === pathName);
+    }
+
+    /**
+     * Returns speaker object based from global speaker list if it matches passed character paramater
+     * Returns null if no match found
+     * @param  {Char} curSpeaker
+     */
+    getSpeakerFromSpeakerList(curSpeaker, speakerList) {
+        for (const speaker of speakerList) {
+            if (speaker.name === curSpeaker) return speaker;
+        }
+        return null;
+    }
+
+    getScaledConversationPos(point) {
+        const pos = this.testPoint.getSharedPosValues(point);
+        const rectLength = this.getRectLength(point.talkTurn);
+        return {
+            timelineXPos: pos.timelineXPos,
+            selTimelineXPos: pos.selTimelineXPos,
+            floorPlanXPos: pos.floorPlanXPos,
+            floorPlanYPos: pos.floorPlanYPos,
+            rectLength,
+            adjustYPos: this.testPoint.getConversationAdjustYPos(pos.floorPlanYPos, rectLength)
+        };
+    }
+    /**
+     * Sets length of each conversation turn in GUI display based on textSize method
+     * @param  {String} talkTurn
+     */
+    getRectLength(talkTurn) {
+        this.sk.textSize(1); // Controls measurement of pixels in a string that corresponds to vertical pixel height of rectangle.
+        let rectLength = this.sk.textWidth(talkTurn);
+        if (rectLength < this.rect.minPixelLength) rectLength = this.rect.minPixelLength; // if current turn is small set it to the minimum height
+        this.sk.textSize(this.sk.GUITEXTSIZE); // IMPORTANT: reset text size
+        return rectLength;
     }
 }
