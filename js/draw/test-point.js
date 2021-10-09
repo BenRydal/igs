@@ -64,15 +64,15 @@ class TestPoint {
 
     getViewXPos(view, floorPlanXPos, selTimelineXPos) {
         if (view === this.sk.PLAN) return floorPlanXPos;
-        else if (view === this.sk.SPACETIME) {
+        else {
             if (this.sk.sketchController.handle3D.getIsShowing()) return floorPlanXPos;
             else return selTimelineXPos;
-        } else return null;
+        }
     }
 
     getZPos(view, selTimelineXPos) {
         if (view === this.sk.PLAN) return 0;
-        else { // NOTE: view can be one of two constants or "null" for conversation drawing
+        else {
             if (this.sk.sketchController.handle3D.getIsShowing()) return selTimelineXPos;
             else return 0;
         }
