@@ -39,7 +39,7 @@ class DrawMovement {
         let isDrawingCode = false; // controls beginning/ending lines based on codes that have been loaded
         for (let i = 1; i < movementArray.length; i++) { // start at 1 to allow testing of current and prior indices
             const p = this.createComparePoint(view, movementArray[i], movementArray[i - 1]); // a compare point consists of current and prior augmented points
-            if (this.testPoint.isShowingInGUI(p.cur.pos)) {
+            if (this.testPoint.isShowingInGUI(p.cur.pos.timelineXPos)) {
                 if (p.cur.codeIsShowing) {
                     if (view === this.sk.SPACETIME) this.recordDot(p.cur.pos);
                     if (!isDrawingCode) isDrawingCode = this.beginNewCodeDrawing(p.cur.isFatLine, p.cur.point.codes.color);

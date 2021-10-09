@@ -8,8 +8,8 @@ class TestPoint {
         this.sk = sketch;
     }
 
-    isShowingInGUI(point) {
-        return this.sk.gui.timelinePanel.overAxis(point.timelineXPos) && this.isShowingInAnimation(point.timelineXPos);
+    isShowingInGUI(pixelTime) {
+        return this.sk.gui.timelinePanel.overAxis(pixelTime) && this.isShowingInAnimation(pixelTime);
     }
 
     isShowingInAnimation(value) {
@@ -106,18 +106,18 @@ class TestPoint {
      * @param  {Object returned from getScaledPos} pos
      * @param  {MovementPoint} point
      */
-    selectModeForConversation(pos, point) {
+    selectModeForConversation(xPos, yPos, isStopped) {
         switch (this.sk.gui.dataPanel.getCurSelectTab()) {
             case 0:
                 return true;
             case 1:
-                return this.sk.gui.fpContainer.overCursor(pos.floorPlanXPos, pos.floorPlanYPos);
+                return this.sk.gui.fpContainer.overCursor(xPos, yPos);
             case 2:
-                return this.sk.gui.fpContainer.overSlicer(pos.floorPlanXPos, pos.floorPlanYPos);
+                return this.sk.gui.fpContainer.overSlicer(xPos, yPos);
             case 3:
-                return !point.isStopped;
+                return !isStopped;
             case 4:
-                return point.isStopped;
+                return isStopped;
         }
     }
 
