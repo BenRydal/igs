@@ -226,7 +226,7 @@ class DrawMovement {
     getNewDot(curPos, curDot) {
         const [xPos, yPos, zPos, timePos, map3DMouse] = [curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.zPos, curPos.selTimelineXPos, this.sk.sketchController.mapToSelectTimeThenPixelTime(this.sk.mouseX)];
         if (this.sk.sketchController.getIsAnimate()) {
-            return this.createDot(xPos, yPos, zPos, timePos, null);
+            return this.createDot(xPos, yPos, zPos, timePos, null); // pass null as this means most recent point will always create Dot object
         } else if (this.sk.sketchController.mode.isVideoPlay) {
             const videoToSelectTime = this.sk.sketchController.mapVideoTimeToSelectedTime();
             if (this.compareToCurDot(videoToSelectTime, timePos, curDot)) return this.createDot(xPos, yPos, zPos, timePos, Math.abs(videoToSelectTime - timePos));
