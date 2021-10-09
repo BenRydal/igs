@@ -142,39 +142,6 @@ class DrawConversation {
         return textBox;
     }
 
-    getScaledConversationPos(point) {
-        const timelineXPos = this.sk.sketchController.mapTotalTimeToPixelTime(point.time);
-        const selTimelineXPos = this.sk.sketchController.mapSelectTimeToPixelTime(timelineXPos);
-        const [floorPlanXPos, floorPlanYPos] = this.sk.sketchController.handleRotation.getScaledXYPos(point.xPos, point.yPos, this.sk.gui.fpContainer.getContainer(), this.sk.core.inputFloorPlan.getParams());
-        const rectLength = this.getRectLength(point.talkTurn);
-        return {
-            timelineXPos,
-            selTimelineXPos,
-            floorPlanXPos,
-            floorPlanYPos,
-            rectLength,
-            yPos: this.getYPos(floorPlanYPos, rectLength)
-        };
-    }
-    /**
-     * Sets length of each conversation turn in GUI display based on textSize method
-     * @param  {String} talkTurn
-     */
-    getRectLength(talkTurn) {
-        this.sk.textSize(1); // Controls measurement of pixels in a string that corresponds to vertical pixel height of rectangle.
-        let rectLength = this.sk.textWidth(talkTurn);
-        if (rectLength < this.rect.minPixelLength) rectLength = this.rect.minPixelLength; // if current turn is small set it to the minimum height
-        this.sk.textSize(this.sk.GUITEXTSIZE); // reset text size
-        return rectLength;
-    }
-
-    // Adjusts positioning of rects correctly for align and 3D views
-    getYPos(floorPlanYPos, rectLength) {
-        if (this.sk.sketchController.mode.isAlignTalk) return 0;
-        else if (this.sk.sketchController.handle3D.getIsShowing()) return floorPlanYPos; // REMOVED subtract rectLength
-        else return floorPlanYPos - rectLength;
-    }
-
     /**
      * Tests whether to draw selected speaker
      * Speaker must be showing and either program on all talk mode or speaker matches pathname
@@ -195,5 +162,36 @@ class DrawConversation {
             if (speaker.name === curSpeaker) return speaker;
         }
         return null;
+    }
+
+    getScaledConversationPos(point) {
+        const pos = this.testPoint.getSharedPosValues(point);
+        const rectLength = this.getRectLength(point.talkTurn);
+        return {
+            timelineXPos: pos.timelineXPos,
+            selTimelineXPos: pos.selTimelineXPos,
+            floorPlanXPos: pos.floorPlanXPos,
+            floorPlanYPos: pos.floorPlanYPos,
+            rectLength,
+            yPos: this.getYPos(pos.floorPlanYPos, rectLength)
+        };
+    }
+    /**
+     * Sets length of each conversation turn in GUI display based on textSize method
+     * @param  {String} talkTurn
+     */
+    getRectLength(talkTurn) {
+        this.sk.textSize(1); // Controls measurement of pixels in a string that corresponds to vertical pixel height of rectangle.
+        let rectLength = this.sk.textWidth(talkTurn);
+        if (rectLength < this.rect.minPixelLength) rectLength = this.rect.minPixelLength; // if current turn is small set it to the minimum height
+        this.sk.textSize(this.sk.GUITEXTSIZE); // reset text size
+        return rectLength;
+    }
+
+    // Adjusts positioning of rects correctly for align and 3D views
+    getYPos(floorPlanYPos, rectLength) {
+        if (this.sk.sketchController.mode.isAlignTalk) return 0;
+        else if (this.sk.sketchController.handle3D.getIsShowing()) return floorPlanYPos; // REMOVED subtract rectLength
+        else return floorPlanYPos - rectLength;
     }
 }

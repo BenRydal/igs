@@ -47,8 +47,7 @@ class TestPoint {
      * @param  {Movement Or Conversation Point} point
      * @param  {Integer} view
      */
-
-    getScaledPos(point, view) {
+    getSharedPosValues(point) {
         const timelineXPos = this.sk.sketchController.mapTotalTimeToPixelTime(point.time);
         const selTimelineXPos = this.sk.sketchController.mapSelectTimeToPixelTime(timelineXPos);
         const [floorPlanXPos, floorPlanYPos] = this.sk.sketchController.handleRotation.getScaledXYPos(point.xPos, point.yPos, this.sk.gui.fpContainer.getContainer(), this.sk.core.inputFloorPlan.getParams());
@@ -57,25 +56,7 @@ class TestPoint {
             selTimelineXPos,
             floorPlanXPos,
             floorPlanYPos,
-            viewXPos: this.getViewXPos(view, floorPlanXPos, selTimelineXPos),
-            zPos: this.getZPos(view, selTimelineXPos)
         };
-    }
-
-    getViewXPos(view, floorPlanXPos, selTimelineXPos) {
-        if (view === this.sk.PLAN) return floorPlanXPos;
-        else {
-            if (this.sk.sketchController.handle3D.getIsShowing()) return floorPlanXPos;
-            else return selTimelineXPos;
-        }
-    }
-
-    getZPos(view, selTimelineXPos) {
-        if (view === this.sk.PLAN) return 0;
-        else {
-            if (this.sk.sketchController.handle3D.getIsShowing()) return selTimelineXPos;
-            else return 0;
-        }
     }
 
     /**
@@ -88,7 +69,7 @@ class TestPoint {
 
     /**
      * Controls fat line drawing/segmentation
-     * @param  {Object returned from getScaledPos} pos
+     * @param  {Object returned from getScaledMovementPos} pos
      * @param  {MovementPoint} point
      */
     selectModeForFatLine(pos, pointIsStopped) {
@@ -103,7 +84,7 @@ class TestPoint {
     }
     /**
      * Controls conversation drawing based on selectMode
-     * @param  {Object returned from getScaledPos} pos
+     * @param  {Object returned from getScaledConversationPos} pos
      * @param  {MovementPoint} point
      */
     selectModeForConversation(xPos, yPos, isStopped) {
@@ -134,7 +115,7 @@ class TestPoint {
     /**
      * Determines whether new dot should be created to display depending on animate, video or mouse position
      * NOTE: returns null if no newDot is created
-     * @param  {Object returned from getScaledPos} curPos
+     * @param  {Object returned from getScaledMovementPos} curPos
      * @param  {Dot} curDot
      */
     getNewDot(curPos, curDot) {

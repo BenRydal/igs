@@ -91,7 +91,7 @@ class DrawMovement {
 
     /**
      * Ends and begins a new line, passes values to set strokeweight and color for new line
-     * @param  {Object returned from getScaledPos} pos
+     * @param  {Object returned from getScaledMovementPos} pos
      * @param  {Integer} weight
      */
     endThenBeginNewLine(pos, weight, color) {
@@ -130,7 +130,7 @@ class DrawMovement {
     }
 
     augmentPoint(view, point) {
-        const pos = this.testPoint.getScaledPos(point, view);
+        const pos = this.getScaledMovementPos(point, view);
         return {
             point,
             pos,
@@ -141,7 +141,7 @@ class DrawMovement {
 
     /**
      * Tests if newDot has been created and updates current dot value and video scrub variable if so
-     * @param  {Object returned from getScaledPos} curPos
+     * @param  {Object returned from getScaledMovementPos} curPos
      */
     recordDot(curPos) {
         const newDot = this.testPoint.getNewDot(curPos, this.dot);
@@ -187,5 +187,33 @@ class DrawMovement {
     setFillStyle(color) {
         if (this.style.colorByPaths) this.sk.fill(this.style.shade);
         else this.sk.fill(color);
+    }
+
+    getScaledMovementPos(point, view) {
+        const pos = this.testPoint.getSharedPosValues(point);
+        return {
+            timelineXPos: pos.timelineXPos,
+            selTimelineXPos: pos.selTimelineXPos,
+            floorPlanXPos: pos.floorPlanXPos,
+            floorPlanYPos: pos.floorPlanYPos,
+            viewXPos: this.getViewXPos(view, pos.floorPlanXPos, pos.selTimelineXPos),
+            zPos: this.getZPos(view, pos.selTimelineXPos)
+        };
+    }
+
+    getViewXPos(view, floorPlanXPos, selTimelineXPos) {
+        if (view === this.sk.PLAN) return floorPlanXPos;
+        else {
+            if (this.sk.sketchController.handle3D.getIsShowing()) return floorPlanXPos;
+            else return selTimelineXPos;
+        }
+    }
+
+    getZPos(view, selTimelineXPos) {
+        if (view === this.sk.PLAN) return 0;
+        else {
+            if (this.sk.sketchController.handle3D.getIsShowing()) return selTimelineXPos;
+            else return 0;
+        }
     }
 }
