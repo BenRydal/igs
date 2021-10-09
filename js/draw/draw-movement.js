@@ -106,7 +106,6 @@ class DrawMovement {
         this.sk.vertex(pos.viewXPos, pos.floorPlanYPos, pos.zPos);
     }
 
-
     /**
      * Stops are drawn as circles. These circles can be drawn while also drawing with P5's curveVertex method
      * Testing if the priorPoit is stopped is to only draw a stop once
