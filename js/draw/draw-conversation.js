@@ -65,22 +65,22 @@ class DrawConversation {
      * NOTE: if recordConversationBubble is called, that method also sets new strokeWeight to highlight the curRect
      */
     over2DRects(point, curPos) {
-        if (this.sk.overRect(curPos.floorPlanXPos, curPos.yPos, this.rect.pixelWidth, curPos.length)) this.recordConversationBubble(point, this.sk.PLAN);
-        else if (this.sk.overRect(curPos.xPosTimeline, curPos.yPos, this.rect.pixelWidth, curPos.length)) this.recordConversationBubble(point, this.sk.SPACETIME);
+        if (this.sk.overRect(curPos.floorPlanXPos, curPos.yPos, this.rect.pixelWidth, curPos.rectLength)) this.recordConversationBubble(point, this.sk.PLAN);
+        else if (this.sk.overRect(curPos.selTimelineXPos, curPos.yPos, this.rect.pixelWidth, curPos.rectLength)) this.recordConversationBubble(point, this.sk.SPACETIME);
     }
 
     drawFloorPlanRects(curPos) {
-        this.sk.rect(curPos.floorPlanXPos, curPos.yPos, this.rect.pixelWidth, curPos.length);
+        this.sk.rect(curPos.floorPlanXPos, curPos.yPos, this.rect.pixelWidth, curPos.rectLength);
     }
 
     drawSpaceTime2DRects(curPos) {
-        this.sk.rect(curPos.xPosTimeline, curPos.yPos, this.rect.pixelWidth, curPos.length);
+        this.sk.rect(curPos.selTimelineXPos, curPos.yPos, this.rect.pixelWidth, curPos.rectLength);
     }
 
     drawSpaceTime3DRects(curPos) {
         const translateZoom = Math.abs(this.sk.sketchController.handle3D.getCurTranslatePos().zoom);
-        if (this.sk.sketchController.mode.isAlignTalk) this.sk.quad(0, translateZoom, curPos.xPosTimeline, curPos.length, translateZoom, curPos.xPosTimeline, curPos.length, translateZoom, curPos.xPosTimeline + this.rect.pixelWidth, 0, translateZoom, curPos.xPosTimeline + this.rect.pixelWidth);
-        else this.sk.quad(curPos.floorPlanXPos, curPos.yPos, curPos.xPosTimeline, curPos.floorPlanXPos + curPos.length, curPos.yPos, curPos.xPosTimeline, curPos.floorPlanXPos + curPos.length, curPos.yPos, curPos.xPosTimeline + this.rect.pixelWidth, curPos.floorPlanXPos, curPos.yPos, curPos.xPosTimeline + this.rect.pixelWidth);
+        if (this.sk.sketchController.mode.isAlignTalk) this.sk.quad(0, translateZoom, curPos.selTimelineXPos, curPos.rectLength, translateZoom, curPos.selTimelineXPos, curPos.rectLength, translateZoom, curPos.selTimelineXPos + this.rect.pixelWidth, 0, translateZoom, curPos.selTimelineXPos + this.rect.pixelWidth);
+        else this.sk.quad(curPos.floorPlanXPos, curPos.yPos, curPos.selTimelineXPos, curPos.floorPlanXPos + curPos.rectLength, curPos.yPos, curPos.selTimelineXPos, curPos.floorPlanXPos + curPos.rectLength, curPos.yPos, curPos.selTimelineXPos + this.rect.pixelWidth, curPos.floorPlanXPos, curPos.yPos, curPos.selTimelineXPos + this.rect.pixelWidth);
     }
 
     /**
@@ -148,12 +148,12 @@ class DrawConversation {
         const [floorPlanXPos, floorPlanYPos] = this.sk.sketchController.handleRotation.getScaledXYPos(point.xPos, point.yPos, this.sk.gui.fpContainer.getContainer(), this.sk.core.inputFloorPlan.getParams());
         const rectLength = this.getRectLength(point.talkTurn);
         return {
-            length: rectLength, // rectLength
-            yPos: this.getYPos(floorPlanYPos, rectLength),
             timelineXPos,
-            xPosTimeline: selTimelineXPos, //selTimelineXPos
+            selTimelineXPos,
             floorPlanXPos,
-            floorPlanYPos
+            floorPlanYPos,
+            rectLength,
+            yPos: this.getYPos(floorPlanYPos, rectLength)
         };
     }
     /**
