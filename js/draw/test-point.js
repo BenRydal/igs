@@ -69,23 +69,23 @@ class TestPoint {
 
     /**
      * Controls fat line drawing/segmentation
-     * @param  {Object returned from getScaledMovementPos} pos
-     * @param  {MovementPoint} point
+     * @param  {Number} xPos, yPos
+     * @param  {boolean} pointIsStopped
      */
-    selectModeForFatLine(pos, pointIsStopped) {
+    selectModeForFatLine(xPos, yPos, pointIsStopped) {
         switch (this.sk.gui.dataPanel.getCurSelectTab()) {
             case 1:
-                return this.sk.gui.fpContainer.overCursor(pos.floorPlanXPos, pos.floorPlanYPos);
+                return this.sk.gui.fpContainer.overCursor(xPos, yPos);
             case 2:
-                return this.sk.gui.fpContainer.overSlicer(pos.floorPlanXPos, pos.floorPlanYPos);
+                return this.sk.gui.fpContainer.overSlicer(xPos, yPos);
             default:
                 return pointIsStopped; // this always returns false for floorplan view
         }
     }
     /**
      * Controls conversation drawing based on selectMode
-     * @param  {Object returned from getScaledConversationPos} pos
-     * @param  {MovementPoint} point
+     * @param  {Number} xPos, yPos
+     * @param  {boolean} pointIsStopped
      */
     selectModeForConversation(xPos, yPos, isStopped) {
         switch (this.sk.gui.dataPanel.getCurSelectTab()) {

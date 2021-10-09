@@ -74,6 +74,7 @@ class DrawMovement {
 
     /**
      * Organizes start/ending of new line based on changes in isFatLine or codes
+     * @param  {ComparePoint} p
      */
     setFatLineDrawing(p) {
         if (p.cur.isFatLine) {
@@ -84,7 +85,10 @@ class DrawMovement {
             else this.sk.vertex(p.cur.pos.viewXPos, p.cur.pos.floorPlanYPos, p.cur.pos.zPos); // if already drawing thin line, continue it
         }
     }
-
+    /**
+     * Color value is used to determine if curPoint is a new code
+     * @param  {ComparePoint} p
+     */
     isNewCode(p) {
         return p.cur.point.codes.color !== p.prior.point.codes.color;
     }
@@ -135,7 +139,7 @@ class DrawMovement {
             point,
             pos,
             codeIsShowing: this.testPoint.isShowingInCodeList(point.codes.array),
-            isFatLine: this.testPoint.selectModeForFatLine(pos, point.isStopped)
+            isFatLine: this.testPoint.selectModeForFatLine(pos.floorPlanXPos, pos.floorPlanYPos, point.isStopped)
         }
     }
 
@@ -188,7 +192,10 @@ class DrawMovement {
         if (this.style.colorByPaths) this.sk.fill(this.style.shade);
         else this.sk.fill(color);
     }
-
+    /**
+     * @param  {MovementPoint} point
+     * @param  {Integer} view
+     */
     getScaledMovementPos(point, view) {
         const pos = this.testPoint.getSharedPosValues(point);
         return {
