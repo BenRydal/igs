@@ -14,13 +14,13 @@ class DrawMovement {
             shade: null,
             thinStroke: null,
             fatStroke: null,
-            colorByPaths: this.testPoint.getColorMode() // boolean indicating whether to color by paths or codes
+            colorByPaths: this.testPoint.isColorPathMode() // boolean indicating whether to color by paths or codes
         }
     }
 
     setData(path) {
         this.dot = null; // reset 
-        this.setStartingStyles(path.color);
+        this.setStartingStyles(path.color.pathMode);
         this.setDraw(this.sk.PLAN, path.movement);
         this.setDraw(this.sk.SPACETIME, path.movement);
         if (this.dot !== null) this.drawDot(this.dot);
@@ -41,7 +41,7 @@ class DrawMovement {
             const p = this.createComparePoint(view, movementArray[i], movementArray[i - 1]); // a compare point consists of current and prior augmented points
             if (this.testPoint.isShowingInGUI(p.cur.pos.timelineXPos)) {
                 if (p.cur.codeIsShowing) {
-                    if (view === this.sk.SPACETIME) this.recordDot(p.cur.pos);
+                    if (view === this.sk.SPACETIME) this.recordDot(p.cur);
                     if (!isDrawingCode) isDrawingCode = this.beginNewCodeDrawing(p.cur.isFatLine, p.cur.point.codes.color);
                     if (this.testPoint.isPlanViewAndStopped(view, p.cur.point.isStopped)) this.drawStopCircle(p); // you are able to draw circles between begin/end shape
                     else this.setFatLineDrawing(p);
@@ -146,8 +146,8 @@ class DrawMovement {
      * Tests if newDot has been created and updates current dot value and video scrub variable if so
      * @param  {Object returned from getScaledMovementPos} curPos
      */
-    recordDot(curPos) {
-        const newDot = this.getNewDot(curPos, this.dot);
+    recordDot(augmentedPoint) {
+        const newDot = this.getNewDot(augmentedPoint, this.dot);
         if (newDot !== null) {
             this.dot = newDot;
             this.sk.sketchController.setDotTimeForVideoScrub(this.dot.timePos);
@@ -164,12 +164,12 @@ class DrawMovement {
     drawFloorPlanDot(curDot, dotSize) {
         this.sk.stroke(0);
         this.sk.strokeWeight(5);
-        this.setFillStyle(this.sk.COLORGRAY);
+        this.setFillStyle(curDot.color);
         this.sk.circle(curDot.xPos, curDot.yPos, dotSize);
     }
 
     draw3DSpaceTimeDot(curDot) {
-        this.setLineStyle(25, this.sk.COLORGRAY);
+        this.setLineStyle(25, curDot.color);
         this.sk.point(curDot.xPos, curDot.yPos, curDot.zPos);
         this.sk.strokeWeight(2);
         this.sk.line(curDot.xPos, curDot.yPos, 0, curDot.xPos, curDot.yPos, curDot.zPos);
@@ -226,18 +226,18 @@ class DrawMovement {
     /**
      * Determines whether new dot should be created to display depending on animate, video or mouse position
      * NOTE: returns null if no newDot is created
-     * @param  {Object returned from getScaledMovementPos} curPos
+     * @param  {Augmented Point} augmentedPoint
      * @param  {Dot} curDot
      */
-    getNewDot(curPos, curDot) {
-        const [xPos, yPos, zPos, timePos, map3DMouse] = [curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.zPos, curPos.selTimelineXPos, this.sk.sketchController.mapToSelectTimeThenPixelTime(this.sk.mouseX)];
+    getNewDot(augmentedPoint, curDot) {
+        const [xPos, yPos, zPos, timePos, map3DMouse, codeColor] = [augmentedPoint.pos.floorPlanXPos, augmentedPoint.pos.floorPlanYPos, augmentedPoint.pos.zPos, augmentedPoint.pos.selTimelineXPos, this.sk.sketchController.mapToSelectTimeThenPixelTime(this.sk.mouseX), augmentedPoint.point.codes.color];
         if (this.sk.sketchController.getIsAnimate()) {
-            return this.createDot(xPos, yPos, zPos, timePos, null); // pass null as this means most recent point will always create Dot object
+            return this.createDot(xPos, yPos, zPos, timePos, codeColor, null); // pass null as this means most recent point will always create Dot object
         } else if (this.sk.sketchController.mode.isVideoPlay) {
             const videoToSelectTime = this.sk.sketchController.mapVideoTimeToSelectedTime();
-            if (this.compareToCurDot(videoToSelectTime, timePos, curDot)) return this.createDot(xPos, yPos, zPos, timePos, Math.abs(videoToSelectTime - timePos));
+            if (this.compareToCurDot(videoToSelectTime, timePos, curDot)) return this.createDot(xPos, yPos, zPos, timePos, codeColor, Math.abs(videoToSelectTime - timePos));
         } else if (this.sk.gui.timelinePanel.aboveTimeline(this.sk.mouseX, this.sk.mouseY) && this.compareToCurDot(map3DMouse, timePos, curDot)) {
-            return this.createDot(xPos, yPos, zPos, map3DMouse, Math.abs(map3DMouse - timePos));
+            return this.createDot(xPos, yPos, zPos, map3DMouse, codeColor, Math.abs(map3DMouse - timePos));
         }
         return null;
     }
@@ -248,12 +248,13 @@ class DrawMovement {
         return pixelStart >= pixelEnd - pixelAmountToCompare && pixelStart <= pixelEnd + pixelAmountToCompare;
     }
 
-    createDot(xPos, yPos, zPos, timePos, lengthToCompare) {
+    createDot(xPos, yPos, zPos, timePos, color, lengthToCompare) {
         return {
             xPos,
             yPos,
             zPos,
             timePos,
+            color,
             lengthToCompare // used to compare data points to find closest dot value
         }
     }

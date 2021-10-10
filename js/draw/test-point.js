@@ -45,8 +45,8 @@ class TestPoint {
     /**
      * Currently returns whether color by paths/people is selected in GUI
      */
-    getColorMode() {
-        return this.sk.gui.dataPanel.getCurColorTab() === 0;
+    isColorPathMode() {
+        return this.sk.gui.dataPanel.isColorTabPathMode();
     }
 
     /**
