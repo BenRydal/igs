@@ -56,7 +56,6 @@ class Core {
 
     /**
      * Path and Speaker objects are separate so that each speaker and path object can match or vary for different number of movement files and speakers
-     * Color for each Path, Speaker and Code Object has pathMode and codeMode. These are important to how data is colored in GUI.
      */
     createPath(name, movementPointArray, conversationPointArray) {
         return {
@@ -84,6 +83,9 @@ class Core {
         };
     }
 
+    /**
+     * Color for each Path, Speaker and Code Object has pathMode and codeMode. These are important to how data is colored in GUI.
+     */
     createColorForGUI(pathModeColor, codeModeColor) {
         return {
             pathMode: pathModeColor,
