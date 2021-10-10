@@ -55,11 +55,48 @@ class Core {
     }
 
     /**
+     * Path and Speaker objects are separate so that each speaker and path object can match or vary for different number of movement files and speakers
+     * Color for each Path, Speaker and Code Object has pathMode and codeMode. These are important to how data is colored in GUI.
+     */
+    createPath(name, movementPointArray, conversationPointArray) {
+        return {
+            name, // Char first letter of filename
+            isShowing: true, // boolean used to indicate if speaker showing in GUI
+            color: this.createColorForGUI(this.getPathModeColor(name), this.sk.COLORGRAY),
+            movement: movementPointArray,
+            conversation: conversationPointArray
+        }
+    }
+
+    createSpeaker(name) {
+        return {
+            name, // String up to 2 characters
+            isShowing: true, // boolean indicating if showing in GUI
+            color: this.createColorForGUI(this.COLOR_LIST[this.speakerList.length % this.COLOR_LIST.length], this.sk.COLORGRAY)
+        };
+    }
+
+    createCode(name) {
+        return {
+            name, // Char first letter of filename
+            isShowing: false, // if displaying in GUI
+            color: this.createColorForGUI(this.sk.COLORGRAY, this.COLOR_LIST[this.codeList.length % this.COLOR_LIST.length])
+        };
+    }
+
+    createColorForGUI(pathModeColor, codeModeColor) {
+        return {
+            pathMode: pathModeColor,
+            codeMode: codeModeColor
+        }
+    }
+
+    /**
      * Organizes retrieval of path color depending on whether conversation file has been loaded
      * @param  {Char} name
      */
-    getCurPathColor(name) {
-        if (this.sk.arrayIsLoaded(this.speakerList)) return this.setPathColorBySpeaker(name);
+    getPathModeColor(name) {
+        if (this.sk.arrayIsLoaded(this.speakerList)) return this.setPathModeColorBySpeaker(name);
         else return this.COLOR_LIST[this.pathList.length % this.COLOR_LIST.length]; // color is next in Color list
     }
 
@@ -68,10 +105,10 @@ class Core {
      * Otherwise returns color from colorList based on num of speakers + numOfPaths that do not have corresponding speaker
      * @param  {char} pathName
      */
-    setPathColorBySpeaker(pathName) {
+    setPathModeColorBySpeaker(pathName) {
         if (this.speakerList.some(e => e.name === pathName)) {
             const hasSameName = (element) => element.name === pathName; // condition to satisfy/does it have pathName
-            return this.speakerList[this.speakerList.findIndex(hasSameName)].color; // returns first index that satisfies condition/index of speaker that matches pathName
+            return this.speakerList[this.speakerList.findIndex(hasSameName)].color.pathMode; // returns first index that satisfies condition/index of speaker that matches pathName
         } else return this.COLOR_LIST[this.speakerList.length + this.getNumPathsWithNoSpeaker() % this.COLOR_LIST.length]; // assign color to path
     }
 
@@ -88,35 +125,6 @@ class Core {
 
     sortByName(list) {
         return list.sort((a, b) => (a.name > b.name) ? 1 : -1);
-    }
-
-    /**
-     * Path and Speaker objects are separate so that each speaker and path object can match or vary for different number of movement files and speakers
-     */
-    createPath(name, movementPointArray, conversationPointArray) {
-        return {
-            name, // Char matches 1st letter of CSV file
-            color: this.getCurPathColor(name),
-            isShowing: true, // boolean used to indicate if speaker showing in GUI
-            movement: movementPointArray,
-            conversation: conversationPointArray
-        }
-    }
-
-    createSpeaker(name) {
-        return {
-            name, // string
-            color: this.COLOR_LIST[this.speakerList.length % this.COLOR_LIST.length],
-            isShowing: true // boolean indicating if showing in GUI
-        };
-    }
-
-    createCode(name) {
-        return {
-            name, // first letter of filename
-            color: this.sk.COLORGRAY, // color drawn in GUI
-            isShowing: false // if displaying in GUI
-        };
     }
 
     clearAll() {

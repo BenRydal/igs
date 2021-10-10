@@ -121,12 +121,15 @@ class DataPanel {
     }
 
     drawList(person, curXPos) {
+        let curColor;
+        if (this.isColorTabPathMode()) curColor = person.color.pathMode;
+        else curColor = person.color.codeMode;
         this.sk.strokeWeight(5);
-        this.sk.stroke(person.color);
+        this.sk.stroke(curColor);
         this.sk.noFill();
         this.sk.rect(curXPos, this.tabs.height, this.spacing, this.spacing);
         if (person.isShowing) {
-            this.sk.fill(person.color);
+            this.sk.fill(curColor);
             this.sk.rect(curXPos, this.tabs.height, this.spacing, this.spacing);
         }
         this.sk.fill(0);
@@ -163,8 +166,8 @@ class DataPanel {
         return this.tabs.select.curTab;
     }
 
-    getCurColorTab() {
-        return this.tabs.color.curTab;
+    isColorTabPathMode() {
+        return this.tabs.color.curTab === 0;
     }
 
     setMultiTab(setMethod, newTab) {

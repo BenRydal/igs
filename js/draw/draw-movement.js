@@ -14,13 +14,13 @@ class DrawMovement {
             shade: null,
             thinStroke: null,
             fatStroke: null,
-            colorByPaths: this.testPoint.getColorMode() // boolean indicating whether to color by paths or codes
+            colorByPaths: this.testPoint.isColorPathMode() // boolean indicating whether to color by paths or codes
         }
     }
 
     setData(path) {
         this.dot = null; // reset 
-        this.setStartingStyles(path.color);
+        this.setStartingStyles(path.color.pathMode);
         this.setDraw(this.sk.PLAN, path.movement);
         this.setDraw(this.sk.SPACETIME, path.movement);
         if (this.dot !== null) this.drawDot(this.dot);
