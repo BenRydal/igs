@@ -92,6 +92,11 @@ class DomController {
         else element.style.display = 'none';
     }
 
+    hideIntroMessage() {
+        let element = document.querySelector('.introContainer');
+        element.style.display = 'none';
+    }
+
     /**
      * Example data format: [String directory, String floorPlan image file, String conversation File, String movement File[], String video platform, video params(see Video Player Interface)]
      */
@@ -141,7 +146,7 @@ class DomController {
     }
 
     loadUserData() {
-        this.handleHowToButton();
+        this.hideIntroMessage();
         this.sk.core.clearAll();
         this.clearCurVideo();
         this.sk.loop(); // rerun P5 draw loop
@@ -152,7 +157,7 @@ class DomController {
      */
     loadExampleData(params) {
         this.sk.core.clearAll();
-        this.handleHowToButton();
+        this.hideIntroMessage();
         this.updateVideo(params[4], params[5]);
         this.sk.core.inputFloorPlan.update(params[0] + params[1]);
         this.sk.core.parseConversation.prepExampleFile(params[0], params[2]);
