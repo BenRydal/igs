@@ -6,7 +6,6 @@ class SketchController {
             isAnimate: false,
             isAlignTalk: false,
             isAllTalk: true,
-            isIntro: true,
             isVideoPlay: false,
             isVideoShow: false
         }
@@ -166,10 +165,6 @@ class SketchController {
         this.mode.isAllTalk = value;
     }
 
-    setIsIntro(value) {
-        this.mode.isIntro = value;
-    }
-
     setIsVideoPlay(value) {
         this.mode.isVideoPlay = value;
     }
@@ -193,10 +188,6 @@ class SketchController {
 
     setDotTimeForVideoScrub(timePos) {
         this.dotTimeForVideoScrub = timePos;
-    }
-
-    getIsIntro() {
-        return this.mode.isIntro;
     }
 
     getIsAnimate() {

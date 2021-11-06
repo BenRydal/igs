@@ -6,7 +6,7 @@ html * {
     position: relative;
 }
 
-.intro-container {
+.introContainer {
     position: absolute;
     top: 5vh;
     width: 70vw;
