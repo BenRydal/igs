@@ -22,7 +22,6 @@ html * {
 .introTitle {
     color: black;
     padding: 25px;
-    text-indent: 30px;
     text-transform: uppercase;
     text-align: center;
     font-size: 1.75vw;
@@ -31,8 +30,8 @@ html * {
 
 .introMsg {
     color: black;
-    padding-right: 50px;
-    padding-left: 50px;
+    padding-right: 3vw;
+    padding-left: 3vw;
     text-align: left;
     line-height: 1.6;
     font-size: 1.3vw;
@@ -41,11 +40,14 @@ html * {
 
 .introMsgCredits {
     color: black;
-    padding: 50px;
+    padding-top: 1.5vh;
+    padding-right: 3vw;
+    padding-left: 3vw;
     text-align: left;
     line-height: 1.6;
     font-size: 1vw;
     font-style: italic;
+    text-align: justify;
 }
 
 .introBar {
