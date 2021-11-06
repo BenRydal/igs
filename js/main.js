@@ -21,6 +21,7 @@ const igs = new p5((sk) => {
 
     sk.setup = function () {
         sk.canvas = sk.createCanvas(window.innerWidth, window.innerHeight, sk.WEBGL);
+        sk.canvas.parent('sketch-holder');
         // SINGLETONS
         sk.core = new Core(sk); // holds core data, update and parsing methods/classes
         sk.gui = new GUI(sk); // holds GUI elements/classes

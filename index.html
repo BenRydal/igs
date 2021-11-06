@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <head>
     <title>Interaction Geography Slicer (IGS): Visualizing Interaction over Space and Time</title>
@@ -35,7 +36,6 @@
 </head>
 
 <body>
-    <script src="js/main.js"></script>
     <div class="introBar">
         <form action="/action_page.php">
             <select id="examples" name="examples" onchange="igs.domController.handleExampleDropDown()">
@@ -98,6 +98,27 @@
                 onclick="igs.domController.handleClearButton()"></button>
             <label for="clearButton">Clear Data</label>
         </form>
+    </div>
+    <div class="container" id="sketch-holder">
+        <script src="js/main.js"></script>
+        <div class="intro-container">
+            <h1 class="introTitle">Interaction Geography Slicer (IGS)</h1>
+            <p class="introMsg">
+                "Hi There! This is a tool to visualize movement, conversation, and video data over space
+                and time. Data are displayed over a floor plan and a timeline and can be viewed in 2D or 3D.
+            </p>
+            <p class="introMsg">
+                Use the top menu to visualize different sample datasets or upload your own data. Use the top and bottom
+                left buttons
+                as well as the timeline to selectively study displayed data. For example, you can animate data,
+                visualize conversation in different ways, and interact with video data by clicking anywhere on the
+                timeline to play & pause video.
+            </p>
+            <p class="introMsg">
+                For further information and demonstration videos on using the IGS click <a
+                    href="https://benrydal.com/software/igs">HERE</a> "
+            </p>
+        </div>
     </div>
 </body>
 
