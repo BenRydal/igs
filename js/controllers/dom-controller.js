@@ -87,8 +87,9 @@ class DomController {
     }
 
     handleHowToButton() {
-        this.sk.sketchController.setIsIntro(!this.sk.sketchController.mode.isIntro);
-        this.sk.loop();
+        let element = document.querySelector('.introContainer');
+        if (element.style.display === 'none') element.style.display = 'block';
+        else element.style.display = 'none';
     }
 
     /**
@@ -140,7 +141,7 @@ class DomController {
     }
 
     loadUserData() {
-        this.sk.sketchController.setIsIntro(false); // Hide intro msg if showing
+        this.handleHowToButton();
         this.sk.core.clearAll();
         this.clearCurVideo();
         this.sk.loop(); // rerun P5 draw loop
@@ -151,7 +152,7 @@ class DomController {
      */
     loadExampleData(params) {
         this.sk.core.clearAll();
-        this.sk.sketchController.setIsIntro(false); // Hide intro msg if showing
+        this.handleHowToButton();
         this.updateVideo(params[4], params[5]);
         this.sk.core.inputFloorPlan.update(params[0] + params[1]);
         this.sk.core.parseConversation.prepExampleFile(params[0], params[2]);

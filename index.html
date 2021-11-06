@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <head>
     <title>Interaction Geography Slicer (IGS): Visualizing Interaction over Space and Time</title>
@@ -24,6 +25,7 @@
     <script src="js/draw/draw-conversation.js"></script>
     <script src="js/draw/test-point.js"></script>
     <script src="js/video/video-player.js"></script>
+    <script src="js/main.js"></script>
     <link rel="stylesheet" type="text/css" href="css/input.css" />
     <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
@@ -35,7 +37,6 @@
 </head>
 
 <body>
-    <script src="js/main.js"></script>
     <div class="introBar">
         <form action="/action_page.php">
             <select id="examples" name="examples" onchange="igs.domController.handleExampleDropDown()">
@@ -98,6 +99,31 @@
                 onclick="igs.domController.handleClearButton()"></button>
             <label for="clearButton">Clear Data</label>
         </form>
+    </div>
+    <div class="container" id="sketch-holder">
+        <div class="introContainer">
+            <h1 class="introTitle">Interaction Geography Slicer (IGS)</h1>
+            <p class="introMsg">
+                Hello! This is a tool to visualize movement, conversation, and video data over space
+                and time. Data are displayed over a floor plan and a timeline and can be viewed in 2D or 3D.
+            </p>
+            <p class="introMsg">
+                Use the top menu to visualize different sample datasets or upload your own data. Use the top and bottom
+                left buttons as well as the timeline to selectively study displayed data. For example, you can toggle
+                individual movement paths and speakers, animate data, visualize conversation in different ways, and
+                interact with video data by clicking anywhere above the timeline to play & pause video.
+            </p>
+            <p class="introMsg">
+                For further information on how to use and format your data for the IGS
+                click <a href="https://benrydal.com/software/igs">here</a>
+            </p>
+            <p class="introMsgCredits">
+                IGS software is an open-source project licensed under the GNU General Public License Version 2.0. It is
+                written in p5.js and JavaScript and developed by Ben Rydal Shapiro and contributors with support from
+                the National Science Foundation. For additional credits and to contribute to the project please see the
+                GitHub repository linked <a href="https://github.com/BenRydal/igs">here</a>
+            </p>
+        </div>
     </div>
 </body>
 
