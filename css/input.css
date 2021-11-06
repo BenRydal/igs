@@ -39,6 +39,15 @@ html * {
     text-align: justify;
 }
 
+.introMsgCredits {
+    color: black;
+    padding: 50px;
+    text-align: left;
+    line-height: 1.6;
+    font-size: 1vw;
+    font-style: italic;
+}
+
 .introBar {
     text-align: center;
     margin-bottom: 10px;
