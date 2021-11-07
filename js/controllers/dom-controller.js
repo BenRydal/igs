@@ -84,6 +84,7 @@ class DomController {
      * Example data format: [String directory, String floorPlan image file, String conversation File, String movement File[], String video platform, video params(see Video Player Interface)]
      */
     handleExampleDropDown() {
+        if (this.sk.sketchController.getIsAnimate()) this.sk.sketchController.startEndAnimation(); // reset animation if running
         let option = document.getElementById("examples").value;
         if (option === "Load Data") this.showInputBar();
         else this.hideInputBar();
