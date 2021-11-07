@@ -4,6 +4,7 @@ class SketchController {
         this.sk = sketch;
         this.mode = {
             isAnimate: false,
+            isAnimatePause: false,
             isAlignTalk: false,
             isAllTalk: true,
             isVideoPlay: false,
@@ -44,20 +45,21 @@ class SketchController {
 
     // ****** UPDATE METHODS ****** //
 
-    updateAnimationCounter() {
-        if (this.mode.isAnimate) this.animationCounter = this.mapPixelTimeToTotalTime(this.sk.gui.timelinePanel.getSelectEnd());
-        else this.animationCounter = this.mapPixelTimeToTotalTime(this.sk.gui.timelinePanel.getSelectStart());
-        this.setIsAnimate(!this.mode.isAnimate);
-    }
-
     updateAnimation() {
-        if (this.mode.isAnimate) {
+        if (this.mode.isAnimate && !this.mode.isAnimatePause) {
             const animationIncrementRateDivisor = 1000; // this divisor seems to work best
             const curTimeIntervalInSeconds = this.mapPixelTimeToTotalTime(this.sk.gui.timelinePanel.getSelectEnd()) - this.mapPixelTimeToTotalTime(this.sk.gui.timelinePanel.getSelectStart()); // Get amount of time in seconds currently displayed
             const animationIncrementValue = curTimeIntervalInSeconds / animationIncrementRateDivisor; // set increment value based on that value/divisor to keep constant sketchController.mode.isAnimate speed regardless of time interval selected
             if (this.animationCounter < this.mapPixelTimeToTotalTime(this.sk.gui.timelinePanel.getSelectEnd())) this.animationCounter += animationIncrementValue;
             else this.setIsAnimate(false);
         }
+    }
+
+    startEndAnimation() {
+        if (this.mode.isAnimate) this.animationCounter = this.mapPixelTimeToTotalTime(this.sk.gui.timelinePanel.getSelectEnd());
+        else this.animationCounter = this.mapPixelTimeToTotalTime(this.sk.gui.timelinePanel.getSelectStart());
+        this.setIsAnimate(!this.mode.isAnimate);
+        this.setIsAnimatePause(false);
     }
 
     updateVideoDisplay() {
@@ -157,12 +159,28 @@ class SketchController {
         this.mode.isAnimate = value;
     }
 
-    setIsAlignTalk(value) {
-        this.mode.isAlignTalk = value;
+    setIsAnimatePause(value) {
+        this.mode.isAnimatePause = value;
+    }
+
+    toggleIsAnimatePause() {
+        this.mode.isAnimatePause = !this.mode.isAnimatePause;
+    }
+
+    getIsAnimate() {
+        return this.mode.isAnimate;
     }
 
     setIsAllTalk(value) {
         this.mode.isAllTalk = value;
+    }
+
+    toggleIsAlignTalk() {
+        this.mode.isAlignTalk = !this.mode.isAlignTalk;
+    }
+
+    toggleIsAllTalk() {
+        this.mode.isAllTalk = !this.mode.isAllTalk;
     }
 
     setIsVideoPlay(value) {
@@ -188,10 +206,6 @@ class SketchController {
 
     setDotTimeForVideoScrub(timePos) {
         this.dotTimeForVideoScrub = timePos;
-    }
-
-    getIsAnimate() {
-        return this.mode.isAnimate;
     }
 
     /**

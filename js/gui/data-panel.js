@@ -17,7 +17,7 @@ class DataPanel {
             select: this.createMultiTab(["none", "region", "slice", "moving", "stopped"]),
             color: this.createMultiTab(["people", "codes"]),
             rotate: this.createSingleTab(["rotate left", "rotate right"]),
-            talk: this.createSingleTab(["align", "all on path"]),
+            talk: this.createSingleTab(["align", "all speakers on path"]),
             animate: this.createSingleTab(["start/end", "pause/play"])
         }
     }
@@ -198,8 +198,8 @@ class DataPanel {
                 else this.sk.sketchController.toggleIsAllTalk();
                 break;
             case 1:
-                if (selectedTab === 0) this.sk.sketchController.updateAnimationCounter();
-                else this.sk.sketchController.pausePlayAnimation();
+                if (selectedTab === 0) this.sk.sketchController.startEndAnimation();
+                else this.sk.sketchController.toggleIsAnimatePause();
                 break;
             case 2:
                 if (selectedTab === 0) this.sk.sketchController.setRotateLeft();
