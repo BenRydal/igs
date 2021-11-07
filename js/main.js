@@ -16,7 +16,7 @@ https://etd.library.vanderbilt.edu/available/etd-03212018-140140/unrestricted/Sh
 const igs = new p5((sk) => {
 
     sk.preload = function () {
-        sk.font_Lato = sk.loadFont("data/fonts/Lato-Light.ttf");
+        sk.font_Lato = sk.loadFont("data/fonts/Lato-Regular.ttf");
     }
 
     sk.setup = function () {

@@ -10,13 +10,13 @@ class DataPanel {
         this.spacing = this.sk.height / 50;
         this.headers = {
             height: timelineBottom,
-            tabs: this.createMultiTab(["Movement", "Speakers", "Floor Plan", "Select", "Codes", "Color"])
+            tabs: this.createMultiTab(["MOVEMENT", "TALK", "FLOOR PLAN", "SELECT", "CODES", "COLOR"])
         }
         this.tabs = {
             height: timelineBottom + this.spacing * 2,
             select: this.createMultiTab(["none", "region", "slice", "moving", "stopped"]),
-            color: this.createMultiTab(["People", "Codes"]),
-            rotate: this.createSingleTab(["rotate left", "rotate right"])
+            color: this.createMultiTab(["people", "codes"]),
+            rotate: this.createSingleTab(["left rotate", "right rotate"])
         }
     }
     /**
