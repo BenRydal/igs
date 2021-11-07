@@ -6,8 +6,8 @@ class DataPanel {
      */
     constructor(sketch, timelineBottom) {
         this.sk = sketch;
-        this.xPos = 10;
-        this.spacing = this.sk.height / 50;
+        this.xPos = 10; // starting x position of data panel
+        this.spacing = this.sk.height / 45; // single variable controls spacing of elements in data panel
         this.headers = {
             height: timelineBottom,
             tabs: this.createMultiTab(["MOVEMENT", "TALK", "FLOOR PLAN", "SELECT", "CODES", "COLOR"])
@@ -124,12 +124,13 @@ class DataPanel {
         let curColor;
         if (this.isColorTabPathMode()) curColor = person.color.pathMode;
         else curColor = person.color.codeMode;
-        this.sk.strokeWeight(5);
-        this.sk.stroke(curColor);
-        this.sk.noFill();
-        this.sk.rect(curXPos, this.tabs.height, this.spacing, this.spacing);
-        if (person.isShowing) {
+        if (person.isShowing) { // draw checkbox with color fill
             this.sk.fill(curColor);
+            this.sk.rect(curXPos, this.tabs.height, this.spacing, this.spacing);
+        } else { // only draw checkbox outline with color
+            this.sk.strokeWeight(3);
+            this.sk.stroke(curColor);
+            this.sk.noFill();
             this.sk.rect(curXPos, this.tabs.height, this.spacing, this.spacing);
         }
         this.sk.fill(0);
