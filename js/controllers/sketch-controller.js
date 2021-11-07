@@ -18,7 +18,7 @@ class SketchController {
 
     // ****** P5 HANDLERS ****** //
     updateLoop() {
-        if (this.mode.isAnimate || this.mode.isVideoPlay || this.handle3D.getIsTransitioning()) this.sk.loop();
+        if ((this.mode.isAnimate && !this.mode.isAnimatePause) || this.mode.isVideoPlay || this.handle3D.getIsTransitioning()) this.sk.loop();
         else this.sk.noLoop();
     }
 
