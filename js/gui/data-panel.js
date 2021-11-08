@@ -1,9 +1,10 @@
+/**
+ * Data panel consists of a header object and associated tabs object that holds all data/labels for each header
+ * Each header/tab has an organize method that handles drawing and mouse handlers/over methods
+ * To add another header/tab, update string lists in constructor and add organize/draw/over methods
+ */
 class DataPanel {
-    /**
-     * Data panel consists of a header object and associated tabs object that holds all data/labels for each header
-     * Each header/tab has an organize method that handles drawing and mouse handlers/over methods
-     * To add another header/tab, update string lists and add organize/draw/over methods
-     */
+
     constructor(sketch, timelineBottom) {
         this.sk = sketch;
         this.xPos = 10; // starting x position of data panel
@@ -22,7 +23,7 @@ class DataPanel {
         }
     }
     /**
-     * A MultiTab is a tab that has a list of different sub tabs where only one sub tab can be selected at once
+     * A MultiTab has list of names and an integer curTab to allow for different selection possibilities of sub-tabs
      */
     createMultiTab(nameArray) {
         return {
@@ -31,7 +32,7 @@ class DataPanel {
         }
     }
     /**
-     * A single tab is a tab where sub tabs can be toggled simultaneously
+     * A single tab is a tab with only a list of names
      */
     createSingleTab(nameArray) {
         return {
@@ -41,14 +42,15 @@ class DataPanel {
 
     /**
      * Organizes whether and which tabs to draw or handle mouse events in data panel
-     * @param  {Integer} mode // program constant for determing gui drawing or handling
+     * NOTE: the integers passed to organizeSingle/MultiTab methods determine method calls later in setMulti/SingleTab methods
+     * @param  {Integer} mode // program constant for determining gui drawing or handling
      * @param  {Array} pathList // program data that allows for dynamic GUI display and updating
      * @param  {Array} speakerList
      * @param  {Array} codeList
      */
     organize(mode, pathList, speakerList, codeList) {
         this.organizeHeaders(mode); // Draws or tests if over headers
-        switch (this.headers.tabs.curTab) { // Draws or tests if over tabs
+        switch (this.headers.tabs.curTab) {
             case 0:
                 this.organizeList(mode, pathList);
                 break;
@@ -77,8 +79,7 @@ class DataPanel {
     }
 
     /**
-     * Updates integer indicating current header selected
-     * @param  {Integer} mode
+     * Four different organize methods organize four respective drawing or mouse over method calls
      */
     organizeHeaders(mode) {
         let curXPos = this.xPos;
