@@ -24,7 +24,7 @@ class SketchController {
 
     handleMousePressed() {
         if (this.testVideoToPlay()) this.playPauseMovie();
-        else this.sk.gui.dataPanel.organize(this.sk.HANDLEGUI, this.sk.core.pathList, this.sk.core.speakerList, this.sk.core.codeList);
+        //else this.sk.gui.dataPanel.organize(this.sk.HANDLEGUI, this.sk.core.pathList, this.sk.core.speakerList, this.sk.core.codeList);
     }
 
     handleMouseDragged() {

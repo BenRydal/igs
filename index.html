@@ -113,6 +113,87 @@
             </p>
         </div>
     </div>
+
+    <div class="main-tab-container">
+        <div class="top-tabs-container">
+            <label for="main-tab-1">MOVEMENT</label>
+            <label for="main-tab-2">SPEAKERS</label>
+            <label for="main-tab-3">TALK</label>
+            <label for="main-tab-4">ANIMATE</label>
+            <label for="main-tab-5">SELECT</label>
+            <label for="main-tab-6">FLOOR PLAN</label>
+            <label for="main-tab-7">CODES</label>
+            <label for="main-tab-8">COLOR</label>
+        </div>
+
+        <!-- TAB 1 CONTAINER -->
+        <input class="tab-radio" id="main-tab-1" name="main-group" type="radio" checked="checked" />
+        <div class="tab-content">
+            <div class="sub-tabs-container">
+                <label for="sub-tab-1">Sub Tab 1</label>
+                <label for="sub-tab-2">Sub Tab 2</label>
+            </div>
+            <!-- Sub Tab -->
+            <!-- CHANGE TO BUTTON??? -->
+            <input class="tab-radio" id="sub-tab-1" name="sub-group" type="radio" checked="checked">
+            <input class="tab-radio" id="sub-tab-2" name="sub-group" type="radio">
+        </div>
+
+        <!-- TAB 3 CONTAINER -->
+        <input class="tab-radio" id="main-tab-3" name="main-group" type="radio" />
+        <div class="tab-content">
+            <div class="sub-tabs-container">
+                <!-- NOTE: due to id note below, remember to match the for. The actual title doesn't matter, just to show it works... -->
+                <label for="sub-tab3-1">Align</label>
+                <label for="sub-tab3-2">All Speakers On Path</label>
+            </div>
+            <!-- Sub Tabs -->
+            <!-- NOTE: name="sub-group" will require to be unique to the tab, ie: tab2 = sub-group2, tab3 = sub-group 3 etc. -->
+            <!-- NOTE: id have to be unique. So for each sub tabs, the input id will have to change-->
+            <input class="tab-radio" id="sub-tab3-1" name="sub-group3" type="radio" checked="checked"
+                onclick="igs.sketchController.toggleIsAlignTalk()">
+            <input class="tab-radio" id="sub-tab3-2" name="sub-group3" type="radio"
+                onclick="igs.sketchController.toggleIsAllTalk()">
+
+        </div>
+
+        <!-- TAB 4 CONTAINER -->
+        <input class="tab-radio" id="main-tab-4" name="main-group" type="radio" />
+        <div class="tab-content">
+            <div class="sub-tabs-container">
+                <!-- NOTE: due to id note below, remember to match the for. The actual title doesn't matter, just to show it works... -->
+                <label for="sub-tab4-1">Start/End</label>
+                <label for="sub-tab4-2">Play/Pause</label>
+            </div>
+            <!-- Sub Tabs -->
+            <!-- NOTE: name="sub-group" will require to be unique to the tab, ie: tab2 = sub-group2, tab3 = sub-group 3 etc. -->
+            <!-- NOTE: id have to be unique. So for each sub tabs, the input id will have to change-->
+            <input class="tab-radio" id="sub-tab4-1" name="sub-group4" type="radio" checked="checked"
+                onclick="igs.sketchController.startEndAnimation()">
+            <input class="tab-radio" id="sub-tab4-2" name="sub-group4" type="radio"
+                onclick="igs.sketchController.toggleIsAnimatePause()">
+
+        </div>
+
+        <!-- TAB 6 CONTAINER -->
+        <input class="tab-radio" id="main-tab-6" name="main-group" type="radio" />
+        <div class="tab-content">
+            <div class="sub-tabs-container">
+                <!-- NOTE: due to id note below, remember to match the for. The actual title doesn't matter, just to show it works... -->
+                <label for="sub-tab6-1">Rotate Left</label>
+                <label for="sub-tab6-2">Rotate Right</label>
+            </div>
+            <!-- Sub Tabs -->
+            <!-- NOTE: name="sub-group" will require to be unique to the tab, ie: tab2 = sub-group2, tab3 = sub-group 3 etc. -->
+            <!-- NOTE: id have to be unique. So for each sub tabs, the input id will have to change-->
+            <input class="tab-radio" id="sub-tab6-1" name="sub-group6" type="radio" checked="checked"
+                onclick="igs.sketchController.setRotateLeft()">
+            <input class="tab-radio" id="sub-tab6-2" name="sub-group6" type="radio"
+                onclick="igs.sketchController.setRotateRight()">
+
+        </div>
+    </div>
+
 </body>
 
 </html>
