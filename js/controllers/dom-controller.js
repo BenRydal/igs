@@ -61,25 +61,8 @@ class DomController {
         this.sk.loop(); // rerun P5 draw loop
     }
 
-    handleAnimateButton() {
-        this.sk.sketchController.updateAnimationCounter();
-        this.sk.loop();
-    }
-
     handleToggle3DButton() {
         this.sk.sketchController.handleToggle3D();
-    }
-
-    handleAlignTalkButton() {
-        this.sk.sketchController.setIsAlignTalk(!this.sk.sketchController.mode.isAlignTalk);
-        this.sk.loop();
-
-    }
-
-    handleAllTalkButton() {
-        this.sk.sketchController.setIsAllTalk(!this.sk.sketchController.mode.isAllTalk);
-        this.sk.loop();
-
     }
 
     handleVideoButton() {
@@ -101,6 +84,7 @@ class DomController {
      * Example data format: [String directory, String floorPlan image file, String conversation File, String movement File[], String video platform, video params(see Video Player Interface)]
      */
     handleExampleDropDown() {
+        if (this.sk.sketchController.getIsAnimate()) this.sk.sketchController.startEndAnimation(); // reset animation if running
         let option = document.getElementById("examples").value;
         if (option === "Load Data") this.showInputBar();
         else this.hideInputBar();

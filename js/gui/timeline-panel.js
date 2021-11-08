@@ -43,7 +43,7 @@ class TimelinePanel {
     }
 
     drawSelectors() {
-        this.sk.strokeWeight(4);
+        this.sk.strokeWeight(7);
         this.sk.line(this.selectStart, this.top, this.selectStart, this.bottom);
         this.sk.line(this.selectEnd, this.top, this.selectEnd, this.bottom);
     }
