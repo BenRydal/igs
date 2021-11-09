@@ -96,7 +96,7 @@ class Core {
     createCode(name) {
         return {
             name, // Char first letter of filename
-            isShowing: false, // if displaying in GUI
+            isShowing: true, // if displaying in GUI
             color: this.createColorForGUI(this.sk.COLORGRAY, this.COLOR_LIST[this.codeList.length % this.COLOR_LIST.length])
         };
     }

@@ -196,7 +196,7 @@ label:hover {
     left: 0;
     height: 25px;
     width: 25px;
-    background-color: #eee;
+    background-color: rgb(146, 142, 142);
 }
 
 /* On mouse-over, add a grey background color */
