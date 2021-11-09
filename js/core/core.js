@@ -46,7 +46,9 @@ class Core {
     }
 
     updateCodes(codeName) {
+        this.sk.domController.removeAllElements("codesMainTab");
         this.codeList.push(this.createCode(codeName));
+        for (const code of this.codeList) this.sk.domController.updateMainTab(code, "codesMainTab");
         this.clearMovement();
         this.parseMovement.reProcessAllPointArrays();
         this.sk.loop(); // rerun P5 draw loop
@@ -71,6 +73,7 @@ class Core {
 
     /**
      * Path and Speaker objects are separate so that each speaker and path object can match or vary for different number of movement files and speakers
+     * NOTE: Path, Speaker, and Code MUST all have a name, isShowing and color attributes
      */
     createPath(name, movementPointArray, conversationPointArray) {
         return {
