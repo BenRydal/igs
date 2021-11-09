@@ -16,21 +16,28 @@ class Core {
     }
 
     updateMovement(pathName, movementPointArray, conversationPointArray) {
+        let element = document.getElementById("movementMainTab");
+        while (element.firstChild) {
+            element.removeChild(element.firstChild);
+        }
         this.pathList.push(this.createPath(pathName, movementPointArray, conversationPointArray));
-        //this.pathList = this.sortByName(this.pathList);
-        this.updateMainTab(pathName, "movementMainTab");
+        this.pathList = this.sortByName(this.pathList);
+
+        for (let i = 0; i < this.pathList.length; i++) {
+            this.updateMainTab(this.pathList[i].name, "movementMainTab", this.pathList, i);
+        }
 
         this.setTotalTime(movementPointArray);
         this.parseCodes.resetCounters(); // must reset code counters if multiple paths are loaded
         this.sk.loop(); // rerun P5 draw loop
     }
 
-    updateMainTab(checkboxName, mainTabId) {
+    updateMainTab(checkboxName, mainTabId, list, curNum) {
         let parent = document.getElementById(mainTabId); // Get parent tab to append new div and label to
         let label = document.createElement('label'); //  Make label
         let div = document.createElement('input'); // Make checkbox div
         let span = document.createElement('span'); // Make span to hold new checkbox styles
-        const curPathNum = this.pathList.length - 1; // used to pass value to set color for checkbox background color event listener
+        //const curListNum = list.length - 1; // used to pass value to set color for checkbox background color event listener
         label.textContent = checkboxName; // set name to text of path
         label.setAttribute('class', 'tab-checkbox');
         div.setAttribute("type", "checkbox");
@@ -38,12 +45,12 @@ class Core {
         // div.id = "sub-tab-1";
         span.className = "checkmark";
         // UPDATE with boolean for code vs. path Mode
-        span.style.backgroundColor = this.pathList[curPathNum].color.pathMode;
+        span.style.backgroundColor = list[curNum].color.pathMode;
         div.addEventListener('change', () => {
-            this.pathList[curPathNum].isShowing = !this.pathList[curPathNum].isShowing; // update isShowing for path
-            if (this.pathList[curPathNum].isShowing) {
+            list[curNum].isShowing = !list[curNum].isShowing; // update isShowing for path
+            if (list[curNum].isShowing) {
                 // UPDATE with boolean for code vs. path Mode NEED IN BOTH PLACES
-                span.style.backgroundColor = this.pathList[curPathNum].color.pathMode;
+                span.style.backgroundColor = list[curNum].color.pathMode;
             } else span.style.backgroundColor = "";
             this.sk.loop();
         });
@@ -53,9 +60,18 @@ class Core {
     }
 
     updateConversation(parsedConversationFile) {
+        let element = document.getElementById("conversationMainTab");
+        while (element.firstChild) {
+            element.removeChild(element.firstChild);
+        }
         this.setSpeakerList(parsedConversationFile);
-        //this.updateMainTab(pathName, "movementMainTab");
         this.speakerList = this.sortByName(this.speakerList);
+
+        for (let i = 0; i < this.speakerList.length; i++) {
+            this.updateMainTab(this.speakerList[i].name, "conversationMainTab", this.speakerList, i);
+        }
+
+        //for (const speaker of this.speakerList) this.updateMainTab(speaker.name, "conversationMainTab", this.speakerList);
         this.parseMovement.reProcessAllPointArrays(); // must reprocess movement
         this.sk.loop(); // rerun P5 draw loop
     }
