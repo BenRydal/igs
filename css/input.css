@@ -118,7 +118,7 @@ label {
 }
 
 label:hover {
-    background-color: #ec3a04;
+    background-color: #ccc;
 }
 
 /* label input:checked {
