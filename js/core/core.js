@@ -17,7 +17,40 @@ class Core {
 
     updateMovement(pathName, movementPointArray, conversationPointArray) {
         this.pathList.push(this.createPath(pathName, movementPointArray, conversationPointArray));
-        this.pathList = this.sortByName(this.pathList);
+
+        //this.pathList = this.sortByName(this.pathList);
+
+
+        let parent = document.getElementById('zzzz');
+
+        //  Make label
+        let label = document.createElement('label');
+        label.textContent = pathName;
+        label.setAttribute('class', 'tab-checkbox');
+
+        let div = document.createElement('input');
+        div.setAttribute("type", "checkbox");
+        // div.name = "sub-group";
+        // div.id = "sub-tab-1";
+
+        let span = document.createElement('span');
+        span.className = "checkmark";
+
+        let curPathNum = this.pathList.length - 1;
+        // UPDATE with boolean for code vs. path Mode
+        span.style.backgroundColor = this.pathList[curPathNum].color.pathMode;
+        div.addEventListener('change', () => {
+            // toggle show for path
+            this.pathList[curPathNum].isShowing = !this.pathList[curPathNum].isShowing;
+            // UPDATE with boolean for code vs. path Mode NEED IN BOTH PLACES
+            if (this.pathList[curPathNum].isShowing) span.style.backgroundColor = this.pathList[curPathNum].color.pathMode;
+            else span.style.backgroundColor = "";
+        });
+
+        label.appendChild(div);
+        label.appendChild(span);
+        parent.appendChild(label);
+
         this.setTotalTime(movementPointArray);
         this.parseCodes.resetCounters(); // must reset code counters if multiple paths are loaded
         this.sk.loop(); // rerun P5 draw loop

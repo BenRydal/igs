@@ -121,9 +121,9 @@ label:hover {
     background-color: #ec3a04;
 }
 
-label input:checked {
+/* label input:checked {
     background-color: red;
-}
+} */
 
 .tab-radio {
     display: none;
@@ -156,4 +156,55 @@ label input:checked {
     padding: 10px;
     background-color: #ffffff;
     border: 1px solid #ddd;
+}
+
+
+
+
+.tab-checkbox {
+    background-color: #ffffff;
+    color: black;
+    display: inline;
+    position: relative;
+    padding-left: 35px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    font-size: 22px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* Hide the browser's default checkbox */
+.tab-checkbox input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.tab-content label:hover {
+    background-color: #ffffff;
+}
+
+/* Create a custom checkbox */
+.checkmark {
+    position: absolute;
+    top: 12;
+    left: 0;
+    height: 25px;
+    width: 25px;
+    background-color: #eee;
+}
+
+/* On mouse-over, add a grey background color */
+.tab-checkbox:hover input~.checkmark {
+    background-color: #ccc;
+}
+
+/* When the checkbox is checked, add a blue background */
+.tab-checkbox input:checked~.checkmark {
+    background-color: #eee;
 }
