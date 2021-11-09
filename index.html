@@ -18,7 +18,6 @@
     <script src="js/controllers/handle-3D.js"></script>
     <script src="js/controllers/handle-rotation.js"></script>
     <script src="js/gui/gui-interface.js"></script>
-    <script src="js/gui/data-panel.js"></script>
     <script src="js/gui/timeline-panel.js"></script>
     <script src="js/gui/floorplan-container.js"></script>
     <script src="js/draw/draw-movement.js"></script>
@@ -172,8 +171,35 @@
 
         </div>
 
+        <!-- TAB 5 CONTAINER SELECT -->
+        <input class="tab-radio" id="main-tab-5" name="main-group" type="radio" />
+        <div class="tab-content">
+            <div class="sub-tabs-container">
+                <!-- NOTE: due to id note below, remember to match the for. The actual title doesn't matter, just to show it works... -->
+                <label for="sub-tab5-1">None</label>
+                <label for="sub-tab5-2">Region</label>
+                <label for="sub-tab5-3">Slice</label>
+                <label for="sub-tab5-4">Moving</label>
+                <label for="sub-tab5-5">Stopped</label>
+            </div>
+            <!-- Sub Tabs -->
+            <!-- NOTE: name="sub-group" will require to be unique to the tab, ie: tab2 = sub-group2, tab3 = sub-group 3 etc. -->
+            <!-- NOTE: id have to be unique. So for each sub tabs, the input id will have to change-->
+            <input class="tab-radio" id="sub-tab5-1" name="sub-group5" type="radio" checked="checked"
+                onclick="igs.sketchController.setCurSelectTab(0)">
+            <input class="tab-radio" id="sub-tab5-2" name="sub-group5" type="radio"
+                onclick="igs.sketchController.setCurSelectTab(1)">
+            <input class="tab-radio" id="sub-tab5-3" name="sub-group5" type="radio" checked="checked"
+                onclick="igs.sketchController.setCurSelectTab(2)">
+            <input class="tab-radio" id="sub-tab5-4" name="sub-group5" type="radio"
+                onclick="igs.sketchController.setCurSelectTab(3)">
+            <input class="tab-radio" id="sub-tab5-5" name="sub-group5" type="radio"
+                onclick="igs.sketchController.setCurSelectTab(4)">
 
-        <!-- TAB 6 CONTAINER -->
+        </div>
+
+
+        <!-- TAB 6 CONTAINER FLOOR PLAN-->
         <input class="tab-radio" id="main-tab-6" name="main-group" type="radio" />
         <div class="tab-content">
             <div class="sub-tabs-container">

@@ -10,6 +10,7 @@ class SketchController {
             isVideoPlay: false,
             isVideoShow: false,
             isPathColorMode: true,
+            curSelectTab: 0 // 5 options: None, Region, Slice, Moving, Stopped
         }
         this.handle3D = new Handle3D(this.sk);
         this.handleRotation = new HandleRotation(this.sk);
@@ -25,7 +26,6 @@ class SketchController {
 
     handleMousePressed() {
         if (this.testVideoToPlay()) this.playPauseMovie();
-        //else this.sk.gui.dataPanel.organize(this.sk.HANDLEGUI, this.sk.core.pathList, this.sk.core.speakerList, this.sk.core.codeList);
     }
 
     handleMouseDragged() {
@@ -207,6 +207,14 @@ class SketchController {
 
     setIsPathColorMode(value) {
         this.mode.isPathColorMode = value;
+    }
+
+    getCurSelectTab() {
+        return this.mode.curSelectTab;
+    }
+
+    setCurSelectTab(value) {
+        this.mode.curSelectTab = value;
     }
 
     setDotTimeForVideoScrub(timePos) {

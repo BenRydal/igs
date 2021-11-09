@@ -22,7 +22,7 @@ class TestPoint {
      * @param  {MovementPoint} curPoint
      */
     isPlanViewAndStopped(view, pointIsStopped) {
-        return (view === this.sk.PLAN && pointIsStopped && this.sk.gui.dataPanel.getCurSelectTab() !== 3);
+        return (view === this.sk.PLAN && pointIsStopped && this.sk.sketchController.getCurSelectTab() !== 3);
     }
 
     /**
@@ -77,7 +77,7 @@ class TestPoint {
      * @param  {boolean} pointIsStopped
      */
     selectModeForFatLine(xPos, yPos, pointIsStopped) {
-        switch (this.sk.gui.dataPanel.getCurSelectTab()) {
+        switch (this.sk.sketchController.getCurSelectTab()) {
             case 1:
                 return this.sk.gui.fpContainer.overCursor(xPos, yPos);
             case 2:
@@ -92,7 +92,7 @@ class TestPoint {
      * @param  {boolean} pointIsStopped
      */
     selectModeForConversation(xPos, yPos, isStopped) {
-        switch (this.sk.gui.dataPanel.getCurSelectTab()) {
+        switch (this.sk.sketchController.getCurSelectTab()) {
             case 0:
                 return true;
             case 1:
@@ -107,7 +107,7 @@ class TestPoint {
     }
 
     selectModeForStrokeWeights() {
-        switch (this.sk.gui.dataPanel.getCurSelectTab()) {
+        switch (this.sk.sketchController.getCurSelectTab()) {
             case 3:
                 return [1, 0];
             case 4:
