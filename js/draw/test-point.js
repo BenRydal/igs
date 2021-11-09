@@ -43,13 +43,6 @@ class TestPoint {
     }
 
     /**
-     * Currently returns whether color by paths/people is selected in GUI
-     */
-    isColorPathMode() {
-        return this.sk.gui.dataPanel.isColorTabPathMode();
-    }
-
-    /**
      * Returns scaled pixel values for a point to graphical display
      * IMPORTANT: currently view parameter can be either one of 2 constants or "null" for conversation drawing
      * @param  {Movement Or Conversation Point} point

@@ -196,6 +196,24 @@
         <div class="tab-content" id="codesMainTab">
         </div>
 
+        <!-- TAB 8 CONTAINER COLOR-->
+        <input class="tab-radio" id="main-tab-8" name="main-group" type="radio" />
+        <div class="tab-content">
+            <div class="sub-tabs-container">
+                <!-- NOTE: due to id note below, remember to match the for. The actual title doesn't matter, just to show it works... -->
+                <label for="sub-tab8-1">By Movement</label>
+                <label for="sub-tab8-2">By Codes</label>
+            </div>
+            <!-- Sub Tabs -->
+            <!-- NOTE: name="sub-group" will require to be unique to the tab, ie: tab2 = sub-group2, tab3 = sub-group 3 etc. -->
+            <!-- NOTE: id have to be unique. So for each sub tabs, the input id will have to change-->
+            <input class="tab-radio" id="sub-tab8-1" name="sub-group8" type="radio" checked="checked"
+                onclick="igs.sketchController.setIsPathColorMode(true)">
+            <input class="tab-radio" id="sub-tab8-2" name="sub-group8" type="radio"
+                onclick="igs.sketchController.setIsPathColorMode(false)">
+        </div>
+
+
     </div>
 
 </body>

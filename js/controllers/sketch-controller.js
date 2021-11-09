@@ -8,7 +8,8 @@ class SketchController {
             isAlignTalk: false,
             isAllTalk: true,
             isVideoPlay: false,
-            isVideoShow: false
+            isVideoShow: false,
+            isPathColorMode: true,
         }
         this.handle3D = new Handle3D(this.sk);
         this.handleRotation = new HandleRotation(this.sk);
@@ -199,9 +200,13 @@ class SketchController {
         this.handleRotation.setRotateLeft();
     }
 
-    // NOTE: this setter is modifying core vars but this still seems to be best solution
-    setCoreData(personFromList) {
-        personFromList.isShowing = !personFromList.isShowing;
+
+    getIsPathColorMode() {
+        return this.mode.isPathColorMode;
+    }
+
+    setIsPathColorMode(value) {
+        this.mode.isPathColorMode = value;
     }
 
     setDotTimeForVideoScrub(timePos) {

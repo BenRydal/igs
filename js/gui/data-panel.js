@@ -139,23 +139,23 @@ class DataPanel {
         this.sk.text(tabs.names[selectedTab], curXPos, this.tabs.height);
     }
 
-    drawList(person, curXPos) {
-        let curColor;
-        if (this.isColorTabPathMode()) curColor = person.color.pathMode;
-        else curColor = person.color.codeMode;
-        if (person.isShowing) { // draw checkbox with color fill
-            this.sk.fill(curColor);
-            this.sk.rect(curXPos, this.tabs.height, this.spacing, this.spacing);
-        } else { // only draw checkbox outline with color
-            this.sk.strokeWeight(3);
-            this.sk.stroke(curColor);
-            this.sk.noFill();
-            this.sk.rect(curXPos, this.tabs.height, this.spacing, this.spacing);
-        }
-        this.sk.fill(0);
-        this.sk.noStroke();
-        this.sk.text(person.name, curXPos + 1.3 * this.spacing, this.tabs.height - 5);
-    }
+    // drawList(person, curXPos) {
+    //     let curColor;
+    //     if (this.isColorTabPathMode()) curColor = person.color.pathMode;
+    //     else curColor = person.color.codeMode;
+    //     if (person.isShowing) { // draw checkbox with color fill
+    //         this.sk.fill(curColor);
+    //         this.sk.rect(curXPos, this.tabs.height, this.spacing, this.spacing);
+    //     } else { // only draw checkbox outline with color
+    //         this.sk.strokeWeight(3);
+    //         this.sk.stroke(curColor);
+    //         this.sk.noFill();
+    //         this.sk.rect(curXPos, this.tabs.height, this.spacing, this.spacing);
+    //     }
+    //     this.sk.fill(0);
+    //     this.sk.noStroke();
+    //     this.sk.text(person.name, curXPos + 1.3 * this.spacing, this.tabs.height - 5);
+    // }
 
     overHeader(xPos, pixelWidth, header) {
         if (this.sk.overRect(xPos, this.headers.height, xPos + pixelWidth, this.spacing)) this.headers.tabs.curTab = header;
@@ -177,9 +177,6 @@ class DataPanel {
         return this.tabs.select.curTab;
     }
 
-    isColorTabPathMode() {
-        return this.tabs.color.curTab === 0;
-    }
 
     setMultiTab(setMethod, newTab) {
         switch (setMethod) {

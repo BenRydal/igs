@@ -194,12 +194,13 @@ class DomController {
         // div.name = "sub-group";
         // div.id = "sub-tab-1";
         span.className = "checkmark";
-        span.style.backgroundColor = curItem.color.pathMode; // UPDATE with boolean for code vs. path Mode
+        if (this.sk.sketchController.getIsPathColorMode()) span.style.backgroundColor = curItem.color.pathMode;
+        else span.style.backgroundColor = curItem.color.codeMode;
         div.addEventListener('change', () => {
             curItem.isShowing = !curItem.isShowing; // update isShowing for path
             if (curItem.isShowing) {
-                // UPDATE with boolean for code vs. path Mode NEED IN BOTH PLACES
-                span.style.backgroundColor = curItem.color.pathMode;
+                if (this.sk.sketchController.getIsPathColorMode()) span.style.backgroundColor = curItem.color.pathMode;
+                else span.style.backgroundColor = curItem.color.codeMode;
             } else span.style.backgroundColor = "";
             this.sk.loop();
         });
