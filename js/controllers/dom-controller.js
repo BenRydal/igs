@@ -175,4 +175,11 @@ class DomController {
             this.sk.sketchController.setIsVideoShow(false);
         }
     }
+
+    removeAllElements(elementId) {
+        let element = document.getElementById(elementId);
+        while (element.firstChild) {
+            element.removeChild(element.firstChild);
+        }
+    }
 }

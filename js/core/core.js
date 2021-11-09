@@ -16,10 +16,7 @@ class Core {
     }
 
     updateMovement(pathName, movementPointArray, conversationPointArray) {
-        let element = document.getElementById("movementMainTab");
-        while (element.firstChild) {
-            element.removeChild(element.firstChild);
-        }
+        this.sk.domController.removeAllElements("movementMainTab");
         this.pathList.push(this.createPath(pathName, movementPointArray, conversationPointArray));
         this.pathList = this.sortByName(this.pathList);
 
@@ -60,10 +57,8 @@ class Core {
     }
 
     updateConversation(parsedConversationFile) {
-        let element = document.getElementById("conversationMainTab");
-        while (element.firstChild) {
-            element.removeChild(element.firstChild);
-        }
+        this.sk.domController.removeAllElements("conversationMainTab");
+
         this.setSpeakerList(parsedConversationFile);
         this.speakerList = this.sortByName(this.speakerList);
 
