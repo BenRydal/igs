@@ -15,58 +15,32 @@ class Core {
         this.COLOR_LIST = ['#6a3d9a', '#ff7f00', '#33a02c', '#1f78b4', '#e31a1c', '#ffff99', '#b15928', '#cab2d6', '#fdbf6f', '#b2df8a', '#a6cee3', '#fb9a99']; // 12 Class Paired: (Dark) purple, orange, green, blue, red, yellow, brown, (Light) lPurple, lOrange, lGreen, lBlue, lRed
     }
 
+    /**
+     * Method to update movement program data and GUI
+     * NOTE: order is critical 
+     * @param  {Char} pathName First character letter of filename
+     * @param  {Array} movementPointArray
+     * @param  {Array} conversationPointArray
+     */
     updateMovement(pathName, movementPointArray, conversationPointArray) {
-        this.sk.domController.removeAllElements("movementMainTab");
-        this.pathList.push(this.createPath(pathName, movementPointArray, conversationPointArray));
-        this.pathList = this.sortByName(this.pathList);
-
-        for (let i = 0; i < this.pathList.length; i++) {
-            this.updateMainTab(this.pathList[i].name, "movementMainTab", this.pathList, i);
-        }
-
+        this.sk.domController.removeAllElements("movementMainTab"); // remove all GUI/checkbox elements from dom
+        this.pathList.push(this.createPath(pathName, movementPointArray, conversationPointArray)); // update data list
+        this.pathList = this.sortByName(this.pathList); // then sort
+        for (const path of this.pathList) this.sk.domController.updateMainTab(path, "movementMainTab"); // add new set of GUI/checkbox elements to the DOM
         this.setTotalTime(movementPointArray);
         this.parseCodes.resetCounters(); // must reset code counters if multiple paths are loaded
         this.sk.loop(); // rerun P5 draw loop
     }
 
-    updateMainTab(checkboxName, mainTabId, list, curNum) {
-        let parent = document.getElementById(mainTabId); // Get parent tab to append new div and label to
-        let label = document.createElement('label'); //  Make label
-        let div = document.createElement('input'); // Make checkbox div
-        let span = document.createElement('span'); // Make span to hold new checkbox styles
-        //const curListNum = list.length - 1; // used to pass value to set color for checkbox background color event listener
-        label.textContent = checkboxName; // set name to text of path
-        label.setAttribute('class', 'tab-checkbox');
-        div.setAttribute("type", "checkbox");
-        // div.name = "sub-group";
-        // div.id = "sub-tab-1";
-        span.className = "checkmark";
-        // UPDATE with boolean for code vs. path Mode
-        span.style.backgroundColor = list[curNum].color.pathMode;
-        div.addEventListener('change', () => {
-            list[curNum].isShowing = !list[curNum].isShowing; // update isShowing for path
-            if (list[curNum].isShowing) {
-                // UPDATE with boolean for code vs. path Mode NEED IN BOTH PLACES
-                span.style.backgroundColor = list[curNum].color.pathMode;
-            } else span.style.backgroundColor = "";
-            this.sk.loop();
-        });
-        label.appendChild(div);
-        label.appendChild(span);
-        parent.appendChild(label);
-    }
-
-    updateConversation(parsedConversationFile) {
+    /**
+     * NOTE: method follows same format as updateMovement with a few minor differences
+     * @param  {PapaParse results Array} parsedConversationFileArray
+     */
+    updateConversation(parsedConversationFileArray) {
         this.sk.domController.removeAllElements("conversationMainTab");
-
-        this.setSpeakerList(parsedConversationFile);
+        this.setSpeakerList(parsedConversationFileArray);
         this.speakerList = this.sortByName(this.speakerList);
-
-        for (let i = 0; i < this.speakerList.length; i++) {
-            this.updateMainTab(this.speakerList[i].name, "conversationMainTab", this.speakerList, i);
-        }
-
-        //for (const speaker of this.speakerList) this.updateMainTab(speaker.name, "conversationMainTab", this.speakerList);
+        for (const speaker of this.speakerList) this.sk.domController.updateMainTab(speaker, "conversationMainTab");
         this.parseMovement.reProcessAllPointArrays(); // must reprocess movement
         this.sk.loop(); // rerun P5 draw loop
     }
@@ -83,8 +57,8 @@ class Core {
         if (this.totalTimeInSeconds < curPathEndTime) this.totalTimeInSeconds = curPathEndTime; // update global total time, make sure to floor value as integer
     }
 
-    setSpeakerList(parsedConversationArray) {
-        for (const curRow of parsedConversationArray) {
+    setSpeakerList(parsedConversationFileArray) {
+        for (const curRow of parsedConversationFileArray) {
             let tempSpeakerList = []; // create/populate temp list to store strings to test from global core.speakerList
             for (const tempSpeaker of this.speakerList) tempSpeakerList.push(tempSpeaker.name);
             // If row is good data, test if core.speakerList already has speaker and if not add speaker 

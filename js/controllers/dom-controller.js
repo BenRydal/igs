@@ -182,4 +182,29 @@ class DomController {
             element.removeChild(element.firstChild);
         }
     }
+
+    updateMainTab(curItem, mainTabId) {
+        let parent = document.getElementById(mainTabId); // Get parent tab to append new div and label to
+        let label = document.createElement('label'); //  Make label
+        let div = document.createElement('input'); // Make checkbox div
+        let span = document.createElement('span'); // Make span to hold new checkbox styles
+        label.textContent = curItem.name; // set name to text of path
+        label.setAttribute('class', 'tab-checkbox');
+        div.setAttribute("type", "checkbox");
+        // div.name = "sub-group";
+        // div.id = "sub-tab-1";
+        span.className = "checkmark";
+        span.style.backgroundColor = curItem.color.pathMode; // UPDATE with boolean for code vs. path Mode
+        div.addEventListener('change', () => {
+            curItem.isShowing = !curItem.isShowing; // update isShowing for path
+            if (curItem.isShowing) {
+                // UPDATE with boolean for code vs. path Mode NEED IN BOTH PLACES
+                span.style.backgroundColor = curItem.color.pathMode;
+            } else span.style.backgroundColor = "";
+            this.sk.loop();
+        });
+        label.appendChild(div);
+        label.appendChild(span);
+        parent.appendChild(label);
+    }
 }
