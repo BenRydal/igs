@@ -7,8 +7,7 @@ class GUI {
         this.fpContainer = new FloorPlanContainer(this.sk, this.timelinePanel.getStart(), this.timelinePanel.getEnd(), this.timelinePanel.getHeight());
     }
 
-    updateGUI(pathList, speakerList, codeList) {
-        //this.sk.gui.dataPanel.organize(this.sk.DRAWGUI, pathList, speakerList, codeList); // pass these to dynamically update
+    updateGUI() {
         this.sk.gui.timelinePanel.draw();
         this.sk.gui.timelinePanel.updateSlicer(this.sk.sketchController.handle3D.getIsShowing());
         this.sk.gui.fpContainer.updateSelectors(this.sk.gui.dataPanel.getCurSelectTab());
