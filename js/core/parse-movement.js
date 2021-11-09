@@ -44,7 +44,7 @@ class ParseMovement {
     parseFiles(fileList, callback) {
         this.clear(); // clear existing movement data once before processing files
         // TODO: clear all movement divs
-        let element = document.getElementById("zzzz");
+        let element = document.getElementById("movementMainTab");
         while (element.firstChild) {
             element.removeChild(element.firstChild);
         }

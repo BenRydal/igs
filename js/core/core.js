@@ -17,47 +17,44 @@ class Core {
 
     updateMovement(pathName, movementPointArray, conversationPointArray) {
         this.pathList.push(this.createPath(pathName, movementPointArray, conversationPointArray));
-
         //this.pathList = this.sortByName(this.pathList);
-
-
-        let parent = document.getElementById('zzzz');
-
-        //  Make label
-        let label = document.createElement('label');
-        label.textContent = pathName;
-        label.setAttribute('class', 'tab-checkbox');
-
-        let div = document.createElement('input');
-        div.setAttribute("type", "checkbox");
-        // div.name = "sub-group";
-        // div.id = "sub-tab-1";
-
-        let span = document.createElement('span');
-        span.className = "checkmark";
-
-        let curPathNum = this.pathList.length - 1;
-        // UPDATE with boolean for code vs. path Mode
-        span.style.backgroundColor = this.pathList[curPathNum].color.pathMode;
-        div.addEventListener('change', () => {
-            // toggle show for path
-            this.pathList[curPathNum].isShowing = !this.pathList[curPathNum].isShowing;
-            // UPDATE with boolean for code vs. path Mode NEED IN BOTH PLACES
-            if (this.pathList[curPathNum].isShowing) span.style.backgroundColor = this.pathList[curPathNum].color.pathMode;
-            else span.style.backgroundColor = "";
-        });
-
-        label.appendChild(div);
-        label.appendChild(span);
-        parent.appendChild(label);
+        this.updateMainTab(pathName, "movementMainTab");
 
         this.setTotalTime(movementPointArray);
         this.parseCodes.resetCounters(); // must reset code counters if multiple paths are loaded
         this.sk.loop(); // rerun P5 draw loop
     }
 
+    updateMainTab(checkboxName, mainTabId) {
+        let parent = document.getElementById(mainTabId); // Get parent tab to append new div and label to
+        let label = document.createElement('label'); //  Make label
+        let div = document.createElement('input'); // Make checkbox div
+        let span = document.createElement('span'); // Make span to hold new checkbox styles
+        const curPathNum = this.pathList.length - 1; // used to pass value to set color for checkbox background color event listener
+        label.textContent = checkboxName; // set name to text of path
+        label.setAttribute('class', 'tab-checkbox');
+        div.setAttribute("type", "checkbox");
+        // div.name = "sub-group";
+        // div.id = "sub-tab-1";
+        span.className = "checkmark";
+        // UPDATE with boolean for code vs. path Mode
+        span.style.backgroundColor = this.pathList[curPathNum].color.pathMode;
+        div.addEventListener('change', () => {
+            this.pathList[curPathNum].isShowing = !this.pathList[curPathNum].isShowing; // update isShowing for path
+            if (this.pathList[curPathNum].isShowing) {
+                // UPDATE with boolean for code vs. path Mode NEED IN BOTH PLACES
+                span.style.backgroundColor = this.pathList[curPathNum].color.pathMode;
+            } else span.style.backgroundColor = "";
+            this.sk.loop();
+        });
+        label.appendChild(div);
+        label.appendChild(span);
+        parent.appendChild(label);
+    }
+
     updateConversation(parsedConversationFile) {
         this.setSpeakerList(parsedConversationFile);
+        //this.updateMainTab(pathName, "movementMainTab");
         this.speakerList = this.sortByName(this.speakerList);
         this.parseMovement.reProcessAllPointArrays(); // must reprocess movement
         this.sk.loop(); // rerun P5 draw loop
