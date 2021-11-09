@@ -191,6 +191,7 @@ class DomController {
         label.textContent = curItem.name; // set name to text of path
         label.setAttribute('class', 'tab-checkbox');
         div.setAttribute("type", "checkbox");
+        div.checked = true;
         // div.name = "sub-group";
         // div.id = "sub-tab-1";
         span.className = "checkmark";
