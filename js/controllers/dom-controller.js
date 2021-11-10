@@ -191,12 +191,20 @@ class DomController {
         label.textContent = curItem.name; // set name to text of path
         label.setAttribute('class', 'tab-checkbox');
         div.setAttribute("type", "checkbox");
-        div.checked = true;
         // div.name = "sub-group";
         // div.id = "sub-tab-1";
         span.className = "checkmark";
-        if (this.sk.sketchController.getIsPathColorMode()) span.style.backgroundColor = curItem.color.pathMode;
-        else span.style.backgroundColor = curItem.color.codeMode;
+
+        if (curItem.isShowing) {
+            if (this.sk.sketchController.getIsPathColorMode()) span.style.backgroundColor = curItem.color.pathMode;
+            else span.style.backgroundColor = curItem.color.codeMode;
+            div.checked = true;
+        } else {
+            span.style.backgroundColor = "";
+            //span.style.backgroundColor = "D3D3D3";
+            div.checked = false;
+        }
+
         div.addEventListener('change', () => {
             curItem.isShowing = !curItem.isShowing; // update isShowing for path
             if (curItem.isShowing) {
@@ -208,5 +216,16 @@ class DomController {
         label.appendChild(div);
         label.appendChild(span);
         parent.appendChild(label);
+    }
+
+    reProcessCheckboxMainTabs() {
+        this.reProcessCheckboxList(this.sk.core.pathList, "movementMainTab");
+        this.reProcessCheckboxList(this.sk.core.speakerList, "conversationMainTab");
+        this.reProcessCheckboxList(this.sk.core.codeList, "codesMainTab");
+    }
+
+    reProcessCheckboxList(list, elementId) {
+        this.removeAllElements(elementId);
+        for (const item of list) this.updateMainTab(item, elementId);
     }
 }

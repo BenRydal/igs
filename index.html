@@ -234,9 +234,9 @@
             <!-- NOTE: name="sub-group" will require to be unique to the tab, ie: tab2 = sub-group2, tab3 = sub-group 3 etc. -->
             <!-- NOTE: id have to be unique. So for each sub tabs, the input id will have to change-->
             <input class="tab-radio" id="sub-tab8-1" name="sub-group8" type="radio" checked="checked"
-                onclick="igs.sketchController.setIsPathColorMode(true); igs.loop()">
+                onclick="igs.sketchController.setIsPathColorMode(true); igs.domController.reProcessCheckboxMainTabs(); igs.loop()">
             <input class="tab-radio" id="sub-tab8-2" name="sub-group8" type="radio"
-                onclick="igs.sketchController.setIsPathColorMode(false); igs.loop()">
+                onclick="igs.sketchController.setIsPathColorMode(false); igs.domController.reProcessCheckboxMainTabs(); igs.loop()">
         </div>
 
 

@@ -19,7 +19,7 @@ body {
 
 .main-tab-container {
     position: absolute;
-    top: 93%;
+    top: 94%;
 }
 
 .introContainer {
@@ -196,13 +196,13 @@ label:hover {
     left: 0;
     height: 25px;
     width: 25px;
-    background-color: #A9A9A9;
+    background-color: #D3D3D3;
 }
 
 /* On mouse-over, add a dark grey background color */
-.tab-checkbox:hover input~.checkmark {
+/* .tab-checkbox:hover input~.checkmark {
     background-color: #D3D3D3;
-}
+} */
 
 /* When the checkbox is checked, add a dark grey background */
 /* .tab-checkbox input:checked~.checkmark {
