@@ -57,6 +57,7 @@ class DomController {
 
     handleClearButton() {
         this.sk.core.clearAll();
+        this.clearAllCheckboxes();
         this.clearCurVideo();
         this.sk.loop(); // rerun P5 draw loop
     }
