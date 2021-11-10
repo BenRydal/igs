@@ -19,7 +19,8 @@ body {
 
 .main-tab-container {
     position: absolute;
-    top: 94%;
+    max-width: 48%;
+    top: 90%;
 }
 
 .introContainer {
