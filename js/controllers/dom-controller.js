@@ -132,6 +132,7 @@ class DomController {
     loadUserData() {
         this.hideIntroMessage();
         this.sk.core.clearAll();
+        this.clearAllCheckboxes();
         this.clearCurVideo();
         this.sk.loop(); // rerun P5 draw loop
     }
@@ -141,6 +142,7 @@ class DomController {
      */
     loadExampleData(params) {
         this.sk.core.clearAll();
+        this.clearAllCheckboxes();
         this.hideIntroMessage();
         this.updateVideo(params[4], params[5]);
         this.sk.core.inputFloorPlan.update(params[0] + params[1]);
@@ -173,13 +175,6 @@ class DomController {
             this.sk.videoPlayer = null;
             this.sk.sketchController.setIsVideoPlay(false);
             this.sk.sketchController.setIsVideoShow(false);
-        }
-    }
-
-    removeAllElements(elementId) {
-        let element = document.getElementById(elementId);
-        while (element.firstChild) {
-            element.removeChild(element.firstChild);
         }
     }
 
@@ -228,5 +223,18 @@ class DomController {
     reProcessCheckboxList(list, elementId) {
         this.removeAllElements(elementId);
         for (const item of list) this.updateMainTab(item, elementId);
+    }
+
+    clearAllCheckboxes() {
+        this.removeAllElements("movementMainTab");
+        this.removeAllElements("conversationMainTab");
+        this.removeAllElements("codesMainTab");
+    }
+
+    removeAllElements(elementId) {
+        let element = document.getElementById(elementId);
+        while (element.firstChild) {
+            element.removeChild(element.firstChild);
+        }
     }
 }
