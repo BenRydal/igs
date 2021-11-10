@@ -3,8 +3,8 @@ class DomController {
     constructor(sketch) {
         this.sk = sketch;
     }
+
     /**
-     * Parses user inputted floor plan image for processing
      * @param  {PNG, JPG, JPEG File} input
      */
     handleFloorPlanFile(input) {
@@ -13,8 +13,7 @@ class DomController {
     }
 
     /**
-     * Sends user inputted movement files into fileList for processing
-     * @param  {.CSV File} input
+     * @param  {CSV Files} input
      */
     handleMovementFiles(input) {
         let fileList = [];
@@ -24,8 +23,7 @@ class DomController {
     }
 
     /**
-     * Sends file from user input for conversation parsing
-     * @param  {File} input
+     * @param  {CSV File} input
      */
     handleConversationFile(input) {
         this.sk.core.parseConversation.prepFile(input.files[0]);
@@ -33,11 +31,11 @@ class DomController {
     }
 
     /**
-     * Parses user inputted video file for processing
-     * @param  {.MP4 File} input
+     * @param  {MP4 File} input
      */
     handleVideoFile(input) {
         const fileLocation = URL.createObjectURL(input.files[0]);
+        this.clearCurVideo();
         this.updateVideo('File', {
             fileName: fileLocation
         });
@@ -45,8 +43,7 @@ class DomController {
     }
 
     /**
-     * Sends user inputted movement files into fileList for processing
-     * @param  {.CSV FileList} input
+     * @param  {CSV Files} input
      */
     handleCodeFiles(input) {
         let fileList = [];
@@ -56,9 +53,7 @@ class DomController {
     }
 
     handleClearButton() {
-        this.sk.core.clearAll();
-        this.clearAllCheckboxes();
-        this.clearCurVideo();
+        this.clearAllData();
         this.sk.loop(); // rerun P5 draw loop
     }
 
@@ -132,9 +127,7 @@ class DomController {
 
     loadUserData() {
         this.hideIntroMessage();
-        this.sk.core.clearAll();
-        this.clearAllCheckboxes();
-        this.clearCurVideo();
+        this.clearAllData();
         this.sk.loop(); // rerun P5 draw loop
     }
 
@@ -142,9 +135,8 @@ class DomController {
      * @param  {[String directory, String floorPlan image file, String conversation File, String movement File[], String video platform, video params (see Video Player Interface)]} params
      */
     loadExampleData(params) {
-        this.sk.core.clearAll();
-        this.clearAllCheckboxes();
         this.hideIntroMessage();
+        this.clearAllData();
         this.updateVideo(params[4], params[5]);
         this.sk.core.inputFloorPlan.update(params[0] + params[1]);
         this.sk.core.parseConversation.prepExampleFile(params[0], params[2]);
@@ -157,7 +149,6 @@ class DomController {
      * @param  {VideoPlayer Specific Params} params
      */
     updateVideo(platform, params) {
-        this.clearCurVideo();
         const videoWidth = this.sk.width / 5;
         const videoHeight = this.sk.width / 6;
         switch (platform) {
@@ -170,6 +161,12 @@ class DomController {
         }
     }
 
+    clearAllData() {
+        this.sk.core.clearAll();
+        this.clearAllCheckboxes();
+        this.clearCurVideo();
+    }
+
     clearCurVideo() {
         if (this.sk.dataIsLoaded(this.sk.videoPlayer)) { // if there is a video, destroy it
             this.sk.videoPlayer.destroy();
@@ -179,6 +176,9 @@ class DomController {
         }
     }
 
+    /**
+     * DOM CHECKBOX UPDATES
+     */
     updateMainTab(curItem, mainTabId) {
         let parent = document.getElementById(mainTabId); // Get parent tab to append new div and label to
         let label = document.createElement('label'); //  Make label
@@ -190,8 +190,6 @@ class DomController {
         label.textContent = curItem.name; // set name to text of path
         label.setAttribute('class', 'tab-checkbox');
         div.setAttribute("type", "checkbox");
-        // div.name = "sub-group";
-        // div.id = "sub-tab-1";
         span.className = "checkmark";
         span.style.border = "medium solid" + curColor;
         if (curItem.isShowing) {
@@ -201,7 +199,6 @@ class DomController {
             span.style.backgroundColor = "";
             div.checked = false;
         }
-
         div.addEventListener('change', () => {
             curItem.isShowing = !curItem.isShowing; // update isShowing for path
             if (curItem.isShowing) {
