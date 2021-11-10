@@ -188,20 +188,21 @@ class DomController {
         let label = document.createElement('label'); //  Make label
         let div = document.createElement('input'); // Make checkbox div
         let span = document.createElement('span'); // Make span to hold new checkbox styles
+        let curColor;
+        if (this.sk.sketchController.getIsPathColorMode()) curColor = curItem.color.pathMode;
+        else curColor = curItem.color.codeMode;
         label.textContent = curItem.name; // set name to text of path
         label.setAttribute('class', 'tab-checkbox');
         div.setAttribute("type", "checkbox");
         // div.name = "sub-group";
         // div.id = "sub-tab-1";
         span.className = "checkmark";
-
+        span.style.border = "medium solid" + curColor;
         if (curItem.isShowing) {
-            if (this.sk.sketchController.getIsPathColorMode()) span.style.backgroundColor = curItem.color.pathMode;
-            else span.style.backgroundColor = curItem.color.codeMode;
+            span.style.backgroundColor = curColor;
             div.checked = true;
         } else {
             span.style.backgroundColor = "";
-            //span.style.backgroundColor = "D3D3D3";
             div.checked = false;
         }
 

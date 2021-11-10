@@ -189,14 +189,15 @@ label:hover {
     background-color: #ffffff;
 }
 
-/* Create a custom checkbox with light grey backround that matches sk.COLORGREY constant */
+/* Create a custom checkbox */
 .checkmark {
     position: absolute;
     top: 12;
     left: 0;
-    height: 25px;
-    width: 25px;
-    background-color: #D3D3D3;
+    height: 20px;
+    width: 20px;
+    /* background-color: #D3D3D3;
+        border: 1px solid black; */
 }
 
 /* On mouse-over, add a dark grey background color */
