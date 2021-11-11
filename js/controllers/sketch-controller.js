@@ -8,7 +8,9 @@ class SketchController {
             isAlignTalk: false,
             isAllTalk: true,
             isVideoPlay: false,
-            isVideoShow: false
+            isVideoShow: false,
+            isPathColorMode: true,
+            curSelectTab: 0 // 5 options: None, Region, Slice, Moving, Stopped
         }
         this.handle3D = new Handle3D(this.sk);
         this.handleRotation = new HandleRotation(this.sk);
@@ -24,7 +26,6 @@ class SketchController {
 
     handleMousePressed() {
         if (this.testVideoToPlay()) this.playPauseMovie();
-        else this.sk.gui.dataPanel.organize(this.sk.HANDLEGUI, this.sk.core.pathList, this.sk.core.speakerList, this.sk.core.codeList);
     }
 
     handleMouseDragged() {
@@ -199,9 +200,21 @@ class SketchController {
         this.handleRotation.setRotateLeft();
     }
 
-    // NOTE: this setter is modifying core vars but this still seems to be best solution
-    setCoreData(personFromList) {
-        personFromList.isShowing = !personFromList.isShowing;
+
+    getIsPathColorMode() {
+        return this.mode.isPathColorMode;
+    }
+
+    setIsPathColorMode(value) {
+        this.mode.isPathColorMode = value;
+    }
+
+    getCurSelectTab() {
+        return this.mode.curSelectTab;
+    }
+
+    setCurSelectTab(value) {
+        this.mode.curSelectTab = value;
     }
 
     setDotTimeForVideoScrub(timePos) {

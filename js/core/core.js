@@ -15,23 +15,40 @@ class Core {
         this.COLOR_LIST = ['#6a3d9a', '#ff7f00', '#33a02c', '#1f78b4', '#e31a1c', '#ffff99', '#b15928', '#cab2d6', '#fdbf6f', '#b2df8a', '#a6cee3', '#fb9a99']; // 12 Class Paired: (Dark) purple, orange, green, blue, red, yellow, brown, (Light) lPurple, lOrange, lGreen, lBlue, lRed
     }
 
+    /**
+     * Method to update movement program data and GUI
+     * NOTE: order is critical 
+     * @param  {Char} pathName First character letter of filename
+     * @param  {Array} movementPointArray
+     * @param  {Array} conversationPointArray
+     */
     updateMovement(pathName, movementPointArray, conversationPointArray) {
-        this.pathList.push(this.createPath(pathName, movementPointArray, conversationPointArray));
-        this.pathList = this.sortByName(this.pathList);
+        this.sk.domController.removeAllElements("movementMainTab"); // remove all GUI/checkbox elements from dom
+        this.pathList.push(this.createPath(pathName, movementPointArray, conversationPointArray)); // update data list
+        this.pathList = this.sortByName(this.pathList); // then sort
+        for (const path of this.pathList) this.sk.domController.updateMainTab(path, "movementMainTab"); // add new set of GUI/checkbox elements to the DOM
         this.setTotalTime(movementPointArray);
         this.parseCodes.resetCounters(); // must reset code counters if multiple paths are loaded
         this.sk.loop(); // rerun P5 draw loop
     }
 
-    updateConversation(parsedConversationFile) {
-        this.setSpeakerList(parsedConversationFile);
+    /**
+     * NOTE: method follows same format as updateMovement with a few minor differences
+     * @param  {PapaParse results Array} parsedConversationFileArray
+     */
+    updateConversation(parsedConversationFileArray) {
+        this.sk.domController.removeAllElements("conversationMainTab");
+        this.setSpeakerList(parsedConversationFileArray);
         this.speakerList = this.sortByName(this.speakerList);
+        for (const speaker of this.speakerList) this.sk.domController.updateMainTab(speaker, "conversationMainTab");
         this.parseMovement.reProcessAllPointArrays(); // must reprocess movement
         this.sk.loop(); // rerun P5 draw loop
     }
 
     updateCodes(codeName) {
+        this.sk.domController.removeAllElements("codesMainTab");
         this.codeList.push(this.createCode(codeName));
+        for (const code of this.codeList) this.sk.domController.updateMainTab(code, "codesMainTab");
         this.clearMovement();
         this.parseMovement.reProcessAllPointArrays();
         this.sk.loop(); // rerun P5 draw loop
@@ -42,8 +59,8 @@ class Core {
         if (this.totalTimeInSeconds < curPathEndTime) this.totalTimeInSeconds = curPathEndTime; // update global total time, make sure to floor value as integer
     }
 
-    setSpeakerList(parsedConversationArray) {
-        for (const curRow of parsedConversationArray) {
+    setSpeakerList(parsedConversationFileArray) {
+        for (const curRow of parsedConversationFileArray) {
             let tempSpeakerList = []; // create/populate temp list to store strings to test from global core.speakerList
             for (const tempSpeaker of this.speakerList) tempSpeakerList.push(tempSpeaker.name);
             // If row is good data, test if core.speakerList already has speaker and if not add speaker 
@@ -56,6 +73,7 @@ class Core {
 
     /**
      * Path and Speaker objects are separate so that each speaker and path object can match or vary for different number of movement files and speakers
+     * NOTE: Path, Speaker, and Code MUST all have a name, isShowing and color attributes
      */
     createPath(name, movementPointArray, conversationPointArray) {
         return {
@@ -78,7 +96,7 @@ class Core {
     createCode(name) {
         return {
             name, // Char first letter of filename
-            isShowing: false, // if displaying in GUI
+            isShowing: true, // if displaying in GUI
             color: this.createColorForGUI(this.sk.COLORGRAY, this.COLOR_LIST[this.codeList.length % this.COLOR_LIST.length])
         };
     }

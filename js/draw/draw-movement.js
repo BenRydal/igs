@@ -14,7 +14,6 @@ class DrawMovement {
             shade: null,
             thinStroke: null,
             fatStroke: null,
-            colorByPaths: this.testPoint.isColorPathMode() // boolean indicating whether to color by paths or codes
         }
     }
 
@@ -183,12 +182,12 @@ class DrawMovement {
 
     setLineStyle(weight, color) {
         this.sk.strokeWeight(weight);
-        if (this.style.colorByPaths) this.sk.stroke(this.style.shade);
+        if (this.sk.sketchController.getIsPathColorMode()) this.sk.stroke(this.style.shade);
         else this.sk.stroke(color);
     }
 
     setFillStyle(color) {
-        if (this.style.colorByPaths) this.sk.fill(this.style.shade);
+        if (this.sk.sketchController.getIsPathColorMode()) this.sk.fill(this.style.shade);
         else this.sk.fill(color);
     }
     /**

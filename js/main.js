@@ -34,7 +34,7 @@ const igs = new p5((sk) => {
         sk.DRAWGUI = 0;
         sk.HANDLEGUI = 1;
         sk.GUITEXTSIZE = sk.width / 70;
-        sk.COLORGRAY = 150;
+        sk.COLORGRAY = "#A9A9A9"; // this color matches checkmark color in DOM Controller
         // STYLES
         sk.textSize(sk.GUITEXTSIZE);
         sk.textFont(sk.font_Lato);
@@ -54,7 +54,7 @@ const igs = new p5((sk) => {
         if (sk.sketchController.testVideoAndDivAreLoaded()) sk.sketchController.updateVideoDisplay();
         if (sk.sketchController.handle3D.getIsShowing()) sk.sketchController.update3DSlicerRect();
         if (sk.sketchController.translationComplete()) sk.pop();
-        sk.gui.updateGUI(sk.core.pathList, sk.core.speakerList, sk.core.codeList); // draw keys last
+        sk.gui.updateGUI(); // draw keys last
         sk.sketchController.updateAnimation();
         sk.sketchController.updateLoop();
     }

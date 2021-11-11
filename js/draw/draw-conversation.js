@@ -3,7 +3,6 @@ class DrawConversation {
     constructor(sketch) {
         this.sk = sketch;
         this.testPoint = new TestPoint(this.sk);
-        this.colorByPaths = this.testPoint.isColorPathMode(); // boolean indicating whether to color by paths or codes
         this.conversationBubble = { // represents user selected conversation
             isSelected: false,
             point: null, // stores one ConversationPoint object for selected conversation turn
@@ -26,7 +25,7 @@ class DrawConversation {
             if (this.testPoint.isShowingInGUI(curPos.timelineXPos) && this.testPoint.selectModeForConversation(curPos.floorPlanXPos, curPos.floorPlanYPos, point.isStopped) && this.testPoint.isShowingInCodeList(point.codes.array)) {
                 const curSpeaker = this.getSpeakerFromSpeakerList(point.speaker, speakerList); // get speaker object from global list equivalent to the current speaker of point
                 if (this.testSpeakerToDraw(curSpeaker, path.name)) {
-                    if (this.colorByPaths) this.organizeRectDrawing(point, curPos, curSpeaker.color.pathMode);
+                    if (this.sk.sketchController.getIsPathColorMode()) this.organizeRectDrawing(point, curPos, curSpeaker.color.pathMode);
                     else this.organizeRectDrawing(point, curPos, point.codes.color);
                 }
             }

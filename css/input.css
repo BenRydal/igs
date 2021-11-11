@@ -2,13 +2,25 @@ html * {
     font-family: Arial, Helvetica, sans-serif;
 }
 
-html, body {
+*,
+*:hover {
+    transition: all .3s;
+}
+
+html,
+body {
     max-width: 100%;
     overflow-x: hidden;
 }
 
 .container {
     position: relative;
+}
+
+.main-tab-container {
+    position: absolute;
+    max-width: 48%;
+    top: 90%;
 }
 
 .introContainer {
@@ -85,11 +97,116 @@ html, body {
     padding: 5px;
 }
 
-.inputfile:focus+label,
+/* .inputfile:focus+label,
 .inputfile+label:hover {
     background-color: #999;
+} */
+
+/* .inputfile+label {
+    cursor: pointer;
+} */
+
+
+
+/* Main Tabs */
+label {
+    background-color: #817c81;
+    color: #ffffff;
+    display: inline-block;
+    cursor: pointer;
+    padding: 8px;
+    font-size: 14px;
 }
 
-.inputfile+label {
-    cursor: pointer;
+label:hover {
+    background-color: #ccc;
 }
+
+/* label input:checked {
+    background-color: red;
+} */
+
+.tab-radio {
+    display: none;
+}
+
+/* Tabs behaviour, hidden if not checked/clicked */
+.sub-tab-content,
+.tab-content {
+    display: none;
+}
+
+.tab-radio:checked+.tab-content,
+.tab-radio:checked+.sub-tab-content {
+    display: block;
+}
+
+/* Sub-tabs */
+.sub-tabs-container label {
+    background-color: #f3f4fa;
+    color: #030700;
+    border: 1px solid #ddd;
+}
+
+.sub-tabs-container label:hover {
+    background-color: #919604;
+}
+
+/* Tabs Content */
+.tab-content {
+    padding: 10px;
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+}
+
+
+
+
+.tab-checkbox {
+    background-color: #ffffff;
+    color: black;
+    display: inline;
+    position: relative;
+    padding-left: 35px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    font-size: 22px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* Hide the browser's default checkbox */
+.tab-checkbox input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.tab-content label:hover {
+    background-color: #ffffff;
+}
+
+/* Create a custom checkbox */
+.checkmark {
+    position: absolute;
+    top: 12;
+    left: 0;
+    height: 20px;
+    width: 20px;
+    /* background-color: #D3D3D3;
+        border: 1px solid black; */
+}
+
+/* On mouse-over, add a dark grey background color */
+/* .tab-checkbox:hover input~.checkmark {
+    background-color: #D3D3D3;
+} */
+
+/* When the checkbox is checked, add a dark grey background */
+/* .tab-checkbox input:checked~.checkmark {
+    background-color: #1b03f5;
+} */
