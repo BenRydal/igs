@@ -87,8 +87,8 @@ class YoutubePlayer {
         return this.player.getDuration();
     }
 
-    updatePos(xPos, yPos, offset) {
-        this.sk.select('#moviePlayer').position(xPos - this.videoWidth, yPos + offset);
+    updatePos(xPos, yPos) {
+        this.sk.select('#moviePlayer').position(xPos - this.videoWidth, yPos);
     }
 
     destroy() {
@@ -166,8 +166,8 @@ class P5FilePlayer {
         return this.movie.duration();
     }
 
-    updatePos(xPos, yPos, offset) {
-        this.sk.select('#moviePlayer').position(xPos - this.videoWidth, yPos + offset);
+    updatePos(xPos, yPos) {
+        this.sk.select('#moviePlayer').position(xPos - this.videoWidth, yPos);
     }
 
     destroy() {

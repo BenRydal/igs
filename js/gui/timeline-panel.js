@@ -139,6 +139,10 @@ class TimelinePanel {
         return (xPos >= this.start && xPos <= this.end) && (yPos >= 0 && yPos <= this.top);
     }
 
+    getTop() {
+        return this.top;
+    }
+
     getBottom() {
         return this.bottom;
     }
