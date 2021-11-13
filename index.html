@@ -139,13 +139,13 @@
         <input class="tab-radio" id="main-tab-3" name="main-group" type="radio" />
         <div class="tab-content">
             <div class="sub-tabs-container">
-                <!-- NOTE: due to id note below, remember to match the for. The actual title doesn't matter, just to show it works... -->
+                <!-- NOTE: due to id note below, remember to match the for in label-->
                 <label for="sub-tab3-1">Align</label>
                 <label for="sub-tab3-2">All Speakers On Path</label>
             </div>
             <!-- Sub Tabs -->
             <!-- NOTE: name="sub-group" will require to be unique to the tab, ie: tab2 = sub-group2, tab3 = sub-group 3 etc. -->
-            <!-- NOTE: id have to be unique. So for each sub tabs, the input id will have to change-->
+            <!-- NOTE: id has to be unique. Input ID changes for each sub-tab-->
             <input class="tab-radio" id="sub-tab3-1" name="sub-group3" type="radio" checked="checked"
                 onclick="igs.sketchController.toggleIsAlignTalk(); igs.loop()">
             <input class="tab-radio" id="sub-tab3-2" name="sub-group3" type="radio"
@@ -157,25 +157,20 @@
         <input class="tab-radio" id="main-tab-4" name="main-group" type="radio" />
         <div class="tab-content">
             <div class="sub-tabs-container">
-                <!-- NOTE: due to id note below, remember to match the for. The actual title doesn't matter, just to show it works... -->
                 <label for="sub-tab4-1">Start/End</label>
                 <label for="sub-tab4-2">Play/Pause</label>
             </div>
             <!-- Sub Tabs -->
-            <!-- NOTE: name="sub-group" will require to be unique to the tab, ie: tab2 = sub-group2, tab3 = sub-group 3 etc. -->
-            <!-- NOTE: id have to be unique. So for each sub tabs, the input id will have to change-->
             <input class="tab-radio" id="sub-tab4-1" name="sub-group4" type="radio" checked="checked"
                 onclick="igs.sketchController.startEndAnimation(); igs.loop()">
             <input class="tab-radio" id="sub-tab4-2" name="sub-group4" type="radio"
                 onclick="igs.sketchController.toggleIsAnimatePause(); igs.loop()">
-
         </div>
 
         <!-- TAB 5 CONTAINER SELECT -->
         <input class="tab-radio" id="main-tab-5" name="main-group" type="radio" />
         <div class="tab-content">
             <div class="sub-tabs-container">
-                <!-- NOTE: due to id note below, remember to match the for. The actual title doesn't matter, just to show it works... -->
                 <label for="sub-tab5-1">None</label>
                 <label for="sub-tab5-2">Region</label>
                 <label for="sub-tab5-3">Slice</label>
@@ -183,8 +178,6 @@
                 <label for="sub-tab5-5">Stopped</label>
             </div>
             <!-- Sub Tabs -->
-            <!-- NOTE: name="sub-group" will require to be unique to the tab, ie: tab2 = sub-group2, tab3 = sub-group 3 etc. -->
-            <!-- NOTE: id have to be unique. So for each sub tabs, the input id will have to change-->
             <input class="tab-radio" id="sub-tab5-1" name="sub-group5" type="radio" checked="checked"
                 onclick="igs.sketchController.setCurSelectTab(0); igs.loop()">
             <input class="tab-radio" id="sub-tab5-2" name="sub-group5" type="radio"
@@ -195,26 +188,20 @@
                 onclick="igs.sketchController.setCurSelectTab(3); igs.loop()">
             <input class="tab-radio" id="sub-tab5-5" name="sub-group5" type="radio"
                 onclick="igs.sketchController.setCurSelectTab(4); igs.loop()">
-
         </div>
-
 
         <!-- TAB 6 CONTAINER FLOOR PLAN-->
         <input class="tab-radio" id="main-tab-6" name="main-group" type="radio" />
         <div class="tab-content">
             <div class="sub-tabs-container">
-                <!-- NOTE: due to id note below, remember to match the for. The actual title doesn't matter, just to show it works... -->
                 <label for="sub-tab6-1">Rotate Left</label>
                 <label for="sub-tab6-2">Rotate Right</label>
             </div>
             <!-- Sub Tabs -->
-            <!-- NOTE: name="sub-group" will require to be unique to the tab, ie: tab2 = sub-group2, tab3 = sub-group 3 etc. -->
-            <!-- NOTE: id have to be unique. So for each sub tabs, the input id will have to change-->
             <input class="tab-radio" id="sub-tab6-1" name="sub-group6" type="radio" checked="checked"
                 onclick="igs.sketchController.setRotateLeft(); igs.loop()">
             <input class="tab-radio" id="sub-tab6-2" name="sub-group6" type="radio"
                 onclick="igs.sketchController.setRotateRight(); igs.loop()">
-
         </div>
 
         <!-- TAB 7 CONTAINER CODES -->
@@ -226,22 +213,15 @@
         <input class="tab-radio" id="main-tab-8" name="main-group" type="radio" />
         <div class="tab-content">
             <div class="sub-tabs-container">
-                <!-- NOTE: due to id note below, remember to match the for. The actual title doesn't matter, just to show it works... -->
                 <label for="sub-tab8-1">People</label>
                 <label for="sub-tab8-2">Codes</label>
             </div>
             <!-- Sub Tabs -->
-            <!-- NOTE: name="sub-group" will require to be unique to the tab, ie: tab2 = sub-group2, tab3 = sub-group 3 etc. -->
-            <!-- NOTE: id have to be unique. So for each sub tabs, the input id will have to change-->
             <input class="tab-radio" id="sub-tab8-1" name="sub-group8" type="radio" checked="checked"
                 onclick="igs.sketchController.setIsPathColorMode(true); igs.domController.reProcessCheckboxMainTabs(); igs.loop()">
             <input class="tab-radio" id="sub-tab8-2" name="sub-group8" type="radio"
                 onclick="igs.sketchController.setIsPathColorMode(false); igs.domController.reProcessCheckboxMainTabs(); igs.loop()">
         </div>
-
-
     </div>
-
 </body>
-
 </html>
