@@ -65,8 +65,9 @@ class SketchController {
 
     updateVideoDisplay() {
         if (this.mode.isVideoShow) {
-            if (this.sk.mouseY < this.sk.gui.timelinePanel.getTop()) this.sk.videoPlayer.updatePos(this.sk.mouseX - 25, this.sk.mouseY - 100); // third parameter is offset value
-            else this.sk.videoPlayer.updatePos(this.sk.width / 5, 0); // if over bottom gui controls, display video at top left of screen
+            const xPos = this.sk.constrain(this.sk.mouseX, this.sk.width / 5, this.sk.width);
+            const yPos = this.sk.constrain(this.sk.mouseY, 50, this.sk.gui.timelinePanel.getTop() - this.sk.width / 6);
+            this.sk.videoPlayer.updatePos(xPos, yPos);
             if (!this.mode.isVideoPlay) this.setVideoScrubbing();
         }
     }
