@@ -126,6 +126,7 @@ const igs = new p5((sk) => {
         sk.loop();
     }
     sk.mouseMoved = function () {
+        sk.sketchController.handleMouseMoved();
         sk.loop();
     }
 

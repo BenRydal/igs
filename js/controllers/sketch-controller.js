@@ -38,6 +38,11 @@ class SketchController {
         this.sk.gui.timelinePanel.resetLock();
     }
 
+    handleMouseMoved() {
+        if (this.sk.gui.timelinePanel.overEitherSelector()) this.sk.cursor(this.sk.HAND);
+        else this.sk.cursor(this.sk.ARROW);
+    }
+
     handleToggle3D() {
         this.handle3D.toggleIsShowing();
         this.handle3D.setIsTransitioning(true);
