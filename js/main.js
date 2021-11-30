@@ -39,7 +39,7 @@ const igs = new p5((sk) => {
         sk.textSize(sk.GUITEXTSIZE);
         sk.textFont(sk.font_Lato);
         sk.textAlign(sk.LEFT, sk.TOP);
-        sk.smooth();
+        sk.smooth(); // must enable when using 3D
     }
 
     sk.draw = function () {
@@ -121,10 +121,12 @@ const igs = new p5((sk) => {
         sk.sketchController.handleMouseDragged();
         sk.loop();
     }
+
     sk.mouseReleased = function () {
         sk.sketchController.handleMouseReleased();
         sk.loop();
     }
+
     sk.mouseMoved = function () {
         sk.sketchController.handleMouseMoved();
         sk.loop();
