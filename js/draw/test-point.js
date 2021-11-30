@@ -86,6 +86,22 @@ class TestPoint {
                 return pointIsStopped; // this always returns false for floorplan view
         }
     }
+
+    // TODO:
+    /**
+     * 
+     * @param  {String} talkTurn
+     */
+    isTalkTurnSelected(talkTurn) {
+        const wordToSearch = this.sk.sketchController.getWordToSearch();
+        if (!wordToSearch) return true; // Always return true if empty/no value
+        else {
+            const escape = wordToSearch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+            if (wordToSearch.length === 1) return new RegExp(escape, "i").test(talkTurn); // case insensitive regex test
+            else return new RegExp('\\b' + escape + '\\b', "i").test(talkTurn); // \\b for whole word test
+        }
+    }
+
     /**
      * Controls conversation drawing based on selectMode
      * @param  {Number} xPos, yPos

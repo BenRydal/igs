@@ -22,7 +22,7 @@ class DrawConversation {
     setData(path, speakerList) {
         for (const point of path.conversation) {
             const curPos = this.getScaledConversationPos(point);
-            if (this.testPoint.isShowingInGUI(curPos.timelineXPos) && this.testPoint.selectModeForConversation(curPos.floorPlanXPos, curPos.floorPlanYPos, point.isStopped) && this.testPoint.isShowingInCodeList(point.codes.array)) {
+            if (this.testPoint.isTalkTurnSelected(point.talkTurn) && this.testPoint.isShowingInGUI(curPos.timelineXPos) && this.testPoint.selectModeForConversation(curPos.floorPlanXPos, curPos.floorPlanYPos, point.isStopped) && this.testPoint.isShowingInCodeList(point.codes.array)) {
                 const curSpeaker = this.getSpeakerFromSpeakerList(point.speaker, speakerList); // get speaker object from global list equivalent to the current speaker of point
                 if (this.testSpeakerToDraw(curSpeaker, path.name)) {
                     if (this.sk.sketchController.getIsPathColorMode()) this.organizeRectDrawing(point, curPos, curSpeaker.color.pathMode);

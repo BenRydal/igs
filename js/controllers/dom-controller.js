@@ -235,4 +235,9 @@ class DomController {
             element.removeChild(element.firstChild);
         }
     }
+
+    updateWordToSearch() {
+        const searchInputDiv = document.getElementById("word-search");
+        this.sk.sketchController.setWordToSearch(searchInputDiv.value);
+    }
 }

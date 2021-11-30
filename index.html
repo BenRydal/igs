@@ -139,18 +139,19 @@
         <input class="tab-radio" id="main-tab-3" name="main-group" type="radio" />
         <div class="tab-content">
             <div class="sub-tabs-container">
-                <!-- NOTE: due to id note below, remember to match the for in label-->
+                <!-- NOTE: due to id note below, remember to match the for. The actual title doesn't matter, just to show it works... -->
+                <input type="search" id="word-search" name="search-input" placeholder="Search"
+                    onsearch="igs.domController.updateWordToSearch(); igs.loop()">
                 <label for="sub-tab3-1">Align</label>
                 <label for="sub-tab3-2">All Speakers On Path</label>
             </div>
             <!-- Sub Tabs -->
             <!-- NOTE: name="sub-group" will require to be unique to the tab, ie: tab2 = sub-group2, tab3 = sub-group 3 etc. -->
-            <!-- NOTE: id has to be unique. Input ID changes for each sub-tab-->
+            <!-- NOTE: id have to be unique. So for each sub tabs, the input id will have to change-->
             <input class="tab-radio" id="sub-tab3-1" name="sub-group3" type="radio" checked="checked"
                 onclick="igs.sketchController.toggleIsAlignTalk(); igs.loop()">
             <input class="tab-radio" id="sub-tab3-2" name="sub-group3" type="radio"
                 onclick="igs.sketchController.toggleIsAllTalk(); igs.loop()">
-
         </div>
 
         <!-- TAB 4 CONTAINER ANIMATE -->
@@ -224,4 +225,5 @@
         </div>
     </div>
 </body>
+
 </html>
