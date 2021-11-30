@@ -18,14 +18,6 @@ class TestPoint {
     }
 
     /**
-     * @param  {Integer} view
-     * @param  {MovementPoint} curPoint
-     */
-    isPlanViewAndStopped(view, pointIsStopped) {
-        return (view === this.sk.PLAN && pointIsStopped && this.sk.sketchController.getCurSelectTab() !== 3);
-    }
-
-    /**
      * This method tests if a point is showing for all selected codes from codeList
      * IMPLEMENTATION: Iterate through core codeList and return false if: for any of codes that are true in codeList a code at curPoint is false 
      * @param  {MovementPoint} point
@@ -60,15 +52,13 @@ class TestPoint {
         };
     }
 
+    // ***** DRAW MOVEMENT TESTS ***** //
     /**
-     * Adjusts Y positioning of conversation rectangles correctly for align and 3 D views
+     * @param  {Integer} view
+     * @param  {MovementPoint} curPoint
      */
-    getConversationAdjustYPos(floorPlanYPos, rectLength) {
-        if (this.sk.sketchController.mode.isAlignTalk) {
-            if (this.sk.sketchController.handle3D.getIsShowing()) return this.sk.gui.fpContainer.getContainer().height;
-            else return 0;
-        } else if (this.sk.sketchController.handle3D.getIsShowing()) return floorPlanYPos;
-        else return floorPlanYPos - rectLength;
+    isPlanViewAndStopped(view, pointIsStopped) {
+        return (view === this.sk.PLAN && pointIsStopped && this.sk.sketchController.getCurSelectTab() !== 3);
     }
 
     /**
@@ -87,7 +77,19 @@ class TestPoint {
         }
     }
 
-    // TODO:
+    selectModeForStrokeWeights() {
+        switch (this.sk.sketchController.getCurSelectTab()) {
+            case 3:
+                return [1, 0];
+            case 4:
+                return [0, 9];
+            default:
+                return [1, 9];
+        }
+    }
+
+    // ***** DRAW CONVERSATION TESTS ***** //
+
     /**
      * 
      * @param  {String} talkTurn
@@ -100,6 +102,17 @@ class TestPoint {
             if (wordToSearch.length === 1) return new RegExp(escape, "i").test(talkTurn); // case insensitive regex test
             else return new RegExp('\\b' + escape + '\\b', "i").test(talkTurn); // \\b for whole word test
         }
+    }
+
+    /**
+     * Adjusts Y positioning of conversation rectangles correctly for align and 3 D views
+     */
+    getConversationAdjustYPos(floorPlanYPos, rectLength) {
+        if (this.sk.sketchController.mode.isAlignTalk) {
+            if (this.sk.sketchController.handle3D.getIsShowing()) return this.sk.gui.fpContainer.getContainer().height;
+            else return 0;
+        } else if (this.sk.sketchController.handle3D.getIsShowing()) return floorPlanYPos;
+        else return floorPlanYPos - rectLength;
     }
 
     /**
@@ -119,17 +132,6 @@ class TestPoint {
                 return !isStopped;
             case 4:
                 return isStopped;
-        }
-    }
-
-    selectModeForStrokeWeights() {
-        switch (this.sk.sketchController.getCurSelectTab()) {
-            case 3:
-                return [1, 0];
-            case 4:
-                return [0, 9];
-            default:
-                return [1, 9];
         }
     }
 }
