@@ -23,7 +23,7 @@ class DomController {
         Papa.parse(fileToParse, {
             complete: (results, file) => {
                 console.log("Parsing complete:", results, file);
-                this.sk.core.testCSVFileForProcessing(results, file);
+                this.sk.core.testHeadersForProcessing(results, file);
             },
             error: (error, file) => {
                 alert("Parsing error with one of your CSV file. Please make sure your file is formatted correctly as a .CSV");
@@ -43,26 +43,6 @@ class DomController {
             fileName: fileLocation
         });
     }
-
-    async zzzPrepExampleFile(folder, fileName) {
-        try {
-            const response = await fetch(new Request(folder + fileName));
-            const buffer = await response.arrayBuffer();
-            const file = new File([buffer], fileName, {
-                type: "text/csv",
-            });
-            this.testFileTypeForProcessing(file);
-        } catch (error) {
-            alert("Error loading example conversation data. Please make sure you have a good internet connection")
-            console.log(error);
-        }
-    }
-
-
-
-
-
-
 
     handleClearButton() {
         this.clearAllData();
@@ -157,8 +137,22 @@ class DomController {
         this.clearAllData();
         this.updateVideo(params[4], params[5]);
         this.sk.core.inputFloorPlan.update(params[0] + params[1]);
-        this.zzzPrepExampleFile(params[0], params[2]);
-        for (const fileName of params[3]) this.zzzPrepExampleFile(params[0], fileName);
+        this.prepExampleCSVFile(params[0], params[2]); // only one conversation file to prep
+        for (const fileName of params[3]) this.prepExampleCSVFile(params[0], fileName); // loop through string array to prep each CSV file
+    }
+
+    async prepExampleCSVFile(folder, fileName) {
+        try {
+            const response = await fetch(new Request(folder + fileName));
+            const buffer = await response.arrayBuffer();
+            const file = new File([buffer], fileName, {
+                type: "text/csv",
+            });
+            this.testFileTypeForProcessing(file);
+        } catch (error) {
+            alert("Error loading CSV file. Please make sure you have a good internet connection")
+            console.log(error);
+        }
     }
 
     /**
