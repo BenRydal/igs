@@ -7,10 +7,9 @@ class ParseMovement {
     }
 
     /**
-     * Organizes custom tests of parsed file, clearing of existing data and updating both parsedFileArray and program data
+     * Adds new data to parsedFileArray and program data
      * @param  {Papaparse results Array} results
      * @param  {File} file
-     * @param  {Integer} fileNum // used to clear existing movement data for first new file only
      */
     processFile(results, file) {
         const pathName = this.testData.cleanFileName(file.name);

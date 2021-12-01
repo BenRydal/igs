@@ -3,21 +3,18 @@ class ParseCodes {
     constructor(sketch, testData) {
         this.sk = sketch;
         this.testData = testData;
-        this.parsedFileArray = []; // each index holds a CodeTable object that represents results.data array, character name and counter number
+        this.parsedFileArray = []; // holds CodeTable objects that represent results.data array, character name and counter number
     }
 
     /**
-     * Organizes updating codeFileData if parsed results from PapaParse passes additional tests
-     * NOTE: fileNum and fileListLength are used to clear current data and reprocess files
+     * Updates parsedFileArray with new codeTable
      * @param  {PapaParse results Array} results
      * @param  {File} file
-     * @param  {Integer} fileNum
-     * @param  {Integer} fileListLength
      */
     processFile(results, file) {
         const codeName = this.testData.cleanFileName(file.name);
         this.parsedFileArray.push(this.createCodeTable(results.data, codeName));
-        this.sk.core.updateCodes(codeName); // 2nd parameter is test for if it is last file
+        this.sk.core.updateCodes(codeName);
     }
 
     createCodeTable(resultsDataArray, codeName) {
