@@ -19,7 +19,7 @@ class Core {
      * @param  {PapaParse results Array} results
      * @param  {File} file
      */
-    testCSVFileForProcessing(results, file) {
+    testHeadersForProcessing(results, file) {
         if (this.testData.parsedResults(results, this.testData.headersMovement, this.testData.movementRowForType)) this.parseMovement.processFile(results, file);
         else if (this.testData.parsedResults(results, this.testData.headersConversation, this.testData.conversationRowForType)) this.parseConversation.processFile(results, file);
         else if (this.testData.parsedResults(results, this.testData.headersCodes, this.testData.codeRowForType)) this.parseCodes.processFile(results, file);
