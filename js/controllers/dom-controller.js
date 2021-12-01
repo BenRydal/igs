@@ -5,52 +5,50 @@ class DomController {
     }
 
     /**
-     * @param  {PNG, JPG, JPEG File} input
+     * @param  {Files} input
      */
-    handleFloorPlanFile(input) {
-        this.sk.core.inputFloorPlan.update(URL.createObjectURL(input.files[0]));
-        input.value = ''; // reset input value so you can load same file again in browser
-    }
-
-    /**
-     * @param  {CSV Files} input
-     */
-    handleMovementFiles(input) {
-        let fileList = [];
-        for (const file of input.files) fileList.push(file);
-        this.sk.core.parseMovement.prepFiles(fileList);
+    handleAllFiles(input) {
+        for (const file of input.files) this.checkFileType(file);
         input.value = ''; // reset input value so you can load same file(s) again in browser
     }
 
-    /**
-     * @param  {CSV File} input
-     */
-    handleConversationFile(input) {
-        this.sk.core.parseConversation.prepFile(input.files[0]);
-        input.value = ''; // reset input value so you can load same file again in browser
+    checkFileType(file) {
+        if (file.type === "text/csv") this.sk.core.parseCSVFile(file);
+        else if (file.type === "image/png" || file.type === "image/jpg" || file.type === "image/jpeg") this.sk.core.inputFloorPlan.update(URL.createObjectURL(file));
+        else if (file.type === "video/mp4") this.zzzHandleVideo(file);
+        else alert("issue with file / not right type");
     }
 
     /**
      * @param  {MP4 File} input
      */
-    handleVideoFile(input) {
-        const fileLocation = URL.createObjectURL(input.files[0]);
+    zzzHandleVideo(file) {
         this.clearCurVideo();
+        const fileLocation = URL.createObjectURL(file);
         this.updateVideo('File', {
             fileName: fileLocation
         });
-        input.value = ''; // reset input value so you can load same file again in browser
     }
 
-    /**
-     * @param  {CSV Files} input
-     */
-    handleCodeFiles(input) {
-        let fileList = [];
-        for (const file of input.files) fileList.push(file);
-        this.sk.core.parseCodes.prepFiles(fileList);
-        input.value = ''; // reset input value so you can load same file(s) again in browser
+    async zzzPrepExampleFile(folder, fileName) {
+        try {
+            const response = await fetch(new Request(folder + fileName));
+            const buffer = await response.arrayBuffer();
+            const file = new File([buffer], fileName, {
+                type: "text/csv",
+            });
+            this.checkFileType(file);
+        } catch (error) {
+            alert("Error loading example conversation data. Please make sure you have a good internet connection")
+            console.log(error);
+        }
     }
+
+
+
+
+
+
 
     handleClearButton() {
         this.clearAllData();
@@ -132,15 +130,21 @@ class DomController {
     }
 
     /**
-     * @param  {[String directory, String floorPlan image file, String conversation File, String movement File[], String video platform, video params (see Video Player Interface)]} params
+     * @param {Array} params
+     * [0] String directory/folder
+     * [1] String floorPlan image filename
+     * [2] String conversation filename
+     * [3] Array of String movement filenames
+     * [4] String video platform (e.g.File or youTube)
+     * [5] Video params(see videoPlayer interface)
      */
     loadExampleData(params) {
         this.hideIntroMessage();
         this.clearAllData();
         this.updateVideo(params[4], params[5]);
         this.sk.core.inputFloorPlan.update(params[0] + params[1]);
-        this.sk.core.parseConversation.prepExampleFile(params[0], params[2]);
-        this.sk.core.parseMovement.prepExampleFiles(params[0], params[3]);
+        this.zzzPrepExampleFile(params[0], params[2]);
+        for (const fileName of params[3]) this.zzzPrepExampleFile(params[0], fileName);
     }
 
     /**

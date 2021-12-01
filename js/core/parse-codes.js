@@ -7,32 +7,6 @@ class ParseCodes {
     }
 
     /**
-     * NOTE: This method is necessary to bind the correct "this" context to callback function
-     * @param  {CSV File[]} fileList
-     */
-    prepFiles(fileList) {
-        this.parseFiles(fileList, this.processFile.bind(this));
-    }
-
-    /**
-     * @param  {.CSV File[]} fileList
-     */
-    parseFiles(fileList, callback) {
-        this.clear(); // clear existing code data once before processing starts
-        for (const fileToParse of fileList) {
-            Papa.parse(fileToParse, {
-                complete: (results, file) => callback(results, file),
-                error: (error, file) => {
-                    alert("Parsing error with your code file. Please make sure your file is formatted correctly as a .CSV");
-                    console.log(error, file);
-                },
-                header: true,
-                dynamicTyping: true,
-            });
-        }
-    }
-
-    /**
      * Organizes updating codeFileData if parsed results from PapaParse passes additional tests
      * NOTE: fileNum and fileListLength are used to clear current data and reprocess files
      * @param  {PapaParse results Array} results
@@ -41,7 +15,6 @@ class ParseCodes {
      * @param  {Integer} fileListLength
      */
     processFile(results, file) {
-        console.log("Parsing complete:", results, file);
         if (this.testData.parsedResults(results, this.testData.headersCodes, this.testData.codeRowForType)) {
             const codeName = this.testData.cleanFileName(file.name);
             this.parsedFileArray.push(this.createCodeTable(results.data, codeName));

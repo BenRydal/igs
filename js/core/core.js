@@ -15,6 +15,28 @@ class Core {
         this.COLOR_LIST = ['#6a3d9a', '#ff7f00', '#33a02c', '#1f78b4', '#e31a1c', '#ffff99', '#b15928', '#cab2d6', '#fdbf6f', '#b2df8a', '#a6cee3', '#fb9a99']; // 12 Class Paired: (Dark) purple, orange, green, blue, red, yellow, brown, (Light) lPurple, lOrange, lGreen, lBlue, lRed
     }
 
+    parseCSVFile(fileToParse) {
+        Papa.parse(fileToParse, {
+            complete: (results, file) => this.testFileHeaders(results, file),
+            error: (error, file) => {
+                alert("Parsing error with one of your CSV file. Please make sure your file is formatted correctly as a .CSV");
+                console.log(error, file);
+            },
+            header: true,
+            dynamicTyping: true,
+        });
+    }
+
+    testFileHeaders(results, file) {
+        console.log("Parsing complete:", results, file);
+        if (this.testData.parsedResults(results, this.testData.headersMovement, this.testData.movementRowForType)) this.parseMovement.processFile(results, file);
+        else if (this.testData.parsedResults(results, this.testData.headersConversation, this.testData.conversationRowForType)) this.parseConversation.processFile(results, file);
+        else if (this.testData.parsedResults(results, this.testData.headersCodes, this.testData.codeRowForType)) this.parseCodes.processFile(results, file);
+        else alert("header issue with CSV file");
+    }
+
+
+
     /**
      * Method to update movement program data and GUI
      * NOTE: order is critical 
