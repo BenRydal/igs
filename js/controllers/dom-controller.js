@@ -5,7 +5,7 @@ class DomController {
     }
 
     /**
-     * @param  {Files} input
+     * @param  {PNG/JPG, CSV, MP4 Array} input
      */
     handleAllFiles(input) {
         for (const file of input.files) this.checkFileType(file);
@@ -16,7 +16,7 @@ class DomController {
         if (file.type === "text/csv") this.sk.core.parseCSVFile(file);
         else if (file.type === "image/png" || file.type === "image/jpg" || file.type === "image/jpeg") this.sk.core.inputFloorPlan.update(URL.createObjectURL(file));
         else if (file.type === "video/mp4") this.zzzHandleVideo(file);
-        else alert("issue with file / not right type");
+        else alert("Error loading file. Please make sure your file is an accepted format"); // this should not be possible due to HTML5 accept for file inputs, but in case
     }
 
     /**
