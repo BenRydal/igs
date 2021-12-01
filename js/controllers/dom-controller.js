@@ -76,6 +76,7 @@ class DomController {
         switch (option) {
             case "Load Data":
                 this.loadUserData();
+                this.sk.sketchController.setIsAllTalk(false); // not essential but setting matches each case differently
                 break;
             case "Example 1":
                 this.loadExampleData(['data/example-1/', 'floorplan.png', 'conversation.csv', ['Jordan.csv'], 'Youtube', {
@@ -93,7 +94,7 @@ class DomController {
                 this.loadExampleData(['data/example-3/', 'floorplan.png', 'conversation.csv', ['Teacher.csv'], 'Youtube', {
                     videoId: 'Iu0rxb-xkMk'
                 }]);
-                this.sk.sketchController.setIsAllTalk(true); // not essential but setting matches each case differently
+                this.sk.sketchController.setIsAllTalk(true);
                 break;
             case "Example 4":
                 this.loadExampleData(['data/example-4/', 'floorplan.png', 'conversation.csv', ['Teacher.csv', 'Sean.csv', 'Mei.csv', 'Cassandra.csv', 'Nathan.csv'], 'Youtube', {
