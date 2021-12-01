@@ -2,15 +2,16 @@ class Core {
 
     constructor(sketch) {
         this.sk = sketch;
+        // Parsing Classes
         this.testData = new TestData(); // encapsulates various tests for parsing data
         this.parseMovement = new ParseMovement(this.sk, this.testData);
         this.parseConversation = new ParseConversation(this.sk, this.testData);
         this.parseCodes = new ParseCodes(this.sk, this.testData);
-        // PROGRAM DATA
+        // Program Data
+        this.inputFloorPlan = new InputFloorPlan(this.sk); // holds floorPlan image and associated methods
         this.speakerList = []; // Holds speaker objects for number of speakers parsed from successfully loaded conversation file
         this.pathList = []; // Holds path objects for each successfully loaded movement file
         this.codeList = []; // holds code objects for each successfully loaded code file
-        this.inputFloorPlan = new InputFloorPlan(this.sk); // class to hold floorplan image and associated methods
         this.totalTimeInSeconds = 0; // Time value in seconds that all displayed data is set to, set dynamically when updating movement data
         this.COLOR_LIST = ['#6a3d9a', '#ff7f00', '#33a02c', '#1f78b4', '#e31a1c', '#ffff99', '#b15928', '#cab2d6', '#fdbf6f', '#b2df8a', '#a6cee3', '#fb9a99']; // 12 Class Paired: (Dark) purple, orange, green, blue, red, yellow, brown, (Light) lPurple, lOrange, lGreen, lBlue, lRed
     }
