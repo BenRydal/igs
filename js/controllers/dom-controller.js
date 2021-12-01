@@ -13,10 +13,25 @@ class DomController {
     }
 
     checkFileType(file) {
-        if (file.type === "text/csv") this.sk.core.parseCSVFile(file);
+        if (file.type === "text/csv") this.parseCSVFile(file);
         else if (file.type === "image/png" || file.type === "image/jpg" || file.type === "image/jpeg") this.sk.core.inputFloorPlan.update(URL.createObjectURL(file));
         else if (file.type === "video/mp4") this.zzzHandleVideo(file);
         else alert("Error loading file. Please make sure your file is an accepted format"); // this should not be possible due to HTML5 accept for file inputs, but in case
+    }
+
+    parseCSVFile(fileToParse) {
+        Papa.parse(fileToParse, {
+            complete: (results, file) => {
+                console.log("Parsing complete:", results, file);
+                this.sk.core.testCSVFileForProcessing(results, file);
+            },
+            error: (error, file) => {
+                alert("Parsing error with one of your CSV file. Please make sure your file is formatted correctly as a .CSV");
+                console.log(error, file);
+            },
+            header: true,
+            dynamicTyping: true,
+        });
     }
 
     /**
