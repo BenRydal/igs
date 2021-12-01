@@ -7,15 +7,15 @@ class DomController {
     /**
      * @param  {PNG/JPG, CSV, MP4 Array} input
      */
-    handleAllFiles(input) {
-        for (const file of input.files) this.checkFileType(file);
+    handleLoadFileButton(input) {
+        for (const file of input.files) this.testFileTypeForProcessing(file);
         input.value = ''; // reset input value so you can load same file(s) again in browser
     }
 
-    checkFileType(file) {
+    testFileTypeForProcessing(file) {
         if (file.type === "text/csv") this.parseCSVFile(file);
         else if (file.type === "image/png" || file.type === "image/jpg" || file.type === "image/jpeg") this.sk.core.inputFloorPlan.update(URL.createObjectURL(file));
-        else if (file.type === "video/mp4") this.zzzHandleVideo(file);
+        else if (file.type === "video/mp4") this.prepVideoFromFile(URL.createObjectURL(file));
         else alert("Error loading file. Please make sure your file is an accepted format"); // this should not be possible due to HTML5 accept for file inputs, but in case
     }
 
@@ -37,9 +37,8 @@ class DomController {
     /**
      * @param  {MP4 File} input
      */
-    zzzHandleVideo(file) {
+    prepVideoFromFile(fileLocation) {
         this.clearCurVideo();
-        const fileLocation = URL.createObjectURL(file);
         this.updateVideo('File', {
             fileName: fileLocation
         });
@@ -52,7 +51,7 @@ class DomController {
             const file = new File([buffer], fileName, {
                 type: "text/csv",
             });
-            this.checkFileType(file);
+            this.testFileTypeForProcessing(file);
         } catch (error) {
             alert("Error loading example conversation data. Please make sure you have a good internet connection")
             console.log(error);
