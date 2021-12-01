@@ -8,7 +8,6 @@ class Core {
         this.parseConversation = new ParseConversation(this.sk, this.testData);
         this.parseCodes = new ParseCodes(this.sk, this.testData);
         // Program Data
-        this.inputFloorPlan = new InputFloorPlan(this.sk); // holds floorPlan image and associated methods
         this.speakerList = []; // Holds speaker objects for number of speakers parsed from successfully loaded conversation file
         this.pathList = []; // Holds path objects for each successfully loaded movement file
         this.codeList = []; // holds code objects for each successfully loaded code file
@@ -160,7 +159,6 @@ class Core {
     }
 
     clearAll() {
-        this.inputFloorPlan.clear();
         this.parseMovement.clear();
         this.parseConversation.clear();
         this.parseCodes.clear();
