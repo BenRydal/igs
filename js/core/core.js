@@ -17,7 +17,7 @@ class Core {
 
     parseCSVFile(fileToParse) {
         Papa.parse(fileToParse, {
-            complete: (results, file) => this.testFileHeaders(results, file),
+            complete: (results, file) => this.testCSVFile(results, file),
             error: (error, file) => {
                 alert("Parsing error with one of your CSV file. Please make sure your file is formatted correctly as a .CSV");
                 console.log(error, file);
@@ -27,18 +27,17 @@ class Core {
         });
     }
 
-    testFileHeaders(results, file) {
+    /**
+     * @param  {PapaParse results Array} results
+     * @param  {File} file
+     */
+    testCSVFile(results, file) {
         console.log("Parsing complete:", results, file);
         if (this.testData.parsedResults(results, this.testData.headersMovement, this.testData.movementRowForType)) this.parseMovement.processFile(results, file);
         else if (this.testData.parsedResults(results, this.testData.headersConversation, this.testData.conversationRowForType)) this.parseConversation.processFile(results, file);
         else if (this.testData.parsedResults(results, this.testData.headersCodes, this.testData.codeRowForType)) this.parseCodes.processFile(results, file);
         else alert("Error loading CSV file. Please make sure your file is a CSV file formatted with correct column headers");
     }
-
-
-
-
-
 
     /**
      * Method to update movement program data and GUI
