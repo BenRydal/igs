@@ -7,11 +7,9 @@ class ParseConversation {
     }
 
     processFile(results, file) {
-        if (this.testData.parsedResults(results, this.testData.headersConversation, this.testData.conversationRowForType)) {
-            this.clear();
-            this.parsedFileArray = results.data;
-            this.sk.core.updateConversation(this.parsedFileArray);
-        } else alert("Error loading conversation file. Please make sure your file is a .CSV file formatted with column headers: " + this.testData.headersConversation.toString());
+        this.clear();
+        this.parsedFileArray = results.data;
+        this.sk.core.updateConversation(this.parsedFileArray);
     }
 
 

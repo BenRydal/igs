@@ -32,8 +32,11 @@ class Core {
         if (this.testData.parsedResults(results, this.testData.headersMovement, this.testData.movementRowForType)) this.parseMovement.processFile(results, file);
         else if (this.testData.parsedResults(results, this.testData.headersConversation, this.testData.conversationRowForType)) this.parseConversation.processFile(results, file);
         else if (this.testData.parsedResults(results, this.testData.headersCodes, this.testData.codeRowForType)) this.parseCodes.processFile(results, file);
-        else alert("header issue with CSV file");
+        else alert("Error loading CSV file. Please make sure your file is a CSV file formatted with correct column headers");
     }
+
+
+
 
 
 

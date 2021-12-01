@@ -13,14 +13,12 @@ class ParseMovement {
      * @param  {Integer} fileNum // used to clear existing movement data for first new file only
      */
     processFile(results, file) {
-        if (this.testData.parsedResults(results, this.testData.headersMovement, this.testData.movementRowForType)) {
-            const pathName = this.testData.cleanFileName(file.name);
-            this.parsedFileArray.push({
-                parsedMovementArray: results.data,
-                firstCharOfFileName: pathName
-            });
-            this.processPointArrays(results.data, pathName);
-        } else alert("Error loading movement file. Please make sure your file is a .CSV file formatted with column headers: " + this.testData.headersMovement.toString());
+        const pathName = this.testData.cleanFileName(file.name);
+        this.parsedFileArray.push({
+            parsedMovementArray: results.data,
+            firstCharOfFileName: pathName
+        });
+        this.processPointArrays(results.data, pathName);
     }
 
     processPointArrays(resultsDataArray, pathName) {

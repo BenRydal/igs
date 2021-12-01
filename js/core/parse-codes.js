@@ -15,11 +15,9 @@ class ParseCodes {
      * @param  {Integer} fileListLength
      */
     processFile(results, file) {
-        if (this.testData.parsedResults(results, this.testData.headersCodes, this.testData.codeRowForType)) {
-            const codeName = this.testData.cleanFileName(file.name);
-            this.parsedFileArray.push(this.createCodeTable(results.data, codeName));
-            this.sk.core.updateCodes(codeName); // 2nd parameter is test for if it is last file
-        } else alert("Error loading code file. Please make sure your file is a .CSV file formatted with column headers: " + this.testData.headersCodes.toString());
+        const codeName = this.testData.cleanFileName(file.name);
+        this.parsedFileArray.push(this.createCodeTable(results.data, codeName));
+        this.sk.core.updateCodes(codeName); // 2nd parameter is test for if it is last file
     }
 
     createCodeTable(resultsDataArray, codeName) {
