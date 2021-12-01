@@ -68,9 +68,6 @@ class DomController {
         element.style.display = 'none';
     }
 
-    /**
-     * Example data format: [String directory, String floorPlan image file, String conversation File, String movement File[], String video platform, video params(see Video Player Interface)]
-     */
     handleExampleDropDown() {
         if (this.sk.sketchController.getIsAnimate()) this.sk.sketchController.startEndAnimation(); // reset animation if running
         let option = document.getElementById("examples").value;
@@ -108,13 +105,13 @@ class DomController {
     }
 
     showInputBar() {
-        let element = document.querySelector('.inputBar');
-        element.style.display = 'block';
+        const elementList = document.querySelectorAll(".loadData");
+        elementList.forEach(element => element.style.display = 'inline');
     }
 
     hideInputBar() {
-        let element = document.querySelector('.inputBar');
-        element.style.display = 'none';
+        const elementList = document.querySelectorAll(".loadData");
+        elementList.forEach(element => element.style.display = 'none');
     }
 
     loadUserData() {
