@@ -90,11 +90,17 @@ body {
     display: inline-block;
     border: 1px solid black;
     padding: 5px;
-} 
+}
 
-/* For hiding load data buttons on program start */
+/* Display none for hiding load data buttons on program start */
 .loadData+label {
+    font-size: 1em;
+    font-weight: 300;
+    color: black;
+    background-color: white;
     display: none;
+    border: 1px solid black;
+    padding: 5px;
 }
 
 /* Main Tabs */
