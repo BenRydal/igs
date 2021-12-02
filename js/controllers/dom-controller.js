@@ -71,8 +71,8 @@ class DomController {
     handleExampleDropDown() {
         if (this.sk.sketchController.getIsAnimate()) this.sk.sketchController.startEndAnimation(); // reset animation if running
         let option = document.getElementById("examples").value;
-        if (option === "Load Data") this.showInputBar();
-        else this.hideInputBar();
+        if (option === "Load Data") this.showLoadDataButtons();
+        else this.hideLoadDataButtons();
         switch (option) {
             case "Load Data":
                 this.loadUserData();
@@ -105,12 +105,12 @@ class DomController {
         }
     }
 
-    showInputBar() {
+    showLoadDataButtons() {
         const elementList = document.querySelectorAll(".loadData");
         elementList.forEach(element => element.style.display = 'inline');
     }
 
-    hideInputBar() {
+    hideLoadDataButtons() {
         const elementList = document.querySelectorAll(".loadData");
         elementList.forEach(element => element.style.display = 'none');
     }
