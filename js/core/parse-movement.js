@@ -7,71 +7,17 @@ class ParseMovement {
     }
 
     /**
-     * This method is important for binding this to callback
-     * @param  {CSV File Array} fileList
-     */
-    prepFiles(fileList) {
-        this.parseFiles(fileList, this.processFiles.bind(this));
-    }
-
-    /**
-     * Handles async loading of movement files. 
-     * NOTE: folder and filename are separated for convenience later in program
-     * @param  {String} folder
-     * @param  {String} fileNames
-     */
-    async prepExampleFiles(folder, fileNames) {
-        try {
-            let fileList = [];
-            for (const name of fileNames) {
-                const response = await fetch(new Request(folder + name));
-                const buffer = await response.arrayBuffer();
-                fileList.push(new File([buffer], name, {
-                    type: "text/csv",
-                }));
-            }
-            this.parseFiles(fileList, this.processFiles.bind(this)); // parse file after retrieval, maintain correct this context on callback with bind
-        } catch (error) {
-            alert("Error loading example movement data. Please make sure you have a good internet connection")
-            console.log(error);
-        }
-    }
-
-    /**
-     * Parses file and sends for further testing/processing
-     * @param  {CSV File Array} fileList
-     */
-    parseFiles(fileList, callback) {
-        this.clear(); // clear existing movement data once before processing files
-        for (const fileToParse of fileList) {
-            Papa.parse(fileToParse, {
-                complete: (results, file) => callback(results, file),
-                error: (error, file) => {
-                    alert("Parsing error with your movement file. Please make sure your file is formatted correctly as a .CSV");
-                    console.log(error, file);
-                },
-                header: true,
-                dynamicTyping: true,
-            });
-        }
-    }
-
-    /**
-     * Organizes custom tests of parsed file, clearing of existing data and updating both parsedFileArray and program data
+     * Adds new data to parsedFileArray and program data
      * @param  {Papaparse results Array} results
      * @param  {File} file
-     * @param  {Integer} fileNum // used to clear existing movement data for first new file only
      */
-    processFiles(results, file) {
-        console.log("Parsing complete:", results, file);
-        if (this.testData.parsedResults(results, this.testData.headersMovement, this.testData.movementRowForType)) {
-            const pathName = this.testData.cleanFileName(file.name);
-            this.parsedFileArray.push({
-                parsedMovementArray: results.data,
-                firstCharOfFileName: pathName
-            });
-            this.processPointArrays(results.data, pathName);
-        } else alert("Error loading movement file. Please make sure your file is a .CSV file formatted with column headers: " + this.testData.headersMovement.toString());
+    processFile(results, file) {
+        const pathName = this.testData.cleanFileName(file.name);
+        this.parsedFileArray.push({
+            parsedMovementArray: results.data,
+            firstCharOfFileName: pathName
+        });
+        this.processPointArrays(results.data, pathName);
     }
 
     processPointArrays(resultsDataArray, pathName) {

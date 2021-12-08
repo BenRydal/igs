@@ -72,11 +72,6 @@ body {
     margin-bottom: 10px;
 }
 
-.inputBar {
-    text-align: center;
-    margin-bottom: 10px;
-    display: none;
-}
 
 .inputfile {
     width: 0.1px;
@@ -97,16 +92,10 @@ body {
     padding: 5px;
 }
 
-/* .inputfile:focus+label,
-.inputfile+label:hover {
-    background-color: #999;
-} */
-
-/* .inputfile+label {
-    cursor: pointer;
-} */
-
-
+/* Display none for hiding load data buttons on program start */
+.loadData+label {
+    display: none;
+}
 
 /* Main Tabs */
 label {
@@ -130,7 +119,7 @@ label:hover {
     display: none;
 }
 
-/* Tabs behaviour, hidden if not checked/clicked */
+/* Tabs behavior, hidden if not checked/clicked */
 .sub-tab-content,
 .tab-content {
     display: none;
@@ -159,9 +148,6 @@ label:hover {
     border: 1px solid #ddd;
 }
 
-
-
-
 .tab-checkbox {
     background-color: #ffffff;
     color: black;
@@ -177,7 +163,7 @@ label:hover {
     user-select: none;
 }
 
-/* Hide the browser's default checkbox */
+/* Hide browser's default checkbox */
 .tab-checkbox input {
     position: absolute;
     opacity: 0;
@@ -197,16 +183,4 @@ label:hover {
     left: 0;
     height: 20px;
     width: 20px;
-    /* background-color: #D3D3D3;
-        border: 1px solid black; */
 }
-
-/* On mouse-over, add a dark grey background color */
-/* .tab-checkbox:hover input~.checkmark {
-    background-color: #D3D3D3;
-} */
-
-/* When the checkbox is checked, add a dark grey background */
-/* .tab-checkbox input:checked~.checkmark {
-    background-color: #1b03f5;
-} */

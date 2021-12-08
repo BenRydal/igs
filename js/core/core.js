@@ -2,17 +2,28 @@ class Core {
 
     constructor(sketch) {
         this.sk = sketch;
+        // Parsing Classes
         this.testData = new TestData(); // encapsulates various tests for parsing data
         this.parseMovement = new ParseMovement(this.sk, this.testData);
         this.parseConversation = new ParseConversation(this.sk, this.testData);
         this.parseCodes = new ParseCodes(this.sk, this.testData);
-        // PROGRAM DATA
+        // Program Data
         this.speakerList = []; // Holds speaker objects for number of speakers parsed from successfully loaded conversation file
         this.pathList = []; // Holds path objects for each successfully loaded movement file
         this.codeList = []; // holds code objects for each successfully loaded code file
-        this.inputFloorPlan = new InputFloorPlan(this.sk); // class to hold floorplan image and associated methods
         this.totalTimeInSeconds = 0; // Time value in seconds that all displayed data is set to, set dynamically when updating movement data
         this.COLOR_LIST = ['#6a3d9a', '#ff7f00', '#33a02c', '#1f78b4', '#e31a1c', '#ffff99', '#b15928', '#cab2d6', '#fdbf6f', '#b2df8a', '#a6cee3', '#fb9a99']; // 12 Class Paired: (Dark) purple, orange, green, blue, red, yellow, brown, (Light) lPurple, lOrange, lGreen, lBlue, lRed
+    }
+
+    /**
+     * @param  {PapaParse results Array} results
+     * @param  {File} file
+     */
+    testParsedResultsForProcessing(results, file) {
+        if (this.testData.parsedResults(results, this.testData.headersMovement, this.testData.movementRowForType)) this.parseMovement.processFile(results, file);
+        else if (this.testData.parsedResults(results, this.testData.headersConversation, this.testData.conversationRowForType)) this.parseConversation.processFile(results, file);
+        else if (this.testData.parsedResults(results, this.testData.headersCodes, this.testData.codeRowForType)) this.parseCodes.processFile(results, file);
+        else alert("Error loading CSV file. Please make sure your file is a CSV file formatted with correct column headers");
     }
 
     /**
@@ -148,7 +159,6 @@ class Core {
     }
 
     clearAll() {
-        this.inputFloorPlan.clear();
         this.parseMovement.clear();
         this.parseConversation.clear();
         this.parseCodes.clear();

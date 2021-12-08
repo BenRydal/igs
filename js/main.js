@@ -28,6 +28,7 @@ const igs = new p5((sk) => {
         sk.domController = new DomController(sk); // handles DOM/buttons user interaction
         sk.sketchController = new SketchController(sk); // coordinates calls across classes
         sk.videoPlayer = null; // abstract class for different video classes
+        sk.inputFloorPlan = new InputFloorPlan(sk);
         // CONSTANTS
         sk.PLAN = 0;
         sk.SPACETIME = 1;
@@ -39,14 +40,14 @@ const igs = new p5((sk) => {
         sk.textSize(sk.GUITEXTSIZE);
         sk.textFont(sk.font_Lato);
         sk.textAlign(sk.LEFT, sk.TOP);
-        sk.smooth();
+        sk.smooth(); // must enable when using 3D
     }
 
     sk.draw = function () {
         sk.background(255);
         sk.translate(-sk.width / 2, -sk.height / 2, 0); // always recenter canvas to top left when using WEBGL renderer
         sk.sketchController.handle3D.update3DTranslation();
-        if (sk.dataIsLoaded(sk.core.inputFloorPlan.getImg())) sk.sketchController.setFloorPlan();
+        if (sk.dataIsLoaded(sk.inputFloorPlan.getImg())) sk.sketchController.setFloorPlan();
         if (sk.arrayIsLoaded(sk.core.pathList)) {
             if (sk.arrayIsLoaded(sk.core.speakerList)) sk.setMovementAndConversation();
             else sk.setMovement();
@@ -79,9 +80,9 @@ const igs = new p5((sk) => {
         if (this.sketchController.handle3D.getIsShowing()) {
             sk.push();
             sk.translate(0, 0, -1);
-            sk.image(sk.core.inputFloorPlan.getImg(), 0, 0, width, height);
+            sk.image(sk.inputFloorPlan.getImg(), 0, 0, width, height);
             sk.pop();
-        } else sk.image(sk.core.inputFloorPlan.getImg(), 0, 0, width, height);
+        } else sk.image(sk.inputFloorPlan.getImg(), 0, 0, width, height);
     }
 
     sk.drawRotatedFloorPlan = function (angle, width, height, container) {
@@ -121,11 +122,14 @@ const igs = new p5((sk) => {
         sk.sketchController.handleMouseDragged();
         sk.loop();
     }
+
     sk.mouseReleased = function () {
         sk.sketchController.handleMouseReleased();
         sk.loop();
     }
+
     sk.mouseMoved = function () {
+        sk.sketchController.handleMouseMoved();
         sk.loop();
     }
 

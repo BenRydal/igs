@@ -10,7 +10,9 @@ class SketchController {
             isVideoPlay: false,
             isVideoShow: false,
             isPathColorMode: true,
-            curSelectTab: 0 // 5 options: None, Region, Slice, Moving, Stopped
+            curSelectTab: 0, // 5 options: None, Region, Slice, Moving, Stopped
+            wordToSearch: "" // String value to dynamically search words in conversation
+
         }
         this.handle3D = new Handle3D(this.sk);
         this.handleRotation = new HandleRotation(this.sk);
@@ -34,6 +36,11 @@ class SketchController {
 
     handleMouseReleased() {
         this.sk.gui.timelinePanel.resetLock();
+    }
+
+    handleMouseMoved() {
+        if (this.sk.gui.timelinePanel.overEitherSelector()) this.sk.cursor(this.sk.HAND);
+        else this.sk.cursor(this.sk.ARROW);
     }
 
     handleToggle3D() {
@@ -221,6 +228,14 @@ class SketchController {
 
     setDotTimeForVideoScrub(timePos) {
         this.dotTimeForVideoScrub = timePos;
+    }
+
+    setWordToSearch(value) {
+        this.mode.wordToSearch = value;
+    }
+
+    getWordToSearch() {
+        return this.mode.wordToSearch;
     }
 
     /**

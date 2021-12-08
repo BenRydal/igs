@@ -9,7 +9,6 @@
     <script src="libs/papaparse.min.js"></script>
     <script src="js/core/core.js"></script>
     <script src="js/core/test-data.js"></script>
-    <script src="js/core/floorplan.js"></script>
     <script src="js/core/parse-conversation.js"></script>
     <script src="js/core/parse-movement.js"></script>
     <script src="js/core/parse-codes.js"></script>
@@ -24,6 +23,7 @@
     <script src="js/draw/draw-conversation.js"></script>
     <script src="js/draw/test-point.js"></script>
     <script src="js/video/video-player.js"></script>
+    <script src="js/floorplan/floorplan.js"></script>
     <script src="js/main.js"></script>
     <link rel="stylesheet" type="text/css" href="css/input.css" />
     <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png">
@@ -47,6 +47,20 @@
                 <option value="Example 4">EXAMPLE 4: CLASSROOM DISCUSSION</option>
             </select>
 
+            <!-- loadData class used to show/hide buttons when load data option selected -->
+            <input type="file" name="file" id="inputAllData" class="inputfile loadData" multiple
+                accept=".png, .jpg, .jpeg, .csv, .mp4" onchange="igs.domController.handleLoadFileButton(this)">
+            <label for="inputAllData" class="loadData" title="Floor Plan (PNG/JPG)
+Movement (CSV)
+Conversation (CSV)
+Code (CSV)
+Video (MP4)">LOAD FILES</label>
+
+            <button type="button" id="clearButton" class="inputfile loadData"
+                onclick="igs.domController.handleClearButton()"></button>
+            <label for="clearButton" class="loadData">CLEAR</label>
+
+
             <button type="button" id="3DButton" class="inputfile"
                 onclick="igs.domController.handleToggle3DButton()"></button>
             <label for="3DButton">2D/3D</label>
@@ -60,33 +74,9 @@
             <label for="howToButton">HOW TO USE</label>
         </form>
     </div>
-    <div class="inputBar">
-        <form action="/action_page.php">
-            <input type="file" name="file" id="inputFloorPlan" class="inputfile" accept=".png, .jpg, .jpeg"
-                onchange="igs.domController.handleFloorPlanFile(this)">
-            <label for="inputFloorPlan">Floor Plan (PNG/JPG)</label>
 
-            <input type="file" name="file" id="inputMovement" class="inputfile" multiple accept=".csv"
-                onchange="igs.domController.handleMovementFiles(this)">
-            <label for="inputMovement">Movement (CSVs)</label>
 
-            <input type="file" name="file" id="inputConversation" class="inputfile" accept=".csv"
-                onchange="igs.domController.handleConversationFile(this)">
-            <label for="inputConversation">Conversation (CSV)</label>
 
-            <input type="file" name="file" id="inputVideo" class="inputfile" accept=".mp4"
-                onchange="igs.domController.handleVideoFile(this)">
-            <label for="inputVideo">Video (MP4)</label>
-
-            <input type="file" name="file" id="inputCodes" class="inputfile" multiple accept=".csv"
-                onchange="igs.domController.handleCodeFiles(this)">
-            <label for="inputCodes">Code (CSVs)</label>
-
-            <button type="button" id="clearButton" class="inputfile"
-                onclick="igs.domController.handleClearButton()"></button>
-            <label for="clearButton">Clear Data</label>
-        </form>
-    </div>
     <div class="container" id="sketch-holder">
         <div class="introContainer">
             <h1 class="introTitle">Interaction Geography Slicer (IGS)</h1>
@@ -139,18 +129,19 @@
         <input class="tab-radio" id="main-tab-3" name="main-group" type="radio" />
         <div class="tab-content">
             <div class="sub-tabs-container">
-                <!-- NOTE: due to id note below, remember to match the for in label-->
+                <!-- NOTE: due to id note below, remember to match the for. The actual title doesn't matter, just to show it works... -->
+                <input type="search" id="word-search" name="search-input" placeholder="Search"
+                    onsearch="igs.domController.updateWordToSearch(); igs.loop()">
                 <label for="sub-tab3-1">Align</label>
                 <label for="sub-tab3-2">All Speakers On Path</label>
             </div>
             <!-- Sub Tabs -->
             <!-- NOTE: name="sub-group" will require to be unique to the tab, ie: tab2 = sub-group2, tab3 = sub-group 3 etc. -->
-            <!-- NOTE: id has to be unique. Input ID changes for each sub-tab-->
+            <!-- NOTE: id have to be unique. So for each sub tabs, the input id will have to change-->
             <input class="tab-radio" id="sub-tab3-1" name="sub-group3" type="radio" checked="checked"
                 onclick="igs.sketchController.toggleIsAlignTalk(); igs.loop()">
             <input class="tab-radio" id="sub-tab3-2" name="sub-group3" type="radio"
                 onclick="igs.sketchController.toggleIsAllTalk(); igs.loop()">
-
         </div>
 
         <!-- TAB 4 CONTAINER ANIMATE -->
@@ -224,4 +215,5 @@
         </div>
     </div>
 </body>
+
 </html>

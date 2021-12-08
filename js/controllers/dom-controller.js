@@ -5,51 +5,43 @@ class DomController {
     }
 
     /**
-     * @param  {PNG, JPG, JPEG File} input
+     * @param  {PNG/JPG/JPEG, CSV, MP4 Array} input
      */
-    handleFloorPlanFile(input) {
-        this.sk.core.inputFloorPlan.update(URL.createObjectURL(input.files[0]));
-        input.value = ''; // reset input value so you can load same file again in browser
-    }
-
-    /**
-     * @param  {CSV Files} input
-     */
-    handleMovementFiles(input) {
-        let fileList = [];
-        for (const file of input.files) fileList.push(file);
-        this.sk.core.parseMovement.prepFiles(fileList);
+    handleLoadFileButton(input) {
+        for (const file of input.files) this.testFileTypeForProcessing(file);
         input.value = ''; // reset input value so you can load same file(s) again in browser
     }
 
-    /**
-     * @param  {CSV File} input
-     */
-    handleConversationFile(input) {
-        this.sk.core.parseConversation.prepFile(input.files[0]);
-        input.value = ''; // reset input value so you can load same file again in browser
+    testFileTypeForProcessing(file) {
+        if (file.type === "text/csv") this.parseCSVFile(file);
+        else if (file.type === "image/png" || file.type === "image/jpg" || file.type === "image/jpeg") this.sk.inputFloorPlan.update(URL.createObjectURL(file));
+        else if (file.type === "video/mp4") this.prepVideoFromFile(URL.createObjectURL(file));
+        else alert("Error loading file. Please make sure your file is an accepted format"); // this should not be possible due to HTML5 accept for file inputs, but in case
+    }
+
+    parseCSVFile(fileToParse) {
+        Papa.parse(fileToParse, {
+            complete: (results, file) => {
+                console.log("Parsing complete:", results, file);
+                this.sk.core.testParsedResultsForProcessing(results, file);
+            },
+            error: (error, file) => {
+                alert("Parsing error with one of your CSV file. Please make sure your file is formatted correctly as a .CSV");
+                console.log(error, file);
+            },
+            header: true,
+            dynamicTyping: true,
+        });
     }
 
     /**
      * @param  {MP4 File} input
      */
-    handleVideoFile(input) {
-        const fileLocation = URL.createObjectURL(input.files[0]);
+    prepVideoFromFile(fileLocation) {
         this.clearCurVideo();
         this.updateVideo('File', {
             fileName: fileLocation
         });
-        input.value = ''; // reset input value so you can load same file again in browser
-    }
-
-    /**
-     * @param  {CSV Files} input
-     */
-    handleCodeFiles(input) {
-        let fileList = [];
-        for (const file of input.files) fileList.push(file);
-        this.sk.core.parseCodes.prepFiles(fileList);
-        input.value = ''; // reset input value so you can load same file(s) again in browser
     }
 
     handleClearButton() {
@@ -76,17 +68,15 @@ class DomController {
         element.style.display = 'none';
     }
 
-    /**
-     * Example data format: [String directory, String floorPlan image file, String conversation File, String movement File[], String video platform, video params(see Video Player Interface)]
-     */
     handleExampleDropDown() {
         if (this.sk.sketchController.getIsAnimate()) this.sk.sketchController.startEndAnimation(); // reset animation if running
         let option = document.getElementById("examples").value;
-        if (option === "Load Data") this.showInputBar();
-        else this.hideInputBar();
+        if (option === "Load Data") this.showLoadDataButtons();
+        else this.hideLoadDataButtons();
         switch (option) {
             case "Load Data":
                 this.loadUserData();
+                this.sk.sketchController.setIsAllTalk(false); // not essential but setting matches each case differently
                 break;
             case "Example 1":
                 this.loadExampleData(['data/example-1/', 'floorplan.png', 'conversation.csv', ['Jordan.csv'], 'Youtube', {
@@ -104,7 +94,7 @@ class DomController {
                 this.loadExampleData(['data/example-3/', 'floorplan.png', 'conversation.csv', ['Teacher.csv'], 'Youtube', {
                     videoId: 'Iu0rxb-xkMk'
                 }]);
-                this.sk.sketchController.setIsAllTalk(true); // not essential but setting matches each case differently
+                this.sk.sketchController.setIsAllTalk(true);
                 break;
             case "Example 4":
                 this.loadExampleData(['data/example-4/', 'floorplan.png', 'conversation.csv', ['Teacher.csv', 'Sean.csv', 'Mei.csv', 'Cassandra.csv', 'Nathan.csv'], 'Youtube', {
@@ -115,14 +105,14 @@ class DomController {
         }
     }
 
-    showInputBar() {
-        let element = document.querySelector('.inputBar');
-        element.style.display = 'block';
+    showLoadDataButtons() {
+        const elementList = document.querySelectorAll(".loadData");
+        elementList.forEach(element => element.style.display = 'inline');
     }
 
-    hideInputBar() {
-        let element = document.querySelector('.inputBar');
-        element.style.display = 'none';
+    hideLoadDataButtons() {
+        const elementList = document.querySelectorAll(".loadData");
+        elementList.forEach(element => element.style.display = 'none');
     }
 
     loadUserData() {
@@ -132,15 +122,35 @@ class DomController {
     }
 
     /**
-     * @param  {[String directory, String floorPlan image file, String conversation File, String movement File[], String video platform, video params (see Video Player Interface)]} params
+     * @param {Array} params
+     * [0] String directory/folder
+     * [1] String floorPlan image filename
+     * [2] String conversation filename
+     * [3] Array of String movement filenames
+     * [4] String video platform (e.g.File or youTube)
+     * [5] Video params(see videoPlayer interface)
      */
     loadExampleData(params) {
         this.hideIntroMessage();
         this.clearAllData();
         this.updateVideo(params[4], params[5]);
-        this.sk.core.inputFloorPlan.update(params[0] + params[1]);
-        this.sk.core.parseConversation.prepExampleFile(params[0], params[2]);
-        this.sk.core.parseMovement.prepExampleFiles(params[0], params[3]);
+        this.sk.inputFloorPlan.update(params[0] + params[1]);
+        this.prepExampleCSVFile(params[0], params[2]); // only one conversation file to prep
+        for (const fileName of params[3]) this.prepExampleCSVFile(params[0], fileName); // loop through string array to prep each CSV file
+    }
+
+    async prepExampleCSVFile(folder, fileName) {
+        try {
+            const response = await fetch(new Request(folder + fileName));
+            const buffer = await response.arrayBuffer();
+            const file = new File([buffer], fileName, {
+                type: "text/csv",
+            });
+            this.testFileTypeForProcessing(file);
+        } catch (error) {
+            alert("Error loading CSV file. Please make sure you have a good internet connection")
+            console.log(error);
+        }
     }
 
     /**
@@ -163,6 +173,7 @@ class DomController {
 
     clearAllData() {
         this.sk.core.clearAll();
+        this.sk.inputFloorPlan.clear();
         this.clearAllCheckboxes();
         this.clearCurVideo();
     }
@@ -234,5 +245,10 @@ class DomController {
         while (element.firstChild) {
             element.removeChild(element.firstChild);
         }
+    }
+
+    updateWordToSearch() {
+        const searchInputDiv = document.getElementById("word-search");
+        this.sk.sketchController.setWordToSearch(searchInputDiv.value);
     }
 }
