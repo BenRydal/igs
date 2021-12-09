@@ -109,7 +109,6 @@ class P5FilePlayer {
         this.isLoaded = false;
         this.movie = this.sk.createVideo(params['fileName'], () => {
             console.log("File Player Ready:");
-            this.movie.onload = () => URL.revokeObjectURL(this.src);
             this.setMovieDiv();
             this.isLoaded = true;
             this.sk.sketchController.toggleVideoShowHide(); // Show video once it has been loaded
