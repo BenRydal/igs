@@ -50,7 +50,8 @@
             <!-- loadData class used to show/hide buttons when load data option selected -->
             <input type="file" name="file" id="inputAllData" class="inputfile loadData" multiple
                 accept=".png, .jpg, .jpeg, .csv, .mp4" onchange="igs.domController.handleLoadFileButton(this)">
-            <label for="inputAllData" class="loadData" title="Floor Plan (PNG/JPG)
+            <label for="inputAllData" class="loadData" title="Load Files in the following formats:
+Floor Plan (PNG/JPG)
 Movement (CSV)
 Conversation (CSV)
 Code (CSV)
@@ -58,20 +59,20 @@ Video (MP4)">LOAD FILES</label>
 
             <button type="button" id="clearButton" class="inputfile loadData"
                 onclick="igs.domController.handleClearButton()"></button>
-            <label for="clearButton" class="loadData">CLEAR</label>
+            <label for="clearButton" class="loadData" title="Clear All Loaded Data">CLEAR</label>
 
 
             <button type="button" id="3DButton" class="inputfile"
                 onclick="igs.domController.handleToggle3DButton()"></button>
-            <label for="3DButton">2D/3D</label>
+            <label for="3DButton" title="Toggle 2D and 3D Views">2D/3D</label>
 
             <button type="button" id="videoButton" class="inputfile"
                 onclick="igs.domController.handleVideoButton()"></button>
-            <label for="videoButton">VIDEO</label>
+            <label for="videoButton" title="Show/Hide Video">VIDEO</label>
 
             <button type="button" id="howToButton" class="inputfile"
                 onclick="igs.domController.handleHowToButton()"></button>
-            <label for="howToButton">HOW TO USE</label>
+            <label for="howToButton" title="Learn How To Use This Tool">HOW TO USE</label>
         </form>
     </div>
 
