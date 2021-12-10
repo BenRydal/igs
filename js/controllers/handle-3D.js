@@ -2,9 +2,9 @@ class Handle3D {
     /**
      * Class holds variables and methods that control 3D view and transitioning between 2D and 3D views
      */
-    constructor(sketch) {
+    constructor(sketch, isShowing) {
         this.sk = sketch;
-        this.isShowing = true;
+        this.isShowing = isShowing;
         this.isTransitioning = false;
         this.translate = {
             zoom: -(this.sk.height / 1.5),

@@ -22,7 +22,6 @@ const igs = new p5((sk) => {
     sk.setup = function () {
         sk.canvas = sk.createCanvas(window.innerWidth, window.innerHeight, sk.WEBGL);
         sk.canvas.parent('sketch-holder');
-        // SINGLETONS
         sk.core = new Core(sk); // holds core data, update and parsing methods/classes
         sk.gui = new GUI(sk); // holds GUI elements/classes
         sk.domController = new DomController(sk); // handles DOM/buttons user interaction
@@ -130,6 +129,13 @@ const igs = new p5((sk) => {
 
     sk.mouseMoved = function () {
         sk.sketchController.handleMouseMoved();
+        sk.loop();
+    }
+
+    sk.windowResized = function () {
+        sk.resizeCanvas(window.innerWidth, window.innerHeight);
+        sk.gui = new GUI(sk); // update GUI vars
+        sk.sketchController.handle3D = new Handle3D(sk, sk.sketchController.handle3D.isShowing); // update 3D display vars, pass current 3D showing mode
         sk.loop();
     }
 

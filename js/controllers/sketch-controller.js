@@ -14,7 +14,7 @@ class SketchController {
             wordToSearch: "" // String value to dynamically search words in conversation
 
         }
-        this.handle3D = new Handle3D(this.sk);
+        this.handle3D = new Handle3D(this.sk, true); // boolean sets 3D to showing
         this.handleRotation = new HandleRotation(this.sk);
         this.animationCounter = 0; // counter to synchronize animation across all data
         this.dotTimeForVideoScrub = null; // Set in draw movement data and used to display correct video frame when scrubbing video
