@@ -33,6 +33,7 @@ class YoutubePlayer {
             playerVars: {
                 controls: 0, // hides controls on the video
                 disablekb: 1, // disables keyboard controls on the video
+                playsinline: 1 // plays inline for mobile browsers not fullscreen
             },
             events: {
                 'onReady': () => {
