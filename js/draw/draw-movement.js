@@ -235,7 +235,7 @@ class DrawMovement {
         } else if (this.sk.sketchController.mode.isVideoPlay) {
             const videoToSelectTime = this.sk.sketchController.mapVideoTimeToSelectedTime();
             if (this.compareToCurDot(videoToSelectTime, timePos, curDot)) return this.createDot(xPos, yPos, zPos, timePos, codeColor, Math.abs(videoToSelectTime - timePos));
-        } else if (this.sk.gui.timelinePanel.aboveTimeline(this.sk.mouseX, this.sk.mouseY) && this.compareToCurDot(map3DMouse, timePos, curDot)) {
+        } else if (this.sk.sketchController.testTimeline() && this.compareToCurDot(map3DMouse, timePos, curDot)) {
             return this.createDot(xPos, yPos, zPos, map3DMouse, codeColor, Math.abs(map3DMouse - timePos));
         }
         return null;

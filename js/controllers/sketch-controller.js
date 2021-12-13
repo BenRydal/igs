@@ -79,7 +79,7 @@ class SketchController {
 
     setVideoScrubbing() {
         if (this.mode.isAnimate) this.sk.videoPlayer.seekTo(Math.floor(this.sk.map(this.dotTimeForVideoScrub, this.sk.gui.timelinePanel.getStart(), this.sk.gui.timelinePanel.getEnd(), this.mapPixelTimeToVideoTime(this.sk.gui.timelinePanel.getSelectStart()), this.mapPixelTimeToVideoTime(this.sk.gui.timelinePanel.getSelectEnd()))));
-        else if (this.sk.gui.timelinePanel.aboveTimeline(this.sk.mouseX, this.sk.mouseY)) {
+        else if (this.testTimeline()) {
             this.sk.videoPlayer.seekTo(Math.floor(this.mapPixelTimeToVideoTime(this.mapPixelTimeToSelectTime(this.sk.mouseX))));
             this.sk.videoPlayer.pause(); // Add to prevent accidental video playing that seems to occur
         }
@@ -113,7 +113,7 @@ class SketchController {
     }
 
     update3DSlicerRect() {
-        if (this.sk.gui.timelinePanel.aboveTimeline(this.sk.mouseX, this.sk.mouseY)) {
+        if (this.testTimeline()) {
             this.sk.gui.timelinePanel.draw3DSlicerRect(this.sk.gui.fpContainer.getContainer(), this.mapToSelectTimeThenPixelTime(this.sk.mouseX)); // pass mapped mouseX as zPos
         }
     }
@@ -129,6 +129,10 @@ class SketchController {
 
     testVideoAndDivAreLoaded() {
         return (this.sk.dataIsLoaded(this.sk.videoPlayer) && this.sk.videoPlayer.getIsLoaded());
+    }
+
+    testTimeline() {
+        return this.sk.gui.timelinePanel.overTimeline(this.sk.mouseX, this.sk.mouseY);
     }
 
     // ****** MAP HELPERS ****** //
