@@ -72,9 +72,7 @@ class SketchController {
 
     updateVideoDisplay() {
         if (this.mode.isVideoShow) {
-            const xPos = this.sk.constrain(this.sk.mouseX, this.sk.width / 5, this.sk.width);
-            const yPos = this.sk.constrain(this.sk.mouseY, 50, this.sk.gui.timelinePanel.getTop() - this.sk.width / 6);
-            this.sk.videoPlayer.updatePos(xPos, yPos);
+            this.sk.videoPlayer.updatePos(this.sk.mouseX, this.sk.mouseY, 50, this.sk.gui.timelinePanel.getTop());
             if (!this.mode.isVideoPlay) this.setVideoScrubbing();
         }
     }

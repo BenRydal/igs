@@ -88,7 +88,9 @@ class YoutubePlayer {
         return this.player.getDuration();
     }
 
-    updatePos(xPos, yPos) {
+    updatePos(mouseX, mouseY, top, bottom) {
+        const xPos = this.sk.constrain(mouseX, this.videoWidth, this.sk.width);
+        const yPos = this.sk.constrain(mouseY, top, bottom - this.videoHeight);
         this.sk.select('#moviePlayer').position(xPos - this.videoWidth, yPos);
     }
 
@@ -108,6 +110,7 @@ class P5FilePlayer {
         this.videoWidth = null;
         this.videoHeight = null;
         this.isLoaded = false;
+        this.isOver = false; // used internally to test if user selected movie element
         this.movie = this.sk.createVideo(params['fileName'], () => {
             console.log("File Player Ready:");
             this.setMovieDiv();
@@ -124,6 +127,15 @@ class P5FilePlayer {
         this.movie.size(this.videoWidth, this.videoHeight);
         //this.movie.hide();
         this.movie.position(0, 0);
+        this.movie.mousePressed(() => {
+            this.isOver = true;
+        });
+        this.movie.mouseReleased(() => {
+            this.isOver = false;
+        });
+        this.movie.mouseOver(() => {
+            this.sk.select('#moviePlayer').style('cursor', 'grab'); // set mouse cursor style--this overrides any P5 cursor styles set in draw loop
+        });
     }
 
     getIsLoaded() {
@@ -168,8 +180,10 @@ class P5FilePlayer {
         return this.movie.duration();
     }
 
-    updatePos(xPos, yPos) {
-        this.sk.select('#moviePlayer').position(xPos - this.videoWidth, yPos);
+    updatePos(mouseX, mouseY, top, bottom) {
+        const xPos = this.sk.constrain(mouseX, this.videoWidth / 2, this.sk.width - this.videoWidth / 2);
+        const yPos = this.sk.constrain(mouseY, top + this.videoHeight / 2, bottom - this.videoHeight / 2);
+        if (this.isOver) this.sk.select('#moviePlayer').position(xPos - this.videoWidth / 2, yPos - this.videoHeight / 2);
     }
 
     destroy() {
