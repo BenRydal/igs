@@ -27,7 +27,7 @@ class SketchController {
     }
 
     handleMousePressed() {
-        if (this.testVideoToPlay()) this.playPauseMovie();
+        this.playPauseVideoFromTimeline();
     }
 
     handleMouseDragged() {
@@ -87,9 +87,8 @@ class SketchController {
 
     toggleVideoShowHide() {
         if (this.mode.isVideoShow) {
-            this.sk.videoPlayer.pause();
+            this.pauseMovie();
             this.sk.videoPlayer.hide();
-            this.setIsVideoPlay(false);
             this.setIsVideoShow(false);
         } else {
             this.sk.videoPlayer.show();
@@ -97,27 +96,32 @@ class SketchController {
         }
     }
 
-    playPauseMovie() {
-        if (this.mode.isVideoPlay) {
-            this.sk.videoPlayer.pause();
-            this.setIsVideoPlay(false);
-        } else {
-            this.sk.videoPlayer.play();
-            this.sk.videoPlayer.seekTo(this.mapPixelTimeToVideoTime(this.mapPixelTimeToSelectTime(this.sk.mouseX)));
-            this.setIsVideoPlay(true);
+    // 2 playPause video methods differ with respect to tests and seekTo method call
+    playPauseVideoFromTimeline() {
+        if (this.testVideoToPlay()) {
+            if (this.mode.isVideoPlay) this.pauseMovie();
+            else {
+                this.playVideo();
+                this.sk.videoPlayer.seekTo(this.mapPixelTimeToVideoTime(this.mapPixelTimeToSelectTime(this.sk.mouseX)));
+            }
         }
     }
 
-    zzzPlayPauseMovie() {
+    playPauseVideoFromButton() {
         if (this.testVideoAndDivAreLoaded() && this.mode.isVideoShow && !this.mode.isAnimate) {
-            if (this.mode.isVideoPlay) {
-                this.sk.videoPlayer.pause();
-                this.setIsVideoPlay(false);
-            } else {
-                this.sk.videoPlayer.play();
-                this.setIsVideoPlay(true);
-            }
+            if (this.mode.isVideoPlay) this.pauseMovie();
+            else this.playVideo();
         }
+    }
+
+    pauseMovie() {
+        this.sk.videoPlayer.pause();
+        this.setIsVideoPlay(false);
+    }
+
+    playVideo() {
+        this.sk.videoPlayer.play();
+        this.setIsVideoPlay(true);
     }
 
     increaseVideoSize() {
