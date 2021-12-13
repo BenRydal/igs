@@ -11,6 +11,7 @@ class YoutubePlayer {
         this.sk = sketch;
         this.targetId = 'moviePlayer';
         this.videoId = params['videoId'];
+        this.duration = null;
         this.videoWidth = this.sk.width / 5; // these dimensions work nicely for example data
         this.videoHeight = this.sk.width / 7;
         this.movie = this.sk.createDiv();
@@ -38,16 +39,13 @@ class YoutubePlayer {
             events: {
                 'onReady': () => {
                     console.log("YT player ready: ");
+                    this.duration = this.player.getDuration();
                     this.isLoaded = true;
                     this.sk.sketchController.toggleVideoShowHide(); // Show video once loaded
                     this.sk.loop(); // rerun P5 draw loop after loading image
                 }
             }
         });
-    }
-
-    getIsLoaded() {
-        return this.isLoaded;
     }
 
     show() {
@@ -80,12 +78,16 @@ class YoutubePlayer {
         this.player.unMute();
     }
 
+    getIsLoaded() {
+        return this.isLoaded;
+    }
+
     getCurrentTime() {
         return this.player.getCurrentTime();
     }
 
     getVideoDuration() {
-        return this.player.getDuration();
+        return this.duration;
     }
 
     updatePos(mouseX, mouseY, top, bottom) {
@@ -107,6 +109,7 @@ class P5FilePlayer {
      */
     constructor(sketch, params) {
         this.sk = sketch;
+        this.duration = null;
         this.videoWidth = null;
         this.videoHeight = null;
         this.isLoaded = false;
@@ -125,7 +128,7 @@ class P5FilePlayer {
         this.videoWidth = this.sk.width / 5; // nice starting width for all loaded videos
         this.videoHeight = (this.movie.height / this.movie.width) * this.videoWidth; // scale height proportional to original aspect ratio
         this.movie.size(this.videoWidth, this.videoHeight);
-        //this.movie.hide();
+        this.duration = this.movie.duration();
         this.movie.position(0, 0);
         this.movie.mousePressed(() => {
             this.isOver = true;
@@ -136,10 +139,6 @@ class P5FilePlayer {
         this.movie.mouseOver(() => {
             this.sk.select('#moviePlayer').style('cursor', 'grab'); // set mouse cursor style--this overrides any P5 cursor styles set in draw loop
         });
-    }
-
-    getIsLoaded() {
-        return this.isLoaded;
     }
 
     show() {
@@ -172,12 +171,16 @@ class P5FilePlayer {
         this.movie.volume(1);
     }
 
+    getIsLoaded() {
+        return this.isLoaded;
+    }
+
     getCurrentTime() {
         return this.movie.time();
     }
 
     getVideoDuration() {
-        return this.movie.duration();
+        return this.duration;
     }
 
     updatePos(mouseX, mouseY, top, bottom) {
