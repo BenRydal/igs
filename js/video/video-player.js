@@ -22,7 +22,7 @@ class YoutubePlayer {
     setMovieDiv() {
         this.movie.id(this.targetId);
         this.movie.size(this.videoWidth, this.videoHeight);
-        this.movie.hide();
+        //this.movie.hide();
         this.movie.position(0, 0);
     }
 
@@ -122,7 +122,7 @@ class P5FilePlayer {
         this.videoWidth = this.sk.width / 5; // nice starting width for all loaded videos
         this.videoHeight = (this.movie.height / this.movie.width) * this.videoWidth; // scale height proportional to original aspect ratio
         this.movie.size(this.videoWidth, this.videoHeight);
-        this.movie.hide();
+        //this.movie.hide();
         this.movie.position(0, 0);
     }
 
