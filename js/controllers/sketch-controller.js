@@ -214,6 +214,10 @@ class SketchController {
         return this.mode.isPathColorMode;
     }
 
+    toggleIsPathColorMode() {
+        this.mode.isPathColorMode = !this.mode.isPathColorMode;
+    }
+
     setIsPathColorMode(value) {
         this.mode.isPathColorMode = value;
     }
