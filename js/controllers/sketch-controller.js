@@ -108,6 +108,26 @@ class SketchController {
         }
     }
 
+    zzzPlayPauseMovie() {
+        if (this.testVideoAndDivAreLoaded() && this.mode.isVideoShow && !this.mode.isAnimate) {
+            if (this.mode.isVideoPlay) {
+                this.sk.videoPlayer.pause();
+                this.setIsVideoPlay(false);
+            } else {
+                this.sk.videoPlayer.play();
+                this.setIsVideoPlay(true);
+            }
+        }
+    }
+
+    increaseVideoSize() {
+        if (this.testVideoAndDivAreLoaded()) this.sk.videoPlayer.increaseSize();
+    }
+
+    decreaseVideoSize() {
+        if (this.testVideoAndDivAreLoaded()) this.sk.videoPlayer.decreaseSize();
+    }
+
     translationComplete() {
         return this.handle3D.getIsShowing() || this.handle3D.getIsTransitioning();
     }

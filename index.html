@@ -61,14 +61,9 @@ Video (MP4)">LOAD FILES</label>
                 onclick="igs.domController.handleClearButton()"></button>
             <label for="clearButton" class="loadData" title="Clear All Loaded Data">CLEAR</label>
 
-
             <button type="button" id="3DButton" class="inputfile"
                 onclick="igs.domController.handleToggle3DButton()"></button>
             <label for="3DButton" title="Toggle 2D and 3D Views">2D/3D</label>
-
-            <button type="button" id="videoButton" class="inputfile"
-                onclick="igs.domController.handleVideoButton()"></button>
-            <label for="videoButton" title="Show/Hide Video">VIDEO</label>
 
             <button type="button" id="howToButton" class="inputfile"
                 onclick="igs.domController.handleHowToButton()"></button>
@@ -113,7 +108,7 @@ Video (MP4)">LOAD FILES</label>
             <label for="main-tab-5">SELECT</label>
             <label for="main-tab-6">FLOOR PLAN</label>
             <label for="main-tab-7">CODES</label>
-            <!-- <label for="main-tab-8">COLOR</label> -->
+            <label for="main-tab-8">VIDEO</label>
         </div>
 
         <!-- TAB 1 CONTAINER MOVEMENT -->
@@ -201,17 +196,24 @@ Video (MP4)">LOAD FILES</label>
         <div class="tab-content" id="codesMainTab">
         </div>
 
-        <!-- <input class="tab-radio" id="main-tab-8" name="main-group" type="radio" />
+        <!-- TAB 8 CONTAINER VIDEO -->
+        <input class="tab-radio" id="main-tab-8" name="main-group" type="radio" />
         <div class="tab-content">
             <div class="sub-tabs-container">
-                <label for="sub-tab8-1">People</label>
-                <label for="sub-tab8-2">Codes</label>
+                <label for="sub-tab8-1">Show/Hide</label>
+                <label for="sub-tab8-2">Play/Pause</label>
+                <label for="sub-tab8-3">+</label>
+                <label for="sub-tab8-4">-</label>
             </div>
             <input class="tab-radio" id="sub-tab8-1" name="sub-group8" type="radio" checked="checked"
-                onclick="igs.sketchController.setIsPathColorMode(true); igs.domController.reProcessCheckboxMainTabs(); igs.loop()">
+                onclick="igs.domController.handleVideoButton(); igs.loop()">
             <input class="tab-radio" id="sub-tab8-2" name="sub-group8" type="radio"
-                onclick="igs.sketchController.setIsPathColorMode(false); igs.domController.reProcessCheckboxMainTabs(); igs.loop()">
-        </div> -->
+                onclick="igs.sketchController.zzzPlayPauseMovie(); igs.loop()">
+            <input class="tab-radio" id="sub-tab8-3" name="sub-group8" type="radio" checked="checked"
+                onclick="igs.sketchController.increaseVideoSize(); igs.loop()">
+            <input class="tab-radio" id="sub-tab8-4" name="sub-group8" type="radio"
+                onclick="igs.sketchController.decreaseVideoSize(); igs.loop()">
+        </div>
 
     </div>
 </body>

@@ -14,6 +14,7 @@ class YoutubePlayer {
         this.duration = null;
         this.videoWidth = this.sk.width / 5; // these dimensions work nicely for example data
         this.videoHeight = this.sk.width / 7;
+        this.increment = 25;
         this.movie = this.sk.createDiv();
         this.isLoaded = false;
         this.setMovieDiv();
@@ -23,7 +24,6 @@ class YoutubePlayer {
     setMovieDiv() {
         this.movie.id(this.targetId);
         this.movie.size(this.videoWidth, this.videoHeight);
-        //this.movie.hide();
         this.movie.position(0, 0);
     }
 
@@ -96,6 +96,18 @@ class YoutubePlayer {
         this.sk.select('#moviePlayer').position(xPos - this.videoWidth, yPos);
     }
 
+    increaseSize() {
+        this.videoHeight = (this.videoHeight / this.videoWidth) * (this.videoWidth + this.increment);
+        this.videoWidth += this.increment;
+        this.sk.select('#moviePlayer').size(this.videoWidth, this.videoHeight);
+    }
+
+    decreaseSize() {
+        this.videoHeight = (this.videoHeight / this.videoWidth) * (this.videoWidth - this.increment);
+        this.videoWidth -= this.increment;
+        this.sk.select('#moviePlayer').size(this.videoWidth, this.videoHeight);
+    }
+
     destroy() {
         this.player.destroy(); // destroy the player object
         this.movie.remove(); // remove the div element
@@ -114,6 +126,7 @@ class P5FilePlayer {
         this.videoHeight = null;
         this.isLoaded = false;
         this.isOver = false; // used internally to test if user selected movie element
+        this.increment = 25; //for increasing and decreasing video size
         this.movie = this.sk.createVideo(params['fileName'], () => {
             console.log("File Player Ready:");
             this.setMovieDiv();
@@ -187,6 +200,18 @@ class P5FilePlayer {
         const xPos = this.sk.constrain(mouseX, this.videoWidth / 2, this.sk.width - this.videoWidth / 2);
         const yPos = this.sk.constrain(mouseY, top + this.videoHeight / 2, bottom - this.videoHeight / 2);
         if (this.isOver) this.sk.select('#moviePlayer').position(xPos - this.videoWidth / 2, yPos - this.videoHeight / 2);
+    }
+
+    increaseSize() {
+        this.videoHeight = (this.videoHeight / this.videoWidth) * (this.videoWidth + this.increment);
+        this.videoWidth += this.increment;
+        this.sk.select('#moviePlayer').size(this.videoWidth, this.videoHeight);
+    }
+
+    decreaseSize() {
+        this.videoHeight = (this.videoHeight / this.videoWidth) * (this.videoWidth - this.increment);
+        this.videoWidth -= this.increment;
+        this.sk.select('#moviePlayer').size(this.videoWidth, this.videoHeight);
     }
 
     destroy() {
