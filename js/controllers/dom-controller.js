@@ -161,14 +161,12 @@ class DomController {
      * @param  {VideoPlayer Specific Params} params
      */
     updateVideo(platform, params) {
-        const videoWidth = this.sk.width / 5;
-        const videoHeight = this.sk.width / 6;
         switch (platform) {
             case "Youtube":
-                this.sk.videoPlayer = new YoutubePlayer(this.sk, params, videoWidth, videoHeight);
+                this.sk.videoPlayer = new YoutubePlayer(this.sk, params);
                 break;
             case "File":
-                this.sk.videoPlayer = new P5FilePlayer(this.sk, params, videoWidth, videoHeight);
+                this.sk.videoPlayer = new P5FilePlayer(this.sk, params);
                 break;
         }
     }

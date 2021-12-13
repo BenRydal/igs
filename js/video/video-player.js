@@ -7,12 +7,12 @@ class YoutubePlayer {
      * Include the following script in head of the format: <script type = "text/javascript" src = "https://www.youtube.com/iframe_api"> < /script>
      * @param  {videoId: 'your_videoId_here'} params
      */
-    constructor(sketch, params, videoWidth, videoHeight) {
+    constructor(sketch, params) {
         this.sk = sketch;
         this.targetId = 'moviePlayer';
         this.videoId = params['videoId'];
-        this.videoWidth = videoWidth;
-        this.videoHeight = videoHeight;
+        this.videoWidth = this.sk.width / 5; // these dimensions work nicely for example data
+        this.videoHeight = this.sk.width / 7;
         this.movie = this.sk.createDiv();
         this.isLoaded = false;
         this.setMovieDiv();
@@ -103,10 +103,10 @@ class P5FilePlayer {
     /**
      * @param  {fileName: 'your_fileLocation_here'} params
      */
-    constructor(sketch, params, videoWidth, videoHeight) {
+    constructor(sketch, params) {
         this.sk = sketch;
-        this.videoWidth = videoWidth;
-        this.videoHeight = videoHeight;
+        this.videoWidth = null;
+        this.videoHeight = null;
         this.isLoaded = false;
         this.movie = this.sk.createVideo(params['fileName'], () => {
             console.log("File Player Ready:");
@@ -119,6 +119,8 @@ class P5FilePlayer {
 
     setMovieDiv() {
         this.movie.id('moviePlayer');
+        this.videoWidth = this.sk.width / 5; // nice starting width for all loaded videos
+        this.videoHeight = (this.movie.height / this.movie.width) * this.videoWidth; // scale height proportional to original aspect ratio
         this.movie.size(this.videoWidth, this.videoHeight);
         this.movie.hide();
         this.movie.position(0, 0);
