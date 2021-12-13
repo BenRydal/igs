@@ -86,13 +86,15 @@ class SketchController {
     }
 
     toggleVideoShowHide() {
-        if (this.mode.isVideoShow) {
-            this.pauseMovie();
-            this.sk.videoPlayer.hide();
-            this.setIsVideoShow(false);
-        } else {
-            this.sk.videoPlayer.show();
-            this.setIsVideoShow(true);
+        if (this.sk.sketchController.testVideoAndDivAreLoaded()) {
+            if (this.mode.isVideoShow) {
+                this.pauseMovie();
+                this.sk.videoPlayer.hide();
+                this.setIsVideoShow(false);
+            } else {
+                this.sk.videoPlayer.show();
+                this.setIsVideoShow(true);
+            }
         }
     }
 

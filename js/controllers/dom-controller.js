@@ -54,10 +54,6 @@ class DomController {
         this.sk.sketchController.handleToggle3D();
     }
 
-    handleVideoButton() {
-        if (this.sk.sketchController.testVideoAndDivAreLoaded()) this.sk.sketchController.toggleVideoShowHide();
-    }
-
     handleHowToButton() {
         let element = document.querySelector('.introContainer');
         if (element.style.display === 'none') element.style.display = 'block';
