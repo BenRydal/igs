@@ -85,7 +85,7 @@ class SketchController {
         }
     }
 
-    toggleVideoShowHide() {
+    toggleShowVideo() {
         if (this.sk.sketchController.testVideoAndDivAreLoaded()) {
             if (this.mode.isVideoShow) {
                 this.pauseMovie();

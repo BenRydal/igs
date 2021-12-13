@@ -41,7 +41,7 @@ class YoutubePlayer {
                     console.log("YT player ready: ");
                     this.duration = this.player.getDuration();
                     this.isLoaded = true;
-                    this.sk.sketchController.toggleVideoShowHide(); // Show video once loaded
+                    this.sk.sketchController.toggleShowVideo(); // Show video once loaded
                     this.sk.loop(); // rerun P5 draw loop after loading image
                 }
             }
@@ -131,7 +131,7 @@ class P5FilePlayer {
             console.log("File Player Ready:");
             this.setMovieDiv();
             this.isLoaded = true;
-            this.sk.sketchController.toggleVideoShowHide(); // Show video once it has been loaded
+            this.sk.sketchController.toggleShowVideo(); // Show video once it has been loaded
             this.sk.loop(); // rerun P5 draw loop after loading image
         });
     }
