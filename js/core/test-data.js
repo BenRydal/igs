@@ -13,7 +13,7 @@ class TestData {
      * Note: must bind this to callbackTypeTest to set correct "this" context
      */
     parsedResults(results, headers, callbackTypeTest) {
-        return results.data.length > 1 && this.includesAllHeaders(results.meta.fields, headers) && this.hasOneCleanRow(results.data, callbackTypeTest.bind(this));
+        return results.data.length > 0 && this.includesAllHeaders(results.meta.fields, headers) && this.hasOneCleanRow(results.data, callbackTypeTest.bind(this));
     }
 
     includesAllHeaders(meta, headers) {
