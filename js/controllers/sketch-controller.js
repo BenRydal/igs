@@ -124,7 +124,7 @@ class SketchController {
 
     // ****** TEST HELPERS ****** //
     testVideoToPlay() {
-        return this.testVideoAndDivAreLoaded() && this.mode.isVideoShow && !this.mode.isAnimate && this.sk.gui.timelinePanel.aboveTimeline(this.sk.mouseX, this.sk.mouseY);
+        return this.testVideoAndDivAreLoaded() && this.mode.isVideoShow && !this.mode.isAnimate && this.sk.gui.timelinePanel.overTimeline(this.sk.mouseX, this.sk.mouseY) && !this.sk.gui.timelinePanel.overEitherSelector();
     }
 
     testVideoAndDivAreLoaded() {
