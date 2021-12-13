@@ -104,11 +104,11 @@ Video (MP4)">LOAD FILES</label>
             <label for="main-tab-1">MOVEMENT</label>
             <label for="main-tab-2">SPEAKERS</label>
             <label for="main-tab-3">TALK</label>
-            <label for="main-tab-4">ANIMATE</label>
-            <label for="main-tab-5">SELECT</label>
-            <label for="main-tab-6">FLOOR PLAN</label>
-            <label for="main-tab-7">CODES</label>
-            <label for="main-tab-8">VIDEO</label>
+            <label for="main-tab-4">VIDEO</label>
+            <label for="main-tab-5">ANIMATE</label>
+            <label for="main-tab-6">SELECT</label>
+            <label for="main-tab-7">FLOOR PLAN</label>
+            <label for="main-tab-8">CODES</label>
         </div>
 
         <!-- TAB 1 CONTAINER MOVEMENT -->
@@ -140,81 +140,80 @@ Video (MP4)">LOAD FILES</label>
                 onclick="igs.sketchController.toggleIsAllTalk(); igs.loop()">
         </div>
 
-        <!-- TAB 4 CONTAINER ANIMATE -->
+        <!-- TAB 4 CONTAINER VIDEO -->
         <input class="tab-radio" id="main-tab-4" name="main-group" type="radio" />
         <div class="tab-content">
             <div class="sub-tabs-container">
-                <label for="sub-tab4-1">Start/End</label>
+                <label for="sub-tab4-1">Show/Hide</label>
                 <label for="sub-tab4-2">Play/Pause</label>
+                <label for="sub-tab4-3">+</label>
+                <label for="sub-tab4-4">-</label>
             </div>
-            <!-- Sub Tabs -->
             <input class="tab-radio" id="sub-tab4-1" name="sub-group4" type="radio" checked="checked"
-                onclick="igs.sketchController.startEndAnimation(); igs.loop()">
-            <input class="tab-radio" id="sub-tab4-2" name="sub-group4" type="radio"
-                onclick="igs.sketchController.toggleIsAnimatePause(); igs.loop()">
-        </div>
-
-        <!-- TAB 5 CONTAINER SELECT -->
-        <input class="tab-radio" id="main-tab-5" name="main-group" type="radio" />
-        <div class="tab-content">
-            <div class="sub-tabs-container">
-                <label for="sub-tab5-1">None</label>
-                <label for="sub-tab5-2">Region</label>
-                <label for="sub-tab5-3">Slice</label>
-                <label for="sub-tab5-4">Moving</label>
-                <label for="sub-tab5-5">Stopped</label>
-            </div>
-            <!-- Sub Tabs -->
-            <input class="tab-radio" id="sub-tab5-1" name="sub-group5" type="radio" checked="checked"
-                onclick="igs.sketchController.setCurSelectTab(0); igs.loop()">
-            <input class="tab-radio" id="sub-tab5-2" name="sub-group5" type="radio"
-                onclick="igs.sketchController.setCurSelectTab(1); igs.loop()">
-            <input class="tab-radio" id="sub-tab5-3" name="sub-group5" type="radio" checked="checked"
-                onclick="igs.sketchController.setCurSelectTab(2); igs.loop()">
-            <input class="tab-radio" id="sub-tab5-4" name="sub-group5" type="radio"
-                onclick="igs.sketchController.setCurSelectTab(3); igs.loop()">
-            <input class="tab-radio" id="sub-tab5-5" name="sub-group5" type="radio"
-                onclick="igs.sketchController.setCurSelectTab(4); igs.loop()">
-        </div>
-
-        <!-- TAB 6 CONTAINER FLOOR PLAN-->
-        <input class="tab-radio" id="main-tab-6" name="main-group" type="radio" />
-        <div class="tab-content">
-            <div class="sub-tabs-container">
-                <label for="sub-tab6-1">Rotate Left</label>
-                <label for="sub-tab6-2">Rotate Right</label>
-            </div>
-            <!-- Sub Tabs -->
-            <input class="tab-radio" id="sub-tab6-1" name="sub-group6" type="radio" checked="checked"
-                onclick="igs.sketchController.setRotateLeft(); igs.loop()">
-            <input class="tab-radio" id="sub-tab6-2" name="sub-group6" type="radio"
-                onclick="igs.sketchController.setRotateRight(); igs.loop()">
-        </div>
-
-        <!-- TAB 7 CONTAINER CODES -->
-        <input class="tab-radio" id="main-tab-7" name="main-group" type="radio" />
-        <div class="tab-content" id="codesMainTab">
-        </div>
-
-        <!-- TAB 8 CONTAINER VIDEO -->
-        <input class="tab-radio" id="main-tab-8" name="main-group" type="radio" />
-        <div class="tab-content">
-            <div class="sub-tabs-container">
-                <label for="sub-tab8-1">Show/Hide</label>
-                <label for="sub-tab8-2">Play/Pause</label>
-                <label for="sub-tab8-3">+</label>
-                <label for="sub-tab8-4">-</label>
-            </div>
-            <input class="tab-radio" id="sub-tab8-1" name="sub-group8" type="radio" checked="checked"
                 onclick="igs.domController.handleVideoButton(); igs.loop()">
-            <input class="tab-radio" id="sub-tab8-2" name="sub-group8" type="radio"
+            <input class="tab-radio" id="sub-tab4-2" name="sub-group4" type="radio"
                 onclick="igs.sketchController.playPauseVideoFromButton(); igs.loop()">
-            <input class="tab-radio" id="sub-tab8-3" name="sub-group8" type="radio" checked="checked"
+            <input class="tab-radio" id="sub-tab4-3" name="sub-group4" type="radio" checked="checked"
                 onclick="igs.sketchController.increaseVideoSize(); igs.loop()">
-            <input class="tab-radio" id="sub-tab8-4" name="sub-group8" type="radio"
+            <input class="tab-radio" id="sub-tab4-4" name="sub-group4" type="radio"
                 onclick="igs.sketchController.decreaseVideoSize(); igs.loop()">
         </div>
 
+        <!-- TAB 5 CONTAINER ANIMATE -->
+        <input class="tab-radio" id="main-tab-5" name="main-group" type="radio" />
+        <div class="tab-content">
+            <div class="sub-tabs-container">
+                <label for="sub-tab5-1">Start/End</label>
+                <label for="sub-tab5-2">Play/Pause</label>
+            </div>
+            <!-- Sub Tabs -->
+            <input class="tab-radio" id="sub-tab5-1" name="sub-group5" type="radio" checked="checked"
+                onclick="igs.sketchController.startEndAnimation(); igs.loop()">
+            <input class="tab-radio" id="sub-tab5-2" name="sub-group5" type="radio"
+                onclick="igs.sketchController.toggleIsAnimatePause(); igs.loop()">
+        </div>
+
+        <!-- TAB 6 CONTAINER SELECT -->
+        <input class="tab-radio" id="main-tab-6" name="main-group" type="radio" />
+        <div class="tab-content">
+            <div class="sub-tabs-container">
+                <label for="sub-tab6-1">None</label>
+                <label for="sub-tab6-2">Region</label>
+                <label for="sub-tab6-3">Slice</label>
+                <label for="sub-tab6-4">Moving</label>
+                <label for="sub-tab6-5">Stopped</label>
+            </div>
+            <!-- Sub Tabs -->
+            <input class="tab-radio" id="sub-tab6-1" name="sub-group6" type="radio" checked="checked"
+                onclick="igs.sketchController.setCurSelectTab(0); igs.loop()">
+            <input class="tab-radio" id="sub-tab6-2" name="sub-group6" type="radio"
+                onclick="igs.sketchController.setCurSelectTab(1); igs.loop()">
+            <input class="tab-radio" id="sub-tab6-3" name="sub-group6" type="radio" checked="checked"
+                onclick="igs.sketchController.setCurSelectTab(2); igs.loop()">
+            <input class="tab-radio" id="sub-tab6-4" name="sub-group6" type="radio"
+                onclick="igs.sketchController.setCurSelectTab(3); igs.loop()">
+            <input class="tab-radio" id="sub-tab6-5" name="sub-group6" type="radio"
+                onclick="igs.sketchController.setCurSelectTab(4); igs.loop()">
+        </div>
+
+        <!-- TAB 7 CONTAINER FLOOR PLAN-->
+        <input class="tab-radio" id="main-tab-7" name="main-group" type="radio" />
+        <div class="tab-content">
+            <div class="sub-tabs-container">
+                <label for="sub-tab7-1">Rotate Left</label>
+                <label for="sub-tab7-2">Rotate Right</label>
+            </div>
+            <!-- Sub Tabs -->
+            <input class="tab-radio" id="sub-tab7-1" name="sub-group7" type="radio" checked="checked"
+                onclick="igs.sketchController.setRotateLeft(); igs.loop()">
+            <input class="tab-radio" id="sub-tab7-2" name="sub-group7" type="radio"
+                onclick="igs.sketchController.setRotateRight(); igs.loop()">
+        </div>
+
+        <!-- TAB 8 CONTAINER CODES -->
+        <input class="tab-radio" id="main-tab-8" name="main-group" type="radio" />
+        <div class="tab-content" id="codesMainTab">
+        </div>
     </div>
 </body>
 
