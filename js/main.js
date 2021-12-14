@@ -135,6 +135,8 @@ const igs = new p5((sk) => {
     sk.windowResized = function () {
         sk.resizeCanvas(window.innerWidth, window.innerHeight);
         sk.gui = new GUI(sk); // update GUI vars
+        sk.GUITEXTSIZE = sk.width / 70;
+        sk.textSize(sk.GUITEXTSIZE);
         sk.sketchController.handle3D = new Handle3D(sk, sk.sketchController.handle3D.isShowing); // update 3D display vars, pass current 3D showing mode
         sk.loop();
     }

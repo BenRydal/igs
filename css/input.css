@@ -137,9 +137,9 @@ label:hover {
     border: 1px solid #ddd;
 }
 
-.sub-tabs-container label:hover {
+/* .sub-tabs-container label:hover {
     background-color: #919604;
-}
+} */
 
 /* Tabs Content */
 .tab-content {

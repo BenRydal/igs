@@ -61,14 +61,9 @@ Video (MP4)">LOAD FILES</label>
                 onclick="igs.domController.handleClearButton()"></button>
             <label for="clearButton" class="loadData" title="Clear All Loaded Data">CLEAR</label>
 
-
             <button type="button" id="3DButton" class="inputfile"
                 onclick="igs.domController.handleToggle3DButton()"></button>
             <label for="3DButton" title="Toggle 2D and 3D Views">2D/3D</label>
-
-            <button type="button" id="videoButton" class="inputfile"
-                onclick="igs.domController.handleVideoButton()"></button>
-            <label for="videoButton" title="Show/Hide Video">VIDEO</label>
 
             <button type="button" id="howToButton" class="inputfile"
                 onclick="igs.domController.handleHowToButton()"></button>
@@ -86,14 +81,14 @@ Video (MP4)">LOAD FILES</label>
                 and time. Data are displayed over a floor plan and a timeline and can be viewed in 2D or 3D.
             </p>
             <p class="introMsg">
-                Use the top menu to visualize different sample datasets or upload your own data. Use the top and bottom
-                left buttons as well as the timeline to selectively study displayed data. For example, you can toggle
-                individual movement paths and speakers, animate data, visualize conversation in different ways, and
-                interact with video data by clicking anywhere above the timeline to play & pause video.
+                Use the top menu to visualize different sample datasets or upload your own data. Use the bottom
+                left tabs as well as the timeline to selectively study displayed data. For example, you can toggle
+                individual movement paths and speakers, visualize conversation in different ways, animate data, and
+                play/pause video by clicking anywhere on the timeline.
             </p>
             <p class="introMsg">
                 For further information on how to use and format your data for the IGS
-                click <a href="https://benrydal.com/software/igs">HERE</a>
+                click <a href="https://benrydal.com/software/igs">here</a>
             </p>
             <p class="introMsgCredits">
                 IGS software is an open-source project licensed under the GNU General Public License Version 2.0. It is
@@ -109,11 +104,11 @@ Video (MP4)">LOAD FILES</label>
             <label for="main-tab-1">MOVEMENT</label>
             <label for="main-tab-2">SPEAKERS</label>
             <label for="main-tab-3">TALK</label>
-            <label for="main-tab-4">ANIMATE</label>
-            <label for="main-tab-5">SELECT</label>
-            <label for="main-tab-6">FLOOR PLAN</label>
-            <label for="main-tab-7">CODES</label>
-            <label for="main-tab-8">COLOR</label>
+            <label for="main-tab-4">VIDEO</label>
+            <label for="main-tab-5">ANIMATE</label>
+            <label for="main-tab-6">SELECT</label>
+            <label for="main-tab-7">FLOOR PLAN</label>
+            <label for="main-tab-8">CODES</label>
         </div>
 
         <!-- TAB 1 CONTAINER MOVEMENT -->
@@ -145,74 +140,79 @@ Video (MP4)">LOAD FILES</label>
                 onclick="igs.sketchController.toggleIsAllTalk(); igs.loop()">
         </div>
 
-        <!-- TAB 4 CONTAINER ANIMATE -->
+        <!-- TAB 4 CONTAINER VIDEO -->
         <input class="tab-radio" id="main-tab-4" name="main-group" type="radio" />
         <div class="tab-content">
             <div class="sub-tabs-container">
-                <label for="sub-tab4-1">Start/End</label>
+                <label for="sub-tab4-1">Show/Hide</label>
                 <label for="sub-tab4-2">Play/Pause</label>
+                <label for="sub-tab4-3">+</label>
+                <label for="sub-tab4-4">-</label>
             </div>
-            <!-- Sub Tabs -->
             <input class="tab-radio" id="sub-tab4-1" name="sub-group4" type="radio" checked="checked"
-                onclick="igs.sketchController.startEndAnimation(); igs.loop()">
+                onclick="igs.sketchController.toggleShowVideo(); igs.loop()">
             <input class="tab-radio" id="sub-tab4-2" name="sub-group4" type="radio"
-                onclick="igs.sketchController.toggleIsAnimatePause(); igs.loop()">
+                onclick="igs.sketchController.playPauseVideoFromButton(); igs.loop()">
+            <input class="tab-radio" id="sub-tab4-3" name="sub-group4" type="radio" checked="checked"
+                onclick="igs.sketchController.increaseVideoSize(); igs.loop()">
+            <input class="tab-radio" id="sub-tab4-4" name="sub-group4" type="radio"
+                onclick="igs.sketchController.decreaseVideoSize(); igs.loop()">
         </div>
 
-        <!-- TAB 5 CONTAINER SELECT -->
+        <!-- TAB 5 CONTAINER ANIMATE -->
         <input class="tab-radio" id="main-tab-5" name="main-group" type="radio" />
         <div class="tab-content">
             <div class="sub-tabs-container">
-                <label for="sub-tab5-1">None</label>
-                <label for="sub-tab5-2">Region</label>
-                <label for="sub-tab5-3">Slice</label>
-                <label for="sub-tab5-4">Moving</label>
-                <label for="sub-tab5-5">Stopped</label>
+                <label for="sub-tab5-1">Start/End</label>
+                <label for="sub-tab5-2">Play/Pause</label>
             </div>
             <!-- Sub Tabs -->
             <input class="tab-radio" id="sub-tab5-1" name="sub-group5" type="radio" checked="checked"
-                onclick="igs.sketchController.setCurSelectTab(0); igs.loop()">
+                onclick="igs.sketchController.startEndAnimation(); igs.loop()">
             <input class="tab-radio" id="sub-tab5-2" name="sub-group5" type="radio"
-                onclick="igs.sketchController.setCurSelectTab(1); igs.loop()">
-            <input class="tab-radio" id="sub-tab5-3" name="sub-group5" type="radio" checked="checked"
-                onclick="igs.sketchController.setCurSelectTab(2); igs.loop()">
-            <input class="tab-radio" id="sub-tab5-4" name="sub-group5" type="radio"
-                onclick="igs.sketchController.setCurSelectTab(3); igs.loop()">
-            <input class="tab-radio" id="sub-tab5-5" name="sub-group5" type="radio"
-                onclick="igs.sketchController.setCurSelectTab(4); igs.loop()">
+                onclick="igs.sketchController.toggleIsAnimatePause(); igs.loop()">
         </div>
 
-        <!-- TAB 6 CONTAINER FLOOR PLAN-->
+        <!-- TAB 6 CONTAINER SELECT -->
         <input class="tab-radio" id="main-tab-6" name="main-group" type="radio" />
         <div class="tab-content">
             <div class="sub-tabs-container">
-                <label for="sub-tab6-1">Rotate Left</label>
-                <label for="sub-tab6-2">Rotate Right</label>
+                <label for="sub-tab6-1">None</label>
+                <label for="sub-tab6-2">Region</label>
+                <label for="sub-tab6-3">Slice</label>
+                <label for="sub-tab6-4">Moving</label>
+                <label for="sub-tab6-5">Stopped</label>
             </div>
             <!-- Sub Tabs -->
             <input class="tab-radio" id="sub-tab6-1" name="sub-group6" type="radio" checked="checked"
-                onclick="igs.sketchController.setRotateLeft(); igs.loop()">
+                onclick="igs.sketchController.setCurSelectTab(0); igs.loop()">
             <input class="tab-radio" id="sub-tab6-2" name="sub-group6" type="radio"
+                onclick="igs.sketchController.setCurSelectTab(1); igs.loop()">
+            <input class="tab-radio" id="sub-tab6-3" name="sub-group6" type="radio" checked="checked"
+                onclick="igs.sketchController.setCurSelectTab(2); igs.loop()">
+            <input class="tab-radio" id="sub-tab6-4" name="sub-group6" type="radio"
+                onclick="igs.sketchController.setCurSelectTab(3); igs.loop()">
+            <input class="tab-radio" id="sub-tab6-5" name="sub-group6" type="radio"
+                onclick="igs.sketchController.setCurSelectTab(4); igs.loop()">
+        </div>
+
+        <!-- TAB 7 CONTAINER FLOOR PLAN-->
+        <input class="tab-radio" id="main-tab-7" name="main-group" type="radio" />
+        <div class="tab-content">
+            <div class="sub-tabs-container">
+                <label for="sub-tab7-1">Rotate Left</label>
+                <label for="sub-tab7-2">Rotate Right</label>
+            </div>
+            <!-- Sub Tabs -->
+            <input class="tab-radio" id="sub-tab7-1" name="sub-group7" type="radio" checked="checked"
+                onclick="igs.sketchController.setRotateLeft(); igs.loop()">
+            <input class="tab-radio" id="sub-tab7-2" name="sub-group7" type="radio"
                 onclick="igs.sketchController.setRotateRight(); igs.loop()">
         </div>
 
-        <!-- TAB 7 CONTAINER CODES -->
-        <input class="tab-radio" id="main-tab-7" name="main-group" type="radio" />
-        <div class="tab-content" id="codesMainTab">
-        </div>
-
-        <!-- TAB 8 CONTAINER COLOR-->
+        <!-- TAB 8 CONTAINER CODES -->
         <input class="tab-radio" id="main-tab-8" name="main-group" type="radio" />
-        <div class="tab-content">
-            <div class="sub-tabs-container">
-                <label for="sub-tab8-1">People</label>
-                <label for="sub-tab8-2">Codes</label>
-            </div>
-            <!-- Sub Tabs -->
-            <input class="tab-radio" id="sub-tab8-1" name="sub-group8" type="radio" checked="checked"
-                onclick="igs.sketchController.setIsPathColorMode(true); igs.domController.reProcessCheckboxMainTabs(); igs.loop()">
-            <input class="tab-radio" id="sub-tab8-2" name="sub-group8" type="radio"
-                onclick="igs.sketchController.setIsPathColorMode(false); igs.domController.reProcessCheckboxMainTabs(); igs.loop()">
+        <div class="tab-content" id="codesMainTab">
         </div>
     </div>
 </body>

@@ -46,15 +46,12 @@ class DomController {
 
     handleClearButton() {
         this.clearAllData();
+        this.sk.sketchController.setIsPathColorMode(true); // set to true in case user has changed color based on loaded code files
         this.sk.loop(); // rerun P5 draw loop
     }
 
     handleToggle3DButton() {
         this.sk.sketchController.handleToggle3D();
-    }
-
-    handleVideoButton() {
-        if (this.sk.sketchController.testVideoAndDivAreLoaded()) this.sk.sketchController.toggleVideoShowHide();
     }
 
     handleHowToButton() {
@@ -69,6 +66,7 @@ class DomController {
     }
 
     handleExampleDropDown() {
+        this.sk.sketchController.setIsPathColorMode(true); // set to true in case user has changed color based on loaded code files
         if (this.sk.sketchController.getIsAnimate()) this.sk.sketchController.startEndAnimation(); // reset animation if running
         let option = document.getElementById("examples").value;
         if (option === "Load Data") this.showLoadDataButtons();
@@ -159,14 +157,12 @@ class DomController {
      * @param  {VideoPlayer Specific Params} params
      */
     updateVideo(platform, params) {
-        const videoWidth = this.sk.width / 5;
-        const videoHeight = this.sk.width / 6;
         switch (platform) {
             case "Youtube":
-                this.sk.videoPlayer = new YoutubePlayer(this.sk, params, videoWidth, videoHeight);
+                this.sk.videoPlayer = new YoutubePlayer(this.sk, params);
                 break;
             case "File":
-                this.sk.videoPlayer = new P5FilePlayer(this.sk, params, videoWidth, videoHeight);
+                this.sk.videoPlayer = new P5FilePlayer(this.sk, params);
                 break;
         }
     }
@@ -188,7 +184,7 @@ class DomController {
     }
 
     /**
-     * DOM CHECKBOX UPDATES
+     * DOM UPDATE METHODS
      */
     updateMainTab(curItem, mainTabId) {
         let parent = document.getElementById(mainTabId); // Get parent tab to append new div and label to
@@ -221,6 +217,27 @@ class DomController {
         label.appendChild(div);
         label.appendChild(span);
         parent.appendChild(label);
+    }
+
+    updateCodeColorTab(mainTabId) {
+        let parent = document.getElementById(mainTabId); // Get parent tab to append new div and label to
+        let div = document.createElement('div'); // Make div to hold sub-tabs-container class
+        let label = document.createElement('label'); //  Make label
+        let input = document.createElement('input'); // Create the actual input and set correct class
+        div.setAttribute('class', 'sub-tabs-container');
+        div.style.cssFloat = 'left'; // float the div to make element align with checkboxes added later
+        div.style.marginRight = "10px";
+        div.addEventListener('click', () => {
+            this.sk.sketchController.toggleIsPathColorMode();
+            this.reProcessCheckboxMainTabs();
+            this.updateCodeColorTab("codesMainTab");
+            this.sk.loop();
+        });
+        label.textContent = "Color By Codes"; // set label text
+        input.setAttribute('class', 'tab-radio');
+        div.appendChild(label);
+        div.appendChild(input);
+        parent.appendChild(div);
     }
 
     reProcessCheckboxMainTabs() {

@@ -4,8 +4,8 @@ class TimelinePanel {
         this.sk = sketch;
         this.start = this.sk.width * 0.5;
         this.end = this.sk.width * 0.975;
-        this.height = this.sk.height * .85;
-        this.thickness = this.sk.height / 15;
+        this.height = this.sk.height * .88;
+        this.thickness = this.sk.height / 13;
         this.top = this.height - this.thickness / 2;
         this.bottom = this.height + this.thickness / 2;
         this.selectStart = this.start;
@@ -59,7 +59,7 @@ class TimelinePanel {
 
     drawCenterLabel() {
         this.sk.textAlign(this.sk.CENTER);
-        if (this.aboveTimeline(this.sk.mouseX, this.sk.mouseY)) {
+        if (this.sk.sketchController.testTimeline()) {
             const mapMouseX = this.sk.sketchController.mapPixelTimeToSelectTime(this.sk.mouseX);
             const timeInSeconds = this.sk.sketchController.mapPixelTimeToTotalTime(mapMouseX);
             const minutes = Math.floor(timeInSeconds / 60);
@@ -71,7 +71,7 @@ class TimelinePanel {
     }
 
     updateSlicer(isShowing) {
-        if (this.aboveTimeline(this.sk.mouseX, this.sk.mouseY)) {
+        if (this.sk.sketchController.testTimeline()) {
             if (isShowing) this.drawShortSlicer();
             else this.drawLongSlicer();
         }
@@ -136,11 +136,7 @@ class TimelinePanel {
     }
 
     overTimeline() {
-        return this.sk.overRect(this.start - this.doublePadding, this.top, this.length + this.doublePadding, this.thickness);
-    }
-
-    aboveTimeline(xPos, yPos) {
-        return (xPos >= this.start && xPos <= this.end) && (yPos >= 0 && yPos <= this.top);
+        return this.sk.overRect(this.start, this.top, this.length, this.thickness);
     }
 
     getTop() {

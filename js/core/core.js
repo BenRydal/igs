@@ -60,6 +60,7 @@ class Core {
         this.sk.domController.removeAllElements("codesMainTab");
         this.codeList.push(this.createCode(codeName));
         for (const code of this.codeList) this.sk.domController.updateMainTab(code, "codesMainTab");
+        this.sk.domController.updateCodeColorTab("codesMainTab");
         this.clearMovement();
         this.parseMovement.reProcessAllPointArrays();
         this.sk.loop(); // rerun P5 draw loop
