@@ -4,7 +4,7 @@ class TimelinePanel {
         this.sk = sketch;
         this.start = this.sk.width * 0.5;
         this.end = this.sk.width * 0.975;
-        this.height = this.sk.height * .85;
+        this.height = this.sk.height * .88;
         this.thickness = this.sk.height / 13;
         this.top = this.height - this.thickness / 2;
         this.bottom = this.height + this.thickness / 2;

@@ -3,7 +3,7 @@ class GUI {
     constructor(sketch) {
         this.sk = sketch;
         this.timelinePanel = new TimelinePanel(this.sk);
-        this.fpContainer = new FloorPlanContainer(this.sk, this.timelinePanel.getStart(), this.timelinePanel.getEnd(), this.timelinePanel.getHeight());
+        this.fpContainer = new FloorPlanContainer(this.sk, this.timelinePanel.getStart(), this.timelinePanel.getEnd(), this.timelinePanel.getTop());
     }
 
     updateGUI() {
