@@ -5,7 +5,7 @@ class TimelinePanel {
         this.start = this.sk.width * 0.5;
         this.end = this.sk.width * 0.975;
         this.height = this.sk.height * .85;
-        this.thickness = this.sk.height / 15;
+        this.thickness = this.sk.height / 13;
         this.top = this.height - this.thickness / 2;
         this.bottom = this.height + this.thickness / 2;
         this.selectStart = this.start;
@@ -136,7 +136,7 @@ class TimelinePanel {
     }
 
     overTimeline() {
-        return this.sk.overRect(this.start - this.doublePadding, this.top, this.length + this.doublePadding, this.thickness);
+        return this.sk.overRect(this.start, this.top, this.length, this.thickness);
     }
 
     getTop() {
