@@ -11,7 +11,7 @@ class ParseCodes {
      * @param  {PapaParse results Array} results
      * @param  {File} file
      */
-    processFile(results, file) {
+    processSingleCodeFile(results, file) {
         const codeName = this.testData.cleanFileName(file.name);
         this.parsedFileArray.push(this.createCodeTable(results.data, codeName));
         this.sk.core.updateCodes(codeName);
