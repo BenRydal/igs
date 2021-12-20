@@ -63,22 +63,22 @@ class ParseCodes {
      * @param  {Number/Float} curTime
      */
     addCodeArray(curTime) {
-        let codesToAdd = [];
+        let codeArrayToAdd = [];
         let color = this.sk.COLORGRAY;
         for (let i = 0; i < this.parsedFileArray.length; i++) {
             if (this.timeIsBetweenCurRow(curTime, this.parsedFileArray[i])) {
-                codesToAdd.push(true);
+                codeArrayToAdd.push(true);
                 color = this.getCodeColor(color, i);
             } else {
                 if (this.parsedFileArray[i].counter < this.parsedFileArray[i].parsedCodeArray.length - 1 && this.timeIsBetweenNextRow(curTime, this.parsedFileArray[i])) {
-                    codesToAdd.push(true);
+                    codeArrayToAdd.push(true);
                     color = this.getCodeColor(color, i);
                     this.parsedFileArray[i].counter++;
-                } else codesToAdd.push(false);
+                } else codeArrayToAdd.push(false);
             }
         }
         return {
-            array: codesToAdd,
+            array: codeArrayToAdd,
             color: color
         }
     }
