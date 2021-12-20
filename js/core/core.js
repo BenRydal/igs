@@ -22,6 +22,8 @@ class Core {
     testParsedResultsForProcessing(results, file) {
         if (this.testData.parsedResults(results, this.testData.headersMovement, this.testData.movementRowForType)) this.parseMovement.processFile(results, file);
         else if (this.testData.parsedResults(results, this.testData.headersConversation, this.testData.conversationRowForType)) this.parseConversation.processFile(results, file);
+        // test multiCodeFile before singleCodeFile because it has same headers with one additional header
+        else if (this.testData.parsedResults(results, this.testData.headersMultiCodes, this.testData.multiCodeRowForType)) this.parseCodes.processMultiCodeFile(results);
         else if (this.testData.parsedResults(results, this.testData.headersCodes, this.testData.codeRowForType)) this.parseCodes.processFile(results, file);
         else alert("Error loading CSV file. Please make sure your file is a CSV file formatted with correct column headers");
     }
