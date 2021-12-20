@@ -96,11 +96,11 @@ class ParseCodes {
     }
 
     getStartTime(results, row) {
-        return results[row][this.testData.headersCodes[0]];
+        return results[row][this.testData.headersSingleCodes[0]];
     }
 
     getEndTime(results, row) {
-        return results[row][this.testData.headersCodes[1]];
+        return results[row][this.testData.headersSingleCodes[1]];
     }
 
     between(x, min, max) {

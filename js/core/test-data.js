@@ -3,8 +3,8 @@ class TestData {
     constructor() {
         this.headersMovement = ['time', 'x', 'y']; // String array indicating movement movement file headers, data in each column should be of type number or it won't process
         this.headersConversation = ['time', 'speaker', 'talk']; // String array indicating conversation file headers, data in time column shout be of type number, speaker column should be of type String, talk column should be not null or undefined
-        this.headersCodes = ['start', 'end'];
-        this.headersMultiCodes = ['code', 'start', 'end']; // multiCodeHeaders match headerCodes with one extra column 'code'
+        this.headersSingleCodes = ['start', 'end'];
+        this.headersMultiCodes = ['code', 'start', 'end']; // multiCodeHeaders MATCH singleCodeHeaders with one extra column 'code'
     }
 
     /**
@@ -40,7 +40,7 @@ class TestData {
     }
 
     codeRowForType(curRow) {
-        return typeof curRow[this.headersCodes[0]] === 'number' && typeof curRow[this.headersCodes[1]] === 'number';
+        return typeof curRow[this.headersSingleCodes[0]] === 'number' && typeof curRow[this.headersSingleCodes[1]] === 'number';
     }
 
     multiCodeRowForType(curRow) {
