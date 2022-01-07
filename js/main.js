@@ -113,23 +113,24 @@ const igs = new p5((sk) => {
     }
 
     sk.mousePressed = function () {
-        sk.sketchController.handleMousePressed();
-        sk.loop();
+        this.sketchController.playPauseVideoFromTimeline();
+        this.loop();
     }
 
     sk.mouseDragged = function () {
-        sk.sketchController.handleMouseDragged();
-        sk.loop();
+        if (!this.sketchController.getIsAnimate()) this.gui.timelinePanel.handle();
+        this.loop();
     }
 
     sk.mouseReleased = function () {
-        sk.sketchController.handleMouseReleased();
-        sk.loop();
+        this.gui.timelinePanel.resetLock();
+        this.loop();
     }
 
     sk.mouseMoved = function () {
-        sk.sketchController.handleMouseMoved();
-        sk.loop();
+        if (this.gui.timelinePanel.overEitherSelector()) this.cursor(this.HAND);
+        else this.cursor(this.ARROW);
+        this.loop();
     }
 
     sk.windowResized = function () {
