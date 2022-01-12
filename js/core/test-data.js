@@ -1,10 +1,11 @@
 class TestData {
 
     constructor() {
-        this.headersMovement = ['time', 'x', 'y']; // String array indicating movement movement file headers, data in each column should be of type number or it won't process
-        this.headersConversation = ['time', 'speaker', 'talk']; // String array indicating conversation file headers, data in time column shout be of type number, speaker column should be of type String, talk column should be not null or undefined
-        this.headersSingleCodes = ['start', 'end'];
-        this.headersMultiCodes = ['code', 'start', 'end']; // multiCodeHeaders MATCH singleCodeHeaders with one extra column 'code'
+        // NOTE: All headers must be lowercase as input data tables are converted to lowercase when loaded using PapaParse transformHeaders method
+        this.headersMovement = ['time', 'x', 'y']; // Each index is tested to be type number
+        this.headersConversation = ['time', 'speaker', 'talk']; // Of type number, string, and not null or undefined
+        this.headersSingleCodes = ['start', 'end']; // Of type number
+        this.headersMultiCodes = ['code', 'start', 'end']; // matches singleCodeHeaders with one extra column 'code' of type string
     }
 
     /**
@@ -17,9 +18,10 @@ class TestData {
         return results.data.length > 0 && this.includesAllHeaders(results.meta.fields, headers) && this.hasOneCleanRow(results.data, callbackTypeTest.bind(this));
     }
 
-    includesAllHeaders(meta, headers) {
+    // NOTE: fieldNames from parsed file are converted to lowercase on Processing with PapaParse transformHeaders method
+    includesAllHeaders(fieldNamesLowerCase, headers) {
         for (const header of headers) {
-            if (!meta.includes(header)) return false;
+            if (!fieldNamesLowerCase.includes(header)) return false;
         }
         return true;
     }
