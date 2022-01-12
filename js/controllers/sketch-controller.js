@@ -20,27 +20,9 @@ class SketchController {
         this.dotTimeForVideoScrub = null; // Set in draw movement data and used to display correct video frame when scrubbing video
     }
 
-    // ****** P5 HANDLERS ****** //
     updateLoop() {
         if ((this.mode.isAnimate && !this.mode.isAnimatePause) || this.mode.isVideoPlay || this.handle3D.getIsTransitioning()) this.sk.loop();
         else this.sk.noLoop();
-    }
-
-    handleMousePressed() {
-        this.playPauseVideoFromTimeline();
-    }
-
-    handleMouseDragged() {
-        if (!this.mode.isAnimate) this.sk.gui.timelinePanel.handle();
-    }
-
-    handleMouseReleased() {
-        this.sk.gui.timelinePanel.resetLock();
-    }
-
-    handleMouseMoved() {
-        if (this.sk.gui.timelinePanel.overEitherSelector()) this.sk.cursor(this.sk.HAND);
-        else this.sk.cursor(this.sk.ARROW);
     }
 
     handleToggle3D() {
@@ -50,8 +32,6 @@ class SketchController {
         else this.setRotateLeft();
         this.sk.loop();
     }
-
-    // ****** UPDATE METHODS ****** //
 
     updateAnimation() {
         if (this.mode.isAnimate && !this.mode.isAnimatePause) {
