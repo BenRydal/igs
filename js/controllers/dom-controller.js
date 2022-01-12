@@ -29,8 +29,11 @@ class DomController {
                 alert("Parsing error with one of your CSV file. Please make sure your file is formatted correctly as a .CSV");
                 console.log(error, file);
             },
+            dynamicTyping: true, // If true, numeric and boolean data will be converted to their type instead of remaining strings
             header: true,
-            dynamicTyping: true,
+            transformHeader: (h) => {
+                return h.trim().toLowerCase();
+            },
         });
     }
 
