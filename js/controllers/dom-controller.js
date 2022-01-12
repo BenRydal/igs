@@ -32,7 +32,7 @@ class DomController {
             dynamicTyping: true, // If true, numeric and boolean data will be converted to their type instead of remaining strings
             header: true,
             transformHeader: (h) => {
-                return h.toLowerCase();
+                return h.trim().toLowerCase();
             },
         });
     }
