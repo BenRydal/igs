@@ -85,7 +85,7 @@ class ParseMovement {
             yPos: movementPoint.yPos,
             isStopped: movementPoint.isStopped,
             codes: movementPoint.codes,
-            speaker: this.testData.cleanSpeaker(curConversationRow[this.testData.headersConversation[1]]), // String name of speaker
+            speaker: this.testData.cleanFileName(curConversationRow[this.testData.headersConversation[1]]), // String name of speaker
             talkTurn: curConversationRow[this.testData.headersConversation[2]] // String text of conversation turn
         }
     }

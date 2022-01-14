@@ -67,23 +67,11 @@ class TestData {
     }
 
     /**
-     * Used to compare and add new speakers to speakerList
-     * @param  {String} s
-     */
-    cleanSpeaker(string) {
-        return string.trim().toUpperCase().substring(0, 2);
-    }
-
-    /**
-     * Used to compare and add new paths to pathList
-     * NOTE: this may need to match cleanSpeaker in the future
+     * Used to compare and add new data to core data lists from CSV file names and data
      * @param  {String} s
      */
     cleanFileName(string) {
-        return string.charAt(0).toUpperCase();
-    }
-
-    cleanCodeFileName(string) {
+        console.log(string.trim().replace(/\.[^/.]+$/, "").toLowerCase());
         return string.trim().replace(/\.[^/.]+$/, "").toLowerCase();
     }
 }

@@ -12,7 +12,7 @@ class ParseCodes {
      * @param  {File} file
      */
     processSingleCodeFile(results, file) {
-        const codeName = this.testData.cleanCodeFileName(file.name); // remove file extension
+        const codeName = this.testData.cleanFileName(file.name); // remove file extension
         this.parsedFileArray.push(this.createCodeTable(results.data, codeName));
         this.sk.core.updateCodes(codeName);
     }
@@ -34,7 +34,7 @@ class ParseCodes {
      */
     updateParsedFileArrayForMultiCodes(results) {
         for (const row of results.data) {
-            const curCodeName = this.testData.cleanCodeFileName(row[this.testData.headersMultiCodes[0]]);
+            const curCodeName = this.testData.cleanFileName(row[this.testData.headersMultiCodes[0]]);
             let addNewTable = true; // to add new code table if parsedFileArray empty or no name match/existing codeTable NOT updated
             for (const codeTable of this.parsedFileArray) { // test for name match to updated existing codeTable
                 if (codeTable.codeName === curCodeName) {
