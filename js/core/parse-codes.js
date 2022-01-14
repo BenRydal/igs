@@ -12,7 +12,7 @@ class ParseCodes {
      * @param  {File} file
      */
     processSingleCodeFile(results, file) {
-        const codeName = this.testData.cleanFileName(file.name);
+        const codeName = this.testData.cleanCodeFileName(file.name); // remove file extension
         this.parsedFileArray.push(this.createCodeTable(results.data, codeName));
         this.sk.core.updateCodes(codeName);
     }
@@ -24,7 +24,7 @@ class ParseCodes {
     processMultiCodeFile(results) {
         this.clear(); // NOTE: clearing all existing code data prevents mixing single and multi code files. You can only have ONE multicode file
         this.updateParsedFileArrayForMultiCodes(results);
-        for (const codeTable of this.parsedFileArray) this.sk.core.updateCodes(codeTable.firstCharOfFileName);
+        for (const codeTable of this.parsedFileArray) this.sk.core.updateCodes(codeTable.codeName);
     }
 
     /**
@@ -34,23 +34,23 @@ class ParseCodes {
      */
     updateParsedFileArrayForMultiCodes(results) {
         for (const row of results.data) {
-            const codeName = this.testData.cleanFileName(row[this.testData.headersMultiCodes[0]]);
+            const curCodeName = this.testData.cleanCodeFileName(row[this.testData.headersMultiCodes[0]]);
             let addNewTable = true; // to add new code table if parsedFileArray empty or no name match/existing codeTable NOT updated
             for (const codeTable of this.parsedFileArray) { // test for name match to updated existing codeTable
-                if (codeTable.firstCharOfFileName === codeName) {
+                if (codeTable.codeName === curCodeName) {
                     codeTable.parsedCodeArray.push(row); // update matching parsedCodeArray with new row object
                     addNewTable = false;
                     break; // existing codeTable updated so no need to process any other code tables
                 }
             }
-            if (addNewTable) this.parsedFileArray.push(this.createCodeTable([row], codeName)); // NOTE: make sure row is added as an array
+            if (addNewTable) this.parsedFileArray.push(this.createCodeTable([row], curCodeName)); // NOTE: make sure row is added as an array
         }
     }
 
     createCodeTable(resultsDataArray, codeName) {
         return {
             parsedCodeArray: resultsDataArray,
-            firstCharOfFileName: codeName,
+            codeName: codeName,
             counter: 0
         }
     }

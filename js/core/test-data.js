@@ -82,4 +82,8 @@ class TestData {
     cleanFileName(string) {
         return string.charAt(0).toUpperCase();
     }
+
+    cleanCodeFileName(string) {
+        return string.trim().replace(/\.[^/.]+$/, "").toLowerCase();
+    }
 }
