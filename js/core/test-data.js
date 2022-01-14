@@ -71,7 +71,6 @@ class TestData {
      * @param  {String} s
      */
     cleanFileName(string) {
-        console.log(string.trim().replace(/\.[^/.]+$/, "").toLowerCase());
         return string.trim().replace(/\.[^/.]+$/, "").toLowerCase();
     }
 }
