@@ -80,7 +80,7 @@ class DomController {
                 this.sk.sketchController.setIsAllTalk(false); // not essential but setting matches each case differently
                 break;
             case "Example 1":
-                this.loadExampleData(['data/example-1/', 'floorplan.png', 'conversation.csv', ['Jordan.csv'], 'Youtube', {
+                this.loadExampleData(['data/example-1/', 'floorplan.png', 'conversation.csv', ['Jordan.csv', 'Possession.csv'], 'Youtube', {
                     videoId: 'iiMjfVOj8po'
                 }]);
                 this.sk.sketchController.setIsAllTalk(false);
@@ -92,7 +92,7 @@ class DomController {
                 this.sk.sketchController.setIsAllTalk(false);
                 break;
             case "Example 3":
-                this.loadExampleData(['data/example-3/', 'floorplan.png', 'conversation.csv', ['Teacher.csv'], 'Youtube', {
+                this.loadExampleData(['data/example-3/', 'floorplan.png', 'conversation.csv', ['Teacher.csv', 'lesson-graph.csv'], 'Youtube', {
                     videoId: 'Iu0rxb-xkMk'
                 }]);
                 this.sk.sketchController.setIsAllTalk(true);
@@ -127,7 +127,7 @@ class DomController {
      * [0] String directory/folder
      * [1] String floorPlan image filename
      * [2] String conversation filename
-     * [3] Array of String movement filenames
+     * [3] Array of String filenames
      * [4] String video platform (e.g.File or youTube)
      * [5] Video params(see videoPlayer interface)
      */
