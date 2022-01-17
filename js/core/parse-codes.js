@@ -68,15 +68,17 @@ class ParseCodes {
         let codeArrayToAdd = [];
         let color = this.sk.COLORGRAY;
         for (let i = 0; i < this.parsedFileArray.length; i++) {
-            if (this.timeIsBetweenCurRow(curTime, this.parsedFileArray[i])) {
-                codeArrayToAdd.push(true);
-                color = this.getCodeColor(color, i);
-            } else {
-                if (this.parsedFileArray[i].counter < this.parsedFileArray[i].parsedCodeArray.length - 1 && this.timeIsBetweenNextRow(curTime, this.parsedFileArray[i])) {
+            if (this.testData.codeRowForType(row)) {
+                if (this.timeIsBetweenCurRow(curTime, this.parsedFileArray[i])) {
                     codeArrayToAdd.push(true);
                     color = this.getCodeColor(color, i);
-                    this.parsedFileArray[i].counter++;
-                } else codeArrayToAdd.push(false);
+                } else {
+                    if (this.parsedFileArray[i].counter < this.parsedFileArray[i].parsedCodeArray.length - 1 && this.timeIsBetweenNextRow(curTime, this.parsedFileArray[i])) {
+                        codeArrayToAdd.push(true);
+                        color = this.getCodeColor(color, i);
+                        this.parsedFileArray[i].counter++;
+                    } else codeArrayToAdd.push(false);
+                }
             }
         }
         return {
