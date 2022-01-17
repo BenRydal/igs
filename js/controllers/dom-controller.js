@@ -186,12 +186,30 @@ class DomController {
         }
     }
 
+    updateMovementCheckboxes(pathList) {
+        this.updateCheckboxList(pathList, "movementMainTab", "checkbox-movement");
+    }
 
+    updateConversationCheckboxes(speakerList) {
+        this.updateCheckboxList(speakerList, "conversationMainTab", "checkbox-conversation");
+    }
 
-    /**
-     * DOM UPDATE METHODS
-     */
-    updateCheckboxes(curItem, mainTabClass, checkboxClass) {
+    updateCodeCheckboxes(codeList) {
+        this.updateCheckboxList(codeList, "codesMainTab", "checkbox-code");
+    }
+
+    updateAllCheckboxes() {
+        this.updateCheckboxList(this.sk.core.pathList, "movementMainTab", "checkbox-movement");
+        this.updateCheckboxList(this.sk.core.speakerList, "conversationMainTab", "checkbox-conversation");
+        this.updateCheckboxList(this.sk.core.codeList, "codesMainTab", "checkbox-code");
+    }
+
+    updateCheckboxList(list, elementId, checkboxClass) {
+        this.removeAllElements(checkboxClass);
+        for (const item of list) this.createCheckbox(item, elementId, checkboxClass);
+    }
+
+    createCheckbox(curItem, mainTabClass, checkboxClass) {
         let parent = document.getElementById(mainTabClass); // Get parent tab to append new div and label to
         let label = document.createElement('label'); //  Make label
         let div = document.createElement('input'); // Make checkbox div
@@ -223,17 +241,6 @@ class DomController {
         label.appendChild(div);
         label.appendChild(span);
         parent.appendChild(label);
-    }
-
-    reProcessCheckboxMainTabs() {
-        this.reProcessCheckboxList(this.sk.core.pathList, "movementMainTab", "checkbox-movement");
-        this.reProcessCheckboxList(this.sk.core.speakerList, "conversationMainTab", "checkbox-conversation");
-        this.reProcessCheckboxList(this.sk.core.codeList, "codesMainTab", "checkbox-code");
-    }
-
-    reProcessCheckboxList(list, elementId, checkboxClass) {
-        this.removeAllElements(checkboxClass);
-        for (const item of list) this.updateCheckboxes(item, elementId, checkboxClass);
     }
 
     clearAllCheckboxes() {

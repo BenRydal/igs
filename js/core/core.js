@@ -36,13 +36,12 @@ class Core {
      * @param  {Array} conversationPointArray
      */
     updateMovement(pathName, movementPointArray, conversationPointArray) {
-        this.sk.domController.removeAllElements("checkbox-movement"); // remove all GUI/checkbox elements from dom
         this.pathList.push(this.createPath(pathName, movementPointArray, conversationPointArray)); // update data list
         this.pathList = this.sortByName(this.pathList); // then sort
-        for (const path of this.pathList) this.sk.domController.updateCheckboxes(path, "movementMainTab", "checkbox-movement"); // add new set of GUI/checkbox elements to the DOM
         this.setTotalTime(movementPointArray);
         this.parseCodes.resetCounters(); // must reset code counters if multiple paths are loaded
-        this.sk.loop(); // rerun P5 draw loop
+        this.sk.domController.updateMovementCheckboxes(this.pathList);
+        this.sk.loop();
     }
 
     /**
@@ -50,21 +49,19 @@ class Core {
      * @param  {PapaParse results Array} parsedConversationFileArray
      */
     updateConversation(parsedConversationFileArray) {
-        this.sk.domController.removeAllElements("checkbox-conversation");
         this.setSpeakerList(parsedConversationFileArray);
         this.speakerList = this.sortByName(this.speakerList);
-        for (const speaker of this.speakerList) this.sk.domController.updateCheckboxes(speaker, "conversationMainTab", "checkbox-conversation");
         this.parseMovement.reProcessAllPointArrays(); // must reprocess movement
-        this.sk.loop(); // rerun P5 draw loop
+        this.sk.domController.updateConversationCheckboxes(this.speakerList);
+        this.sk.loop();
     }
 
     updateCodes(codeName) {
-        this.sk.domController.removeAllElements("checkbox-code");
         this.codeList.push(this.createCode(codeName));
-        for (const code of this.codeList) this.sk.domController.updateCheckboxes(code, "codesMainTab", "checkbox-code");
         this.clearMovement();
         this.parseMovement.reProcessAllPointArrays();
-        this.sk.loop(); // rerun P5 draw loop
+        this.sk.domController.updateCodeCheckboxes(this.codeList);
+        this.sk.loop();
     }
 
     setTotalTime(movementPointArray) {
