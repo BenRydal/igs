@@ -34,16 +34,18 @@ class ParseCodes {
      */
     updateParsedFileArrayForMultiCodes(results) {
         for (const row of results.data) {
-            const curCodeName = this.testData.cleanFileName(row[this.testData.headersMultiCodes[0]]);
-            let addNewTable = true; // to add new code table if parsedFileArray empty or no name match/existing codeTable NOT updated
-            for (const codeTable of this.parsedFileArray) { // test for name match to updated existing codeTable
-                if (codeTable.codeName === curCodeName) {
-                    codeTable.parsedCodeArray.push(row); // update matching parsedCodeArray with new row object
-                    addNewTable = false;
-                    break; // existing codeTable updated so no need to process any other code tables
+            if (this.testData.codeRowForType(row)) {
+                const curCodeName = this.testData.cleanFileName(row[this.testData.headersMultiCodes[0]]);
+                let addNewTable = true; // to add new code table if parsedFileArray empty or no name match/existing codeTable NOT updated
+                for (const codeTable of this.parsedFileArray) { // test for name match to updated existing codeTable
+                    if (codeTable.codeName === curCodeName) {
+                        codeTable.parsedCodeArray.push(row); // update matching parsedCodeArray with new row object
+                        addNewTable = false;
+                        break; // existing codeTable updated so no need to process any other code tables
+                    }
                 }
+                if (addNewTable) this.parsedFileArray.push(this.createCodeTable([row], curCodeName)); // NOTE: make sure row is added as an array
             }
-            if (addNewTable) this.parsedFileArray.push(this.createCodeTable([row], curCodeName)); // NOTE: make sure row is added as an array
         }
     }
 
