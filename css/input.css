@@ -148,6 +148,10 @@ label:hover {
     border: 1px solid #ddd;
 }
 
+.button-float {
+    float: right;
+}
+
 .tab-checkbox {
     background-color: #ffffff;
     color: black;

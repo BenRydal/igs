@@ -186,11 +186,13 @@ class DomController {
         }
     }
 
+
+
     /**
      * DOM UPDATE METHODS
      */
-    updateMainTab(curItem, mainTabId) {
-        let parent = document.getElementById(mainTabId); // Get parent tab to append new div and label to
+    updateCheckboxes(curItem, mainTabClass, checkboxClass) {
+        let parent = document.getElementById(mainTabClass); // Get parent tab to append new div and label to
         let label = document.createElement('label'); //  Make label
         let div = document.createElement('input'); // Make checkbox div
         let span = document.createElement('span'); // Make span to hold new checkbox styles
@@ -198,9 +200,10 @@ class DomController {
         if (this.sk.sketchController.getIsPathColorMode()) curColor = curItem.color.pathMode;
         else curColor = curItem.color.codeMode;
         label.textContent = curItem.name; // set name to text of path
-        label.setAttribute('class', 'tab-checkbox');
+        label.classList.add("tab-checkbox", checkboxClass);
         div.setAttribute("type", "checkbox");
-        span.className = "checkmark";
+        div.classList.add(checkboxClass);
+        span.classList.add("checkmark", checkboxClass);
         span.style.border = "medium solid" + curColor;
         if (curItem.isShowing) {
             span.style.backgroundColor = curColor;
@@ -222,49 +225,28 @@ class DomController {
         parent.appendChild(label);
     }
 
-    updateCodeColorTab(mainTabId) {
-        let parent = document.getElementById(mainTabId); // Get parent tab to append new div and label to
-        let div = document.createElement('div'); // Make div to hold sub-tabs-container class
-        let label = document.createElement('label'); //  Make label
-        let input = document.createElement('input'); // Create the actual input and set correct class
-        div.setAttribute('class', 'sub-tabs-container');
-        div.style.cssFloat = 'left'; // float the div to make element align with checkboxes added later
-        div.style.marginRight = "10px";
-        div.addEventListener('click', () => {
-            this.sk.sketchController.toggleIsPathColorMode();
-            this.reProcessCheckboxMainTabs();
-            this.updateCodeColorTab("codesMainTab");
-            this.sk.loop();
-        });
-        label.textContent = "Color By Codes"; // set label text
-        input.setAttribute('class', 'tab-radio');
-        div.appendChild(label);
-        div.appendChild(input);
-        parent.appendChild(div);
-    }
-
     reProcessCheckboxMainTabs() {
-        this.reProcessCheckboxList(this.sk.core.pathList, "movementMainTab");
-        this.reProcessCheckboxList(this.sk.core.speakerList, "conversationMainTab");
-        this.reProcessCheckboxList(this.sk.core.codeList, "codesMainTab");
+        this.reProcessCheckboxList(this.sk.core.pathList, "movementMainTab", "checkbox-movement");
+        this.reProcessCheckboxList(this.sk.core.speakerList, "conversationMainTab", "checkbox-conversation");
+        this.reProcessCheckboxList(this.sk.core.codeList, "codesMainTab", "checkbox-code");
     }
 
-    reProcessCheckboxList(list, elementId) {
-        this.removeAllElements(elementId);
-        for (const item of list) this.updateMainTab(item, elementId);
+    reProcessCheckboxList(list, elementId, checkboxClass) {
+        this.removeAllElements(checkboxClass);
+        for (const item of list) this.updateCheckboxes(item, elementId, checkboxClass);
     }
 
     clearAllCheckboxes() {
-        this.removeAllElements("movementMainTab");
-        this.removeAllElements("conversationMainTab");
-        this.removeAllElements("codesMainTab");
+        this.removeAllElements("checkbox-movement");
+        this.removeAllElements("checkbox-conversation");
+        this.removeAllElements("checkbox-code");
     }
 
     removeAllElements(elementId) {
-        let element = document.getElementById(elementId);
-        while (element.firstChild) {
-            element.removeChild(element.firstChild);
-        }
+        let elementList = document.querySelectorAll("." + elementId);
+        elementList.forEach(function (userItem) {
+            userItem.remove();
+        });
     }
 
     updateWordToSearch() {
