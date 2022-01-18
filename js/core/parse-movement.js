@@ -12,22 +12,22 @@ class ParseMovement {
      * @param  {File} file
      */
     processFile(results, file) {
-        const pathName = this.testData.cleanFileName(file.name);
+        const stringName = this.testData.cleanFileName(file.name);
         this.parsedFileArray.push({
             parsedMovementArray: results.data,
-            firstCharOfFileName: pathName
+            stringName
         });
-        this.processPointArrays(results.data, pathName);
+        this.processPointArrays(results.data, stringName);
     }
 
-    processPointArrays(resultsDataArray, pathName) {
+    processPointArrays(resultsDataArray, stringName) {
         const [movementPointArray, conversationPointArray] = this.createPointArrays(resultsDataArray, this.sk.core.parseConversation.getParsedFileArray());
-        this.sk.core.updateMovement(pathName, movementPointArray, conversationPointArray);
+        this.sk.core.updateMovement(stringName, movementPointArray, conversationPointArray);
     }
 
     reProcessAllPointArrays() {
         for (const index of this.parsedFileArray) {
-            this.processPointArrays(index.parsedMovementArray, index.firstCharOfFileName);
+            this.processPointArrays(index.parsedMovementArray, index.stringName);
         }
     }
 
