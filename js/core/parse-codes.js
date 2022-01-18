@@ -66,7 +66,7 @@ class ParseCodes {
      */
     addCodeArray(curTime) {
         let codeArrayToAdd = [];
-        let color = this.sk.COLORGRAY;
+        let color = this.sk.COLORGRAY; // color when there are no codes, also used in getCodeColor method
         for (let i = 0; i < this.parsedFileArray.length; i++) {
             const curCodeTableRow = this.parsedFileArray[i].parsedCodeArray[this.parsedFileArray[i].counter];
             if (this.testData.codeRowForType(curCodeTableRow)) {
