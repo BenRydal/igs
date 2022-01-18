@@ -30,7 +30,8 @@ class DomController {
                 console.log(error, file);
             },
             dynamicTyping: true, // If true, numeric and boolean data will be converted to their type instead of remaining strings
-            header: true,
+            header: 'true',
+            skipEmptyLines: 'greedy', // If set to 'greedy', lines that don't have any content (those which have only whitespace after parsing) will also be skipped
             transformHeader: (h) => {
                 return h.trim().toLowerCase();
             },
