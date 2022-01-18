@@ -68,7 +68,8 @@ class ParseCodes {
         let codeArrayToAdd = [];
         let color = this.sk.COLORGRAY;
         for (let i = 0; i < this.parsedFileArray.length; i++) {
-            if (this.testData.codeRowForType(this.parsedFileArray[i].parsedCodeArray[this.parsedFileArray[i].counter])) {
+            const curCounterRow = this.parsedFileArray[i].parsedCodeArray[this.parsedFileArray[i].counter];
+            if (this.testData.codeRowForType(curCounterRow)) {
                 if (this.timeIsBetweenCurRow(curTime, this.parsedFileArray[i])) {
                     codeArrayToAdd.push(true);
                     color = this.getCodeColor(color, i);
