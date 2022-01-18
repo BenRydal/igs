@@ -21,6 +21,12 @@ class DomController {
 
     parseCSVFile(fileToParse) {
         Papa.parse(fileToParse, {
+            dynamicTyping: true, // If true, numeric and boolean data will be converted to their type instead of remaining strings
+            skipEmptyLines: 'greedy', // If set to 'greedy', lines that don't have any content (those which have only whitespace after parsing) will also be skipped
+            header: 'true',
+            transformHeader: (h) => {
+                return h.trim().toLowerCase();
+            },
             complete: (results, file) => {
                 console.log("Parsing complete:", results, file);
                 this.sk.core.testParsedResultsForProcessing(results, file);
@@ -28,13 +34,7 @@ class DomController {
             error: (error, file) => {
                 alert("Parsing error with one of your CSV file. Please make sure your file is formatted correctly as a .CSV");
                 console.log(error, file);
-            },
-            dynamicTyping: true, // If true, numeric and boolean data will be converted to their type instead of remaining strings
-            header: 'true',
-            skipEmptyLines: 'greedy', // If set to 'greedy', lines that don't have any content (those which have only whitespace after parsing) will also be skipped
-            transformHeader: (h) => {
-                return h.trim().toLowerCase();
-            },
+            }
         });
     }
 
