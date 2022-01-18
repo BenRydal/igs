@@ -3,7 +3,7 @@ class ParseCodes {
     constructor(sketch, testData) {
         this.sk = sketch;
         this.testData = testData;
-        this.parsedFileArray = []; // holds CodeTable objects that represent results.data array, character name and counter number
+        this.parsedFileArray = []; // holds CodeTable objects
     }
 
     /**
@@ -34,7 +34,7 @@ class ParseCodes {
      */
     updateParsedFileArrayForMultiCodes(results) {
         for (const row of results.data) {
-            if (this.testData.codeRowForType(row)) {
+            if (this.testData.codeRowForType(row)) { // IMPORTANT: in case there is partial missing data etc. 
                 const curCodeName = this.testData.cleanFileName(row[this.testData.headersMultiCodes[0]]);
                 let addNewTable = true; // to add new code table if parsedFileArray empty or no name match/existing codeTable NOT updated
                 for (const codeTable of this.parsedFileArray) { // test for name match to updated existing codeTable
@@ -69,7 +69,7 @@ class ParseCodes {
         let color = this.sk.COLORGRAY; // color when there are no codes, also used in getCodeColor method
         for (let i = 0; i < this.parsedFileArray.length; i++) {
             const curCodeTableRow = this.parsedFileArray[i].parsedCodeArray[this.parsedFileArray[i].counter];
-            if (this.testData.codeRowForType(curCodeTableRow)) {
+            if (this.testData.codeRowForType(curCodeTableRow)) { // IMPORTANT: in case there is partial missing data etc. 
                 if (this.timeIsBetweenCurRow(curTime, this.parsedFileArray[i])) {
                     codeArrayToAdd.push(true);
                     color = this.getCodeColor(color, i);

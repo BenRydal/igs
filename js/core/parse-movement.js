@@ -3,7 +3,7 @@ class ParseMovement {
     constructor(sketch, testData) {
         this.sk = sketch;
         this.testData = testData;
-        this.parsedFileArray = []; // Each index of array holds a PapaParse results.data array and string/character for name of path
+        this.parsedFileArray = []; // Holds PapaParse results.data array and string name of path for each processed file
     }
 
     /**

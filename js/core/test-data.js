@@ -5,7 +5,7 @@ class TestData {
         this.headersMovement = ['time', 'x', 'y']; // Each index is tested to be type number
         this.headersConversation = ['time', 'speaker', 'talk']; // Of type number, string, and not null or undefined
         this.headersSingleCodes = ['start', 'end']; // Of type number
-        this.headersMultiCodes = ['code', 'start', 'end']; // matches singleCodeHeaders with one extra column 'code' of type string
+        this.headersMultiCodes = ['code', 'start', 'end']; // MUST MATCH singleCodeHeaders with one extra column 'code' of type string
     }
 
     /**
