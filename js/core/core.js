@@ -36,13 +36,12 @@ class Core {
      * @param  {Array} conversationPointArray
      */
     updateMovement(pathName, movementPointArray, conversationPointArray) {
-        this.sk.domController.removeAllElements("movementMainTab"); // remove all GUI/checkbox elements from dom
         this.pathList.push(this.createPath(pathName, movementPointArray, conversationPointArray)); // update data list
         this.pathList = this.sortByName(this.pathList); // then sort
-        for (const path of this.pathList) this.sk.domController.updateMainTab(path, "movementMainTab"); // add new set of GUI/checkbox elements to the DOM
         this.setTotalTime(movementPointArray);
         this.parseCodes.resetCounters(); // must reset code counters if multiple paths are loaded
-        this.sk.loop(); // rerun P5 draw loop
+        this.sk.domController.updateMovementCheckboxes(this.pathList);
+        this.sk.loop();
     }
 
     /**
@@ -50,22 +49,19 @@ class Core {
      * @param  {PapaParse results Array} parsedConversationFileArray
      */
     updateConversation(parsedConversationFileArray) {
-        this.sk.domController.removeAllElements("conversationMainTab");
         this.setSpeakerList(parsedConversationFileArray);
         this.speakerList = this.sortByName(this.speakerList);
-        for (const speaker of this.speakerList) this.sk.domController.updateMainTab(speaker, "conversationMainTab");
         this.parseMovement.reProcessAllPointArrays(); // must reprocess movement
-        this.sk.loop(); // rerun P5 draw loop
+        this.sk.domController.updateConversationCheckboxes(this.speakerList);
+        this.sk.loop();
     }
 
     updateCodes(codeName) {
-        this.sk.domController.removeAllElements("codesMainTab");
         this.codeList.push(this.createCode(codeName));
-        for (const code of this.codeList) this.sk.domController.updateMainTab(code, "codesMainTab");
-        this.sk.domController.updateCodeColorTab("codesMainTab");
         this.clearMovement();
         this.parseMovement.reProcessAllPointArrays();
-        this.sk.loop(); // rerun P5 draw loop
+        this.sk.domController.updateCodeCheckboxes(this.codeList);
+        this.sk.loop();
     }
 
     setTotalTime(movementPointArray) {
@@ -79,7 +75,7 @@ class Core {
             for (const tempSpeaker of this.speakerList) tempSpeakerList.push(tempSpeaker.name);
             // If row is good data, test if core.speakerList already has speaker and if not add speaker 
             if (this.testData.conversationRowForType(curRow)) {
-                const speaker = this.testData.cleanSpeaker(curRow[this.testData.headersConversation[1]]); // get cleaned speaker character
+                const speaker = this.testData.cleanFileName(curRow[this.testData.headersConversation[1]]); // get cleaned speaker character
                 if (!tempSpeakerList.includes(speaker)) this.speakerList.push(this.createSpeaker(speaker));
             }
         }

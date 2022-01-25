@@ -21,6 +21,12 @@ class DomController {
 
     parseCSVFile(fileToParse) {
         Papa.parse(fileToParse, {
+            dynamicTyping: true, // If true, numeric and boolean data will be converted to their type instead of remaining strings
+            skipEmptyLines: 'greedy', // If set to 'greedy', lines that don't have any content (those which have only whitespace after parsing) will also be skipped
+            header: 'true',
+            transformHeader: (h) => {
+                return h.trim().toLowerCase();
+            },
             complete: (results, file) => {
                 console.log("Parsing complete:", results, file);
                 this.sk.core.testParsedResultsForProcessing(results, file);
@@ -28,12 +34,7 @@ class DomController {
             error: (error, file) => {
                 alert("Parsing error with one of your CSV file. Please make sure your file is formatted correctly as a .CSV");
                 console.log(error, file);
-            },
-            dynamicTyping: true, // If true, numeric and boolean data will be converted to their type instead of remaining strings
-            header: true,
-            transformHeader: (h) => {
-                return h.trim().toLowerCase();
-            },
+            }
         });
     }
 
@@ -80,7 +81,7 @@ class DomController {
                 this.sk.sketchController.setIsAllTalk(false); // not essential but setting matches each case differently
                 break;
             case "Example 1":
-                this.loadExampleData(['data/example-1/', 'floorplan.png', 'conversation.csv', ['Jordan.csv'], 'Youtube', {
+                this.loadExampleData(['data/example-1/', 'floorplan.png', 'conversation.csv', ['Jordan.csv', 'Possession.csv'], 'Youtube', {
                     videoId: 'iiMjfVOj8po'
                 }]);
                 this.sk.sketchController.setIsAllTalk(false);
@@ -92,7 +93,7 @@ class DomController {
                 this.sk.sketchController.setIsAllTalk(false);
                 break;
             case "Example 3":
-                this.loadExampleData(['data/example-3/', 'floorplan.png', 'conversation.csv', ['Teacher.csv'], 'Youtube', {
+                this.loadExampleData(['data/example-3/', 'floorplan.png', 'conversation.csv', ['Teacher.csv', 'lesson-graph.csv'], 'Youtube', {
                     videoId: 'Iu0rxb-xkMk'
                 }]);
                 this.sk.sketchController.setIsAllTalk(true);
@@ -127,7 +128,7 @@ class DomController {
      * [0] String directory/folder
      * [1] String floorPlan image filename
      * [2] String conversation filename
-     * [3] Array of String movement filenames
+     * [3] Array of String filenames
      * [4] String video platform (e.g.File or youTube)
      * [5] Video params(see videoPlayer interface)
      */
@@ -186,11 +187,31 @@ class DomController {
         }
     }
 
-    /**
-     * DOM UPDATE METHODS
-     */
-    updateMainTab(curItem, mainTabId) {
-        let parent = document.getElementById(mainTabId); // Get parent tab to append new div and label to
+    updateMovementCheckboxes(pathList) {
+        this.updateCheckboxList(pathList, "movementMainTab", "checkbox-movement");
+    }
+
+    updateConversationCheckboxes(speakerList) {
+        this.updateCheckboxList(speakerList, "conversationMainTab", "checkbox-conversation");
+    }
+
+    updateCodeCheckboxes(codeList) {
+        this.updateCheckboxList(codeList, "codesMainTab", "checkbox-code");
+    }
+
+    updateAllCheckboxes() {
+        this.updateCheckboxList(this.sk.core.pathList, "movementMainTab", "checkbox-movement");
+        this.updateCheckboxList(this.sk.core.speakerList, "conversationMainTab", "checkbox-conversation");
+        this.updateCheckboxList(this.sk.core.codeList, "codesMainTab", "checkbox-code");
+    }
+
+    updateCheckboxList(list, elementId, checkboxClass) {
+        this.removeAllElements(checkboxClass);
+        for (const item of list) this.createCheckbox(item, elementId, checkboxClass);
+    }
+
+    createCheckbox(curItem, mainTabClass, checkboxClass) {
+        let parent = document.getElementById(mainTabClass); // Get parent tab to append new div and label to
         let label = document.createElement('label'); //  Make label
         let div = document.createElement('input'); // Make checkbox div
         let span = document.createElement('span'); // Make span to hold new checkbox styles
@@ -198,9 +219,10 @@ class DomController {
         if (this.sk.sketchController.getIsPathColorMode()) curColor = curItem.color.pathMode;
         else curColor = curItem.color.codeMode;
         label.textContent = curItem.name; // set name to text of path
-        label.setAttribute('class', 'tab-checkbox');
+        label.classList.add("tab-checkbox", checkboxClass);
         div.setAttribute("type", "checkbox");
-        span.className = "checkmark";
+        div.classList.add(checkboxClass);
+        span.classList.add("checkmark", checkboxClass);
         span.style.border = "medium solid" + curColor;
         if (curItem.isShowing) {
             span.style.backgroundColor = curColor;
@@ -222,49 +244,17 @@ class DomController {
         parent.appendChild(label);
     }
 
-    updateCodeColorTab(mainTabId) {
-        let parent = document.getElementById(mainTabId); // Get parent tab to append new div and label to
-        let div = document.createElement('div'); // Make div to hold sub-tabs-container class
-        let label = document.createElement('label'); //  Make label
-        let input = document.createElement('input'); // Create the actual input and set correct class
-        div.setAttribute('class', 'sub-tabs-container');
-        div.style.cssFloat = 'left'; // float the div to make element align with checkboxes added later
-        div.style.marginRight = "10px";
-        div.addEventListener('click', () => {
-            this.sk.sketchController.toggleIsPathColorMode();
-            this.reProcessCheckboxMainTabs();
-            this.updateCodeColorTab("codesMainTab");
-            this.sk.loop();
-        });
-        label.textContent = "Color By Codes"; // set label text
-        input.setAttribute('class', 'tab-radio');
-        div.appendChild(label);
-        div.appendChild(input);
-        parent.appendChild(div);
-    }
-
-    reProcessCheckboxMainTabs() {
-        this.reProcessCheckboxList(this.sk.core.pathList, "movementMainTab");
-        this.reProcessCheckboxList(this.sk.core.speakerList, "conversationMainTab");
-        this.reProcessCheckboxList(this.sk.core.codeList, "codesMainTab");
-    }
-
-    reProcessCheckboxList(list, elementId) {
-        this.removeAllElements(elementId);
-        for (const item of list) this.updateMainTab(item, elementId);
-    }
-
     clearAllCheckboxes() {
-        this.removeAllElements("movementMainTab");
-        this.removeAllElements("conversationMainTab");
-        this.removeAllElements("codesMainTab");
+        this.removeAllElements("checkbox-movement");
+        this.removeAllElements("checkbox-conversation");
+        this.removeAllElements("checkbox-code");
     }
 
     removeAllElements(elementId) {
-        let element = document.getElementById(elementId);
-        while (element.firstChild) {
-            element.removeChild(element.firstChild);
-        }
+        let elementList = document.querySelectorAll("." + elementId);
+        elementList.forEach(function (userItem) {
+            userItem.remove();
+        });
     }
 
     updateWordToSearch() {

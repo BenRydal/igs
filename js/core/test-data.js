@@ -5,7 +5,7 @@ class TestData {
         this.headersMovement = ['time', 'x', 'y']; // Each index is tested to be type number
         this.headersConversation = ['time', 'speaker', 'talk']; // Of type number, string, and not null or undefined
         this.headersSingleCodes = ['start', 'end']; // Of type number
-        this.headersMultiCodes = ['code', 'start', 'end']; // matches singleCodeHeaders with one extra column 'code' of type string
+        this.headersMultiCodes = ['code', 'start', 'end']; // MUST MATCH singleCodeHeaders with one extra column 'code' of type string
     }
 
     /**
@@ -67,19 +67,10 @@ class TestData {
     }
 
     /**
-     * Used to compare and add new speakers to speakerList
-     * @param  {String} s
-     */
-    cleanSpeaker(string) {
-        return string.trim().toUpperCase().substring(0, 2);
-    }
-
-    /**
-     * Used to compare and add new paths to pathList
-     * NOTE: this may need to match cleanSpeaker in the future
+     * Used to compare and add new data to core data lists from CSV file names and data
      * @param  {String} s
      */
     cleanFileName(string) {
-        return string.charAt(0).toUpperCase();
+        return string.trim().replace(/\.[^/.]+$/, "").toLowerCase();
     }
 }

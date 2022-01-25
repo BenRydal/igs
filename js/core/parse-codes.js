@@ -3,7 +3,7 @@ class ParseCodes {
     constructor(sketch, testData) {
         this.sk = sketch;
         this.testData = testData;
-        this.parsedFileArray = []; // holds CodeTable objects that represent results.data array, character name and counter number
+        this.parsedFileArray = []; // holds CodeTable objects
     }
 
     /**
@@ -12,7 +12,7 @@ class ParseCodes {
      * @param  {File} file
      */
     processSingleCodeFile(results, file) {
-        const codeName = this.testData.cleanFileName(file.name);
+        const codeName = this.testData.cleanFileName(file.name); // remove file extension
         this.parsedFileArray.push(this.createCodeTable(results.data, codeName));
         this.sk.core.updateCodes(codeName);
     }
@@ -24,7 +24,7 @@ class ParseCodes {
     processMultiCodeFile(results) {
         this.clear(); // NOTE: clearing all existing code data prevents mixing single and multi code files. You can only have ONE multicode file
         this.updateParsedFileArrayForMultiCodes(results);
-        for (const codeTable of this.parsedFileArray) this.sk.core.updateCodes(codeTable.firstCharOfFileName);
+        for (const codeTable of this.parsedFileArray) this.sk.core.updateCodes(codeTable.codeName);
     }
 
     /**
@@ -34,23 +34,25 @@ class ParseCodes {
      */
     updateParsedFileArrayForMultiCodes(results) {
         for (const row of results.data) {
-            const codeName = this.testData.cleanFileName(row[this.testData.headersMultiCodes[0]]);
-            let addNewTable = true; // to add new code table if parsedFileArray empty or no name match/existing codeTable NOT updated
-            for (const codeTable of this.parsedFileArray) { // test for name match to updated existing codeTable
-                if (codeTable.firstCharOfFileName === codeName) {
-                    codeTable.parsedCodeArray.push(row); // update matching parsedCodeArray with new row object
-                    addNewTable = false;
-                    break; // existing codeTable updated so no need to process any other code tables
+            if (this.testData.codeRowForType(row)) { // IMPORTANT: in case there is partial missing data etc. 
+                const curCodeName = this.testData.cleanFileName(row[this.testData.headersMultiCodes[0]]);
+                let addNewTable = true; // to add new code table if parsedFileArray empty or no name match/existing codeTable NOT updated
+                for (const codeTable of this.parsedFileArray) { // test for name match to updated existing codeTable
+                    if (codeTable.codeName === curCodeName) {
+                        codeTable.parsedCodeArray.push(row); // update matching parsedCodeArray with new row object
+                        addNewTable = false;
+                        break; // existing codeTable updated so no need to process any other code tables
+                    }
                 }
+                if (addNewTable) this.parsedFileArray.push(this.createCodeTable([row], curCodeName)); // NOTE: make sure row is added as an array
             }
-            if (addNewTable) this.parsedFileArray.push(this.createCodeTable([row], codeName)); // NOTE: make sure row is added as an array
         }
     }
 
     createCodeTable(resultsDataArray, codeName) {
         return {
             parsedCodeArray: resultsDataArray,
-            firstCharOfFileName: codeName,
+            codeName: codeName,
             counter: 0
         }
     }
@@ -64,17 +66,20 @@ class ParseCodes {
      */
     addCodeArray(curTime) {
         let codeArrayToAdd = [];
-        let color = this.sk.COLORGRAY;
+        let color = this.sk.COLORGRAY; // color when there are no codes, also used in getCodeColor method
         for (let i = 0; i < this.parsedFileArray.length; i++) {
-            if (this.timeIsBetweenCurRow(curTime, this.parsedFileArray[i])) {
-                codeArrayToAdd.push(true);
-                color = this.getCodeColor(color, i);
-            } else {
-                if (this.parsedFileArray[i].counter < this.parsedFileArray[i].parsedCodeArray.length - 1 && this.timeIsBetweenNextRow(curTime, this.parsedFileArray[i])) {
+            const curCodeTableRow = this.parsedFileArray[i].parsedCodeArray[this.parsedFileArray[i].counter];
+            if (this.testData.codeRowForType(curCodeTableRow)) { // IMPORTANT: in case there is partial missing data etc. 
+                if (this.timeIsBetweenCurRow(curTime, this.parsedFileArray[i])) {
                     codeArrayToAdd.push(true);
                     color = this.getCodeColor(color, i);
-                    this.parsedFileArray[i].counter++;
-                } else codeArrayToAdd.push(false);
+                } else {
+                    if (this.parsedFileArray[i].counter < this.parsedFileArray[i].parsedCodeArray.length - 1 && this.timeIsBetweenNextRow(curTime, this.parsedFileArray[i])) {
+                        codeArrayToAdd.push(true);
+                        color = this.getCodeColor(color, i);
+                        this.parsedFileArray[i].counter++;
+                    } else codeArrayToAdd.push(false);
+                }
             }
         }
         return {

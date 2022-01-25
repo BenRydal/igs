@@ -3,7 +3,7 @@ class ParseMovement {
     constructor(sketch, testData) {
         this.sk = sketch;
         this.testData = testData;
-        this.parsedFileArray = []; // Each index of array holds a PapaParse results.data array and string/character for name of path
+        this.parsedFileArray = []; // Holds PapaParse results.data array and string name of path for each processed file
     }
 
     /**
@@ -12,22 +12,22 @@ class ParseMovement {
      * @param  {File} file
      */
     processFile(results, file) {
-        const pathName = this.testData.cleanFileName(file.name);
+        const stringName = this.testData.cleanFileName(file.name);
         this.parsedFileArray.push({
             parsedMovementArray: results.data,
-            firstCharOfFileName: pathName
+            stringName
         });
-        this.processPointArrays(results.data, pathName);
+        this.processPointArrays(results.data, stringName);
     }
 
-    processPointArrays(resultsDataArray, pathName) {
+    processPointArrays(resultsDataArray, stringName) {
         const [movementPointArray, conversationPointArray] = this.createPointArrays(resultsDataArray, this.sk.core.parseConversation.getParsedFileArray());
-        this.sk.core.updateMovement(pathName, movementPointArray, conversationPointArray);
+        this.sk.core.updateMovement(stringName, movementPointArray, conversationPointArray);
     }
 
     reProcessAllPointArrays() {
         for (const index of this.parsedFileArray) {
-            this.processPointArrays(index.parsedMovementArray, index.firstCharOfFileName);
+            this.processPointArrays(index.parsedMovementArray, index.stringName);
         }
     }
 
@@ -85,7 +85,7 @@ class ParseMovement {
             yPos: movementPoint.yPos,
             isStopped: movementPoint.isStopped,
             codes: movementPoint.codes,
-            speaker: this.testData.cleanSpeaker(curConversationRow[this.testData.headersConversation[1]]), // String name of speaker
+            speaker: this.testData.cleanFileName(curConversationRow[this.testData.headersConversation[1]]), // String name of speaker
             talkTurn: curConversationRow[this.testData.headersConversation[2]] // String text of conversation turn
         }
     }

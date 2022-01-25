@@ -102,7 +102,6 @@ Video (MP4)">LOAD FILES</label>
     <div class="main-tab-container">
         <div class="top-tabs-container">
             <label for="main-tab-1">MOVEMENT</label>
-            <label for="main-tab-2">SPEAKERS</label>
             <label for="main-tab-3">TALK</label>
             <label for="main-tab-4">VIDEO</label>
             <label for="main-tab-5">ANIMATE</label>
@@ -116,20 +115,15 @@ Video (MP4)">LOAD FILES</label>
         <div class="tab-content" id="movementMainTab">
         </div>
 
-        <!-- TAB 2 CONTAINER CONVERSATION -->
-        <input class="tab-radio" id="main-tab-2" name="main-group" type="radio" />
-        <div class="tab-content" id="conversationMainTab">
-        </div>
-
         <!-- TAB 3 CONTAINER TALK -->
         <input class="tab-radio" id="main-tab-3" name="main-group" type="radio" />
-        <div class="tab-content">
-            <div class="sub-tabs-container">
+        <div class="tab-content" id="conversationMainTab">
+            <div class="sub-tabs-container button-float">
                 <!-- NOTE: due to id note below, remember to match the for. The actual title doesn't matter, just to show it works... -->
                 <input type="search" id="word-search" name="search-input" placeholder="Search"
                     onsearch="igs.domController.updateWordToSearch(); igs.loop()">
                 <label for="sub-tab3-1">Align</label>
-                <label for="sub-tab3-2">All Speakers On Path</label>
+                <label for="sub-tab3-2">All On Path</label>
             </div>
             <!-- Sub Tabs -->
             <!-- NOTE: name="sub-group" will require to be unique to the tab, ie: tab2 = sub-group2, tab3 = sub-group 3 etc. -->
@@ -213,6 +207,12 @@ Video (MP4)">LOAD FILES</label>
         <!-- TAB 8 CONTAINER CODES -->
         <input class="tab-radio" id="main-tab-8" name="main-group" type="radio" />
         <div class="tab-content" id="codesMainTab">
+            <div class="sub-tabs-container button-float">
+                <label for="sub-tab8-1">Color By Codes</label>
+            </div>
+            <!-- Sub Tabs -->
+            <input class="tab-radio" id="sub-tab8-1" name="sub-group8" type="radio" checked="checked"
+                onclick="igs.sketchController.toggleIsPathColorMode(); igs.domController.updateAllCheckboxes(); igs.loop()">
         </div>
     </div>
 </body>
