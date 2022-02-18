@@ -148,10 +148,10 @@ class DrawMovement {
 
     /**
      * Tests if newDot has been created and updates current dot value and video scrub variable if so
-     * @param  {Object returned from getScaledMovementPos} curPos
+     * @param  {AugmentPoint} augmentPoint
      */
-    recordDot(augmentedPoint) {
-        const newDot = this.getNewDot(augmentedPoint, this.dot);
+    recordDot(augmentPoint) {
+        const newDot = this.getNewDot(augmentPoint, this.dot);
         if (newDot !== null) {
             this.dot = newDot;
             this.sk.sketchController.setDotTimeForVideoScrub(this.dot.timePos);
