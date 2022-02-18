@@ -45,7 +45,7 @@ class DrawMovement {
         for (let i = 1; i < movementArray.length; i++) { // start at 1 to allow testing of current and prior indices
             const p = this.createComparePoint(view, movementArray[i], movementArray[i - 1]); // a compare point consists of current and prior augmented points
             if (this.testPoint.isShowingInGUI(p.cur.pos.timelineXPos)) {
-                if (p.cur.codeIsShowing && this.testPoint.selectMode(p.cur.point.isStopped)) {
+                if (this.isVisible(p.cur)) {
                     if (view === this.sk.SPACETIME) this.recordDot(p.cur);
                     if (p.cur.point.isStopped) this.updateStopDrawing(p, view);
                     else this.updateMovementDrawing(p);
@@ -55,6 +55,10 @@ class DrawMovement {
             }
         }
         this.sk.endShape(); // end shape in case still drawing
+    }
+
+    isVisible(curAugmentPoint) {
+        return (this.testPoint.isShowingInCodeList(curAugmentPoint.point.codes.array) && this.testPoint.selectMode(curAugmentPoint.point.isStopped));
     }
 
     updateStopDrawing(p, view) {
@@ -139,8 +143,7 @@ class DrawMovement {
     augmentPoint(view, point) {
         return {
             point,
-            pos: this.getScaledMovementPos(point, view),
-            codeIsShowing: this.testPoint.isShowingInCodeList(point.codes.array)
+            pos: this.getScaledMovementPos(point, view)
         }
     }
 
