@@ -134,12 +134,12 @@ class DrawMovement {
      */
     createComparePoint(view, curIndex, priorIndex) {
         return {
-            cur: this.augmentPoint(view, curIndex),
-            prior: this.augmentPoint(view, priorIndex)
+            cur: this.createAugmentPoint(view, curIndex),
+            prior: this.createAugmentPoint(view, priorIndex)
         }
     }
 
-    augmentPoint(view, point) {
+    createAugmentPoint(view, point) {
         return {
             point,
             pos: this.getScaledMovementPos(point, view)
