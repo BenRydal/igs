@@ -47,7 +47,7 @@ class DrawMovement {
             if (this.isVisible(p.cur)) {
                 if (view === this.sk.SPACETIME) this.recordDot(p.cur);
                 if (p.cur.point.isStopped) this.updateStopDrawing(p, view);
-                else this.updateMovementDrawing(p);
+                else this.updateMovementDrawing(p, p.prior.point.isStopped, this.style.thinStroke);
             } else {
                 if (this.isDrawingLine) this.endLine();
             }
@@ -58,22 +58,17 @@ class DrawMovement {
     updateStopDrawing(p, view) {
         if (view === this.sk.PLAN) {
             if (!p.prior.point.isStopped) this.drawStopCircle(p); // PriorPoint test makes sure to only draw a stop circle once
-        } else {
-            if (!this.isDrawingLine) this.beginLine(p.cur.point.isStopped, p.cur.point.codes.color);
-            if (!p.prior.point.isStopped || this.isNewCode(p)) this.endThenBeginNewLine(p.prior.pos, this.style.fatStroke, p.cur.point.codes.color);
-            else this.sk.vertex(p.cur.pos.viewXPos, p.cur.pos.floorPlanYPos, p.cur.pos.zPos); // if already drawing fat line, continue it
-        }
+        } else this.updateMovementDrawing(p, !p.prior.point.isStopped, this.style.fatStroke);
     }
 
-    updateMovementDrawing(p) {
+    updateMovementDrawing(p, stopTest, stroke) {
         if (!this.isDrawingLine) this.beginLine(p.cur.point.isStopped, p.cur.point.codes.color);
-        if (p.prior.point.isStopped || this.isNewCode(p)) this.endThenBeginNewLine(p.prior.pos, this.style.thinStroke, p.cur.point.codes.color);
-        else this.sk.vertex(p.cur.pos.viewXPos, p.cur.pos.floorPlanYPos, p.cur.pos.zPos); // if already drawing thin line, continue it
+        if (stopTest || this.isNewCode(p)) this.endThenBeginNewLine(p.prior.pos, stroke, p.cur.point.codes.color);
+        else this.sk.vertex(p.cur.pos.viewXPos, p.cur.pos.floorPlanYPos, p.cur.pos.zPos); // if already drawing fat line, continue it
     }
 
     /**
-     * Begins drawing shape based on code segmentation
-     * Sets strokeweight based on isStopped and returns value to update isDrawingCode
+     * Begins new line and updates isDrawingLine boolean
      */
     beginLine(isStopped, color) {
         if (isStopped) this.setLineStyle(this.style.fatStroke, color);
@@ -83,7 +78,7 @@ class DrawMovement {
     }
 
     /**
-     * Ends drawing shape based on code segmentation and returns value to update isDrawingCode
+     * Ends line and updates isDrawingLine boolean
      */
     endLine() {
         this.sk.endShape();
