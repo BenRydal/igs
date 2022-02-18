@@ -29,6 +29,9 @@ class DrawMovement {
     }
 
     /**
+     * // NOTE: stops/movement treated fifferently in plan/space time views
+     // stops/movement and what is visible (selection, highlights) determine line segmentation
+
      * Organizes segmentation of line drawing based on a variety of conditions
      * There are 2 primary ways to start / end lines:
      3 ways to change line thickness / color:
@@ -86,7 +89,6 @@ class DrawMovement {
     }
 
     /**
-     * Ends and begins a new line, passes values to set strokeweight and color for new line
      * @param  {Object returned from getScaledMovementPos} pos
      * @param  {Integer} weight
      */
@@ -99,7 +101,7 @@ class DrawMovement {
     }
 
     /**
-     * Stops are drawn as circles. These circles can be drawn while also drawing with P5's curveVertex method
+     * NOTE: Stop circles can be drawn while also drawing within P5's curveVertex shape/method
      * @param  {ComparePoint} p
      */
     drawStopCircle(p) {
@@ -109,7 +111,7 @@ class DrawMovement {
     }
 
     /**
-     * Color value is used to determine if curPoint is a new code
+     * NOTE: Color value is used to determine if curPoint is a new code
      * @param  {ComparePoint} p
      */
     isNewCode(p) {
@@ -125,7 +127,7 @@ class DrawMovement {
     }
 
     /**
-     * A compare point augments current and prior points with screen pixel position variables and booleans indicating if the point passes code and selection tests
+     * A compare point is an object with two augmented points
      * @param  {Integer} view
      * @param  {MovementPoint} curIndex 
      * @param  {MovementPoint} priorIndex 
