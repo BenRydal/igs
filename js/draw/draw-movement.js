@@ -1,8 +1,8 @@
 /**
- * This class provides a set of methods to draw highly customized lines in both floor plan and space-time views of the IGS.
- * Many of the methods address specific browser constraints and balance drawing curves efficiently and aesthetically meaningfully
- * For example, using the "line" method in a library like P5 is inefficient and curveVertex increases efficiency tremendously but 
- * the tradeoff is more customized methods and conditional structures to handle starting/begining lines/shapes
+ * This class provides a set of custom methods to draw movement data in floorPlan and space-time views of the IGS.
+ * Many of the methods address specific browser constraints and balance aesthetic and efficient curve drawing needs
+ * For example, using the "line" method in a library like P5 is inefficient and curveVertex increases efficiency significantly but 
+ * the tradeoff is the need for more customized methods and conditional structures to handle starting/begining lines/shapes
  */
 class DrawMovement {
 
@@ -29,20 +29,12 @@ class DrawMovement {
     }
 
     /**
-     * // NOTE: stops/movement treated fifferently in plan/space time views
-     // stops/movement and what is visible (selection, highlights) determine line segmentation
-
-     * Organizes segmentation of line drawing based on a variety of conditions
-     * There are 2 primary ways to start / end lines:
-     3 ways to change line thickness / color:
-         1) code changes
-     2) stop - movement changes
-     3) highlight selection(different logic ? )
-     * point is stopped or moving this boolean is tested to draw distinct line segments adjacent in space and time
+     * Organizes segmentation of line drawing to draw lines with varying strokes, thickness etc.
+     * NOTE: stops are drawn as circles in floorPlan view
+     * NOTE: 2 things determine line segmentation: 1) change from stop to movement and 2) whether point is visible (e.g., selected, highlighted etc.)
      * @param  {Integer} view
      * @param  {MovementPoint []} movementArray
      */
-
     setDraw(view, movementArray) {
         this.isDrawingLine = false; // always reset
         for (let i = 1; i < movementArray.length; i++) { // start at 1 to allow testing of current and prior indices
@@ -58,21 +50,24 @@ class DrawMovement {
         this.sk.endShape(); // end shape in case still drawing
     }
 
+    /**
+     * Stops are draw as circles in floorPlan view
+     */
     updateStopDrawing(p, view) {
         if (view === this.sk.PLAN) {
             if (!p.prior.point.isStopped) this.drawStopCircle(p); // PriorPoint test makes sure to only draw a stop circle once
         } else this.updateMovementDrawing(p, !p.prior.point.isStopped, this.style.fatStroke);
     }
 
+    /**
+     * NOTE: stopTest can vary depending on if this method is called when updatingStopDrawing
+     */
     updateMovementDrawing(p, stopTest, stroke) {
         if (!this.isDrawingLine) this.beginLine(p.cur.point.isStopped, p.cur.point.codes.color);
         if (stopTest || this.isNewCode(p)) this.endThenBeginNewLine(p.prior.pos, stroke, p.cur.point.codes.color);
         else this.sk.vertex(p.cur.pos.viewXPos, p.cur.pos.floorPlanYPos, p.cur.pos.zPos); // if already drawing fat line, continue it
     }
 
-    /**
-     * Begins new line and updates isDrawingLine boolean
-     */
     beginLine(isStopped, color) {
         if (isStopped) this.setLineStyle(this.style.fatStroke, color);
         else this.setLineStyle(this.style.thinStroke, color);
@@ -80,18 +75,11 @@ class DrawMovement {
         this.isDrawingLine = true;
     }
 
-    /**
-     * Ends line and updates isDrawingLine boolean
-     */
     endLine() {
         this.sk.endShape();
         this.isDrawingLine = false;
     }
 
-    /**
-     * @param  {Object returned from getScaledMovementPos} pos
-     * @param  {Integer} weight
-     */
     endThenBeginNewLine(pos, weight, color) {
         this.sk.vertex(pos.viewXPos, pos.floorPlanYPos, pos.zPos);
         this.sk.endShape();
