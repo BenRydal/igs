@@ -10,6 +10,7 @@ class DrawMovement {
         this.sk = sketch;
         this.testPoint = new TestPoint(this.sk);
         this.dot = null; // represents user selection dot drawn in both floor plan and space-time views
+        this.isDrawingLine = false; // boolean controls start/end line segment drawing based on code file and GUI selections
         this.style = {
             shade: null,
             thinStroke: 1,
@@ -40,31 +41,36 @@ class DrawMovement {
      */
 
     setDraw(view, movementArray) {
-        let isDrawingLine = false; // controls beginning/ending lines based on user loaded codes and select methods
+        this.isDrawingLine = false; // always reset
         for (let i = 1; i < movementArray.length; i++) { // start at 1 to allow testing of current and prior indices
             const p = this.createComparePoint(view, movementArray[i], movementArray[i - 1]); // a compare point consists of current and prior augmented points
             if (this.testPoint.isShowingInGUI(p.cur.pos.timelineXPos)) {
                 if (p.cur.codeIsShowing && this.testPoint.selectMode(p.cur.point.isStopped)) {
                     if (view === this.sk.SPACETIME) this.recordDot(p.cur);
-
-                    if (p.cur.point.isStopped) {
-                        if (view === this.sk.PLAN) this.drawStopCircle(p);
-                        else {
-                            if (!isDrawingLine) isDrawingLine = this.beginLine(p.cur.point.isStopped, p.cur.point.codes.color);
-                            if (!p.prior.point.isStopped || this.isNewCode(p)) this.endThenBeginNewLine(p.prior.pos, this.style.fatStroke, p.cur.point.codes.color);
-                            else this.sk.vertex(p.cur.pos.viewXPos, p.cur.pos.floorPlanYPos, p.cur.pos.zPos); // if already drawing fat line, continue it
-                        }
-                    } else {
-                        if (!isDrawingLine) isDrawingLine = this.beginLine(p.cur.point.isStopped, p.cur.point.codes.color);
-                        if (p.prior.point.isStopped || this.isNewCode(p)) this.endThenBeginNewLine(p.prior.pos, this.style.thinStroke, p.cur.point.codes.color);
-                        else this.sk.vertex(p.cur.pos.viewXPos, p.cur.pos.floorPlanYPos, p.cur.pos.zPos); // if already drawing thin line, continue it
-                    }
+                    if (p.cur.point.isStopped) this.updateStopDrawing(p, view);
+                    else this.updateMovementDrawing(p);
                 } else {
-                    if (isDrawingLine) isDrawingLine = this.endLine();
+                    if (this.isDrawingLine) this.endLine();
                 }
             }
         }
         this.sk.endShape(); // end shape in case still drawing
+    }
+
+    updateStopDrawing(p, view) {
+        if (view === this.sk.PLAN) {
+            if (!p.prior.point.isStopped) this.drawStopCircle(p); // PriorPoint test makes sure to only draw a stop circle once
+        } else {
+            if (!this.isDrawingLine) this.beginLine(p.cur.point.isStopped, p.cur.point.codes.color);
+            if (!p.prior.point.isStopped || this.isNewCode(p)) this.endThenBeginNewLine(p.prior.pos, this.style.fatStroke, p.cur.point.codes.color);
+            else this.sk.vertex(p.cur.pos.viewXPos, p.cur.pos.floorPlanYPos, p.cur.pos.zPos); // if already drawing fat line, continue it
+        }
+    }
+
+    updateMovementDrawing(p) {
+        if (!this.isDrawingLine) this.beginLine(p.cur.point.isStopped, p.cur.point.codes.color);
+        if (p.prior.point.isStopped || this.isNewCode(p)) this.endThenBeginNewLine(p.prior.pos, this.style.thinStroke, p.cur.point.codes.color);
+        else this.sk.vertex(p.cur.pos.viewXPos, p.cur.pos.floorPlanYPos, p.cur.pos.zPos); // if already drawing thin line, continue it
     }
 
     /**
@@ -75,7 +81,7 @@ class DrawMovement {
         if (isStopped) this.setLineStyle(this.style.fatStroke, color);
         else this.setLineStyle(this.style.thinStroke, color);
         this.sk.beginShape();
-        return true;
+        this.isDrawingLine = true;
     }
 
     /**
@@ -83,7 +89,7 @@ class DrawMovement {
      */
     endLine() {
         this.sk.endShape();
-        return false;
+        this.isDrawingLine = false;
     }
 
     /**
@@ -101,15 +107,12 @@ class DrawMovement {
 
     /**
      * Stops are drawn as circles. These circles can be drawn while also drawing with P5's curveVertex method
-     * Testing if the priorPoit is stopped is to only draw a stop once
      * @param  {ComparePoint} p
      */
     drawStopCircle(p) {
-        if (!p.prior.point.isStopped) {
-            this.setFillStyle(p.cur.point.codes.color);
-            this.sk.circle(p.cur.pos.viewXPos, p.cur.pos.floorPlanYPos, this.style.stopSize);
-            this.sk.noFill();
-        }
+        this.setFillStyle(p.cur.point.codes.color);
+        this.sk.circle(p.cur.pos.viewXPos, p.cur.pos.floorPlanYPos, this.style.stopSize);
+        this.sk.noFill();
     }
 
     /**
