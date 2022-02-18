@@ -55,10 +55,6 @@ class DrawMovement {
         this.sk.endShape(); // end shape in case still drawing
     }
 
-    isVisible(curAugmentPoint) {
-        return (this.testPoint.isShowingInGUI(curAugmentPoint.pos.timelineXPos) && this.testPoint.isShowingInCodeList(curAugmentPoint.point.codes.array) && this.testPoint.selectMode(curAugmentPoint.point.isStopped));
-    }
-
     updateStopDrawing(p, view) {
         if (view === this.sk.PLAN) {
             if (!p.prior.point.isStopped) this.drawStopCircle(p); // PriorPoint test makes sure to only draw a stop circle once
@@ -123,6 +119,14 @@ class DrawMovement {
      */
     isNewCode(p) {
         return p.cur.point.codes.color !== p.prior.point.codes.color;
+    }
+
+    /**
+     * Holds tests for determining if point is visible (e.g., selected, highlighted)
+     * @param  {AugmentPoint} augmentPoint
+     */
+    isVisible(augmentPoint) {
+        return (this.testPoint.isShowingInGUI(augmentPoint.pos.timelineXPos) && this.testPoint.isShowingInCodeList(augmentPoint.point.codes.array) && this.testPoint.selectMode(augmentPoint.point.isStopped));
     }
 
     /**
