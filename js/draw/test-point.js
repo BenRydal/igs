@@ -52,42 +52,6 @@ class TestPoint {
         };
     }
 
-    // ***** DRAW MOVEMENT TESTS ***** //
-    /**
-     * @param  {Integer} view
-     * @param  {MovementPoint} curPoint
-     */
-    isPlanViewAndStopped(view, pointIsStopped) {
-        return (view === this.sk.PLAN && pointIsStopped && this.sk.sketchController.getCurSelectTab() !== 3);
-    }
-
-    /**
-     * Controls fat line drawing/segmentation
-     * @param  {Number} xPos, yPos
-     * @param  {boolean} pointIsStopped
-     */
-    selectModeForFatLine(xPos, yPos, pointIsStopped) {
-        switch (this.sk.sketchController.getCurSelectTab()) {
-            case 1:
-                return this.sk.gui.fpContainer.overCursor(xPos, yPos);
-            case 2:
-                return this.sk.gui.fpContainer.overSlicer(xPos, yPos);
-            default:
-                return pointIsStopped; // this always returns false for floorplan view
-        }
-    }
-
-    selectModeForStrokeWeights() {
-        switch (this.sk.sketchController.getCurSelectTab()) {
-            case 3:
-                return [1, 0];
-            case 4:
-                return [0, 9];
-            default:
-                return [1, 9];
-        }
-    }
-
     // ***** DRAW CONVERSATION TESTS ***** //
 
     /**
@@ -116,18 +80,17 @@ class TestPoint {
     }
 
     /**
-     * Controls conversation drawing based on selectMode
-     * @param  {Number} xPos, yPos
+     * 
      * @param  {boolean} pointIsStopped
      */
-    selectModeForConversation(xPos, yPos, isStopped) {
+    selectMode(isStopped) {
         switch (this.sk.sketchController.getCurSelectTab()) {
             case 0:
                 return true;
             case 1:
-                return this.sk.gui.fpContainer.overCursor(xPos, yPos);
+                return true;
             case 2:
-                return this.sk.gui.fpContainer.overSlicer(xPos, yPos);
+                return true; // TODO: NOTE one of these will become single/multi highlight test
             case 3:
                 return !isStopped;
             case 4:
