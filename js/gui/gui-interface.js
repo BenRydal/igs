@@ -7,8 +7,8 @@ class GUI {
     }
 
     updateGUI() {
-        this.sk.gui.timelinePanel.draw();
-        this.sk.gui.timelinePanel.updateSlicer(this.sk.sketchController.handle3D.getIsShowing());
-        this.sk.gui.fpContainer.updateSelectors(this.sk.sketchController.getCurSelectTab());
+        this.timelinePanel.draw();
+        this.timelinePanel.updateSlicer(this.sk.sketchController.handle3D.getIsShowing());
+        this.fpContainer.updateSelectors(this.sk.sketchController.getCurSelectTab());
     }
 }
