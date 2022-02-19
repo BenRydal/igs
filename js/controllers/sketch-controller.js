@@ -80,12 +80,10 @@ class SketchController {
 
     // 2 playPause video methods differ with respect to tests and seekTo method call
     playPauseVideoFromTimeline() {
-        if (this.testVideoToPlay()) {
-            if (this.mode.isVideoPlay) this.pauseMovie();
-            else {
-                this.playVideo();
-                this.sk.videoPlayer.seekTo(this.mapPixelTimeToVideoTime(this.mapPixelTimeToSelectTime(this.sk.mouseX)));
-            }
+        if (this.mode.isVideoPlay) this.pauseMovie();
+        else {
+            this.playVideo();
+            this.sk.videoPlayer.seekTo(this.mapPixelTimeToVideoTime(this.mapPixelTimeToSelectTime(this.sk.mouseX)));
         }
     }
 

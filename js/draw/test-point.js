@@ -83,18 +83,20 @@ class TestPoint {
      * 
      * @param  {boolean} pointIsStopped
      */
-    selectMode(isStopped) {
+    selectMode(xPos, yPos, isStopped) {
         switch (this.sk.sketchController.getCurSelectTab()) {
             case 0:
                 return true;
             case 1:
-                return true;
+                return this.sk.gui.fpContainer.overCursor(xPos, yPos);
             case 2:
-                return true; // TODO: NOTE one of these will become single/multi highlight test
+                return this.sk.gui.fpContainer.overSlicer(xPos, yPos); // TODO: NOTE one of these will become single/multi highlight test
             case 3:
                 return !isStopped;
             case 4:
                 return isStopped;
+            case 5:
+                return true;
         }
     }
 }

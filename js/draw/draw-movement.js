@@ -111,7 +111,7 @@ class DrawMovement {
      * @param  {AugmentPoint} augmentPoint
      */
     isVisible(augmentPoint) {
-        return (this.testPoint.isShowingInGUI(augmentPoint.pos.timelineXPos) && this.testPoint.isShowingInCodeList(augmentPoint.point.codes.array) && this.testPoint.selectMode(augmentPoint.point.isStopped));
+        return (this.testPoint.isShowingInGUI(augmentPoint.pos.timelineXPos) && this.testPoint.isShowingInCodeList(augmentPoint.point.codes.array) && this.testPoint.selectMode(augmentPoint.pos.floorPlanXPos, augmentPoint.pos.floorPlanYPos, augmentPoint.point.isStopped));
     }
 
     /**
