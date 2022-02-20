@@ -47,7 +47,10 @@ const igs = new p5((sk) => {
         sk.translate(-sk.width / 2, -sk.height / 2, 0); // always recenter canvas to top left when using WEBGL renderer
         // 3D translation test
         if (sk.sketchController.handle3D.getIsShowing() || sk.sketchController.handle3D.getIsTransitioning()) sk.sketchController.handle3D.update3DTranslation();
-        if (sk.dataIsLoaded(sk.inputFloorPlan.getImg())) sk.sketchController.setFloorPlan();
+
+        if (sk.dataIsLoaded(sk.inputFloorPlan.getImg())) sk.sketchController.handleRotation.setFloorPlan(sk.gui.fpContainer.getContainer());
+
+
         if (sk.arrayIsLoaded(sk.core.pathList)) {
             if (sk.arrayIsLoaded(sk.core.speakerList)) sk.setMovementAndConversation();
             else sk.setMovement();
@@ -59,27 +62,6 @@ const igs = new p5((sk) => {
         sk.gui.updateGUI(); // draw keys last
         sk.sketchController.updateAnimation();
         sk.sketchController.updateLoop();
-    }
-
-    /**
-     * NOTE: When drawing floor plan, translate down on z axis -1 pixel so shapes are drawn cleanly on top of the floor plan
-     */
-    sk.drawFloorPlan = function (width, height) {
-        if (this.sketchController.handle3D.getIsShowing()) {
-            sk.push();
-            sk.translate(0, 0, -1);
-            sk.image(sk.inputFloorPlan.getImg(), 0, 0, width, height);
-            sk.pop();
-        } else sk.image(sk.inputFloorPlan.getImg(), 0, 0, width, height);
-    }
-
-    sk.drawRotatedFloorPlan = function (angle, width, height, container) {
-        sk.push();
-        sk.imageMode(sk.CENTER); // important method to include here
-        sk.translate(container.width / 2, container.height / 2);
-        sk.rotate(angle);
-        sk.drawFloorPlan(width, height);
-        sk.pop();
     }
 
     sk.setMovement = function () {

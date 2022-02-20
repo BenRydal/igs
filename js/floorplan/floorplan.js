@@ -24,6 +24,27 @@ class InputFloorPlan {
         });
     }
 
+    /**
+     * NOTE: When drawing floor plan, translate down on z axis -1 pixel so shapes are drawn cleanly on top of the floor plan
+     */
+    draw(width, height) {
+        if (this.sk.sketchController.handle3D.getIsShowing()) {
+            this.sk.push();
+            this.sk.translate(0, 0, -1);
+            this.sk.image(this.img, 0, 0, width, height);
+            this.sk.pop();
+        } else this.sk.image(this.img, 0, 0, width, height);
+    }
+
+    rotateAndDraw(angle, width, height, container) {
+        this.sk.push();
+        this.sk.imageMode(this.sk.CENTER); // important method to include here
+        this.sk.translate(container.width / 2, container.height / 2);
+        this.sk.rotate(angle);
+        this.draw(width, height);
+        this.sk.pop();
+    }
+
     getImg() {
         return this.img;
     }

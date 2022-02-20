@@ -11,16 +11,16 @@ class HandleRotation {
     setFloorPlan(container) {
         switch (this.curFloorPlanRotation) {
             case 0:
-                this.sk.drawFloorPlan(container.width, container.height);
+                this.sk.inputFloorPlan.draw(container.width, container.height);
                 break;
             case 1:
-                this.sk.drawRotatedFloorPlan(this.sk.HALF_PI, container.height, container.width, container);
+                this.sk.inputFloorPlan.rotateAndDraw(this.sk.HALF_PI, container.height, container.width, container);
                 break;
             case 2:
-                this.sk.drawRotatedFloorPlan(this.sk.PI, container.width, container.height, container);
+                this.sk.inputFloorPlan.rotateAndDraw(this.sk.PI, container.width, container.height, container);
                 break;
             case 3:
-                this.sk.drawRotatedFloorPlan(-this.sk.HALF_PI, container.height, container.width, container);
+                this.sk.inputFloorPlan.rotateAndDraw(-this.sk.HALF_PI, container.height, container.width, container);
                 break;
         }
     }

@@ -42,6 +42,7 @@ class SketchController {
 
 
 
+
     updateLoop() {
         if ((this.mode.isAnimate && !this.mode.isAnimatePause) || this.mode.isVideoPlay || this.handle3D.getIsTransitioning()) this.sk.loop();
         else this.sk.noLoop();
@@ -138,10 +139,6 @@ class SketchController {
         if (this.testTimeline()) {
             this.sk.gui.timelinePanel.draw3DSlicerRect(this.sk.gui.fpContainer.getContainer(), this.mapToSelectTimeThenPixelTime(this.sk.mouseX)); // pass mapped mouseX as zPos
         }
-    }
-
-    setFloorPlan() {
-        this.handleRotation.setFloorPlan(this.sk.gui.fpContainer.getContainer());
     }
 
     // ****** TEST HELPERS ****** //
