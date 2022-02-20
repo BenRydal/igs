@@ -18,12 +18,6 @@ class SketchController {
         this.dotTimeForVideoScrub = null; // Set in draw movement data and used to display correct video frame when scrubbing video
     }
 
-
-
-
-
-
-
     updateLoop() {
         if ((this.mode.isAnimate && !this.mode.isAnimatePause) || this.mode.isVideoPlay || this.handle3D.getIsTransitioning()) this.sk.loop();
         else this.sk.noLoop();
