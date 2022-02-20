@@ -36,12 +36,16 @@ class DrawConversation {
         return (this.testPoint.isTalkTurnSelected(point.talkTurn) && this.testPoint.isShowingInGUI(curPos.timelineXPos) && this.testPoint.selectMode(curPos, point.isStopped) && this.testPoint.isShowingInCodeList(point.codes.array));
     }
     /**
-     * Organizes drawing of single text/textbox for a selected conversation
-     * Must be translated to show above all other visual elements with WEBGL renderer
-     * NOTE: this is called after all conversation rects are drawn so it is displayed on top visually
+     * Draws single textbox for user selected conversation
+     * NOTE: Must be translated 1 pixel to show text above all other visual elements with WEBGL renderer
      */
     setConversationBubble() {
-        if (this.conversationBubble.isSelected) this.sk.translateCanvasForText(this.drawTextBox.bind(this, this.conversationBubble.point));
+        if (this.conversationBubble.isSelected) {
+            this.sk.push();
+            this.sk.translate(0, 0, 1);
+            this.drawTextBox(this.conversationBubble.point);
+            this.sk.pop();
+        }
     }
 
     /**

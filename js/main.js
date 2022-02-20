@@ -61,14 +61,6 @@ const igs = new p5((sk) => {
         sk.sketchController.updateLoop();
     }
 
-    // For text in 2D, must translate 1 pixel so text is readable when using WebGL renderer
-    sk.translateCanvasForText = function (callback) {
-        sk.push();
-        sk.translate(0, 0, 1);
-        callback();
-        sk.pop();
-    }
-
     sk.translateCanvasTo3D = function (curPos) {
         sk.push();
         sk.translate(curPos.xPos, curPos.yPos, curPos.zoom);
