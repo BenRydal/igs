@@ -83,37 +83,35 @@ const igs = new p5((sk) => {
         drawConversation.setConversationBubble(); // draw conversation text last so it displays on top
     }
 
-    // TODO: Replace  all "this" with sk!!!
-
     sk.mousePressed = function () {
-        if (this.sketchController.testVideoToPlay()) this.sketchController.playPauseVideoFromTimeline();
+        if (sk.sketchController.testVideoToPlay()) sk.sketchController.playPauseVideoFromTimeline();
         // Called on mousePressed and overCanvas and in highlight mode
         // TODO: add overspace-time view
-        //else if (this.sketchController.getCurSelectTab() === 5 && (this.gui.fpContainer.overFloorPlan(this.mouseX, this.mouseY) || this.gui.timelinePanel.overTimeline(this.mouseX, this.mouseY))) {
-        else if (this.sketchController.getCurSelectTab() === 5) {
-            this.gui.highlight.startHighlight(this.mouseX, this.mouseY);
+        //else if (sk.sketchController.getCurSelectTab() === 5 && (sk.gui.fpContainer.overFloorPlan(sk.mouseX, sk.mouseY) || sk.gui.timelinePanel.overTimeline(sk.mouseX, sk.mouseY))) {
+        else if (sk.sketchController.getCurSelectTab() === 5) {
+            sk.gui.highlight.startHighlight(sk.mouseX, sk.mouseY);
         }
-        this.loop();
+        sk.loop();
     }
 
     sk.mouseDragged = function () {
-        if (!this.sketchController.getIsAnimate()) this.gui.timelinePanel.handle();
-        this.loop();
+        if (!sk.sketchController.getIsAnimate()) sk.gui.timelinePanel.handle();
+        sk.loop();
     }
 
     sk.mouseReleased = function () {
-        this.gui.timelinePanel.resetLock();
-        if (this.sketchController.getCurSelectTab() === 5) {
-            if (!(this.keyIsPressed && this.keyCode === this.OPTION)) this.gui.highlight.resetHighlightArray();
-            this.gui.highlight.updateHighlightArray(this.mouseX, this.mouseY);
+        sk.gui.timelinePanel.resetLock();
+        if (sk.sketchController.getCurSelectTab() === 5) {
+            if (!(sk.keyIsPressed && sk.keyCode === sk.OPTION)) sk.gui.highlight.resetHighlightArray();
+            sk.gui.highlight.updateHighlightArray(sk.mouseX, sk.mouseY);
         }
-        this.loop();
+        sk.loop();
     }
 
     sk.mouseMoved = function () {
-        if (this.gui.timelinePanel.overEitherSelector()) this.cursor(this.HAND);
-        else this.cursor(this.ARROW);
-        this.loop();
+        if (sk.gui.timelinePanel.overEitherSelector()) sk.cursor(sk.HAND);
+        else sk.cursor(sk.ARROW);
+        sk.loop();
     }
 
     sk.windowResized = function () {
