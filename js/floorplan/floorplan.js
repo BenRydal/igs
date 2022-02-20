@@ -72,16 +72,6 @@ class InputFloorPlan {
         }
     }
 
-    setRotateRight() {
-        this.curFloorPlanRotation++;
-        if (this.curFloorPlanRotation > 3) this.curFloorPlanRotation = 0;
-    }
-
-    setRotateLeft() {
-        this.curFloorPlanRotation--;
-        if (this.curFloorPlanRotation < 0) this.curFloorPlanRotation = 3;
-    }
-
     /**
      * NOTE: When drawing floor plan, translate down on z axis -1 pixel so shapes are drawn cleanly on top of the floor plan
      */
@@ -101,6 +91,16 @@ class InputFloorPlan {
         this.sk.rotate(angle);
         this.draw(width, height);
         this.sk.pop();
+    }
+
+    setRotateRight() {
+        this.curFloorPlanRotation++;
+        if (this.curFloorPlanRotation > 3) this.curFloorPlanRotation = 0;
+    }
+
+    setRotateLeft() {
+        this.curFloorPlanRotation--;
+        if (this.curFloorPlanRotation < 0) this.curFloorPlanRotation = 3;
     }
 
     getImg() {
