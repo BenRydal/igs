@@ -50,8 +50,8 @@ class SketchController {
     handleToggle3D() {
         this.handle3D.toggleIsShowing();
         this.handle3D.setIsTransitioning(true);
-        if (this.handle3D.getIsShowing()) this.sk.inputFloorPlan.setRotateRight(); // must rotate floor plan to make matching space-time view appear in both 2D and 3D
-        else this.sk.inputFloorPlan.setRotateLeft();
+        if (this.handle3D.getIsShowing()) this.sk.floorPlan.setRotateRight(); // must rotate floor plan to make matching space-time view appear in both 2D and 3D
+        else this.sk.floorPlan.setRotateLeft();
         this.sk.loop();
     }
 

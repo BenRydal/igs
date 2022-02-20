@@ -1,4 +1,4 @@
-class InputFloorPlan {
+class FloorPlan {
 
     constructor(sk) {
         this.sk = sk;

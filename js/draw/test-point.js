@@ -43,7 +43,7 @@ class TestPoint {
     getSharedPosValues(point) {
         const timelineXPos = this.sk.sketchController.mapTotalTimeToPixelTime(point.time);
         const selTimelineXPos = this.sk.sketchController.mapSelectTimeToPixelTime(timelineXPos);
-        const [floorPlanXPos, floorPlanYPos] = this.sk.inputFloorPlan.getScaledXYPos(point.xPos, point.yPos, this.sk.gui.fpContainer.getContainer());
+        const [floorPlanXPos, floorPlanYPos] = this.sk.floorPlan.getScaledXYPos(point.xPos, point.yPos, this.sk.gui.fpContainer.getContainer());
         return {
             timelineXPos,
             selTimelineXPos,

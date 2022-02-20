@@ -27,7 +27,7 @@ const igs = new p5((sk) => {
         sk.domController = new DomController(sk); // handles DOM/buttons user interaction
         sk.sketchController = new SketchController(sk); // coordinates calls across classes
         sk.videoPlayer = null; // abstract class for different video classes
-        sk.inputFloorPlan = new InputFloorPlan(sk);
+        sk.floorPlan = new FloorPlan(sk);
         // CONSTANTS
         sk.PLAN = 0;
         sk.SPACETIME = 1;
@@ -48,7 +48,7 @@ const igs = new p5((sk) => {
         // 3D translation test
         if (sk.sketchController.handle3D.getIsShowing() || sk.sketchController.handle3D.getIsTransitioning()) sk.sketchController.handle3D.update3DTranslation();
 
-        if (sk.dataIsLoaded(sk.inputFloorPlan.getImg())) sk.inputFloorPlan.setFloorPlan(sk.gui.fpContainer.getContainer());
+        if (sk.dataIsLoaded(sk.floorPlan.getImg())) sk.floorPlan.setFloorPlan(sk.gui.fpContainer.getContainer());
 
 
         if (sk.arrayIsLoaded(sk.core.pathList)) {
