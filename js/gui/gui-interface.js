@@ -24,7 +24,7 @@ class GUI {
             this.sk.strokeWeight(1);
             if (this.highlight.isHighlighting()) this.sk.rect(this.highlight.curXTop, this.highlight.curYTop, this.sk.mouseX - this.highlight.curXTop, this.sk.mouseY - this.highlight.curYTop);
             this.sk.stroke(150);
-            for (const highlightRect of this.sk.sketchController.mode.highlightArray) {
+            for (const highlightRect of this.highlight.highlightArray) {
                 this.sk.rect(highlightRect.xPos, highlightRect.yPos, highlightRect.width, highlightRect.height);
             }
         }

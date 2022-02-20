@@ -96,7 +96,7 @@ class TestPoint {
             case 4:
                 return isStopped;
             case 5:
-                return this.sk.sketchController.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos);
+                return this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos);
         }
     }
 }

@@ -83,6 +83,8 @@ const igs = new p5((sk) => {
         drawConversation.setConversationBubble(); // draw conversation text last so it displays on top
     }
 
+    // TODO: Replace  all "this" with sk!!!
+
     sk.mousePressed = function () {
         if (this.sketchController.testVideoToPlay()) this.sketchController.playPauseVideoFromTimeline();
         // Called on mousePressed and overCanvas and in highlight mode
@@ -102,9 +104,8 @@ const igs = new p5((sk) => {
     sk.mouseReleased = function () {
         this.gui.timelinePanel.resetLock();
         if (this.sketchController.getCurSelectTab() === 5) {
-            if (!(this.keyIsPressed && this.keyCode === this.OPTION)) this.sketchController.resetHighlightArray();
-            if (this.gui.highlight.isHighlighting()) this.sketchController.updateHighlightArray(this.gui.highlight.createHighlightRect(this.mouseX, this.mouseY));
-            this.gui.highlight.endHighlight();
+            if (!(this.keyIsPressed && this.keyCode === this.OPTION)) this.gui.highlight.resetHighlightArray();
+            this.gui.highlight.updateHighlightArray(this.mouseX, this.mouseY);
         }
         this.loop();
     }
