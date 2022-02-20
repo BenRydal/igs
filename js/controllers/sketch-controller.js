@@ -134,10 +134,6 @@ class SketchController {
         if (this.testVideoAndDivAreLoaded()) this.sk.videoPlayer.decreaseSize();
     }
 
-    translationComplete() {
-        return this.handle3D.getIsShowing() || this.handle3D.getIsTransitioning();
-    }
-
     update3DSlicerRect() {
         if (this.testTimeline()) {
             this.sk.gui.timelinePanel.draw3DSlicerRect(this.sk.gui.fpContainer.getContainer(), this.mapToSelectTimeThenPixelTime(this.sk.mouseX)); // pass mapped mouseX as zPos
