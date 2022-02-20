@@ -85,10 +85,7 @@ const igs = new p5((sk) => {
 
     sk.mousePressed = function () {
         if (sk.sketchController.testVideoToPlay()) sk.sketchController.playPauseVideoFromTimeline();
-        // Called on mousePressed and overCanvas and in highlight mode
-        // TODO: add overspace-time view
-        //else if (sk.sketchController.getCurSelectTab() === 5 && (sk.gui.fpContainer.overFloorPlan(sk.mouseX, sk.mouseY) || sk.gui.timelinePanel.overTimeline(sk.mouseX, sk.mouseY))) {
-        else if (sk.sketchController.getCurSelectTab() === 5) {
+        else if (sk.sketchController.getCurSelectTab() === 5 && sk.overRect(0, 0, sk.width, sk.gui.timelinePanel.getTop())) {
             sk.gui.highlight.startHighlight(sk.mouseX, sk.mouseY);
         }
         sk.loop();
@@ -101,7 +98,7 @@ const igs = new p5((sk) => {
 
     sk.mouseReleased = function () {
         sk.gui.timelinePanel.resetLock();
-        if (sk.sketchController.getCurSelectTab() === 5) {
+        if (sk.sketchController.getCurSelectTab() === 5 && sk.overRect(0, 0, sk.width, sk.gui.timelinePanel.getTop())) {
             if (!(sk.keyIsPressed && sk.keyCode === sk.OPTION)) sk.gui.highlight.resetHighlightArray();
             sk.gui.highlight.updateHighlightArray(sk.mouseX, sk.mouseY);
         }
