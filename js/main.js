@@ -116,7 +116,8 @@ const igs = new p5((sk) => {
         if (this.sketchController.testVideoToPlay()) this.sketchController.playPauseVideoFromTimeline();
         // Called on mousePressed and overCanvas and in highlight mode
         // TODO: add overspace-time view
-        else if (this.sketchController.getCurSelectTab() === 5 && (this.gui.fpContainer.overFloorPlan(this.mouseX, this.mouseY) || this.gui.timelinePanel.overTimeline(this.mouseX, this.mouseY))) {
+        //else if (this.sketchController.getCurSelectTab() === 5 && (this.gui.fpContainer.overFloorPlan(this.mouseX, this.mouseY) || this.gui.timelinePanel.overTimeline(this.mouseX, this.mouseY))) {
+        else if (this.sketchController.getCurSelectTab() === 5) {
             this.gui.highlight.startHighlight(this.mouseX, this.mouseY);
         }
         this.loop();
@@ -129,12 +130,10 @@ const igs = new p5((sk) => {
 
     sk.mouseReleased = function () {
         this.gui.timelinePanel.resetLock();
-        // TODO: move highlightArray to sketchController
-        // then just send return from CreateHighlight to it
-        // Might be adding a set/get function to sketchController for highlightArray!
         if (this.sketchController.getCurSelectTab() === 5) {
-            if (!(this.keyIsPressed && this.keyCode === this.OPTION)) this.gui.highlight.resetHighlightArray();
-            if (this.gui.highlight.isHighlighting) this.gui.highlight.addHighlight(this.mouseX, this.mouseY);
+            if (!(this.keyIsPressed && this.keyCode === this.OPTION)) this.sketchController.resetHighlightArray();
+            if (this.gui.highlight.isHighlighting()) this.sketchController.updateHighlightArray(this.gui.highlight.createHighlightRect(this.mouseX, this.mouseY));
+            this.gui.highlight.endHighlight();
         }
         this.loop();
     }
