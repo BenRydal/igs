@@ -48,7 +48,7 @@ const igs = new p5((sk) => {
         // 3D translation test
         if (sk.sketchController.handle3D.getIsShowing() || sk.sketchController.handle3D.getIsTransitioning()) sk.sketchController.handle3D.update3DTranslation();
 
-        if (sk.dataIsLoaded(sk.inputFloorPlan.getImg())) sk.sketchController.handleRotation.setFloorPlan(sk.gui.fpContainer.getContainer());
+        if (sk.dataIsLoaded(sk.inputFloorPlan.getImg())) sk.inputFloorPlan.setFloorPlan(sk.gui.fpContainer.getContainer());
 
 
         if (sk.arrayIsLoaded(sk.core.pathList)) {

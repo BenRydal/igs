@@ -15,7 +15,6 @@ class SketchController {
             wordToSearch: "" // String value to dynamically search words in conversation
         }
         this.handle3D = new Handle3D(this.sk, true); // boolean sets 3D to showing
-        this.handleRotation = new HandleRotation(this.sk);
         this.animationCounter = 0; // counter to synchronize animation across all data
         this.dotTimeForVideoScrub = null; // Set in draw movement data and used to display correct video frame when scrubbing video
     }
@@ -51,8 +50,8 @@ class SketchController {
     handleToggle3D() {
         this.handle3D.toggleIsShowing();
         this.handle3D.setIsTransitioning(true);
-        if (this.handle3D.getIsShowing()) this.setRotateRight(); // must rotate floor plan to make matching space-time view appear in both 2D and 3D
-        else this.setRotateLeft();
+        if (this.handle3D.getIsShowing()) this.sk.inputFloorPlan.setRotateRight(); // must rotate floor plan to make matching space-time view appear in both 2D and 3D
+        else this.sk.inputFloorPlan.setRotateLeft();
         this.sk.loop();
     }
 
@@ -221,15 +220,6 @@ class SketchController {
     setIsVideoShow(value) {
         this.mode.isVideoShow = value;
     }
-
-    setRotateRight() {
-        this.handleRotation.setRotateRight();
-    }
-
-    setRotateLeft() {
-        this.handleRotation.setRotateLeft();
-    }
-
 
     getIsPathColorMode() {
         return this.mode.isPathColorMode;

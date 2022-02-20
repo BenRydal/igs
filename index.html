@@ -15,7 +15,6 @@
     <script src="js/controllers/dom-controller.js"></script>
     <script src="js/controllers/sketch-controller.js"></script>
     <script src="js/controllers/handle-3D.js"></script>
-    <script src="js/controllers/handle-rotation.js"></script>
     <script src="js/gui/gui-interface.js"></script>
     <script src="js/gui/timeline-panel.js"></script>
     <script src="js/gui/floorplan-container.js"></script>
@@ -203,9 +202,9 @@ Video (MP4)">LOAD FILES</label>
             </div>
             <!-- Sub Tabs -->
             <input class="tab-radio" id="sub-tab7-1" name="sub-group7" type="radio" checked="checked"
-                onclick="igs.sketchController.setRotateLeft(); igs.loop()">
+                onclick="igs.inputFloorPlan.setRotateLeft(); igs.loop()">
             <input class="tab-radio" id="sub-tab7-2" name="sub-group7" type="radio"
-                onclick="igs.sketchController.setRotateRight(); igs.loop()">
+                onclick="igs.inputFloorPlan.setRotateRight(); igs.loop()">
         </div>
 
         <!-- TAB 8 CONTAINER CODES -->
