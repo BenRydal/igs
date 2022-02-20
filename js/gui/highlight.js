@@ -3,7 +3,6 @@ class Highlight {
     constructor() {
         this.curXTop = null;
         this.curYTop = null;
-        this.highlightArray = [];
     }
 
     // Called on mousePressed and overCanvas and in highlight mode
@@ -13,8 +12,7 @@ class Highlight {
     }
 
     // on mouseRelease and in highlight mode
-    addHighlight(mouseX, mouseY) {
-        this.highlightArray.push(this.createHighlightRect(mouseX, mouseY));
+    endHighlight() {
         this.curXTop = null;
         this.curYTop = null;
     }
@@ -30,14 +28,5 @@ class Highlight {
 
     isHighlighting() {
         return this.curXTop !== null && this.curYTop !== null;
-    }
-
-    // called by clicking on highlight button OR NONE button??
-    resetHighlightArray() {
-        this.highlightArray = [];
-    }
-
-    getHighlightArray() {
-        return this.highlightArray;
     }
 }
