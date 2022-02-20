@@ -83,20 +83,20 @@ class TestPoint {
      * 
      * @param  {boolean} pointIsStopped
      */
-    selectMode(xPos, yPos, isStopped) {
+    selectMode(curPos, isStopped) {
         switch (this.sk.sketchController.getCurSelectTab()) {
             case 0:
                 return true;
             case 1:
-                return this.sk.gui.fpContainer.overCursor(xPos, yPos);
+                return this.sk.gui.fpContainer.overCursor(curPos.floorPlanXPos, curPos.floorPlanYPos);
             case 2:
-                return this.sk.gui.fpContainer.overSlicer(xPos, yPos); // TODO: NOTE one of these will become single/multi highlight test
+                return this.sk.gui.fpContainer.overSlicer(curPos.floorPlanXPos, curPos.floorPlanYPos);
             case 3:
                 return !isStopped;
             case 4:
                 return isStopped;
             case 5:
-                return true;
+                return this.sk.sketchController.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos);
         }
     }
 }
