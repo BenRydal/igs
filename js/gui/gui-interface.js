@@ -11,11 +11,22 @@ class GUI {
         this.timelinePanel.draw();
         this.timelinePanel.updateSlicer(this.sk.sketchController.handle3D.getIsShowing());
         this.fpContainer.updateSelectors(this.sk.sketchController.getCurSelectTab());
-        if (this.sk.sketchController.getCurSelectTab() === 5 && this.highlight.isHighlighting()) {
+        // if (this.sk.sketchController.getCurSelectTab() === 5 && this.highlight.isHighlighting()) {
+        //     this.sk.noFill();
+        //     this.sk.stroke(0);
+        //     this.sk.strokeWeight(1);
+        //     this.sk.rect(this.highlight.curXTop, this.highlight.curYTop, this.sk.mouseX - this.highlight.curXTop, this.sk.mouseY - this.highlight.curYTop);
+        // }
+        // TODO: temp!
+        if (this.sk.sketchController.getCurSelectTab() === 5) {
             this.sk.noFill();
             this.sk.stroke(0);
             this.sk.strokeWeight(1);
-            this.sk.rect(this.highlight.curXTop, this.highlight.curYTop, this.sk.mouseX - this.highlight.curXTop, this.sk.mouseY - this.highlight.curYTop);
+            if (this.highlight.isHighlighting()) this.sk.rect(this.highlight.curXTop, this.highlight.curYTop, this.sk.mouseX - this.highlight.curXTop, this.sk.mouseY - this.highlight.curYTop);
+            this.sk.stroke(150);
+            for (const highlightRect of this.sk.sketchController.mode.highlightArray) {
+                this.sk.rect(highlightRect.xPos, highlightRect.yPos, highlightRect.width, highlightRect.height);
+            }
         }
     }
 }
