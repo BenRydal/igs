@@ -26,7 +26,7 @@ class SketchController {
     handleToggle3D() {
         this.handle3D.toggleIsShowing();
         this.handle3D.setIsTransitioning(true);
-        if (this.handle3D.getIsShowing()) this.sk.floorPlan.setRotateRight(); // must rotate floor plan to make matching space-time view appear in both 2D and 3D
+        if (this.handle3D.getIs3DMode()) this.sk.floorPlan.setRotateRight(); // must rotate floor plan to make matching space-time view appear in both 2D and 3D
         else this.sk.floorPlan.setRotateLeft();
         this.sk.loop();
     }
@@ -153,7 +153,7 @@ class SketchController {
     }
 
     mapSelectTimeToPixelTime(value) {
-        if (this.handle3D.getIsShowing()) return this.sk.map(value, this.sk.gui.timelinePanel.getSelectStart(), this.sk.gui.timelinePanel.getSelectEnd(), this.sk.height / 10, this.sk.height / 1.6);
+        if (this.handle3D.getIs3DMode()) return this.sk.map(value, this.sk.gui.timelinePanel.getSelectStart(), this.sk.gui.timelinePanel.getSelectEnd(), this.sk.height / 10, this.sk.height / 1.6);
         else return this.sk.map(value, this.sk.gui.timelinePanel.getSelectStart(), this.sk.gui.timelinePanel.getSelectEnd(), this.sk.gui.timelinePanel.getStart(), this.sk.gui.timelinePanel.getEnd());
     }
 

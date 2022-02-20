@@ -9,7 +9,7 @@ class GUI {
 
     updateGUI() {
         this.timelinePanel.draw();
-        this.timelinePanel.updateSlicer(this.sk.sketchController.handle3D.getIsShowing());
+        this.timelinePanel.updateSlicer(this.sk.sketchController.handle3D.getIs3DMode());
         this.fpContainer.updateSelectors(this.sk.sketchController.getCurSelectTab());
         // if (this.sk.sketchController.getCurSelectTab() === 5 && this.highlight.isHighlighting()) {
         //     this.sk.noFill();

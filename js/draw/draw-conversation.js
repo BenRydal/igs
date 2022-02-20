@@ -57,7 +57,7 @@ class DrawConversation {
     organizeRectDrawing(point, curPos, curColor) {
         this.sk.noStroke(); // reset if recordConversationBubble is called previously over2DRects
         this.sk.fill(curColor);
-        if (this.sk.sketchController.handle3D.getIsShowing()) {
+        if (this.sk.sketchController.handle3D.getIs3DMode()) {
             this.drawFloorPlan3DRects(curPos);
             this.drawSpaceTime3DRects(curPos);
         } else {

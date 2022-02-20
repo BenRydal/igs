@@ -2,9 +2,9 @@ class Handle3D {
     /**
      * Class holds variables and methods that control 3D view and transitioning between 2D and 3D views
      */
-    constructor(sketch, isShowing) {
+    constructor(sketch, is3DMode) {
         this.sk = sketch;
-        this.isShowing = isShowing;
+        this.is3DMode = is3DMode;
         this.isTransitioning = false;
         this.translate = {
             zoom: -(this.sk.height / 1.5),
@@ -22,11 +22,11 @@ class Handle3D {
 
     update3DTranslation() {
         if (this.isTransitioning) {
-            if (this.isShowing) this.isTransitioning = this.updatePositions();
+            if (this.is3DMode) this.isTransitioning = this.updatePositions();
             else this.isTransitioning = this.resetPositions();
             this.translateFor3D(this.getCurTranslatePos());
         } else {
-            if (this.isShowing) this.translateFor3D(this.getCurTranslatePos());
+            if (this.is3DMode) this.translateFor3D(this.getCurTranslatePos());
         }
     }
 
@@ -63,15 +63,15 @@ class Handle3D {
     }
 
     toggleIsShowing() {
-        this.isShowing = !this.isShowing;
+        this.is3DMode = !this.is3DMode;
     }
 
     setIsTransitioning(value) {
         this.isTransitioning = value;
     }
 
-    getIsShowing() {
-        return this.isShowing;
+    getIs3DMode() {
+        return this.is3DMode;
     }
 
     getIsTransitioning() {

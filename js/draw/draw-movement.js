@@ -149,7 +149,7 @@ class DrawMovement {
     drawDot(curDot) {
         const dotSize = this.sk.width / 50;
         this.drawFloorPlanDot(curDot, dotSize);
-        if (this.sk.sketchController.handle3D.getIsShowing()) this.draw3DSpaceTimeDot(curDot);
+        if (this.sk.sketchController.handle3D.getIs3DMode()) this.draw3DSpaceTimeDot(curDot);
         else this.sk.circle(curDot.timePos, curDot.yPos, dotSize);
     }
 
@@ -196,7 +196,7 @@ class DrawMovement {
     getViewXPos(view, floorPlanXPos, selTimelineXPos) {
         if (view === this.sk.PLAN) return floorPlanXPos;
         else {
-            if (this.sk.sketchController.handle3D.getIsShowing()) return floorPlanXPos;
+            if (this.sk.sketchController.handle3D.getIs3DMode()) return floorPlanXPos;
             else return selTimelineXPos;
         }
     }
@@ -204,7 +204,7 @@ class DrawMovement {
     getZPos(view, selTimelineXPos) {
         if (view === this.sk.PLAN) return 0;
         else {
-            if (this.sk.sketchController.handle3D.getIsShowing()) return selTimelineXPos;
+            if (this.sk.sketchController.handle3D.getIs3DMode()) return selTimelineXPos;
             else return 0;
         }
     }

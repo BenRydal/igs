@@ -46,7 +46,7 @@ const igs = new p5((sk) => {
         sk.background(255);
         sk.translate(-sk.width / 2, -sk.height / 2, 0); // always recenter canvas to top left when using WEBGL renderer
         // 3D translation test
-        if (sk.sketchController.handle3D.getIsShowing() || sk.sketchController.handle3D.getIsTransitioning()) sk.sketchController.handle3D.update3DTranslation();
+        if (sk.sketchController.handle3D.getIs3DMode() || sk.sketchController.handle3D.getIsTransitioning()) sk.sketchController.handle3D.update3DTranslation();
 
         if (sk.dataIsLoaded(sk.floorPlan.getImg())) sk.floorPlan.setFloorPlan(sk.gui.fpContainer.getContainer());
 
@@ -56,9 +56,9 @@ const igs = new p5((sk) => {
             else sk.setMovement();
         }
         if (sk.sketchController.testVideoAndDivAreLoaded()) sk.sketchController.updateVideoDisplay();
-        if (sk.sketchController.handle3D.getIsShowing()) sk.sketchController.update3DSlicerRect();
+        if (sk.sketchController.handle3D.getIs3DMode()) sk.sketchController.update3DSlicerRect();
         // 3D translation test
-        if (sk.sketchController.handle3D.getIsShowing() || sk.sketchController.handle3D.getIsTransitioning()) sk.pop();
+        if (sk.sketchController.handle3D.getIs3DMode() || sk.sketchController.handle3D.getIsTransitioning()) sk.pop();
         sk.gui.updateGUI(); // draw keys last
         sk.sketchController.updateAnimation();
         sk.sketchController.updateLoop();

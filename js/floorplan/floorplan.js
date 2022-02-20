@@ -76,7 +76,7 @@ class FloorPlan {
      * NOTE: When drawing floor plan, translate down on z axis -1 pixel so shapes are drawn cleanly on top of the floor plan
      */
     draw(width, height) {
-        if (this.sk.sketchController.handle3D.getIsShowing()) {
+        if (this.sk.sketchController.handle3D.getIs3DMode()) {
             this.sk.push();
             this.sk.translate(0, 0, -1);
             this.sk.image(this.img, 0, 0, width, height);
