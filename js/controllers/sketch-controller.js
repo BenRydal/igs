@@ -11,14 +11,36 @@ class SketchController {
             isVideoShow: false,
             isPathColorMode: true,
             curSelectTab: 0, // 5 options: None, Region, Slice, Moving, Stopped
+            highlightArray: [],
             wordToSearch: "" // String value to dynamically search words in conversation
-
         }
         this.handle3D = new Handle3D(this.sk, true); // boolean sets 3D to showing
         this.handleRotation = new HandleRotation(this.sk);
         this.animationCounter = 0; // counter to synchronize animation across all data
         this.dotTimeForVideoScrub = null; // Set in draw movement data and used to display correct video frame when scrubbing video
     }
+
+    // called by clicking on highlight button OR NONE button??
+    resetHighlightArray() {
+        this.mode.highlightArray = [];
+    }
+
+    updateHighlightArray(highlightRect) {
+        this.mode.highlightArray.push(highlightRect);
+    }
+
+    // TODO:
+    overHighlightArray(xPos, yPos, xPosTime) {
+        if (!this.mode.highlightArray.length) return true;
+        for (const highlightRect of this.mode.highlightArray) {
+            if (((xPos >= highlightRect.xPos && xPos <= highlightRect.xPos + highlightRect.width) || (xPosTime >= highlightRect.xPos && xPosTime <= highlightRect.xPos + highlightRect.width)) && yPos >= highlightRect.yPos && yPos <= highlightRect.yPos + highlightRect.height) return true;
+            //if (xPos >= highlightRect.xPos && xPos <= highlightRect.xPos + highlightRect.width && yPos >= highlightRect.yPos && yPos <= highlightRect.yPos + highlightRect.height) return true;
+        }
+        return false;
+    }
+
+
+
 
     updateLoop() {
         if ((this.mode.isAnimate && !this.mode.isAnimatePause) || this.mode.isVideoPlay || this.handle3D.getIsTransitioning()) this.sk.loop();
