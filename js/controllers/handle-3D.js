@@ -24,10 +24,16 @@ class Handle3D {
         if (this.isTransitioning) {
             if (this.isShowing) this.isTransitioning = this.updatePositions();
             else this.isTransitioning = this.resetPositions();
-            this.sk.translateCanvasTo3D(this.getCurTranslatePos());
+            this.translateFor3D(this.getCurTranslatePos());
         } else {
-            if (this.isShowing) this.sk.translateCanvasTo3D(this.getCurTranslatePos());
+            if (this.isShowing) this.translateFor3D(this.getCurTranslatePos());
         }
+    }
+
+    translateFor3D(curPos) {
+        this.sk.push();
+        this.sk.translate(curPos.xPos, curPos.yPos, curPos.zoom);
+        this.sk.rotateX(curPos.rotateX);
     }
 
     updatePositions() {
