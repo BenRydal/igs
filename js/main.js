@@ -47,13 +47,13 @@ const igs = new p5((sk) => {
         sk.background(255);
         sk.translate(-sk.width / 2, -sk.height / 2, 0); // recenter canvas to top left when using WEBGL renderer
         // test/translate for 3D mode
-        if (sk.handle3D.getIs3DMode() || sk.handle3D.getIsTransitioning()) sk.handle3D.update3DTranslation();
+        if (sk.handle3D.getIs3DModeOrTransitioning()) sk.handle3D.update3DTranslation();
         // test/draw data
         if (sk.dataIsLoaded(sk.floorPlan.getImg())) sk.drawData();
         if (sk.sketchController.testVideoAndDivAreLoaded() && sk.sketchController.getIsVideoShow()) sk.sketchController.updateVideoDisplay();
         if (sk.handle3D.getIs3DMode() && sk.gui.timelinePanel.overTimeline()) sk.sketchController.update3DSlicerRect();
         // test/end translation for 3D mode
-        if (sk.handle3D.getIs3DMode() || sk.handle3D.getIsTransitioning()) sk.pop();
+        if (sk.handle3D.getIs3DModeOrTransitioning()) sk.pop();
         sk.gui.updateGUI(sk.handle3D.getIs3DMode(), sk.sketchController.getCurSelectTab()); // draw gui last
         // update animation and loop
         if (sk.sketchController.getIsAnimate() && !sk.sketchController.getIsAnimatePause()) sk.sketchController.updateAnimation();
@@ -93,7 +93,7 @@ const igs = new p5((sk) => {
 
     sk.mousePressed = function () {
         if (sk.sketchController.testVideoToPlay()) sk.sketchController.playPauseVideoFromTimeline();
-        else if (sk.sketchController.getCurSelectTab() === 5) sk.gui.highlight.handleMousePressed();
+        else if (sk.sketchController.getCurSelectTab() === 5 && !sk.handle3D.getIs3DModeOrTransitioning()) sk.gui.highlight.handleMousePressed();
         sk.loop();
     }
 
@@ -104,7 +104,7 @@ const igs = new p5((sk) => {
 
     sk.mouseReleased = function () {
         sk.gui.timelinePanel.resetLock();
-        if (sk.sketchController.getCurSelectTab() === 5) sk.gui.highlight.handleMouseRelease();
+        if (sk.sketchController.getCurSelectTab() === 5 && !sk.handle3D.getIs3DModeOrTransitioning()) sk.gui.highlight.handleMouseRelease();
         sk.loop();
     }
 

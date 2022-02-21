@@ -86,6 +86,10 @@ class Handle3D {
         return this.isTransitioning;
     }
 
+    getIs3DModeOrTransitioning() {
+        return this.is3DMode || this.isTransitioning;
+    }
+
     getCurTranslatePos() {
         return this.curTranslatePos;
     }
