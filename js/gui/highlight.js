@@ -1,6 +1,7 @@
 class Highlight {
 
-    constructor() {
+    constructor(sketch) {
+        this.sk = sketch;
         this.curXTop = null;
         this.curYTop = null;
         this.highlightArray = [];
@@ -9,6 +10,17 @@ class Highlight {
     updateHighlightArray(mouseX, mouseY) {
         if (this.isHighlighting()) this.highlightArray.push(this.createHighlightRect(mouseX, mouseY));
         this.endHighlight();
+    }
+
+    draw() {
+        this.sk.noFill();
+        this.sk.stroke(0);
+        this.sk.strokeWeight(1);
+        if (this.isHighlighting()) this.sk.rect(this.curXTop, this.curYTop, this.sk.mouseX - this.curXTop, this.sk.mouseY - this.curYTop);
+        this.sk.stroke(150);
+        for (const highlightRect of this.highlightArray) {
+            this.sk.rect(highlightRect.xPos, highlightRect.yPos, highlightRect.width, highlightRect.height);
+        }
     }
 
     // TODO:
