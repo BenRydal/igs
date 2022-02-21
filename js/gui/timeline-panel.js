@@ -59,7 +59,7 @@ class TimelinePanel {
 
     drawCenterLabel() {
         this.sk.textAlign(this.sk.CENTER);
-        if (this.sk.sketchController.testTimeline()) {
+        if (this.overTimeline()) {
             const mapMouseX = this.sk.sketchController.mapPixelTimeToSelectTime(this.sk.mouseX);
             const timeInSeconds = this.sk.sketchController.mapPixelTimeToTotalTime(mapMouseX);
             const minutes = Math.floor(timeInSeconds / 60);
@@ -71,7 +71,7 @@ class TimelinePanel {
     }
 
     updateSlicer(isShowing) {
-        if (this.sk.sketchController.testTimeline()) {
+        if (this.overTimeline()) {
             if (isShowing) this.drawShortSlicer();
             else this.drawLongSlicer();
         }

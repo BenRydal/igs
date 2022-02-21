@@ -39,7 +39,7 @@ class SketchController {
 
     setVideoScrubbing() {
         if (this.mode.isAnimate) this.sk.videoPlayer.seekTo(Math.floor(this.sk.map(this.dotTimeForVideoScrub, this.sk.gui.timelinePanel.getStart(), this.sk.gui.timelinePanel.getEnd(), this.mapPixelTimeToVideoTime(this.sk.gui.timelinePanel.getSelectStart()), this.mapPixelTimeToVideoTime(this.sk.gui.timelinePanel.getSelectEnd()))));
-        else if (this.testTimeline()) {
+        else if (this.sk.gui.timelinePanel.overTimeline()) {
             this.sk.videoPlayer.seekTo(Math.floor(this.mapPixelTimeToVideoTime(this.mapPixelTimeToSelectTime(this.sk.mouseX))));
             this.sk.videoPlayer.pause(); // Add to prevent accidental video playing that seems to occur
         }
@@ -98,15 +98,11 @@ class SketchController {
 
     // ****** TEST HELPERS ****** //
     testVideoToPlay() {
-        return this.testVideoAndDivAreLoaded() && this.mode.isVideoShow && !this.mode.isAnimate && this.sk.gui.timelinePanel.overTimeline(this.sk.mouseX, this.sk.mouseY) && !this.sk.gui.timelinePanel.overEitherSelector();
+        return this.testVideoAndDivAreLoaded() && this.mode.isVideoShow && !this.mode.isAnimate && this.sk.gui.timelinePanel.overTimeline() && !this.sk.gui.timelinePanel.overEitherSelector();
     }
 
     testVideoAndDivAreLoaded() {
         return (this.sk.dataIsLoaded(this.sk.videoPlayer) && this.sk.videoPlayer.getIsLoaded());
-    }
-
-    testTimeline() {
-        return this.sk.gui.timelinePanel.overTimeline(this.sk.mouseX, this.sk.mouseY);
     }
 
     // ****** MAP HELPERS ****** //

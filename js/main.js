@@ -51,7 +51,7 @@ const igs = new p5((sk) => {
         // Test/draw data
         if (sk.dataIsLoaded(sk.floorPlan.getImg())) sk.drawData();
         if (sk.sketchController.testVideoAndDivAreLoaded() && sk.sketchController.getIsVideoShow()) sk.sketchController.updateVideoDisplay();
-        if (sk.handle3D.getIs3DMode() && sk.sketchController.testTimeline()) sk.sketchController.update3DSlicerRect();
+        if (sk.handle3D.getIs3DMode() && sk.gui.timelinePanel.overTimeline()) sk.sketchController.update3DSlicerRect();
         // 3D pop/end translation
         if (sk.handle3D.getIs3DMode() || sk.handle3D.getIsTransitioning()) sk.pop();
         sk.gui.updateGUI(); // draw keys last TODO: pass params
