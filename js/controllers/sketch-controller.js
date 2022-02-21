@@ -2,17 +2,15 @@ class SketchController {
 
     constructor(sketch) {
         this.sk = sketch;
-        this.mode = {
-            isAnimate: false,
-            isAnimatePause: false,
-            isAlignTalk: false,
-            isAllTalk: true,
-            isVideoPlay: false,
-            isVideoShow: false,
-            isPathColorMode: true,
-            curSelectTab: 0, // 5 options: None, Region, Slice, Moving, Stopped
-            wordToSearch: "" // String value to dynamically search words in conversation
-        }
+        this.isAnimate = false;
+        this.isAnimatePause = false;
+        this.isAlignTalk = false;
+        this.isAllTalk = true;
+        this.isVideoPlay = false;
+        this.isVideoShow = false;
+        this.isPathColorMode = true;
+        this.curSelectTab = 0; // 5 options: None, Region, Slice, Moving, Stopped
+        this.wordToSearch = ""; // String value to dynamically search words in conversation
         this.animationCounter = 0; // counter to synchronize animation across all data
         this.dotTimeForVideoScrub = null; // Set in draw movement data and used to display correct video frame when scrubbing video
     }
@@ -20,15 +18,15 @@ class SketchController {
     updateAnimation() {
         const animationIncrementRateDivisor = 1000; // this divisor seems to work best
         const curTimeIntervalInSeconds = this.mapPixelTimeToTotalTime(this.sk.gui.timelinePanel.getSelectEnd()) - this.mapPixelTimeToTotalTime(this.sk.gui.timelinePanel.getSelectStart()); // Get amount of time in seconds currently displayed
-        const animationIncrementValue = curTimeIntervalInSeconds / animationIncrementRateDivisor; // set increment value based on that value/divisor to keep constant sketchController.mode.isAnimate speed regardless of time interval selected
+        const animationIncrementValue = curTimeIntervalInSeconds / animationIncrementRateDivisor; // set increment value based on that value/divisor to keep constant sketchController.isAnimate speed regardless of time interval selected
         if (this.animationCounter < this.mapPixelTimeToTotalTime(this.sk.gui.timelinePanel.getSelectEnd())) this.animationCounter += animationIncrementValue;
         else this.setIsAnimate(false);
     }
 
     startEndAnimation() {
-        if (this.mode.isAnimate) this.animationCounter = this.mapPixelTimeToTotalTime(this.sk.gui.timelinePanel.getSelectEnd());
+        if (this.isAnimate) this.animationCounter = this.mapPixelTimeToTotalTime(this.sk.gui.timelinePanel.getSelectEnd());
         else this.animationCounter = this.mapPixelTimeToTotalTime(this.sk.gui.timelinePanel.getSelectStart());
-        this.setIsAnimate(!this.mode.isAnimate);
+        this.setIsAnimate(!this.isAnimate);
         this.setIsAnimatePause(false);
     }
 
@@ -38,7 +36,7 @@ class SketchController {
     }
 
     setVideoScrubbing() {
-        if (this.mode.isAnimate) this.sk.videoPlayer.seekTo(Math.floor(this.sk.map(this.dotTimeForVideoScrub, this.sk.gui.timelinePanel.getStart(), this.sk.gui.timelinePanel.getEnd(), this.mapPixelTimeToVideoTime(this.sk.gui.timelinePanel.getSelectStart()), this.mapPixelTimeToVideoTime(this.sk.gui.timelinePanel.getSelectEnd()))));
+        if (this.isAnimate) this.sk.videoPlayer.seekTo(Math.floor(this.sk.map(this.dotTimeForVideoScrub, this.sk.gui.timelinePanel.getStart(), this.sk.gui.timelinePanel.getEnd(), this.mapPixelTimeToVideoTime(this.sk.gui.timelinePanel.getSelectStart()), this.mapPixelTimeToVideoTime(this.sk.gui.timelinePanel.getSelectEnd()))));
         else if (this.sk.gui.timelinePanel.overTimeline()) {
             this.sk.videoPlayer.seekTo(Math.floor(this.mapPixelTimeToVideoTime(this.mapPixelTimeToSelectTime(this.sk.mouseX))));
             this.sk.videoPlayer.pause(); // Add to prevent accidental video playing that seems to occur
@@ -47,7 +45,7 @@ class SketchController {
 
     toggleShowVideo() {
         if (this.sk.sketchController.testVideoAndDivAreLoaded()) {
-            if (this.mode.isVideoShow) {
+            if (this.isVideoShow) {
                 this.pauseMovie();
                 this.sk.videoPlayer.hide();
                 this.setIsVideoShow(false);
@@ -60,7 +58,7 @@ class SketchController {
 
     // 2 playPause video methods differ with respect to tests and seekTo method call
     playPauseVideoFromTimeline() {
-        if (this.mode.isVideoPlay) this.pauseMovie();
+        if (this.isVideoPlay) this.pauseMovie();
         else {
             this.playVideo();
             this.sk.videoPlayer.seekTo(this.mapPixelTimeToVideoTime(this.mapPixelTimeToSelectTime(this.sk.mouseX)));
@@ -68,8 +66,8 @@ class SketchController {
     }
 
     playPauseVideoFromButton() {
-        if (this.testVideoAndDivAreLoaded() && this.mode.isVideoShow && !this.mode.isAnimate) {
-            if (this.mode.isVideoPlay) this.pauseMovie();
+        if (this.testVideoAndDivAreLoaded() && this.isVideoShow && !this.isAnimate) {
+            if (this.isVideoPlay) this.pauseMovie();
             else this.playVideo();
         }
     }
@@ -98,7 +96,7 @@ class SketchController {
 
     // ****** TEST HELPERS ****** //
     testVideoToPlay() {
-        return this.testVideoAndDivAreLoaded() && this.mode.isVideoShow && !this.mode.isAnimate && this.sk.gui.timelinePanel.overTimeline() && !this.sk.gui.timelinePanel.overEitherSelector();
+        return this.testVideoAndDivAreLoaded() && this.isVideoShow && !this.isAnimate && this.sk.gui.timelinePanel.overTimeline() && !this.sk.gui.timelinePanel.overEitherSelector();
     }
 
     testVideoAndDivAreLoaded() {
@@ -138,79 +136,79 @@ class SketchController {
     }
 
     setIsAnimate(value) {
-        this.mode.isAnimate = value;
+        this.isAnimate = value;
     }
 
     setIsAnimatePause(value) {
-        this.mode.isAnimatePause = value;
+        this.isAnimatePause = value;
     }
 
     toggleIsAnimatePause() {
-        this.mode.isAnimatePause = !this.mode.isAnimatePause;
+        this.isAnimatePause = !this.isAnimatePause;
     }
 
     getIsAnimate() {
-        return this.mode.isAnimate;
+        return this.isAnimate;
     }
 
     getIsAnimatePause() {
-        return this.mode.isAnimatePause;
+        return this.isAnimatePause;
     }
 
     setIsAllTalk(value) {
-        this.mode.isAllTalk = value;
+        this.isAllTalk = value;
     }
 
     getIsAllTalk() {
-        return this.mode.isAllTalk;
+        return this.isAllTalk;
     }
 
     toggleIsAlignTalk() {
-        this.mode.isAlignTalk = !this.mode.isAlignTalk;
+        this.isAlignTalk = !this.isAlignTalk;
     }
 
     getIsAlignTalk() {
-        return this.mode.isAlignTalk;
+        return this.isAlignTalk;
     }
 
     toggleIsAllTalk() {
-        this.mode.isAllTalk = !this.mode.isAllTalk;
+        this.isAllTalk = !this.isAllTalk;
     }
 
     getIsVideoPlay() {
-        return this.mode.isVideoPlay;
+        return this.isVideoPlay;
     }
 
     setIsVideoPlay(value) {
-        this.mode.isVideoPlay = value;
+        this.isVideoPlay = value;
     }
 
     setIsVideoShow(value) {
-        this.mode.isVideoShow = value;
+        this.isVideoShow = value;
     }
 
     getIsVideoShow() {
-        return this.mode.isVideoShow;
+        return this.isVideoShow;
     }
 
     getIsPathColorMode() {
-        return this.mode.isPathColorMode;
+        return this.isPathColorMode;
     }
 
     toggleIsPathColorMode() {
-        this.mode.isPathColorMode = !this.mode.isPathColorMode;
+        this.isPathColorMode = !this.isPathColorMode;
     }
 
     setIsPathColorMode(value) {
-        this.mode.isPathColorMode = value;
+        this.isPathColorMode = value;
     }
 
     getCurSelectTab() {
-        return this.mode.curSelectTab;
+        return this.curSelectTab;
     }
 
     setCurSelectTab(value) {
-        this.mode.curSelectTab = value;
+        this.curSelectTab = value;
     }
 
     setDotTimeForVideoScrub(timePos) {
@@ -218,11 +216,11 @@ class SketchController {
     }
 
     setWordToSearch(value) {
-        this.mode.wordToSearch = value;
+        this.wordToSearch = value;
     }
 
     getWordToSearch() {
-        return this.mode.wordToSearch;
+        return this.wordToSearch;
     }
 
     /**
