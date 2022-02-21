@@ -1,15 +1,53 @@
 class Highlight {
 
-    constructor(sketch) {
+    constructor(sketch, bottomBounds) {
         this.sk = sketch;
+        this.curXTop = null; // top corner of highlight region
+        this.curYTop = null;
+        this.highlightArray = []; // holds highlightRect objects
+        this.bounds = { // currently Canvas boundary
+            xPos: 0,
+            yPos: 0,
+            width: sketch.width,
+            height: bottomBounds
+        }
+    }
+
+    /**
+     * Record top corner of highlight region if mousePressed within Canvas boundary
+     */
+    handleMousePressed() {
+        if (this.overBounds()) {
+            this.curXTop = this.sk.mouseX;
+            this.curYTop = this.sk.mouseY;
+        }
+    }
+
+    /**
+     * Update highlightArray if mouseReleased within Canvas boundary
+     * NOTE: if option key is held, multiple highlightRects can be added to highlightArray
+     * Always reset curX/Y top
+     */
+    handleMouseRelease() {
+        if (this.overBounds()) {
+            if (!(this.sk.keyIsPressed && this.sk.keyCode === this.sk.OPTION)) this.resetHighlightArray();
+            if (this.isHighlighting()) this.updateHighlightArray(this.sk.mouseX, this.sk.mouseY);
+        }
         this.curXTop = null;
         this.curYTop = null;
-        this.highlightArray = [];
     }
 
     updateHighlightArray(mouseX, mouseY) {
-        if (this.isHighlighting()) this.highlightArray.push(this.createHighlightRect(mouseX, mouseY));
-        this.endHighlight();
+        this.highlightArray.push(this.createHighlightRect(mouseX, mouseY));
+    }
+
+    createHighlightRect(mouseX, mouseY) {
+        return {
+            xPos: this.curXTop,
+            yPos: this.curYTop,
+            width: mouseX - this.curXTop,
+            height: mouseY - this.curYTop
+        }
     }
 
     draw() {
@@ -28,38 +66,19 @@ class Highlight {
         if (!this.highlightArray.length) return true;
         for (const highlightRect of this.highlightArray) {
             if (((xPos >= highlightRect.xPos && xPos <= highlightRect.xPos + highlightRect.width) || (xPosTime >= highlightRect.xPos && xPosTime <= highlightRect.xPos + highlightRect.width)) && yPos >= highlightRect.yPos && yPos <= highlightRect.yPos + highlightRect.height) return true;
-            //if (xPos >= highlightRect.xPos && xPos <= highlightRect.xPos + highlightRect.width && yPos >= highlightRect.yPos && yPos <= highlightRect.yPos + highlightRect.height) return true;
         }
         return false;
-    }
-
-    // Called on mousePressed and overCanvas and in highlight mode
-    startHighlight(mouseX, mouseY) {
-        this.curXTop = mouseX;
-        this.curYTop = mouseY;
-    }
-
-    // on mouseRelease and in highlight mode
-    endHighlight() {
-        this.curXTop = null;
-        this.curYTop = null;
-    }
-
-    createHighlightRect(mouseX, mouseY) {
-        return {
-            xPos: this.curXTop,
-            yPos: this.curYTop,
-            width: mouseX - this.curXTop,
-            height: mouseY - this.curYTop
-        }
     }
 
     isHighlighting() {
         return this.curXTop !== null && this.curYTop !== null;
     }
 
-    // called by clicking on highlight button OR NONE button??
     resetHighlightArray() {
         this.highlightArray = [];
+    }
+
+    overBounds() {
+        return this.sk.overRect(this.bounds.xPos, this.bounds.yPos, this.bounds.width, this.bounds.height);
     }
 }
