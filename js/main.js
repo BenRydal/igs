@@ -35,26 +35,27 @@ const igs = new p5((sk) => {
         sk.DRAWGUI = 0;
         sk.HANDLEGUI = 1;
         sk.GUITEXTSIZE = sk.width / 70;
-        sk.COLORGRAY = "#A9A9A9"; // this color matches checkmark color in DOM Controller
+        sk.COLORGRAY = "#A9A9A9"; // matches checkmark color in DOM Controller
         // STYLES
         sk.textSize(sk.GUITEXTSIZE);
         sk.textFont(sk.font_Lato);
         sk.textAlign(sk.LEFT, sk.TOP);
-        sk.smooth(); // must enable when using 3D
+        sk.smooth(); // must enable when using WEBGL renderer
     }
 
     sk.draw = function () {
         sk.background(255);
         sk.translate(-sk.width / 2, -sk.height / 2, 0); // recenter canvas to top left when using WEBGL renderer
-        // 3D translation
+        // test/translate for 3D mode
         if (sk.handle3D.getIs3DMode() || sk.handle3D.getIsTransitioning()) sk.handle3D.update3DTranslation();
-        // Test/draw data
+        // test/draw data
         if (sk.dataIsLoaded(sk.floorPlan.getImg())) sk.drawData();
         if (sk.sketchController.testVideoAndDivAreLoaded() && sk.sketchController.getIsVideoShow()) sk.sketchController.updateVideoDisplay();
         if (sk.handle3D.getIs3DMode() && sk.gui.timelinePanel.overTimeline()) sk.sketchController.update3DSlicerRect();
-        // 3D pop/end translation
+        // test/end translation for 3D mode
         if (sk.handle3D.getIs3DMode() || sk.handle3D.getIsTransitioning()) sk.pop();
         sk.gui.updateGUI(sk.handle3D.getIs3DMode(), sk.sketchController.getCurSelectTab()); // draw gui last
+        // update animation and loop
         if (sk.sketchController.getIsAnimate() && !sk.sketchController.getIsAnimatePause()) sk.sketchController.updateAnimation();
         if ((sk.sketchController.getIsAnimate() && !sk.sketchController.getIsAnimatePause()) || sk.sketchController.getIsVideoPlay() || sk.handle3D.getIsTransitioning()) sk.loop();
         else sk.noLoop();
@@ -142,9 +143,6 @@ const igs = new p5((sk) => {
         return data != null; // in javascript this tests for both undefined and null values
     }
 
-    /**
-     * @param  {Any Type} data
-     */
     sk.arrayIsLoaded = function (data) {
         return Array.isArray(data) && data.length;
     }
