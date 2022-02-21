@@ -72,7 +72,7 @@ class TestPoint {
      * Adjusts Y positioning of conversation rectangles correctly for align and 3 D views
      */
     getConversationAdjustYPos(floorPlanYPos, rectLength) {
-        if (this.sk.sketchController.mode.isAlignTalk) {
+        if (this.sk.sketchController.getIsAlignTalk()) {
             if (this.sk.handle3D.getIs3DMode()) return this.sk.gui.fpContainer.getContainer().height;
             else return 0;
         } else if (this.sk.handle3D.getIs3DMode()) return floorPlanYPos;

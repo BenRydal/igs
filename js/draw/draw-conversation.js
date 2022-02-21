@@ -94,7 +94,7 @@ class DrawConversation {
 
     drawSpaceTime3DRects(curPos) {
         const translateZoom = Math.abs(this.sk.handle3D.getCurTranslatePos().zoom);
-        if (this.sk.sketchController.mode.isAlignTalk) this.sk.quad(0, translateZoom, curPos.selTimelineXPos, curPos.rectLength, translateZoom, curPos.selTimelineXPos, curPos.rectLength, translateZoom, curPos.selTimelineXPos + this.rect.pixelWidth, 0, translateZoom, curPos.selTimelineXPos + this.rect.pixelWidth);
+        if (this.sk.sketchController.getIsAlignTalk()) this.sk.quad(0, translateZoom, curPos.selTimelineXPos, curPos.rectLength, translateZoom, curPos.selTimelineXPos, curPos.rectLength, translateZoom, curPos.selTimelineXPos + this.rect.pixelWidth, 0, translateZoom, curPos.selTimelineXPos + this.rect.pixelWidth);
         else this.sk.quad(curPos.floorPlanXPos, curPos.adjustYPos, curPos.selTimelineXPos, curPos.floorPlanXPos + curPos.rectLength, curPos.adjustYPos, curPos.selTimelineXPos, curPos.floorPlanXPos + curPos.rectLength, curPos.adjustYPos, curPos.selTimelineXPos + this.rect.pixelWidth, curPos.floorPlanXPos, curPos.adjustYPos, curPos.selTimelineXPos + this.rect.pixelWidth);
     }
 
@@ -164,7 +164,7 @@ class DrawConversation {
      * @param  {Char} pathName
      */
     testSpeakerToDraw(speaker, pathName) {
-        return speaker != null && speaker.isShowing && (this.sk.sketchController.mode.isAllTalk || speaker.name === pathName);
+        return speaker != null && speaker.isShowing && (this.sk.sketchController.getIsAllTalk() || speaker.name === pathName);
     }
 
     /**

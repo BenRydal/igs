@@ -161,8 +161,16 @@ class SketchController {
         this.mode.isAllTalk = value;
     }
 
+    getIsAllTalk(value) {
+        return this.mode.isAllTalk;
+    }
+
     toggleIsAlignTalk() {
         this.mode.isAlignTalk = !this.mode.isAlignTalk;
+    }
+
+    getIsAlignTalk() {
+        return this.mode.isAlignTalk;
     }
 
     toggleIsAllTalk() {
