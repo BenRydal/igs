@@ -161,7 +161,7 @@ class SketchController {
         this.mode.isAllTalk = value;
     }
 
-    getIsAllTalk(value) {
+    getIsAllTalk() {
         return this.mode.isAllTalk;
     }
 
