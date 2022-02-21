@@ -7,7 +7,6 @@ class GUI {
         this.highlight = new Highlight(this.sk);
     }
 
-    // TODO: pass params
     updateGUI(is3DMode, curSelectTab) {
         this.timelinePanel.draw();
         this.timelinePanel.updateSlicer(is3DMode);
