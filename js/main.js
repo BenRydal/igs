@@ -45,7 +45,7 @@ const igs = new p5((sk) => {
 
     sk.draw = function () {
         sk.background(255);
-        sk.translate(-sk.width / 2, -sk.height / 2, 0); // always recenter canvas to top left when using WEBGL renderer
+        sk.translate(-sk.width / 2, -sk.height / 2, 0); // recenter canvas to top left when using WEBGL renderer
         // 3D translation
         if (sk.handle3D.getIs3DMode() || sk.handle3D.getIsTransitioning()) sk.handle3D.update3DTranslation();
         // Test/draw data
