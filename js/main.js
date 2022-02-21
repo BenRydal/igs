@@ -48,8 +48,9 @@ const igs = new p5((sk) => {
         sk.translate(-sk.width / 2, -sk.height / 2, 0); // always recenter canvas to top left when using WEBGL renderer
         // 3D translation
         if (sk.handle3D.getIs3DMode() || sk.handle3D.getIsTransitioning()) sk.handle3D.update3DTranslation();
+        // Test/draw data
         if (sk.dataIsLoaded(sk.floorPlan.getImg())) sk.drawData();
-        if (sk.sketchController.testVideoAndDivAreLoaded()) sk.sketchController.updateVideoDisplay();
+        if (sk.sketchController.testVideoAndDivAreLoaded() && sk.sketchController.getIsVideoShow()) sk.sketchController.updateVideoDisplay();
         if (sk.handle3D.getIs3DMode() && sk.sketchController.testTimeline()) sk.sketchController.update3DSlicerRect();
         // 3D pop/end translation
         if (sk.handle3D.getIs3DMode() || sk.handle3D.getIsTransitioning()) sk.pop();

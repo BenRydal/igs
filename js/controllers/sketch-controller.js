@@ -33,10 +33,8 @@ class SketchController {
     }
 
     updateVideoDisplay() {
-        if (this.mode.isVideoShow) {
-            this.sk.videoPlayer.updatePos(this.sk.mouseX, this.sk.mouseY, 50, this.sk.gui.timelinePanel.getTop());
-            if (!this.mode.isVideoPlay) this.setVideoScrubbing();
-        }
+        this.sk.videoPlayer.updatePos(this.sk.mouseX, this.sk.mouseY, 50, this.sk.gui.timelinePanel.getTop());
+        if (!this.getIsVideoPlay()) this.setVideoScrubbing();
     }
 
     setVideoScrubbing() {
@@ -185,6 +183,10 @@ class SketchController {
 
     setIsVideoShow(value) {
         this.mode.isVideoShow = value;
+    }
+
+    getIsVideoShow() {
+        return this.mode.isVideoShow;
     }
 
     getIsPathColorMode() {
