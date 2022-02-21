@@ -110,6 +110,7 @@ const igs = new p5((sk) => {
 
     sk.mouseMoved = function () {
         if (sk.gui.timelinePanel.overEitherSelector()) sk.cursor(sk.HAND);
+        else if (sk.sketchController.getCurSelectTab() === 5) sk.cursor(sk.CROSS);
         else sk.cursor(sk.ARROW);
         sk.loop();
     }
