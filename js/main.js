@@ -46,24 +46,28 @@ const igs = new p5((sk) => {
     sk.draw = function () {
         sk.background(255);
         sk.translate(-sk.width / 2, -sk.height / 2, 0); // always recenter canvas to top left when using WEBGL renderer
-        // 3D translation test
+        // 3D translation
         if (sk.handle3D.getIs3DMode() || sk.handle3D.getIsTransitioning()) sk.handle3D.update3DTranslation();
-
-        if (sk.dataIsLoaded(sk.floorPlan.getImg())) {
-            sk.floorPlan.setFloorPlan(sk.gui.fpContainer.getContainer());
-            if (sk.arrayIsLoaded(sk.core.pathList)) {
-                if (sk.arrayIsLoaded(sk.core.speakerList)) sk.setMovementAndConversation();
-                else sk.setMovement();
-            }
-        }
+        if (sk.dataIsLoaded(sk.floorPlan.getImg())) sk.drawData();
         if (sk.sketchController.testVideoAndDivAreLoaded()) sk.sketchController.updateVideoDisplay();
         if (sk.handle3D.getIs3DMode() && sk.sketchController.testTimeline()) sk.sketchController.update3DSlicerRect();
-        // 3D translation test
+        // 3D pop/end translation
         if (sk.handle3D.getIs3DMode() || sk.handle3D.getIsTransitioning()) sk.pop();
         sk.gui.updateGUI(); // draw keys last TODO: pass params
         if (sk.sketchController.getIsAnimate() && !sk.sketchController.getIsAnimatePause()) sk.sketchController.updateAnimation();
         if ((sk.sketchController.getIsAnimate() && !sk.sketchController.getIsAnimatePause()) || sk.sketchController.getIsVideoPlay() || sk.handle3D.getIsTransitioning()) sk.loop();
         else sk.noLoop();
+    }
+
+    /**
+     * Important: Floor plan must be loaded to draw any data
+     */
+    sk.drawData = function () {
+        sk.floorPlan.setFloorPlan(sk.gui.fpContainer.getContainer());
+        if (sk.arrayIsLoaded(sk.core.pathList)) {
+            if (sk.arrayIsLoaded(sk.core.speakerList)) sk.setMovementAndConversation();
+            else sk.setMovement();
+        }
     }
 
     sk.setMovement = function () {
