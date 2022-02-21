@@ -8,13 +8,6 @@ class FloorPlanContainer {
         this.selectorSize = 100;
     }
 
-    updateSelectors(curSelectTab) {
-        if (this.overFloorPlan(this.sk.mouseX, this.sk.mouseY)) {
-            if (curSelectTab === 1) this.drawRegionSelector();
-            else if (curSelectTab === 2) this.drawSlicerSelector();
-        }
-    }
-
     drawRegionSelector() {
         this.setSelectorStroke();
         this.sk.circle(this.sk.mouseX, this.sk.mouseY, this.selectorSize);

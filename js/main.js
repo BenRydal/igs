@@ -51,10 +51,10 @@ const igs = new p5((sk) => {
         // test/draw data
         if (sk.dataIsLoaded(sk.floorPlan.getImg())) sk.drawData();
         if (sk.sketchController.testVideoAndDivAreLoaded() && sk.sketchController.getIsVideoShow()) sk.sketchController.updateVideoDisplay();
-        if (sk.handle3D.getIs3DMode() && sk.gui.timelinePanel.overTimeline()) sk.sketchController.update3DSlicerRect();
+        sk.gui.updateGUIWithTranslation();
         // test/end translation for 3D mode
         if (sk.handle3D.getIs3DModeOrTransitioning()) sk.pop();
-        sk.gui.updateGUI(sk.handle3D.getIs3DMode(), sk.sketchController.getCurSelectTab()); // draw gui last
+        sk.gui.updateGUI(); // draw gui last
         // update animation and loop
         if (sk.sketchController.getIsAnimate() && !sk.sketchController.getIsAnimatePause()) sk.sketchController.updateAnimation();
         if ((sk.sketchController.getIsAnimate() && !sk.sketchController.getIsAnimatePause()) || sk.sketchController.getIsVideoPlay() || sk.handle3D.getIsTransitioning()) sk.loop();

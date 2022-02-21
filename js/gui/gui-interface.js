@@ -7,10 +7,24 @@ class GUI {
         this.highlight = new Highlight(this.sk, this.timelinePanel.getTop());
     }
 
-    updateGUI(is3DMode, curSelectTab) {
+    updateGUI() {
         this.timelinePanel.draw();
-        this.timelinePanel.updateSlicer(is3DMode);
-        this.fpContainer.updateSelectors(curSelectTab);
-        this.highlight.draw();
+        if (this.timelinePanel.overTimeline()) {
+            if (this.sk.handle3D.getIs3DMode()) this.timelinePanel.drawShortSlicer();
+            else this.timelinePanel.drawLongSlicer();
+        }
+        if (!this.sk.handle3D.getIs3DModeOrTransitioning()) {
+            if (this.fpContainer.overFloorPlan(this.sk.mouseX, this.sk.mouseY)) {
+                if (this.sk.sketchController.getCurSelectTab() === 1) this.fpContainer.drawRegionSelector();
+                else if (this.sk.sketchController.getCurSelectTab() === 2) this.fpContainer.drawSlicerSelector();
+            }
+            this.highlight.draw();
+        }
+    }
+
+    updateGUIWithTranslation() {
+        if (this.sk.handle3D.getIs3DMode() && this.timelinePanel.overTimeline()) {
+            this.timelinePanel.draw3DSlicerRect(this.fpContainer.getContainer(), this.sk.sketchController.mapToSelectTimeThenPixelTime(this.sk.mouseX));
+        }
     }
 }

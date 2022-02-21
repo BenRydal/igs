@@ -88,9 +88,11 @@ class TestPoint {
             case 0:
                 return true;
             case 1:
-                return this.sk.gui.fpContainer.overCursor(curPos.floorPlanXPos, curPos.floorPlanYPos) && this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos);
+                if (this.sk.handle3D.getIs3DModeOrTransitioning()) return true;
+                else return this.sk.gui.fpContainer.overCursor(curPos.floorPlanXPos, curPos.floorPlanYPos) && this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos);
             case 2:
-                return this.sk.gui.fpContainer.overSlicer(curPos.floorPlanXPos, curPos.floorPlanYPos) && this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos);
+                if (this.sk.handle3D.getIs3DModeOrTransitioning()) return true;
+                else return this.sk.gui.fpContainer.overSlicer(curPos.floorPlanXPos, curPos.floorPlanYPos) && this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos);
             case 3:
                 return !isStopped && this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos);
             case 4:

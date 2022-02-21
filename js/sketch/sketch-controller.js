@@ -90,10 +90,6 @@ class SketchController {
         if (this.testVideoAndDivAreLoaded()) this.sk.videoPlayer.decreaseSize();
     }
 
-    update3DSlicerRect() {
-        this.sk.gui.timelinePanel.draw3DSlicerRect(this.sk.gui.fpContainer.getContainer(), this.mapToSelectTimeThenPixelTime(this.sk.mouseX)); // pass mapped mouseX as zPos
-    }
-
     // ****** TEST HELPERS ****** //
     testVideoToPlay() {
         return this.testVideoAndDivAreLoaded() && this.isVideoShow && !this.isAnimate && this.sk.gui.timelinePanel.overTimeline() && !this.sk.gui.timelinePanel.overEitherSelector();
