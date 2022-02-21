@@ -54,7 +54,7 @@ const igs = new p5((sk) => {
         if (sk.handle3D.getIs3DMode() && sk.gui.timelinePanel.overTimeline()) sk.sketchController.update3DSlicerRect();
         // 3D pop/end translation
         if (sk.handle3D.getIs3DMode() || sk.handle3D.getIsTransitioning()) sk.pop();
-        sk.gui.updateGUI(); // draw keys last TODO: pass params
+        sk.gui.updateGUI(sk.handle3D.getIs3DMode(), sk.sketchController.getCurSelectTab()); // draw gui last
         if (sk.sketchController.getIsAnimate() && !sk.sketchController.getIsAnimatePause()) sk.sketchController.updateAnimation();
         if ((sk.sketchController.getIsAnimate() && !sk.sketchController.getIsAnimatePause()) || sk.sketchController.getIsVideoPlay() || sk.handle3D.getIsTransitioning()) sk.loop();
         else sk.noLoop();

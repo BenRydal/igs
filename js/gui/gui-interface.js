@@ -8,18 +8,11 @@ class GUI {
     }
 
     // TODO: pass params
-    updateGUI() {
+    updateGUI(is3DMode, curSelectTab) {
         this.timelinePanel.draw();
-        this.timelinePanel.updateSlicer(this.sk.handle3D.getIs3DMode());
-        this.fpContainer.updateSelectors(this.sk.sketchController.getCurSelectTab());
-        // if (this.sk.sketchController.getCurSelectTab() === 5 && this.highlight.isHighlighting()) {
-        //     this.sk.noFill();
-        //     this.sk.stroke(0);
-        //     this.sk.strokeWeight(1);
-        //     this.sk.rect(this.highlight.curXTop, this.highlight.curYTop, this.sk.mouseX - this.highlight.curXTop, this.sk.mouseY - this.highlight.curYTop);
-        // }
-        // TODO: temp!
-        if (this.sk.sketchController.getCurSelectTab() === 5) {
+        this.timelinePanel.updateSlicer(is3DMode);
+        this.fpContainer.updateSelectors(curSelectTab);
+        if (curSelectTab === 5) {
             this.sk.noFill();
             this.sk.stroke(0);
             this.sk.strokeWeight(1);
