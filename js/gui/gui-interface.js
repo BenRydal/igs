@@ -11,6 +11,6 @@ class GUI {
         this.timelinePanel.draw();
         this.timelinePanel.updateSlicer(is3DMode);
         this.fpContainer.updateSelectors(curSelectTab);
-        if (curSelectTab === 5) this.highlight.draw();
+        this.highlight.draw();
     }
 }

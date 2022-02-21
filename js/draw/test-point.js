@@ -80,7 +80,7 @@ class TestPoint {
     }
 
     /**
-     * 
+     * @param  {Movement/Conversation Pos Object} curPos
      * @param  {boolean} pointIsStopped
      */
     selectMode(curPos, isStopped) {
@@ -88,13 +88,13 @@ class TestPoint {
             case 0:
                 return true;
             case 1:
-                return this.sk.gui.fpContainer.overCursor(curPos.floorPlanXPos, curPos.floorPlanYPos);
+                return this.sk.gui.fpContainer.overCursor(curPos.floorPlanXPos, curPos.floorPlanYPos) && this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos);
             case 2:
-                return this.sk.gui.fpContainer.overSlicer(curPos.floorPlanXPos, curPos.floorPlanYPos);
+                return this.sk.gui.fpContainer.overSlicer(curPos.floorPlanXPos, curPos.floorPlanYPos) && this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos);
             case 3:
-                return !isStopped;
+                return !isStopped && this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos);
             case 4:
-                return isStopped;
+                return isStopped && this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos);
             case 5:
                 return this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos);
         }
