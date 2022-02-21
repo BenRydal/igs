@@ -55,7 +55,7 @@ class DomController {
     }
 
     handleToggle3DButton() {
-        this.sk.sketchController.handleToggle3D();
+        this.sk.handle3D.update();
     }
 
     handleHowToButton() {

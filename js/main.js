@@ -26,6 +26,7 @@ const igs = new p5((sk) => {
         sk.gui = new GUI(sk); // holds GUI elements/classes
         sk.domController = new DomController(sk); // handles DOM/buttons user interaction
         sk.sketchController = new SketchController(sk); // coordinates calls across classes
+        sk.handle3D = new Handle3D(sk, true); // boolean sets 3D to showing
         sk.videoPlayer = null; // abstract class for different video classes
         sk.floorPlan = new FloorPlan(sk);
         // CONSTANTS
@@ -46,22 +47,23 @@ const igs = new p5((sk) => {
         sk.background(255);
         sk.translate(-sk.width / 2, -sk.height / 2, 0); // always recenter canvas to top left when using WEBGL renderer
         // 3D translation test
-        if (sk.sketchController.handle3D.getIs3DMode() || sk.sketchController.handle3D.getIsTransitioning()) sk.sketchController.handle3D.update3DTranslation();
+        if (sk.handle3D.getIs3DMode() || sk.handle3D.getIsTransitioning()) sk.handle3D.update3DTranslation();
 
-        if (sk.dataIsLoaded(sk.floorPlan.getImg())) sk.floorPlan.setFloorPlan(sk.gui.fpContainer.getContainer());
-
-
-        if (sk.arrayIsLoaded(sk.core.pathList)) {
-            if (sk.arrayIsLoaded(sk.core.speakerList)) sk.setMovementAndConversation();
-            else sk.setMovement();
+        if (sk.dataIsLoaded(sk.floorPlan.getImg())) {
+            sk.floorPlan.setFloorPlan(sk.gui.fpContainer.getContainer());
+            if (sk.arrayIsLoaded(sk.core.pathList)) {
+                if (sk.arrayIsLoaded(sk.core.speakerList)) sk.setMovementAndConversation();
+                else sk.setMovement();
+            }
         }
         if (sk.sketchController.testVideoAndDivAreLoaded()) sk.sketchController.updateVideoDisplay();
-        if (sk.sketchController.handle3D.getIs3DMode()) sk.sketchController.update3DSlicerRect();
+        if (sk.handle3D.getIs3DMode() && sk.sketchController.testTimeline()) sk.sketchController.update3DSlicerRect();
         // 3D translation test
-        if (sk.sketchController.handle3D.getIs3DMode() || sk.sketchController.handle3D.getIsTransitioning()) sk.pop();
-        sk.gui.updateGUI(); // draw keys last
-        sk.sketchController.updateAnimation();
-        sk.sketchController.updateLoop();
+        if (sk.handle3D.getIs3DMode() || sk.handle3D.getIsTransitioning()) sk.pop();
+        sk.gui.updateGUI(); // draw keys last TODO: pass params
+        if (sk.sketchController.getIsAnimate() && !sk.sketchController.getIsAnimatePause()) sk.sketchController.updateAnimation();
+        if ((sk.sketchController.getIsAnimate() && !sk.sketchController.getIsAnimatePause()) || sk.sketchController.getIsVideoPlay() || sk.handle3D.getIsTransitioning()) sk.loop();
+        else sk.noLoop();
     }
 
     sk.setMovement = function () {
@@ -116,7 +118,7 @@ const igs = new p5((sk) => {
         sk.gui = new GUI(sk); // update GUI vars
         sk.GUITEXTSIZE = sk.width / 70;
         sk.textSize(sk.GUITEXTSIZE);
-        sk.sketchController.handle3D = new Handle3D(sk, sk.sketchController.handle3D.isShowing); // update 3D display vars, pass current 3D showing mode
+        sk.handle3D = new Handle3D(sk, sk.handle3D.getIs3DMode()); // update 3D display vars, pass current 3D mode
         sk.loop();
     }
 

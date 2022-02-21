@@ -57,7 +57,7 @@ class DrawConversation {
     organizeRectDrawing(point, curPos, curColor) {
         this.sk.noStroke(); // reset if recordConversationBubble is called previously over2DRects
         this.sk.fill(curColor);
-        if (this.sk.sketchController.handle3D.getIs3DMode()) {
+        if (this.sk.handle3D.getIs3DMode()) {
             this.drawFloorPlan3DRects(curPos);
             this.drawSpaceTime3DRects(curPos);
         } else {
@@ -93,7 +93,7 @@ class DrawConversation {
     }
 
     drawSpaceTime3DRects(curPos) {
-        const translateZoom = Math.abs(this.sk.sketchController.handle3D.getCurTranslatePos().zoom);
+        const translateZoom = Math.abs(this.sk.handle3D.getCurTranslatePos().zoom);
         if (this.sk.sketchController.mode.isAlignTalk) this.sk.quad(0, translateZoom, curPos.selTimelineXPos, curPos.rectLength, translateZoom, curPos.selTimelineXPos, curPos.rectLength, translateZoom, curPos.selTimelineXPos + this.rect.pixelWidth, 0, translateZoom, curPos.selTimelineXPos + this.rect.pixelWidth);
         else this.sk.quad(curPos.floorPlanXPos, curPos.adjustYPos, curPos.selTimelineXPos, curPos.floorPlanXPos + curPos.rectLength, curPos.adjustYPos, curPos.selTimelineXPos, curPos.floorPlanXPos + curPos.rectLength, curPos.adjustYPos, curPos.selTimelineXPos + this.rect.pixelWidth, curPos.floorPlanXPos, curPos.adjustYPos, curPos.selTimelineXPos + this.rect.pixelWidth);
     }

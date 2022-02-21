@@ -13,32 +13,16 @@ class SketchController {
             curSelectTab: 0, // 5 options: None, Region, Slice, Moving, Stopped
             wordToSearch: "" // String value to dynamically search words in conversation
         }
-        this.handle3D = new Handle3D(this.sk, true); // boolean sets 3D to showing
         this.animationCounter = 0; // counter to synchronize animation across all data
         this.dotTimeForVideoScrub = null; // Set in draw movement data and used to display correct video frame when scrubbing video
     }
 
-    updateLoop() {
-        if ((this.mode.isAnimate && !this.mode.isAnimatePause) || this.mode.isVideoPlay || this.handle3D.getIsTransitioning()) this.sk.loop();
-        else this.sk.noLoop();
-    }
-
-    handleToggle3D() {
-        this.handle3D.toggleIsShowing();
-        this.handle3D.setIsTransitioning(true);
-        if (this.handle3D.getIs3DMode()) this.sk.floorPlan.setRotateRight(); // must rotate floor plan to make matching space-time view appear in both 2D and 3D
-        else this.sk.floorPlan.setRotateLeft();
-        this.sk.loop();
-    }
-
     updateAnimation() {
-        if (this.mode.isAnimate && !this.mode.isAnimatePause) {
-            const animationIncrementRateDivisor = 1000; // this divisor seems to work best
-            const curTimeIntervalInSeconds = this.mapPixelTimeToTotalTime(this.sk.gui.timelinePanel.getSelectEnd()) - this.mapPixelTimeToTotalTime(this.sk.gui.timelinePanel.getSelectStart()); // Get amount of time in seconds currently displayed
-            const animationIncrementValue = curTimeIntervalInSeconds / animationIncrementRateDivisor; // set increment value based on that value/divisor to keep constant sketchController.mode.isAnimate speed regardless of time interval selected
-            if (this.animationCounter < this.mapPixelTimeToTotalTime(this.sk.gui.timelinePanel.getSelectEnd())) this.animationCounter += animationIncrementValue;
-            else this.setIsAnimate(false);
-        }
+        const animationIncrementRateDivisor = 1000; // this divisor seems to work best
+        const curTimeIntervalInSeconds = this.mapPixelTimeToTotalTime(this.sk.gui.timelinePanel.getSelectEnd()) - this.mapPixelTimeToTotalTime(this.sk.gui.timelinePanel.getSelectStart()); // Get amount of time in seconds currently displayed
+        const animationIncrementValue = curTimeIntervalInSeconds / animationIncrementRateDivisor; // set increment value based on that value/divisor to keep constant sketchController.mode.isAnimate speed regardless of time interval selected
+        if (this.animationCounter < this.mapPixelTimeToTotalTime(this.sk.gui.timelinePanel.getSelectEnd())) this.animationCounter += animationIncrementValue;
+        else this.setIsAnimate(false);
     }
 
     startEndAnimation() {
@@ -111,9 +95,7 @@ class SketchController {
     }
 
     update3DSlicerRect() {
-        if (this.testTimeline()) {
-            this.sk.gui.timelinePanel.draw3DSlicerRect(this.sk.gui.fpContainer.getContainer(), this.mapToSelectTimeThenPixelTime(this.sk.mouseX)); // pass mapped mouseX as zPos
-        }
+        this.sk.gui.timelinePanel.draw3DSlicerRect(this.sk.gui.fpContainer.getContainer(), this.mapToSelectTimeThenPixelTime(this.sk.mouseX)); // pass mapped mouseX as zPos
     }
 
     // ****** TEST HELPERS ****** //
@@ -153,7 +135,7 @@ class SketchController {
     }
 
     mapSelectTimeToPixelTime(value) {
-        if (this.handle3D.getIs3DMode()) return this.sk.map(value, this.sk.gui.timelinePanel.getSelectStart(), this.sk.gui.timelinePanel.getSelectEnd(), this.sk.height / 10, this.sk.height / 1.6);
+        if (this.sk.handle3D.getIs3DMode()) return this.sk.map(value, this.sk.gui.timelinePanel.getSelectStart(), this.sk.gui.timelinePanel.getSelectEnd(), this.sk.height / 10, this.sk.height / 1.6);
         else return this.sk.map(value, this.sk.gui.timelinePanel.getSelectStart(), this.sk.gui.timelinePanel.getSelectEnd(), this.sk.gui.timelinePanel.getStart(), this.sk.gui.timelinePanel.getEnd());
     }
 
@@ -177,6 +159,10 @@ class SketchController {
         return this.mode.isAnimate;
     }
 
+    getIsAnimatePause() {
+        return this.mode.isAnimatePause;
+    }
+
     setIsAllTalk(value) {
         this.mode.isAllTalk = value;
     }
@@ -187,6 +173,10 @@ class SketchController {
 
     toggleIsAllTalk() {
         this.mode.isAllTalk = !this.mode.isAllTalk;
+    }
+
+    getIsVideoPlay() {
+        return this.mode.isVideoPlay;
     }
 
     setIsVideoPlay(value) {

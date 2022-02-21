@@ -20,6 +20,14 @@ class Handle3D {
         }
     }
 
+    update() {
+        this.toggleIs3D();
+        this.setIsTransitioning(true);
+        if (this.getIs3DMode()) this.sk.floorPlan.setRotateRight(); // must rotate floor plan to make matching space-time view appear in both 2D and 3D
+        else this.sk.floorPlan.setRotateLeft();
+        this.sk.loop();
+    }
+
     update3DTranslation() {
         if (this.isTransitioning) {
             if (this.is3DMode) this.isTransitioning = this.updatePositions();
@@ -62,7 +70,7 @@ class Handle3D {
         return false;
     }
 
-    toggleIsShowing() {
+    toggleIs3D() {
         this.is3DMode = !this.is3DMode;
     }
 
