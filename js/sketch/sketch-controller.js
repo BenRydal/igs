@@ -90,7 +90,6 @@ class SketchController {
         if (this.testVideoAndDivAreLoaded()) this.sk.videoPlayer.decreaseSize();
     }
 
-    // ****** TEST HELPERS ****** //
     testVideoToPlay() {
         return this.testVideoAndDivAreLoaded() && this.isVideoShow && !this.isAnimate && this.sk.gui.timelinePanel.overTimeline() && !this.sk.gui.timelinePanel.overEitherSelector();
     }
@@ -98,8 +97,6 @@ class SketchController {
     testVideoAndDivAreLoaded() {
         return (this.sk.dataIsLoaded(this.sk.videoPlayer) && this.sk.videoPlayer.getIsLoaded());
     }
-
-    // ****** MAP HELPERS ****** //
 
     mapVideoTimeToSelectedTime() {
         const timelinePos = this.mapTotalTimeToPixelTime(this.sk.videoPlayer.getCurrentTime());
