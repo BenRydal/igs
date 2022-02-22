@@ -25,10 +25,6 @@ class FloorPlanContainer {
         this.sk.stroke(0);
     }
 
-    overFloorPlan(xPos, yPos) {
-        return (xPos >= 0 && xPos <= this.width) && (yPos >= 0 && yPos <= this.height);
-    }
-
     overCursor(xPos, yPos, xPosTime) {
         return this.sk.overCircle(xPos, yPos, this.selectorSize) || this.sk.overCircle(xPosTime, yPos, this.selectorSize);
     }
