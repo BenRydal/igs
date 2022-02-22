@@ -23,12 +23,12 @@ const igs = new p5((sk) => {
         sk.canvas = sk.createCanvas(window.innerWidth, window.innerHeight, sk.WEBGL);
         sk.canvas.parent('sketch-holder');
         sk.core = new Core(sk); // holds core data, update and parsing methods/classes
-        sk.gui = new GUI(sk); // holds GUI elements/classes
+        sk.gui = new GUI(sk); // holds canvas GUI elements/classes
         sk.domController = new DomController(sk); // handles DOM/buttons user interaction
         sk.sketchController = new SketchController(sk); // coordinates calls across classes
         sk.handle3D = new Handle3D(sk, true); // boolean sets 3D to showing
         sk.videoPlayer = null; // abstract class for different video classes
-        sk.floorPlan = new FloorPlan(sk);
+        sk.floorPlan = new FloorPlan(sk); // holds floor plan data and drawing methods
         // CONSTANTS
         sk.PLAN = 0;
         sk.SPACETIME = 1;
@@ -46,16 +46,16 @@ const igs = new p5((sk) => {
     sk.draw = function () {
         sk.background(255);
         sk.translate(-sk.width / 2, -sk.height / 2, 0); // recenter canvas to top left when using WEBGL renderer
-        // test/translate for 3D mode
+        // Test/translate for 3D mode
         if (sk.handle3D.getIs3DModeOrTransitioning()) sk.handle3D.update3DTranslation();
-        // test/draw data
+        // Test/draw data
         if (sk.dataIsLoaded(sk.floorPlan.getImg())) sk.drawData();
         if (sk.sketchController.testVideoAndDivAreLoaded() && sk.sketchController.getIsVideoShow()) sk.sketchController.updateVideoDisplay();
         sk.gui.updateGUIWithTranslation();
-        // test/end translation for 3D mode
+        // Test/end translation for 3D mode
         if (sk.handle3D.getIs3DModeOrTransitioning()) sk.pop();
         sk.gui.updateGUI(); // draw gui last
-        // update animation and loop
+        // Update animation and loop
         if (sk.sketchController.getIsAnimate() && !sk.sketchController.getIsAnimatePause()) sk.sketchController.updateAnimation();
         if ((sk.sketchController.getIsAnimate() && !sk.sketchController.getIsAnimatePause()) || sk.sketchController.getIsVideoPlay() || sk.handle3D.getIsTransitioning()) sk.loop();
         else sk.noLoop();
