@@ -122,8 +122,8 @@ Video (MP4)">LOAD FILES</label>
                 <!-- NOTE: due to id note below, remember to match the for. The actual title doesn't matter, just to show it works... -->
                 <input type="search" id="word-search" name="search-input" placeholder="Search"
                     onsearch="igs.domController.updateWordToSearch(); igs.loop()">
-                <label for="sub-tab3-1">Align</label>
-                <label for="sub-tab3-2">All On Path</label>
+                <label for="sub-tab3-1" title="Align talk along top">Align</label>
+                <label for="sub-tab3-2" title="Show talk by all speakers along each movement path">All On Path</label>
             </div>
             <!-- Sub Tabs -->
             <!-- NOTE: name="sub-group" will require to be unique to the tab, ie: tab2 = sub-group2, tab3 = sub-group 3 etc. -->
@@ -171,12 +171,12 @@ Video (MP4)">LOAD FILES</label>
         <input class="tab-radio" id="main-tab-6" name="main-group" type="radio" />
         <div class="tab-content">
             <div class="sub-tabs-container">
-                <label for="sub-tab6-1">None</label>
-                <label for="sub-tab6-2">Region</label>
-                <label for="sub-tab6-3">Slice</label>
-                <label for="sub-tab6-4">Moving</label>
-                <label for="sub-tab6-5">Stopped</label>
-                <label for="sub-tab6-6">Highlight</label>
+                <label for="sub-tab6-1" title="Reset selectors">Reset</label>
+                <label for="sub-tab6-2" title="Hover to highlight circular regions of data (2D only)">Circle</label>
+                <label for="sub-tab6-3" title="Hover to highlight rectangular slices of data (2D only)">Slice</label>
+                <label for="sub-tab6-4" title="Highlight only movement">Movement</label>
+                <label for="sub-tab6-5" title="Highlight only stops">Stops</label>
+                <label for="sub-tab6-6" title="Drag to select rectangular regions of data (2D only but appears in 3D)">Highlight</label>
             </div>
             <!-- Sub Tabs -->
             <input class="tab-radio" id="sub-tab6-1" name="sub-group6" type="radio" checked="checked"
@@ -211,7 +211,7 @@ Video (MP4)">LOAD FILES</label>
         <input class="tab-radio" id="main-tab-8" name="main-group" type="radio" />
         <div class="tab-content" id="codesMainTab">
             <div class="sub-tabs-container button-float">
-                <label for="sub-tab8-1">Color By Codes</label>
+                <label for="sub-tab8-1" title="Color data by codes if loaded (grey indicates no code and black indicates multiple codes)">Color By Codes</label>
             </div>
             <!-- Sub Tabs -->
             <input class="tab-radio" id="sub-tab8-1" name="sub-group8" type="radio" checked="checked"

@@ -124,7 +124,11 @@ class SketchController {
 
     mapSelectTimeToPixelTime(value) {
         if (this.sk.handle3D.getIs3DMode()) return this.sk.map(value, this.sk.gui.timelinePanel.getSelectStart(), this.sk.gui.timelinePanel.getSelectEnd(), this.sk.height / 10, this.sk.height / 1.6);
-        else return this.sk.map(value, this.sk.gui.timelinePanel.getSelectStart(), this.sk.gui.timelinePanel.getSelectEnd(), this.sk.gui.timelinePanel.getStart(), this.sk.gui.timelinePanel.getEnd());
+        else return this.mapSelectTimeToPixelTime2D(value);
+    }
+
+    mapSelectTimeToPixelTime2D(value) {
+        return this.sk.map(value, this.sk.gui.timelinePanel.getSelectStart(), this.sk.gui.timelinePanel.getSelectEnd(), this.sk.gui.timelinePanel.getStart(), this.sk.gui.timelinePanel.getEnd());
     }
 
     mapTotalTimeToPixelTime(value) {

@@ -14,15 +14,13 @@ class GUI {
             else this.timelinePanel.drawLongSlicer();
         }
         if (!this.sk.handle3D.getIs3DModeOrTransitioning()) {
-            if (this.fpContainer.overFloorPlan(this.sk.mouseX, this.sk.mouseY)) {
-                if (this.sk.sketchController.getCurSelectTab() === 1) this.fpContainer.drawRegionSelector();
-                else if (this.sk.sketchController.getCurSelectTab() === 2) this.fpContainer.drawSlicerSelector();
-            }
-            this.highlight.draw();
+            if (this.sk.sketchController.getCurSelectTab() === 1) this.fpContainer.drawRegionSelector();
+            else if (this.sk.sketchController.getCurSelectTab() === 2) this.fpContainer.drawSlicerSelector();
         }
     }
 
     updateGUIWithTranslation() {
+        this.highlight.setDraw();
         if (this.sk.handle3D.getIs3DMode() && this.timelinePanel.overTimeline()) {
             this.timelinePanel.draw3DSlicerRect(this.fpContainer.getContainer(), this.sk.sketchController.mapToSelectTimeThenPixelTime(this.sk.mouseX));
         }
