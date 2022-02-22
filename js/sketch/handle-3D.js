@@ -1,7 +1,8 @@
+/**
+ * Class to control 3D view and transitioning between 2D and 3D views
+ */
 class Handle3D {
-    /**
-     * Class holds variables and methods that control 3D view and transitioning between 2D and 3D views
-     */
+
     constructor(sketch, is3DMode) {
         this.sk = sketch;
         this.is3DMode = is3DMode;
