@@ -98,13 +98,13 @@ const igs = new p5((sk) => {
     }
 
     sk.mouseDragged = function () {
-        if (!sk.sketchController.getIsAnimate()) sk.gui.timelinePanel.handle();
+        if (!sk.sketchController.getIsAnimate() && sk.gui.timelinePanel.isLockedOrOverTimeline()) sk.gui.timelinePanel.handle();
         sk.loop();
     }
 
     sk.mouseReleased = function () {
-        sk.gui.timelinePanel.resetLock();
-        if (sk.sketchController.getCurSelectTab() === 5 && !sk.handle3D.getIs3DModeOrTransitioning()) sk.gui.highlight.handleMouseRelease();
+        if (sk.sketchController.getCurSelectTab() === 5 && !sk.handle3D.getIs3DModeOrTransitioning() && !sk.gui.timelinePanel.isLockedOrOverTimeline()) sk.gui.highlight.handleMouseRelease();
+        sk.gui.timelinePanel.resetLock(); // reset after handlingHighlight
         sk.loop();
     }
 

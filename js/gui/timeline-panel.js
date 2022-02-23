@@ -94,16 +94,14 @@ class TimelinePanel {
     }
 
     handle() {
-        if (this.isLockedOrOverTimeline()) {
-            if (this.isLockedLeft || (!this.isLockedRight && this.overSelector(this.selectStart))) {
-                this.isLockedLeft = true;
-                this.selectStart = this.sk.constrain(this.sk.mouseX, this.start, this.end);
-                if (this.selectStart > this.selectEnd - this.doublePadding) this.selectStart = this.selectEnd - this.doublePadding; // prevents overstriking
-            } else if (this.isLockedRight || this.overSelector(this.selectEnd)) {
-                this.isLockedRight = true;
-                this.selectEnd = this.sk.constrain(this.sk.mouseX, this.start, this.end);
-                if (this.selectEnd < this.selectStart + this.doublePadding) this.selectEnd = this.selectStart + this.doublePadding; // prevents overstriking
-            }
+        if (this.isLockedLeft || (!this.isLockedRight && this.overSelector(this.selectStart))) {
+            this.isLockedLeft = true;
+            this.selectStart = this.sk.constrain(this.sk.mouseX, this.start, this.end);
+            if (this.selectStart > this.selectEnd - this.doublePadding) this.selectStart = this.selectEnd - this.doublePadding; // prevents overstriking
+        } else if (this.isLockedRight || this.overSelector(this.selectEnd)) {
+            this.isLockedRight = true;
+            this.selectEnd = this.sk.constrain(this.sk.mouseX, this.start, this.end);
+            if (this.selectEnd < this.selectStart + this.doublePadding) this.selectEnd = this.selectStart + this.doublePadding; // prevents overstriking
         }
     }
 
