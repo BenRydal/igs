@@ -31,22 +31,20 @@ class Highlight {
     handleMouseRelease() {
         if (this.overBounds()) {
             if (!(this.sk.keyIsPressed && this.sk.keyCode === this.sk.OPTION)) this.resetHighlightArray();
-            if (this.isHighlighting()) this.updateHighlightArray();
+            if (this.isHighlighting()) this.highlightArray.push(this.createHighlightRect());
         }
-        this.curXTop = null;
-        this.curYTop = null;
+        this.resetCurHighlight();
     }
 
-    updateHighlightArray() {
-        this.highlightArray.push(this.createHighlightRect(this.sk.mouseX, this.sk.mouseY));
-    }
-
-    createHighlightRect(mouseX, mouseY) {
+    /**
+     * Returns top corner and width/height of user drawn selection rectangle dragged in any direction
+     */
+    createHighlightRect() {
         return {
-            xPos: this.curXTop,
-            yPos: this.curYTop,
-            width: mouseX - this.curXTop,
-            height: mouseY - this.curYTop
+            xPos: Math.min(this.curXTop, this.sk.mouseX),
+            yPos: Math.min(this.curYTop, this.sk.mouseY),
+            width: Math.abs(this.sk.mouseX - this.curXTop),
+            height: Math.abs(this.sk.mouseY - this.curYTop)
         }
     }
 
@@ -119,11 +117,19 @@ class Highlight {
     overHighlightRect(highlightRect, xPos, yPos, xPosTimeToMap) {
         const xPosTime = this.sk.sketchController.mapSelectTimeToPixelTime2D(xPosTimeToMap); // Map method maintains highlight rect scaling if user adjusts timeline, make sure to test 2D only
         if (this.sk.handle3D.getIs3DMode()) {
-            if (this.sk.gui.timelinePanel.overAxis(highlightRect.xPos)) return xPosTime >= highlightRect.xPos && xPosTime <= highlightRect.xPos + highlightRect.width && yPos >= highlightRect.yPos && yPos <= highlightRect.yPos + highlightRect.height;
-            else return xPos >= highlightRect.xPos && xPos <= highlightRect.xPos + highlightRect.width && yPos >= highlightRect.yPos && yPos <= highlightRect.yPos + highlightRect.height;
+            if (this.sk.gui.timelinePanel.overAxis(highlightRect.xPos)) return this.betweenX(xPosTime, highlightRect) && this.betweenY(yPos, highlightRect);
+            else return this.betweenX(xPos, highlightRect) && this.betweenY(yPos, highlightRect);
         } else {
-            return ((xPos >= highlightRect.xPos && xPos <= highlightRect.xPos + highlightRect.width) || (xPosTime >= highlightRect.xPos && xPosTime <= highlightRect.xPos + highlightRect.width)) && yPos >= highlightRect.yPos && yPos <= highlightRect.yPos + highlightRect.height;
+            return (this.betweenX(xPos, highlightRect) || this.betweenX(xPosTime, highlightRect)) && this.betweenY(yPos, highlightRect);
         }
+    }
+
+    betweenX(xPos, highlightRect) {
+        return xPos >= highlightRect.xPos && xPos <= highlightRect.xPos + highlightRect.width;
+    }
+
+    betweenY(yPos, highlightRect) {
+        return yPos >= highlightRect.yPos && yPos <= highlightRect.yPos + highlightRect.height;
     }
 
     isHighlighting() {
@@ -132,6 +138,11 @@ class Highlight {
 
     resetHighlightArray() {
         this.highlightArray = [];
+    }
+
+    resetCurHighlight() {
+        this.curXTop = null;
+        this.curYTop = null;
     }
 
     overBounds() {
