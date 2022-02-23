@@ -1,5 +1,5 @@
 /**
- * This class holds different tests and helper methods used in draw movement and conversation classes
+ * This class holds different utility and helper methods used in draw movement and conversation classes
  * It centralizes decisions about what points to show and not show and is coupled with the sketchController/gui classes
  */
 class TestPoint {
@@ -50,33 +50,6 @@ class TestPoint {
             floorPlanXPos,
             floorPlanYPos,
         };
-    }
-
-    // ***** DRAW CONVERSATION TESTS ***** //
-
-    /**
-     * 
-     * @param  {String} talkTurn
-     */
-    isTalkTurnSelected(talkTurn) {
-        const wordToSearch = this.sk.sketchController.getWordToSearch();
-        if (!wordToSearch) return true; // Always return true if empty/no value
-        else {
-            const escape = wordToSearch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
-            if (wordToSearch.length === 1) return new RegExp(escape, "i").test(talkTurn); // case insensitive regex test
-            else return new RegExp('\\b' + escape + '\\b', "i").test(talkTurn); // \\b for whole word test
-        }
-    }
-
-    /**
-     * Adjusts Y positioning of conversation rectangles correctly for align and 3 D views
-     */
-    getConversationAdjustYPos(floorPlanYPos, rectLength) {
-        if (this.sk.sketchController.getIsAlignTalk()) {
-            if (this.sk.handle3D.getIs3DMode()) return this.sk.gui.fpContainer.getContainer().height;
-            else return 0;
-        } else if (this.sk.handle3D.getIs3DMode()) return floorPlanYPos;
-        else return floorPlanYPos - rectLength;
     }
 
     /**

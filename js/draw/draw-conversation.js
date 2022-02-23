@@ -33,7 +33,7 @@ class DrawConversation {
     }
 
     isVisible(point, curPos) {
-        return (this.testPoint.isTalkTurnSelected(point.talkTurn) && this.testPoint.isShowingInGUI(curPos.timelineXPos) && this.testPoint.selectMode(curPos, point.isStopped) && this.testPoint.isShowingInCodeList(point.codes.array));
+        return (this.isTalkTurnSelected(point.talkTurn) && this.testPoint.isShowingInGUI(curPos.timelineXPos) && this.testPoint.selectMode(curPos, point.isStopped) && this.testPoint.isShowingInCodeList(point.codes.array));
     }
     /**
      * Draws single textbox for user selected conversation
@@ -188,9 +188,35 @@ class DrawConversation {
             floorPlanXPos: pos.floorPlanXPos,
             floorPlanYPos: pos.floorPlanYPos,
             rectLength,
-            adjustYPos: this.testPoint.getConversationAdjustYPos(pos.floorPlanYPos, rectLength)
+            adjustYPos: this.getConversationAdjustYPos(pos.floorPlanYPos, rectLength)
         };
     }
+
+    /**
+     * Adjusts Y positioning of conversation rectangles correctly for align and 3 D views
+     */
+    getConversationAdjustYPos(floorPlanYPos, rectLength) {
+        if (this.sk.sketchController.getIsAlignTalk()) {
+            if (this.sk.handle3D.getIs3DMode()) return this.sk.gui.fpContainer.getContainer().height;
+            else return 0;
+        } else if (this.sk.handle3D.getIs3DMode()) return floorPlanYPos;
+        else return floorPlanYPos - rectLength;
+    }
+
+    /**
+     * 
+     * @param  {String} talkTurn
+     */
+    isTalkTurnSelected(talkTurn) {
+        const wordToSearch = this.sk.sketchController.getWordToSearch();
+        if (!wordToSearch) return true; // Always return true if empty/no value
+        else {
+            const escape = wordToSearch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+            if (wordToSearch.length === 1) return new RegExp(escape, "i").test(talkTurn); // case insensitive regex test
+            else return new RegExp('\\b' + escape + '\\b', "i").test(talkTurn); // \\b for whole word test
+        }
+    }
+
     /**
      * Sets length of each conversation turn in GUI display based on textSize method
      * @param  {String} talkTurn
