@@ -1,8 +1,8 @@
 /**
- * This class provides a set of methods to draw highly customized lines in both floor plan and space-time views of the IGS.
- * Many of the methods address specific browser constraints and balance drawing curves efficiently and aesthetically meaningfully
- * For example, using the "line" method in a library like P5 is inefficient and curveVertex increases efficiency tremendously but 
- * the tradeoff is more customized methods and conditional structures to handle starting/begining lines/shapes
+ * This class provides a set of custom methods to draw movement data in floorPlan and space-time views of the IGS.
+ * Many of the methods address specific browser constraints and balance aesthetic and efficient curve drawing needs
+ * For example, using the "line" method in a library like P5 is inefficient and curveVertex increases efficiency significantly but 
+ * the tradeoff is the need for more customized methods and conditional structures to handle starting/begining lines/shapes
  */
 class DrawMovement {
 
@@ -10,93 +10,76 @@ class DrawMovement {
         this.sk = sketch;
         this.testPoint = new TestPoint(this.sk);
         this.dot = null; // represents user selection dot drawn in both floor plan and space-time views
+        this.isDrawingLine = false; // boolean controls start/end line segment drawing based on code file and GUI selections
         this.style = {
             shade: null,
-            thinStroke: null,
-            fatStroke: null,
+            thinStroke: 1,
+            fatStroke: 9,
+            stopSize: 10
         }
     }
 
     setData(path) {
         this.dot = null; // reset 
-        this.setStartingStyles(path.color.pathMode);
+        this.sk.noFill(); // important for curveVertex drawing
+        this.style.shade = path.color.pathMode;
         this.setDraw(this.sk.PLAN, path.movement);
         this.setDraw(this.sk.SPACETIME, path.movement);
         if (this.dot !== null) this.drawDot(this.dot);
     }
 
     /**
-     * Organizes segmentation of line drawing based on a variety of conditions
-     * There are 2 primary ways to start/end lines:
-     * 1) User loaded codes are tested to draw distinct line segments that can be separated in space and time
-     * 2) isFatLine boolean is based on what points are either selected by a user in the GUI OR indicate if a 
-     * point is stopped or moving this boolean is tested to draw distinct line segments adjacent in space and time
+     * Organizes segmentation of line drawing to draw lines with varying strokes, thickness etc.
+     * NOTE: stops are drawn as circles in floorPlan view
+     * NOTE: 2 things determine line segmentation: 1) change from stop to movement and 2) whether point is visible (e.g., selected, highlighted etc.)
      * @param  {Integer} view
      * @param  {MovementPoint []} movementArray
      */
     setDraw(view, movementArray) {
-        let isDrawingCode = false; // controls beginning/ending lines based on codes that have been loaded
+        this.isDrawingLine = false; // always reset
         for (let i = 1; i < movementArray.length; i++) { // start at 1 to allow testing of current and prior indices
             const p = this.createComparePoint(view, movementArray[i], movementArray[i - 1]); // a compare point consists of current and prior augmented points
-            if (this.testPoint.isShowingInGUI(p.cur.pos.timelineXPos)) {
-                if (p.cur.codeIsShowing) {
-                    if (view === this.sk.SPACETIME) this.recordDot(p.cur);
-                    if (!isDrawingCode) isDrawingCode = this.beginNewCodeDrawing(p.cur.isFatLine, p.cur.point.codes.color);
-                    if (this.testPoint.isPlanViewAndStopped(view, p.cur.point.isStopped)) this.drawStopCircle(p); // you are able to draw circles between begin/end shape
-                    else this.setFatLineDrawing(p);
-                } else {
-                    if (isDrawingCode) isDrawingCode = this.endCurCodeDrawing();
-                }
+            if (this.isVisible(p.cur)) {
+                if (view === this.sk.SPACETIME) this.recordDot(p.cur);
+                if (p.cur.point.isStopped) this.updateStopDrawing(p, view);
+                else this.updateMovementDrawing(p, p.prior.point.isStopped, this.style.thinStroke);
+            } else {
+                if (this.isDrawingLine) this.endLine();
             }
         }
         this.sk.endShape(); // end shape in case still drawing
     }
 
     /**
-     * Begins drawing shape based on code segmentation
-     * Sets strokeweight based on current state of isFatLine and returns value to update isDrawingCode
+     * Stops are draw as circles in floorPlan view
      */
-    beginNewCodeDrawing(isFatLine, color) {
-        if (isFatLine) this.setLineStyle(this.style.fatStroke, color);
+    updateStopDrawing(p, view) {
+        if (view === this.sk.PLAN) {
+            if (!p.prior.point.isStopped) this.drawStopCircle(p); // PriorPoint test makes sure to only draw a stop circle once
+        } else this.updateMovementDrawing(p, !p.prior.point.isStopped, this.style.fatStroke);
+    }
+
+    /**
+     * NOTE: stopTest can vary depending on if this method is called when updatingStopDrawing
+     */
+    updateMovementDrawing(p, stopTest, stroke) {
+        if (!this.isDrawingLine) this.beginLine(p.cur.point.isStopped, p.cur.point.codes.color);
+        if (stopTest || this.isNewCode(p)) this.endThenBeginNewLine(p.prior.pos, stroke, p.cur.point.codes.color);
+        else this.sk.vertex(p.cur.pos.viewXPos, p.cur.pos.floorPlanYPos, p.cur.pos.zPos); // if already drawing fat line, continue it
+    }
+
+    beginLine(isStopped, color) {
+        if (isStopped) this.setLineStyle(this.style.fatStroke, color);
         else this.setLineStyle(this.style.thinStroke, color);
         this.sk.beginShape();
-        return true;
+        this.isDrawingLine = true;
     }
 
-    /**
-     * Ends drawing shape based on code segmentation and returns value to update isDrawingCode
-     */
-    endCurCodeDrawing() {
+    endLine() {
         this.sk.endShape();
-        return false;
+        this.isDrawingLine = false;
     }
 
-    /**
-     * Organizes start/ending of new line based on changes in isFatLine or codes
-     * @param  {ComparePoint} p
-     */
-    setFatLineDrawing(p) {
-        if (p.cur.isFatLine) {
-            if (!p.prior.isFatLine || this.isNewCode(p)) this.endThenBeginNewLine(p.prior.pos, this.style.fatStroke, p.cur.point.codes.color);
-            else this.sk.vertex(p.cur.pos.viewXPos, p.cur.pos.floorPlanYPos, p.cur.pos.zPos); // if already drawing fat line, continue it
-        } else {
-            if (p.prior.isFatLine || this.isNewCode(p)) this.endThenBeginNewLine(p.prior.pos, this.style.thinStroke, p.cur.point.codes.color);
-            else this.sk.vertex(p.cur.pos.viewXPos, p.cur.pos.floorPlanYPos, p.cur.pos.zPos); // if already drawing thin line, continue it
-        }
-    }
-    /**
-     * Color value is used to determine if curPoint is a new code
-     * @param  {ComparePoint} p
-     */
-    isNewCode(p) {
-        return p.cur.point.codes.color !== p.prior.point.codes.color;
-    }
-
-    /**
-     * Ends and begins a new line, passes values to set strokeweight and color for new line
-     * @param  {Object returned from getScaledMovementPos} pos
-     * @param  {Integer} weight
-     */
     endThenBeginNewLine(pos, weight, color) {
         this.sk.vertex(pos.viewXPos, pos.floorPlanYPos, pos.zPos);
         this.sk.endShape();
@@ -106,47 +89,57 @@ class DrawMovement {
     }
 
     /**
-     * Stops are drawn as circles. These circles can be drawn while also drawing with P5's curveVertex method
-     * Testing if the priorPoit is stopped is to only draw a stop once
+     * NOTE: Stop circles can be drawn while also drawing within P5's curveVertex shape/method
      * @param  {ComparePoint} p
      */
     drawStopCircle(p) {
-        if (!p.prior.point.isStopped) {
-            this.setFillStyle(p.cur.point.codes.color);
-            this.sk.circle(p.cur.pos.viewXPos, p.cur.pos.floorPlanYPos, 9);
-            this.sk.noFill();
-        }
+        this.setFillStyle(p.cur.point.codes.color);
+        this.sk.circle(p.cur.pos.viewXPos, p.cur.pos.floorPlanYPos, this.style.stopSize);
+        this.sk.noFill();
     }
 
     /**
-     * A compare point augments current and prior points with screen pixel position variables and booleans indicating if the point passes code and selection tests
+     * NOTE: Color value is used to determine if curPoint is a new code
+     * @param  {ComparePoint} p
+     */
+    isNewCode(p) {
+        return p.cur.point.codes.color !== p.prior.point.codes.color;
+    }
+
+    /**
+     * Holds tests for determining if point is visible (e.g., selected, highlighted)
+     * @param  {AugmentPoint} augmentPoint
+     */
+    isVisible(augmentPoint) {
+        return (this.testPoint.isShowingInGUI(augmentPoint.pos.timelineXPos) && this.testPoint.isShowingInCodeList(augmentPoint.point.codes.array) && this.testPoint.selectMode(augmentPoint.pos, augmentPoint.point.isStopped));
+    }
+
+    /**
+     * A compare point is an object with two augmented points
      * @param  {Integer} view
      * @param  {MovementPoint} curIndex 
      * @param  {MovementPoint} priorIndex 
      */
     createComparePoint(view, curIndex, priorIndex) {
         return {
-            cur: this.augmentPoint(view, curIndex),
-            prior: this.augmentPoint(view, priorIndex)
+            cur: this.createAugmentPoint(view, curIndex),
+            prior: this.createAugmentPoint(view, priorIndex)
         }
     }
 
-    augmentPoint(view, point) {
-        const pos = this.getScaledMovementPos(point, view);
+    createAugmentPoint(view, point) {
         return {
             point,
-            pos,
-            codeIsShowing: this.testPoint.isShowingInCodeList(point.codes.array),
-            isFatLine: this.testPoint.selectModeForFatLine(pos.floorPlanXPos, pos.floorPlanYPos, point.isStopped)
+            pos: this.getScaledMovementPos(point, view)
         }
     }
 
     /**
      * Tests if newDot has been created and updates current dot value and video scrub variable if so
-     * @param  {Object returned from getScaledMovementPos} curPos
+     * @param  {AugmentPoint} augmentPoint
      */
-    recordDot(augmentedPoint) {
-        const newDot = this.getNewDot(augmentedPoint, this.dot);
+    recordDot(augmentPoint) {
+        const newDot = this.getNewDot(augmentPoint, this.dot);
         if (newDot !== null) {
             this.dot = newDot;
             this.sk.sketchController.setDotTimeForVideoScrub(this.dot.timePos);
@@ -156,7 +149,7 @@ class DrawMovement {
     drawDot(curDot) {
         const dotSize = this.sk.width / 50;
         this.drawFloorPlanDot(curDot, dotSize);
-        if (this.sk.sketchController.handle3D.getIsShowing()) this.draw3DSpaceTimeDot(curDot);
+        if (this.sk.handle3D.getIs3DMode()) this.draw3DSpaceTimeDot(curDot);
         else this.sk.circle(curDot.timePos, curDot.yPos, dotSize);
     }
 
@@ -172,12 +165,6 @@ class DrawMovement {
         this.sk.point(curDot.xPos, curDot.yPos, curDot.zPos);
         this.sk.strokeWeight(2);
         this.sk.line(curDot.xPos, curDot.yPos, 0, curDot.xPos, curDot.yPos, curDot.zPos);
-    }
-
-    setStartingStyles(color) {
-        this.sk.noFill(); // IMPORTANT for curveVertex drawing
-        this.style.shade = color;
-        [this.style.thinStroke, this.style.fatStroke] = this.testPoint.selectModeForStrokeWeights();
     }
 
     setLineStyle(weight, color) {
@@ -209,7 +196,7 @@ class DrawMovement {
     getViewXPos(view, floorPlanXPos, selTimelineXPos) {
         if (view === this.sk.PLAN) return floorPlanXPos;
         else {
-            if (this.sk.sketchController.handle3D.getIsShowing()) return floorPlanXPos;
+            if (this.sk.handle3D.getIs3DMode()) return floorPlanXPos;
             else return selTimelineXPos;
         }
     }
@@ -217,7 +204,7 @@ class DrawMovement {
     getZPos(view, selTimelineXPos) {
         if (view === this.sk.PLAN) return 0;
         else {
-            if (this.sk.sketchController.handle3D.getIsShowing()) return selTimelineXPos;
+            if (this.sk.handle3D.getIs3DMode()) return selTimelineXPos;
             else return 0;
         }
     }
@@ -232,10 +219,10 @@ class DrawMovement {
         const [xPos, yPos, zPos, timePos, map3DMouse, codeColor] = [augmentedPoint.pos.floorPlanXPos, augmentedPoint.pos.floorPlanYPos, augmentedPoint.pos.zPos, augmentedPoint.pos.selTimelineXPos, this.sk.sketchController.mapToSelectTimeThenPixelTime(this.sk.mouseX), augmentedPoint.point.codes.color];
         if (this.sk.sketchController.getIsAnimate()) {
             return this.createDot(xPos, yPos, zPos, timePos, codeColor, null); // pass null as this means most recent point will always create Dot object
-        } else if (this.sk.sketchController.mode.isVideoPlay) {
+        } else if (this.sk.sketchController.getIsVideoPlay()) {
             const videoToSelectTime = this.sk.sketchController.mapVideoTimeToSelectedTime();
             if (this.compareToCurDot(videoToSelectTime, timePos, curDot)) return this.createDot(xPos, yPos, zPos, timePos, codeColor, Math.abs(videoToSelectTime - timePos));
-        } else if (this.sk.sketchController.testTimeline() && this.compareToCurDot(map3DMouse, timePos, curDot)) {
+        } else if (this.sk.gui.timelinePanel.overTimeline() && this.compareToCurDot(map3DMouse, timePos, curDot)) {
             return this.createDot(xPos, yPos, zPos, map3DMouse, codeColor, Math.abs(map3DMouse - timePos));
         }
         return null;

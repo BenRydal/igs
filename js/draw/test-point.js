@@ -1,5 +1,5 @@
 /**
- * This class holds different tests and helper methods used in draw movement and conversation classes
+ * This class holds different utility and helper methods used in draw movement and conversation classes
  * It centralizes decisions about what points to show and not show and is coupled with the sketchController/gui classes
  */
 class TestPoint {
@@ -43,7 +43,7 @@ class TestPoint {
     getSharedPosValues(point) {
         const timelineXPos = this.sk.sketchController.mapTotalTimeToPixelTime(point.time);
         const selTimelineXPos = this.sk.sketchController.mapSelectTimeToPixelTime(timelineXPos);
-        const [floorPlanXPos, floorPlanYPos] = this.sk.sketchController.handleRotation.getScaledXYPos(point.xPos, point.yPos, this.sk.gui.fpContainer.getContainer(), this.sk.inputFloorPlan.getParams());
+        const [floorPlanXPos, floorPlanYPos] = this.sk.floorPlan.getScaledXYPos(point.xPos, point.yPos, this.sk.gui.fpContainer.getContainer());
         return {
             timelineXPos,
             selTimelineXPos,
@@ -52,86 +52,26 @@ class TestPoint {
         };
     }
 
-    // ***** DRAW MOVEMENT TESTS ***** //
     /**
-     * @param  {Integer} view
-     * @param  {MovementPoint} curPoint
-     */
-    isPlanViewAndStopped(view, pointIsStopped) {
-        return (view === this.sk.PLAN && pointIsStopped && this.sk.sketchController.getCurSelectTab() !== 3);
-    }
-
-    /**
-     * Controls fat line drawing/segmentation
-     * @param  {Number} xPos, yPos
+     * @param  {Movement/Conversation Pos Object} curPos
      * @param  {boolean} pointIsStopped
      */
-    selectModeForFatLine(xPos, yPos, pointIsStopped) {
-        switch (this.sk.sketchController.getCurSelectTab()) {
-            case 1:
-                return this.sk.gui.fpContainer.overCursor(xPos, yPos);
-            case 2:
-                return this.sk.gui.fpContainer.overSlicer(xPos, yPos);
-            default:
-                return pointIsStopped; // this always returns false for floorplan view
-        }
-    }
-
-    selectModeForStrokeWeights() {
-        switch (this.sk.sketchController.getCurSelectTab()) {
-            case 3:
-                return [1, 0];
-            case 4:
-                return [0, 9];
-            default:
-                return [1, 9];
-        }
-    }
-
-    // ***** DRAW CONVERSATION TESTS ***** //
-
-    /**
-     * 
-     * @param  {String} talkTurn
-     */
-    isTalkTurnSelected(talkTurn) {
-        const wordToSearch = this.sk.sketchController.getWordToSearch();
-        if (!wordToSearch) return true; // Always return true if empty/no value
-        else {
-            const escape = wordToSearch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
-            if (wordToSearch.length === 1) return new RegExp(escape, "i").test(talkTurn); // case insensitive regex test
-            else return new RegExp('\\b' + escape + '\\b', "i").test(talkTurn); // \\b for whole word test
-        }
-    }
-
-    /**
-     * Adjusts Y positioning of conversation rectangles correctly for align and 3 D views
-     */
-    getConversationAdjustYPos(floorPlanYPos, rectLength) {
-        if (this.sk.sketchController.mode.isAlignTalk) {
-            if (this.sk.sketchController.handle3D.getIsShowing()) return this.sk.gui.fpContainer.getContainer().height;
-            else return 0;
-        } else if (this.sk.sketchController.handle3D.getIsShowing()) return floorPlanYPos;
-        else return floorPlanYPos - rectLength;
-    }
-
-    /**
-     * Controls conversation drawing based on selectMode
-     * @param  {Number} xPos, yPos
-     * @param  {boolean} pointIsStopped
-     */
-    selectModeForConversation(xPos, yPos, isStopped) {
+    selectMode(curPos, isStopped) {
         switch (this.sk.sketchController.getCurSelectTab()) {
             case 0:
                 return true;
             case 1:
-                return this.sk.gui.fpContainer.overCursor(xPos, yPos);
+                if (this.sk.handle3D.getIs3DModeOrTransitioning()) return true;
+                else return this.sk.gui.fpContainer.overCursor(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos) && this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos);
             case 2:
-                return this.sk.gui.fpContainer.overSlicer(xPos, yPos);
+                if (this.sk.handle3D.getIs3DModeOrTransitioning()) return true;
+                else return this.sk.gui.fpContainer.overSlicer(curPos.floorPlanXPos, curPos.selTimelineXPos) && this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos);
             case 3:
-                return !isStopped;
+                return !isStopped && this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos);
             case 4:
-                return isStopped;
+                return isStopped && this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos);
+            case 5:
+                return this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.timelineXPos);
         }
     }
 }

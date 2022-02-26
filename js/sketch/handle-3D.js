@@ -1,10 +1,11 @@
+/**
+ * Class to control 3D view and transitioning between 2D and 3D views
+ */
 class Handle3D {
-    /**
-     * Class holds variables and methods that control 3D view and transitioning between 2D and 3D views
-     */
-    constructor(sketch, isShowing) {
+
+    constructor(sketch, is3DMode) {
         this.sk = sketch;
-        this.isShowing = isShowing;
+        this.is3DMode = is3DMode;
         this.isTransitioning = false;
         this.translate = {
             zoom: -(this.sk.height / 1.5),
@@ -20,14 +21,26 @@ class Handle3D {
         }
     }
 
+    update() {
+        this.toggleIs3D();
+        this.setIsTransitioning(true);
+        this.sk.loop();
+    }
+
     update3DTranslation() {
         if (this.isTransitioning) {
-            if (this.isShowing) this.isTransitioning = this.updatePositions();
+            if (this.is3DMode) this.isTransitioning = this.updatePositions();
             else this.isTransitioning = this.resetPositions();
-            this.sk.translateCanvasTo3D(this.getCurTranslatePos());
+            this.translateFor3D(this.getCurTranslatePos());
         } else {
-            if (this.isShowing) this.sk.translateCanvasTo3D(this.getCurTranslatePos());
+            if (this.is3DMode) this.translateFor3D(this.getCurTranslatePos());
         }
+    }
+
+    translateFor3D(curPos) {
+        this.sk.push();
+        this.sk.translate(curPos.xPos, curPos.yPos, curPos.zoom);
+        this.sk.rotateX(curPos.rotateX);
     }
 
     updatePositions() {
@@ -56,20 +69,24 @@ class Handle3D {
         return false;
     }
 
-    toggleIsShowing() {
-        this.isShowing = !this.isShowing;
+    toggleIs3D() {
+        this.is3DMode = !this.is3DMode;
     }
 
     setIsTransitioning(value) {
         this.isTransitioning = value;
     }
 
-    getIsShowing() {
-        return this.isShowing;
+    getIs3DMode() {
+        return this.is3DMode;
     }
 
     getIsTransitioning() {
         return this.isTransitioning;
+    }
+
+    getIs3DModeOrTransitioning() {
+        return this.is3DMode || this.isTransitioning;
     }
 
     getCurTranslatePos() {

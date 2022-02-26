@@ -59,7 +59,7 @@ class TimelinePanel {
 
     drawCenterLabel() {
         this.sk.textAlign(this.sk.CENTER);
-        if (this.sk.sketchController.testTimeline()) {
+        if (this.overTimeline()) {
             const mapMouseX = this.sk.sketchController.mapPixelTimeToSelectTime(this.sk.mouseX);
             const timeInSeconds = this.sk.sketchController.mapPixelTimeToTotalTime(mapMouseX);
             const minutes = Math.floor(timeInSeconds / 60);
@@ -68,13 +68,6 @@ class TimelinePanel {
             this.sk.text(label, this.start + this.length / 2, this.height);
         } else this.sk.text("MINUTES", this.start + this.length / 2, this.height);
         this.sk.textAlign(this.sk.LEFT); // reset
-    }
-
-    updateSlicer(isShowing) {
-        if (this.sk.sketchController.testTimeline()) {
-            if (isShowing) this.drawShortSlicer();
-            else this.drawLongSlicer();
-        }
     }
 
     setSlicerStroke() {
@@ -101,16 +94,14 @@ class TimelinePanel {
     }
 
     handle() {
-        if (this.isLockedOrOverTimeline()) {
-            if (this.isLockedLeft || (!this.isLockedRight && this.overSelector(this.selectStart))) {
-                this.isLockedLeft = true;
-                this.selectStart = this.sk.constrain(this.sk.mouseX, this.start, this.end);
-                if (this.selectStart > this.selectEnd - this.doublePadding) this.selectStart = this.selectEnd - this.doublePadding; // prevents overstriking
-            } else if (this.isLockedRight || this.overSelector(this.selectEnd)) {
-                this.isLockedRight = true;
-                this.selectEnd = this.sk.constrain(this.sk.mouseX, this.start, this.end);
-                if (this.selectEnd < this.selectStart + this.doublePadding) this.selectEnd = this.selectStart + this.doublePadding; // prevents overstriking
-            }
+        if (this.isLockedLeft || (!this.isLockedRight && this.overSelector(this.selectStart))) {
+            this.isLockedLeft = true;
+            this.selectStart = this.sk.constrain(this.sk.mouseX, this.start, this.end);
+            if (this.selectStart > this.selectEnd - this.doublePadding) this.selectStart = this.selectEnd - this.doublePadding; // prevents overstriking
+        } else if (this.isLockedRight || this.overSelector(this.selectEnd)) {
+            this.isLockedRight = true;
+            this.selectEnd = this.sk.constrain(this.sk.mouseX, this.start, this.end);
+            if (this.selectEnd < this.selectStart + this.doublePadding) this.selectEnd = this.selectStart + this.doublePadding; // prevents overstriking
         }
     }
 

@@ -22,7 +22,7 @@ class DrawConversation {
     setData(path, speakerList) {
         for (const point of path.conversation) {
             const curPos = this.getScaledConversationPos(point);
-            if (this.testPoint.isTalkTurnSelected(point.talkTurn) && this.testPoint.isShowingInGUI(curPos.timelineXPos) && this.testPoint.selectModeForConversation(curPos.floorPlanXPos, curPos.floorPlanYPos, point.isStopped) && this.testPoint.isShowingInCodeList(point.codes.array)) {
+            if (this.isVisible(point, curPos)) {
                 const curSpeaker = this.getSpeakerFromSpeakerList(point.speaker, speakerList); // get speaker object from global list equivalent to the current speaker of point
                 if (this.testSpeakerToDraw(curSpeaker, path.name)) {
                     if (this.sk.sketchController.getIsPathColorMode()) this.organizeRectDrawing(point, curPos, curSpeaker.color.pathMode);
@@ -32,13 +32,20 @@ class DrawConversation {
         }
     }
 
+    isVisible(point, curPos) {
+        return (this.isTalkTurnSelected(point.talkTurn) && this.testPoint.isShowingInGUI(curPos.timelineXPos) && this.testPoint.selectMode(curPos, point.isStopped) && this.testPoint.isShowingInCodeList(point.codes.array));
+    }
     /**
-     * Organizes drawing of single text/textbox for a selected conversation
-     * Must be translated to show above all other visual elements with WEBGL renderer
-     * NOTE: this is called after all conversation rects are drawn so it is displayed on top visually
+     * Draws single textbox for user selected conversation
+     * NOTE: Must be translated 1 pixel to show text above all other visual elements with WEBGL renderer
      */
     setConversationBubble() {
-        if (this.conversationBubble.isSelected) this.sk.translateCanvasForText(this.drawTextBox.bind(this, this.conversationBubble.point));
+        if (this.conversationBubble.isSelected) {
+            this.sk.push();
+            this.sk.translate(0, 0, 1);
+            this.drawTextBox(this.conversationBubble.point);
+            this.sk.pop();
+        }
     }
 
     /**
@@ -50,7 +57,7 @@ class DrawConversation {
     organizeRectDrawing(point, curPos, curColor) {
         this.sk.noStroke(); // reset if recordConversationBubble is called previously over2DRects
         this.sk.fill(curColor);
-        if (this.sk.sketchController.handle3D.getIsShowing()) {
+        if (this.sk.handle3D.getIs3DMode()) {
             this.drawFloorPlan3DRects(curPos);
             this.drawSpaceTime3DRects(curPos);
         } else {
@@ -86,8 +93,8 @@ class DrawConversation {
     }
 
     drawSpaceTime3DRects(curPos) {
-        const translateZoom = Math.abs(this.sk.sketchController.handle3D.getCurTranslatePos().zoom);
-        if (this.sk.sketchController.mode.isAlignTalk) this.sk.quad(0, translateZoom, curPos.selTimelineXPos, curPos.rectLength, translateZoom, curPos.selTimelineXPos, curPos.rectLength, translateZoom, curPos.selTimelineXPos + this.rect.pixelWidth, 0, translateZoom, curPos.selTimelineXPos + this.rect.pixelWidth);
+        const translateZoom = Math.abs(this.sk.handle3D.getCurTranslatePos().zoom);
+        if (this.sk.sketchController.getIsAlignTalk()) this.sk.quad(0, translateZoom, curPos.selTimelineXPos, curPos.rectLength, translateZoom, curPos.selTimelineXPos, curPos.rectLength, translateZoom, curPos.selTimelineXPos + this.rect.pixelWidth, 0, translateZoom, curPos.selTimelineXPos + this.rect.pixelWidth);
         else this.sk.quad(curPos.floorPlanXPos, curPos.adjustYPos, curPos.selTimelineXPos, curPos.floorPlanXPos + curPos.rectLength, curPos.adjustYPos, curPos.selTimelineXPos, curPos.floorPlanXPos + curPos.rectLength, curPos.adjustYPos, curPos.selTimelineXPos + this.rect.pixelWidth, curPos.floorPlanXPos, curPos.adjustYPos, curPos.selTimelineXPos + this.rect.pixelWidth);
     }
 
@@ -157,7 +164,7 @@ class DrawConversation {
      * @param  {Char} pathName
      */
     testSpeakerToDraw(speaker, pathName) {
-        return speaker != null && speaker.isShowing && (this.sk.sketchController.mode.isAllTalk || speaker.name === pathName);
+        return speaker != null && speaker.isShowing && (this.sk.sketchController.getIsAllTalk() || speaker.name === pathName);
     }
 
     /**
@@ -181,9 +188,35 @@ class DrawConversation {
             floorPlanXPos: pos.floorPlanXPos,
             floorPlanYPos: pos.floorPlanYPos,
             rectLength,
-            adjustYPos: this.testPoint.getConversationAdjustYPos(pos.floorPlanYPos, rectLength)
+            adjustYPos: this.getConversationAdjustYPos(pos.floorPlanYPos, rectLength)
         };
     }
+
+    /**
+     * Adjusts Y positioning of conversation rectangles correctly for align and 3 D views
+     */
+    getConversationAdjustYPos(floorPlanYPos, rectLength) {
+        if (this.sk.sketchController.getIsAlignTalk()) {
+            if (this.sk.handle3D.getIs3DMode()) return this.sk.gui.fpContainer.getContainer().height;
+            else return 0;
+        } else if (this.sk.handle3D.getIs3DMode()) return floorPlanYPos;
+        else return floorPlanYPos - rectLength;
+    }
+
+    /**
+     * 
+     * @param  {String} talkTurn
+     */
+    isTalkTurnSelected(talkTurn) {
+        const wordToSearch = this.sk.sketchController.getWordToSearch();
+        if (!wordToSearch) return true; // Always return true if empty/no value
+        else {
+            const escape = wordToSearch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+            if (wordToSearch.length === 1) return new RegExp(escape, "i").test(talkTurn); // case insensitive regex test
+            else return new RegExp('\\b' + escape + '\\b', "i").test(talkTurn); // \\b for whole word test
+        }
+    }
+
     /**
      * Sets length of each conversation turn in GUI display based on textSize method
      * @param  {String} talkTurn

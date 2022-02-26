@@ -23,74 +23,53 @@ const igs = new p5((sk) => {
         sk.canvas = sk.createCanvas(window.innerWidth, window.innerHeight, sk.WEBGL);
         sk.canvas.parent('sketch-holder');
         sk.core = new Core(sk); // holds core data, update and parsing methods/classes
-        sk.gui = new GUI(sk); // holds GUI elements/classes
+        sk.gui = new GUI(sk); // holds canvas GUI elements/classes
         sk.domController = new DomController(sk); // handles DOM/buttons user interaction
         sk.sketchController = new SketchController(sk); // coordinates calls across classes
+        sk.handle3D = new Handle3D(sk, true); // boolean sets 3D to showing
         sk.videoPlayer = null; // abstract class for different video classes
-        sk.inputFloorPlan = new InputFloorPlan(sk);
+        sk.floorPlan = new FloorPlan(sk); // holds floor plan data and drawing methods
         // CONSTANTS
         sk.PLAN = 0;
         sk.SPACETIME = 1;
         sk.DRAWGUI = 0;
         sk.HANDLEGUI = 1;
         sk.GUITEXTSIZE = sk.width / 70;
-        sk.COLORGRAY = "#A9A9A9"; // this color matches checkmark color in DOM Controller
+        sk.COLORGRAY = "#A9A9A9"; // matches checkmark color in DOM Controller
         // STYLES
         sk.textSize(sk.GUITEXTSIZE);
         sk.textFont(sk.font_Lato);
         sk.textAlign(sk.LEFT, sk.TOP);
-        sk.smooth(); // must enable when using 3D
+        sk.smooth(); // must enable when using WEBGL renderer
     }
 
     sk.draw = function () {
         sk.background(255);
-        sk.translate(-sk.width / 2, -sk.height / 2, 0); // always recenter canvas to top left when using WEBGL renderer
-        sk.sketchController.handle3D.update3DTranslation();
-        if (sk.dataIsLoaded(sk.inputFloorPlan.getImg())) sk.sketchController.setFloorPlan();
+        sk.translate(-sk.width / 2, -sk.height / 2, 0); // recenter canvas to top left when using WEBGL renderer
+        // Test/translate for 3D mode
+        if (sk.handle3D.getIs3DModeOrTransitioning()) sk.handle3D.update3DTranslation();
+        // Test/draw data
+        if (sk.dataIsLoaded(sk.floorPlan.getImg())) sk.drawData();
+        if (sk.sketchController.testVideoAndDivAreLoaded() && sk.sketchController.getIsVideoShow()) sk.sketchController.updateVideoDisplay();
+        sk.gui.updateGUIWithTranslation();
+        // Test/end translation for 3D mode
+        if (sk.handle3D.getIs3DModeOrTransitioning()) sk.pop();
+        sk.gui.updateGUI(); // draw gui last
+        // Update animation and loop
+        if (sk.sketchController.getIsAnimate() && !sk.sketchController.getIsAnimatePause()) sk.sketchController.updateAnimation();
+        if ((sk.sketchController.getIsAnimate() && !sk.sketchController.getIsAnimatePause()) || sk.sketchController.getIsVideoPlay() || sk.handle3D.getIsTransitioning()) sk.loop();
+        else sk.noLoop();
+    }
+
+    /**
+     * Important: Floor plan must be loaded to draw any data
+     */
+    sk.drawData = function () {
+        sk.floorPlan.setFloorPlan(sk.gui.fpContainer.getContainer());
         if (sk.arrayIsLoaded(sk.core.pathList)) {
             if (sk.arrayIsLoaded(sk.core.speakerList)) sk.setMovementAndConversation();
             else sk.setMovement();
         }
-        if (sk.sketchController.testVideoAndDivAreLoaded()) sk.sketchController.updateVideoDisplay();
-        if (sk.sketchController.handle3D.getIsShowing()) sk.sketchController.update3DSlicerRect();
-        if (sk.sketchController.translationComplete()) sk.pop();
-        sk.gui.updateGUI(); // draw keys last
-        sk.sketchController.updateAnimation();
-        sk.sketchController.updateLoop();
-    }
-
-    // For text in 2D, must translate 1 pixel so text is readable when using WebGL renderer
-    sk.translateCanvasForText = function (callback) {
-        sk.push();
-        sk.translate(0, 0, 1);
-        callback();
-        sk.pop();
-    }
-
-    sk.translateCanvasTo3D = function (curPos) {
-        sk.push();
-        sk.translate(curPos.xPos, curPos.yPos, curPos.zoom);
-        sk.rotateX(curPos.rotateX);
-    }
-    /**
-     * NOTE: When drawing floor plan, translate down on z axis -1 pixel so shapes are drawn cleanly on top of the floor plan
-     */
-    sk.drawFloorPlan = function (width, height) {
-        if (this.sketchController.handle3D.getIsShowing()) {
-            sk.push();
-            sk.translate(0, 0, -1);
-            sk.image(sk.inputFloorPlan.getImg(), 0, 0, width, height);
-            sk.pop();
-        } else sk.image(sk.inputFloorPlan.getImg(), 0, 0, width, height);
-    }
-
-    sk.drawRotatedFloorPlan = function (angle, width, height, container) {
-        sk.push();
-        sk.imageMode(sk.CENTER); // important method to include here
-        sk.translate(container.width / 2, container.height / 2);
-        sk.rotate(angle);
-        sk.drawFloorPlan(width, height);
-        sk.pop();
     }
 
     sk.setMovement = function () {
@@ -113,24 +92,27 @@ const igs = new p5((sk) => {
     }
 
     sk.mousePressed = function () {
-        this.sketchController.playPauseVideoFromTimeline();
-        this.loop();
+        if (sk.sketchController.testVideoToPlay()) sk.sketchController.playPauseVideoFromTimeline();
+        else if (sk.sketchController.getCurSelectTab() === 5 && !sk.handle3D.getIs3DModeOrTransitioning()) sk.gui.highlight.handleMousePressed();
+        sk.loop();
     }
 
     sk.mouseDragged = function () {
-        if (!this.sketchController.getIsAnimate()) this.gui.timelinePanel.handle();
-        this.loop();
+        if (!sk.sketchController.getIsAnimate() && sk.gui.timelinePanel.isLockedOrOverTimeline()) sk.gui.timelinePanel.handle();
+        sk.loop();
     }
 
     sk.mouseReleased = function () {
-        this.gui.timelinePanel.resetLock();
-        this.loop();
+        if (sk.sketchController.getCurSelectTab() === 5 && !sk.handle3D.getIs3DModeOrTransitioning() && !sk.gui.timelinePanel.isLockedOrOverTimeline()) sk.gui.highlight.handleMouseRelease();
+        sk.gui.timelinePanel.resetLock(); // reset after handlingHighlight
+        sk.loop();
     }
 
     sk.mouseMoved = function () {
-        if (this.gui.timelinePanel.overEitherSelector()) this.cursor(this.HAND);
-        else this.cursor(this.ARROW);
-        this.loop();
+        if (sk.gui.timelinePanel.overEitherSelector()) sk.cursor(sk.HAND);
+        else if (sk.sketchController.getCurSelectTab() === 5) sk.cursor(sk.CROSS);
+        else sk.cursor(sk.ARROW);
+        sk.loop();
     }
 
     sk.windowResized = function () {
@@ -138,7 +120,7 @@ const igs = new p5((sk) => {
         sk.gui = new GUI(sk); // update GUI vars
         sk.GUITEXTSIZE = sk.width / 70;
         sk.textSize(sk.GUITEXTSIZE);
-        sk.sketchController.handle3D = new Handle3D(sk, sk.sketchController.handle3D.isShowing); // update 3D display vars, pass current 3D showing mode
+        sk.handle3D = new Handle3D(sk, sk.handle3D.getIs3DMode()); // update 3D display vars, pass current 3D mode
         sk.loop();
     }
 
@@ -157,9 +139,6 @@ const igs = new p5((sk) => {
         return data != null; // in javascript this tests for both undefined and null values
     }
 
-    /**
-     * @param  {Any Type} data
-     */
     sk.arrayIsLoaded = function (data) {
         return Array.isArray(data) && data.length;
     }

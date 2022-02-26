@@ -12,13 +12,13 @@
     <script src="js/core/parse-conversation.js"></script>
     <script src="js/core/parse-movement.js"></script>
     <script src="js/core/parse-codes.js"></script>
-    <script src="js/controllers/dom-controller.js"></script>
-    <script src="js/controllers/sketch-controller.js"></script>
-    <script src="js/controllers/handle-3D.js"></script>
-    <script src="js/controllers/handle-rotation.js"></script>
+    <script src="js/sketch/dom-controller.js"></script>
+    <script src="js/sketch/sketch-controller.js"></script>
+    <script src="js/sketch/handle-3D.js"></script>
     <script src="js/gui/gui-interface.js"></script>
     <script src="js/gui/timeline-panel.js"></script>
     <script src="js/gui/floorplan-container.js"></script>
+    <script src="js/gui/highlight.js"></script>
     <script src="js/draw/draw-movement.js"></script>
     <script src="js/draw/draw-conversation.js"></script>
     <script src="js/draw/test-point.js"></script>
@@ -122,8 +122,8 @@ Video (MP4)">LOAD FILES</label>
                 <!-- NOTE: due to id note below, remember to match the for. The actual title doesn't matter, just to show it works... -->
                 <input type="search" id="word-search" name="search-input" placeholder="Search"
                     onsearch="igs.domController.updateWordToSearch(); igs.loop()">
-                <label for="sub-tab3-1">Align</label>
-                <label for="sub-tab3-2">All On Path</label>
+                <label for="sub-tab3-1" title="Align talk along top">Align</label>
+                <label for="sub-tab3-2" title="Show talk by all speakers along each movement path">All On Path</label>
             </div>
             <!-- Sub Tabs -->
             <!-- NOTE: name="sub-group" will require to be unique to the tab, ie: tab2 = sub-group2, tab3 = sub-group 3 etc. -->
@@ -171,15 +171,16 @@ Video (MP4)">LOAD FILES</label>
         <input class="tab-radio" id="main-tab-6" name="main-group" type="radio" />
         <div class="tab-content">
             <div class="sub-tabs-container">
-                <label for="sub-tab6-1">None</label>
-                <label for="sub-tab6-2">Region</label>
-                <label for="sub-tab6-3">Slice</label>
-                <label for="sub-tab6-4">Moving</label>
-                <label for="sub-tab6-5">Stopped</label>
+                <label for="sub-tab6-1" title="Reset selectors">Reset</label>
+                <label for="sub-tab6-2" title="Hover to highlight circular regions of data (2D only)">Circle</label>
+                <label for="sub-tab6-3" title="Hover to highlight rectangular slices of data (2D only)">Slice</label>
+                <label for="sub-tab6-4" title="Highlight only movement">Movement</label>
+                <label for="sub-tab6-5" title="Highlight only stops">Stops</label>
+                <label for="sub-tab6-6" title="Drag to select rectangular regions of data (2D only but appears in 3D)">Highlight</label>
             </div>
             <!-- Sub Tabs -->
             <input class="tab-radio" id="sub-tab6-1" name="sub-group6" type="radio" checked="checked"
-                onclick="igs.sketchController.setCurSelectTab(0); igs.loop()">
+                onclick="igs.sketchController.setCurSelectTab(0); ; igs.gui.highlight.resetHighlightArray(); igs.loop()">
             <input class="tab-radio" id="sub-tab6-2" name="sub-group6" type="radio"
                 onclick="igs.sketchController.setCurSelectTab(1); igs.loop()">
             <input class="tab-radio" id="sub-tab6-3" name="sub-group6" type="radio" checked="checked"
@@ -188,6 +189,8 @@ Video (MP4)">LOAD FILES</label>
                 onclick="igs.sketchController.setCurSelectTab(3); igs.loop()">
             <input class="tab-radio" id="sub-tab6-5" name="sub-group6" type="radio"
                 onclick="igs.sketchController.setCurSelectTab(4); igs.loop()">
+            <input class="tab-radio" id="sub-tab6-6" name="sub-group6" type="radio"
+                onclick="igs.sketchController.setCurSelectTab(5); igs.loop()">
         </div>
 
         <!-- TAB 7 CONTAINER FLOOR PLAN-->
@@ -199,16 +202,16 @@ Video (MP4)">LOAD FILES</label>
             </div>
             <!-- Sub Tabs -->
             <input class="tab-radio" id="sub-tab7-1" name="sub-group7" type="radio" checked="checked"
-                onclick="igs.sketchController.setRotateLeft(); igs.loop()">
+                onclick="igs.floorPlan.setRotateLeft(); igs.loop()">
             <input class="tab-radio" id="sub-tab7-2" name="sub-group7" type="radio"
-                onclick="igs.sketchController.setRotateRight(); igs.loop()">
+                onclick="igs.floorPlan.setRotateRight(); igs.loop()">
         </div>
 
         <!-- TAB 8 CONTAINER CODES -->
         <input class="tab-radio" id="main-tab-8" name="main-group" type="radio" />
         <div class="tab-content" id="codesMainTab">
             <div class="sub-tabs-container button-float">
-                <label for="sub-tab8-1">Color By Codes</label>
+                <label for="sub-tab8-1" title="Color data by codes if loaded (grey indicates no code and black indicates multiple codes)">Color By Codes</label>
             </div>
             <!-- Sub Tabs -->
             <input class="tab-radio" id="sub-tab8-1" name="sub-group8" type="radio" checked="checked"

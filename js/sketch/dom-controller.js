@@ -14,7 +14,7 @@ class DomController {
 
     testFileTypeForProcessing(file) {
         if (file.type === "text/csv") this.parseCSVFile(file);
-        else if (file.type === "image/png" || file.type === "image/jpg" || file.type === "image/jpeg") this.sk.inputFloorPlan.update(URL.createObjectURL(file));
+        else if (file.type === "image/png" || file.type === "image/jpg" || file.type === "image/jpeg") this.sk.floorPlan.update(URL.createObjectURL(file));
         else if (file.type === "video/mp4") this.prepVideoFromFile(URL.createObjectURL(file));
         else alert("Error loading file. Please make sure your file is an accepted format"); // this should not be possible due to HTML5 accept for file inputs, but in case
     }
@@ -55,7 +55,7 @@ class DomController {
     }
 
     handleToggle3DButton() {
-        this.sk.sketchController.handleToggle3D();
+        this.sk.handle3D.update();
     }
 
     handleHowToButton() {
@@ -136,7 +136,7 @@ class DomController {
         this.hideIntroMessage();
         this.clearAllData();
         this.updateVideo(params[4], params[5]);
-        this.sk.inputFloorPlan.update(params[0] + params[1]);
+        this.sk.floorPlan.update(params[0] + params[1]);
         this.prepExampleCSVFile(params[0], params[2]); // only one conversation file to prep
         for (const fileName of params[3]) this.prepExampleCSVFile(params[0], fileName); // loop through string array to prep each CSV file
     }
@@ -173,7 +173,7 @@ class DomController {
 
     clearAllData() {
         this.sk.core.clearAll();
-        this.sk.inputFloorPlan.clear();
+        this.sk.floorPlan.clear();
         this.clearAllCheckboxes();
         this.clearCurVideo();
     }

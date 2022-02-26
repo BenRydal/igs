@@ -8,13 +8,6 @@ class FloorPlanContainer {
         this.selectorSize = 100;
     }
 
-    updateSelectors(curSelectTab) {
-        if (this.overFloorPlan(this.sk.mouseX, this.sk.mouseY)) {
-            if (curSelectTab === 1) this.drawRegionSelector();
-            else if (curSelectTab === 2) this.drawSlicerSelector();
-        }
-    }
-
     drawRegionSelector() {
         this.setSelectorStroke();
         this.sk.circle(this.sk.mouseX, this.sk.mouseY, this.selectorSize);
@@ -32,16 +25,12 @@ class FloorPlanContainer {
         this.sk.stroke(0);
     }
 
-    overFloorPlan(xPos, yPos) {
-        return (xPos >= 0 && xPos <= this.width) && (yPos >= 0 && yPos <= this.height);
+    overCursor(xPos, yPos, xPosTime) {
+        return this.sk.overCircle(xPos, yPos, this.selectorSize) || this.sk.overCircle(xPosTime, yPos, this.selectorSize);
     }
 
-    overCursor(xPos, yPos) {
-        return this.sk.overCircle(xPos, yPos, this.selectorSize);
-    }
-
-    overSlicer(xPos, yPos) {
-        return this.sk.overRect(xPos - this.slicerSize, 0, (2 * this.slicerSize), this.height);
+    overSlicer(xPos, xPosTime) {
+        return this.sk.overRect(xPos - this.slicerSize, 0, (2 * this.slicerSize), this.height) || this.sk.overRect(xPosTime - this.slicerSize, 0, (2 * this.slicerSize), this.height);
     }
 
     getContainer() {
