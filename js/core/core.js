@@ -87,7 +87,7 @@ class Core {
      */
     createPath(name, movementPointArray, conversationPointArray) {
         return {
-            name, // Char first letter of filename
+            name, // string name
             isShowing: true, // boolean used to indicate if speaker showing in GUI
             color: this.createColorForGUI(this.getPathModeColor(name), this.sk.COLORGRAY),
             movement: movementPointArray,
@@ -97,7 +97,7 @@ class Core {
 
     createSpeaker(name) {
         return {
-            name, // String up to 2 characters
+            name, // string name
             isShowing: true, // boolean indicating if showing in GUI
             color: this.createColorForGUI(this.COLOR_LIST[this.speakerList.length % this.COLOR_LIST.length], this.sk.COLORGRAY)
         };
@@ -105,7 +105,7 @@ class Core {
 
     createCode(name) {
         return {
-            name, // Char first letter of filename
+            name, // string name
             isShowing: false, // if displaying in GUI
             color: this.createColorForGUI(this.sk.COLORGRAY, this.COLOR_LIST[this.codeList.length % this.COLOR_LIST.length])
         };
