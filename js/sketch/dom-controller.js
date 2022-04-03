@@ -13,7 +13,7 @@ class DomController {
     }
 
     testFileTypeForProcessing(file) {
-        if (file.type === "text/csv") this.parseCSVFile(file);
+        if (file.name.toLowerCase().endsWith(".csv")) this.parseCSVFile(file); // NOTE: Don't use MIME type test for CSV files, for some users it does not allow CSV file loading 
         else if (file.type === "image/png" || file.type === "image/jpg" || file.type === "image/jpeg") this.sk.floorPlan.update(URL.createObjectURL(file));
         else if (file.type === "video/mp4") this.prepVideoFromFile(URL.createObjectURL(file));
         else alert("Error loading file. Please make sure your file is an accepted format"); // this should not be possible due to HTML5 accept for file inputs, but in case
