@@ -12,10 +12,15 @@ class DomController {
         input.value = ''; // reset input value so you can load same file(s) again in browser
     }
 
+    /**
+     * Extension and MIME type test are used to provide most inclusive testing of file format
+     * @param  {File} file
+     */
     testFileTypeForProcessing(file) {
-        if (file.name.toLowerCase().endsWith(".csv")) this.parseCSVFile(file); // NOTE: Don't use MIME type test for CSV files, for some users it does not allow CSV file loading 
-        else if (file.type === "image/png" || file.type === "image/jpg" || file.type === "image/jpeg") this.sk.floorPlan.update(URL.createObjectURL(file));
-        else if (file.type === "video/mp4") this.prepVideoFromFile(URL.createObjectURL(file));
+        const fileName = file.name.toLowerCase();
+        if (fileName.endsWith(".csv") || file.type === "text/csv") this.parseCSVFile(file);
+        else if (fileName.endsWith(".png") || fileName.endsWith(".jpg") || fileName.endsWith(".jpeg") || file.type === "image/png" || file.type === "image/jpg" || file.type === "image/jpeg") this.sk.floorPlan.update(URL.createObjectURL(file));
+        else if (fileName.endsWith(".mp4") || file.type === "video/mp4") this.prepVideoFromFile(URL.createObjectURL(file));
         else alert("Error loading file. Please make sure your file is an accepted format"); // this should not be possible due to HTML5 accept for file inputs, but in case
     }
 
