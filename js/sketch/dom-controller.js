@@ -140,10 +140,10 @@ class DomController {
     loadExampleData(params) {
         this.hideIntroMessage();
         this.clearAllData();
-        this.updateVideo(params[4], params[5]);
         this.sk.floorPlan.update(params[0] + params[1]);
         this.prepExampleCSVFile(params[0], params[2]); // only one conversation file to prep
         for (const fileName of params[3]) this.prepExampleCSVFile(params[0], fileName); // loop through string array to prep each CSV file
+        this.updateVideo(params[4], params[5]);
     }
 
     async prepExampleCSVFile(folder, fileName) {
@@ -155,7 +155,7 @@ class DomController {
             });
             this.testFileTypeForProcessing(file);
         } catch (error) {
-            alert("Error loading CSV file. Please make sure you have a good internet connection")
+            alert("Error loading CSV file. Please make sure you have a good internet connection");
             console.log(error);
         }
     }
@@ -166,13 +166,18 @@ class DomController {
      * @param  {VideoPlayer Specific Params} params
      */
     updateVideo(platform, params) {
-        switch (platform) {
-            case "Youtube":
-                this.sk.videoPlayer = new YoutubePlayer(this.sk, params);
-                break;
-            case "File":
-                this.sk.videoPlayer = new P5FilePlayer(this.sk, params);
-                break;
+        try {
+            switch (platform) {
+                case "Youtube":
+                    this.sk.videoPlayer = new YoutubePlayer(this.sk, params);
+                    break;
+                case "File":
+                    this.sk.videoPlayer = new P5FilePlayer(this.sk, params);
+                    break;
+            }
+        } catch (error) {
+            alert("Error loading video file.");
+            console.log(error);
         }
     }
 
