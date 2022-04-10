@@ -176,7 +176,7 @@ class DomController {
                     break;
             }
         } catch (error) {
-            alert("Error loading video file.");
+            alert("Error loading video file. Please make sure your video is formatted correctly as a .MP4 file or if loading an example dataset that you have access to YouTube");
             console.log(error);
         }
     }
