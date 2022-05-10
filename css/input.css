@@ -111,10 +111,6 @@ label:hover {
     background-color: #ccc;
 }
 
-/* label input:checked {
-    background-color: red;
-} */
-
 .tab-radio {
     display: none;
 }
@@ -136,10 +132,6 @@ label:hover {
     color: #030700;
     border: 1px solid #ddd;
 }
-
-/* .sub-tabs-container label:hover {
-    background-color: #919604;
-} */
 
 /* Tabs Content */
 .tab-content {
