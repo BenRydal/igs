@@ -140,6 +140,10 @@ label:hover {
     border: 1px solid #ddd;
 }
 
+.tab-content label:hover {
+    background-color: #ffffff;
+}
+
 .button-float {
     float: right;
 }
@@ -166,10 +170,6 @@ label:hover {
     width: 0;
 }
 
-.tab-content label:hover {
-    background-color: #ffffff;
-}
-
 /* Create a custom checkbox */
 .checkmark {
     position: absolute;
@@ -177,4 +177,15 @@ label:hover {
     left: 0;
     height: 20px;
     width: 20px;
+}
+
+/* Create a custom colorpicker */
+.colorpicker {
+    position: absolute;
+    background-color: #817c81;
+    top: 12;
+    left: 0;
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
 }
