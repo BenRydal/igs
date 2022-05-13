@@ -5,6 +5,8 @@ class DomController {
     }
 
     updateMovementCheckboxes(pathList) {
+        // TODO: if isChecked, uncheck color change button and: 
+        // document.getElementById('label-color-talk').innerHTML = 'Change Color';
         this.updateCheckboxList(pathList, "movementMainTab", "checkbox-movement");
     }
 
