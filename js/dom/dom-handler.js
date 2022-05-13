@@ -12,6 +12,65 @@ class DomHandler {
         input.value = ''; // reset input value so you can load same file(s) again in browser
     }
 
+    handleClearButton() {
+        this.clearAllData();
+        this.sk.sketchController.setIsPathColorMode(true); // set to true in case user has changed color based on loaded code files
+        this.sk.loop(); // rerun P5 draw loop
+    }
+
+    handleToggle3DButton() {
+        this.sk.handle3D.update();
+    }
+
+    handleHowToButton() {
+        let element = document.querySelector('.introContainer');
+        if (element.style.display === 'none') element.style.display = 'block';
+        else element.style.display = 'none';
+    }
+
+    handleWordSearchInput() {
+        const searchInputDiv = document.getElementById("word-search");
+        this.sk.sketchController.setWordToSearch(searchInputDiv.value);
+    }
+
+    handleExampleDropDown() {
+        this.sk.sketchController.setIsPathColorMode(true); // set to true in case user has changed color based on loaded code files
+        if (this.sk.sketchController.getIsAnimate()) this.sk.sketchController.startEndAnimation(); // reset animation if running
+        let option = document.getElementById("examples").value;
+        if (option === "Load Data") this.showLoadDataButtons();
+        else this.hideLoadDataButtons();
+        switch (option) {
+            case "Load Data":
+                this.loadUserData();
+                this.sk.sketchController.setIsAllTalk(false); // not essential but setting matches each case differently
+                break;
+            case "Example 1":
+                this.loadExampleData(['data/example-1/', 'floorplan.png', 'conversation.csv', ['Jordan.csv', 'Possession.csv'], 'Youtube', {
+                    videoId: 'iiMjfVOj8po'
+                }]);
+                this.sk.sketchController.setIsAllTalk(false);
+                break;
+            case "Example 2":
+                this.loadExampleData(['data/example-2/', 'floorplan.png', 'conversation.csv', ['Lily.csv', 'Jeans.csv', 'Adhir.csv', 'Mae.csv', 'Blake.csv'], 'Youtube', {
+                    videoId: 'pWJ3xNk1Zpg'
+                }]);
+                this.sk.sketchController.setIsAllTalk(false);
+                break;
+            case "Example 3":
+                this.loadExampleData(['data/example-3/', 'floorplan.png', 'conversation.csv', ['Teacher.csv', 'lesson-graph.csv'], 'Youtube', {
+                    videoId: 'Iu0rxb-xkMk'
+                }]);
+                this.sk.sketchController.setIsAllTalk(true);
+                break;
+            case "Example 4":
+                this.loadExampleData(['data/example-4/', 'floorplan.png', 'conversation.csv', ['Teacher.csv', 'Sean.csv', 'Mei.csv', 'Cassandra.csv', 'Nathan.csv'], 'Youtube', {
+                    videoId: 'OJSZCK4GPQY'
+                }]);
+                this.sk.sketchController.setIsAllTalk(false);
+                break;
+        }
+    }
+
     /**
      * Extension and MIME type test are used to provide most inclusive testing of file format
      * @param  {File} file
@@ -53,64 +112,12 @@ class DomHandler {
         });
     }
 
-    handleClearButton() {
-        this.clearAllData();
-        this.sk.sketchController.setIsPathColorMode(true); // set to true in case user has changed color based on loaded code files
-        this.sk.loop(); // rerun P5 draw loop
-    }
-
-    handleToggle3DButton() {
-        this.sk.handle3D.update();
-    }
-
-    handleHowToButton() {
-        let element = document.querySelector('.introContainer');
-        if (element.style.display === 'none') element.style.display = 'block';
-        else element.style.display = 'none';
-    }
 
     hideIntroMessage() {
         let element = document.querySelector('.introContainer');
         element.style.display = 'none';
     }
 
-    handleExampleDropDown() {
-        this.sk.sketchController.setIsPathColorMode(true); // set to true in case user has changed color based on loaded code files
-        if (this.sk.sketchController.getIsAnimate()) this.sk.sketchController.startEndAnimation(); // reset animation if running
-        let option = document.getElementById("examples").value;
-        if (option === "Load Data") this.showLoadDataButtons();
-        else this.hideLoadDataButtons();
-        switch (option) {
-            case "Load Data":
-                this.loadUserData();
-                this.sk.sketchController.setIsAllTalk(false); // not essential but setting matches each case differently
-                break;
-            case "Example 1":
-                this.loadExampleData(['data/example-1/', 'floorplan.png', 'conversation.csv', ['Jordan.csv', 'Possession.csv'], 'Youtube', {
-                    videoId: 'iiMjfVOj8po'
-                }]);
-                this.sk.sketchController.setIsAllTalk(false);
-                break;
-            case "Example 2":
-                this.loadExampleData(['data/example-2/', 'floorplan.png', 'conversation.csv', ['Lily.csv', 'Jeans.csv', 'Adhir.csv', 'Mae.csv', 'Blake.csv'], 'Youtube', {
-                    videoId: 'pWJ3xNk1Zpg'
-                }]);
-                this.sk.sketchController.setIsAllTalk(false);
-                break;
-            case "Example 3":
-                this.loadExampleData(['data/example-3/', 'floorplan.png', 'conversation.csv', ['Teacher.csv', 'lesson-graph.csv'], 'Youtube', {
-                    videoId: 'Iu0rxb-xkMk'
-                }]);
-                this.sk.sketchController.setIsAllTalk(true);
-                break;
-            case "Example 4":
-                this.loadExampleData(['data/example-4/', 'floorplan.png', 'conversation.csv', ['Teacher.csv', 'Sean.csv', 'Mei.csv', 'Cassandra.csv', 'Nathan.csv'], 'Youtube', {
-                    videoId: 'OJSZCK4GPQY'
-                }]);
-                this.sk.sketchController.setIsAllTalk(false);
-                break;
-        }
-    }
 
     showLoadDataButtons() {
         const elementList = document.querySelectorAll(".loadData");
@@ -195,10 +202,5 @@ class DomHandler {
             this.sk.sketchController.setIsVideoPlay(false);
             this.sk.sketchController.setIsVideoShow(false);
         }
-    }
-
-    updateWordToSearch() {
-        const searchInputDiv = document.getElementById("word-search");
-        this.sk.sketchController.setWordToSearch(searchInputDiv.value);
     }
 }

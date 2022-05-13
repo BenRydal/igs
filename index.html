@@ -129,7 +129,7 @@ Video (MP4)">LOAD FILES</label>
             <div class="sub-tabs-container button-float">
                 <!-- NOTE: due to id note below, remember to match the for. The actual title doesn't matter, just to show it works... -->
                 <input type="search" id="word-search" name="search-input" placeholder="Search"
-                    onsearch="igs.domHandler.updateWordToSearch(); igs.loop()">
+                    onsearch="igs.domHandler.handleWordSearchInput(); igs.loop()">
                 <label for="sub-tab3-1" title="Align talk along top">Align</label>
                 <label for="sub-tab3-2" title="Show talk by all speakers along each movement path">All On Path</label>
                 <label for="sub-tab3-3" id ="label-color-talk" title="Click to change and set colors">Change Color</label>
