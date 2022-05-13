@@ -24,7 +24,8 @@ const igs = new p5((sk) => {
         sk.canvas.parent('sketch-holder');
         sk.core = new Core(sk); // holds core data, update and parsing methods/classes
         sk.gui = new GUI(sk); // holds canvas GUI elements/classes
-        sk.domController = new DomController(sk); // handles DOM/buttons user interaction
+        sk.domHandler = new DomHandler(sk); // handles DOM input from user
+        sk.domController = new DomController(sk); // updates DOM
         sk.sketchController = new SketchController(sk); // coordinates calls across classes
         sk.handle3D = new Handle3D(sk, true); // boolean sets 3D to showing
         sk.videoPlayer = null; // abstract class for different video classes

@@ -12,6 +12,7 @@
     <script src="js/core/parse-conversation.js"></script>
     <script src="js/core/parse-movement.js"></script>
     <script src="js/core/parse-codes.js"></script>
+    <script src="js/dom/dom-handler.js"></script>
     <script src="js/dom/dom-controller.js"></script>
     <script src="js/sketch/sketch-controller.js"></script>
     <script src="js/sketch/handle-3D.js"></script>
@@ -38,7 +39,7 @@
 <body>
     <div class="introBar">
         <form action="/action_page.php">
-            <select id="examples" name="examples" onchange="igs.domController.handleExampleDropDown()">
+            <select id="examples" name="examples" onchange="igs.domHandler.handleExampleDropDown()">
                 <option disabled selected value> -- Select an Option -- </option>
                 <option value="Load Data">LOAD DATA</option>
                 <option value="Example 1">EXAMPLE 1: MICHAEL JORDAN'S LAST SHOT</option>
@@ -49,7 +50,7 @@
 
             <!-- loadData class used to show/hide buttons when load data option selected -->
             <input type="file" name="file" id="inputAllData" class="inputfile loadData" multiple
-                accept=".png, .jpg, .jpeg, .csv, .mp4" onchange="igs.domController.handleLoadFileButton(this)">
+                accept=".png, .jpg, .jpeg, .csv, .mp4" onchange="igs.domHandler.handleLoadFileButton(this)">
             <label for="inputAllData" class="loadData" title="Load Files in the following formats:
 Floor Plan (PNG/JPG)
 Movement (CSV)
@@ -58,15 +59,15 @@ Code (CSV)
 Video (MP4)">LOAD FILES</label>
 
             <button type="button" id="clearButton" class="inputfile loadData"
-                onclick="igs.domController.handleClearButton()"></button>
+                onclick="igs.domHandler.handleClearButton()"></button>
             <label for="clearButton" class="loadData" title="Clear All Loaded Data">CLEAR</label>
 
             <button type="button" id="3DButton" class="inputfile"
-                onclick="igs.domController.handleToggle3DButton()"></button>
+                onclick="igs.domHandler.handleToggle3DButton()"></button>
             <label for="3DButton" title="Toggle 2D and 3D Views">2D/3D</label>
 
             <button type="button" id="howToButton" class="inputfile"
-                onclick="igs.domController.handleHowToButton()"></button>
+                onclick="igs.domHandler.handleHowToButton()"></button>
             <label for="howToButton" title="Learn How To Use This Tool">HOW TO USE</label>
         </form>
     </div>
@@ -128,7 +129,7 @@ Video (MP4)">LOAD FILES</label>
             <div class="sub-tabs-container button-float">
                 <!-- NOTE: due to id note below, remember to match the for. The actual title doesn't matter, just to show it works... -->
                 <input type="search" id="word-search" name="search-input" placeholder="Search"
-                    onsearch="igs.domController.updateWordToSearch(); igs.loop()">
+                    onsearch="igs.domHandler.updateWordToSearch(); igs.loop()">
                 <label for="sub-tab3-1" title="Align talk along top">Align</label>
                 <label for="sub-tab3-2" title="Show talk by all speakers along each movement path">All On Path</label>
                 <label for="sub-tab3-3" id ="label-color-talk" title="Click to change and set colors">Change Color</label>
