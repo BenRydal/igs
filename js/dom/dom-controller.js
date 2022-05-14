@@ -140,7 +140,15 @@ class DomController {
         span.style.backgroundColor = div.value;
         div.addEventListener('input', () => {
             if (this.sk.sketchController.getIsPathColorMode()) curItem.color.pathMode = div.value;
-            else curItem.color.codeMode = div.value;
+            else {
+                // TODO: update code color for all movement points in each path corresponding to code being updated in GUI
+                for (const path of this.sk.core.pathList) {
+                    for (const point of path.movement) {
+                        if (point.codes.color === curItem.color.codeMode) point.codes.color = div.value;
+                    }
+                }
+                curItem.color.codeMode = div.value; // update codeMode to show properly in GUI
+            }
             span.style.backgroundColor = div.value;
             span.style.border = "medium solid" + div.value;
             this.sk.loop();
