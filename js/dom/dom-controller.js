@@ -5,18 +5,17 @@ class DomController {
     }
 
     updateMovementCheckboxes(pathList) {
-        // TODO: if isChecked, uncheck color change button and: 
-        // document.getElementById('label-color-talk').innerHTML = 'Change Color';
-        this.updateCheckboxList(pathList, "movementMainTab", "checkbox-movement");
+        this.updateCheckboxList(pathList, "movementMainTab", "checkbox-movement", "label-color-movement");
     }
 
     updateConversationCheckboxes(speakerList) {
-        this.updateCheckboxList(speakerList, "conversationMainTab", "checkbox-conversation");
+        this.updateCheckboxList(speakerList, "conversationMainTab", "checkbox-conversation", "label-color-talk");
     }
 
     updateCodeCheckboxes(codeList) {
-        this.updateCheckboxList(codeList, "codesMainTab", "checkbox-code");
+        this.updateCheckboxList(codeList, "codesMainTab", "checkbox-code", "label-color-code");
     }
+
 
 
 
@@ -37,9 +36,10 @@ class DomController {
         this.updateColorModeButtonText(isChecked);
         this.sk.sketchController.toggleIsPathColorMode();
         this.toggleColorChangeButtons();
-        this.updateCheckboxList(this.sk.core.pathList, "movementMainTab", "checkbox-movement");
-        this.updateCheckboxList(this.sk.core.speakerList, "conversationMainTab", "checkbox-conversation");
-        this.updateCheckboxList(this.sk.core.codeList, "codesMainTab", "checkbox-code");
+        this.updateCheckboxList(this.sk.core.pathList, "movementMainTab", "checkbox-movement", "label-color-movement");
+        this.updateCheckboxList(this.sk.core.speakerList, "conversationMainTab", "checkbox-conversation", "label-color-talk");
+        this.updateCheckboxList(this.sk.core.codeList, "codesMainTab", "checkbox-code", "label-color-code");
+
     }
 
     /**
@@ -60,45 +60,31 @@ class DomController {
         });
     }
 
-
-
     updateMovementColorChangeButton(isChecked) {
-        if (isChecked) {
-            document.getElementById('label-color-movement').innerHTML = 'Set Color';
-            this.updateColorPickerList(this.sk.core.pathList, "movementMainTab", "checkbox-movement");
-        } else {
-            document.getElementById('label-color-movement').innerHTML = 'Change Color';
-            this.updateCheckboxList(this.sk.core.pathList, "movementMainTab", "checkbox-movement");
-        }
+        if (isChecked) this.updateColorPickerList(this.sk.core.pathList, "movementMainTab", "checkbox-movement", "label-color-movement");
+        else this.updateCheckboxList(this.sk.core.pathList, "movementMainTab", "checkbox-movement", "label-color-movement");
     }
 
     updateTalkColorChangeButton(isChecked) {
-        if (isChecked) {
-            document.getElementById('label-color-talk').innerHTML = 'Set Color';
-            this.updateColorPickerList(this.sk.core.speakerList, "conversationMainTab", "checkbox-conversation");
-        } else {
-            document.getElementById('label-color-talk').innerHTML = 'Change Color';
-            this.updateCheckboxList(this.sk.core.speakerList, "conversationMainTab", "checkbox-conversation");
-        }
+        if (isChecked) this.updateColorPickerList(this.sk.core.speakerList, "conversationMainTab", "checkbox-conversation", "label-color-talk");
+        else this.updateCheckboxList(this.sk.core.speakerList, "conversationMainTab", "checkbox-conversation", "label-color-talk");
     }
 
     updateCodeColorChangeButton(isChecked) {
-        if (isChecked) {
-            document.getElementById('label-color-code').innerHTML = 'Set Color';
-            this.updateColorPickerList(this.sk.core.codeList, "codesMainTab", "checkbox-code");
-        } else {
-            document.getElementById('label-color-code').innerHTML = 'Change Color';
-            this.updateCheckboxList(this.sk.core.codeList, "codesMainTab", "checkbox-code");
-        }
+        if (isChecked) this.updateColorPickerList(this.sk.core.codeList, "codesMainTab", "checkbox-code", "label-color-code");
+        else this.updateCheckboxList(this.sk.core.codeList, "codesMainTab", "checkbox-code", "label-color-code");
     }
 
 
-    updateCheckboxList(list, elementId, checkboxClass) {
+    updateCheckboxList(list, elementId, checkboxClass, labelID) {
+        document.getElementById(labelID).innerHTML = 'Change Color';
         this.removeAllElements(checkboxClass);
         for (const item of list) this.createCheckbox(item, elementId, checkboxClass);
     }
+
     // TODO: consider updating checkboxClass name
-    updateColorPickerList(list, elementId, checkboxClass) {
+    updateColorPickerList(list, elementId, checkboxClass, labelID) {
+        document.getElementById(labelID).innerHTML = 'Set Color';
         this.removeAllElements(checkboxClass);
         for (const item of list) this.createColorPicker(item, elementId, checkboxClass);
     }
