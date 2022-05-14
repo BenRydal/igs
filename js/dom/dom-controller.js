@@ -18,12 +18,23 @@ class DomController {
         this.updateCheckboxList(codeList, "codesMainTab", "checkbox-code");
     }
 
+
+
+    resetColorCodeButton() {
+        document.getElementById('sub-tab8-1').checked = false; // reset color code button
+        this.updateColorModeButtonText(false)
+    }
+
+    updateColorModeButtonText(isChecked) {
+        if (isChecked) document.getElementById('label-toggle-color-mode').innerHTML = 'Color By Paths';
+        else document.getElementById('label-toggle-color-mode').innerHTML = 'Color By Codes';
+    }
+
     /**
      * Resets buttons/GUI when color by codes button is pressed
      */
     updateColorCodesButton(isChecked) {
-        if (isChecked) document.getElementById('label-color-by-codes').innerHTML = 'Color By Paths';
-        else document.getElementById('label-color-by-codes').innerHTML = 'Color By Codes';
+        this.updateColorModeButtonText(isChecked);
         this.sk.sketchController.toggleIsPathColorMode();
         this.toggleColorChangeButtons();
         this.updateCheckboxList(this.sk.core.pathList, "movementMainTab", "checkbox-movement");
@@ -48,6 +59,8 @@ class DomController {
             }
         });
     }
+
+
 
     updateMovementColorChangeButton(isChecked) {
         if (isChecked) {

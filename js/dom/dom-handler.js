@@ -34,11 +34,8 @@ class DomHandler {
     }
 
     handleExampleDropDown() {
-        this.sk.sketchController.setIsPathColorMode(true); // set to true in case user has changed color based on loaded code files
-        if (this.sk.sketchController.getIsAnimate()) this.sk.sketchController.startEndAnimation(); // reset animation if running
-        let option = document.getElementById("examples").value;
-        if (option === "Load Data") this.showLoadDataButtons();
-        else this.hideLoadDataButtons();
+        const option = document.getElementById("examples").value;
+        this.resetGUI(option);
         switch (option) {
             case "Load Data":
                 this.loadUserData();
@@ -69,6 +66,17 @@ class DomHandler {
                 this.sk.sketchController.setIsAllTalk(false);
                 break;
         }
+    }
+
+    resetGUI(option) {
+        if (option === "Load Data") this.showLoadDataButtons();
+        else this.hideLoadDataButtons();
+        if (!this.sk.sketchController.getIsPathColorMode()) {
+            this.sk.sketchController.setIsPathColorMode(true); // set to true in case user has changed color based on loaded code files
+            this.sk.domController.resetColorCodeButton();
+            this.sk.domController.toggleColorChangeButtons();
+        }
+        if (this.sk.sketchController.getIsAnimate()) this.sk.sketchController.startEndAnimation(); // reset animation if running
     }
 
     /**
