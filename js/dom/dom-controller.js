@@ -14,9 +14,10 @@ class DomController {
 
     }
 
+
     resetColorMode() {
         document.getElementById('sub-tab8-1').checked = false; // reset color code button
-        this.updateColorModeLabel(false)
+        this.updateColorModeLabel(false);
     }
 
     updateColorModeLabel(isChecked) {
@@ -45,15 +46,15 @@ class DomController {
     updateCheckboxList(subTab) {
         switch (subTab) {
             case "movement":
-                this.clearCheckboxes("label-color-movement", "checkbox-movement");
+                this.clearCheckboxes("sub-tab1-1", "checkbox-movement");
                 for (const item of this.sk.core.pathList) this.createCheckbox(item, "movementMainTab", "checkbox-movement");
                 break;
             case "talk":
-                this.clearCheckboxes("label-color-talk", "checkbox-conversation");
+                this.clearCheckboxes("sub-tab3-3", "checkbox-conversation");
                 for (const item of this.sk.core.speakerList) this.createCheckbox(item, "conversationMainTab", "checkbox-conversation");
                 break;
             case "codes":
-                this.clearCheckboxes("label-color-code", "checkbox-code");
+                this.clearCheckboxes("sub-tab8-2", "checkbox-code");
                 for (const item of this.sk.core.codeList) this.createCheckbox(item, "codesMainTab", "checkbox-code");
                 break;
         }
@@ -63,33 +64,37 @@ class DomController {
     updateColorPickerList(subTab) {
         switch (subTab) {
             case "movement":
-                this.clearColorPickers("label-color-movement", "checkbox-movement");
+                this.clearColorPickers("sub-tab1-1", "checkbox-movement");
                 for (const item of this.sk.core.pathList) this.createColorPicker(item, "movementMainTab", "checkbox-movement");
                 break;
             case "talk":
-                this.clearColorPickers("label-color-talk", "checkbox-conversation");
+                this.clearColorPickers("sub-tab3-3", "checkbox-conversation");
                 for (const item of this.sk.core.speakerList) this.createColorPicker(item, "conversationMainTab", "checkbox-conversation");
                 break;
             case "codes":
-                this.clearColorPickers("label-color-code", "checkbox-code");
+                this.clearColorPickers("sub-tab8-2", "checkbox-code");
                 for (const item of this.sk.core.codeList) this.createColorPicker(item, "codesMainTab", "checkbox-code");
                 break;
         }
     }
 
     clearAllCheckboxes() {
-        this.clearCheckboxes("label-color-movement", "checkbox-movement");
-        this.clearCheckboxes("label-color-talk", "checkbox-conversation");
-        this.clearCheckboxes("label-color-code", "checkbox-code");
+        this.clearCheckboxes("sub-tab1-1", "checkbox-movement");
+        this.clearCheckboxes("sub-tab3-3", "checkbox-conversation");
+        this.clearCheckboxes("sub-tab8-2", "checkbox-code");
     }
 
-    clearCheckboxes(labelID, checkboxClass) {
-        document.getElementById(labelID).innerHTML = "Change Color";
+    clearCheckboxes(inputID, checkboxClass) {
+        const element = document.getElementById(inputID);
+        element.checked = false; // reset input checkbox checked attribute
+        element.labels[0].innerHTML = 'Change Color'; // reset text for label of input
         this.removeAllElements(checkboxClass);
     }
 
-    clearColorPickers(labelID, colorPickerClass) {
-        document.getElementById(labelID).innerHTML = "Set Color";
+    clearColorPickers(inputID, colorPickerClass) {
+        const element = document.getElementById(inputID);
+        element.checked = true; // reset input checkbox checked attribute
+        element.labels[0].innerHTML = 'Set Color'; // reset text for label of input
         this.removeAllElements(colorPickerClass);
     }
 
