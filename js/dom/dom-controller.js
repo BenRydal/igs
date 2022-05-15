@@ -49,18 +49,15 @@ class DomController {
     updateCheckboxList(subTab) {
         switch (subTab) {
             case "movement":
-                document.getElementById("label-color-movement").innerHTML = 'Change Color';
-                this.removeAllElements("checkbox-movement");
+                this.clearCheckboxes("label-color-movement", "checkbox-movement");
                 for (const item of this.sk.core.pathList) this.createCheckbox(item, "movementMainTab", "checkbox-movement");
                 break;
             case "talk":
-                document.getElementById("label-color-talk").innerHTML = 'Change Color';
-                this.removeAllElements("checkbox-conversation");
+                this.clearCheckboxes("label-color-talk", "checkbox-conversation");
                 for (const item of this.sk.core.speakerList) this.createCheckbox(item, "conversationMainTab", "checkbox-conversation");
                 break;
             case "codes":
-                document.getElementById("label-color-code").innerHTML = 'Change Color';
-                this.removeAllElements("checkbox-code");
+                this.clearCheckboxes("label-color-code", "checkbox-code");
                 for (const item of this.sk.core.codeList) this.createCheckbox(item, "codesMainTab", "checkbox-code");
                 break;
         }
@@ -70,23 +67,29 @@ class DomController {
     updateColorPickerList(subTab) {
         switch (subTab) {
             case "movement":
-                document.getElementById("label-color-movement").innerHTML = 'Set Color';
-                this.removeAllElements("checkbox-movement");
+                this.clearColorPickers("label-color-movement", "checkbox-movement");
                 for (const item of this.sk.core.pathList) this.createColorPicker(item, "movementMainTab", "checkbox-movement");
                 break;
             case "talk":
-                document.getElementById("label-color-talk").innerHTML = 'Set Color';
-                this.removeAllElements("checkbox-conversation");
+                this.clearColorPickers("label-color-talk", "checkbox-conversation");
                 for (const item of this.sk.core.speakerList) this.createColorPicker(item, "conversationMainTab", "checkbox-conversation");
                 break;
             case "codes":
-                document.getElementById("label-color-code").innerHTML = 'Set Color';
-                this.removeAllElements("checkbox-code");
+                this.clearColorPickers("label-color-code", "checkbox-code");
                 for (const item of this.sk.core.codeList) this.createColorPicker(item, "codesMainTab", "checkbox-code");
                 break;
         }
     }
 
+    clearCheckboxes(labelID, checkboxClass) {
+        document.getElementById(labelID).innerHTML = "Change Color";
+        this.removeAllElements(checkboxClass);
+    }
+
+    clearColorPickers(labelID, colorPickerClass) {
+        document.getElementById(labelID).innerHTML = "Set Color";
+        this.removeAllElements(colorPickerClass);
+    }
 
     createCheckbox(curItem, mainTabClass, checkboxClass) {
         let parent = document.getElementById(mainTabClass); // Get parent tab to append new div and label to
@@ -157,6 +160,7 @@ class DomController {
     }
 
     clearAllCheckboxes() {
+        // TODO: update text for colorchange buttons and other things?
         this.removeAllElements("checkbox-movement");
         this.removeAllElements("checkbox-conversation");
         this.removeAllElements("checkbox-code");
