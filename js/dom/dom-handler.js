@@ -35,12 +35,10 @@ class DomHandler {
 
     handleExampleDropDown() {
         const option = document.getElementById("examples").value;
-        this.resetGUI(option);
+        if (option === "Load Data") this.showLoadDataButtons();
+        else this.hideLoadDataButtons();
+        this.resetGUI();
         switch (option) {
-            case "Load Data":
-                this.loadUserData();
-                this.sk.sketchController.setIsAllTalk(false); // not essential but setting matches each case differently
-                break;
             case "Example 1":
                 this.loadExampleData(['data/example-1/', 'floorplan.png', 'conversation.csv', ['Jordan.csv', 'Possession.csv'], 'Youtube', {
                     videoId: 'iiMjfVOj8po'
@@ -68,9 +66,9 @@ class DomHandler {
         }
     }
 
-    resetGUI(option) {
-        if (option === "Load Data") this.showLoadDataButtons();
-        else this.hideLoadDataButtons();
+    resetGUI() {
+        this.hideIntroMessage();
+        this.clearAllData();
         if (!this.sk.sketchController.getIsPathColorMode()) {
             this.sk.sketchController.setIsPathColorMode(true); // set to true in case user has changed color based on loaded code files
             this.sk.domController.resetColorCodeButton();
@@ -137,12 +135,6 @@ class DomHandler {
         elementList.forEach(element => element.style.display = 'none');
     }
 
-    loadUserData() {
-        this.hideIntroMessage();
-        this.clearAllData();
-        this.sk.loop(); // rerun P5 draw loop
-    }
-
     /**
      * @param {Array} params
      * [0] String directory/folder
@@ -153,8 +145,6 @@ class DomHandler {
      * [5] Video params(see videoPlayer interface)
      */
     loadExampleData(params) {
-        this.hideIntroMessage();
-        this.clearAllData();
         this.sk.floorPlan.update(params[0] + params[1]);
         this.prepExampleCSVFile(params[0], params[2]); // only one conversation file to prep
         for (const fileName of params[3]) this.prepExampleCSVFile(params[0], fileName); // loop through string array to prep each CSV file
