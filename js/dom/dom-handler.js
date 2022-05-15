@@ -125,12 +125,12 @@ class DomHandler {
 
 
     showLoadDataButtons() {
-        const elementList = document.querySelectorAll(".loadData");
+        const elementList = document.querySelectorAll(".js-main-menu-bar__load-files--display");
         elementList.forEach(element => element.style.display = 'inline');
     }
 
     hideLoadDataButtons() {
-        const elementList = document.querySelectorAll(".loadData");
+        const elementList = document.querySelectorAll(".js-main-menu-bar__load-files--display");
         elementList.forEach(element => element.style.display = 'none');
     }
 

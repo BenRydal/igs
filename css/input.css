@@ -57,13 +57,13 @@ body {
     text-align: justify;
 }
 
-.introBar {
+.main-menu-bar {
     text-align: center;
     margin-bottom: 10px;
 }
 
 
-.inputfile {
+.main-menu-bar__input {
     width: 0.1px;
     height: 0.1px;
     opacity: 0;
@@ -72,7 +72,7 @@ body {
     z-index: -1;
 }
 
-.inputfile+label {
+.main-menu-bar__input+label {
     font-size: 1em;
     font-weight: 300;
     color: black;
@@ -83,9 +83,11 @@ body {
 }
 
 /* Display none for hiding load data buttons on program start */
-.loadData+label {
+.js-main-menu-bar__load-files--display+label {
     display: none;
 }
+
+
 
 .main-tab-container {
     position: absolute;

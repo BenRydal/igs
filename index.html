@@ -37,7 +37,7 @@
 </head>
 
 <body>
-    <div class="introBar">
+    <div class="main-menu-bar">
         <form action="/action_page.php">
             <select id="examples" name="examples" onchange="igs.domHandler.handleExampleDropDown()">
                 <option disabled selected value> -- Select an Option -- </option>
@@ -48,25 +48,25 @@
                 <option value="Example 4">EXAMPLE 4: CLASSROOM DISCUSSION</option>
             </select>
 
-            <!-- loadData class used to show/hide buttons when load data option selected -->
-            <input type="file" name="file" id="inputAllData" class="inputfile loadData" multiple
+            <!-- js-main-menu-bar__load-files--display class used to show/hide buttons when load data option selected -->
+            <input type="file" name="file" id="load-files-button" class="main-menu-bar__input js-main-menu-bar__load-files--display" multiple
                 accept=".png, .jpg, .jpeg, .csv, .mp4" onchange="igs.domHandler.handleLoadFileButton(this)">
-            <label for="inputAllData" class="loadData" title="Load Files in the following formats:
+            <label for="load-files-button" class="js-main-menu-bar__load-files--display" title="Load Files in the following formats:
 Floor Plan (PNG/JPG)
 Movement (CSV)
 Conversation (CSV)
 Code (CSV)
 Video (MP4)">LOAD FILES</label>
 
-            <button type="button" id="clear-button" class="inputfile loadData"
+            <button type="button" id="clear-button" class="main-menu-bar__input js-main-menu-bar__load-files--display"
                 onclick="igs.domHandler.handleClearButton()"></button>
-            <label for="clear-button" class="loadData" title="Clear All Loaded Data">CLEAR</label>
+            <label for="clear-button" class="js-main-menu-bar__load-files--display" title="Clear All Loaded Data">CLEAR</label>
 
-            <button type="button" id="3D-button" class="inputfile"
+            <button type="button" id="3D-button" class="main-menu-bar__input"
                 onclick="igs.domHandler.handleToggle3DButton()"></button>
             <label for="3D-button" title="Toggle 2D and 3D Views">2D/3D</label>
 
-            <button type="button" id="how-to-button" class="inputfile"
+            <button type="button" id="how-to-button" class="main-menu-bar__input"
                 onclick="igs.domHandler.handleHowToButton()"></button>
             <label for="how-to-button" title="Learn How To Use This Tool">HOW TO USE</label>
         </form>
