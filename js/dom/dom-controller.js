@@ -4,22 +4,8 @@ class DomController {
         this.sk = sketch;
     }
 
-
-    resetColorCodeButton() {
-        document.getElementById('sub-tab8-1').checked = false; // reset color code button
-        this.updateColorModeButtonText(false)
-    }
-
-    updateColorModeButtonText(isChecked) {
-        if (isChecked) document.getElementById('label-toggle-color-mode').innerHTML = 'Color By Paths';
-        else document.getElementById('label-toggle-color-mode').innerHTML = 'Color By Codes';
-    }
-
-    /**
-     * Resets buttons/GUI when color by codes button is pressed
-     */
-    updateColorCodesButton(isChecked) {
-        this.updateColorModeButtonText(isChecked);
+    updateColorMode(isChecked) {
+        this.updateColorModeLabel(isChecked);
         this.sk.sketchController.toggleIsPathColorMode();
         this.toggleColorChangeButtons();
         this.updateCheckboxList("movement");
@@ -28,12 +14,22 @@ class DomController {
 
     }
 
+    resetColorMode() {
+        document.getElementById('sub-tab8-1').checked = false; // reset color code button
+        this.updateColorModeLabel(false)
+    }
+
+    updateColorModeLabel(isChecked) {
+        if (isChecked) document.getElementById('js-color-mode').innerHTML = 'Color By Paths';
+        else document.getElementById('js-color-mode').innerHTML = 'Color By Codes';
+    }
+
     /**
      * Resets text, display and checked properties for each color change button
      * NOTE: .labels returns nodeList so access first element to update label for each input
      */
     toggleColorChangeButtons() {
-        let elementList = document.querySelectorAll(".changeColorButton"); // get all input elements for each button
+        let elementList = document.querySelectorAll(".js-color-change"); // get all input elements for each button
         elementList.forEach(function (element) {
             element.checked = false; // reset input element checked value
             element.labels[0].innerHTML = 'Change Color'; // reset text for label of input

@@ -120,7 +120,7 @@ Video (MP4)">LOAD FILES</label>
                 <label id="label-color-movement" for="sub-tab1-1" title="Click to change and set colors">Change
                     Color</label>
             </div>
-            <input class="tab-radio changeColorButton" id="sub-tab1-1" name="sub-group1" type="checkbox"
+            <input class="tab-radio js-color-change" id="sub-tab1-1" name="sub-group1" type="checkbox"
                 onchange="this.checked ? igs.domController.updateColorPickerList('movement') : igs.domController.updateCheckboxList('movement'); igs.loop()">
         </div>
 
@@ -143,7 +143,7 @@ Video (MP4)">LOAD FILES</label>
                 onclick="igs.sketchController.toggleIsAlignTalk(); igs.loop()">
             <input class="tab-radio" id="sub-tab3-2" name="sub-group3" type="radio"
                 onclick="igs.sketchController.toggleIsAllTalk(); igs.loop()">
-            <input class="tab-radio changeColorButton" id="sub-tab3-3" name="sub-group3" type="checkbox"
+            <input class="tab-radio js-color-change" id="sub-tab3-3" name="sub-group3" type="checkbox"
                 onchange="this.checked ? igs.domController.updateColorPickerList('talk') : igs.domController.updateCheckboxList('talk'); igs.loop()">
         </div>
 
@@ -225,7 +225,7 @@ Video (MP4)">LOAD FILES</label>
         <input class="tab-radio" id="main-tab-8" name="main-group" type="radio" />
         <div class="tab-content" id="codesMainTab">
             <div class="sub-tabs-container button-float">
-                <label for="sub-tab8-1" id="label-toggle-color-mode"
+                <label for="sub-tab8-1" id="js-color-mode"
                     title="Color data by codes if loaded (grey indicates no code and black indicates multiple codes)">Color
                     By Codes</label>
                 <label for="sub-tab8-2" id="label-color-code" style="display: none"
@@ -233,8 +233,8 @@ Video (MP4)">LOAD FILES</label>
             </div>
             <!-- Sub Tabs -->
             <input class="tab-radio" id="sub-tab8-1" name="sub-group8" type="checkbox"
-                onchange="igs.domController.updateColorCodesButton(this.checked); igs.loop()">
-            <input class="tab-radio changeColorButton" id="sub-tab8-2" name="sub-group8" type="checkbox"
+                onchange="igs.domController.updateColorMode(this.checked); igs.loop()">
+            <input class="tab-radio js-color-change" id="sub-tab8-2" name="sub-group8" type="checkbox"
                 onchange="this.checked ? igs.domController.updateColorPickerList('codes') : igs.domController.updateCheckboxList('codes'); igs.loop()">
         </div>
     </div>
