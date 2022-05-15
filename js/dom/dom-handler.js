@@ -72,7 +72,6 @@ class DomHandler {
         if (!this.sk.sketchController.getIsPathColorMode()) {
             this.sk.sketchController.setIsPathColorMode(true); // set to true in case user has changed color based on loaded code files
             this.sk.domController.resetColorMode();
-            this.sk.domController.toggleColorChangeButtons();
         }
         if (this.sk.sketchController.getIsAnimate()) this.sk.sketchController.startEndAnimation(); // reset animation if running
     }
