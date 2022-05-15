@@ -37,7 +37,7 @@ class DomHandler {
         const option = document.getElementById("examples").value;
         if (option === "Load Data") this.showLoadDataButtons();
         else this.hideLoadDataButtons();
-        this.resetGUI();
+        this.resetOnDropDownSelection();
         switch (option) {
             case "Example 1":
                 this.loadExampleData(['data/example-1/', 'floorplan.png', 'conversation.csv', ['Jordan.csv', 'Possession.csv'], 'Youtube', {
@@ -66,7 +66,7 @@ class DomHandler {
         }
     }
 
-    resetGUI() {
+    resetOnDropDownSelection() {
         this.hideIntroMessage();
         this.clearAllData();
         if (!this.sk.sketchController.getIsPathColorMode()) {
