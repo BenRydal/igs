@@ -13,6 +13,36 @@ body {
     overflow-x: hidden;
 }
 
+.main-menu-bar {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+
+.main-menu-bar__input {
+    width: 0.1px;
+    height: 0.1px;
+    opacity: 0;
+    overflow: hidden;
+    position: absolute;
+    z-index: -1;
+}
+
+.main-menu-bar__input+label {
+    font-size: 1em;
+    font-weight: 300;
+    color: black;
+    background-color: white;
+    display: inline-block;
+    border: 1px solid black;
+    padding: 5px;
+}
+
+/* Display none for hiding load data buttons on program start */
+.js-main-menu-bar__load-files--display+label {
+    display: none;
+}
+
 .how-to-container {
     position: absolute;
     top: 10vh;
@@ -55,36 +85,6 @@ body {
     font-size: 1vw;
     font-style: italic;
     text-align: justify;
-}
-
-.main-menu-bar {
-    text-align: center;
-    margin-bottom: 10px;
-}
-
-
-.main-menu-bar__input {
-    width: 0.1px;
-    height: 0.1px;
-    opacity: 0;
-    overflow: hidden;
-    position: absolute;
-    z-index: -1;
-}
-
-.main-menu-bar__input+label {
-    font-size: 1em;
-    font-weight: 300;
-    color: black;
-    background-color: white;
-    display: inline-block;
-    border: 1px solid black;
-    padding: 5px;
-}
-
-/* Display none for hiding load data buttons on program start */
-.js-main-menu-bar__load-files--display+label {
-    display: none;
 }
 
 
