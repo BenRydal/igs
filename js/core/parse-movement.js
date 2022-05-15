@@ -70,7 +70,7 @@ class ParseMovement {
             xPos: curRow[this.testData.headersMovement[1]],
             yPos: curRow[this.testData.headersMovement[2]],
             isStopped: this.testData.isStopped(curRow, movementPointArray),
-            codes: this.sk.core.parseCodes.addCodeData(curRow[this.testData.headersMovement[0]])
+            codes: this.sk.core.parseCodes.getCodeData(curRow[this.testData.headersMovement[0]])
         }
     }
 

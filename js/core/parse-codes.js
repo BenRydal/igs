@@ -65,7 +65,7 @@ class ParseCodes {
      * 
      * @param  {Number/Float} curTime
      */
-    addCodeData(curTime) {
+    getCodeData(curTime) {
         let hasCodeArray = [];
         let color = this.sk.core.COLORGRAY; // if no matching codes are found, this will be the color returned
         for (let i = 0; i < this.parsedFileArray.length; i++) {
