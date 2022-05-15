@@ -60,6 +60,8 @@ class ParseCodes {
      * Invoked when creating point arrays in parseMovement
      * Tests if the current time value is between any start/end code times in all loaded codeTables
      * NOTE: comparing to next row in codeTable and use of codeTable counters tries to do this in a most efficient manner
+     * Returns list of boolean vars indicating if value is within range for all loaded codes and
+     * a single color variable, which can be gray if value is not within range for loaded codes or black if within multiple ranges
      * 
      * @param  {Number/Float} curTime
      */
@@ -82,8 +84,8 @@ class ParseCodes {
             }
         }
         return {
-            hasCodeArray, // a list of boolean vars indicating if point is true for all loaded codes
-            color // a single color variable for a code, can be grey if point has no code or black if multiple
+            hasCodeArray,
+            color
         }
     }
 
