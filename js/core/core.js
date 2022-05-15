@@ -12,6 +12,7 @@ class Core {
         this.pathList = []; // Holds path objects for each successfully loaded movement file
         this.codeList = []; // holds code objects for each successfully loaded code file
         this.totalTimeInSeconds = 0; // Time value in seconds that all displayed data is set to, set dynamically when updating movement data
+        this.COLORGRAY = "#A9A9A9"; // should match representation of data in GUI
         this.COLOR_LIST = ['#6a3d9a', '#ff7f00', '#33a02c', '#1f78b4', '#e31a1c', '#b15928', '#cab2d6', '#fdbf6f', '#b2df8a', '#a6cee3', '#fb9a99', '#ffed6f']; // 12 Class Paired: (Dark) purple, orange, green, blue, red, brown, (Light) lPurple, lOrange, lGreen, lBlue, lRed, yellow
     }
 
@@ -57,7 +58,7 @@ class Core {
     }
 
     updateCodes(codeName) {
-        this.codeList.push(this.createDisplayData(codeName, false, this.sk.COLORGRAY, this.COLOR_LIST[this.codeList.length % this.COLOR_LIST.length]));
+        this.codeList.push(this.createDisplayData(codeName, false, this.COLORGRAY, this.COLOR_LIST[this.codeList.length % this.COLOR_LIST.length]));
         this.clearMovement();
         this.parseMovement.reProcessAllPointArrays();
         this.sk.domController.updateCheckboxes("codes");
@@ -76,7 +77,7 @@ class Core {
             // If row is good data, test if core.speakerList already has speaker and if not add speaker 
             if (this.testData.conversationRowForType(curRow)) {
                 const speaker = this.testData.cleanFileName(curRow[this.testData.headersConversation[1]]); // get cleaned speaker character
-                if (!tempSpeakerList.includes(speaker)) this.speakerList.push(this.createDisplayData(speaker, true, this.COLOR_LIST[this.speakerList.length % this.COLOR_LIST.length], this.sk.COLORGRAY));
+                if (!tempSpeakerList.includes(speaker)) this.speakerList.push(this.createDisplayData(speaker, true, this.COLOR_LIST[this.speakerList.length % this.COLOR_LIST.length], this.COLORGRAY));
             }
         }
     }
@@ -86,7 +87,7 @@ class Core {
      * NOTE: Path, Speaker, and Code MUST all have a name, isShowing and color attributes
      */
     createPath(name, movementPointArray, conversationPointArray) {
-        const displayData = this.createDisplayData(name, true, this.getPathModeColor(name), this.sk.COLORGRAY);
+        const displayData = this.createDisplayData(name, true, this.getPathModeColor(name), this.COLORGRAY);
         return {
             name: displayData.name, // string name
             isShowing: displayData.isShowing, // boolean used to indicate if speaker showing in GUI

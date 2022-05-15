@@ -36,7 +36,6 @@ const igs = new p5((sk) => {
         sk.DRAWGUI = 0;
         sk.HANDLEGUI = 1;
         sk.GUITEXTSIZE = sk.width / 70;
-        sk.COLORGRAY = "#A9A9A9"; // matches checkmark color in DOM Controller
         // STYLES
         sk.textSize(sk.GUITEXTSIZE);
         sk.textFont(sk.font_Lato);

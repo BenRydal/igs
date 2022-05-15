@@ -66,7 +66,7 @@ class ParseCodes {
      */
     addCodeArray(curTime) {
         let codeArrayToAdd = [];
-        let color = this.sk.COLORGRAY; // color when there are no codes, also used in getCodeColor method
+        let color = this.sk.core.COLORGRAY; // color when there are no codes, also used in getCodeColor method
         for (let i = 0; i < this.parsedFileArray.length; i++) {
             const curCodeTableRow = this.parsedFileArray[i].parsedCodeArray[this.parsedFileArray[i].counter];
             if (this.testData.codeRowForType(curCodeTableRow)) { // IMPORTANT: in case there is partial missing data etc. 
@@ -89,7 +89,7 @@ class ParseCodes {
     }
 
     getCodeColor(color, index) {
-        if (color === this.sk.COLORGRAY) return this.sk.core.COLOR_LIST[index % this.sk.core.COLOR_LIST.length];
+        if (color === this.sk.core.COLORGRAY) return this.sk.core.COLOR_LIST[index % this.sk.core.COLOR_LIST.length];
         else return 0; // if color already assigned, make it black because there are multiple true codes for same curTime
     }
     timeIsBetweenCurRow(curTime, codeTable) {
