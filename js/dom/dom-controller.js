@@ -102,18 +102,26 @@ class DomController {
         this.removeAllElements(colorPickerClass);
     }
 
-    createCheckbox(curItem, mainTabClass, checkboxClass) {
+    createSubTabElement(mainTabClass, curItem, checkboxClass, divType) {
         let parent = document.getElementById(mainTabClass); // Get parent tab to append new div and label to
         let label = document.createElement('label'); //  Make label
         let div = document.createElement('input'); // Make checkbox div
         let span = document.createElement('span'); // Make span to hold new checkbox styles
+        label.textContent = curItem.name; // set name to text of path
+        label.classList.add("tab-checkbox", checkboxClass); // TODO: update
+        div.setAttribute("type", divType);
+        div.classList.add(checkboxClass);
+        label.appendChild(div);
+        label.appendChild(span);
+        parent.appendChild(label);
+        return [div, span];
+    }
+
+    createCheckbox(curItem, mainTabClass, checkboxClass) {
+        let [div, span] = this.createSubTabElement(mainTabClass, curItem, checkboxClass, "checkbox");
         let curColor;
         if (this.sk.sketchController.getIsPathColorMode()) curColor = curItem.color.pathMode;
         else curColor = curItem.color.codeMode;
-        label.textContent = curItem.name; // set name to text of path
-        label.classList.add("tab-checkbox", checkboxClass);
-        div.setAttribute("type", "checkbox");
-        div.classList.add(checkboxClass);
         span.classList.add("checkmark", checkboxClass);
         span.style.border = "medium solid" + curColor;
         if (curItem.isShowing) {
@@ -131,20 +139,10 @@ class DomController {
             } else span.style.backgroundColor = "";
             this.sk.loop();
         });
-        label.appendChild(div);
-        label.appendChild(span);
-        parent.appendChild(label);
     }
 
     createColorPicker(curItem, mainTabClass, checkboxClass) {
-        let parent = document.getElementById(mainTabClass); // Get parent tab to append new div and label to
-        let label = document.createElement('label'); //  Make label
-        let div = document.createElement('input'); // Make checkbox div
-        let span = document.createElement('span'); // Make span to hold new checkbox styles
-        label.textContent = curItem.name; // set name to text of path
-        label.classList.add("tab-checkbox", checkboxClass); // TODO: update
-        div.setAttribute("type", "color");
-        div.classList.add(checkboxClass);
+        let [div, span] = this.createSubTabElement(mainTabClass, curItem, checkboxClass, "color");
         if (this.sk.sketchController.getIsPathColorMode()) div.value = curItem.color.pathMode;
         else div.value = curItem.color.codeMode;
         span.classList.add("colorpicker", checkboxClass);
@@ -165,9 +163,6 @@ class DomController {
             span.style.border = "medium solid" + div.value;
             this.sk.loop();
         });
-        label.appendChild(div);
-        label.appendChild(span);
-        parent.appendChild(label);
     }
 
     removeAllElements(elementId) {
