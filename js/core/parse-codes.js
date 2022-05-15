@@ -29,7 +29,6 @@ class ParseCodes {
 
     /**
      * For each row, updates either an existing codeTable in parsedFileArray or adds a new codeTable
-     * NOTE: First letter of first column used to test if there is existing codeTable object
      * @param  {PapaParse results Array} results
      */
     updateParsedFileArrayForMultiCodes(results) {
@@ -64,27 +63,26 @@ class ParseCodes {
      * 
      * @param  {Number/Float} curTime
      */
-    addCodeArray(curTime) {
-        let codeArrayToAdd = [];
-        let color = null;
+    addCodeData(curTime) {
+        let hasCodeArray = [];
+        let color = this.sk.core.COLORGRAY; // if no matching codes are found, this will be the color returned
         for (let i = 0; i < this.parsedFileArray.length; i++) {
             const curCodeTableRow = this.parsedFileArray[i].parsedCodeArray[this.parsedFileArray[i].counter];
             if (this.testData.codeRowForType(curCodeTableRow)) { // IMPORTANT: in case there is partial missing data etc. 
                 if (this.timeIsBetweenCurRow(curTime, this.parsedFileArray[i])) {
-                    codeArrayToAdd.push(true);
+                    hasCodeArray.push(true);
                     color = this.getCodeColor(color, i);
                 } else {
                     if (this.parsedFileArray[i].counter < this.parsedFileArray[i].parsedCodeArray.length - 1 && this.timeIsBetweenNextRow(curTime, this.parsedFileArray[i])) {
-                        codeArrayToAdd.push(true);
+                        hasCodeArray.push(true);
                         color = this.getCodeColor(color, i);
                         this.parsedFileArray[i].counter++;
-                    } else codeArrayToAdd.push(false);
+                    } else hasCodeArray.push(false);
                 }
             }
         }
-        if (color === null) color = this.sk.core.COLORGRAY; // if no matching codes, assign gray color
         return {
-            array: codeArrayToAdd, // a list of boolean vars indicating if point is true for all loaded codes
+            array: hasCodeArray, // a list of boolean vars indicating if point is true for all loaded codes
             color: color // a single color variable for a code, can be grey if point has no code or black if multiple
         }
     }
