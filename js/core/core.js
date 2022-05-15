@@ -40,7 +40,7 @@ class Core {
         this.pathList = this.sortByName(this.pathList); // then sort
         this.setTotalTime(movementPointArray);
         this.parseCodes.resetCounters(); // must reset code counters if multiple paths are loaded
-        this.sk.domController.updateMovementCheckboxes(this.pathList);
+        this.sk.domController.updateCheckboxList("movement");
         this.sk.loop();
     }
 
@@ -52,7 +52,7 @@ class Core {
         this.setSpeakerList(parsedConversationFileArray);
         this.speakerList = this.sortByName(this.speakerList);
         this.parseMovement.reProcessAllPointArrays(); // must reprocess movement
-        this.sk.domController.updateConversationCheckboxes(this.speakerList);
+        this.sk.domController.updateCheckboxList("talk");
         this.sk.loop();
     }
 
@@ -60,7 +60,7 @@ class Core {
         this.codeList.push(this.createCode(codeName));
         this.clearMovement();
         this.parseMovement.reProcessAllPointArrays();
-        this.sk.domController.updateCodeCheckboxes(this.codeList);
+        this.sk.domController.updateCheckboxList("codes");
         this.sk.loop();
     }
 
