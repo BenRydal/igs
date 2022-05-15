@@ -39,7 +39,7 @@ class DomController {
         });
     }
 
-    updateCheckboxList(subTab) {
+    updateCheckboxes(subTab) {
         switch (subTab) {
             case "movement":
                 this.clearCheckboxes("sub-tab1-1", "checkbox-movement");
@@ -57,7 +57,7 @@ class DomController {
     }
 
     // TODO: consider updating checkboxClass name
-    updateColorPickerList(subTab) {
+    updateColorPickers(subTab) {
         switch (subTab) {
             case "movement":
                 this.clearColorPickers("sub-tab1-1", "checkbox-movement");
@@ -75,9 +75,9 @@ class DomController {
     }
 
     updateAllCheckboxes() {
-        this.updateCheckboxList("movement");
-        this.updateCheckboxList("talk");
-        this.updateCheckboxList("codes");
+        this.updateCheckboxes("movement");
+        this.updateCheckboxes("talk");
+        this.updateCheckboxes("codes");
     }
 
     clearAllCheckboxes() {

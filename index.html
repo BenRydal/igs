@@ -121,7 +121,7 @@ Video (MP4)">LOAD FILES</label>
                     Color</label>
             </div>
             <input class="tab-radio js-color-change" id="sub-tab1-1" name="sub-group1" type="checkbox"
-                onchange="this.checked ? igs.domController.updateColorPickerList('movement') : igs.domController.updateCheckboxList('movement'); igs.loop()">
+                onchange="this.checked ? igs.domController.updateColorPickers('movement') : igs.domController.updateCheckboxes('movement'); igs.loop()">
         </div>
 
         <!-- TAB 3 CONTAINER TALK -->
@@ -144,7 +144,7 @@ Video (MP4)">LOAD FILES</label>
             <input class="tab-radio" id="sub-tab3-2" name="sub-group3" type="radio"
                 onclick="igs.sketchController.toggleIsAllTalk(); igs.loop()">
             <input class="tab-radio js-color-change" id="sub-tab3-3" name="sub-group3" type="checkbox"
-                onchange="this.checked ? igs.domController.updateColorPickerList('talk') : igs.domController.updateCheckboxList('talk'); igs.loop()">
+                onchange="this.checked ? igs.domController.updateColorPickers('talk') : igs.domController.updateCheckboxes('talk'); igs.loop()">
         </div>
 
         <!-- TAB 4 CONTAINER VIDEO -->
@@ -235,7 +235,7 @@ Video (MP4)">LOAD FILES</label>
             <input class="tab-radio" id="sub-tab8-1" name="sub-group8" type="checkbox"
                 onchange="igs.domController.updateColorMode(this.checked); igs.loop()">
             <input class="tab-radio js-color-change" id="sub-tab8-2" name="sub-group8" type="checkbox"
-                onchange="this.checked ? igs.domController.updateColorPickerList('codes') : igs.domController.updateCheckboxList('codes'); igs.loop()">
+                onchange="this.checked ? igs.domController.updateColorPickers('codes') : igs.domController.updateCheckboxes('codes'); igs.loop()">
         </div>
     </div>
 </body>
