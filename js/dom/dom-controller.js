@@ -8,12 +8,8 @@ class DomController {
         this.updateColorModeLabel(isChecked);
         this.sk.sketchController.toggleIsPathColorMode();
         this.toggleColorChangeButtons();
-        this.updateCheckboxList("movement");
-        this.updateCheckboxList("talk");
-        this.updateCheckboxList("codes");
-
+        this.updateAllCheckboxes();
     }
-
 
     resetColorMode() {
         document.getElementById('sub-tab8-1').checked = false; // reset color code button
@@ -76,6 +72,12 @@ class DomController {
                 for (const item of this.sk.core.codeList) this.createColorPicker(item, "codesMainTab", "checkbox-code");
                 break;
         }
+    }
+
+    updateAllCheckboxes() {
+        this.updateCheckboxList("movement");
+        this.updateCheckboxList("talk");
+        this.updateCheckboxList("codes");
     }
 
     clearAllCheckboxes() {
