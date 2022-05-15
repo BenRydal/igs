@@ -81,6 +81,12 @@ class DomController {
         }
     }
 
+    clearAllCheckboxes() {
+        this.clearCheckboxes("label-color-movement", "checkbox-movement");
+        this.clearCheckboxes("label-color-talk", "checkbox-conversation");
+        this.clearCheckboxes("label-color-code", "checkbox-code");
+    }
+
     clearCheckboxes(labelID, checkboxClass) {
         document.getElementById(labelID).innerHTML = "Change Color";
         this.removeAllElements(checkboxClass);
@@ -157,13 +163,6 @@ class DomController {
         label.appendChild(div);
         label.appendChild(span);
         parent.appendChild(label);
-    }
-
-    clearAllCheckboxes() {
-        // TODO: update text for colorchange buttons and other things?
-        this.removeAllElements("checkbox-movement");
-        this.removeAllElements("checkbox-conversation");
-        this.removeAllElements("checkbox-code");
     }
 
     removeAllElements(elementId) {
