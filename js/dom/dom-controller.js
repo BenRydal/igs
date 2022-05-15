@@ -29,7 +29,7 @@ class DomController {
      * NOTE: .labels returns nodeList so access first element to update label for each input
      */
     toggleColorChangeButtons() {
-        let elementList = document.querySelectorAll(".js-color-change"); // get all input elements for each button
+        const elementList = document.querySelectorAll(".js-color-change"); // get all input elements for each button
         elementList.forEach(function (element) {
             element.checked = false; // reset input element checked value
             element.labels[0].innerHTML = 'Change Color'; // reset text for label of input
