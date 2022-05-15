@@ -66,7 +66,7 @@ class ParseCodes {
      */
     addCodeArray(curTime) {
         let codeArrayToAdd = [];
-        let color = this.sk.core.COLORGRAY; // color when there are no codes, also used in getCodeColor method
+        let color = null;
         for (let i = 0; i < this.parsedFileArray.length; i++) {
             const curCodeTableRow = this.parsedFileArray[i].parsedCodeArray[this.parsedFileArray[i].counter];
             if (this.testData.codeRowForType(curCodeTableRow)) { // IMPORTANT: in case there is partial missing data etc. 
@@ -82,6 +82,7 @@ class ParseCodes {
                 }
             }
         }
+        if (color === null) color = this.sk.core.COLORGRAY; // if no matching codes, assign gray color
         return {
             array: codeArrayToAdd, // a list of boolean vars indicating if point is true for all loaded codes
             color: color // a single color variable for a code, can be grey if point has no code or black if multiple
