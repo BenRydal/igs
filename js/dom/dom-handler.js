@@ -23,7 +23,7 @@ class DomHandler {
     }
 
     handleHowToButton() {
-        let element = document.querySelector('.introContainer');
+        let element = document.querySelector('.how-to-container');
         if (element.style.display === 'none') element.style.display = 'block';
         else element.style.display = 'none';
     }
@@ -119,7 +119,7 @@ class DomHandler {
 
 
     hideIntroMessage() {
-        let element = document.querySelector('.introContainer');
+        let element = document.querySelector('.how-to-container');
         element.style.display = 'none';
     }
 
