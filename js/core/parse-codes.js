@@ -83,8 +83,8 @@ class ParseCodes {
             }
         }
         return {
-            array: codeArrayToAdd,
-            color: color
+            array: codeArrayToAdd, // a list of boolean vars indicating if point is true for all loaded codes
+            color: color // a single color variable for a code, can be grey if point has no code or black if multiple
         }
     }
 
