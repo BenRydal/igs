@@ -13,10 +13,6 @@ body {
     overflow-x: hidden;
 }
 
-.container {
-    position: relative;
-}
-
 .main-tab-container {
     position: absolute;
     max-width: 48%;
@@ -25,7 +21,7 @@ body {
 
 .introContainer {
     position: absolute;
-    top: 5vh;
+    top: 10vh;
     width: 70vw;
     height: 70vh;
     border: 2px solid black;
