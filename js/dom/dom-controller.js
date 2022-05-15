@@ -4,8 +4,8 @@ class DomController {
         this.sk = sketch;
     }
 
-    updateColorMode(isChecked) {
-        this.updateColorModeLabel(isChecked);
+    updateColorMode() {
+        this.updateColorModeLabel();
         this.sk.sketchController.toggleIsPathColorMode();
         this.toggleColorChangeButtons();
         this.updateAllCheckboxes();
@@ -13,12 +13,13 @@ class DomController {
 
     resetColorMode() {
         document.getElementById('sub-tab8-1').checked = false; // reset color code button
-        this.updateColorModeLabel(false);
+        this.updateColorModeLabel();
     }
 
-    updateColorModeLabel(isChecked) {
-        if (isChecked) document.getElementById('js-color-mode').innerHTML = 'Color By Paths';
-        else document.getElementById('js-color-mode').innerHTML = 'Color By Codes';
+    updateColorModeLabel() {
+        const element = document.getElementById('sub-tab8-1');
+        if (element.checked) element.labels[0].innerHTML = 'Color By Paths';
+        else element.labels[0].innerHTML = 'Color By Codes';
     }
 
     /**
