@@ -46,22 +46,6 @@ class DomController {
         });
     }
 
-    updateMovementColorChangeButton(isChecked) {
-        if (isChecked) this.updateColorPickerList(this.sk.core.pathList, "movementMainTab", "checkbox-movement", "label-color-movement");
-        else this.updateCheckboxList("movement");
-    }
-
-    updateTalkColorChangeButton(isChecked) {
-        if (isChecked) this.updateColorPickerList(this.sk.core.speakerList, "conversationMainTab", "checkbox-conversation", "label-color-talk");
-        else this.updateCheckboxList("talk");
-    }
-
-    updateCodeColorChangeButton(isChecked) {
-        if (isChecked) this.updateColorPickerList(this.sk.core.codeList, "codesMainTab", "checkbox-code", "label-color-code");
-        else this.updateCheckboxList("codes");
-    }
-
-
     updateCheckboxList(subTab) {
         switch (subTab) {
             case "movement":
@@ -83,11 +67,26 @@ class DomController {
     }
 
     // TODO: consider updating checkboxClass name
-    updateColorPickerList(list, elementId, checkboxClass, labelID) {
-        document.getElementById(labelID).innerHTML = 'Set Color';
-        this.removeAllElements(checkboxClass);
-        for (const item of list) this.createColorPicker(item, elementId, checkboxClass);
+    updateColorPickerList(subTab) {
+        switch (subTab) {
+            case "movement":
+                document.getElementById("label-color-movement").innerHTML = 'Set Color';
+                this.removeAllElements("checkbox-movement");
+                for (const item of this.sk.core.pathList) this.createColorPicker(item, "movementMainTab", "checkbox-movement");
+                break;
+            case "talk":
+                document.getElementById("label-color-talk").innerHTML = 'Set Color';
+                this.removeAllElements("checkbox-conversation");
+                for (const item of this.sk.core.speakerList) this.createColorPicker(item, "conversationMainTab", "checkbox-conversation");
+                break;
+            case "codes":
+                document.getElementById("label-color-code").innerHTML = 'Set Color';
+                this.removeAllElements("checkbox-code");
+                for (const item of this.sk.core.codeList) this.createColorPicker(item, "codesMainTab", "checkbox-code");
+                break;
+        }
     }
+
 
     createCheckbox(curItem, mainTabClass, checkboxClass) {
         let parent = document.getElementById(mainTabClass); // Get parent tab to append new div and label to
