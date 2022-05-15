@@ -33,7 +33,7 @@ class DrawConversation {
     }
 
     isVisible(point, curPos) {
-        return (this.isTalkTurnSelected(point.talkTurn) && this.testPoint.isShowingInGUI(curPos.timelineXPos) && this.testPoint.selectMode(curPos, point.isStopped) && this.testPoint.isShowingInCodeList(point.codes.array));
+        return (this.isTalkTurnSelected(point.talkTurn) && this.testPoint.isShowingInGUI(curPos.timelineXPos) && this.testPoint.selectMode(curPos, point.isStopped) && this.testPoint.isShowingInCodeList(point.codes.hasCodeArray));
     }
     /**
      * Draws single textbox for user selected conversation

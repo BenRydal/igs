@@ -112,7 +112,7 @@ class DrawMovement {
      * @param  {AugmentPoint} augmentPoint
      */
     isVisible(augmentPoint) {
-        return (this.testPoint.isShowingInGUI(augmentPoint.pos.timelineXPos) && this.testPoint.isShowingInCodeList(augmentPoint.point.codes.array) && this.testPoint.selectMode(augmentPoint.pos, augmentPoint.point.isStopped));
+        return (this.testPoint.isShowingInGUI(augmentPoint.pos.timelineXPos) && this.testPoint.isShowingInCodeList(augmentPoint.point.codes.hasCodeArray) && this.testPoint.selectMode(augmentPoint.pos, augmentPoint.point.isStopped));
     }
 
     /**
