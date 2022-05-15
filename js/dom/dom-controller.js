@@ -45,15 +45,15 @@ class DomController {
         switch (subTab) {
             case "movement":
                 this.clearCheckboxes("sub-tab1-1", "checkbox-movement");
-                for (const item of this.sk.core.pathList) this.createCheckbox(item, "movementMainTab", "checkbox-movement");
+                for (const item of this.sk.core.pathList) this.createCheckbox(item, "movement-main-tab", "checkbox-movement");
                 break;
             case "talk":
                 this.clearCheckboxes("sub-tab3-3", "checkbox-conversation");
-                for (const item of this.sk.core.speakerList) this.createCheckbox(item, "conversationMainTab", "checkbox-conversation");
+                for (const item of this.sk.core.speakerList) this.createCheckbox(item, "talk-main-tab", "checkbox-conversation");
                 break;
             case "codes":
                 this.clearCheckboxes("sub-tab8-2", "checkbox-code");
-                for (const item of this.sk.core.codeList) this.createCheckbox(item, "codesMainTab", "checkbox-code");
+                for (const item of this.sk.core.codeList) this.createCheckbox(item, "codes-main-tab", "checkbox-code");
                 break;
         }
     }
@@ -63,15 +63,15 @@ class DomController {
         switch (subTab) {
             case "movement":
                 this.clearColorPickers("sub-tab1-1", "checkbox-movement");
-                for (const item of this.sk.core.pathList) this.createColorPicker(item, "movementMainTab", "checkbox-movement");
+                for (const item of this.sk.core.pathList) this.createColorPicker(item, "movement-main-tab", "checkbox-movement");
                 break;
             case "talk":
                 this.clearColorPickers("sub-tab3-3", "checkbox-conversation");
-                for (const item of this.sk.core.speakerList) this.createColorPicker(item, "conversationMainTab", "checkbox-conversation");
+                for (const item of this.sk.core.speakerList) this.createColorPicker(item, "talk-main-tab", "checkbox-conversation");
                 break;
             case "codes":
                 this.clearColorPickers("sub-tab8-2", "checkbox-code");
-                for (const item of this.sk.core.codeList) this.createColorPicker(item, "codesMainTab", "checkbox-code");
+                for (const item of this.sk.core.codeList) this.createColorPicker(item, "codes-main-tab", "checkbox-code");
                 break;
         }
     }
