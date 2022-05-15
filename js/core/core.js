@@ -57,7 +57,7 @@ class Core {
     }
 
     updateCodes(codeName) {
-        this.codeList.push(this.createCode(codeName));
+        this.codeList.push(this.createDisplayData(codeName, false, this.sk.COLORGRAY, this.COLOR_LIST[this.codeList.length % this.COLOR_LIST.length]));
         this.clearMovement();
         this.parseMovement.reProcessAllPointArrays();
         this.sk.domController.updateCheckboxes("codes");
@@ -76,7 +76,7 @@ class Core {
             // If row is good data, test if core.speakerList already has speaker and if not add speaker 
             if (this.testData.conversationRowForType(curRow)) {
                 const speaker = this.testData.cleanFileName(curRow[this.testData.headersConversation[1]]); // get cleaned speaker character
-                if (!tempSpeakerList.includes(speaker)) this.speakerList.push(this.createSpeaker(speaker));
+                if (!tempSpeakerList.includes(speaker)) this.speakerList.push(this.createDisplayData(speaker, true, this.COLOR_LIST[this.speakerList.length % this.COLOR_LIST.length], this.sk.COLORGRAY));
             }
         }
     }
@@ -86,38 +86,28 @@ class Core {
      * NOTE: Path, Speaker, and Code MUST all have a name, isShowing and color attributes
      */
     createPath(name, movementPointArray, conversationPointArray) {
+        const displayData = this.createDisplayData(name, true, this.getPathModeColor(name), this.sk.COLORGRAY);
         return {
-            name, // string name
-            isShowing: true, // boolean used to indicate if speaker showing in GUI
-            color: this.createColorForGUI(this.getPathModeColor(name), this.sk.COLORGRAY),
+            name: displayData.name, // string name
+            isShowing: displayData.isShowing, // boolean used to indicate if speaker showing in GUI
+            color: displayData.color,
             movement: movementPointArray,
             conversation: conversationPointArray
         }
     }
 
-    createSpeaker(name) {
+    createDisplayData(name, isShowing, colorPathMode, colorCodeMode) {
         return {
             name, // string name
-            isShowing: true, // boolean indicating if showing in GUI
-            color: this.createColorForGUI(this.COLOR_LIST[this.speakerList.length % this.COLOR_LIST.length], this.sk.COLORGRAY)
-        };
+            isShowing, // toggle display in GUI
+            color: this.createColorDisplayObject(colorPathMode, colorCodeMode) // 
+        }
     }
 
-    createCode(name) {
+    createColorDisplayObject(pathMode, codeMode) {
         return {
-            name, // string name
-            isShowing: false, // if displaying in GUI
-            color: this.createColorForGUI(this.sk.COLORGRAY, this.COLOR_LIST[this.codeList.length % this.COLOR_LIST.length])
-        };
-    }
-
-    /**
-     * Color for each Path, Speaker and Code Object has pathMode and codeMode. These are important to how data is colored in GUI.
-     */
-    createColorForGUI(pathModeColor, codeModeColor) {
-        return {
-            pathMode: pathModeColor,
-            codeMode: codeModeColor
+            pathMode,
+            codeMode
         }
     }
 
