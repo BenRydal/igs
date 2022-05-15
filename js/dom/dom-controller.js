@@ -131,14 +131,16 @@ class DomController {
             span.style.backgroundColor = "";
             div.checked = false;
         }
-        div.addEventListener('change', () => {
-            curItem.isShowing = !curItem.isShowing; // update isShowing for path
-            if (curItem.isShowing) {
-                if (this.sk.sketchController.getIsPathColorMode()) span.style.backgroundColor = curItem.color.pathMode;
-                else span.style.backgroundColor = curItem.color.codeMode;
-            } else span.style.backgroundColor = "";
-            this.sk.loop();
-        });
+        div.addEventListener('change', () => this.toggleCheckboxAndData(curItem, span));
+    }
+
+    toggleCheckboxAndData(curItem, span) {
+        curItem.isShowing = !curItem.isShowing; // update isShowing for path
+        if (curItem.isShowing) {
+            if (this.sk.sketchController.getIsPathColorMode()) span.style.backgroundColor = curItem.color.pathMode;
+            else span.style.backgroundColor = curItem.color.codeMode;
+        } else span.style.backgroundColor = "";
+        this.sk.loop();
     }
 
     createColorPicker(curItem, mainTabClass, checkboxClass) {
@@ -148,21 +150,23 @@ class DomController {
         span.classList.add("colorpicker", checkboxClass);
         span.style.border = "medium solid" + div.value;
         span.style.backgroundColor = div.value;
-        div.addEventListener('input', () => {
-            if (this.sk.sketchController.getIsPathColorMode()) curItem.color.pathMode = div.value;
-            else {
-                // TODO: update code color for all movement points in each path corresponding to code being updated in GUI
-                for (const path of this.sk.core.pathList) {
-                    for (const point of path.movement) {
-                        if (point.codes.color === curItem.color.codeMode) point.codes.color = div.value;
-                    }
+        div.addEventListener('input', () => this.toggleColorPickerAndData(curItem, div, span));
+    }
+
+    toggleColorPickerAndData(curItem, div, span) {
+        if (this.sk.sketchController.getIsPathColorMode()) curItem.color.pathMode = div.value;
+        else {
+            // TODO: update code color for all movement points in each path corresponding to code being updated in GUI
+            for (const path of this.sk.core.pathList) {
+                for (const point of path.movement) {
+                    if (point.codes.color === curItem.color.codeMode) point.codes.color = div.value;
                 }
-                curItem.color.codeMode = div.value; // update codeMode to show properly in GUI
             }
-            span.style.backgroundColor = div.value;
-            span.style.border = "medium solid" + div.value;
-            this.sk.loop();
-        });
+            curItem.color.codeMode = div.value; // update codeMode to show properly in GUI
+        }
+        span.style.backgroundColor = div.value;
+        span.style.border = "medium solid" + div.value;
+        this.sk.loop();
     }
 
     removeAllElements(elementId) {
