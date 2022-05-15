@@ -14,7 +14,7 @@ class DomController {
     resetColorMode() {
         document.getElementById('sub-tab8-1').checked = false; // reset color code button
         this.updateColorModeLabel();
-        this.sk.domController.toggleColorChangeButtons();
+        this.toggleColorChangeButtons();
     }
 
     updateColorModeLabel() {
