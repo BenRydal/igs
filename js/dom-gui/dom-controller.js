@@ -4,6 +4,21 @@ class DomController {
         this.sk = sketch;
     }
 
+    hideIntroMessage() {
+        let element = document.querySelector('.how-to-container');
+        element.style.display = 'none';
+    }
+
+    showLoadDataButtons() {
+        const elementList = document.querySelectorAll(".js-main-menu-bar__load-files--display");
+        elementList.forEach(element => element.style.display = 'inline');
+    }
+
+    hideLoadDataButtons() {
+        const elementList = document.querySelectorAll(".js-main-menu-bar__load-files--display");
+        elementList.forEach(element => element.style.display = 'none');
+    }
+
     resetColorMode() {
         document.getElementById('sub-tab8-1').checked = false; // reset color code button
         this.updateColorModeLabel();

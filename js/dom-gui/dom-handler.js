@@ -42,8 +42,8 @@ class DomHandler {
 
     handleExampleDropDown() {
         const option = document.getElementById("examples").value;
-        if (option === "Load Data") this.showLoadDataButtons();
-        else this.hideLoadDataButtons();
+        if (option === "Load Data") this.sk.domController.showLoadDataButtons();
+        else this.sk.domController.hideLoadDataButtons();
         this.resetOnDropDownSelection();
         switch (option) {
             case "Example 1":
@@ -74,7 +74,7 @@ class DomHandler {
     }
 
     resetOnDropDownSelection() {
-        this.hideIntroMessage();
+        this.sk.domController.hideIntroMessage();
         this.clearAllData();
         if (!this.sk.sketchController.getIsPathColorMode()) {
             this.sk.sketchController.setIsPathColorMode(true); // set to true in case user has changed color based on loaded code files
@@ -122,23 +122,6 @@ class DomHandler {
         this.updateVideo('File', {
             fileName: fileLocation
         });
-    }
-
-
-    hideIntroMessage() {
-        let element = document.querySelector('.how-to-container');
-        element.style.display = 'none';
-    }
-
-
-    showLoadDataButtons() {
-        const elementList = document.querySelectorAll(".js-main-menu-bar__load-files--display");
-        elementList.forEach(element => element.style.display = 'inline');
-    }
-
-    hideLoadDataButtons() {
-        const elementList = document.querySelectorAll(".js-main-menu-bar__load-files--display");
-        elementList.forEach(element => element.style.display = 'none');
     }
 
     /**
