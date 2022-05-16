@@ -1,16 +1,11 @@
 /*
-CREDITS/LICENSE INFORMATION: 
-This software is written in JavaScript and p5.js and uses YouTube and Kaltura Video Player APIs and the PapaParse library by Matt Holt for CSV file processing. 
-This software is licensed under the GNU General Public License Version 2.0. 
-See the GNU General Public License included with this software for more details. 
-Classroom discussion example data is used with special permission from Mathematics Teaching and Learning to Teach (MTLT), 
-University of Michigan. (2010). Sean Numbers-Ofala. Classroom science lesson data is made possible by the researchers 
-and teachers who created The Third International Mathematics and Science Study (TIMSS) 1999 Video Study. 
-IGS software was originally developed by Ben Rydal Shapiro at Vanderbilt University 
-as part of his dissertation titled Interaction Geography & the Learning Sciences. 
-Copyright (C) 2018 Ben Rydal Shapiro, and contributors. 
-To reference or read more about this work please see: 
-https://etd.library.vanderbilt.edu/available/etd-03212018-140140/unrestricted/Shapiro_Dissertation.pdf
+Launches IGS as a p5 sketch in instance mode. p5 sketch, DOM and data are coordinated as follows:
+    1) Various sketch classes update canvas-based visualizations
+    2) Dom handler and controller classes update DOM based GUI
+    3) Program data based on CSV files is stored in core class
+    4) FloorPlan class holds image data and p5 drawing methods to represent images on the canvas
+    5) VideoPlayer class is an abstract class that holds video data and p5 drawing methods to represent video on the canvas
+    6) Additional 
 */
 
 const igs = new p5((sk) => {
@@ -22,14 +17,14 @@ const igs = new p5((sk) => {
     sk.setup = function () {
         sk.canvas = sk.createCanvas(window.innerWidth, window.innerHeight, sk.WEBGL);
         sk.canvas.parent('sketch-holder');
-        sk.core = new Core(sk); // holds core data, update and parsing methods/classes
-        sk.gui = new GUI(sk); // holds canvas GUI elements/classes
-        sk.domHandler = new DomHandler(sk); // handles DOM input from user
-        sk.domController = new DomController(sk); // updates DOM
-        sk.sketchController = new SketchController(sk); // coordinates calls across classes
-        sk.handle3D = new Handle3D(sk, true); // boolean sets 3D to showing
-        sk.videoPlayer = null; // abstract class for different video classes
-        sk.floorPlan = new FloorPlan(sk); // holds floor plan data and drawing methods
+        sk.core = new Core(sk);
+        sk.gui = new GUI(sk);
+        sk.domHandler = new DomHandler(sk);
+        sk.domController = new DomController(sk);
+        sk.sketchController = new SketchController(sk);
+        sk.handle3D = new Handle3D(sk, true);
+        sk.videoPlayer = null;
+        sk.floorPlan = new FloorPlan(sk);
         // CONSTANTS
         sk.PLAN = 0;
         sk.SPACETIME = 1;
