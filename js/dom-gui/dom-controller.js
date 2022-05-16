@@ -66,7 +66,6 @@ class DomController {
         }
     }
 
-    // TODO: consider updating checkboxClass name
     updateColorPickers(subTab) {
         switch (subTab) {
             case "movement":
@@ -90,6 +89,85 @@ class DomController {
         this.updateCheckboxes("codes");
     }
 
+
+    /**
+     * CreateCheckbox/CreateColorPicker create elements that have same styles but have different input types
+     * and event listeners.
+     */
+    createCheckbox(coreDataItem, mainTabClass, checkboxClass) {
+        let [div, span] = this.createSubTabElement(mainTabClass, coreDataItem, checkboxClass, "checkbox");
+        let curColor;
+        if (this.sk.sketchController.getIsPathColorMode()) curColor = coreDataItem.color.pathMode;
+        else curColor = coreDataItem.color.codeMode;
+        span.classList.add("checkmark", checkboxClass);
+        span.style.border = "medium solid" + curColor;
+        if (coreDataItem.isShowing) {
+            span.style.backgroundColor = curColor;
+            div.checked = true;
+        } else {
+            span.style.backgroundColor = "";
+            div.checked = false;
+        }
+        div.addEventListener('change', () => this.toggleCheckboxAndData(coreDataItem, span));
+    }
+
+    createColorPicker(coreDataItem, mainTabClass, checkboxClass) {
+        let [div, span] = this.createSubTabElement(mainTabClass, coreDataItem, checkboxClass, "color");
+        if (this.sk.sketchController.getIsPathColorMode()) div.value = coreDataItem.color.pathMode;
+        else div.value = coreDataItem.color.codeMode;
+        span.classList.add("colorpicker", checkboxClass);
+        span.style.border = "medium solid" + div.value;
+        span.style.backgroundColor = div.value;
+        div.addEventListener('input', () => this.toggleColorPickerAndData(coreDataItem, div, span));
+    }
+
+    createSubTabElement(mainTabClass, coreDataItem, checkboxClass, divType) {
+        let parent = document.getElementById(mainTabClass); // Get parent tab to append new div and label to
+        let label = document.createElement('label'); //  Make label
+        let div = document.createElement('input'); // Make checkbox div
+        let span = document.createElement('span'); // Make span to hold new checkbox styles
+        label.textContent = coreDataItem.name; // set name to text of path
+        label.classList.add("tab-checkbox", checkboxClass);
+        div.setAttribute("type", divType);
+        div.classList.add(checkboxClass);
+        label.appendChild(div);
+        label.appendChild(span);
+        parent.appendChild(label);
+        return [div, span];
+    }
+
+    /**
+     * Updates checkbox display and also corresponding core program data
+     * NOTE: both toggle methods alter core program data. This is not ideal but is the best solution for now.
+     */
+    toggleCheckboxAndData(coreDataItem, span) {
+        coreDataItem.isShowing = !coreDataItem.isShowing; // update isShowing for path
+        if (coreDataItem.isShowing) {
+            if (this.sk.sketchController.getIsPathColorMode()) span.style.backgroundColor = coreDataItem.color.pathMode;
+            else span.style.backgroundColor = coreDataItem.color.codeMode;
+        } else span.style.backgroundColor = "";
+        this.sk.loop();
+    }
+
+    /**
+     * To update for codeMode, iterate through all points in a path and update code color for each point if it is being changed in GUI
+     * TODO: should this method also iterate through points in path.conversation?
+     */
+    toggleColorPickerAndData(coreDataItem, div, span) {
+        if (this.sk.sketchController.getIsPathColorMode()) coreDataItem.color.pathMode = div.value;
+        else {
+            for (const path of this.sk.core.pathList) {
+                for (const point of path.movement) {
+                    if (point.codes.color === coreDataItem.color.codeMode) point.codes.color = div.value;
+                }
+            }
+            coreDataItem.color.codeMode = div.value; // update codeMode to show properly in GUI
+        }
+        span.style.backgroundColor = div.value;
+        span.style.border = "medium solid" + div.value;
+        this.sk.loop();
+    }
+
     clearAllCheckboxes() {
         this.clearCheckboxes("sub-tab1-1", "checkbox-movement");
         this.clearCheckboxes("sub-tab3-3", "checkbox-conversation");
@@ -108,73 +186,6 @@ class DomController {
         element.checked = true; // reset input checkbox checked attribute
         element.labels[0].innerHTML = 'Set Color'; // reset text for label of input
         this.removeAllElements(colorPickerClass);
-    }
-
-    createSubTabElement(mainTabClass, coreDataItem, checkboxClass, divType) {
-        let parent = document.getElementById(mainTabClass); // Get parent tab to append new div and label to
-        let label = document.createElement('label'); //  Make label
-        let div = document.createElement('input'); // Make checkbox div
-        let span = document.createElement('span'); // Make span to hold new checkbox styles
-        label.textContent = coreDataItem.name; // set name to text of path
-        label.classList.add("tab-checkbox", checkboxClass); // TODO: update
-        div.setAttribute("type", divType);
-        div.classList.add(checkboxClass);
-        label.appendChild(div);
-        label.appendChild(span);
-        parent.appendChild(label);
-        return [div, span];
-    }
-
-    createCheckbox(coreDataItem, mainTabClass, checkboxClass) {
-        let [div, span] = this.createSubTabElement(mainTabClass, coreDataItem, checkboxClass, "checkbox");
-        let curColor;
-        if (this.sk.sketchController.getIsPathColorMode()) curColor = coreDataItem.color.pathMode;
-        else curColor = coreDataItem.color.codeMode;
-        span.classList.add("checkmark", checkboxClass);
-        span.style.border = "medium solid" + curColor;
-        if (coreDataItem.isShowing) {
-            span.style.backgroundColor = curColor;
-            div.checked = true;
-        } else {
-            span.style.backgroundColor = "";
-            div.checked = false;
-        }
-        div.addEventListener('change', () => this.toggleCheckboxAndData(coreDataItem, span));
-    }
-
-    toggleCheckboxAndData(coreDataItem, span) {
-        coreDataItem.isShowing = !coreDataItem.isShowing; // update isShowing for path
-        if (coreDataItem.isShowing) {
-            if (this.sk.sketchController.getIsPathColorMode()) span.style.backgroundColor = coreDataItem.color.pathMode;
-            else span.style.backgroundColor = coreDataItem.color.codeMode;
-        } else span.style.backgroundColor = "";
-        this.sk.loop();
-    }
-
-    createColorPicker(coreDataItem, mainTabClass, checkboxClass) {
-        let [div, span] = this.createSubTabElement(mainTabClass, coreDataItem, checkboxClass, "color");
-        if (this.sk.sketchController.getIsPathColorMode()) div.value = coreDataItem.color.pathMode;
-        else div.value = coreDataItem.color.codeMode;
-        span.classList.add("colorpicker", checkboxClass);
-        span.style.border = "medium solid" + div.value;
-        span.style.backgroundColor = div.value;
-        div.addEventListener('input', () => this.toggleColorPickerAndData(coreDataItem, div, span));
-    }
-
-    toggleColorPickerAndData(coreDataItem, div, span) {
-        if (this.sk.sketchController.getIsPathColorMode()) coreDataItem.color.pathMode = div.value;
-        else {
-            // TODO: update code color for all movement points in each path corresponding to code being updated in GUI
-            for (const path of this.sk.core.pathList) {
-                for (const point of path.movement) {
-                    if (point.codes.color === coreDataItem.color.codeMode) point.codes.color = div.value;
-                }
-            }
-            coreDataItem.color.codeMode = div.value; // update codeMode to show properly in GUI
-        }
-        span.style.backgroundColor = div.value;
-        span.style.border = "medium solid" + div.value;
-        this.sk.loop();
     }
 
     removeAllElements(elementId) {
