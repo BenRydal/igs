@@ -8,7 +8,7 @@ class DrawMovement {
 
     constructor(sketch) {
         this.sk = sketch;
-        this.testPoint = new TestPoint(this.sk);
+        this.drawUtils = new DrawUtils(this.sk);
         this.dot = null; // represents user selection dot drawn in both floor plan and space-time views
         this.isDrawingLine = false; // boolean controls start/end line segment drawing based on code file and GUI selections
         this.style = {
@@ -112,7 +112,7 @@ class DrawMovement {
      * @param  {AugmentPoint} augmentPoint
      */
     isVisible(augmentPoint) {
-        return (this.testPoint.isShowingInGUI(augmentPoint.pos.timelineXPos) && this.testPoint.isShowingInCodeList(augmentPoint.point.codes.hasCodeArray) && this.testPoint.selectMode(augmentPoint.pos, augmentPoint.point.isStopped));
+        return (this.drawUtils.isShowingInGUI(augmentPoint.pos.timelineXPos) && this.drawUtils.isShowingInCodeList(augmentPoint.point.codes.hasCodeArray) && this.drawUtils.selectMode(augmentPoint.pos, augmentPoint.point.isStopped));
     }
 
     /**
@@ -183,7 +183,7 @@ class DrawMovement {
      * @param  {Integer} view
      */
     getScaledMovementPos(point, view) {
-        const pos = this.testPoint.getSharedPosValues(point);
+        const pos = this.drawUtils.getSharedPosValues(point);
         return {
             timelineXPos: pos.timelineXPos,
             selTimelineXPos: pos.selTimelineXPos,

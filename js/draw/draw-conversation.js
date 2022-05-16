@@ -2,7 +2,7 @@ class DrawConversation {
 
     constructor(sketch) {
         this.sk = sketch;
-        this.testPoint = new TestPoint(this.sk);
+        this.drawUtils = new DrawUtils(this.sk);
         this.conversationBubble = { // represents user selected conversation
             isSelected: false,
             point: null, // stores one ConversationPoint object for selected conversation turn
@@ -33,7 +33,7 @@ class DrawConversation {
     }
 
     isVisible(point, curPos) {
-        return (this.isTalkTurnSelected(point.talkTurn) && this.testPoint.isShowingInGUI(curPos.timelineXPos) && this.testPoint.selectMode(curPos, point.isStopped) && this.testPoint.isShowingInCodeList(point.codes.hasCodeArray));
+        return (this.isTalkTurnSelected(point.talkTurn) && this.drawUtils.isShowingInGUI(curPos.timelineXPos) && this.drawUtils.selectMode(curPos, point.isStopped) && this.drawUtils.isShowingInCodeList(point.codes.hasCodeArray));
     }
     /**
      * Draws single textbox for user selected conversation
@@ -180,7 +180,7 @@ class DrawConversation {
     }
 
     getScaledConversationPos(point) {
-        const pos = this.testPoint.getSharedPosValues(point);
+        const pos = this.drawUtils.getSharedPosValues(point);
         const rectLength = this.getRectLength(point.talkTurn);
         return {
             timelineXPos: pos.timelineXPos,
