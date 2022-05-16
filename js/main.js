@@ -1,11 +1,10 @@
 /*
-Launches IGS as a p5 sketch in instance mode. p5 sketch, DOM and data are coordinated as follows:
+Launches IGS as a p5 sketch in instance mode. p5 sketch, DOM and program data are coordinated as follows:
     1) Various sketch classes update canvas-based visualizations
     2) Dom handler and controller classes update DOM based GUI
     3) Program data based on CSV files is stored in core class
     4) FloorPlan class holds image data and p5 drawing methods to represent images on the canvas
     5) VideoPlayer class is an abstract class that holds video data and p5 drawing methods to represent video on the canvas
-    6) Additional 
 */
 
 const igs = new p5((sk) => {
@@ -39,16 +38,13 @@ const igs = new p5((sk) => {
     sk.draw = function () {
         sk.background(255);
         sk.translate(-sk.width / 2, -sk.height / 2, 0); // recenter canvas to top left when using WEBGL renderer
-        // Test/translate for 3D mode
-        if (sk.handle3D.getIs3DModeOrTransitioning()) sk.handle3D.update3DTranslation();
-        // Test/draw data
-        if (sk.dataIsLoaded(sk.floorPlan.getImg())) sk.drawData();
+        if (sk.handle3D.getIs3DModeOrTransitioning()) sk.handle3D.update3DTranslation(); // handles transitioning between 2D/3D modes
+        if (sk.dataIsLoaded(sk.floorPlan.getImg())) sk.drawData(); // floorPlan must be loaded to draw any data
         if (sk.sketchController.testVideoAndDivAreLoaded() && sk.sketchController.getIsVideoShow()) sk.sketchController.updateVideoDisplay();
-        sk.gui.updateGUIWithTranslation();
-        // Test/end translation for 3D mode
+        sk.gui.updateGUIWithTranslation(); // draw canvas GUI elements in 3D
         if (sk.handle3D.getIs3DModeOrTransitioning()) sk.pop();
-        sk.gui.updateGUI(); // draw gui last
-        // Update animation and loop
+        sk.gui.updateGUI(); // draw all other canvas GUI elements in 2D
+        // Determine whether to re-run draw loop depending on program state
         if (sk.sketchController.getIsAnimate() && !sk.sketchController.getIsAnimatePause()) sk.sketchController.updateAnimation();
         if ((sk.sketchController.getIsAnimate() && !sk.sketchController.getIsAnimatePause()) || sk.sketchController.getIsVideoPlay() || sk.handle3D.getIsTransitioning()) sk.loop();
         else sk.noLoop();
