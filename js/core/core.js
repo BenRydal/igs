@@ -1,5 +1,10 @@
 /**
  * This class holds core program data and associated parsing methods from processed CSV files.
+ * Separate parsing classes for movement, conversation, and code CSV files test parsed data from PapaParse
+ * results and generate different data structures 
+ * These data structures are integrated into a Path object which is the central data structure for the IGS
+ * Original data from each CSV file is stored within each parsing class for re-processing as new data is loaded
+ * Each time CSV file is successfully loaded and parsed, domController is called to update GUI elements 
  * 
  */
 
