@@ -52,16 +52,16 @@ class DomController {
     updateCheckboxes(subTab) {
         switch (subTab) {
             case "movement":
-                this.clearCheckboxes("sub-tab1-1", "checkbox-movement");
-                for (const coreDataItem of this.sk.core.pathList) this.createCheckbox(coreDataItem, "movement-main-tab", "checkbox-movement");
+                this.clearCheckboxes("sub-tab1-1", "input-class-movement");
+                for (const coreDataItem of this.sk.core.pathList) this.createCheckbox(coreDataItem, "movement-main-tab", "input-class-movement");
                 break;
             case "talk":
-                this.clearCheckboxes("sub-tab3-3", "checkbox-conversation");
-                for (const coreDataItem of this.sk.core.speakerList) this.createCheckbox(coreDataItem, "talk-main-tab", "checkbox-conversation");
+                this.clearCheckboxes("sub-tab3-3", "input-class-talk");
+                for (const coreDataItem of this.sk.core.speakerList) this.createCheckbox(coreDataItem, "talk-main-tab", "input-class-talk");
                 break;
             case "codes":
-                this.clearCheckboxes("sub-tab8-2", "checkbox-code");
-                for (const coreDataItem of this.sk.core.codeList) this.createCheckbox(coreDataItem, "codes-main-tab", "checkbox-code");
+                this.clearCheckboxes("sub-tab8-2", "input-class-code");
+                for (const coreDataItem of this.sk.core.codeList) this.createCheckbox(coreDataItem, "codes-main-tab", "input-class-code");
                 break;
         }
     }
@@ -69,16 +69,16 @@ class DomController {
     updateColorPickers(subTab) {
         switch (subTab) {
             case "movement":
-                this.clearColorPickers("sub-tab1-1", "checkbox-movement");
-                for (const coreDataItem of this.sk.core.pathList) this.createColorPicker(coreDataItem, "movement-main-tab", "checkbox-movement");
+                this.clearColorPickers("sub-tab1-1", "input-class-movement");
+                for (const coreDataItem of this.sk.core.pathList) this.createColorPicker(coreDataItem, "movement-main-tab", "input-class-movement");
                 break;
             case "talk":
-                this.clearColorPickers("sub-tab3-3", "checkbox-conversation");
-                for (const coreDataItem of this.sk.core.speakerList) this.createColorPicker(coreDataItem, "talk-main-tab", "checkbox-conversation");
+                this.clearColorPickers("sub-tab3-3", "input-class-talk");
+                for (const coreDataItem of this.sk.core.speakerList) this.createColorPicker(coreDataItem, "talk-main-tab", "input-class-talk");
                 break;
             case "codes":
-                this.clearColorPickers("sub-tab8-2", "checkbox-code");
-                for (const coreDataItem of this.sk.core.codeList) this.createColorPicker(coreDataItem, "codes-main-tab", "checkbox-code");
+                this.clearColorPickers("sub-tab8-2", "input-class-code");
+                for (const coreDataItem of this.sk.core.codeList) this.createColorPicker(coreDataItem, "codes-main-tab", "input-class-code");
                 break;
         }
     }
@@ -94,12 +94,12 @@ class DomController {
      * CreateCheckbox/CreateColorPicker create elements that have same styles but have different input types
      * and event listeners.
      */
-    createCheckbox(coreDataItem, mainTabClass, checkboxClass) {
-        let [div, span] = this.createSubTabElement(mainTabClass, coreDataItem, checkboxClass, "checkbox");
+    createCheckbox(coreDataItem, mainTabClass, inputClass) {
+        let [div, span] = this.createSubTabElement(mainTabClass, coreDataItem, inputClass, "checkbox");
         let curColor;
         if (this.sk.sketchController.getIsPathColorMode()) curColor = coreDataItem.color.pathMode;
         else curColor = coreDataItem.color.codeMode;
-        span.classList.add("checkmark", checkboxClass);
+        span.classList.add("checkmark", inputClass);
         span.style.border = "medium solid" + curColor;
         if (coreDataItem.isShowing) {
             span.style.backgroundColor = curColor;
@@ -111,25 +111,25 @@ class DomController {
         div.addEventListener('change', () => this.toggleCheckboxAndData(coreDataItem, span));
     }
 
-    createColorPicker(coreDataItem, mainTabClass, checkboxClass) {
-        let [div, span] = this.createSubTabElement(mainTabClass, coreDataItem, checkboxClass, "color");
+    createColorPicker(coreDataItem, mainTabClass, inputClass) {
+        let [div, span] = this.createSubTabElement(mainTabClass, coreDataItem, inputClass, "color");
         if (this.sk.sketchController.getIsPathColorMode()) div.value = coreDataItem.color.pathMode;
         else div.value = coreDataItem.color.codeMode;
-        span.classList.add("colorpicker", checkboxClass);
+        span.classList.add("colorpicker", inputClass);
         span.style.border = "medium solid" + div.value;
         span.style.backgroundColor = div.value;
         div.addEventListener('input', () => this.toggleColorPickerAndData(coreDataItem, div, span));
     }
 
-    createSubTabElement(mainTabClass, coreDataItem, checkboxClass, divType) {
+    createSubTabElement(mainTabClass, coreDataItem, inputClass, inputDivType) {
         let parent = document.getElementById(mainTabClass); // Get parent tab to append new div and label to
         let label = document.createElement('label'); //  Make label
         let div = document.createElement('input'); // Make checkbox div
         let span = document.createElement('span'); // Make span to hold new checkbox styles
         label.textContent = coreDataItem.name; // set name to text of path
-        label.classList.add("tab-checkbox", checkboxClass);
-        div.setAttribute("type", divType);
-        div.classList.add(checkboxClass);
+        label.classList.add("tab-checkbox", inputClass);
+        div.setAttribute("type", inputDivType);
+        div.classList.add(inputClass);
         label.appendChild(div);
         label.appendChild(span);
         parent.appendChild(label);
@@ -169,16 +169,16 @@ class DomController {
     }
 
     clearAllCheckboxes() {
-        this.clearCheckboxes("sub-tab1-1", "checkbox-movement");
-        this.clearCheckboxes("sub-tab3-3", "checkbox-conversation");
-        this.clearCheckboxes("sub-tab8-2", "checkbox-code");
+        this.clearCheckboxes("sub-tab1-1", "input-class-movement");
+        this.clearCheckboxes("sub-tab3-3", "input-class-talk");
+        this.clearCheckboxes("sub-tab8-2", "input-class-code");
     }
 
-    clearCheckboxes(inputID, checkboxClass) {
+    clearCheckboxes(inputID, inputClass) {
         const element = document.getElementById(inputID);
         element.checked = false; // reset input checkbox checked attribute
         element.labels[0].innerHTML = 'Change Color'; // reset text for label of input
-        this.removeAllElements(checkboxClass);
+        this.removeAllElements(inputClass);
     }
 
     clearColorPickers(inputID, colorPickerClass) {
