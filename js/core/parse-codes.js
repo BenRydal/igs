@@ -90,7 +90,7 @@ class ParseCodes {
     }
 
     getCodeColor(color, index) {
-        if (color === this.sk.core.COLORGRAY) return this.sk.core.COLOR_LIST[index % this.sk.core.COLOR_LIST.length];
+        if (color === this.sk.core.COLORGRAY) return this.sk.core.getNextColorInList(index);
         else return 0; // if color already assigned, make it black because there are multiple true codes for same curTime
     }
     timeIsBetweenCurRow(curTime, codeTable) {

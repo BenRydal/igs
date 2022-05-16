@@ -20,6 +20,10 @@ class Core {
         this.COLOR_LIST = ['#6a3d9a', '#ff7f00', '#33a02c', '#1f78b4', '#e31a1c', '#b15928', '#cab2d6', '#fdbf6f', '#b2df8a', '#a6cee3', '#fb9a99', '#ffed6f']; // 12 Class Paired: (Dark) purple, orange, green, blue, red, brown, (Light) lPurple, lOrange, lGreen, lBlue, lRed, yellow
     }
 
+    getNextColorInList(number) {
+        return this.COLOR_LIST[number % this.COLOR_LIST.length];
+    }
+
     /**
      * @param  {PapaParse results Array} results
      * @param  {File} file
@@ -62,7 +66,7 @@ class Core {
     }
 
     updateCodes(codeName) {
-        this.codeList.push(this.createDisplayData(codeName, false, this.COLORGRAY, this.COLOR_LIST[this.codeList.length % this.COLOR_LIST.length]));
+        this.codeList.push(this.createDisplayData(codeName, false, this.COLORGRAY, this.getNextColorInList(this.codeList.length)));
         this.clearMovement();
         this.parseMovement.reProcessAllPointArrays();
         this.sk.domController.updateCheckboxes("codes");
@@ -81,7 +85,7 @@ class Core {
             // If row is good data, test if core.speakerList already has speaker and if not add speaker 
             if (this.coreUtils.conversationRowForType(curRow)) {
                 const speaker = this.coreUtils.cleanFileName(curRow[this.coreUtils.headersConversation[1]]); // get cleaned speaker character
-                if (!tempSpeakerList.includes(speaker)) this.speakerList.push(this.createDisplayData(speaker, true, this.COLOR_LIST[this.speakerList.length % this.COLOR_LIST.length], this.COLORGRAY));
+                if (!tempSpeakerList.includes(speaker)) this.speakerList.push(this.createDisplayData(speaker, true, this.getNextColorInList(this.speakerList.length), this.COLORGRAY));
             }
         }
     }
@@ -118,7 +122,7 @@ class Core {
      */
     getPathModeColor(name) {
         if (this.sk.arrayIsLoaded(this.speakerList)) return this.setPathModeColorBySpeaker(name);
-        else return this.COLOR_LIST[this.pathList.length % this.COLOR_LIST.length]; // color is next in Color list
+        else return this.getNextColorInList(this.pathList.length);
     }
 
     /**
@@ -130,7 +134,7 @@ class Core {
         if (this.speakerList.some(e => e.name === pathName)) {
             const hasSameName = (element) => element.name === pathName; // condition to satisfy/does it have pathName
             return this.speakerList[this.speakerList.findIndex(hasSameName)].color.pathMode; // returns first index that satisfies condition/index of speaker that matches pathName
-        } else return this.COLOR_LIST[this.speakerList.length + this.getNumPathsWithNoSpeaker() % this.COLOR_LIST.length]; // assign color to path
+        } else return this.getNextColorInList(this.speakerList.length + this.getNumPathsWithNoSpeaker());
     }
 
     /**
