@@ -1,3 +1,7 @@
+/**
+ * This class handles updating various DOM UI elements. Methods are called from DomHandler and Core classes.
+ */
+
 class DomController {
 
     constructor(sketch) {
