@@ -33,8 +33,6 @@ const igs = new p5((sk) => {
         // CONSTANTS
         sk.PLAN = 0;
         sk.SPACETIME = 1;
-        sk.DRAWGUI = 0;
-        sk.HANDLEGUI = 1;
         sk.GUITEXTSIZE = sk.width / 70;
         // STYLES
         sk.textSize(sk.GUITEXTSIZE);
