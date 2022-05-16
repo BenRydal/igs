@@ -19,7 +19,7 @@ class DomController {
         elementList.forEach(element => element.style.display = 'none');
     }
 
-    resetColorMode() {
+    resetColorModeButton() {
         document.getElementById('sub-tab8-1').checked = false; // reset color code button
         this.updateColorModeLabel();
         this.toggleColorChangeButtons();
