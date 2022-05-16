@@ -4,13 +4,6 @@ class DomController {
         this.sk = sketch;
     }
 
-    updateColorMode() {
-        this.updateColorModeLabel();
-        this.sk.sketchController.toggleIsPathColorMode();
-        this.toggleColorChangeButtons();
-        this.updateAllCheckboxes();
-    }
-
     resetColorMode() {
         document.getElementById('sub-tab8-1').checked = false; // reset color code button
         this.updateColorModeLabel();

@@ -33,6 +33,13 @@ class DomHandler {
         this.sk.sketchController.setWordToSearch(searchInputDiv.value);
     }
 
+    handleColorModeButton() {
+        this.sk.domController.updateColorModeLabel();
+        this.sk.sketchController.toggleIsPathColorMode();
+        this.sk.domController.toggleColorChangeButtons();
+        this.sk.domController.updateAllCheckboxes();
+    }
+
     handleExampleDropDown() {
         const option = document.getElementById("examples").value;
         if (option === "Load Data") this.showLoadDataButtons();

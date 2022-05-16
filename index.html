@@ -231,7 +231,7 @@ Video (MP4)">LOAD FILES</label>
             </div>
             <!-- Sub Tabs -->
             <input class="tab-radio" id="sub-tab8-1" name="sub-group8" type="checkbox"
-                onchange="igs.domController.updateColorMode(); igs.loop()">
+                onchange="igs.domHandler.handleColorModeButton(); igs.loop()">
             <input class="tab-radio js-color-change" id="sub-tab8-2" name="sub-group8" type="checkbox"
                 onchange="this.checked ? igs.domController.updateColorPickers('codes') : igs.domController.updateCheckboxes('codes'); igs.loop()">
         </div>
