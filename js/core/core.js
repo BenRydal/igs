@@ -20,10 +20,6 @@ class Core {
         this.COLOR_LIST = ['#6a3d9a', '#ff7f00', '#33a02c', '#1f78b4', '#e31a1c', '#b15928', '#cab2d6', '#fdbf6f', '#b2df8a', '#a6cee3', '#fb9a99', '#ffed6f']; // 12 Class Paired: (Dark) purple, orange, green, blue, red, brown, (Light) lPurple, lOrange, lGreen, lBlue, lRed, yellow
     }
 
-    getNextColorInList(number) {
-        return this.COLOR_LIST[number % this.COLOR_LIST.length];
-    }
-
     /**
      * @param  {PapaParse results Array} results
      * @param  {File} file
@@ -146,6 +142,10 @@ class Core {
             if (!this.speakerList.some(e => e.name === path.name)) count++;
         }
         return count;
+    }
+
+    getNextColorInList(number) {
+        return this.COLOR_LIST[number % this.COLOR_LIST.length];
     }
 
     sortByName(list) {
