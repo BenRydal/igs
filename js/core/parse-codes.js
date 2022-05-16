@@ -1,8 +1,8 @@
 class ParseCodes {
 
-    constructor(sketch, testData) {
+    constructor(sketch, coreUtils) {
         this.sk = sketch;
-        this.testData = testData;
+        this.coreUtils = coreUtils;
         this.parsedFileArray = []; // holds CodeTable objects
     }
 
@@ -12,7 +12,7 @@ class ParseCodes {
      * @param  {File} file
      */
     processSingleCodeFile(results, file) {
-        const codeName = this.testData.cleanFileName(file.name); // remove file extension
+        const codeName = this.coreUtils.cleanFileName(file.name); // remove file extension
         this.parsedFileArray.push(this.createCodeTable(results.data, codeName));
         this.sk.core.updateCodes(codeName);
     }
@@ -33,8 +33,8 @@ class ParseCodes {
      */
     updateParsedFileArrayForMultiCodes(results) {
         for (const row of results.data) {
-            if (this.testData.codeRowForType(row)) { // IMPORTANT: in case there is partial missing data etc. 
-                const curCodeName = this.testData.cleanFileName(row[this.testData.headersMultiCodes[0]]);
+            if (this.coreUtils.codeRowForType(row)) { // IMPORTANT: in case there is partial missing data etc. 
+                const curCodeName = this.coreUtils.cleanFileName(row[this.coreUtils.headersMultiCodes[0]]);
                 let addNewTable = true; // to add new code table if parsedFileArray empty or no name match/existing codeTable NOT updated
                 for (const codeTable of this.parsedFileArray) { // test for name match to updated existing codeTable
                     if (codeTable.codeName === curCodeName) {
@@ -70,7 +70,7 @@ class ParseCodes {
         let color = this.sk.core.COLORGRAY; // if no matching codes are found, this will be the color returned
         for (let i = 0; i < this.parsedFileArray.length; i++) {
             const curCodeTableRow = this.parsedFileArray[i].parsedCodeArray[this.parsedFileArray[i].counter];
-            if (this.testData.codeRowForType(curCodeTableRow)) { // IMPORTANT: in case there is partial missing data etc. 
+            if (this.coreUtils.codeRowForType(curCodeTableRow)) { // IMPORTANT: in case there is partial missing data etc. 
                 if (this.timeIsBetweenCurRow(curTime, this.parsedFileArray[i])) {
                     hasCodeArray.push(true);
                     color = this.getCodeColor(color, i);
@@ -102,11 +102,11 @@ class ParseCodes {
     }
 
     getStartTime(results, row) {
-        return results[row][this.testData.headersSingleCodes[0]];
+        return results[row][this.coreUtils.headersSingleCodes[0]];
     }
 
     getEndTime(results, row) {
-        return results[row][this.testData.headersSingleCodes[1]];
+        return results[row][this.coreUtils.headersSingleCodes[1]];
     }
 
     between(x, min, max) {

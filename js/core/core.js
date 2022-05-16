@@ -3,10 +3,10 @@ class Core {
     constructor(sketch) {
         this.sk = sketch;
         // Parsing Classes
-        this.testData = new TestData(); // encapsulates various tests for parsing data
-        this.parseMovement = new ParseMovement(this.sk, this.testData);
-        this.parseConversation = new ParseConversation(this.sk, this.testData);
-        this.parseCodes = new ParseCodes(this.sk, this.testData);
+        this.coreUtils = new CoreUtils(); // encapsulates various tests for parsing data
+        this.parseMovement = new ParseMovement(this.sk, this.coreUtils);
+        this.parseConversation = new ParseConversation(this.sk, this.coreUtils);
+        this.parseCodes = new ParseCodes(this.sk, this.coreUtils);
         // Program Data
         this.speakerList = []; // Holds speaker objects for number of speakers parsed from successfully loaded conversation file
         this.pathList = []; // Holds path objects for each successfully loaded movement file
@@ -20,12 +20,12 @@ class Core {
      * @param  {PapaParse results Array} results
      * @param  {File} file
      */
-    testParsedResultsForProcessing(results, file) {
-        if (this.testData.parsedResults(results, this.testData.headersMovement, this.testData.movementRowForType)) this.parseMovement.processFile(results, file);
-        else if (this.testData.parsedResults(results, this.testData.headersConversation, this.testData.conversationRowForType)) this.parseConversation.processFile(results, file);
+    testPapaParseResultsForProcessing(results, file) {
+        if (this.coreUtils.testPapaParseResults(results, this.coreUtils.headersMovement, this.coreUtils.movementRowForType)) this.parseMovement.processFile(results, file);
+        else if (this.coreUtils.testPapaParseResults(results, this.coreUtils.headersConversation, this.coreUtils.conversationRowForType)) this.parseConversation.processFile(results, file);
         // test multiCodeFile before singleCodeFile because it has same headers with one additional header
-        else if (this.testData.parsedResults(results, this.testData.headersMultiCodes, this.testData.multiCodeRowForType)) this.parseCodes.processMultiCodeFile(results);
-        else if (this.testData.parsedResults(results, this.testData.headersSingleCodes, this.testData.codeRowForType)) this.parseCodes.processSingleCodeFile(results, file);
+        else if (this.coreUtils.testPapaParseResults(results, this.coreUtils.headersMultiCodes, this.coreUtils.multiCodeRowForType)) this.parseCodes.processMultiCodeFile(results);
+        else if (this.coreUtils.testPapaParseResults(results, this.coreUtils.headersSingleCodes, this.coreUtils.codeRowForType)) this.parseCodes.processSingleCodeFile(results, file);
         else alert("Error loading CSV file. Please make sure your file is a CSV file formatted with correct column headers");
     }
 
@@ -75,8 +75,8 @@ class Core {
             let tempSpeakerList = []; // create/populate temp list to store strings to test from global core.speakerList
             for (const tempSpeaker of this.speakerList) tempSpeakerList.push(tempSpeaker.name);
             // If row is good data, test if core.speakerList already has speaker and if not add speaker 
-            if (this.testData.conversationRowForType(curRow)) {
-                const speaker = this.testData.cleanFileName(curRow[this.testData.headersConversation[1]]); // get cleaned speaker character
+            if (this.coreUtils.conversationRowForType(curRow)) {
+                const speaker = this.coreUtils.cleanFileName(curRow[this.coreUtils.headersConversation[1]]); // get cleaned speaker character
                 if (!tempSpeakerList.includes(speaker)) this.speakerList.push(this.createDisplayData(speaker, true, this.COLOR_LIST[this.speakerList.length % this.COLOR_LIST.length], this.COLORGRAY));
             }
         }

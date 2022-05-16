@@ -98,7 +98,7 @@ class DomHandler {
             },
             complete: (results, file) => {
                 console.log("Parsing complete:", results, file);
-                this.sk.core.testParsedResultsForProcessing(results, file);
+                this.sk.core.testPapaParseResultsForProcessing(results, file);
             },
             error: (error, file) => {
                 alert("Parsing error with one of your CSV file. Please make sure your file is formatted correctly as a .CSV");

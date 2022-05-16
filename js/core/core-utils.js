@@ -1,4 +1,4 @@
-class TestData {
+class CoreUtils {
 
     constructor() {
         // NOTE: All headers must be lowercase as input data tables are converted to lowercase when loaded using PapaParse transformHeaders method
@@ -14,7 +14,7 @@ class TestData {
      * @param  {Function} callbackTypeTest
      * Note: must bind this to callbackTypeTest to set correct "this" context
      */
-    parsedResults(results, headers, callbackTypeTest) {
+    testPapaParseResults(results, headers, callbackTypeTest) {
         return results.data.length > 0 && this.includesAllHeaders(results.meta.fields, headers) && this.hasOneCleanRow(results.data, callbackTypeTest.bind(this));
     }
 
