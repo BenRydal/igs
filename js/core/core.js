@@ -1,13 +1,17 @@
+/**
+ * This class holds core program data and associated parsing methods from processed CSV files.
+ * 
+ */
+
 class Core {
 
     constructor(sketch) {
         this.sk = sketch;
-        // Parsing Classes
-        this.coreUtils = new CoreUtils(); // encapsulates various tests for parsing data
+        this.coreUtils = new CoreUtils(); // utilities for testing CSV files
         this.parseMovement = new ParseMovement(this.sk, this.coreUtils);
         this.parseConversation = new ParseConversation(this.sk, this.coreUtils);
         this.parseCodes = new ParseCodes(this.sk, this.coreUtils);
-        // Program Data
+        // Core program data
         this.speakerList = []; // Holds speaker objects for number of speakers parsed from successfully loaded conversation file
         this.pathList = []; // Holds path objects for each successfully loaded movement file
         this.codeList = []; // holds code objects for each successfully loaded code file
@@ -82,10 +86,6 @@ class Core {
         }
     }
 
-    /**
-     * Path and Speaker objects are separate so that each speaker and path object can match or vary for different number of movement files and speakers
-     * NOTE: Path, Speaker, and Code MUST all have a name, isShowing and color attributes
-     */
     createPath(name, movementPointArray, conversationPointArray) {
         const displayData = this.createDisplayData(name, true, this.getPathModeColor(name), this.COLORGRAY);
         return {
