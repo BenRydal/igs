@@ -56,6 +56,11 @@ const igs = new p5((sk) => {
         document.getElementById("sub-tab3-4").addEventListener("change", function () {
             sk.domController.updateSubTab(this.checked, "talk");
         });
+        // Tab 3 Video
+        document.getElementById("sub-tab4-1").addEventListener("click", sk.sketchController.toggleShowVideo.bind(sk.sketchController));
+        document.getElementById("sub-tab4-2").addEventListener("click", sk.sketchController.playPauseVideoFromButton.bind(sk.sketchController));
+        document.getElementById("sub-tab4-3").addEventListener("click", sk.sketchController.increaseVideoSize.bind(sk.sketchController));
+        document.getElementById("sub-tab4-4").addEventListener("click", sk.sketchController.decreaseVideoSize.bind(sk.sketchController));
     }
 
     sk.draw = function () {
