@@ -31,14 +31,9 @@ import {
 import {
     FloorPlan
 } from './floorplan/floorplan.js';
-
 import {
-    DrawConversation
-} from './draw/draw-conversation.js';
-import {
-    DrawMovement
-} from './draw/draw-movement.js';
-
+    SetPathData
+} from './draw/setPathData.js';
 
 
 const igs = new p5((sk) => {
@@ -73,8 +68,13 @@ const igs = new p5((sk) => {
     sk.draw = function () {
         sk.background(255);
         sk.translate(-sk.width / 2, -sk.height / 2, 0); // recenter canvas to top left when using WEBGL renderer
+        // set/push to 3D if applicable
         if (sk.handle3D.getIs3DModeOrTransitioning()) sk.handle3D.update3DTranslation(); // handles transitioning between 2D/3D modes
-        if (sk.dataIsLoaded(sk.floorPlan.getImg())) sk.drawData(); // floorPlan must be loaded to draw any data
+        if (sk.dataIsLoaded(sk.floorPlan.getImg())) { // floorPlan must be loaded to draw any data
+            sk.floorPlan.setFloorPlan(sk.gui.fpContainer.getContainer());
+            const setPathData = new SetPathData(sk, sk.core.pathList, sk.core.speakerList, sk.core.codeList);
+            setPathData.set();
+        }
         if (sk.sketchController.testVideoAndDivAreLoaded() && sk.sketchController.getIsVideoShow()) sk.sketchController.updateVideoDisplay();
         sk.gui.updateGUIWithTranslation(); // draw canvas GUI elements in 3D
         if (sk.handle3D.getIs3DModeOrTransitioning()) sk.pop();
@@ -83,36 +83,6 @@ const igs = new p5((sk) => {
         if (sk.sketchController.getIsAnimate() && !sk.sketchController.getIsAnimatePause()) sk.sketchController.updateAnimation();
         if ((sk.sketchController.getIsAnimate() && !sk.sketchController.getIsAnimatePause()) || sk.sketchController.getIsVideoPlay() || sk.handle3D.getIsTransitioning()) sk.loop();
         else sk.noLoop();
-    }
-
-    /**
-     * Important: Floor plan must be loaded to draw any data
-     */
-    sk.drawData = function () {
-        sk.floorPlan.setFloorPlan(sk.gui.fpContainer.getContainer());
-        if (sk.arrayIsLoaded(sk.core.pathList)) {
-            if (sk.arrayIsLoaded(sk.core.speakerList)) sk.setMovementAndConversation();
-            else sk.setMovement();
-        }
-    }
-
-    sk.setMovement = function () {
-        const drawMovement = new DrawMovement(sk);
-        for (const path of sk.core.pathList) {
-            if (path.isShowing) drawMovement.setData(path); // draw after conversation so dot displays on top
-        }
-    }
-
-    sk.setMovementAndConversation = function () {
-        const drawConversation = new DrawConversation(sk);
-        const drawMovement = new DrawMovement(sk);
-        for (const path of sk.core.pathList) {
-            if (path.isShowing) {
-                drawConversation.setData(path, sk.core.speakerList);
-                drawMovement.setData(path); // draw after conversation so dot displays on top
-            }
-        }
-        drawConversation.setConversationBubble(); // draw conversation text last so it displays on top
     }
 
     sk.mousePressed = function () {

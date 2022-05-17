@@ -5,15 +5,11 @@
  * the tradeoff is the need for more customized methods and conditional structures to handle starting/begining lines/shapes
  */
 
-import {
-    DrawUtils
-} from './draw-utils.js';
-
 export class DrawMovement {
 
-    constructor(sketch) {
+    constructor(sketch, drawUtils) {
         this.sk = sketch;
-        this.drawUtils = new DrawUtils(this.sk);
+        this.drawUtils = drawUtils;
         this.dot = null; // represents user selection dot drawn in both floor plan and space-time views
         this.isDrawingLine = false; // boolean controls start/end line segment drawing based on code file and GUI selections
         this.style = {

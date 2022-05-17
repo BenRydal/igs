@@ -4,8 +4,9 @@
  */
 export class DrawUtils {
 
-    constructor(sketch) {
+    constructor(sketch, codeList) {
         this.sk = sketch;
+        this.codeList = codeList;
     }
 
     isShowingInGUI(pixelTime) {
@@ -19,13 +20,13 @@ export class DrawUtils {
 
     /**
      * This method tests if a point is showing for all selected codes from codeList
-     * IMPLEMENTATION: Iterate through core codeList and return false if: for any of codes that are true in codeList a code at curPoint is false 
+     * IMPLEMENTATION: Iterate through codeList and return false if: for any of codes that are true in codeList a code at curPoint is false 
      * @param  {MovementPoint} point
      */
     isShowingInCodeList(codesArray) {
-        if (this.sk.arrayIsLoaded(this.sk.core.codeList)) {
-            for (let j = 0; j < this.sk.core.codeList.length; j++) {
-                if (this.sk.core.codeList[j].isShowing) {
+        if (this.sk.arrayIsLoaded(this.codeList)) {
+            for (let j = 0; j < this.codeList.length; j++) {
+                if (this.codeList[j].isShowing) {
                     if (codesArray[j]) continue;
                     else return false;
                 }

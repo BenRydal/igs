@@ -1,12 +1,12 @@
-import {
-    DrawUtils
-} from './draw-utils.js';
+/**
+ * This class holds drawing methods specific to drawing conversation rectangles and text depending on user interaction
+ */
 
 export class DrawConversation {
 
-    constructor(sketch) {
+    constructor(sketch, drawUtils) {
         this.sk = sketch;
-        this.drawUtils = new DrawUtils(this.sk);
+        this.drawUtils = drawUtils;
         this.conversationBubble = { // represents user selected conversation
             isSelected: false,
             point: null, // stores one ConversationPoint object for selected conversation turn
