@@ -7,7 +7,8 @@ class DomHandler {
     /**
      * @param  {PNG/JPG/JPEG, CSV, MP4 Array} input
      */
-    handleLoadFileButton(input) {
+    handleLoadFileButton() {
+        const input = document.getElementById("input-load-files");
         for (const file of input.files) this.testFileTypeForProcessing(file);
         input.value = ''; // reset input value so you can load same file(s) again in browser
     }
@@ -41,7 +42,7 @@ class DomHandler {
     }
 
     handleExampleDropDown() {
-        const option = document.getElementById("examples").value;
+        const option = document.getElementById("data-drop-down-menu").value;
         if (option === "Load Data") this.sk.domController.showLoadDataButtons();
         else this.sk.domController.hideLoadDataButtons();
         this.resetOnDropDownSelection();

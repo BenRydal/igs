@@ -33,6 +33,21 @@ const igs = new p5((sk) => {
         sk.textFont(sk.font_Lato);
         sk.textAlign(sk.LEFT, sk.TOP);
         sk.smooth(); // must enable when using WEBGL renderer
+        sk.addListeners();
+    }
+
+    sk.addListeners = function () {
+
+        document.getElementById("data-drop-down-menu").addEventListener("change", sk.domHandler.handleExampleDropDown.bind(sk.domHandler));
+
+        document.getElementById("input-load-files").addEventListener("change", sk.domHandler.handleLoadFileButton.bind(sk.domHandler));
+
+
+
+        // document.getElementById("input-floorplan").addEventListener("change", sk.domHandler.handleFloorPlanButton.bind(this));
+        // document.getElementById("input-video").addEventListener("change", sk.domHandler.handleVideoButton.bind(this));
+        // document.getElementById("button-save").addEventListener("click", sk.domHandler.handleSaveButton.bind(this));
+        // document.getElementById("button-clear").addEventListener("click", sk.domHandler.handleClearButton.bind(this));
     }
 
     sk.draw = function () {

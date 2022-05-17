@@ -36,7 +36,7 @@
 <body>
     <div class="main-menu-bar">
         <form action="/action_page.php">
-            <select id="examples" name="examples" onchange="igs.domHandler.handleExampleDropDown()">
+            <select id="data-drop-down-menu" name="drop-down-menu">
                 <option disabled selected value> -- Select an Option -- </option>
                 <option value="Load Data">LOAD DATA</option>
                 <option value="Example 1">EXAMPLE 1: MICHAEL JORDAN'S LAST SHOT</option>
@@ -44,12 +44,10 @@
                 <option value="Example 3">EXAMPLE 3: CLASSROOM SCIENCE LESSON</option>
                 <option value="Example 4">EXAMPLE 4: CLASSROOM DISCUSSION</option>
             </select>
-
-            <!-- js-main-menu-bar__load-files--display class used to show/hide buttons when load data option selected -->
-            <input type="file" name="file" id="load-files-button"
+            <input type="file" name="file" id="input-load-files"
                 class="main-menu-bar__input js-main-menu-bar__load-files--display" multiple
-                accept=".png, .jpg, .jpeg, .csv, .mp4" onchange="igs.domHandler.handleLoadFileButton(this)">
-            <label for="load-files-button" class="js-main-menu-bar__load-files--display" title="Load Files in the following formats:
+                accept=".png, .jpg, .jpeg, .csv, .mp4">
+            <label for="input-load-files" class="js-main-menu-bar__load-files--display" title="Load Files in the following formats:
 Floor Plan (PNG/JPG)
 Movement (CSV)
 Conversation (CSV)
