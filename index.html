@@ -49,7 +49,8 @@
             </select>
 
             <!-- js-main-menu-bar__load-files--display class used to show/hide buttons when load data option selected -->
-            <input type="file" name="file" id="load-files-button" class="main-menu-bar__input js-main-menu-bar__load-files--display" multiple
+            <input type="file" name="file" id="load-files-button"
+                class="main-menu-bar__input js-main-menu-bar__load-files--display" multiple
                 accept=".png, .jpg, .jpeg, .csv, .mp4" onchange="igs.domHandler.handleLoadFileButton(this)">
             <label for="load-files-button" class="js-main-menu-bar__load-files--display" title="Load Files in the following formats:
 Floor Plan (PNG/JPG)
@@ -60,7 +61,8 @@ Video (MP4)">LOAD FILES</label>
 
             <button type="button" id="clear-button" class="main-menu-bar__input js-main-menu-bar__load-files--display"
                 onclick="igs.domHandler.handleClearButton()"></button>
-            <label for="clear-button" class="js-main-menu-bar__load-files--display" title="Clear All Loaded Data">CLEAR</label>
+            <label for="clear-button" class="js-main-menu-bar__load-files--display"
+                title="Clear All Loaded Data">CLEAR</label>
 
             <button type="button" id="3D-button" class="main-menu-bar__input"
                 onclick="igs.domHandler.handleToggle3DButton()"></button>
@@ -73,31 +75,32 @@ Video (MP4)">LOAD FILES</label>
     </div>
 
 
-
-    <div class="how-to-container" id="sketch-holder">
-        <h1 class="how-to-container__title">Interaction Geography Slicer (IGS)</h1>
-        <p class="how-to-container__text">
-            Hello! This is a tool to visualize movement, conversation, and video data over space
-            and time. Data are displayed over a floor plan and a timeline and can be viewed in 2D or 3D.
-        </p>
-        <p class="how-to-container__text">
-            Use the top menu to visualize different sample datasets or upload your own data. Use the bottom
-            left tabs as well as the timeline to selectively study displayed data. For example, you can toggle
-            individual movement paths and speakers, visualize conversation in different ways, animate data, and
-            play/pause video by clicking anywhere on the timeline.
-        </p>
-        <p class="how-to-container__text">
-            For further information, <a href="https://benrydal.com/software/igs">learn how to use and format your
-                data for the IGS</a>
-        </p>
-        <p class="how-to-container__credits">
-            IGS software is an open-source project built with <a href="https://p5js.org/">p5.js</a> licensed under
-            the GNU General Public License Version 2.0 and
-            developed with support from the National Science Foundation.
-            <a href="https://github.com/BenRydal/igs">Contribute</a> |
-            <a href="https://par.nsf.gov/servlets/purl/10074100">Reference</a> |
-            <a href="https://www.benrydal.com/interactiongeography">Learn More About Interaction Geography</a>
-        </p>
+    <div class="p5-container" id="sketch-holder">
+        <div class="how-to-container">
+            <h1 class="how-to-container__title">Interaction Geography Slicer (IGS)</h1>
+            <p class="how-to-container__text">
+                Hello! This is a tool to visualize movement, conversation, and video data over space
+                and time. Data are displayed over a floor plan and a timeline and can be viewed in 2D or 3D.
+            </p>
+            <p class="how-to-container__text">
+                Use the top menu to visualize different sample datasets or upload your own data. Use the bottom
+                left tabs as well as the timeline to selectively study displayed data. For example, you can toggle
+                individual movement paths and speakers, visualize conversation in different ways, animate data, and
+                play/pause video by clicking anywhere on the timeline.
+            </p>
+            <p class="how-to-container__text">
+                For further information, <a href="https://benrydal.com/software/igs">learn how to use and format your
+                    data for the IGS</a>
+            </p>
+            <p class="how-to-container__credits">
+                IGS software is an open-source project built with <a href="https://p5js.org/">p5.js</a> licensed under
+                the GNU General Public License Version 2.0 and
+                developed with support from the National Science Foundation.
+                <a href="https://github.com/BenRydal/igs">Contribute</a> |
+                <a href="https://par.nsf.gov/servlets/purl/10074100">Reference</a> |
+                <a href="https://www.benrydal.com/interactiongeography">Learn More About Interaction Geography</a>
+            </p>
+        </div>
     </div>
 
     <div class="main-tab-container">
@@ -130,7 +133,8 @@ Video (MP4)">LOAD FILES</label>
                 <input type="search" id="word-search" name="search-input" placeholder="Search"
                     onsearch="igs.domHandler.handleWordSearchInput(); igs.loop()">
                 <label for="sub-tab3-1" title="Align talk along top">Align</label>
-                <label for="sub-tab3-2" title="Show talk by all speakers along each movement path">All On Path</label>
+                <label for="sub-tab3-2" title="Show talk by all speakers along each movement path">All On
+                    Path</label>
                 <label for="sub-tab3-3" title="Click to change and set colors">Change
                     Color</label>
             </div>

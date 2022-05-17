@@ -43,9 +43,13 @@ body {
     display: none;
 }
 
+.p5-container {
+    position: relative;
+}
+
 .how-to-container {
     position: absolute;
-    top: 10vh;
+    top: 6vh;
     width: 70vw;
     height: 70vh;
     border: 2px solid black;
