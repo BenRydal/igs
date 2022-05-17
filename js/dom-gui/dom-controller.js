@@ -53,6 +53,11 @@ class DomController {
         });
     }
 
+    updateSubTab(isChecked, subTab) {
+        if (isChecked) this.updateColorPickers(subTab);
+        else this.updateCheckboxes(subTab);
+    }
+
     updateCheckboxes(subTab) {
         switch (subTab) {
             case "movement":

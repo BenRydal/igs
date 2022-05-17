@@ -47,16 +47,14 @@ const igs = new p5((sk) => {
         document.getElementById("how-to-button").addEventListener("click", sk.domHandler.handleHowToButton.bind(sk.domHandler));
         // Tab 1
         document.getElementById("sub-tab1-1").addEventListener("change", function () {
-            if (this.checked) sk.domController.updateColorPickers('movement');
-            else sk.domController.updateCheckboxes('movement');
+            sk.domController.updateSubTab(this.checked, "movement");
         });
         // Tab 2 Talk
         document.getElementById("sub-tab3-1").addEventListener("change", sk.domHandler.handleWordSearchInput.bind(sk.domHandler));
         document.getElementById("sub-tab3-2").addEventListener("click", sk.sketchController.toggleIsAlignTalk.bind(sk.sketchController));
         document.getElementById("sub-tab3-3").addEventListener("click", sk.sketchController.toggleIsAllTalk.bind(sk.sketchController));
         document.getElementById("sub-tab3-4").addEventListener("change", function () {
-            if (this.checked) sk.domController.updateColorPickers('talk');
-            else sk.domController.updateCheckboxes('talk');
+            sk.domController.updateSubTab(this.checked, "talk");
         });
     }
 
