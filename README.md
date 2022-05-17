@@ -4,7 +4,7 @@
 
 Hi there! This is a repository for the Interaction Geography Slicer (IGS), an open-source, dynamic visualization tool that provides novel ways to visualize movement, conversation, and audio/video data over space and time. We are rapidly developing and expanding IGS features and collaborators in this effort are welcome. If you have found a bug, you can file it under the “issues” tab. You can also request new features here. For more information on the IGS and also how to properly format, collect, or transcribe your data for use in this tool please visit: [Interaction Geography Slicer](https://www.benrydal.com/software/igs)
 
-![repo](coverImage.png)
+![repo](./images/coverImage.png)
 
 ## Credits & License Information
 
