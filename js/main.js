@@ -37,9 +37,7 @@ const igs = new p5((sk) => {
     }
 
     sk.addListeners = function () {
-
-        // TODO: ADD LISTENER FOR LOOPS!!!! THEN REMOVE ALL LOOPS FROM DOM HANDLER!!!
-        // Menu Bar
+        // Main Menu Bar
         document.getElementById("data-drop-down-menu").addEventListener("change", sk.domHandler.handleExampleDropDown.bind(sk.domHandler));
         document.getElementById("input-load-files").addEventListener("change", sk.domHandler.handleLoadFileButton.bind(sk.domHandler));
         document.getElementById("clear-button").addEventListener("click", sk.domHandler.handleClearButton.bind(sk.domHandler));
@@ -90,10 +88,18 @@ const igs = new p5((sk) => {
         document.getElementById("sub-tab7-2").addEventListener("click", sk.floorPlan.setRotateRight.bind(sk.floorPlan));
 
         // Tab 7 Codes
-        document.getElementById("sub-tab8-1").addEventListener("change", sk.domHandler.handleColorModeButton.bind(sk.domHandler));
+        document.getElementById("sub-tab8-1").addEventListener("click", sk.domHandler.handleColorModeButton.bind(sk.domHandler));
         document.getElementById("sub-tab8-2").addEventListener("change", function () {
             sk.domController.updateSubTab(this.checked, "codes");
         });
+
+        // Update sketch loop for specific tabs/elements
+        document.querySelectorAll('.loop-sketch').forEach(element => {
+            element.addEventListener('click', function () {
+                sk.loop();
+            });
+        });
+
     }
 
     sk.draw = function () {
