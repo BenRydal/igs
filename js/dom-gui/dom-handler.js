@@ -24,7 +24,7 @@ class DomHandler {
     }
 
     handleHowToButton() {
-        let element = document.querySelector('.how-to-container');
+        const element = document.querySelector('.how-to-container');
         if (element.style.display === 'none') element.style.display = 'block';
         else element.style.display = 'none';
     }

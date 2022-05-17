@@ -44,7 +44,7 @@
                 <option value="Example 3">EXAMPLE 3: CLASSROOM SCIENCE LESSON</option>
                 <option value="Example 4">EXAMPLE 4: CLASSROOM DISCUSSION</option>
             </select>
-            <input type="file" name="file" id="input-load-files"
+            <input type="file" name="input-files" id="input-load-files"
                 class="main-menu-bar__input js-main-menu-bar__load-files--display" multiple
                 accept=".png, .jpg, .jpeg, .csv, .mp4">
             <label for="input-load-files" class="js-main-menu-bar__load-files--display" title="Load Files in the following formats:
@@ -53,18 +53,13 @@ Movement (CSV)
 Conversation (CSV)
 Code (CSV)
 Video (MP4)">LOAD FILES</label>
-
-            <button type="button" id="clear-button" class="main-menu-bar__input js-main-menu-bar__load-files--display"
-                onclick="igs.domHandler.handleClearButton()"></button>
+            <button type="button" id="clear-button"
+                class="main-menu-bar__input js-main-menu-bar__load-files--display"></button>
             <label for="clear-button" class="js-main-menu-bar__load-files--display"
                 title="Clear All Loaded Data">CLEAR</label>
-
-            <button type="button" id="3D-button" class="main-menu-bar__input"
-                onclick="igs.domHandler.handleToggle3DButton()"></button>
+            <button type="button" id="3D-button" class="main-menu-bar__input"></button>
             <label for="3D-button" title="Toggle 2D and 3D Views">2D/3D</label>
-
-            <button type="button" id="how-to-button" class="main-menu-bar__input"
-                onclick="igs.domHandler.handleHowToButton()"></button>
+            <button type="button" id="how-to-button" class="main-menu-bar__input"></button>
             <label for="how-to-button" title="Learn How To Use This Tool">HOW TO USE</label>
         </form>
     </div>
