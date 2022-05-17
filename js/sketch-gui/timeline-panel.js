@@ -1,4 +1,4 @@
-class TimelinePanel {
+export class TimelinePanel {
 
     constructor(sketch) {
         this.sk = sketch;

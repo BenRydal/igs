@@ -8,7 +8,19 @@
  * 
  */
 
-class Core {
+import {
+    CoreUtils
+} from './core-utils.js';
+import {
+    ParseMovement
+} from './parse-movement.js';
+import {
+    ParseConversation
+} from './parse-conversation.js';
+import {
+    ParseCodes
+} from './parse-codes.js';
+export class Core {
 
     constructor(sketch) {
         this.sk = sketch;

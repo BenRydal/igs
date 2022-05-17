@@ -1,4 +1,4 @@
-class FloorPlanContainer {
+export class FloorPlanContainer {
 
     constructor(sketch, start, end, height) {
         this.sk = sketch;

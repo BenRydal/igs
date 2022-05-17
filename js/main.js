@@ -7,6 +7,36 @@ Launches IGS as a p5 sketch in instance mode. p5 sketch, DOM and program data ar
     5) VideoPlayer class is an abstract class that holds video data and p5 drawing methods to represent video on the canvas
 */
 
+import {
+    Core
+} from './core/core.js';
+import {
+    GUI
+} from './sketch-gui/gui-interface.js';
+import {
+    DomHandler
+} from './dom-gui/dom-handler.js';
+import {
+    DomController
+} from './dom-gui/dom-controller.js';
+import {
+    SketchController
+} from './sketch/sketch-controller.js';
+import {
+    Handle3D
+} from './sketch/handle-3D.js';
+import {
+    FloorPlan
+} from './floorplan/floorplan.js';
+
+import {
+    DrawConversation
+} from './draw/draw-conversation.js';
+import {
+    DrawMovement
+} from './draw/draw-movement.js';
+
+
 const igs = new p5((sk) => {
 
     sk.preload = function () {

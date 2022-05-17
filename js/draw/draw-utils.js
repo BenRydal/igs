@@ -2,7 +2,7 @@
  * This class holds different utility and helper methods used in draw movement and conversation classes
  * It centralizes decisions about what points to show and not show and is coupled with the sketchController/gui classes
  */
-class DrawUtils {
+export class DrawUtils {
 
     constructor(sketch) {
         this.sk = sketch;

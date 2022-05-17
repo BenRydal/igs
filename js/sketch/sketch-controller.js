@@ -1,4 +1,4 @@
-class SketchController {
+export class SketchController {
 
     constructor(sketch) {
         this.sk = sketch;

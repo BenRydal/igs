@@ -1,4 +1,4 @@
-class ParseCodes {
+export class ParseCodes {
 
     constructor(sketch, coreUtils) {
         this.sk = sketch;

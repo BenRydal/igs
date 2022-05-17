@@ -1,4 +1,9 @@
-class DomHandler {
+import {
+    YoutubePlayer,
+    P5FilePlayer
+} from '../video/video-player.js';
+
+export class DomHandler {
 
     constructor(sketch) {
         this.sk = sketch;

@@ -2,7 +2,7 @@
  * A global videoPlayer object acts as an abstract class for all Player sub-classes
  * All Player classes must implement the following methods: seekTo(time), play(), pause(), mute(), unMute(), getCurrentTime(), getVideoDuration(), destroy(), show(), hide()
  */
-class YoutubePlayer {
+export class YoutubePlayer {
     /**
      * Include the following script in head of the format: <script type = "text/javascript" src = "https://www.youtube.com/iframe_api"> < /script>
      * @param  {videoId: 'your_videoId_here'} params
@@ -114,7 +114,7 @@ class YoutubePlayer {
     }
 }
 
-class P5FilePlayer {
+export class P5FilePlayer {
 
     /**
      * @param  {fileName: 'your_fileLocation_here'} params

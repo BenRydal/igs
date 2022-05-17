@@ -1,4 +1,8 @@
-class DrawConversation {
+import {
+    DrawUtils
+} from './draw-utils.js';
+
+export class DrawConversation {
 
     constructor(sketch) {
         this.sk = sketch;

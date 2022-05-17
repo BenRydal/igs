@@ -1,4 +1,15 @@
-class GUI {
+import {
+    TimelinePanel
+} from './timeline-panel.js';
+import {
+    FloorPlanContainer
+} from './floorplan-container.js';
+import {
+    Highlight
+} from './highlight.js';
+
+
+export class GUI {
 
     constructor(sketch) {
         this.sk = sketch;

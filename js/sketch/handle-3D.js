@@ -1,7 +1,7 @@
 /**
  * Class to control 3D view and transitioning between 2D and 3D views
  */
-class Handle3D {
+export class Handle3D {
 
     constructor(sketch, is3DMode) {
         this.sk = sketch;

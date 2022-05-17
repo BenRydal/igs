@@ -4,7 +4,12 @@
  * For example, using the "line" method in a library like P5 is inefficient and curveVertex increases efficiency significantly but 
  * the tradeoff is the need for more customized methods and conditional structures to handle starting/begining lines/shapes
  */
-class DrawMovement {
+
+import {
+    DrawUtils
+} from './draw-utils.js';
+
+export class DrawMovement {
 
     constructor(sketch) {
         this.sk = sketch;

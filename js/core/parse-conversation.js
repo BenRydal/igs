@@ -1,4 +1,4 @@
-class ParseConversation {
+export class ParseConversation {
 
     constructor(sketch, coreUtils) {
         this.sk = sketch;

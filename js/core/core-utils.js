@@ -1,4 +1,4 @@
-class CoreUtils {
+export class CoreUtils {
 
     constructor() {
         // NOTE: All headers must be lowercase as input data tables are converted to lowercase when loaded using PapaParse transformHeaders method

@@ -1,4 +1,4 @@
-class ParseMovement {
+export class ParseMovement {
 
     constructor(sketch, coreUtils) {
         this.sk = sketch;
