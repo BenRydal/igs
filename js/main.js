@@ -39,12 +39,19 @@ const igs = new p5((sk) => {
     sk.addListeners = function () {
 
         // TODO: ADD LISTENER FOR LOOPS!!!! THEN REMOVE ALL LOOPS FROM DOM HANDLER!!!
+        // Menu Bar
         document.getElementById("data-drop-down-menu").addEventListener("change", sk.domHandler.handleExampleDropDown.bind(sk.domHandler));
         document.getElementById("input-load-files").addEventListener("change", sk.domHandler.handleLoadFileButton.bind(sk.domHandler));
         document.getElementById("clear-button").addEventListener("click", sk.domHandler.handleClearButton.bind(sk.domHandler));
         document.getElementById("3D-button").addEventListener("click", sk.domHandler.handleToggle3DButton.bind(sk.domHandler));
         document.getElementById("how-to-button").addEventListener("click", sk.domHandler.handleHowToButton.bind(sk.domHandler));
+        // Tab 1
+        document.getElementById("sub-tab1-1").addEventListener("change", function () {
+            if (this.checked) sk.domController.updateColorPickers('movement');
+            else sk.domController.updateCheckboxes('movement');
+        });
 
+        //onchange = "this.checked ? sk.domController.updateColorPickers('movement') : sk.domController.updateCheckboxes('movement'); sk.loop()
         // document.getElementById("input-floorplan").addEventListener("change", sk.domHandler.handleFloorPlanButton.bind(this));
         // document.getElementById("input-video").addEventListener("change", sk.domHandler.handleVideoButton.bind(this));
         // document.getElementById("button-save").addEventListener("click", sk.domHandler.handleSaveButton.bind(this));
