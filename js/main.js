@@ -64,7 +64,26 @@ const igs = new p5((sk) => {
         // Tab 4 Animate 
         document.getElementById("sub-tab5-1").addEventListener("click", sk.sketchController.startEndAnimation.bind(sk.sketchController));
         document.getElementById("sub-tab5-2").addEventListener("click", sk.sketchController.toggleIsAnimatePause.bind(sk.sketchController));
-
+        // Tab 5 Select
+        document.getElementById("sub-tab6-1").addEventListener("click", function () {
+            sk.sketchController.setCurSelectTab(0);
+            sk.gui.highlight.resetHighlightArray();
+        });
+        document.getElementById("sub-tab6-2").addEventListener("click", function () {
+            sk.sketchController.setCurSelectTab(1);
+        });
+        document.getElementById("sub-tab6-3").addEventListener("click", function () {
+            sk.sketchController.setCurSelectTab(2);
+        });
+        document.getElementById("sub-tab6-4").addEventListener("click", function () {
+            sk.sketchController.setCurSelectTab(3);
+        });
+        document.getElementById("sub-tab6-5").addEventListener("click", function () {
+            sk.sketchController.setCurSelectTab(4);
+        });
+        document.getElementById("sub-tab6-6").addEventListener("click", function () {
+            sk.sketchController.setCurSelectTab(5);
+        });
     }
 
     sk.draw = function () {
