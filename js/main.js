@@ -61,6 +61,10 @@ const igs = new p5((sk) => {
         document.getElementById("sub-tab4-2").addEventListener("click", sk.sketchController.playPauseVideoFromButton.bind(sk.sketchController));
         document.getElementById("sub-tab4-3").addEventListener("click", sk.sketchController.increaseVideoSize.bind(sk.sketchController));
         document.getElementById("sub-tab4-4").addEventListener("click", sk.sketchController.decreaseVideoSize.bind(sk.sketchController));
+        // Tab 4 Animate 
+        document.getElementById("sub-tab5-1").addEventListener("click", sk.sketchController.startEndAnimation.bind(sk.sketchController));
+        document.getElementById("sub-tab5-2").addEventListener("click", sk.sketchController.toggleIsAnimatePause.bind(sk.sketchController));
+
     }
 
     sk.draw = function () {
