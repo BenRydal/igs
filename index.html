@@ -110,8 +110,7 @@ Video (MP4)">LOAD FILES</label>
             <div class="sub-tabs-container button-float">
                 <label for="sub-tab1-1" title="Click to change and set colors">Change Color</label>
             </div>
-            <!-- Sub Tabs -->
-            <!-- NOTE: name="sub-group" will require to be unique to the tab, ie: tab2 = sub-group2, tab3 = sub-group 3 etc. -->
+            <!-- Sub Tabs name="sub-group" will require to be unique to the tab, ie: tab2 = sub-group2, tab3 = sub-group 3 etc. -->
             <input class="tab-radio js-color-change" id="sub-tab1-1" name="sub-group1" type="checkbox">
         </div>
 
@@ -176,35 +175,28 @@ Video (MP4)">LOAD FILES</label>
             <input class="tab-radio" id="sub-tab6-6" name="sub-group6" type="radio">
         </div>
 
-        <!-- TAB 7 CONTAINER FLOOR PLAN-->
+        <!-- TAB 7 FLOOR PLAN-->
         <input class="tab-radio" id="main-tab-7" name="main-group" type="radio" />
         <div class="tab-content">
             <div class="sub-tabs-container">
                 <label for="sub-tab7-1">Rotate Left</label>
                 <label for="sub-tab7-2">Rotate Right</label>
             </div>
-            <!-- Sub Tabs -->
-            <input class="tab-radio" id="sub-tab7-1" name="sub-group7" type="radio" checked="checked"
-                onclick="igs.floorPlan.setRotateLeft(); igs.loop()">
-            <input class="tab-radio" id="sub-tab7-2" name="sub-group7" type="radio"
-                onclick="igs.floorPlan.setRotateRight(); igs.loop()">
+            <input class="tab-radio" id="sub-tab7-1" name="sub-group7" type="checkbox">
+            <input class="tab-radio" id="sub-tab7-2" name="sub-group7" type="checkbox">
         </div>
 
-        <!-- TAB 8 CONTAINER CODES -->
+        <!-- TAB 8 CODES -->
         <input class="tab-radio" id="main-tab-8" name="main-group" type="radio" />
         <div class="tab-content" id="codes-main-tab">
             <div class="sub-tabs-container button-float">
-                <label for="sub-tab8-1"
-                    title="Color data by codes if loaded (grey indicates no code and black indicates multiple codes)">Color
+                <label for="sub-tab8-1" title="Color data by codes files (grey = code and black = multiple codes)">Color
                     By Codes</label>
                 <label for="sub-tab8-2" style="display: none" title="Click to change and set colors">Change
                     Color</label>
             </div>
-            <!-- Sub Tabs -->
-            <input class="tab-radio" id="sub-tab8-1" name="sub-group8" type="checkbox"
-                onchange="igs.domHandler.handleColorModeButton(); igs.loop()">
-            <input class="tab-radio js-color-change" id="sub-tab8-2" name="sub-group8" type="checkbox"
-                onchange="this.checked ? igs.domController.updateColorPickers('codes') : igs.domController.updateCheckboxes('codes'); igs.loop()">
+            <input class="tab-radio" id="sub-tab8-1" name="sub-group8" type="checkbox">
+            <input class="tab-radio js-color-change" id="sub-tab8-2" name="sub-group8" type="checkbox">
         </div>
     </div>
 </body>

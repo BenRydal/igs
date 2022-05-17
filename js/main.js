@@ -84,6 +84,16 @@ const igs = new p5((sk) => {
         document.getElementById("sub-tab6-6").addEventListener("click", function () {
             sk.sketchController.setCurSelectTab(5);
         });
+
+        // Tab 6 Floor Plan
+        document.getElementById("sub-tab7-1").addEventListener("click", sk.floorPlan.setRotateLeft.bind(sk.floorPlan));
+        document.getElementById("sub-tab7-2").addEventListener("click", sk.floorPlan.setRotateRight.bind(sk.floorPlan));
+
+        // Tab 7 Codes
+        document.getElementById("sub-tab8-1").addEventListener("change", sk.domHandler.handleColorModeButton.bind(sk.domHandler));
+        document.getElementById("sub-tab8-2").addEventListener("change", function () {
+            sk.domController.updateSubTab(this.checked, "codes");
+        });
     }
 
     sk.draw = function () {
