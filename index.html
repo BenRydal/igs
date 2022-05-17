@@ -110,6 +110,8 @@ Video (MP4)">LOAD FILES</label>
             <div class="sub-tabs-container button-float">
                 <label for="sub-tab1-1" title="Click to change and set colors">Change Color</label>
             </div>
+            <!-- Sub Tabs -->
+            <!-- NOTE: name="sub-group" will require to be unique to the tab, ie: tab2 = sub-group2, tab3 = sub-group 3 etc. -->
             <input class="tab-radio js-color-change" id="sub-tab1-1" name="sub-group1" type="checkbox">
         </div>
 
@@ -117,24 +119,16 @@ Video (MP4)">LOAD FILES</label>
         <input class="tab-radio" id="main-tab-3" name="main-group" type="radio" />
         <div class="tab-content" id="talk-main-tab">
             <div class="sub-tabs-container button-float">
-                <!-- NOTE: due to id note below, remember to match the for. The actual title doesn't matter, just to show it works... -->
-                <input type="search" id="word-search" name="search-input" placeholder="Search"
-                    onsearch="igs.domHandler.handleWordSearchInput(); igs.loop()">
-                <label for="sub-tab3-1" title="Align talk along top">Align</label>
-                <label for="sub-tab3-2" title="Show talk by all speakers along each movement path">All On
+                <input type="search" id="sub-tab3-1" name="search-input" placeholder="Search">
+                <label for="sub-tab3-2" title="Align talk along top">Align</label>
+                <label for="sub-tab3-3" title="Show talk by all speakers along each movement path">All On
                     Path</label>
-                <label for="sub-tab3-3" title="Click to change and set colors">Change
+                <label for="sub-tab3-4" title="Click to change and set colors">Change
                     Color</label>
             </div>
-            <!-- Sub Tabs -->
-            <!-- NOTE: name="sub-group" will require to be unique to the tab, ie: tab2 = sub-group2, tab3 = sub-group 3 etc. -->
-            <!-- NOTE: id have to be unique. So for each sub tabs, the input id will have to change-->
-            <input class="tab-radio" id="sub-tab3-1" name="sub-group3" type="radio" checked="checked"
-                onclick="igs.sketchController.toggleIsAlignTalk(); igs.loop()">
-            <input class="tab-radio" id="sub-tab3-2" name="sub-group3" type="radio"
-                onclick="igs.sketchController.toggleIsAllTalk(); igs.loop()">
-            <input class="tab-radio js-color-change" id="sub-tab3-3" name="sub-group3" type="checkbox"
-                onchange="this.checked ? igs.domController.updateColorPickers('talk') : igs.domController.updateCheckboxes('talk'); igs.loop()">
+            <input class="tab-radio" id="sub-tab3-2" name="sub-group3" type="radio" checked="checked">
+            <input class="tab-radio" id="sub-tab3-3" name="sub-group3" type="radio">
+            <input class="tab-radio js-color-change" id="sub-tab3-4" name="sub-group3" type="checkbox">
         </div>
 
         <!-- TAB 4 CONTAINER VIDEO -->

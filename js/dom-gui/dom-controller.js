@@ -60,7 +60,7 @@ class DomController {
                 for (const coreDataItem of this.sk.core.pathList) this.createCheckbox(coreDataItem, "movement-main-tab", "input-class-movement");
                 break;
             case "talk":
-                this.clearCheckboxes("sub-tab3-3", "input-class-talk");
+                this.clearCheckboxes("sub-tab3-4", "input-class-talk");
                 for (const coreDataItem of this.sk.core.speakerList) this.createCheckbox(coreDataItem, "talk-main-tab", "input-class-talk");
                 break;
             case "codes":
@@ -77,7 +77,7 @@ class DomController {
                 for (const coreDataItem of this.sk.core.pathList) this.createColorPicker(coreDataItem, "movement-main-tab", "input-class-movement");
                 break;
             case "talk":
-                this.clearColorPickers("sub-tab3-3", "input-class-talk");
+                this.clearColorPickers("sub-tab3-4", "input-class-talk");
                 for (const coreDataItem of this.sk.core.speakerList) this.createColorPicker(coreDataItem, "talk-main-tab", "input-class-talk");
                 break;
             case "codes":
@@ -174,7 +174,7 @@ class DomController {
 
     clearAllCheckboxes() {
         this.clearCheckboxes("sub-tab1-1", "input-class-movement");
-        this.clearCheckboxes("sub-tab3-3", "input-class-talk");
+        this.clearCheckboxes("sub-tab3-4", "input-class-talk");
         this.clearCheckboxes("sub-tab8-2", "input-class-code");
     }
 

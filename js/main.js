@@ -50,12 +50,14 @@ const igs = new p5((sk) => {
             if (this.checked) sk.domController.updateColorPickers('movement');
             else sk.domController.updateCheckboxes('movement');
         });
-
-        //onchange = "this.checked ? sk.domController.updateColorPickers('movement') : sk.domController.updateCheckboxes('movement'); sk.loop()
-        // document.getElementById("input-floorplan").addEventListener("change", sk.domHandler.handleFloorPlanButton.bind(this));
-        // document.getElementById("input-video").addEventListener("change", sk.domHandler.handleVideoButton.bind(this));
-        // document.getElementById("button-save").addEventListener("click", sk.domHandler.handleSaveButton.bind(this));
-        // document.getElementById("button-clear").addEventListener("click", sk.domHandler.handleClearButton.bind(this));
+        // Tab 2 Talk
+        document.getElementById("sub-tab3-1").addEventListener("change", sk.domHandler.handleWordSearchInput.bind(sk.domHandler));
+        document.getElementById("sub-tab3-2").addEventListener("click", sk.sketchController.toggleIsAlignTalk.bind(sk.sketchController));
+        document.getElementById("sub-tab3-3").addEventListener("click", sk.sketchController.toggleIsAllTalk.bind(sk.sketchController));
+        document.getElementById("sub-tab3-4").addEventListener("change", function () {
+            if (this.checked) sk.domController.updateColorPickers('talk');
+            else sk.domController.updateCheckboxes('talk');
+        });
     }
 
     sk.draw = function () {

@@ -30,7 +30,7 @@ class DomHandler {
     }
 
     handleWordSearchInput() {
-        const searchInputDiv = document.getElementById("word-search");
+        const searchInputDiv = document.getElementById("sub-tab3-1");
         this.sk.sketchController.setWordToSearch(searchInputDiv.value);
     }
 
