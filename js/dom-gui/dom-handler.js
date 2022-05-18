@@ -1,5 +1,3 @@
-import { YoutubePlayer, P5FilePlayer } from '../video/video-player.js';
-
 export class DomHandler {
 
     constructor(sketch) {
@@ -84,6 +82,7 @@ export class DomHandler {
             this.sk.domController.resetColorModeButton();
         }
         if (this.sk.sketchController.getIsAnimate()) this.sk.sketchController.startEndAnimation(); // reset animation if running
+        this.sk.loop();
     }
 
     /**
@@ -121,8 +120,8 @@ export class DomHandler {
      * @param  {MP4 File} input
      */
     prepVideoFromFile(fileLocation) {
-        this.clearCurVideo();
-        this.updateVideo('File', {
+        this.sk.videoController.clear();
+        this.sk.videoController.createVideoPlayer('File', {
             fileName: fileLocation
         });
     }
@@ -140,7 +139,7 @@ export class DomHandler {
         this.sk.floorPlan.update(params[0] + params[1]);
         this.prepExampleCSVFile(params[0], params[2]); // only one conversation file to prep
         for (const fileName of params[3]) this.prepExampleCSVFile(params[0], fileName); // loop through string array to prep each CSV file
-        this.updateVideo(params[4], params[5]);
+        this.sk.videoController.createVideoPlayer(params[4], params[5]);
     }
 
     async prepExampleCSVFile(folder, fileName) {
@@ -157,40 +156,10 @@ export class DomHandler {
         }
     }
 
-    /**
-     * Replaces existing videoPlayer object with new VideoPlayer object (YouTube or P5FilePlayer)
-     * @param  {String} platform
-     * @param  {VideoPlayer Specific Params} params
-     */
-    updateVideo(platform, params) {
-        try {
-            switch (platform) {
-                case "Youtube":
-                    this.sk.videoPlayer = new YoutubePlayer(this.sk, params);
-                    break;
-                case "File":
-                    this.sk.videoPlayer = new P5FilePlayer(this.sk, params);
-                    break;
-            }
-        } catch (error) {
-            alert("Error loading video file. Please make sure your video is formatted correctly as a .MP4 file or if loading an example dataset that you have access to YouTube");
-            console.log(error);
-        }
-    }
-
     clearAllData() {
         this.sk.core.clearAll();
         this.sk.floorPlan.clear();
         this.sk.domController.clearAllCheckboxes();
-        this.clearCurVideo();
-    }
-
-    clearCurVideo() {
-        if (this.sk.dataIsLoaded(this.sk.videoPlayer)) { // if there is a video, destroy it
-            this.sk.videoPlayer.destroy();
-            this.sk.videoPlayer = null;
-            this.sk.sketchController.setIsVideoPlay(false);
-            this.sk.sketchController.setIsVideoShow(false);
-        }
+        this.sk.videoController.clear();
     }
 }

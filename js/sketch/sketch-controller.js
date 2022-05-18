@@ -6,13 +6,10 @@ export class SketchController {
         this.isAnimatePause = false;
         this.isAlignTalk = false;
         this.isAllTalk = true;
-        this.isVideoPlay = false;
-        this.isVideoShow = false;
         this.isPathColorMode = true;
         this.curSelectTab = 0; // 5 options: None, Region, Slice, Moving, Stopped
         this.wordToSearch = ""; // String value to dynamically search words in conversation
         this.animationCounter = 0; // counter to synchronize animation across all data
-        this.dotTimeForVideoScrub = null; // Set in draw movement data and used to display correct video frame when scrubbing video
     }
 
     updateAnimation() {
@@ -30,76 +27,8 @@ export class SketchController {
         this.setIsAnimatePause(false);
     }
 
-    updateVideoDisplay() {
-        this.sk.videoPlayer.updatePos(this.sk.mouseX, this.sk.mouseY, 50, this.sk.gui.timelinePanel.getTop());
-        if (!this.getIsVideoPlay()) this.setVideoScrubbing();
-    }
-
-    setVideoScrubbing() {
-        if (this.isAnimate) this.sk.videoPlayer.seekTo(Math.floor(this.sk.map(this.dotTimeForVideoScrub, this.sk.gui.timelinePanel.getStart(), this.sk.gui.timelinePanel.getEnd(), this.mapPixelTimeToVideoTime(this.sk.gui.timelinePanel.getSelectStart()), this.mapPixelTimeToVideoTime(this.sk.gui.timelinePanel.getSelectEnd()))));
-        else if (this.sk.gui.timelinePanel.overTimeline()) {
-            this.sk.videoPlayer.seekTo(Math.floor(this.mapPixelTimeToVideoTime(this.mapPixelTimeToSelectTime(this.sk.mouseX))));
-            this.sk.videoPlayer.pause(); // Add to prevent accidental video playing that seems to occur
-        }
-    }
-
-    toggleShowVideo() {
-        if (this.sk.sketchController.testVideoAndDivAreLoaded()) {
-            if (this.isVideoShow) {
-                this.pauseMovie();
-                this.sk.videoPlayer.hide();
-                this.setIsVideoShow(false);
-            } else {
-                this.sk.videoPlayer.show();
-                this.setIsVideoShow(true);
-            }
-        }
-    }
-
-    // 2 playPause video methods differ with respect to tests and seekTo method call
-    playPauseVideoFromTimeline() {
-        if (this.isVideoPlay) this.pauseMovie();
-        else {
-            this.playVideo();
-            this.sk.videoPlayer.seekTo(this.mapPixelTimeToVideoTime(this.mapPixelTimeToSelectTime(this.sk.mouseX)));
-        }
-    }
-
-    playPauseVideoFromButton() {
-        if (this.testVideoAndDivAreLoaded() && this.isVideoShow && !this.isAnimate) {
-            if (this.isVideoPlay) this.pauseMovie();
-            else this.playVideo();
-        }
-    }
-
-    pauseMovie() {
-        this.sk.videoPlayer.pause();
-        this.setIsVideoPlay(false);
-    }
-
-    playVideo() {
-        this.sk.videoPlayer.play();
-        this.setIsVideoPlay(true);
-    }
-
-    increaseVideoSize() {
-        if (this.testVideoAndDivAreLoaded()) this.sk.videoPlayer.increaseSize();
-    }
-
-    decreaseVideoSize() {
-        if (this.testVideoAndDivAreLoaded()) this.sk.videoPlayer.decreaseSize();
-    }
-
-    testVideoToPlay() {
-        return this.testVideoAndDivAreLoaded() && this.isVideoShow && !this.isAnimate && this.sk.gui.timelinePanel.overTimeline() && !this.sk.gui.timelinePanel.overEitherSelector();
-    }
-
-    testVideoAndDivAreLoaded() {
-        return (this.sk.dataIsLoaded(this.sk.videoPlayer) && this.sk.videoPlayer.getIsLoaded());
-    }
-
     mapVideoTimeToSelectedTime() {
-        const timelinePos = this.mapTotalTimeToPixelTime(this.sk.videoPlayer.getCurrentTime());
+        const timelinePos = this.mapTotalTimeToPixelTime(this.sk.videoController.videoPlayer.getCurrentTime());
         return this.mapSelectTimeToPixelTime(timelinePos);
     }
 
@@ -108,7 +37,7 @@ export class SketchController {
     }
 
     mapPixelTimeToVideoTime(value) {
-        return Math.floor(this.sk.map(value, this.sk.gui.timelinePanel.getStart(), this.sk.gui.timelinePanel.getEnd(), 0, Math.floor(this.sk.videoPlayer.getVideoDuration()))); // must floor vPos to prevent double finite error
+        return Math.floor(this.sk.map(value, this.sk.gui.timelinePanel.getStart(), this.sk.gui.timelinePanel.getEnd(), 0, Math.floor(this.sk.videoController.videoPlayer.getVideoDuration()))); // must floor vPos to prevent double finite error
     }
 
     mapPixelTimeToSelectTime(value) {
@@ -172,22 +101,6 @@ export class SketchController {
         this.isAllTalk = !this.isAllTalk;
     }
 
-    getIsVideoPlay() {
-        return this.isVideoPlay;
-    }
-
-    setIsVideoPlay(value) {
-        this.isVideoPlay = value;
-    }
-
-    setIsVideoShow(value) {
-        this.isVideoShow = value;
-    }
-
-    getIsVideoShow() {
-        return this.isVideoShow;
-    }
-
     getIsPathColorMode() {
         return this.isPathColorMode;
     }
@@ -206,10 +119,6 @@ export class SketchController {
 
     setCurSelectTab(value) {
         this.curSelectTab = value;
-    }
-
-    setDotTimeForVideoScrub(timePos) {
-        this.dotTimeForVideoScrub = timePos;
     }
 
     setWordToSearch(value) {

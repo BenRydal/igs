@@ -17,10 +17,10 @@ export function addListeners(sk) {
         sk.domController.updateSubTab(this.checked, "talk");
     });
     // Tab 3 Video
-    document.getElementById("sub-tab4-1").addEventListener("click", sk.sketchController.toggleShowVideo.bind(sk.sketchController));
-    document.getElementById("sub-tab4-2").addEventListener("click", sk.sketchController.playPauseVideoFromButton.bind(sk.sketchController));
-    document.getElementById("sub-tab4-3").addEventListener("click", sk.sketchController.increaseVideoSize.bind(sk.sketchController));
-    document.getElementById("sub-tab4-4").addEventListener("click", sk.sketchController.decreaseVideoSize.bind(sk.sketchController));
+    document.getElementById("sub-tab4-1").addEventListener("click", sk.videoController.toggleShowVideo.bind(sk.videoController));
+    document.getElementById("sub-tab4-2").addEventListener("click", sk.videoController.playPauseVideoFromButton.bind(sk.videoController));
+    document.getElementById("sub-tab4-3").addEventListener("click", sk.videoController.increaseVideoSize.bind(sk.videoController));
+    document.getElementById("sub-tab4-4").addEventListener("click", sk.videoController.decreaseVideoSize.bind(sk.videoController));
     // Tab 4 Animate 
     document.getElementById("sub-tab5-1").addEventListener("click", sk.sketchController.startEndAnimation.bind(sk.sketchController));
     document.getElementById("sub-tab5-2").addEventListener("click", sk.sketchController.toggleIsAnimatePause.bind(sk.sketchController));

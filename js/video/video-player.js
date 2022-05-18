@@ -41,7 +41,7 @@ export class YoutubePlayer {
                     console.log("YT player ready: ");
                     this.duration = this.player.getDuration();
                     this.isLoaded = true;
-                    this.sk.sketchController.toggleShowVideo(); // Show video once loaded
+                    this.sk.videoController.toggleShowVideo(); // Show video once loaded
                     this.sk.loop(); // rerun P5 draw loop after loading image
                 }
             }
@@ -125,13 +125,13 @@ export class P5FilePlayer {
         this.videoWidth = null;
         this.videoHeight = null;
         this.isLoaded = false;
-        this.isOver = false; // used internally to test if user selected movie element
         this.increment = 25; //for increasing and decreasing video size
+        this.isOver = false; // used internally to test if user selected movie element
         this.movie = this.sk.createVideo(params['fileName'], () => {
             console.log("File Player Ready:");
             this.setMovieDiv();
             this.isLoaded = true;
-            this.sk.sketchController.toggleShowVideo(); // Show video once it has been loaded
+            this.sk.videoController.toggleShowVideo(); // Show video once it has been loaded
             this.sk.loop(); // rerun P5 draw loop after loading image
         });
     }

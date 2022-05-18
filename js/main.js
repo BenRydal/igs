@@ -16,6 +16,7 @@ import { DomController } from './dom-gui/dom-controller.js';
 import { addListeners } from './dom-gui/add-listeners.js';
 import { FloorPlan } from './floorplan/floorplan.js';
 import { SetPathData } from './draw/setPathData.js';
+import { VideoController } from './video/video-controller.js';
 
 
 const igs = new p5((sk) => {
@@ -33,7 +34,7 @@ const igs = new p5((sk) => {
         sk.domController = new DomController(sk);
         sk.sketchController = new SketchController(sk);
         sk.handle3D = new Handle3D(sk, true);
-        sk.videoPlayer = null;
+        sk.videoController = new VideoController(sk);
         sk.floorPlan = new FloorPlan(sk);
         // CONSTANTS
         sk.PLAN = 0;
@@ -60,7 +61,7 @@ const igs = new p5((sk) => {
         sk.gui.update2D(); // draw all other canvas GUI elements in 2D mode
         if (sk.sketchController.getIsAnimate() && !sk.sketchController.getIsAnimatePause()) sk.sketchController.updateAnimation();
         // Determine whether to re-run draw loop depending on user adjustable modes
-        if ((sk.sketchController.getIsAnimate() && !sk.sketchController.getIsAnimatePause()) || sk.sketchController.getIsVideoPlay() || sk.handle3D.getIsTransitioning()) sk.loop();
+        if ((sk.sketchController.getIsAnimate() && !sk.sketchController.getIsAnimatePause()) || sk.videoController.getIsPlaying() || sk.handle3D.getIsTransitioning()) sk.loop();
         else sk.noLoop();
     }
 
@@ -70,11 +71,11 @@ const igs = new p5((sk) => {
             const setPathData = new SetPathData(sk, sk.core.pathList, sk.core.speakerList, sk.core.codeList);
             setPathData.set();
         }
-        if (sk.sketchController.testVideoAndDivAreLoaded() && sk.sketchController.getIsVideoShow()) sk.sketchController.updateVideoDisplay();
+        sk.videoController.updateDisplay();
     }
 
     sk.mousePressed = function() {
-        if (sk.sketchController.testVideoToPlay()) sk.sketchController.playPauseVideoFromTimeline();
+        if (!sk.sketchController.getIsAnimate() && sk.gui.timelinePanel.overTimeline() && !sk.gui.timelinePanel.overEitherSelector()) sk.videoController.playPauseVideoFromTimeline();
         else if (sk.sketchController.getCurSelectTab() === 5 && !sk.handle3D.getIs3DModeOrTransitioning()) sk.gui.highlight.handleMousePressed();
         sk.loop();
     }
