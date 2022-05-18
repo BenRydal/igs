@@ -37,17 +37,16 @@ export class VideoController {
         this.sk.loop();
     }
 
-    // TODO: might send some params to this for this method and setVideo scrubbing
-    updateDisplay(timelinePanel) {
+    updateDisplay() {
         if (this.isPlayerAndDivLoaded() && this.isShowing) {
-            this.videoPlayer.updatePos(this.sk.mouseX, this.sk.mouseY, 50, timelinePanel.getTop());
-            if (!this.getIsPlaying()) this.setVideoScrubbing(timelinePanel);
+            this.videoPlayer.updatePos(this.sk.mouseX, this.sk.mouseY, 50, this.sk.gui.timelinePanel.getTop());
+            if (!this.isPlaying) this.setVideoScrubbing();
         }
     }
 
-    setVideoScrubbing(timelinePanel) {
-        if (this.sk.sketchController.getIsAnimate()) this.seekMethodAnimate(timelinePanel);
-        else if (timelinePanel.overTimeline()) {
+    setVideoScrubbing() {
+        if (this.sk.sketchController.getIsAnimate()) this.seekMethodAnimate();
+        else if (this.sk.gui.timelinePanel.overTimeline()) {
             this.seekMethodMouse();
             this.videoPlayer.pause(); // Add to prevent accidental video playing that seems to occur
         }
@@ -63,16 +62,15 @@ export class VideoController {
     }
 
     getIsPlaying() {
-        // TODO: add test if loaded!?
-        return this.isPlaying;
+        return this.isPlayerAndDivLoaded() && this.isPlaying;
     }
 
     setDotTimeForVideoScrub(timePos) {
         this.dotTimeForVideoScrub = timePos;
     }
 
-    seekMethodAnimate(timelinePanel) {
-        const videoTime = Math.floor(this.sk.map(this.dotTimeForVideoScrub, timelinePanel.getStart(), timelinePanel.getEnd(), this.mapPixelTimeToVideoTime(timelinePanel.getSelectStart()), this.mapPixelTimeToVideoTime(timelinePanel.getSelectEnd())));
+    seekMethodAnimate() {
+        const videoTime = Math.floor(this.sk.map(this.dotTimeForVideoScrub, this.sk.gui.timelinePanel.getStart(), this.sk.gui.timelinePanel.getEnd(), this.mapPixelTimeToVideoTime(this.sk.gui.timelinePanel.getSelectStart()), this.mapPixelTimeToVideoTime(this.sk.gui.timelinePanel.getSelectEnd())));
         this.videoPlayer.seekTo(videoTime);
     }
 
