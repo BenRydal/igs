@@ -50,24 +50,27 @@ const igs = new p5((sk) => {
     sk.draw = function() {
         sk.background(255);
         sk.translate(-sk.width / 2, -sk.height / 2, 0); // recenter canvas to top left when using WEBGL renderer
-        // Translate/update canvas if in 3D mode
-        if (sk.handle3D.getIs3DModeOrTransitioning()) {
+        if (sk.handle3D.getIs3DModeOrTransitioning()) { // Translate/update canvas if in 3D mode
             sk.push();
             sk.handle3D.update3DTranslation();
         }
+        sk.visualizeData();
+        sk.gui.update3D(); // draw canvas GUI elements that adapt to 3D mode
+        if (sk.handle3D.getIs3DModeOrTransitioning()) sk.pop();
+        sk.gui.update2D(); // draw all other canvas GUI elements in 2D mode
+        if (sk.sketchController.getIsAnimate() && !sk.sketchController.getIsAnimatePause()) sk.sketchController.updateAnimation();
+        // Determine whether to re-run draw loop depending on user adjustable modes
+        if ((sk.sketchController.getIsAnimate() && !sk.sketchController.getIsAnimatePause()) || sk.sketchController.getIsVideoPlay() || sk.handle3D.getIsTransitioning()) sk.loop();
+        else sk.noLoop();
+    }
+
+    sk.visualizeData = function() {
         if (sk.dataIsLoaded(sk.floorPlan.getImg())) { // floorPlan must be loaded to draw any data
             sk.floorPlan.setFloorPlan(sk.gui.fpContainer.getContainer());
             const setPathData = new SetPathData(sk, sk.core.pathList, sk.core.speakerList, sk.core.codeList);
             setPathData.set();
         }
         if (sk.sketchController.testVideoAndDivAreLoaded() && sk.sketchController.getIsVideoShow()) sk.sketchController.updateVideoDisplay();
-        sk.gui.update3D(); // draw canvas GUI elements that adapt to 3D mode
-        if (sk.handle3D.getIs3DModeOrTransitioning()) sk.pop();
-        sk.gui.update2D(); // draw all other canvas GUI elements in 2D mode
-        // Determine whether to re-run draw loop depending on user adjustable modes
-        if (sk.sketchController.getIsAnimate() && !sk.sketchController.getIsAnimatePause()) sk.sketchController.updateAnimation();
-        if ((sk.sketchController.getIsAnimate() && !sk.sketchController.getIsAnimatePause()) || sk.sketchController.getIsVideoPlay() || sk.handle3D.getIsTransitioning()) sk.loop();
-        else sk.noLoop();
     }
 
     sk.mousePressed = function() {
