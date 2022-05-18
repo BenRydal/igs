@@ -2,7 +2,7 @@ import { TimelinePanel } from './timeline-panel.js';
 import { FloorPlanContainer } from './floorplan-container.js';
 import { Highlight } from './highlight.js';
 
-export class GUI {
+export class SketchGUI {
 
     constructor(sketch) {
         this.sk = sketch;

@@ -8,7 +8,7 @@ Launches IGS as a p5 sketch in instance mode. p5 sketch, DOM and program data ar
 */
 
 import { Core } from './core/core.js';
-import { GUI } from './sketch-gui/gui-interface.js';
+import { SketchGUI } from './sketch-gui/sketch-gui.js';
 import { DomHandler } from './dom-gui/dom-handler.js';
 import { DomController } from './dom-gui/dom-controller.js';
 import { addListeners } from './dom-gui/add-listeners.js';
@@ -28,7 +28,7 @@ const igs = new p5((sk) => {
         sk.canvas = sk.createCanvas(window.innerWidth, window.innerHeight, sk.WEBGL);
         sk.canvas.parent('sketch-holder');
         sk.core = new Core(sk);
-        sk.gui = new GUI(sk);
+        sk.gui = new SketchGUI(sk);
         sk.domHandler = new DomHandler(sk);
         sk.domController = new DomController(sk);
         sk.sketchController = new SketchController(sk);
@@ -93,7 +93,7 @@ const igs = new p5((sk) => {
 
     sk.windowResized = function() {
         sk.resizeCanvas(window.innerWidth, window.innerHeight);
-        sk.gui = new GUI(sk); // update GUI vars
+        sk.gui = new SketchGUI(sk); // update GUI vars
         sk.GUITEXTSIZE = sk.width / 70;
         sk.textSize(sk.GUITEXTSIZE);
         sk.handle3D = new Handle3D(sk, sk.handle3D.getIs3DMode()); // update 3D display vars, pass current 3D mode
