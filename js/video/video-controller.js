@@ -65,7 +65,7 @@ export class VideoController {
 
     // TODO: might send some params to this for this method and setVideo scrubbing
     updateDisplay() {
-        if (this.testVideoAndDivAreLoaded() && this.isShowing) {
+        if (this.isPlayerAndDivLoaded() && this.isShowing) {
             this.videoPlayer.updatePos(this.sk.mouseX, this.sk.mouseY, 50, this.sk.gui.timelinePanel.getTop());
             if (!this.getIsPlaying()) this.setVideoScrubbing();
         }
@@ -83,9 +83,9 @@ export class VideoController {
     // TODO: PASS VIDEO CONTROLLER TO players and create new upload method??
     // where you set isLoaded, toggle show and call sketch loop?
     toggleShowVideo() {
-        if (this.testVideoAndDivAreLoaded()) {
+        if (this.isPlayerAndDivLoaded()) {
             if (this.isShowing) {
-                this.pauseMovie();
+                this.pause();
                 this.videoPlayer.hide();
                 this.isShowing = false;
             } else {
@@ -97,43 +97,42 @@ export class VideoController {
     }
 
     // 2 playPause video methods differ with respect to tests and seekTo method call
-    playPauseVideoFromTimeline() {
-        if (this.testVideoAndDivAreLoaded() && this.isShowing) {
-            if (this.isPlaying) this.pauseMovie();
+    timelinePlayPause() {
+        if (this.isPlayerAndDivLoaded() && this.isShowing) {
+            if (this.isPlaying) this.pause();
             else {
-                this.playMovie();
+                this.play();
                 this.videoPlayer.seekTo(this.sk.sketchController.mapPixelTimeToVideoTime(this.sk.sketchController.mapPixelTimeToSelectTime(this.sk.mouseX)));
             }
         }
     }
 
-    playPauseVideoFromButton() {
-        if (this.testVideoAndDivAreLoaded() && this.isShowing && !this.sk.sketchController.getIsAnimate()) {
-            if (this.isPlaying) this.pauseMovie();
-            else this.playMovie();
+    buttonPlayPause() {
+        if (this.isPlayerAndDivLoaded() && this.isShowing && !this.sk.sketchController.getIsAnimate()) {
+            if (this.isPlaying) this.pause();
+            else this.play();
         }
     }
 
-    pauseMovie() {
+    pause() {
         this.videoPlayer.pause();
         this.isPlaying = false;
     }
 
-    // TODO: update this method name--matches YT player
-    playMovie() {
+    play() {
         this.videoPlayer.play();
         this.isPlaying = true;
     }
 
-    increaseVideoSize() {
-        if (this.testVideoAndDivAreLoaded()) this.videoPlayer.increaseSize();
+    increasePlayerSize() {
+        if (this.isPlayerAndDivLoaded()) this.videoPlayer.increaseSize();
     }
 
-    decreaseVideoSize() {
-        if (this.testVideoAndDivAreLoaded()) this.videoPlayer.decreaseSize();
+    decreasePlayerSize() {
+        if (this.isPlayerAndDivLoaded()) this.videoPlayer.decreaseSize();
     }
 
-    testVideoAndDivAreLoaded() {
+    isPlayerAndDivLoaded() {
         return (this.sk.dataIsLoaded(this.videoPlayer) && this.isLoaded);
     }
 }

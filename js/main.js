@@ -75,7 +75,7 @@ const igs = new p5((sk) => {
     }
 
     sk.mousePressed = function() {
-        if (!sk.sketchController.getIsAnimate() && sk.gui.timelinePanel.overTimeline() && !sk.gui.timelinePanel.overEitherSelector()) sk.videoController.playPauseVideoFromTimeline();
+        if (!sk.sketchController.getIsAnimate() && sk.gui.timelinePanel.overTimeline() && !sk.gui.timelinePanel.overEitherSelector()) sk.videoController.timelinePlayPause();
         else if (sk.sketchController.getCurSelectTab() === 5 && !sk.handle3D.getIs3DModeOrTransitioning()) sk.gui.highlight.handleMousePressed();
         sk.loop();
     }
