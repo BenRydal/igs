@@ -61,10 +61,10 @@ const igs = new p5((sk) => {
             setPathData.set();
         }
         if (sk.sketchController.testVideoAndDivAreLoaded() && sk.sketchController.getIsVideoShow()) sk.sketchController.updateVideoDisplay();
-        sk.gui.updateGUIWithTranslation(); // draw canvas GUI elements in 3D
+        sk.gui.update3D(); // draw canvas GUI elements that adapt to 3D mode
         if (sk.handle3D.getIs3DModeOrTransitioning()) sk.pop();
-        sk.gui.updateGUI(); // draw all other canvas GUI elements in 2D
-        // Determine whether to re-run draw loop depending on program state
+        sk.gui.update2D(); // draw all other canvas GUI elements in 2D mode
+        // Determine whether to re-run draw loop depending on user adjustable modes
         if (sk.sketchController.getIsAnimate() && !sk.sketchController.getIsAnimatePause()) sk.sketchController.updateAnimation();
         if ((sk.sketchController.getIsAnimate() && !sk.sketchController.getIsAnimatePause()) || sk.sketchController.getIsVideoPlay() || sk.handle3D.getIsTransitioning()) sk.loop();
         else sk.noLoop();
