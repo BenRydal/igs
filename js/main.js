@@ -9,11 +9,11 @@ Launches IGS as a p5 sketch in instance mode. p5 sketch, DOM and program data ar
 
 import { Core } from './core/core.js';
 import { SketchGUI } from './sketch-gui/sketch-gui.js';
+import { SketchController } from './sketch/sketch-controller.js';
+import { Handle3D } from './sketch/handle-3D.js';
 import { DomHandler } from './dom-gui/dom-handler.js';
 import { DomController } from './dom-gui/dom-controller.js';
 import { addListeners } from './dom-gui/add-listeners.js';
-import { SketchController } from './sketch/sketch-controller.js';
-import { Handle3D } from './sketch/handle-3D.js';
 import { FloorPlan } from './floorplan/floorplan.js';
 import { SetPathData } from './draw/setPathData.js';
 
