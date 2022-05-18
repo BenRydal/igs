@@ -1,10 +1,11 @@
 /*
 Launches IGS as a p5 sketch in instance mode. p5 sketch, DOM and program data are coordinated as follows:
-    1) Various sketch classes update canvas-based visualizations
-    2) Dom handler and controller classes update DOM based GUI
+    1) Various sketch classes update canvas-based visualizations (SketchGUI, SketchController, Handle3D)
+    2) Dom handler and Dom controller classes update DOM based GUI
     3) Program data based on CSV files is stored in core class
     4) FloorPlan class holds image data and p5 drawing methods to represent images on the canvas
-    5) VideoPlayer class is an abstract class that holds video data and p5 drawing methods to represent video on the canvas
+    5) VideoPlayer controller holds an abstract class for a videoPlayer object and p5 drawing methods to represent video on the canvas
+    6) Various draw classes represent paths as movement and conversation data
 */
 
 import { Core } from './core/core.js';
