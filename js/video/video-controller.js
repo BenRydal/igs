@@ -1,5 +1,11 @@
-import { YoutubePlayer, P5FilePlayer } from '../video/video-player.js';
+/**
+ * This class controls creation and manipulation of videos loaded by users or from example data
+ * Holds a videoPlayer object that serves as an abstract class for different types of video players (e.g., youtube, from local files)
+ * VideoPlayer object can be updated, erased/replaced dynamically
+ * This class also holds data used by program to interact/play and pause a video
+ */
 
+import { YoutubePlayer, P5FilePlayer } from '../video/video-player.js';
 
 export class VideoController {
 
@@ -37,6 +43,9 @@ export class VideoController {
         this.sk.loop();
     }
 
+    /**
+     * Updates video image and position
+     */
     updateDisplay() {
         if (this.isPlayerAndDivLoaded() && this.isShowing) {
             this.videoPlayer.updatePos(this.sk.mouseX, this.sk.mouseY, 50, this.sk.gui.timelinePanel.getTop());
@@ -52,22 +61,6 @@ export class VideoController {
         }
     }
 
-    mapPixelTimeToVideoTime(value) {
-        return Math.floor(this.sk.map(value, this.sk.gui.timelinePanel.getStart(), this.sk.gui.timelinePanel.getEnd(), 0, Math.floor(this.videoPlayer.getVideoDuration()))); // must floor vPos to prevent double finite error
-    }
-
-    getVideoPlayerCurTime() {
-        return this.videoPlayer.getCurrentTime();
-    }
-
-    getIsPlaying() {
-        return this.isPlaying;
-    }
-
-    setDotTimeForVideoScrub(timePos) {
-        this.dotTimeForVideoScrub = timePos;
-    }
-
     seekMethodAnimate() {
         const videoTime = Math.floor(this.sk.map(this.dotTimeForVideoScrub, this.sk.gui.timelinePanel.getStart(), this.sk.gui.timelinePanel.getEnd(), this.mapPixelTimeToVideoTime(this.sk.gui.timelinePanel.getSelectStart()), this.mapPixelTimeToVideoTime(this.sk.gui.timelinePanel.getSelectEnd())));
         this.videoPlayer.seekTo(videoTime);
@@ -79,8 +72,6 @@ export class VideoController {
 
     }
 
-    // TODO: PASS VIDEO CONTROLLER TO players and create new upload method??
-    // where you set isLoaded, toggle show and call sketch loop?
     toggleShowVideo() {
         if (this.isPlayerAndDivLoaded()) {
             if (this.isShowing) {
@@ -131,12 +122,32 @@ export class VideoController {
         if (this.isPlayerAndDivLoaded()) this.videoPlayer.decreaseSize();
     }
 
+    mapPixelTimeToVideoTime(value) {
+        return Math.floor(this.sk.map(value, this.sk.gui.timelinePanel.getStart(), this.sk.gui.timelinePanel.getEnd(), 0, Math.floor(this.videoPlayer.getVideoDuration()))); // must floor vPos to prevent double finite error
+    }
+
+    getVideoPlayerCurTime() {
+        return this.videoPlayer.getCurrentTime();
+    }
+
+    getIsPlaying() {
+        return this.isPlaying;
+    }
+
+    setDotTimeForVideoScrub(timePos) {
+        this.dotTimeForVideoScrub = timePos;
+    }
+
+    /**
+     * NOTE: boolean test is additional test to make sure video is loaded as sometimes a videoPlayer object
+     * can be created from a file but the data is corrupt in some way
+     */
     isPlayerAndDivLoaded() {
         return (this.sk.dataIsLoaded(this.videoPlayer) && this.isLoaded);
     }
 
     clear() {
-        if (this.sk.dataIsLoaded(this.videoPlayer)) { // if there is a video, destroy it
+        if (this.sk.dataIsLoaded(this.videoPlayer)) { // if any type of videoPlayer object exists, even if data is corrupt destroy it
             this.videoPlayer.destroy();
             this.videoPlayer = null;
             this.isPlaying = false;
