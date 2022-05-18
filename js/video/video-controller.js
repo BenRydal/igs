@@ -52,7 +52,6 @@ export class VideoController {
         }
     }
 
-    // TODO: add if loaded tests?
     mapPixelTimeToVideoTime(value) {
         return Math.floor(this.sk.map(value, this.sk.gui.timelinePanel.getStart(), this.sk.gui.timelinePanel.getEnd(), 0, Math.floor(this.videoPlayer.getVideoDuration()))); // must floor vPos to prevent double finite error
     }
@@ -62,7 +61,7 @@ export class VideoController {
     }
 
     getIsPlaying() {
-        return this.isPlayerAndDivLoaded() && this.isPlaying;
+        return this.isPlaying;
     }
 
     setDotTimeForVideoScrub(timePos) {
