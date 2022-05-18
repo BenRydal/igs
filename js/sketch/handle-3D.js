@@ -31,14 +31,8 @@ export class Handle3D {
         if (this.isTransitioning) {
             if (this.is3DMode) this.isTransitioning = this.updatePositions();
             else this.isTransitioning = this.resetPositions();
-            this.translateFor3D(this.getCurTranslatePos());
-        } else {
-            if (this.is3DMode) this.translateFor3D(this.getCurTranslatePos());
         }
-    }
-
-    translateFor3D(curPos) {
-        this.sk.push();
+        const curPos = this.getCurTranslatePos();
         this.sk.translate(curPos.xPos, curPos.yPos, curPos.zoom);
         this.sk.rotateX(curPos.rotateX);
     }

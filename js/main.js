@@ -50,8 +50,11 @@ const igs = new p5((sk) => {
     sk.draw = function() {
         sk.background(255);
         sk.translate(-sk.width / 2, -sk.height / 2, 0); // recenter canvas to top left when using WEBGL renderer
-        // set/push to 3D if applicable
-        if (sk.handle3D.getIs3DModeOrTransitioning()) sk.handle3D.update3DTranslation(); // handles transitioning between 2D/3D modes
+        // Translate/update canvas if in 3D mode
+        if (sk.handle3D.getIs3DModeOrTransitioning()) {
+            sk.push();
+            sk.handle3D.update3DTranslation();
+        }
         if (sk.dataIsLoaded(sk.floorPlan.getImg())) { // floorPlan must be loaded to draw any data
             sk.floorPlan.setFloorPlan(sk.gui.fpContainer.getContainer());
             const setPathData = new SetPathData(sk, sk.core.pathList, sk.core.speakerList, sk.core.codeList);
