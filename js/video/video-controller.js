@@ -43,16 +43,6 @@ export class VideoController {
         }
     }
 
-    clear() {
-        if (this.sk.dataIsLoaded(this.videoPlayer)) { // if there is a video, destroy it
-            this.videoPlayer.destroy();
-            this.videoPlayer = null;
-            this.isPlaying = false;
-            this.isShowing = false;
-            this.isLoaded = false;
-        }
-    }
-
     getIsPlaying() {
         // TODO: add test if loaded!?
         return this.isPlaying;
@@ -64,17 +54,17 @@ export class VideoController {
 
 
     // TODO: might send some params to this for this method and setVideo scrubbing
-    updateDisplay() {
+    updateDisplay(timelinePanel) {
         if (this.isPlayerAndDivLoaded() && this.isShowing) {
-            this.videoPlayer.updatePos(this.sk.mouseX, this.sk.mouseY, 50, this.sk.gui.timelinePanel.getTop());
-            if (!this.getIsPlaying()) this.setVideoScrubbing();
+            this.videoPlayer.updatePos(this.sk.mouseX, this.sk.mouseY, 50, timelinePanel.getTop());
+            if (!this.getIsPlaying()) this.setVideoScrubbing(timelinePanel);
         }
     }
 
-    setVideoScrubbing() {
+    setVideoScrubbing(timelinePanel) {
         if (this.sk.sketchController.getIsAnimate()) {
-            this.videoPlayer.seekTo(Math.floor(this.sk.map(this.dotTimeForVideoScrub, this.sk.gui.timelinePanel.getStart(), this.sk.gui.timelinePanel.getEnd(), this.sk.sketchController.mapPixelTimeToVideoTime(this.sk.gui.timelinePanel.getSelectStart()), this.sk.sketchController.mapPixelTimeToVideoTime(this.sk.gui.timelinePanel.getSelectEnd()))));
-        } else if (this.sk.gui.timelinePanel.overTimeline()) {
+            this.videoPlayer.seekTo(Math.floor(this.sk.map(this.dotTimeForVideoScrub, timelinePanel.getStart(), timelinePanel.getEnd(), this.sk.sketchController.mapPixelTimeToVideoTime(timelinePanel.getSelectStart()), this.sk.sketchController.mapPixelTimeToVideoTime(timelinePanel.getSelectEnd()))));
+        } else if (timelinePanel.overTimeline()) {
             this.videoPlayer.seekTo(Math.floor(this.sk.sketchController.mapPixelTimeToVideoTime(this.sk.sketchController.mapPixelTimeToSelectTime(this.sk.mouseX))));
             this.videoPlayer.pause(); // Add to prevent accidental video playing that seems to occur
         }
@@ -134,5 +124,15 @@ export class VideoController {
 
     isPlayerAndDivLoaded() {
         return (this.sk.dataIsLoaded(this.videoPlayer) && this.isLoaded);
+    }
+
+    clear() {
+        if (this.sk.dataIsLoaded(this.videoPlayer)) { // if there is a video, destroy it
+            this.videoPlayer.destroy();
+            this.videoPlayer = null;
+            this.isPlaying = false;
+            this.isShowing = false;
+            this.isLoaded = false;
+        }
     }
 }

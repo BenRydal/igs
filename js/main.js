@@ -71,7 +71,7 @@ const igs = new p5((sk) => {
             const setPathData = new SetPathData(sk, sk.core.pathList, sk.core.speakerList, sk.core.codeList);
             setPathData.set();
         }
-        sk.videoController.updateDisplay();
+        sk.videoController.updateDisplay(sk.gui.timelinePanel);
     }
 
     sk.mousePressed = function() {
