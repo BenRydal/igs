@@ -27,17 +27,9 @@ export class SketchController {
         this.setIsAnimatePause(false);
     }
 
-    mapVideoTimeToSelectedTime() {
-        const timelinePos = this.mapTotalTimeToPixelTime(this.sk.videoController.getVideoPlayerCurTime());
-        return this.mapSelectTimeToPixelTime(timelinePos);
-    }
 
     mapPixelTimeToTotalTime(value) {
         return this.sk.map(value, this.sk.gui.timelinePanel.getStart(), this.sk.gui.timelinePanel.getEnd(), 0, this.sk.core.totalTimeInSeconds);
-    }
-
-    mapPixelTimeToVideoTime(value) {
-        return Math.floor(this.sk.map(value, this.sk.gui.timelinePanel.getStart(), this.sk.gui.timelinePanel.getEnd(), 0, Math.floor(this.sk.videoController.getVideoPlayerDuration()))); // must floor vPos to prevent double finite error
     }
 
     mapPixelTimeToSelectTime(value) {
@@ -57,6 +49,7 @@ export class SketchController {
         return this.sk.map(value, this.sk.gui.timelinePanel.getSelectStart(), this.sk.gui.timelinePanel.getSelectEnd(), this.sk.gui.timelinePanel.getStart(), this.sk.gui.timelinePanel.getEnd());
     }
 
+    // maps value from time in seconds from data to time in pixels on timeline
     mapTotalTimeToPixelTime(value) {
         return this.sk.map(value, 0, this.sk.core.totalTimeInSeconds, this.sk.gui.timelinePanel.getStart(), this.sk.gui.timelinePanel.getEnd());
     }

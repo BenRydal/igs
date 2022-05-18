@@ -8,23 +8,8 @@ export class VideoController {
         this.videoPlayer = null;
         this.isPlaying = false;
         this.isShowing = false;
-        this.isLoaded = false;
+        this.isLoaded = false; // this is an additional boolean to test if video successfully loaded
         this.dotTimeForVideoScrub = null; // Set in draw movement data and used to display correct video frame when scrubbing video
-    }
-
-    videoPlayerReady() {
-        this.isLoaded = true;
-        this.toggleShowVideo();
-        this.sk.loop();
-    }
-
-    // TODO: add if loaded tests?
-    getVideoPlayerCurTime() {
-        return this.videoPlayer.getCurrentTime();
-    }
-
-    getVideoPlayerDuration() {
-        return this.videoPlayer.getVideoDuration();
     }
 
     createVideoPlayer(platform, params) {
@@ -43,15 +28,14 @@ export class VideoController {
         }
     }
 
-    getIsPlaying() {
-        // TODO: add test if loaded!?
-        return this.isPlaying;
+    /**
+     * Called from Youtube/File player API if videoPlayer loaded successfully
+     */
+    videoPlayerReady() {
+        this.isLoaded = true;
+        this.toggleShowVideo();
+        this.sk.loop();
     }
-
-    setDotTimeForVideoScrub(timePos) {
-        this.dotTimeForVideoScrub = timePos;
-    }
-
 
     // TODO: might send some params to this for this method and setVideo scrubbing
     updateDisplay(timelinePanel) {
@@ -62,12 +46,40 @@ export class VideoController {
     }
 
     setVideoScrubbing(timelinePanel) {
-        if (this.sk.sketchController.getIsAnimate()) {
-            this.videoPlayer.seekTo(Math.floor(this.sk.map(this.dotTimeForVideoScrub, timelinePanel.getStart(), timelinePanel.getEnd(), this.sk.sketchController.mapPixelTimeToVideoTime(timelinePanel.getSelectStart()), this.sk.sketchController.mapPixelTimeToVideoTime(timelinePanel.getSelectEnd()))));
-        } else if (timelinePanel.overTimeline()) {
-            this.videoPlayer.seekTo(Math.floor(this.sk.sketchController.mapPixelTimeToVideoTime(this.sk.sketchController.mapPixelTimeToSelectTime(this.sk.mouseX))));
+        if (this.sk.sketchController.getIsAnimate()) this.seekMethodAnimate(timelinePanel);
+        else if (timelinePanel.overTimeline()) {
+            this.seekMethodMouse();
             this.videoPlayer.pause(); // Add to prevent accidental video playing that seems to occur
         }
+    }
+
+    // TODO: add if loaded tests?
+    mapPixelTimeToVideoTime(value) {
+        return Math.floor(this.sk.map(value, this.sk.gui.timelinePanel.getStart(), this.sk.gui.timelinePanel.getEnd(), 0, Math.floor(this.videoPlayer.getVideoDuration()))); // must floor vPos to prevent double finite error
+    }
+
+    getVideoPlayerCurTime() {
+        return this.videoPlayer.getCurrentTime();
+    }
+
+    getIsPlaying() {
+        // TODO: add test if loaded!?
+        return this.isPlaying;
+    }
+
+    setDotTimeForVideoScrub(timePos) {
+        this.dotTimeForVideoScrub = timePos;
+    }
+
+    seekMethodAnimate(timelinePanel) {
+        const videoTime = Math.floor(this.sk.map(this.dotTimeForVideoScrub, timelinePanel.getStart(), timelinePanel.getEnd(), this.mapPixelTimeToVideoTime(timelinePanel.getSelectStart()), this.mapPixelTimeToVideoTime(timelinePanel.getSelectEnd())));
+        this.videoPlayer.seekTo(videoTime);
+    }
+
+    seekMethodMouse() {
+        const videoTime = Math.floor(this.mapPixelTimeToVideoTime(this.sk.sketchController.mapPixelTimeToSelectTime(this.sk.mouseX)));
+        this.videoPlayer.seekTo(videoTime);
+
     }
 
     // TODO: PASS VIDEO CONTROLLER TO players and create new upload method??
@@ -92,7 +104,7 @@ export class VideoController {
             if (this.isPlaying) this.pause();
             else {
                 this.play();
-                this.videoPlayer.seekTo(this.sk.sketchController.mapPixelTimeToVideoTime(this.sk.sketchController.mapPixelTimeToSelectTime(this.sk.mouseX)));
+                this.seekMethodMouse();
             }
         }
     }
