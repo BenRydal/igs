@@ -16,7 +16,6 @@ export class YoutubePlayer {
         this.videoHeight = this.sk.width / 7;
         this.increment = 25;
         this.movie = this.sk.createDiv();
-        this.isLoaded = false;
         this.setMovieDiv();
         this.initializePlayer();
     }
@@ -40,9 +39,7 @@ export class YoutubePlayer {
                 'onReady': () => {
                     console.log("YT player ready: ");
                     this.duration = this.player.getDuration();
-                    this.isLoaded = true;
-                    this.sk.videoController.toggleShowVideo(); // Show video once loaded
-                    this.sk.loop(); // rerun P5 draw loop after loading image
+                    this.sk.videoController.videoPlayerReady();
                 }
             }
         });
@@ -76,10 +73,6 @@ export class YoutubePlayer {
 
     unMute() {
         this.player.unMute();
-    }
-
-    getIsLoaded() {
-        return this.isLoaded;
     }
 
     getCurrentTime() {
@@ -124,15 +117,12 @@ export class P5FilePlayer {
         this.duration = null;
         this.videoWidth = null;
         this.videoHeight = null;
-        this.isLoaded = false;
         this.increment = 25; //for increasing and decreasing video size
         this.isOver = false; // used internally to test if user selected movie element
         this.movie = this.sk.createVideo(params['fileName'], () => {
             console.log("File Player Ready:");
             this.setMovieDiv();
-            this.isLoaded = true;
-            this.sk.videoController.toggleShowVideo(); // Show video once it has been loaded
-            this.sk.loop(); // rerun P5 draw loop after loading image
+            this.sk.videoController.videoPlayerReady();
         });
     }
 
@@ -182,10 +172,6 @@ export class P5FilePlayer {
 
     unMute() {
         this.movie.volume(1);
-    }
-
-    getIsLoaded() {
-        return this.isLoaded;
     }
 
     getCurrentTime() {

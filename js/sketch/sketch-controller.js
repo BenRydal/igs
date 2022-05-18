@@ -28,7 +28,7 @@ export class SketchController {
     }
 
     mapVideoTimeToSelectedTime() {
-        const timelinePos = this.mapTotalTimeToPixelTime(this.sk.videoController.videoPlayer.getCurrentTime());
+        const timelinePos = this.mapTotalTimeToPixelTime(this.sk.videoController.getVideoPlayerCurTime());
         return this.mapSelectTimeToPixelTime(timelinePos);
     }
 
@@ -37,7 +37,7 @@ export class SketchController {
     }
 
     mapPixelTimeToVideoTime(value) {
-        return Math.floor(this.sk.map(value, this.sk.gui.timelinePanel.getStart(), this.sk.gui.timelinePanel.getEnd(), 0, Math.floor(this.sk.videoController.videoPlayer.getVideoDuration()))); // must floor vPos to prevent double finite error
+        return Math.floor(this.sk.map(value, this.sk.gui.timelinePanel.getStart(), this.sk.gui.timelinePanel.getEnd(), 0, Math.floor(this.sk.videoController.getVideoPlayerDuration()))); // must floor vPos to prevent double finite error
     }
 
     mapPixelTimeToSelectTime(value) {

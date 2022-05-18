@@ -8,8 +8,23 @@ export class VideoController {
         this.videoPlayer = null;
         this.isPlaying = false;
         this.isShowing = false;
+        this.isLoaded = false;
         this.dotTimeForVideoScrub = null; // Set in draw movement data and used to display correct video frame when scrubbing video
-        // TODO: move isLoaded boolean here??
+    }
+
+    videoPlayerReady() {
+        this.isLoaded = true;
+        this.toggleShowVideo();
+        this.sk.loop();
+    }
+
+    // TODO: add if loaded tests?
+    getVideoPlayerCurTime() {
+        return this.videoPlayer.getCurrentTime();
+    }
+
+    getVideoPlayerDuration() {
+        return this.videoPlayer.getVideoDuration();
     }
 
     createVideoPlayer(platform, params) {
@@ -34,11 +49,9 @@ export class VideoController {
             this.videoPlayer = null;
             this.isPlaying = false;
             this.isShowing = false;
+            this.isLoaded = false;
         }
     }
-
-    // videoPlayer.getCurrentTime()
-    // videoPlayer.getVideoDuration
 
     getIsPlaying() {
         // TODO: add test if loaded!?
@@ -121,6 +134,6 @@ export class VideoController {
     }
 
     testVideoAndDivAreLoaded() {
-        return (this.sk.dataIsLoaded(this.videoPlayer) && this.videoPlayer.getIsLoaded());
+        return (this.sk.dataIsLoaded(this.videoPlayer) && this.isLoaded);
     }
 }
