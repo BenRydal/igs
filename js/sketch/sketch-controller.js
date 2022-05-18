@@ -1,3 +1,7 @@
+/*
+This class holds variables that control program flow and are dynamically updated by user
+It also holds various mapping methods that map data values from different classes across the program
+*/
 export class SketchController {
 
     constructor(sketch) {
@@ -26,7 +30,6 @@ export class SketchController {
         this.setIsAnimate(!this.isAnimate);
         this.setIsAnimatePause(false);
     }
-
 
     mapPixelTimeToTotalTime(value) {
         return this.sk.map(value, this.sk.gui.timelinePanel.getStart(), this.sk.gui.timelinePanel.getEnd(), 0, this.sk.core.totalTimeInSeconds);
