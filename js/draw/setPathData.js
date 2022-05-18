@@ -5,15 +5,9 @@
  * Core data are passed to this class.
  */
 
-import {
-    DrawMovement
-} from './draw-movement.js';
-import {
-    DrawConversation
-} from './draw-conversation.js';
-import {
-    DrawUtils
-} from './draw-utils.js';
+import { DrawMovement } from './draw-movement.js';
+import { DrawConversation } from './draw-conversation.js';
+import { DrawUtils } from './draw-utils.js';
 
 export class SetPathData {
 

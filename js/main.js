@@ -7,42 +7,24 @@ Launches IGS as a p5 sketch in instance mode. p5 sketch, DOM and program data ar
     5) VideoPlayer class is an abstract class that holds video data and p5 drawing methods to represent video on the canvas
 */
 
-import {
-    Core
-} from './core/core.js';
-import {
-    GUI
-} from './sketch-gui/gui-interface.js';
-import {
-    DomHandler
-} from './dom-gui/dom-handler.js';
-import {
-    DomController
-} from './dom-gui/dom-controller.js';
-import {
-    addListeners
-} from './dom-gui/add-listeners.js';
-import {
-    SketchController
-} from './sketch/sketch-controller.js';
-import {
-    Handle3D
-} from './sketch/handle-3D.js';
-import {
-    FloorPlan
-} from './floorplan/floorplan.js';
-import {
-    SetPathData
-} from './draw/setPathData.js';
+import { Core } from './core/core.js';
+import { GUI } from './sketch-gui/gui-interface.js';
+import { DomHandler } from './dom-gui/dom-handler.js';
+import { DomController } from './dom-gui/dom-controller.js';
+import { addListeners } from './dom-gui/add-listeners.js';
+import { SketchController } from './sketch/sketch-controller.js';
+import { Handle3D } from './sketch/handle-3D.js';
+import { FloorPlan } from './floorplan/floorplan.js';
+import { SetPathData } from './draw/setPathData.js';
 
 
 const igs = new p5((sk) => {
 
-    sk.preload = function () {
+    sk.preload = function() {
         sk.font_Lato = sk.loadFont("data/fonts/Lato-Regular.ttf");
     }
 
-    sk.setup = function () {
+    sk.setup = function() {
         sk.canvas = sk.createCanvas(window.innerWidth, window.innerHeight, sk.WEBGL);
         sk.canvas.parent('sketch-holder');
         sk.core = new Core(sk);
@@ -65,7 +47,7 @@ const igs = new p5((sk) => {
         addListeners(sk);
     }
 
-    sk.draw = function () {
+    sk.draw = function() {
         sk.background(255);
         sk.translate(-sk.width / 2, -sk.height / 2, 0); // recenter canvas to top left when using WEBGL renderer
         // set/push to 3D if applicable
@@ -85,31 +67,31 @@ const igs = new p5((sk) => {
         else sk.noLoop();
     }
 
-    sk.mousePressed = function () {
+    sk.mousePressed = function() {
         if (sk.sketchController.testVideoToPlay()) sk.sketchController.playPauseVideoFromTimeline();
         else if (sk.sketchController.getCurSelectTab() === 5 && !sk.handle3D.getIs3DModeOrTransitioning()) sk.gui.highlight.handleMousePressed();
         sk.loop();
     }
 
-    sk.mouseDragged = function () {
+    sk.mouseDragged = function() {
         if (!sk.sketchController.getIsAnimate() && sk.gui.timelinePanel.isLockedOrOverTimeline()) sk.gui.timelinePanel.handle();
         sk.loop();
     }
 
-    sk.mouseReleased = function () {
+    sk.mouseReleased = function() {
         if (sk.sketchController.getCurSelectTab() === 5 && !sk.handle3D.getIs3DModeOrTransitioning() && !sk.gui.timelinePanel.isLockedOrOverTimeline()) sk.gui.highlight.handleMouseRelease();
         sk.gui.timelinePanel.resetLock(); // reset after handlingHighlight
         sk.loop();
     }
 
-    sk.mouseMoved = function () {
+    sk.mouseMoved = function() {
         if (sk.gui.timelinePanel.overEitherSelector()) sk.cursor(sk.HAND);
         else if (sk.sketchController.getCurSelectTab() === 5) sk.cursor(sk.CROSS);
         else sk.cursor(sk.ARROW);
         sk.loop();
     }
 
-    sk.windowResized = function () {
+    sk.windowResized = function() {
         sk.resizeCanvas(window.innerWidth, window.innerHeight);
         sk.gui = new GUI(sk); // update GUI vars
         sk.GUITEXTSIZE = sk.width / 70;
@@ -118,22 +100,22 @@ const igs = new p5((sk) => {
         sk.loop();
     }
 
-    sk.overCircle = function (x, y, diameter) {
+    sk.overCircle = function(x, y, diameter) {
         return sk.sqrt(sk.sq(x - sk.mouseX) + sk.sq(y - sk.mouseY)) < diameter / 2;
     }
 
-    sk.overRect = function (x, y, boxWidth, boxHeight) {
+    sk.overRect = function(x, y, boxWidth, boxHeight) {
         return sk.mouseX >= x && sk.mouseX <= x + boxWidth && sk.mouseY >= y && sk.mouseY <= y + boxHeight;
     }
 
     /**
      * @param  {Any Type} data
      */
-    sk.dataIsLoaded = function (data) {
+    sk.dataIsLoaded = function(data) {
         return data != null; // in javascript this tests for both undefined and null values
     }
 
-    sk.arrayIsLoaded = function (data) {
+    sk.arrayIsLoaded = function(data) {
         return Array.isArray(data) && data.length;
     }
 });

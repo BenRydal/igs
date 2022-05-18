@@ -1,7 +1,4 @@
-import {
-    YoutubePlayer,
-    P5FilePlayer
-} from '../video/video-player.js';
+import { YoutubePlayer, P5FilePlayer } from '../video/video-player.js';
 
 export class DomHandler {
 

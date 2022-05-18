@@ -1,13 +1,6 @@
-import {
-    TimelinePanel
-} from './timeline-panel.js';
-import {
-    FloorPlanContainer
-} from './floorplan-container.js';
-import {
-    Highlight
-} from './highlight.js';
-
+import { TimelinePanel } from './timeline-panel.js';
+import { FloorPlanContainer } from './floorplan-container.js';
+import { Highlight } from './highlight.js';
 
 export class GUI {
 
