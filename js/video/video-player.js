@@ -10,6 +10,7 @@ export class YoutubePlayer {
     constructor(sketch, params) {
         this.sk = sketch;
         this.targetId = 'moviePlayer';
+        this.selectId = '#moviePlayer';
         this.videoId = params['videoId'];
         this.duration = null;
         this.videoWidth = this.sk.width / 5; // these dimensions work nicely for example data
@@ -46,13 +47,11 @@ export class YoutubePlayer {
     }
 
     show() {
-        let element = document.querySelector('#moviePlayer');
-        element.style.display = 'block';
+        document.querySelector(this.selectId).style.display = 'block';
     }
 
     hide() {
-        let element = document.querySelector('#moviePlayer');
-        element.style.display = 'none';
+        document.querySelector(this.selectId).style.display = 'none';
     }
 
     seekTo(time) {
@@ -86,19 +85,19 @@ export class YoutubePlayer {
     updatePos(mouseX, mouseY, top, bottom) {
         const xPos = this.sk.constrain(mouseX, this.videoWidth, this.sk.width);
         const yPos = this.sk.constrain(mouseY, top, bottom - this.videoHeight);
-        this.sk.select('#moviePlayer').position(xPos - this.videoWidth, yPos);
+        this.sk.select(this.selectId).position(xPos - this.videoWidth, yPos);
     }
 
     increaseSize() {
         this.videoHeight = (this.videoHeight / this.videoWidth) * (this.videoWidth + this.increment);
         this.videoWidth += this.increment;
-        this.sk.select('#moviePlayer').size(this.videoWidth, this.videoHeight);
+        this.sk.select(this.selectId).size(this.videoWidth, this.videoHeight);
     }
 
     decreaseSize() {
         this.videoHeight = (this.videoHeight / this.videoWidth) * (this.videoWidth - this.increment);
         this.videoWidth -= this.increment;
-        this.sk.select('#moviePlayer').size(this.videoWidth, this.videoHeight);
+        this.sk.select(this.selectId).size(this.videoWidth, this.videoHeight);
     }
 
     destroy() {
@@ -114,6 +113,8 @@ export class P5FilePlayer {
      */
     constructor(sketch, params) {
         this.sk = sketch;
+        this.targetId = 'moviePlayer';
+        this.selectId = '#moviePlayer';
         this.duration = null;
         this.videoWidth = null;
         this.videoHeight = null;
@@ -127,7 +128,7 @@ export class P5FilePlayer {
     }
 
     setMovieDiv() {
-        this.movie.id('moviePlayer');
+        this.movie.id(this.targetId);
         this.videoWidth = this.sk.width / 5; // nice starting width for all loaded videos
         this.videoHeight = (this.movie.height / this.movie.width) * this.videoWidth; // scale height proportional to original aspect ratio
         this.movie.size(this.videoWidth, this.videoHeight);
@@ -140,17 +141,17 @@ export class P5FilePlayer {
             this.isOver = false;
         });
         this.movie.mouseOver(() => {
-            this.sk.select('#moviePlayer').style('cursor', 'grab'); // set mouse cursor style--this overrides any P5 cursor styles set in draw loop
+            this.sk.select(this.selectId).style('cursor', 'grab'); // set mouse cursor style--this overrides any P5 cursor styles set in draw loop
         });
     }
 
     show() {
-        let element = document.querySelector('#moviePlayer');
+        let element = document.querySelector(this.selectId);
         element.style.display = 'block';
     }
 
     hide() {
-        let element = document.querySelector('#moviePlayer');
+        let element = document.querySelector(this.selectId);
         element.style.display = 'none';
     }
 
@@ -185,19 +186,19 @@ export class P5FilePlayer {
     updatePos(mouseX, mouseY, top, bottom) {
         const xPos = this.sk.constrain(mouseX, this.videoWidth / 2, this.sk.width - this.videoWidth / 2);
         const yPos = this.sk.constrain(mouseY, top + this.videoHeight / 2, bottom - this.videoHeight / 2);
-        if (this.isOver) this.sk.select('#moviePlayer').position(xPos - this.videoWidth / 2, yPos - this.videoHeight / 2);
+        if (this.isOver) this.sk.select(this.selectId).position(xPos - this.videoWidth / 2, yPos - this.videoHeight / 2);
     }
 
     increaseSize() {
         this.videoHeight = (this.videoHeight / this.videoWidth) * (this.videoWidth + this.increment);
         this.videoWidth += this.increment;
-        this.sk.select('#moviePlayer').size(this.videoWidth, this.videoHeight);
+        this.sk.select(this.selectId).size(this.videoWidth, this.videoHeight);
     }
 
     decreaseSize() {
         this.videoHeight = (this.videoHeight / this.videoWidth) * (this.videoWidth - this.increment);
         this.videoWidth -= this.increment;
-        this.sk.select('#moviePlayer').size(this.videoWidth, this.videoHeight);
+        this.sk.select(this.selectId).size(this.videoWidth, this.videoHeight);
     }
 
     destroy() {
