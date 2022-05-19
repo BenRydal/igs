@@ -130,14 +130,13 @@ export class VideoController {
         return this.videoPlayer.getCurrentTime();
     }
 
-    getIsPlaying() {
-        return this.isPlaying;
-    }
-
     setDotTimeForVideoScrub(timePos) {
         this.dotTimeForVideoScrub = timePos;
     }
 
+    isLoadedAndIsPlaying() {
+        return this.isPlayerAndDivLoaded() && this.isPlaying;
+    }
     /**
      * NOTE: boolean test is additional test to make sure video is loaded as sometimes a videoPlayer object
      * can be created from a file but the data is corrupt in some way

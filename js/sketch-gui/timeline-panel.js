@@ -64,7 +64,7 @@ export class TimelinePanel {
             const mapMouseX = this.sk.sketchController.mapPixelTimeToSelectTime(this.sk.mouseX);
             const timeInSeconds = this.sk.sketchController.mapPixelTimeToTotalTime(mapMouseX);
             label = this.getMinutesAndSeconds(timeInSeconds);
-        } else if (this.sk.videoController.isPlayerAndDivLoaded() && this.sk.videoController.getIsPlaying()) {
+        } else if (this.sk.videoController.isLoadedAndIsPlaying()) {
             label = this.getMinutesAndSeconds(this.sk.videoController.getVideoPlayerCurTime());
         }
         this.sk.text(label, this.start + this.length / 2, this.height);
