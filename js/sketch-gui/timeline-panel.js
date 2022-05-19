@@ -59,15 +59,22 @@ export class TimelinePanel {
 
     drawCenterLabel() {
         this.sk.textAlign(this.sk.CENTER);
+        let label = "MINUTES"; // if not updated, display minutes string
         if (this.overTimeline()) {
             const mapMouseX = this.sk.sketchController.mapPixelTimeToSelectTime(this.sk.mouseX);
             const timeInSeconds = this.sk.sketchController.mapPixelTimeToTotalTime(mapMouseX);
-            const minutes = Math.floor(timeInSeconds / 60);
-            const seconds = Math.floor(timeInSeconds - minutes * 60);
-            const label = minutes + " minutes  " + seconds + " seconds";
-            this.sk.text(label, this.start + this.length / 2, this.height);
-        } else this.sk.text("MINUTES", this.start + this.length / 2, this.height);
+            label = this.getMinutesAndSeconds(timeInSeconds);
+        } else if (this.sk.videoController.isPlayerAndDivLoaded() && this.sk.videoController.getIsPlaying()) {
+            label = this.getMinutesAndSeconds(this.sk.videoController.getVideoPlayerCurTime());
+        }
+        this.sk.text(label, this.start + this.length / 2, this.height);
         this.sk.textAlign(this.sk.LEFT); // reset
+    }
+
+    getMinutesAndSeconds(timeInSeconds) {
+        const minutes = Math.floor(timeInSeconds / 60);
+        const seconds = Math.floor(timeInSeconds - minutes * 60);
+        return minutes + " minutes  " + seconds + " seconds";
     }
 
     setSlicerStroke() {
