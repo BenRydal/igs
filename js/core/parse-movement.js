@@ -1,8 +1,8 @@
-class ParseMovement {
+export class ParseMovement {
 
-    constructor(sketch, testData) {
+    constructor(sketch, coreUtils) {
         this.sk = sketch;
-        this.testData = testData;
+        this.coreUtils = coreUtils;
         this.parsedFileArray = []; // Holds PapaParse results.data array and string name of path for each processed file
     }
 
@@ -12,7 +12,7 @@ class ParseMovement {
      * @param  {File} file
      */
     processFile(results, file) {
-        const stringName = this.testData.cleanFileName(file.name);
+        const stringName = this.coreUtils.cleanFileName(file.name);
         this.parsedFileArray.push({
             parsedMovementArray: results.data,
             stringName
@@ -46,15 +46,15 @@ class ParseMovement {
         for (let i = 1; i < parsedMovementArray.length; i++) {
             const curRow = parsedMovementArray[i];
             const priorRow = parsedMovementArray[i - 1];
-            if (this.testData.movementRowForType(curRow) && this.testData.curTimeIsLarger(curRow, priorRow)) {
+            if (this.coreUtils.movementRowForType(curRow) && this.coreUtils.curTimeIsLarger(curRow, priorRow)) {
                 const m = this.createMovementPoint(curRow, movementPointArray);
                 movementPointArray.push(m);
                 if (conversationCounter < parsedConversationArray.length) { // this test both makes sure conversationArray is loaded and counter is not great than length
                     const curConversationRow = parsedConversationArray[conversationCounter];
-                    if (this.testData.conversationRowForType(curConversationRow) && this.testData.movementTimeIsLarger(m.time, curConversationRow)) {
+                    if (this.coreUtils.conversationRowForType(curConversationRow) && this.coreUtils.movementTimeIsLarger(m.time, curConversationRow)) {
                         conversationPointArray.push(this.createConversationPoint(m, curConversationRow));
                         conversationCounter++;
-                    } else if (!this.testData.conversationRowForType(curConversationRow)) conversationCounter++; // make sure to increment counter if bad data to skip row in next iteration of loop
+                    } else if (!this.coreUtils.conversationRowForType(curConversationRow)) conversationCounter++; // make sure to increment counter if bad data to skip row in next iteration of loop
                 }
             }
         }
@@ -66,11 +66,11 @@ class ParseMovement {
      */
     createMovementPoint(curRow, movementPointArray) {
         return {
-            time: curRow[this.testData.headersMovement[0]],
-            xPos: curRow[this.testData.headersMovement[1]],
-            yPos: curRow[this.testData.headersMovement[2]],
-            isStopped: this.testData.isStopped(curRow, movementPointArray),
-            codes: this.sk.core.parseCodes.addCodeArray(curRow[this.testData.headersMovement[0]])
+            time: curRow[this.coreUtils.headersMovement[0]],
+            xPos: curRow[this.coreUtils.headersMovement[1]],
+            yPos: curRow[this.coreUtils.headersMovement[2]],
+            isStopped: this.coreUtils.isStopped(curRow, movementPointArray),
+            codes: this.sk.core.parseCodes.getCodeData(curRow[this.coreUtils.headersMovement[0]])
         }
     }
 
@@ -85,8 +85,8 @@ class ParseMovement {
             yPos: movementPoint.yPos,
             isStopped: movementPoint.isStopped,
             codes: movementPoint.codes,
-            speaker: this.testData.cleanFileName(curConversationRow[this.testData.headersConversation[1]]), // String name of speaker
-            talkTurn: curConversationRow[this.testData.headersConversation[2]] // String text of conversation turn
+            speaker: this.coreUtils.cleanFileName(curConversationRow[this.coreUtils.headersConversation[1]]), // String name of speaker
+            talkTurn: curConversationRow[this.coreUtils.headersConversation[2]] // String text of conversation turn
         }
     }
 

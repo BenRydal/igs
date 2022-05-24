@@ -2,7 +2,7 @@
  * A global videoPlayer object acts as an abstract class for all Player sub-classes
  * All Player classes must implement the following methods: seekTo(time), play(), pause(), mute(), unMute(), getCurrentTime(), getVideoDuration(), destroy(), show(), hide()
  */
-class YoutubePlayer {
+export class YoutubePlayer {
     /**
      * Include the following script in head of the format: <script type = "text/javascript" src = "https://www.youtube.com/iframe_api"> < /script>
      * @param  {videoId: 'your_videoId_here'} params
@@ -10,13 +10,13 @@ class YoutubePlayer {
     constructor(sketch, params) {
         this.sk = sketch;
         this.targetId = 'moviePlayer';
+        this.selectId = '#moviePlayer';
         this.videoId = params['videoId'];
         this.duration = null;
         this.videoWidth = this.sk.width / 5; // these dimensions work nicely for example data
         this.videoHeight = this.sk.width / 7;
         this.increment = 25;
         this.movie = this.sk.createDiv();
-        this.isLoaded = false;
         this.setMovieDiv();
         this.initializePlayer();
     }
@@ -40,22 +40,18 @@ class YoutubePlayer {
                 'onReady': () => {
                     console.log("YT player ready: ");
                     this.duration = this.player.getDuration();
-                    this.isLoaded = true;
-                    this.sk.sketchController.toggleShowVideo(); // Show video once loaded
-                    this.sk.loop(); // rerun P5 draw loop after loading image
+                    this.sk.videoController.videoPlayerReady();
                 }
             }
         });
     }
 
     show() {
-        let element = document.querySelector('#moviePlayer');
-        element.style.display = 'block';
+        document.querySelector(this.selectId).style.display = 'block';
     }
 
     hide() {
-        let element = document.querySelector('#moviePlayer');
-        element.style.display = 'none';
+        document.querySelector(this.selectId).style.display = 'none';
     }
 
     seekTo(time) {
@@ -78,10 +74,6 @@ class YoutubePlayer {
         this.player.unMute();
     }
 
-    getIsLoaded() {
-        return this.isLoaded;
-    }
-
     getCurrentTime() {
         return this.player.getCurrentTime();
     }
@@ -93,19 +85,19 @@ class YoutubePlayer {
     updatePos(mouseX, mouseY, top, bottom) {
         const xPos = this.sk.constrain(mouseX, this.videoWidth, this.sk.width);
         const yPos = this.sk.constrain(mouseY, top, bottom - this.videoHeight);
-        this.sk.select('#moviePlayer').position(xPos - this.videoWidth, yPos);
+        this.sk.select(this.selectId).position(xPos - this.videoWidth, yPos);
     }
 
     increaseSize() {
         this.videoHeight = (this.videoHeight / this.videoWidth) * (this.videoWidth + this.increment);
         this.videoWidth += this.increment;
-        this.sk.select('#moviePlayer').size(this.videoWidth, this.videoHeight);
+        this.sk.select(this.selectId).size(this.videoWidth, this.videoHeight);
     }
 
     decreaseSize() {
         this.videoHeight = (this.videoHeight / this.videoWidth) * (this.videoWidth - this.increment);
         this.videoWidth -= this.increment;
-        this.sk.select('#moviePlayer').size(this.videoWidth, this.videoHeight);
+        this.sk.select(this.selectId).size(this.videoWidth, this.videoHeight);
     }
 
     destroy() {
@@ -114,30 +106,29 @@ class YoutubePlayer {
     }
 }
 
-class P5FilePlayer {
+export class P5FilePlayer {
 
     /**
      * @param  {fileName: 'your_fileLocation_here'} params
      */
     constructor(sketch, params) {
         this.sk = sketch;
+        this.targetId = 'moviePlayer';
+        this.selectId = '#moviePlayer';
         this.duration = null;
         this.videoWidth = null;
         this.videoHeight = null;
-        this.isLoaded = false;
-        this.isOver = false; // used internally to test if user selected movie element
         this.increment = 25; //for increasing and decreasing video size
+        this.isOver = false; // used internally to test if user selected movie element
         this.movie = this.sk.createVideo(params['fileName'], () => {
             console.log("File Player Ready:");
             this.setMovieDiv();
-            this.isLoaded = true;
-            this.sk.sketchController.toggleShowVideo(); // Show video once it has been loaded
-            this.sk.loop(); // rerun P5 draw loop after loading image
+            this.sk.videoController.videoPlayerReady();
         });
     }
 
     setMovieDiv() {
-        this.movie.id('moviePlayer');
+        this.movie.id(this.targetId);
         this.videoWidth = this.sk.width / 5; // nice starting width for all loaded videos
         this.videoHeight = (this.movie.height / this.movie.width) * this.videoWidth; // scale height proportional to original aspect ratio
         this.movie.size(this.videoWidth, this.videoHeight);
@@ -150,17 +141,17 @@ class P5FilePlayer {
             this.isOver = false;
         });
         this.movie.mouseOver(() => {
-            this.sk.select('#moviePlayer').style('cursor', 'grab'); // set mouse cursor style--this overrides any P5 cursor styles set in draw loop
+            this.sk.select(this.selectId).style('cursor', 'grab'); // set mouse cursor style--this overrides any P5 cursor styles set in draw loop
         });
     }
 
     show() {
-        let element = document.querySelector('#moviePlayer');
+        let element = document.querySelector(this.selectId);
         element.style.display = 'block';
     }
 
     hide() {
-        let element = document.querySelector('#moviePlayer');
+        let element = document.querySelector(this.selectId);
         element.style.display = 'none';
     }
 
@@ -184,10 +175,6 @@ class P5FilePlayer {
         this.movie.volume(1);
     }
 
-    getIsLoaded() {
-        return this.isLoaded;
-    }
-
     getCurrentTime() {
         return this.movie.time();
     }
@@ -199,19 +186,19 @@ class P5FilePlayer {
     updatePos(mouseX, mouseY, top, bottom) {
         const xPos = this.sk.constrain(mouseX, this.videoWidth / 2, this.sk.width - this.videoWidth / 2);
         const yPos = this.sk.constrain(mouseY, top + this.videoHeight / 2, bottom - this.videoHeight / 2);
-        if (this.isOver) this.sk.select('#moviePlayer').position(xPos - this.videoWidth / 2, yPos - this.videoHeight / 2);
+        if (this.isOver) this.sk.select(this.selectId).position(xPos - this.videoWidth / 2, yPos - this.videoHeight / 2);
     }
 
     increaseSize() {
         this.videoHeight = (this.videoHeight / this.videoWidth) * (this.videoWidth + this.increment);
         this.videoWidth += this.increment;
-        this.sk.select('#moviePlayer').size(this.videoWidth, this.videoHeight);
+        this.sk.select(this.selectId).size(this.videoWidth, this.videoHeight);
     }
 
     decreaseSize() {
         this.videoHeight = (this.videoHeight / this.videoWidth) * (this.videoWidth - this.increment);
         this.videoWidth -= this.increment;
-        this.sk.select('#moviePlayer').size(this.videoWidth, this.videoHeight);
+        this.sk.select(this.selectId).size(this.videoWidth, this.videoHeight);
     }
 
     destroy() {

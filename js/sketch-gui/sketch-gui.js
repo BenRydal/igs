@@ -1,4 +1,8 @@
-class GUI {
+import { TimelinePanel } from './timeline-panel.js';
+import { FloorPlanContainer } from './floorplan-container.js';
+import { Highlight } from './highlight.js';
+
+export class SketchGUI {
 
     constructor(sketch) {
         this.sk = sketch;
@@ -7,7 +11,7 @@ class GUI {
         this.highlight = new Highlight(this.sk, this.timelinePanel.getTop());
     }
 
-    updateGUI() {
+    update2D() {
         this.timelinePanel.draw();
         if (this.timelinePanel.overTimeline()) {
             if (this.sk.handle3D.getIs3DMode()) this.timelinePanel.drawShortSlicer();
@@ -19,7 +23,7 @@ class GUI {
         }
     }
 
-    updateGUIWithTranslation() {
+    update3D() {
         this.highlight.setDraw();
         if (this.sk.handle3D.getIs3DMode() && this.timelinePanel.overTimeline()) {
             this.timelinePanel.draw3DSlicerRect(this.fpContainer.getContainer(), this.sk.sketchController.mapToSelectTimeThenPixelTime(this.sk.mouseX));

@@ -1,8 +1,8 @@
-class ParseCodes {
+export class ParseCodes {
 
-    constructor(sketch, testData) {
+    constructor(sketch, coreUtils) {
         this.sk = sketch;
-        this.testData = testData;
+        this.coreUtils = coreUtils;
         this.parsedFileArray = []; // holds CodeTable objects
     }
 
@@ -12,7 +12,7 @@ class ParseCodes {
      * @param  {File} file
      */
     processSingleCodeFile(results, file) {
-        const codeName = this.testData.cleanFileName(file.name); // remove file extension
+        const codeName = this.coreUtils.cleanFileName(file.name); // remove file extension
         this.parsedFileArray.push(this.createCodeTable(results.data, codeName));
         this.sk.core.updateCodes(codeName);
     }
@@ -29,13 +29,12 @@ class ParseCodes {
 
     /**
      * For each row, updates either an existing codeTable in parsedFileArray or adds a new codeTable
-     * NOTE: First letter of first column used to test if there is existing codeTable object
      * @param  {PapaParse results Array} results
      */
     updateParsedFileArrayForMultiCodes(results) {
         for (const row of results.data) {
-            if (this.testData.codeRowForType(row)) { // IMPORTANT: in case there is partial missing data etc. 
-                const curCodeName = this.testData.cleanFileName(row[this.testData.headersMultiCodes[0]]);
+            if (this.coreUtils.codeRowForType(row)) { // IMPORTANT: in case there is partial missing data etc. 
+                const curCodeName = this.coreUtils.cleanFileName(row[this.coreUtils.headersMultiCodes[0]]);
                 let addNewTable = true; // to add new code table if parsedFileArray empty or no name match/existing codeTable NOT updated
                 for (const codeTable of this.parsedFileArray) { // test for name match to updated existing codeTable
                     if (codeTable.codeName === curCodeName) {
@@ -61,35 +60,37 @@ class ParseCodes {
      * Invoked when creating point arrays in parseMovement
      * Tests if the current time value is between any start/end code times in all loaded codeTables
      * NOTE: comparing to next row in codeTable and use of codeTable counters tries to do this in a most efficient manner
+     * Returns list of boolean vars indicating if value is within range for all loaded codes and
+     * a single color variable, which can be gray if value is not within range for loaded codes or black if within multiple ranges
      * 
      * @param  {Number/Float} curTime
      */
-    addCodeArray(curTime) {
-        let codeArrayToAdd = [];
-        let color = this.sk.COLORGRAY; // color when there are no codes, also used in getCodeColor method
+    getCodeData(curTime) {
+        let hasCodeArray = [];
+        let color = this.sk.core.COLORGRAY; // if no matching codes are found, this will be the color returned
         for (let i = 0; i < this.parsedFileArray.length; i++) {
             const curCodeTableRow = this.parsedFileArray[i].parsedCodeArray[this.parsedFileArray[i].counter];
-            if (this.testData.codeRowForType(curCodeTableRow)) { // IMPORTANT: in case there is partial missing data etc. 
+            if (this.coreUtils.codeRowForType(curCodeTableRow)) { // IMPORTANT: in case there is partial missing data etc. 
                 if (this.timeIsBetweenCurRow(curTime, this.parsedFileArray[i])) {
-                    codeArrayToAdd.push(true);
+                    hasCodeArray.push(true);
                     color = this.getCodeColor(color, i);
                 } else {
                     if (this.parsedFileArray[i].counter < this.parsedFileArray[i].parsedCodeArray.length - 1 && this.timeIsBetweenNextRow(curTime, this.parsedFileArray[i])) {
-                        codeArrayToAdd.push(true);
+                        hasCodeArray.push(true);
                         color = this.getCodeColor(color, i);
                         this.parsedFileArray[i].counter++;
-                    } else codeArrayToAdd.push(false);
+                    } else hasCodeArray.push(false);
                 }
             }
         }
         return {
-            array: codeArrayToAdd,
-            color: color
+            hasCodeArray,
+            color
         }
     }
 
     getCodeColor(color, index) {
-        if (color === this.sk.COLORGRAY) return this.sk.core.COLOR_LIST[index % this.sk.core.COLOR_LIST.length];
+        if (color === this.sk.core.COLORGRAY) return this.sk.core.getNextColorInList(index);
         else return 0; // if color already assigned, make it black because there are multiple true codes for same curTime
     }
     timeIsBetweenCurRow(curTime, codeTable) {
@@ -101,11 +102,11 @@ class ParseCodes {
     }
 
     getStartTime(results, row) {
-        return results[row][this.testData.headersSingleCodes[0]];
+        return results[row][this.coreUtils.headersSingleCodes[0]];
     }
 
     getEndTime(results, row) {
-        return results[row][this.testData.headersSingleCodes[1]];
+        return results[row][this.coreUtils.headersSingleCodes[1]];
     }
 
     between(x, min, max) {

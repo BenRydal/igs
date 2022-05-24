@@ -4,11 +4,12 @@
  * For example, using the "line" method in a library like P5 is inefficient and curveVertex increases efficiency significantly but 
  * the tradeoff is the need for more customized methods and conditional structures to handle starting/begining lines/shapes
  */
-class DrawMovement {
 
-    constructor(sketch) {
+export class DrawMovement {
+
+    constructor(sketch, drawUtils) {
         this.sk = sketch;
-        this.testPoint = new TestPoint(this.sk);
+        this.drawUtils = drawUtils;
         this.dot = null; // represents user selection dot drawn in both floor plan and space-time views
         this.isDrawingLine = false; // boolean controls start/end line segment drawing based on code file and GUI selections
         this.style = {
@@ -112,7 +113,7 @@ class DrawMovement {
      * @param  {AugmentPoint} augmentPoint
      */
     isVisible(augmentPoint) {
-        return (this.testPoint.isShowingInGUI(augmentPoint.pos.timelineXPos) && this.testPoint.isShowingInCodeList(augmentPoint.point.codes.array) && this.testPoint.selectMode(augmentPoint.pos, augmentPoint.point.isStopped));
+        return (this.drawUtils.isShowingInGUI(augmentPoint.pos.timelineXPos) && this.drawUtils.isShowingInCodeList(augmentPoint.point.codes.hasCodeArray) && this.drawUtils.selectMode(augmentPoint.pos, augmentPoint.point.isStopped));
     }
 
     /**
@@ -143,7 +144,7 @@ class DrawMovement {
         const newDot = this.getNewDot(augmentPoint, this.dot);
         if (newDot !== null) {
             this.dot = newDot;
-            this.sk.sketchController.setDotTimeForVideoScrub(this.dot.timePos);
+            this.sk.videoController.setDotTimeForVideoScrub(this.dot.timePos);
         }
     }
 
@@ -183,7 +184,7 @@ class DrawMovement {
      * @param  {Integer} view
      */
     getScaledMovementPos(point, view) {
-        const pos = this.testPoint.getSharedPosValues(point);
+        const pos = this.drawUtils.getSharedPosValues(point);
         return {
             timelineXPos: pos.timelineXPos,
             selTimelineXPos: pos.selTimelineXPos,
@@ -220,9 +221,10 @@ class DrawMovement {
         const [xPos, yPos, zPos, timePos, map3DMouse, codeColor] = [augmentedPoint.pos.floorPlanXPos, augmentedPoint.pos.floorPlanYPos, augmentedPoint.pos.zPos, augmentedPoint.pos.selTimelineXPos, this.sk.sketchController.mapToSelectTimeThenPixelTime(this.sk.mouseX), augmentedPoint.point.codes.color];
         if (this.sk.sketchController.getIsAnimate()) {
             return this.createDot(xPos, yPos, zPos, timePos, codeColor, null); // pass null as this means most recent point will always create Dot object
-        } else if (this.sk.sketchController.getIsVideoPlay()) {
-            const videoToSelectTime = this.sk.sketchController.mapVideoTimeToSelectedTime();
-            if (this.compareToCurDot(videoToSelectTime, timePos, curDot)) return this.createDot(xPos, yPos, zPos, timePos, codeColor, Math.abs(videoToSelectTime - timePos));
+        } else if (this.sk.videoController.isLoadedAndIsPlaying()) {
+            const videoPixelTime = this.sk.sketchController.mapTotalTimeToPixelTime(this.sk.videoController.getVideoPlayerCurTime());
+            const videoSelectTime = this.sk.sketchController.mapSelectTimeToPixelTime(videoPixelTime);
+            if (this.compareToCurDot(videoSelectTime, timePos, curDot)) return this.createDot(xPos, yPos, zPos, timePos, codeColor, Math.abs(videoSelectTime - timePos));
         } else if (this.sk.gui.timelinePanel.overTimeline() && this.compareToCurDot(map3DMouse, timePos, curDot)) {
             return this.createDot(xPos, yPos, zPos, map3DMouse, codeColor, Math.abs(map3DMouse - timePos));
         }

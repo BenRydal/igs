@@ -1,4 +1,4 @@
-class Highlight {
+export class Highlight {
 
     constructor(sketch, bottomBounds) {
         this.sk = sketch;

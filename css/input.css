@@ -13,19 +13,43 @@ body {
     overflow-x: hidden;
 }
 
-.container {
+.main-menu-bar {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+
+.main-menu-bar__input {
+    width: 0.1px;
+    height: 0.1px;
+    opacity: 0;
+    overflow: hidden;
+    position: absolute;
+    z-index: -1;
+}
+
+.main-menu-bar__input+label {
+    font-size: 1em;
+    font-weight: 300;
+    color: black;
+    background-color: white;
+    display: inline-block;
+    border: 1px solid black;
+    padding: 5px;
+}
+
+/* Display none for hiding load data buttons on program start */
+.js-main-menu-bar__load-files--display+label {
+    display: none;
+}
+
+.p5-container {
     position: relative;
 }
 
-.main-tab-container {
+.how-to-container {
     position: absolute;
-    max-width: 48%;
-    top: 90%;
-}
-
-.introContainer {
-    position: absolute;
-    top: 5vh;
+    top: 6vh;
     width: 70vw;
     height: 70vh;
     border: 2px solid black;
@@ -36,7 +60,7 @@ body {
     background: rgba(255, 255, 255, 0.9);
 }
 
-.introTitle {
+.how-to-container__title {
     color: black;
     padding: 1.5vw;
     text-transform: uppercase;
@@ -45,7 +69,7 @@ body {
     font-weight: bold;
 }
 
-.introMsg {
+.how-to-container__text {
     color: black;
     padding-right: 3vw;
     padding-left: 3vw;
@@ -55,7 +79,7 @@ body {
     text-align: justify;
 }
 
-.introMsgCredits {
+.how-to-container__credits {
     color: black;
     padding-top: 1.5vh;
     padding-right: 3vw;
@@ -67,34 +91,12 @@ body {
     text-align: justify;
 }
 
-.introBar {
-    text-align: center;
-    margin-bottom: 10px;
-}
 
 
-.inputfile {
-    width: 0.1px;
-    height: 0.1px;
-    opacity: 0;
-    overflow: hidden;
+.main-tab-container {
     position: absolute;
-    z-index: -1;
-}
-
-.inputfile+label {
-    font-size: 1em;
-    font-weight: 300;
-    color: black;
-    background-color: white;
-    display: inline-block;
-    border: 1px solid black;
-    padding: 5px;
-}
-
-/* Display none for hiding load data buttons on program start */
-.loadData+label {
-    display: none;
+    max-width: 48%;
+    top: 90%;
 }
 
 /* Main Tabs */
@@ -110,10 +112,6 @@ label {
 label:hover {
     background-color: #ccc;
 }
-
-/* label input:checked {
-    background-color: red;
-} */
 
 .tab-radio {
     display: none;
@@ -137,15 +135,15 @@ label:hover {
     border: 1px solid #ddd;
 }
 
-/* .sub-tabs-container label:hover {
-    background-color: #919604;
-} */
-
 /* Tabs Content */
 .tab-content {
     padding: 10px;
     background-color: #ffffff;
     border: 1px solid #ddd;
+}
+
+.tab-content label:hover {
+    background-color: #ffffff;
 }
 
 .button-float {
@@ -174,10 +172,6 @@ label:hover {
     width: 0;
 }
 
-.tab-content label:hover {
-    background-color: #ffffff;
-}
-
 /* Create a custom checkbox */
 .checkmark {
     position: absolute;
@@ -185,4 +179,15 @@ label:hover {
     left: 0;
     height: 20px;
     width: 20px;
+}
+
+/* Create a custom colorpicker */
+.colorpicker {
+    position: absolute;
+    background-color: #817c81;
+    top: 12;
+    left: 0;
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
 }

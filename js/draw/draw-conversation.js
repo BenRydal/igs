@@ -1,8 +1,12 @@
-class DrawConversation {
+/**
+ * This class holds drawing methods specific to drawing conversation rectangles and text depending on user interaction
+ */
 
-    constructor(sketch) {
+export class DrawConversation {
+
+    constructor(sketch, drawUtils) {
         this.sk = sketch;
-        this.testPoint = new TestPoint(this.sk);
+        this.drawUtils = drawUtils;
         this.conversationBubble = { // represents user selected conversation
             isSelected: false,
             point: null, // stores one ConversationPoint object for selected conversation turn
@@ -33,7 +37,7 @@ class DrawConversation {
     }
 
     isVisible(point, curPos) {
-        return (this.isTalkTurnSelected(point.talkTurn) && this.testPoint.isShowingInGUI(curPos.timelineXPos) && this.testPoint.selectMode(curPos, point.isStopped) && this.testPoint.isShowingInCodeList(point.codes.array));
+        return (this.isTalkTurnSelected(point.talkTurn) && this.drawUtils.isShowingInGUI(curPos.timelineXPos) && this.drawUtils.selectMode(curPos, point.isStopped) && this.drawUtils.isShowingInCodeList(point.codes.hasCodeArray));
     }
     /**
      * Draws single textbox for user selected conversation
@@ -180,7 +184,7 @@ class DrawConversation {
     }
 
     getScaledConversationPos(point) {
-        const pos = this.testPoint.getSharedPosValues(point);
+        const pos = this.drawUtils.getSharedPosValues(point);
         const rectLength = this.getRectLength(point.talkTurn);
         return {
             timelineXPos: pos.timelineXPos,

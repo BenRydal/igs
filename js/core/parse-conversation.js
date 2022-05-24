@@ -1,8 +1,8 @@
-class ParseConversation {
+export class ParseConversation {
 
-    constructor(sketch, testData) {
+    constructor(sketch, coreUtils) {
         this.sk = sketch;
-        this.testData = testData;
+        this.coreUtils = coreUtils;
         this.parsedFileArray = []; // PapaParse results.data Array
     }
 

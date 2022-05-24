@@ -1,4 +1,4 @@
-class FloorPlan {
+export class FloorPlan {
 
     constructor(sk) {
         this.sk = sk;
