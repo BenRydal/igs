@@ -11,34 +11,24 @@ import { DrawUtils } from './draw-utils.js';
 
 export class SetPathData {
 
-    constructor(sketch, pathList, speakerList, codeList) {
+    constructor(sketch, codeList) {
         this.sk = sketch;
-        this.pathList = pathList;
-        this.speakerList = speakerList;
-        this.codeList = codeList;
         this.drawUtils = new DrawUtils(sketch, codeList);
     }
 
-    set() {
-        if (this.sk.arrayIsLoaded(this.pathList)) {
-            if (this.sk.arrayIsLoaded(this.speakerList)) this.setMovementAndConversation();
-            else this.setMovement();
-        }
-    }
-
-    setMovement() {
+    setMovement(pathList) {
         const drawMovement = new DrawMovement(this.sk, this.drawUtils);
-        for (const path of this.pathList) {
+        for (const path of pathList) {
             if (path.isShowing) drawMovement.setData(path);
         }
     }
 
-    setMovementAndConversation() {
+    setMovementAndConversation(pathList, speakerList) {
         const drawConversation = new DrawConversation(this.sk, this.drawUtils);
         const drawMovement = new DrawMovement(this.sk, this.drawUtils);
-        for (const path of this.pathList) {
+        for (const path of pathList) {
             if (path.isShowing) {
-                drawConversation.setData(path, this.speakerList);
+                drawConversation.setData(path, speakerList);
                 drawMovement.setData(path); // draw after conversation so dot displays on top
             }
         }

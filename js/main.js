@@ -69,8 +69,11 @@ const igs = new p5((sk) => {
     sk.visualizeData = function() {
         if (sk.dataIsLoaded(sk.floorPlan.getImg())) { // floorPlan must be loaded to draw any data
             sk.floorPlan.setFloorPlan(sk.gui.fpContainer.getContainer());
-            const setPathData = new SetPathData(sk, sk.core.pathList, sk.core.speakerList, sk.core.codeList);
-            setPathData.set();
+            if (sk.arrayIsLoaded(sk.core.pathList)) {
+                const setPathData = new SetPathData(sk, sk.core.codeList);
+                if (sk.arrayIsLoaded(sk.core.speakerList)) setPathData.setMovementAndConversation(sk.core.pathList, sk.core.speakerList);
+                else setPathData.setMovement(sk.core.pathList);
+            }
         }
         sk.videoController.updateDisplay();
     }
