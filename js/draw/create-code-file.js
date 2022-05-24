@@ -1,11 +1,8 @@
 // TODO:
-// move pathList test in main???
-// Remove codeList from vars in draw movement / convo
+// finalize createCodeFile
 // move methods to drawUtils
-// add createcodefile class
 // add html button and listeners
-
-// new CreateCodeFile(this.sk, pathList, codeList);
+// test if path loaded? and then new CreateCodeFile(this.sk, pathList, codeList);
 
 import { DrawMovement } from './draw-movement.js';
 import { DrawUtils } from './draw-utils.js';
@@ -19,7 +16,7 @@ export class CreateCodeFile {
     }
 
     createCodeFile() {
-        if (this.sk.arrayIsLoaded(this.pathList)) {
+        if (this.sk.arrayIsLoaded(this.pathList)) { // move this to button method?
             const drawMovement = new DrawMovement(this.sk, this.drawUtils);
             for (const path of this.pathList) {
                 if (path.isShowing) {
@@ -39,8 +36,8 @@ export class CreateCodeFile {
         let endTimesArray = [];
         let zzzRecordingCode = false;
         for (let i = 1; i < movementArray.length; i++) { // start at 1 to allow testing of current and prior indices
-            const p = this.createComparePoint(view, movementArray[i], movementArray[i - 1]); // a compare point consists of current and prior augmented points
-            if (this.isVisible(p.cur)) {
+            const p = this.drawUtils.createComparePoint(view, movementArray[i], movementArray[i - 1]); // a compare point consists of current and prior augmented points
+            if (this.drawUtils.isVisible(p.cur.point, p.cur.pos)) {
                 if (zzzRecordingCode === false) {
                     zzzRecordingCode = true;
                     startTimesArray.push(p.cur.point.time);
