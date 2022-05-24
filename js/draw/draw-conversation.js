@@ -25,7 +25,7 @@ export class DrawConversation {
      */
     setData(path, speakerList) {
         for (const point of path.conversation) {
-            const curPos = this.getScaledConversationPos(point);
+            const curPos = this.drawUtils.getScaledConversationPos(point, this.getRectLength(point.talkTurn));
             if (this.isTalkTurnSelected(point.talkTurn) && this.drawUtils.isVisible(point, curPos)) {
                 const curSpeaker = this.getSpeakerFromSpeakerList(point.speaker, speakerList); // get speaker object from global list equivalent to the current speaker of point
                 if (this.testSpeakerToDraw(curSpeaker, path.name)) {
@@ -177,30 +177,6 @@ export class DrawConversation {
             if (speaker.name === curSpeaker) return speaker;
         }
         return null;
-    }
-
-    getScaledConversationPos(point) {
-        const pos = this.drawUtils.getSharedPosValues(point);
-        const rectLength = this.getRectLength(point.talkTurn);
-        return {
-            timelineXPos: pos.timelineXPos,
-            selTimelineXPos: pos.selTimelineXPos,
-            floorPlanXPos: pos.floorPlanXPos,
-            floorPlanYPos: pos.floorPlanYPos,
-            rectLength,
-            adjustYPos: this.getConversationAdjustYPos(pos.floorPlanYPos, rectLength)
-        };
-    }
-
-    /**
-     * Adjusts Y positioning of conversation rectangles correctly for align and 3 D views
-     */
-    getConversationAdjustYPos(floorPlanYPos, rectLength) {
-        if (this.sk.sketchController.getIsAlignTalk()) {
-            if (this.sk.handle3D.getIs3DMode()) return this.sk.gui.fpContainer.getContainer().height;
-            else return 0;
-        } else if (this.sk.handle3D.getIs3DMode()) return floorPlanYPos;
-        else return floorPlanYPos - rectLength;
     }
 
     /**

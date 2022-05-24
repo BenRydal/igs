@@ -40,7 +40,7 @@ export class DrawMovement {
     setDraw(view, movementArray) {
         this.isDrawingLine = false; // always reset
         for (let i = 1; i < movementArray.length; i++) { // start at 1 to allow testing of current and prior indices
-            const p = this.createComparePoint(view, movementArray[i], movementArray[i - 1]); // a compare point consists of current and prior augmented points
+            const p = this.drawUtils.createComparePoint(view, movementArray[i], movementArray[i - 1]); // a compare point consists of current and prior augmented points
             if (this.drawUtils.isVisible(p.cur.point, p.cur.pos)) {
                 if (view === this.sk.SPACETIME) this.recordDot(p.cur);
                 if (p.cur.point.isStopped) this.updateStopDrawing(p, view);
@@ -108,25 +108,6 @@ export class DrawMovement {
         return p.cur.point.codes.color !== p.prior.point.codes.color;
     }
 
-    /**
-     * A compare point is an object with two augmented points
-     * @param  {Integer} view
-     * @param  {MovementPoint} curIndex 
-     * @param  {MovementPoint} priorIndex 
-     */
-    createComparePoint(view, curIndex, priorIndex) {
-        return {
-            cur: this.createAugmentPoint(view, curIndex),
-            prior: this.createAugmentPoint(view, priorIndex)
-        }
-    }
-
-    createAugmentPoint(view, point) {
-        return {
-            point,
-            pos: this.getScaledMovementPos(point, view)
-        }
-    }
 
     /**
      * Tests if newDot has been created and updates current dot value and video scrub variable if so
@@ -171,37 +152,7 @@ export class DrawMovement {
         if (this.sk.sketchController.getIsPathColorMode()) this.sk.fill(this.style.shade);
         else this.sk.fill(color);
     }
-    /**
-     * @param  {MovementPoint} point
-     * @param  {Integer} view
-     */
-    getScaledMovementPos(point, view) {
-        const pos = this.drawUtils.getSharedPosValues(point);
-        return {
-            timelineXPos: pos.timelineXPos,
-            selTimelineXPos: pos.selTimelineXPos,
-            floorPlanXPos: pos.floorPlanXPos,
-            floorPlanYPos: pos.floorPlanYPos,
-            viewXPos: this.getViewXPos(view, pos.floorPlanXPos, pos.selTimelineXPos),
-            zPos: this.getZPos(view, pos.selTimelineXPos)
-        };
-    }
 
-    getViewXPos(view, floorPlanXPos, selTimelineXPos) {
-        if (view === this.sk.PLAN) return floorPlanXPos;
-        else {
-            if (this.sk.handle3D.getIs3DMode()) return floorPlanXPos;
-            else return selTimelineXPos;
-        }
-    }
-
-    getZPos(view, selTimelineXPos) {
-        if (view === this.sk.PLAN) return 0;
-        else {
-            if (this.sk.handle3D.getIs3DMode()) return selTimelineXPos;
-            else return 0;
-        }
-    }
 
     /**
      * Determines whether new dot should be created to display depending on animate, video or mouse position

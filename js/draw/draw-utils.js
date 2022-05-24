@@ -43,24 +43,6 @@ export class DrawUtils {
     }
 
     /**
-     * Returns scaled pixel values for a point to graphical display
-     * IMPORTANT: currently view parameter can be either one of 2 constants or "null" for conversation drawing
-     * @param  {Movement Or Conversation Point} point
-     * @param  {Integer} view
-     */
-    getSharedPosValues(point) {
-        const timelineXPos = this.sk.sketchController.mapTotalTimeToPixelTime(point.time);
-        const selTimelineXPos = this.sk.sketchController.mapSelectTimeToPixelTime(timelineXPos);
-        const [floorPlanXPos, floorPlanYPos] = this.sk.floorPlan.getScaledXYPos(point.xPos, point.yPos, this.sk.gui.fpContainer.getContainer());
-        return {
-            timelineXPos,
-            selTimelineXPos,
-            floorPlanXPos,
-            floorPlanYPos,
-        };
-    }
-
-    /**
      * @param  {Movement/Conversation Pos Object} curPos
      * @param  {boolean} pointIsStopped
      */
@@ -82,4 +64,98 @@ export class DrawUtils {
                 return this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.timelineXPos);
         }
     }
+
+    /**
+     * Returns scaled pixel values for a point to graphical display
+     * IMPORTANT: currently view parameter can be either one of 2 constants or "null" for conversation drawing
+     * @param  {Movement Or Conversation Point} point
+     * @param  {Integer} view
+     */
+    getSharedPosValues(point) {
+        const timelineXPos = this.sk.sketchController.mapTotalTimeToPixelTime(point.time);
+        const selTimelineXPos = this.sk.sketchController.mapSelectTimeToPixelTime(timelineXPos);
+        const [floorPlanXPos, floorPlanYPos] = this.sk.floorPlan.getScaledXYPos(point.xPos, point.yPos, this.sk.gui.fpContainer.getContainer());
+        return {
+            timelineXPos,
+            selTimelineXPos,
+            floorPlanXPos,
+            floorPlanYPos,
+        };
+    }
+
+    /**
+     * A compare point is an object with two augmented points
+     * @param  {Integer} view
+     * @param  {MovementPoint} curIndex 
+     * @param  {MovementPoint} priorIndex 
+     */
+    createComparePoint(view, curIndex, priorIndex) {
+        return {
+            cur: this.createAugmentPoint(view, curIndex),
+            prior: this.createAugmentPoint(view, priorIndex)
+        }
+    }
+
+    createAugmentPoint(view, point) {
+        return {
+            point,
+            pos: this.getScaledMovementPos(point, view)
+        }
+    }
+
+    /**
+     * @param  {MovementPoint} point
+     * @param  {Integer} view
+     */
+    getScaledMovementPos(point, view) {
+        const pos = this.getSharedPosValues(point);
+        return {
+            timelineXPos: pos.timelineXPos,
+            selTimelineXPos: pos.selTimelineXPos,
+            floorPlanXPos: pos.floorPlanXPos,
+            floorPlanYPos: pos.floorPlanYPos,
+            viewXPos: this.getViewXPos(view, pos.floorPlanXPos, pos.selTimelineXPos),
+            zPos: this.getZPos(view, pos.selTimelineXPos)
+        };
+    }
+
+    getViewXPos(view, floorPlanXPos, selTimelineXPos) {
+        if (view === this.sk.PLAN) return floorPlanXPos;
+        else {
+            if (this.sk.handle3D.getIs3DMode()) return floorPlanXPos;
+            else return selTimelineXPos;
+        }
+    }
+
+    getZPos(view, selTimelineXPos) {
+        if (view === this.sk.PLAN) return 0;
+        else {
+            if (this.sk.handle3D.getIs3DMode()) return selTimelineXPos;
+            else return 0;
+        }
+    }
+
+    getScaledConversationPos(point, rectLength) {
+        const pos = this.getSharedPosValues(point);
+        return {
+            timelineXPos: pos.timelineXPos,
+            selTimelineXPos: pos.selTimelineXPos,
+            floorPlanXPos: pos.floorPlanXPos,
+            floorPlanYPos: pos.floorPlanYPos,
+            rectLength,
+            adjustYPos: this.getConversationAdjustYPos(pos.floorPlanYPos, rectLength)
+        };
+    }
+
+    /**
+     * Adjusts Y positioning of conversation rectangles correctly for align and 3 D views
+     */
+    getConversationAdjustYPos(floorPlanYPos, rectLength) {
+        if (this.sk.sketchController.getIsAlignTalk()) {
+            if (this.sk.handle3D.getIs3DMode()) return this.sk.gui.fpContainer.getContainer().height;
+            else return 0;
+        } else if (this.sk.handle3D.getIs3DMode()) return floorPlanYPos;
+        else return floorPlanYPos - rectLength;
+    }
+
 }
