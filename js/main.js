@@ -66,6 +66,9 @@ const igs = new p5((sk) => {
         else sk.noLoop();
     }
 
+    /**
+     * Determines what data is loaded and calls appropriate class drawing methods for that data
+     */
     sk.visualizeData = function() {
         if (sk.dataIsLoaded(sk.floorPlan.getImg())) { // floorPlan must be loaded to draw any data
             sk.floorPlan.setFloorPlan(sk.gui.fpContainer.getContainer());
