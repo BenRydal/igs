@@ -2,7 +2,7 @@
  * This class prepares for drawing of all loaded movement and conversation data held in Path objects
  * Creates instances of DrawMovement and DrawConversation to handle different kinds of drawing methods for each type of data
  * DrawUtils holds helper methods used across DrawMovement and DrawConversation classes
- * Core data are passed to this class.
+ * CodeList is passed to DrawUtils for later use determining what pieces of data to draw
  */
 
 import { DrawMovement } from './draw-movement.js';
