@@ -41,7 +41,7 @@ export class DrawMovement {
         this.isDrawingLine = false; // always reset
         for (let i = 1; i < movementArray.length; i++) { // start at 1 to allow testing of current and prior indices
             const p = this.createComparePoint(view, movementArray[i], movementArray[i - 1]); // a compare point consists of current and prior augmented points
-            if (this.isVisible(p.cur)) {
+            if (this.drawUtils.isVisible(p.cur.point, p.cur.pos)) {
                 if (view === this.sk.SPACETIME) this.recordDot(p.cur);
                 if (p.cur.point.isStopped) this.updateStopDrawing(p, view);
                 else this.updateMovementDrawing(p, p.prior.point.isStopped, this.style.thinStroke);
@@ -106,14 +106,6 @@ export class DrawMovement {
      */
     isNewCode(p) {
         return p.cur.point.codes.color !== p.prior.point.codes.color;
-    }
-
-    /**
-     * Holds tests for determining if point is visible (e.g., selected, highlighted)
-     * @param  {AugmentPoint} augmentPoint
-     */
-    isVisible(augmentPoint) {
-        return (this.drawUtils.isShowingInGUI(augmentPoint.pos.timelineXPos) && this.drawUtils.isShowingInCodeList(augmentPoint.point.codes.hasCodeArray) && this.drawUtils.selectMode(augmentPoint.pos, augmentPoint.point.isStopped));
     }
 
     /**

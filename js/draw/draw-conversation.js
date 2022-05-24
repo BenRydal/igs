@@ -26,7 +26,7 @@ export class DrawConversation {
     setData(path, speakerList) {
         for (const point of path.conversation) {
             const curPos = this.getScaledConversationPos(point);
-            if (this.isVisible(point, curPos)) {
+            if (this.isTalkTurnSelected(point.talkTurn) && this.drawUtils.isVisible(point, curPos)) {
                 const curSpeaker = this.getSpeakerFromSpeakerList(point.speaker, speakerList); // get speaker object from global list equivalent to the current speaker of point
                 if (this.testSpeakerToDraw(curSpeaker, path.name)) {
                     if (this.sk.sketchController.getIsPathColorMode()) this.organizeRectDrawing(point, curPos, curSpeaker.color.pathMode);
@@ -34,10 +34,6 @@ export class DrawConversation {
                 }
             }
         }
-    }
-
-    isVisible(point, curPos) {
-        return (this.isTalkTurnSelected(point.talkTurn) && this.drawUtils.isShowingInGUI(curPos.timelineXPos) && this.drawUtils.selectMode(curPos, point.isStopped) && this.drawUtils.isShowingInCodeList(point.codes.hasCodeArray));
     }
     /**
      * Draws single textbox for user selected conversation

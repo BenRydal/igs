@@ -9,6 +9,13 @@ export class DrawUtils {
         this.codeList = codeList;
     }
 
+    /**
+     * Holds tests for determining if point is visible (e.g., selected, highlighted)
+     */
+    isVisible(point, curPos) {
+        return (this.isShowingInGUI(curPos.timelineXPos) && this.selectMode(curPos, point.isStopped) && this.isShowingInCodeList(point.codes.hasCodeArray));
+    }
+
     isShowingInGUI(pixelTime) {
         return this.sk.gui.timelinePanel.overAxis(pixelTime) && this.isShowingInAnimation(pixelTime);
     }
