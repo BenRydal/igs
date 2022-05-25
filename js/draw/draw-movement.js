@@ -108,19 +108,6 @@ export class DrawMovement {
         return p.cur.point.codes.color !== p.prior.point.codes.color;
     }
 
-
-    /**
-     * Tests if newDot has been created and updates current dot value and video scrub variable if so
-     * @param  {AugmentPoint} augmentPoint
-     */
-    recordDot(augmentPoint) {
-        const newDot = this.getNewDot(augmentPoint, this.dot);
-        if (newDot !== null) {
-            this.dot = newDot;
-            this.sk.videoController.setDotTimeForVideoScrub(this.dot.timePos);
-        }
-    }
-
     drawDot(curDot) {
         const dotSize = this.sk.width / 50;
         this.drawFloorPlanDot(curDot, dotSize);
@@ -153,6 +140,17 @@ export class DrawMovement {
         else this.sk.fill(color);
     }
 
+    /**
+     * Tests if newDot has been created and updates current dot value and video scrub variable if so
+     * @param  {AugmentPoint} augmentPoint
+     */
+    recordDot(augmentPoint) {
+        const newDot = this.getNewDot(augmentPoint, this.dot);
+        if (newDot !== null) {
+            this.dot = newDot;
+            this.sk.videoController.setDotTimeForVideoScrub(this.dot.timePos);
+        }
+    }
 
     /**
      * Determines whether new dot should be created to display depending on animate, video or mouse position
