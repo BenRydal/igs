@@ -135,8 +135,9 @@ export class DrawUtils {
         }
     }
 
-    getScaledConversationPos(point, rectLength) {
+    getScaledConversationPos(point) {
         const pos = this.getSharedPosValues(point);
+        const rectLength = this.sk.constrain(point.talkTurn.length / 2, 3, 175); // 3 and 175 set min and max pixel dimensions
         return {
             timelineXPos: pos.timelineXPos,
             selTimelineXPos: pos.selTimelineXPos,
@@ -154,8 +155,9 @@ export class DrawUtils {
         if (this.sk.sketchController.getIsAlignTalk()) {
             if (this.sk.handle3D.getIs3DMode()) return this.sk.gui.fpContainer.getContainer().height;
             else return 0;
-        } else if (this.sk.handle3D.getIs3DMode()) return floorPlanYPos;
-        else return floorPlanYPos - rectLength;
+        } else if (this.sk.handle3D.getIs3DMode()) {
+            return floorPlanYPos;
+        } else return floorPlanYPos - rectLength;
     }
 
 }

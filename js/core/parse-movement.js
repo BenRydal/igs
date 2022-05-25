@@ -86,7 +86,7 @@ export class ParseMovement {
             isStopped: movementPoint.isStopped,
             codes: movementPoint.codes,
             speaker: this.coreUtils.cleanFileName(curConversationRow[this.coreUtils.headersConversation[1]]), // String name of speaker
-            talkTurn: curConversationRow[this.coreUtils.headersConversation[2]] // String text of conversation turn
+            talkTurn: String(curConversationRow[this.coreUtils.headersConversation[2]]) // Cast to String to treat numbers or booleans as Strings
         }
     }
 

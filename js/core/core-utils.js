@@ -37,8 +37,13 @@ export class CoreUtils {
         return typeof curRow[this.headersMovement[0]] === 'number' && typeof curRow[this.headersMovement[1]] === 'number' && typeof curRow[this.headersMovement[2]] === 'number';
     }
 
+    // NOTE: for talk turns/3rd column, allow boolean, number or string values. These are cast as Strings later in program
     conversationRowForType(curRow) {
-        return typeof curRow[this.headersConversation[0]] === 'number' && typeof curRow[this.headersConversation[1]] === 'string' && curRow[this.headersConversation[2]] != null;
+        return typeof curRow[this.headersConversation[0]] === 'number' && typeof curRow[this.headersConversation[1]] === 'string' && this.isStringNumberOrBoolean(curRow[this.headersConversation[2]]);
+    }
+
+    isStringNumberOrBoolean(value) {
+        return typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean';
     }
 
     codeRowForType(curRow) {

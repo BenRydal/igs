@@ -7,14 +7,11 @@ export class DrawConversation {
     constructor(sketch, drawUtils) {
         this.sk = sketch;
         this.drawUtils = drawUtils;
+        this.rectPixelWidth = this.sk.sketchController.getCurConversationRectWidth(); // width needs to be dynamically updated when new data is loaded and timeline scaling is changed by user
         this.conversationBubble = { // represents user selected conversation
             isSelected: false,
             point: null, // stores one ConversationPoint object for selected conversation turn
             view: this.sk.PLAN // view indicating if user selected conversation in floor plan or space-time views
-        };
-        this.rect = { // represents rectangles drawn for conversation turns
-            minPixelLength: 3, // set minimum pixel length for really short conversation turns
-            pixelWidth: this.sk.sketchController.getCurConversationRectWidth() // width needs to be dynamically updated when new data is loaded and timeline scaling is changed by user
         };
     }
 
@@ -25,7 +22,7 @@ export class DrawConversation {
      */
     setData(path, speakerList) {
         for (const point of path.conversation) {
-            const curPos = this.drawUtils.getScaledConversationPos(point, this.getRectLength(point.talkTurn));
+            const curPos = this.drawUtils.getScaledConversationPos(point);
             if (this.isTalkTurnSelected(point.talkTurn) && this.drawUtils.isVisible(point, curPos)) {
                 const curSpeaker = this.getSpeakerFromSpeakerList(point.speaker, speakerList); // get speaker object from global list equivalent to the current speaker of point
                 if (this.testSpeakerToDraw(curSpeaker, path.name)) {
@@ -71,31 +68,31 @@ export class DrawConversation {
      * NOTE: if recordConversationBubble is called, that method also sets new strokeWeight to highlight the curRect
      */
     over2DRects(point, curPos) {
-        if (this.sk.overRect(curPos.floorPlanXPos, curPos.adjustYPos, this.rect.pixelWidth, curPos.rectLength)) this.recordConversationBubble(point, this.sk.PLAN);
-        else if (this.sk.overRect(curPos.selTimelineXPos, curPos.adjustYPos, this.rect.pixelWidth, curPos.rectLength)) this.recordConversationBubble(point, this.sk.SPACETIME);
+        if (this.sk.overRect(curPos.floorPlanXPos, curPos.adjustYPos, this.rectPixelWidth, curPos.rectLength)) this.recordConversationBubble(point, this.sk.PLAN);
+        else if (this.sk.overRect(curPos.selTimelineXPos, curPos.adjustYPos, this.rectPixelWidth, curPos.rectLength)) this.recordConversationBubble(point, this.sk.SPACETIME);
     }
     /**
      * 2D and 3D floorplan rect drawing differs in the value of adjustYPos and positive/negative value of width/height parameters
      */
     drawFloorPlan2DRects(curPos) {
-        this.sk.rect(curPos.floorPlanXPos, curPos.adjustYPos, this.rect.pixelWidth, curPos.rectLength);
+        this.sk.rect(curPos.floorPlanXPos, curPos.adjustYPos, this.rectPixelWidth, curPos.rectLength);
     }
 
     drawFloorPlan3DRects(curPos) {
-        this.sk.rect(curPos.floorPlanXPos, curPos.adjustYPos, -this.rect.pixelWidth, -curPos.rectLength);
+        this.sk.rect(curPos.floorPlanXPos, curPos.adjustYPos, -this.rectPixelWidth, -curPos.rectLength);
     }
 
     /**
      * 2D and 3D Spacetime rect drawing differs in drawing of rect or quad shapes and zoom parameter
      */
     drawSpaceTime2DRects(curPos) {
-        this.sk.rect(curPos.selTimelineXPos, curPos.adjustYPos, this.rect.pixelWidth, curPos.rectLength);
+        this.sk.rect(curPos.selTimelineXPos, curPos.adjustYPos, this.rectPixelWidth, curPos.rectLength);
     }
 
     drawSpaceTime3DRects(curPos) {
         const translateZoom = Math.abs(this.sk.handle3D.getCurTranslatePos().zoom);
-        if (this.sk.sketchController.getIsAlignTalk()) this.sk.quad(0, translateZoom, curPos.selTimelineXPos, curPos.rectLength, translateZoom, curPos.selTimelineXPos, curPos.rectLength, translateZoom, curPos.selTimelineXPos + this.rect.pixelWidth, 0, translateZoom, curPos.selTimelineXPos + this.rect.pixelWidth);
-        else this.sk.quad(curPos.floorPlanXPos, curPos.adjustYPos, curPos.selTimelineXPos, curPos.floorPlanXPos + curPos.rectLength, curPos.adjustYPos, curPos.selTimelineXPos, curPos.floorPlanXPos + curPos.rectLength, curPos.adjustYPos, curPos.selTimelineXPos + this.rect.pixelWidth, curPos.floorPlanXPos, curPos.adjustYPos, curPos.selTimelineXPos + this.rect.pixelWidth);
+        if (this.sk.sketchController.getIsAlignTalk()) this.sk.quad(0, translateZoom, curPos.selTimelineXPos, curPos.rectLength, translateZoom, curPos.selTimelineXPos, curPos.rectLength, translateZoom, curPos.selTimelineXPos + this.rectPixelWidth, 0, translateZoom, curPos.selTimelineXPos + this.rectPixelWidth);
+        else this.sk.quad(curPos.floorPlanXPos, curPos.adjustYPos, curPos.selTimelineXPos, curPos.floorPlanXPos + curPos.rectLength, curPos.adjustYPos, curPos.selTimelineXPos, curPos.floorPlanXPos + curPos.rectLength, curPos.adjustYPos, curPos.selTimelineXPos + this.rectPixelWidth, curPos.floorPlanXPos, curPos.adjustYPos, curPos.selTimelineXPos + this.rectPixelWidth);
     }
 
     /**
@@ -191,17 +188,5 @@ export class DrawConversation {
             if (wordToSearch.length === 1) return new RegExp(escape, "i").test(talkTurn); // case insensitive regex test
             else return new RegExp('\\b' + escape + '\\b', "i").test(talkTurn); // \\b for whole word test
         }
-    }
-
-    /**
-     * Sets length of each conversation turn in GUI display based on textSize method
-     * @param  {String} talkTurn
-     */
-    getRectLength(talkTurn) {
-        this.sk.textSize(1); // Controls measurement of pixels in a string that corresponds to vertical pixel height of rectangle.
-        let rectLength = this.sk.textWidth(talkTurn);
-        if (rectLength < this.rect.minPixelLength) rectLength = this.rect.minPixelLength; // if current turn is small set it to the minimum height
-        this.sk.textSize(this.sk.GUITEXTSIZE); // IMPORTANT: reset text size
-        return rectLength;
     }
 }
