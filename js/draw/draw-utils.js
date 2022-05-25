@@ -66,24 +66,6 @@ export class DrawUtils {
     }
 
     /**
-     * Returns scaled pixel values for a point to graphical display
-     * IMPORTANT: currently view parameter can be either one of 2 constants or "null" for conversation drawing
-     * @param  {Movement Or Conversation Point} point
-     * @param  {Integer} view
-     */
-    getSharedPosValues(point) {
-        const timelineXPos = this.sk.sketchController.mapTotalTimeToPixelTime(point.time);
-        const selTimelineXPos = this.sk.sketchController.mapSelectTimeToPixelTime(timelineXPos);
-        const [floorPlanXPos, floorPlanYPos] = this.sk.floorPlan.getScaledXYPos(point.xPos, point.yPos, this.sk.gui.fpContainer.getContainer());
-        return {
-            timelineXPos,
-            selTimelineXPos,
-            floorPlanXPos,
-            floorPlanYPos,
-        };
-    }
-
-    /**
      * A compare point is an object with two augmented points
      * @param  {Integer} view
      * @param  {MovementPoint} curIndex 
@@ -104,6 +86,24 @@ export class DrawUtils {
     }
 
     /**
+     * Returns scaled pixel values for a point to graphical display
+     * IMPORTANT: currently view parameter can be either one of 2 constants or "null" for conversation drawing
+     * @param  {Movement Or Conversation Point} point
+     * @param  {Integer} view
+     */
+    getSharedPosValues(point) {
+        const timelineXPos = this.sk.sketchController.mapTotalTimeToPixelTime(point.time);
+        const selTimelineXPos = this.sk.sketchController.mapSelectTimeToPixelTime(timelineXPos);
+        const [floorPlanXPos, floorPlanYPos] = this.sk.floorPlan.getScaledXYPos(point.xPos, point.yPos, this.sk.gui.fpContainer.getContainer());
+        return {
+            timelineXPos,
+            selTimelineXPos,
+            floorPlanXPos,
+            floorPlanYPos,
+        };
+    }
+
+    /**
      * @param  {MovementPoint} point
      * @param  {Integer} view
      */
@@ -116,6 +116,19 @@ export class DrawUtils {
             floorPlanYPos: pos.floorPlanYPos,
             viewXPos: this.getViewXPos(view, pos.floorPlanXPos, pos.selTimelineXPos),
             zPos: this.getZPos(view, pos.selTimelineXPos)
+        };
+    }
+
+    getScaledConversationPos(point) {
+        const pos = this.getSharedPosValues(point);
+        const rectLength = this.sk.constrain(point.talkTurn.length / 2, 3, 175); // 3 and 175 set min and max pixel dimensions
+        return {
+            timelineXPos: pos.timelineXPos,
+            selTimelineXPos: pos.selTimelineXPos,
+            floorPlanXPos: pos.floorPlanXPos,
+            floorPlanYPos: pos.floorPlanYPos,
+            rectLength,
+            adjustYPos: this.getConversationAdjustYPos(pos.floorPlanYPos, rectLength)
         };
     }
 
@@ -133,19 +146,6 @@ export class DrawUtils {
             if (this.sk.handle3D.getIs3DMode()) return selTimelineXPos;
             else return 0;
         }
-    }
-
-    getScaledConversationPos(point) {
-        const pos = this.getSharedPosValues(point);
-        const rectLength = this.sk.constrain(point.talkTurn.length / 2, 3, 175); // 3 and 175 set min and max pixel dimensions
-        return {
-            timelineXPos: pos.timelineXPos,
-            selTimelineXPos: pos.selTimelineXPos,
-            floorPlanXPos: pos.floorPlanXPos,
-            floorPlanYPos: pos.floorPlanYPos,
-            rectLength,
-            adjustYPos: this.getConversationAdjustYPos(pos.floorPlanYPos, rectLength)
-        };
     }
 
     /**

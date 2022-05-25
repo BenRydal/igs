@@ -163,7 +163,7 @@ export class DrawMovement {
     getNewDot(augmentedPoint, curDot) {
         const [xPos, yPos, zPos, timePos, map3DMouse, codeColor] = [augmentedPoint.pos.floorPlanXPos, augmentedPoint.pos.floorPlanYPos, augmentedPoint.pos.zPos, augmentedPoint.pos.selTimelineXPos, this.sk.sketchController.mapToSelectTimeThenPixelTime(this.sk.mouseX), augmentedPoint.point.codes.color];
         if (this.sk.sketchController.getIsAnimate()) {
-            return this.createDot(xPos, yPos, zPos, timePos, codeColor, null); // pass null as this means most recent point will always create Dot object
+            return this.createDot(xPos, yPos, zPos, timePos, codeColor, null); // there is no length to compare when animating so just pass null to emphasize this
         } else if (this.sk.videoController.isLoadedAndIsPlaying()) {
             const videoPixelTime = this.sk.sketchController.mapTotalTimeToPixelTime(this.sk.videoController.getVideoPlayerCurTime());
             const videoSelectTime = this.sk.sketchController.mapSelectTimeToPixelTime(videoPixelTime);
