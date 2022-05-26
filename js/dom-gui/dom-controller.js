@@ -24,13 +24,13 @@ export class DomController {
     }
 
     resetColorModeButton() {
-        document.getElementById('sub-tab8-1').checked = false; // reset color code button
+        document.getElementById('sub-tab8-2').checked = false; // reset color code button
         this.updateColorModeLabel();
         this.toggleColorChangeButtons();
     }
 
     updateColorModeLabel() {
-        const element = document.getElementById('sub-tab8-1');
+        const element = document.getElementById('sub-tab8-2');
         if (element.checked) element.labels[0].innerHTML = 'Color By Paths';
         else element.labels[0].innerHTML = 'Color By Codes';
     }
@@ -41,7 +41,7 @@ export class DomController {
      */
     toggleColorChangeButtons() {
         const elementList = document.querySelectorAll(".js-color-change"); // get all input elements for each button
-        elementList.forEach(function (element) {
+        elementList.forEach(function(element) {
             element.checked = false; // reset input element checked value
             element.labels[0].innerHTML = 'Change Color'; // reset text for label of input
             if (element.labels[0].style.display === 'none') { // toggle display
@@ -69,7 +69,7 @@ export class DomController {
                 for (const coreDataItem of this.sk.core.speakerList) this.createCheckbox(coreDataItem, "talk-main-tab", "input-class-talk");
                 break;
             case "codes":
-                this.clearCheckboxes("sub-tab8-2", "input-class-code");
+                this.clearCheckboxes("sub-tab8-3", "input-class-code");
                 for (const coreDataItem of this.sk.core.codeList) this.createCheckbox(coreDataItem, "codes-main-tab", "input-class-code");
                 break;
         }
@@ -86,7 +86,7 @@ export class DomController {
                 for (const coreDataItem of this.sk.core.speakerList) this.createColorPicker(coreDataItem, "talk-main-tab", "input-class-talk");
                 break;
             case "codes":
-                this.clearColorPickers("sub-tab8-2", "input-class-code");
+                this.clearColorPickers("sub-tab8-3", "input-class-code");
                 for (const coreDataItem of this.sk.core.codeList) this.createColorPicker(coreDataItem, "codes-main-tab", "input-class-code");
                 break;
         }
@@ -180,7 +180,7 @@ export class DomController {
     clearAllCheckboxes() {
         this.clearCheckboxes("sub-tab1-1", "input-class-movement");
         this.clearCheckboxes("sub-tab3-4", "input-class-talk");
-        this.clearCheckboxes("sub-tab8-2", "input-class-code");
+        this.clearCheckboxes("sub-tab8-3", "input-class-code");
     }
 
     clearCheckboxes(inputID, inputClass) {
@@ -199,7 +199,7 @@ export class DomController {
 
     removeAllElements(elementId) {
         let elementList = document.querySelectorAll("." + elementId);
-        elementList.forEach(function (userItem) {
+        elementList.forEach(function(userItem) {
             userItem.remove();
         });
     }
