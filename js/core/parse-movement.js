@@ -66,7 +66,7 @@ export class ParseMovement {
      */
     createMovementPoint(curRow, movementPointArray) {
         return {
-            time: Number.parseFloat(curRow[this.coreUtils.headersMovement[0]]).toFixed(1),
+            time: curRow[this.coreUtils.headersMovement[0]],
             xPos: curRow[this.coreUtils.headersMovement[1]],
             yPos: curRow[this.coreUtils.headersMovement[2]],
             isStopped: this.coreUtils.isStopped(curRow, movementPointArray),
