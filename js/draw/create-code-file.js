@@ -1,23 +1,19 @@
-import { DrawUtils } from './draw-utils.js';
-
+/**
+ * This class holds methods to create and write code files from displayed data. Methods that 
+ * determine what data is displayed/to write should match the logic in other drawing classes
+ */
 export class CreateCodeFile {
 
-    constructor(sketch, codeList) {
+    constructor(sketch, drawUtils) {
         this.sk = sketch;
-        this.drawUtils = new DrawUtils(sketch, codeList);
+        this.drawUtils = drawUtils;
     }
 
-    // Prepares a code file for all selected data for every path showing in GUI
-    create(pathList) {
-        for (const path of pathList) {
-            if (path.isShowing) {
-                const [startTimesArray, endTimesArray] = this.getCodeFileArrays(path.movement);
-                if (endTimesArray.length) { // must have some data in it to save
-                    this.sk.saveTable(this.writeTable(startTimesArray, endTimesArray), path.name, "csv");
-                }
-            }
-        }
+    create(path) {
+        const [startTimesArray, endTimesArray] = this.getCodeFileArrays(path.movement);
+        if (endTimesArray.length) this.sk.saveTable(this.writeTable(startTimesArray, endTimesArray), path.name, "csv");
     }
+
     /**
      * IMPORTANT: the structure of this method should match how movement paths are drawn setDraw method in DrawMovement class
      * It determines which points are showing and saves start/end times values for those points in arrays

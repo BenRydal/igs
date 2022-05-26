@@ -18,7 +18,6 @@ import { addListeners } from './dom-gui/add-listeners.js';
 import { FloorPlan } from './floorplan/floorplan.js';
 import { SetPathData } from './draw/setPathData.js';
 import { VideoController } from './video/video-controller.js';
-import { CreateCodeFile } from './draw/create-code-file.js';
 
 const igs = new p5((sk) => {
 
@@ -107,8 +106,8 @@ const igs = new p5((sk) => {
 
     sk.saveCodeFile = function() {
         if (sk.dataIsLoaded(sk.floorPlan.getImg()) && sk.arrayIsLoaded(sk.core.pathList)) {
-            const createCodeFile = new CreateCodeFile(sk, sk.core.codeList);
-            createCodeFile.create(sk.core.pathList);
+            const setPathData = new SetPathData(sk, sk.core.codeList);
+            setPathData.setCodeFile(sk.core.pathList);
         }
     }
 

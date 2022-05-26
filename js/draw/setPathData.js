@@ -8,6 +8,7 @@
 import { DrawMovement } from './draw-movement.js';
 import { DrawConversation } from './draw-conversation.js';
 import { DrawUtils } from './draw-utils.js';
+import { CreateCodeFile } from './create-code-file.js';
 
 export class SetPathData {
 
@@ -33,5 +34,13 @@ export class SetPathData {
             }
         }
         drawConversation.setConversationBubble(); // draw conversation text last so it displays on top
+    }
+
+    // Prepares a code file for all selected data for every path showing in GUI
+    setCodeFile(pathList) {
+        const createCodeFile = new CreateCodeFile(this.sk, this.drawUtils);
+        for (const path of pathList) {
+            if (path.isShowing) createCodeFile.create(path);
+        }
     }
 }
