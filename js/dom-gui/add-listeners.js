@@ -48,11 +48,12 @@ export function addListeners(sk) {
     document.getElementById("sub-tab7-1").addEventListener("click", sk.floorPlan.setRotateLeft.bind(sk.floorPlan));
     document.getElementById("sub-tab7-2").addEventListener("click", sk.floorPlan.setRotateRight.bind(sk.floorPlan));
     // Tab 7 Codes
-    document.getElementById("sub-tab8-1").addEventListener("click", sk.saveCodeFile.bind(sk));
-    document.getElementById("sub-tab8-2").addEventListener("click", sk.domHandler.handleColorModeButton.bind(sk.domHandler));
-    document.getElementById("sub-tab8-3").addEventListener("change", function() {
+    document.getElementById("sub-tab8-1").addEventListener("click", sk.domHandler.handleColorModeButton.bind(sk.domHandler));
+    document.getElementById("sub-tab8-2").addEventListener("change", function() {
         sk.domController.updateSubTab(this.checked, "codes");
     });
+    // Tab 8 Export
+    document.getElementById("sub-tab9-1").addEventListener("click", sk.saveCodeFile.bind(sk));
 
     // Update sketch loop for specific tabs/elements
     document.querySelectorAll('.loop-sketch').forEach(element => {

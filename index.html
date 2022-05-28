@@ -78,6 +78,7 @@
             <label for="main-tab-6">SELECT</label>
             <label for="main-tab-7">FLOOR PLAN</label>
             <label for="main-tab-8">CODES</label>
+            <label for="main-tab-9">EXPORT</label>
         </div>
 
         <!-- TAB 1 MOVEMENT -->
@@ -166,15 +167,22 @@
         <input class="tab-radio" id="main-tab-8" name="main-group" type="radio">
         <div class="tab-content loop-sketch" id="codes-main-tab">
             <div class="sub-tabs-container button-float">
-                <label for="sub-tab8-1" title="Click to create code files from selected/displayed data">Save Code File</label>
-                <label for="sub-tab8-2" title="Color data by codes files (grey = no code and black = multiple codes)">Color
+                <label for="sub-tab8-1" title="Color data by codes files (grey = no code and black = multiple codes)">Color
                     By Codes</label>
-                <label for="sub-tab8-3" style="display: none" title="Click to change and set colors">Change
+                <label for="sub-tab8-2" style="display: none" title="Click to change and set colors">Change
                     Color</label>
             </div>
             <input class="tab-radio" id="sub-tab8-1" name="sub-group8" type="checkbox">
-            <input class="tab-radio" id="sub-tab8-2" name="sub-group8" type="checkbox">
-            <input class="tab-radio js-color-change" id="sub-tab8-3" name="sub-group8" type="checkbox">
+            <input class="tab-radio js-color-change" id="sub-tab8-2" name="sub-group8" type="checkbox">
+        </div>
+
+        <!-- TAB 9 EXPORT -->
+        <input class="tab-radio" id="main-tab-9" name="main-group" type="radio">
+        <div class="tab-content loop-sketch">
+            <div class="sub-tabs-container">
+                <label for="sub-tab9-1" title="Click to create code files from selected/displayed data">Code File</label>
+            </div>
+            <input class="tab-radio" id="sub-tab9-1" name="sub-group8" type="checkbox">
         </div>
     </div>
 </body>
