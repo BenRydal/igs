@@ -52,6 +52,9 @@ export function addListeners(sk) {
     document.getElementById("sub-tab8-2").addEventListener("change", function() {
         sk.domController.updateSubTab(this.checked, "codes");
     });
+    // Tab 8 Export
+    document.getElementById("sub-tab9-1").addEventListener("click", sk.saveCodeFile.bind(sk));
+
     // Update sketch loop for specific tabs/elements
     document.querySelectorAll('.loop-sketch').forEach(element => {
         element.addEventListener('click', function() {

@@ -40,8 +40,8 @@ export class DrawMovement {
     setDraw(view, movementArray) {
         this.isDrawingLine = false; // always reset
         for (let i = 1; i < movementArray.length; i++) { // start at 1 to allow testing of current and prior indices
-            const p = this.createComparePoint(view, movementArray[i], movementArray[i - 1]); // a compare point consists of current and prior augmented points
-            if (this.isVisible(p.cur)) {
+            const p = this.drawUtils.createComparePoint(view, movementArray[i], movementArray[i - 1]); // a compare point consists of current and prior augmented points
+            if (this.drawUtils.isVisible(p.cur.point, p.cur.pos)) {
                 if (view === this.sk.SPACETIME) this.recordDot(p.cur);
                 if (p.cur.point.isStopped) this.updateStopDrawing(p, view);
                 else this.updateMovementDrawing(p, p.prior.point.isStopped, this.style.thinStroke);
@@ -108,46 +108,6 @@ export class DrawMovement {
         return p.cur.point.codes.color !== p.prior.point.codes.color;
     }
 
-    /**
-     * Holds tests for determining if point is visible (e.g., selected, highlighted)
-     * @param  {AugmentPoint} augmentPoint
-     */
-    isVisible(augmentPoint) {
-        return (this.drawUtils.isShowingInGUI(augmentPoint.pos.timelineXPos) && this.drawUtils.isShowingInCodeList(augmentPoint.point.codes.hasCodeArray) && this.drawUtils.selectMode(augmentPoint.pos, augmentPoint.point.isStopped));
-    }
-
-    /**
-     * A compare point is an object with two augmented points
-     * @param  {Integer} view
-     * @param  {MovementPoint} curIndex 
-     * @param  {MovementPoint} priorIndex 
-     */
-    createComparePoint(view, curIndex, priorIndex) {
-        return {
-            cur: this.createAugmentPoint(view, curIndex),
-            prior: this.createAugmentPoint(view, priorIndex)
-        }
-    }
-
-    createAugmentPoint(view, point) {
-        return {
-            point,
-            pos: this.getScaledMovementPos(point, view)
-        }
-    }
-
-    /**
-     * Tests if newDot has been created and updates current dot value and video scrub variable if so
-     * @param  {AugmentPoint} augmentPoint
-     */
-    recordDot(augmentPoint) {
-        const newDot = this.getNewDot(augmentPoint, this.dot);
-        if (newDot !== null) {
-            this.dot = newDot;
-            this.sk.videoController.setDotTimeForVideoScrub(this.dot.timePos);
-        }
-    }
-
     drawDot(curDot) {
         const dotSize = this.sk.width / 50;
         this.drawFloorPlanDot(curDot, dotSize);
@@ -179,35 +139,16 @@ export class DrawMovement {
         if (this.sk.sketchController.getIsPathColorMode()) this.sk.fill(this.style.shade);
         else this.sk.fill(color);
     }
+
     /**
-     * @param  {MovementPoint} point
-     * @param  {Integer} view
+     * Tests if newDot has been created and updates current dot value and video scrub variable if so
+     * @param  {AugmentPoint} augmentPoint
      */
-    getScaledMovementPos(point, view) {
-        const pos = this.drawUtils.getSharedPosValues(point);
-        return {
-            timelineXPos: pos.timelineXPos,
-            selTimelineXPos: pos.selTimelineXPos,
-            floorPlanXPos: pos.floorPlanXPos,
-            floorPlanYPos: pos.floorPlanYPos,
-            viewXPos: this.getViewXPos(view, pos.floorPlanXPos, pos.selTimelineXPos),
-            zPos: this.getZPos(view, pos.selTimelineXPos)
-        };
-    }
-
-    getViewXPos(view, floorPlanXPos, selTimelineXPos) {
-        if (view === this.sk.PLAN) return floorPlanXPos;
-        else {
-            if (this.sk.handle3D.getIs3DMode()) return floorPlanXPos;
-            else return selTimelineXPos;
-        }
-    }
-
-    getZPos(view, selTimelineXPos) {
-        if (view === this.sk.PLAN) return 0;
-        else {
-            if (this.sk.handle3D.getIs3DMode()) return selTimelineXPos;
-            else return 0;
+    recordDot(augmentPoint) {
+        const newDot = this.getNewDot(augmentPoint, this.dot);
+        if (newDot !== null) {
+            this.dot = newDot;
+            this.sk.videoController.setDotTimeForVideoScrub(this.dot.timePos);
         }
     }
 
@@ -220,7 +161,7 @@ export class DrawMovement {
     getNewDot(augmentedPoint, curDot) {
         const [xPos, yPos, zPos, timePos, map3DMouse, codeColor] = [augmentedPoint.pos.floorPlanXPos, augmentedPoint.pos.floorPlanYPos, augmentedPoint.pos.zPos, augmentedPoint.pos.selTimelineXPos, this.sk.sketchController.mapToSelectTimeThenPixelTime(this.sk.mouseX), augmentedPoint.point.codes.color];
         if (this.sk.sketchController.getIsAnimate()) {
-            return this.createDot(xPos, yPos, zPos, timePos, codeColor, null); // pass null as this means most recent point will always create Dot object
+            return this.createDot(xPos, yPos, zPos, timePos, codeColor, null); // there is no length to compare when animating so just pass null to emphasize this
         } else if (this.sk.videoController.isLoadedAndIsPlaying()) {
             const videoPixelTime = this.sk.sketchController.mapTotalTimeToPixelTime(this.sk.videoController.getVideoPlayerCurTime());
             const videoSelectTime = this.sk.sketchController.mapSelectTimeToPixelTime(videoPixelTime);

@@ -19,7 +19,6 @@ import { FloorPlan } from './floorplan/floorplan.js';
 import { SetPathData } from './draw/setPathData.js';
 import { VideoController } from './video/video-controller.js';
 
-
 const igs = new p5((sk) => {
 
     sk.preload = function() {
@@ -66,11 +65,17 @@ const igs = new p5((sk) => {
         else sk.noLoop();
     }
 
+    /**
+     * Determines what data is loaded and calls appropriate class drawing methods for that data
+     */
     sk.visualizeData = function() {
         if (sk.dataIsLoaded(sk.floorPlan.getImg())) { // floorPlan must be loaded to draw any data
             sk.floorPlan.setFloorPlan(sk.gui.fpContainer.getContainer());
-            const setPathData = new SetPathData(sk, sk.core.pathList, sk.core.speakerList, sk.core.codeList);
-            setPathData.set();
+            if (sk.arrayIsLoaded(sk.core.pathList)) {
+                const setPathData = new SetPathData(sk, sk.core.codeList);
+                if (sk.arrayIsLoaded(sk.core.speakerList)) setPathData.setMovementAndConversation(sk.core.pathList, sk.core.speakerList);
+                else setPathData.setMovement(sk.core.pathList);
+            }
         }
         sk.videoController.updateDisplay();
     }
@@ -97,6 +102,13 @@ const igs = new p5((sk) => {
         else if (sk.sketchController.getCurSelectTab() === 5) sk.cursor(sk.CROSS);
         else sk.cursor(sk.ARROW);
         sk.loop();
+    }
+
+    sk.saveCodeFile = function() {
+        if (sk.dataIsLoaded(sk.floorPlan.getImg()) && sk.arrayIsLoaded(sk.core.pathList)) {
+            const setPathData = new SetPathData(sk, sk.core.codeList);
+            setPathData.setCodeFile(sk.core.pathList);
+        }
     }
 
     sk.windowResized = function() {

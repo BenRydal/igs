@@ -41,7 +41,7 @@ export class DomController {
      */
     toggleColorChangeButtons() {
         const elementList = document.querySelectorAll(".js-color-change"); // get all input elements for each button
-        elementList.forEach(function (element) {
+        elementList.forEach(function(element) {
             element.checked = false; // reset input element checked value
             element.labels[0].innerHTML = 'Change Color'; // reset text for label of input
             if (element.labels[0].style.display === 'none') { // toggle display
@@ -199,7 +199,7 @@ export class DomController {
 
     removeAllElements(elementId) {
         let elementList = document.querySelectorAll("." + elementId);
-        elementList.forEach(function (userItem) {
+        elementList.forEach(function(userItem) {
             userItem.remove();
         });
     }

@@ -1,14 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <head>
     <title>Interaction Geography Slicer (IGS): Visualizing Interaction over Space and Time</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A dynamic visualization tool to visualize movement, conversation, and audiovisual data over space and time.">
+    <meta name="keywords" content="Visualization, Interaction Geography Slicer, Video">
+    <meta name="robots" content="index, follow">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="language" content="English">
+    <meta name="author" content="Ben Rydal Shapiro">
     <script src="https://cdn.jsdelivr.net/npm/p5@0.10.2/lib/p5.js"></script>
     <script type="text/javascript" src="https://www.youtube.com/iframe_api"></script>
     <script src="libs/papaparse.min.js"></script>
     <script type="module" src="./js/main.js"></script>
-    <link rel="stylesheet" type="text/css" href="css/input.css" />
+    <link rel="stylesheet" type="text/css" href="css/input.css">
     <link rel="apple-touch-icon" sizes="180x180" href="images/favicon/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="images/favicon/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="images/favicon/favicon-16x16.png">
@@ -72,10 +78,11 @@
             <label for="main-tab-6">SELECT</label>
             <label for="main-tab-7">FLOOR PLAN</label>
             <label for="main-tab-8">CODES</label>
+            <label for="main-tab-9">EXPORT</label>
         </div>
 
         <!-- TAB 1 MOVEMENT -->
-        <input class="tab-radio" id="main-tab-1" name="main-group" type="radio" checked="checked" />
+        <input class="tab-radio" id="main-tab-1" name="main-group" type="radio" checked="checked">
         <div class="tab-content" id="movement-main-tab">
             <div class="sub-tabs-container button-float">
                 <label for="sub-tab1-1" title="Click to change and set colors">Change Color</label>
@@ -85,7 +92,7 @@
         </div>
 
         <!-- TAB 2 TALK -->
-        <input class="tab-radio" id="main-tab-3" name="main-group" type="radio" />
+        <input class="tab-radio" id="main-tab-3" name="main-group" type="radio">
         <div class="tab-content loop-sketch" id="talk-main-tab">
             <div class="sub-tabs-container button-float">
                 <input type="search" id="sub-tab3-1" name="search-input" placeholder="Search">
@@ -101,7 +108,7 @@
         </div>
 
         <!-- TAB 3 VIDEO -->
-        <input class="tab-radio" id="main-tab-4" name="main-group" type="radio" />
+        <input class="tab-radio" id="main-tab-4" name="main-group" type="radio">
         <div class="tab-content loop-sketch">
             <div class="sub-tabs-container">
                 <label for="sub-tab4-1">Show/Hide</label>
@@ -116,7 +123,7 @@
         </div>
 
         <!-- TAB 5 ANIMATE -->
-        <input class="tab-radio" id="main-tab-5" name="main-group" type="radio" />
+        <input class="tab-radio" id="main-tab-5" name="main-group" type="radio">
         <div class="tab-content loop-sketch">
             <div class="sub-tabs-container">
                 <label for="sub-tab5-1">Start/End</label>
@@ -127,7 +134,7 @@
         </div>
 
         <!-- TAB 6 SELECT -->
-        <input class="tab-radio" id="main-tab-6" name="main-group" type="radio" />
+        <input class="tab-radio" id="main-tab-6" name="main-group" type="radio">
         <div class="tab-content loop-sketch">
             <div class="sub-tabs-container">
                 <label for="sub-tab6-1" title="Reset selectors">Reset</label>
@@ -146,7 +153,7 @@
         </div>
 
         <!-- TAB 7 FLOOR PLAN-->
-        <input class="tab-radio" id="main-tab-7" name="main-group" type="radio" />
+        <input class="tab-radio" id="main-tab-7" name="main-group" type="radio">
         <div class="tab-content loop-sketch">
             <div class="sub-tabs-container">
                 <label for="sub-tab7-1">Rotate Left</label>
@@ -157,7 +164,7 @@
         </div>
 
         <!-- TAB 8 CODES -->
-        <input class="tab-radio" id="main-tab-8" name="main-group" type="radio" />
+        <input class="tab-radio" id="main-tab-8" name="main-group" type="radio">
         <div class="tab-content loop-sketch" id="codes-main-tab">
             <div class="sub-tabs-container button-float">
                 <label for="sub-tab8-1" title="Color data by codes files (grey = no code and black = multiple codes)">Color
@@ -167,6 +174,15 @@
             </div>
             <input class="tab-radio" id="sub-tab8-1" name="sub-group8" type="checkbox">
             <input class="tab-radio js-color-change" id="sub-tab8-2" name="sub-group8" type="checkbox">
+        </div>
+
+        <!-- TAB 9 EXPORT -->
+        <input class="tab-radio" id="main-tab-9" name="main-group" type="radio">
+        <div class="tab-content loop-sketch">
+            <div class="sub-tabs-container">
+                <label for="sub-tab9-1" title="Click to create code files from selected/displayed data">Code File</label>
+            </div>
+            <input class="tab-radio" id="sub-tab9-1" name="sub-group8" type="checkbox">
         </div>
     </div>
 </body>
