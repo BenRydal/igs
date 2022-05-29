@@ -11,6 +11,10 @@ html,
 body {
     max-width: 100%;
     overflow-x: hidden;
+    color: white;
+    background: white;
+    height: 100%;
+    width: 100%;
 }
 
 .main-menu-bar {
