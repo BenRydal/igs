@@ -83,6 +83,10 @@ export class Core {
         if (this.totalTimeInSeconds < curPathEndTime) this.totalTimeInSeconds = curPathEndTime; // update global total time, make sure to floor value as integer
     }
 
+    getTotalTimeInSeconds() {
+        return this.totalTimeInSeconds;
+    }
+
     setSpeakerList(parsedConversationFileArray) {
         for (const curRow of parsedConversationFileArray) {
             let tempSpeakerList = []; // create/populate temp list to store strings to test from global core.speakerList

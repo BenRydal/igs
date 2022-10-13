@@ -32,7 +32,7 @@ export class SketchController {
     }
 
     mapPixelTimeToTotalTime(value) {
-        return this.sk.map(value, this.sk.gui.timelinePanel.getStart(), this.sk.gui.timelinePanel.getEnd(), 0, this.sk.core.totalTimeInSeconds);
+        return this.sk.map(value, this.sk.gui.timelinePanel.getStart(), this.sk.gui.timelinePanel.getEnd(), 0, this.sk.core.getTotalTimeInSeconds());
     }
 
     mapPixelTimeToSelectTime(value) {
@@ -54,7 +54,7 @@ export class SketchController {
 
     // maps value from time in seconds from data to time in pixels on timeline
     mapTotalTimeToPixelTime(value) {
-        return this.sk.map(value, 0, this.sk.core.totalTimeInSeconds, this.sk.gui.timelinePanel.getStart(), this.sk.gui.timelinePanel.getEnd());
+        return this.sk.map(value, 0, this.sk.core.getTotalTimeInSeconds(), this.sk.gui.timelinePanel.getStart(), this.sk.gui.timelinePanel.getEnd());
     }
 
     setIsAnimate(value) {
@@ -131,7 +131,7 @@ export class SketchController {
      */
     getCurConversationRectWidth() {
         const maxRectWidth = 10;
-        const curScaledRectWidth = this.sk.map(this.sk.core.totalTimeInSeconds, 0, 3600, maxRectWidth, 1, true);
+        const curScaledRectWidth = this.sk.map(this.sk.core.getTotalTimeInSeconds(), 0, 3600, maxRectWidth, 1, true);
         return this.sk.map(this.sk.gui.timelinePanel.getSelectEnd() - this.sk.gui.timelinePanel.getSelectStart(), 0, this.sk.gui.timelinePanel.getLength(), maxRectWidth, curScaledRectWidth);
     }
 }
