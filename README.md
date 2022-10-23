@@ -1,6 +1,6 @@
 # Interaction Geography Slicer (IGS)
 
-Hi there! This is a repository for the Interaction Geography Slicer (IGS), an open-source space-time cube system to dynamically visualize movement, conversation, and audio/video data over space and time. For more information on the IGS and how to format, collect, or transcribe your data for use in this tool please visit: [Interaction Geography Slicer](https://www.benrydal.com/software/igs)
+Hi there! This is a repository for the Interaction Geography Slicer (IGS), an open-source space-time cube system to dynamically visualize movement, conversation, and audio/video data over space and time.
 
 IGS Features:
 
@@ -14,7 +14,7 @@ IGS Features:
 
 ## Get started
 
-- [Get Interaction Geography Slicer](https://www.benrydal.com/software/igs)
+- For more information on the IGS and how to format, collect, or transcribe your data for use in this tool please visit: [Interaction Geography Slicer](https://www.benrydal.com/software/igs)
 
 ## Reporting bugs & contributing code
 
