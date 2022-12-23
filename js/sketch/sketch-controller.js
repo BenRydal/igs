@@ -16,8 +16,7 @@ export class SketchController {
         this.animationCounter = 0; // counter to synchronize animation across all data
     }
 
-    updateAnimation() {
-        const animationIncrementRateDivisor = 1000; // this divisor seems to work best
+    updateAnimation(animationIncrementRateDivisor) {
         const curTimeIntervalInSeconds = this.mapPixelTimeToTotalTime(this.sk.gui.timelinePanel.getSelectEnd()) - this.mapPixelTimeToTotalTime(this.sk.gui.timelinePanel.getSelectStart()); // Get amount of time in seconds currently displayed
         const animationIncrementValue = curTimeIntervalInSeconds / animationIncrementRateDivisor; // set increment value based on that value/divisor to keep constant sketchController.isAnimate speed regardless of time interval selected
         if (this.animationCounter < this.mapPixelTimeToTotalTime(this.sk.gui.timelinePanel.getSelectEnd())) this.animationCounter += animationIncrementValue;
