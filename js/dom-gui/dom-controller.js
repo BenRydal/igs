@@ -203,4 +203,10 @@ export class DomController {
             userItem.remove();
         });
     }
+
+    // Return inverse value as higher values cause animation to run slower and you want the inverse of this to be true
+    getAnimateSliderValue() {
+        const animateSlider = document.getElementById("animate-speed-slider");
+        return animateSlider.max - animateSlider.value;
+    }
 }

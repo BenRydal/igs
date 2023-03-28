@@ -15,6 +15,7 @@
     <script src="libs/papaparse.min.js"></script>
     <script type="module" src="./js/main.js"></script>
     <link rel="stylesheet" type="text/css" href="css/input.css">
+    <link rel="stylesheet" type="text/css" href="css/slider.css">
     <link rel="apple-touch-icon" sizes="180x180" href="images/favicon/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="images/favicon/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="images/favicon/favicon-16x16.png">
@@ -128,6 +129,8 @@
             <div class="sub-tabs-container">
                 <label for="sub-tab5-1">Start/End</label>
                 <label for="sub-tab5-2">Play/Pause</label>
+                <!-- <label class= "zzzTest" for="animate-speed-slider">Speed</label> -->
+                <input class="slider" id="animate-speed-slider" type="range" min="100" max="8000" value="4000">
             </div>
             <input class="tab-radio" id="sub-tab5-1" name="sub-group5" type="checkbox">
             <input class="tab-radio" id="sub-tab5-2" name="sub-group5" type="checkbox">

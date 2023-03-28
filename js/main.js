@@ -59,7 +59,7 @@ const igs = new p5((sk) => {
         sk.gui.update3D(); // draw canvas GUI elements that adapt to 3D mode
         if (sk.handle3D.getIs3DModeOrTransitioning()) sk.pop();
         sk.gui.update2D(); // draw all other canvas GUI elements in 2D mode
-        if (sk.sketchController.getIsAnimate() && !sk.sketchController.getIsAnimatePause()) sk.sketchController.updateAnimation();
+        if (sk.sketchController.getIsAnimate() && !sk.sketchController.getIsAnimatePause()) sk.sketchController.updateAnimation(sk.domController.getAnimateSliderValue());
         // Determine whether to re-run draw loop depending on user adjustable modes
         if ((sk.sketchController.getIsAnimate() && !sk.sketchController.getIsAnimatePause()) || sk.videoController.isLoadedAndIsPlaying() || sk.handle3D.getIsTransitioning()) sk.loop();
         else sk.noLoop();
