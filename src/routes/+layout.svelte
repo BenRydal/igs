@@ -11,7 +11,7 @@
       <a class="btn btn-ghost rounded-btn" href="https://github.com/BenRydal">More like this</a>
       <a class="btn btn-ghost rounded-btn" href="/help">Help</a>
       <div class="dropdown dropdown-end dropdown-hover">
-        <label tabindex="-1" class="btn btn-ghost rounded-btn" for="ul">Dropdown</label>
+        <label tabindex="-1" class="btn btn-ghost rounded-btn" for="ul">Examples</label>
         <ul tabindex="-1" class="menu dropdown-content p-2 shadow bg-neutral rounded-box w-52">
           <li><a href='/examples/jordan'>Michael Jordan's Last Shot</a></li>
           <li><a href='/examples/lesson'>Classroom Science Lesson</a></li>

@@ -1,10 +1,8 @@
 <script>
   import P5 from "p5-svelte";
-
   const sketch = (p5) => {
     p5.preload = () => {
       p5.font = p5.loadFont("/fonts/PlusJakartaSans/VariableFont_wght.ttf");
-
     }
 		p5.setup = () => {
 			p5.createCanvas(p5.windowWidth, p5.windowHeight, p5.WEBGL);
@@ -24,5 +22,7 @@
     // }
 	};
 </script>
+
+<button
 
 <P5 {sketch} />
