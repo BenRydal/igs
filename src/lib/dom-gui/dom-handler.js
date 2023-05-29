@@ -1,5 +1,8 @@
-export class DomHandler {
+// import { Papa } from "\/papa/papaparse.min";
 
+import { parse } from 'papaparse';
+
+export class DomHandler {
     constructor(sketch) {
         this.sk = sketch;
     }
@@ -43,7 +46,7 @@ export class DomHandler {
     }
 
     handleExampleDropDown() {
-        const option = document.getElementById("data-drop-down-menu").value;
+        const option = document.getElementById("select-data-dropdown").value;
         if (option === "Load Data") this.sk.domController.showLoadDataButtons();
         else this.sk.domController.hideLoadDataButtons();
         this.resetOnDropDownSelection();
@@ -76,7 +79,6 @@ export class DomHandler {
     }
 
     resetOnDropDownSelection() {
-        this.sk.domController.hideIntroMessage();
         this.clearAllData();
         if (!this.sk.sketchController.getIsPathColorMode()) {
             this.sk.sketchController.setIsPathColorMode(true); // set to true in case user has changed color based on loaded code files
@@ -99,10 +101,10 @@ export class DomHandler {
     }
 
     parseCSVFile(fileToParse) {
-        Papa.parse(fileToParse, {
+        parse(fileToParse, {
             dynamicTyping: true, // If true, numeric and boolean data will be converted to their type instead of remaining strings
             skipEmptyLines: 'greedy', // If set to 'greedy', lines that don't have any content (those which have only whitespace after parsing) will also be skipped
-            header: 'true',
+            header: true,
             transformHeader: (h) => {
                 return h.trim().toLowerCase();
             },
@@ -138,9 +140,10 @@ export class DomHandler {
      */
     loadExampleData(params) {
         this.sk.floorPlan.update(params[0] + params[1]);
+        console.log()
         this.prepExampleCSVFile(params[0], params[2]); // only one conversation file to prep
         for (const fileName of params[3]) this.prepExampleCSVFile(params[0], fileName); // loop through string array to prep each CSV file
-        this.sk.videoController.createVideoPlayer(params[4], params[5]);
+        //this.sk.videoController.createVideoPlayer(params[4], params[5]);
     }
 
     async prepExampleCSVFile(folder, fileName) {
@@ -150,7 +153,9 @@ export class DomHandler {
             const file = new File([buffer], fileName, {
                 type: "text/csv",
             });
+            console.log(file)
             this.testFileTypeForProcessing(file);
+            console.log("Hel")
         } catch (error) {
             alert("Error loading CSV file. Please make sure you have a good internet connection");
             console.log(error);

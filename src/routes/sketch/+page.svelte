@@ -1,4 +1,12 @@
 <script lang="ts">
+  import MdHelpOutline from 'svelte-icons/md/MdHelpOutline.svelte'
+  import MdCloudUpload from 'svelte-icons/md/MdCloudUpload.svelte'
+  import MdCloudDownload from 'svelte-icons/md/MdCloudDownload.svelte'
+  import MdRotateLeft from 'svelte-icons/md/MdRotateLeft.svelte'
+  import MdRotateRight from 'svelte-icons/md/MdRotateRight.svelte'
+  import MdMenu from 'svelte-icons/md/MdMenu.svelte'
+  import Md3DRotation from 'svelte-icons/md/Md3DRotation.svelte'
+
   import P5 from "p5-svelte";
 
 	import {
@@ -10,8 +18,21 @@
 		SketchController,
 		Handle3D,
 		VideoController,
-		SetPathData
+		SetPathData,
+    AddListeners
 	} from "../../lib";
+
+  let selectedTab = "Movement";
+  let tabOptions = [
+    'Movement',
+    'Talk',
+    'Video',
+    'Animate',
+    'Select',
+    'Floor Plan',
+    'Codes',
+    'Export'
+  ]
 
   const sketch = (p5: any) => {
 		p5.preload = () => {
@@ -19,7 +40,7 @@
     }
 
 		p5.setup = () => {
-			p5.createCanvas(window.innerWidth - 20, window.innerHeight - 70, p5.WEBGL);
+			p5.createCanvas(window.innerWidth - 20, window.innerHeight - 160, p5.WEBGL);
 
 			// Library support setup
 			p5.core = new Core(p5);
@@ -41,6 +62,17 @@
 			p5.textFont(p5.font);
 			p5.textAlign(p5.LEFT, p5.TOP);
 			p5.smooth();
+
+    // TEMP
+      // p5.domHandler.loadExampleData(['/data/example-3/', 'floorplan.png', 'conversation.csv', ['Teacher.csv', 'lesson-graph.csv'], 'Youtube', {
+      //               videoId: 'Iu0rxb-xkMk'
+      //           }]);
+
+      // addListeners(sk);
+      AddListeners(p5);
+      // document.getElementById("upload-file-btn")?.addEventListener("click", () => {
+      //   console.log("Helloz")
+      // })
 		};
 
 		p5.draw = () => {
@@ -139,8 +171,190 @@
     p5.arrayIsLoaded = (data: any) => {
       return Array.isArray(data) && data.length;
     }
+
+    const test = () => {
+      console.log("Test function.")
+    }
 	};
+
+  console.log(Object.getOwnPropertyNames(sketch));
 </script>
+
+<div class="drawer">
+  <input id="my-drawer" type="checkbox" class="drawer-toggle" />
+  <div class="drawer-content">
+    <!-- Page content here -->
+    <div class="navbar min-h-16 bg-[#47606e] text-base-100">
+      <div class="flex-1 px-2 lg:flex-none">
+        <label for="my-drawer" class="btn btn-primary drawer-button">Open drawer</label>
+      </div>
+
+      <div class="flex justify-end flex-1 px-2">
+        <div class="flex items-stretch">
+          <div class="btn icon max-h-8">
+            <MdRotateLeft />
+          </div>
+          <div class="btn icon max-h-8">
+            <MdRotateRight />
+          </div>
+          <div class="btn icon max-h-8">
+            <MdCloudDownload />
+          </div>
+          <div id="btn-load-files" class="btn icon max-h-8">
+            <MdCloudUpload />
+          </div>
+          <div id="btn-help" class="btn icon max-h-8">
+            <MdHelpOutline />
+          </div>
+          <div id="btn-toggle-3d" class="btn icon max-h-8">
+            <Md3DRotation />
+          </div>
+          <select id="select-data-dropdown" class="select select-bordered w-full max-w-xs bg-neutral">
+            <option disabled selected>-- Select an Option --</option>
+            <option value="Example 1">Load Data</option>
+            <option value="Example 1">EXAMPLE 1: MICHAEL JORDAN'S LAST SHOT</option>
+            <option value="Example 2">EXAMPLE 2: FAMILY MUSEUM GALLERY VISIT</option>
+            <option value="Example 3">EXAMPLE 3: CLASSROOM SCIENCE LESSON</option>
+            <option value="Example 4">EXAMPLE 4: CLASSROOM DISCUSSION</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="btm-nav">
+      <div class="flex-1 px-2 lg:flex-none">
+        <select bind:value={selectedTab} id="select-data-dropdown" class="select select-bordered w-full max-w-xs bg-neutral text-white dropdown-top">
+          {#each tabOptions as value}<option {value}>{value}</option>{/each}
+        </select>
+      </div>
+      <div>
+        {#if selectedTab == 'Movement'}
+        <input class="tab-radio" id="main-tab-1" name="main-group" type="radio" checked="checked">
+        <div class="tab-content" id="movement-main-tab">
+            <div class="sub-tabs-container button-float">
+                <label for="sub-tab1-1" title="Click to change and set colors">Change Color</label>
+            </div>
+            <!-- Sub Tabs -->
+            <input class="tab-radio js-color-change" id="sub-tab1-1" name="sub-group1" type="checkbox">
+        </div>
+        {/if}
+        {#if selectedTab == 'Talk'}
+        <input class="tab-radio" id="main-tab-3" name="main-group" type="radio">
+        <div class="tab-content loop-sketch" id="talk-main-tab">
+            <div class="sub-tabs-container button-float">
+                <input type="search" id="sub-tab3-1" name="search-input" placeholder="Search">
+                <label for="sub-tab3-2" title="Align talk along top">Align</label>
+                <label for="sub-tab3-3" title="Show talk by all speakers along each movement path">All On
+                    Path</label>
+                <label for="sub-tab3-4" title="Click to change and set colors">Change
+                    Color</label>
+            </div>
+            <input class="tab-radio" id="sub-tab3-2" name="sub-group3" type="checkbox">
+            <input class="tab-radio" id="sub-tab3-3" name="sub-group3" type="checkbox">
+            <input class="tab-radio js-color-change" id="sub-tab3-4" name="sub-group3" type="checkbox">
+        </div>
+        {/if}
+        {#if selectedTab == 'Video'}
+        <input class="tab-radio" id="main-tab-4" name="main-group" type="radio">
+        <div class="tab-content loop-sketch">
+            <div class="sub-tabs-container">
+                <label for="sub-tab4-1">Show/Hide</label>
+                <label for="sub-tab4-2">Play/Pause</label>
+                <label for="sub-tab4-3">+</label>
+                <label for="sub-tab4-4">-</label>
+            </div>
+            <input class="tab-radio" id="sub-tab4-1" name="sub-group4" type="checkbox">
+            <input class="tab-radio" id="sub-tab4-2" name="sub-group4" type="checkbox">
+            <input class="tab-radio" id="sub-tab4-3" name="sub-group4" type="checkbox">
+            <input class="tab-radio" id="sub-tab4-4" name="sub-group4" type="checkbox">
+        </div>
+        {/if}
+        {#if selectedTab == 'Animate'}
+        <input class="tab-radio" id="main-tab-5" name="main-group" type="radio">
+        <div class="tab-content loop-sketch">
+            <div class="sub-tabs-container">
+                <label for="sub-tab5-1">Start/End</label>
+                <label for="sub-tab5-2">Play/Pause</label>
+                <!-- <label class= "zzzTest" for="animate-speed-slider">Speed</label> -->
+                <input class="slider" id="animate-speed-slider" type="range" min="100" max="8000" value="4000">
+            </div>
+            <input class="tab-radio" id="sub-tab5-1" name="sub-group5" type="checkbox">
+            <input class="tab-radio" id="sub-tab5-2" name="sub-group5" type="checkbox">
+        </div>
+
+        {/if}
+        {#if selectedTab == 'Select'}
+        <input class="tab-radio" id="main-tab-6" name="main-group" type="radio">
+        <div class="tab-content loop-sketch">
+            <div class="sub-tabs-container">
+                <label for="sub-tab6-1" title="Reset selectors">Reset</label>
+                <label for="sub-tab6-2" title="Hover to highlight circular regions of data (2D only)">Circle</label>
+                <label for="sub-tab6-3" title="Hover to highlight rectangular slices of data (2D only)">Slice</label>
+                <label for="sub-tab6-4" title="Highlight only movement">Movement</label>
+                <label for="sub-tab6-5" title="Highlight only stops">Stops</label>
+                <label for="sub-tab6-6" title="Drag to select rectangular regions of data in 2D View. Hold option key to select multiple regions.">Highlight</label>
+            </div>
+            <input class="tab-radio" id="sub-tab6-1" name="sub-group6" type="radio">
+            <input class="tab-radio" id="sub-tab6-2" name="sub-group6" type="radio">
+            <input class="tab-radio" id="sub-tab6-3" name="sub-group6" type="radio">
+            <input class="tab-radio" id="sub-tab6-4" name="sub-group6" type="radio">
+            <input class="tab-radio" id="sub-tab6-5" name="sub-group6" type="radio">
+            <input class="tab-radio" id="sub-tab6-6" name="sub-group6" type="radio">
+        </div>
+        {/if}
+        {#if selectedTab == 'Floor Plan'}
+        <input class="tab-radio" id="main-tab-7" name="main-group" type="radio">
+        <div class="tab-content loop-sketch">
+            <div class="sub-tabs-container">
+                <label for="sub-tab7-1">Rotate Left</label>
+                <label for="sub-tab7-2">Rotate Right</label>
+            </div>
+            <input class="tab-radio" id="sub-tab7-1" name="sub-group7" type="checkbox">
+            <input class="tab-radio" id="sub-tab7-2" name="sub-group7" type="checkbox">
+        </div>
+        {/if}
+        {#if selectedTab == 'Codes'}
+        <input class="tab-radio" id="main-tab-8" name="main-group" type="radio">
+        <div class="tab-content loop-sketch" id="codes-main-tab">
+            <div class="sub-tabs-container button-float">
+                <label for="sub-tab8-1" title="Color data by codes files (grey = no code and black = multiple codes)">Color
+                    By Codes</label>
+                <label for="sub-tab8-2" style="display: none" title="Click to change and set colors">Change
+                    Color</label>
+            </div>
+            <input class="tab-radio" id="sub-tab8-1" name="sub-group8" type="checkbox">
+            <input class="tab-radio js-color-change" id="sub-tab8-2" name="sub-group8" type="checkbox">
+        </div>
+        {/if}
+        {#if selectedTab == 'Export'}
+        <input class="tab-radio" id="main-tab-9" name="main-group" type="radio">
+        <div class="tab-content loop-sketch">
+            <div class="sub-tabs-container">
+                <label for="sub-tab9-1" title="Click to create code files from selected/displayed data">Code File</label>
+            </div>
+            <input class="tab-radio" id="sub-tab9-1" name="sub-group8" type="checkbox">
+        </div>
+        {/if}
+      </div>
+    </div>
+
+    <slot />
+  </div>
+  <div class="drawer-side">
+    <label for="my-drawer" class="drawer-overlay"></label>
+    <ul class="menu p-4 w-80 bg-base-100 text-base-content">
+      <!-- Sidebar content here -->
+      <li>Movement</li>
+      <li>Talk</li>
+      <li>Video</li>
+      <li>Select</li>
+      <li>Codes</li>
+      <li>Export</li>
+      <li>2D</li>
+      <li>3D</li>
+    </ul>
+  </div>
+</div>
 
 <!-- Put this part before </body> tag -->
 <input type="checkbox" checked={true} id="my-modal" class="modal-toggle" />
