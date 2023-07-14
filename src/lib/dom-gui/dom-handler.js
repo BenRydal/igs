@@ -109,12 +109,10 @@ export class DomHandler {
                 return h.trim().toLowerCase();
             },
             complete: (results, file) => {
-                console.log("Parsing complete:", results, file);
                 this.sk.core.testPapaParseResultsForProcessing(results, file);
             },
             error: (error, file) => {
                 alert("Parsing error with one of your CSV file. Please make sure your file is formatted correctly as a .CSV");
-                console.log(error, file);
             }
         });
     }
@@ -140,7 +138,6 @@ export class DomHandler {
      */
     loadExampleData(params) {
         this.sk.floorPlan.update(params[0] + params[1]);
-        console.log()
         this.prepExampleCSVFile(params[0], params[2]); // only one conversation file to prep
         for (const fileName of params[3]) this.prepExampleCSVFile(params[0], fileName); // loop through string array to prep each CSV file
         //this.sk.videoController.createVideoPlayer(params[4], params[5]);
@@ -153,19 +150,16 @@ export class DomHandler {
             const file = new File([buffer], fileName, {
                 type: "text/csv",
             });
-            console.log(file)
             this.testFileTypeForProcessing(file);
-            console.log("Hel")
         } catch (error) {
             alert("Error loading CSV file. Please make sure you have a good internet connection");
-            console.log(error);
         }
     }
 
     clearAllData() {
         this.sk.core.clearAll();
         this.sk.floorPlan.clear();
-        this.sk.domController.clearAllCheckboxes();
+        // this.sk.domController.clearAllCheckboxes();
         this.sk.videoController.clear();
     }
 }

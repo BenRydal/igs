@@ -1,11 +1,11 @@
 /**
  * This class holds core program data and associated parsing methods from processed CSV files.
  * Separate parsing classes for movement, conversation, and code CSV files test parsed data from PapaParse
- * results and generate different data structures 
+ * results and generate different data structures
  * These data structures are integrated into a Path object which is the central data structure for the IGS
  * Original data from each CSV file is stored within each parsing class for re-processing as new data is loaded
- * Each time CSV file is successfully loaded and parsed, domController is called to update GUI elements 
- * 
+ * Each time CSV file is successfully loaded and parsed, domController is called to update GUI elements
+ *
  */
 
 import { CoreUtils } from './core-utils.js';
@@ -21,9 +21,10 @@ export class Core {
         this.parseConversation = new ParseConversation(this.sk, this.coreUtils);
         this.parseCodes = new ParseCodes(this.sk, this.coreUtils);
         // Core program data
-        this.speakerList = []; // Holds speaker objects for number of speakers parsed from successfully loaded conversation file
-        this.pathList = []; // Holds path objects for each successfully loaded movement file
-        this.codeList = []; // holds code objects for each successfully loaded code file
+        this.userList = []; // Holds user objects for each successfully loaded user file
+        // this.speakerList = []; // Holds speaker objects for number of speakers parsed from successfully loaded conversation file
+        // this.pathList = []; // Holds path objects for each successfully loaded movement file
+        // this.codeList = []; // holds code objects for each successfully loaded code file
         this.totalTimeInSeconds = 0; // Time value in seconds that all displayed data is set to, set dynamically when updating movement data
         this.COLORGRAY = "#A9A9A9"; // should match representation of data in GUI
         this.COLOR_LIST = ['#6a3d9a', '#ff7f00', '#33a02c', '#1f78b4', '#e31a1c', '#b15928', '#cab2d6', '#fdbf6f', '#b2df8a', '#a6cee3', '#fb9a99', '#ffed6f']; // 12 Class Paired: (Dark) purple, orange, green, blue, red, brown, (Light) lPurple, lOrange, lGreen, lBlue, lRed, yellow
@@ -44,7 +45,7 @@ export class Core {
 
     /**
      * Method to update movement program data and GUI
-     * NOTE: order is critical 
+     * NOTE: order is critical
      * @param  {Char} pathName First character letter of filename
      * @param  {Array} movementPointArray
      * @param  {Array} conversationPointArray
@@ -54,7 +55,7 @@ export class Core {
         this.pathList = this.sortByName(this.pathList); // then sort
         this.setTotalTime(movementPointArray);
         this.parseCodes.resetCounters(); // must reset code counters if multiple paths are loaded
-        this.sk.domController.updateCheckboxes("movement");
+        // this.sk.domController.updateCheckboxes("movement");
         this.sk.loop();
     }
 
@@ -66,17 +67,17 @@ export class Core {
         this.setSpeakerList(parsedConversationFileArray);
         this.speakerList = this.sortByName(this.speakerList);
         this.parseMovement.reProcessAllPointArrays(); // must reprocess movement
-        this.sk.domController.updateCheckboxes("talk");
+        // this.sk.domController.updateCheckboxes("talk");
         this.sk.loop();
     }
 
-    updateCodes(codeName) {
-        this.codeList.push(this.createDisplayData(codeName, false, this.COLORGRAY, this.getNextColorInList(this.codeList.length)));
-        this.clearMovement();
-        this.parseMovement.reProcessAllPointArrays();
-        this.sk.domController.updateCheckboxes("codes");
-        this.sk.loop();
-    }
+    // updateCodes(codeName) {
+    //     this.codeList.push(this.createDisplayData(codeName, false, this.COLORGRAY, this.getNextColorInList(this.codeList.length)));
+    //     this.clearMovement();
+    //     this.parseMovement.reProcessAllPointArrays();
+    //     // this.sk.domController.updateCheckboxes("codes");
+    //     this.sk.loop();
+    // }
 
     setTotalTime(movementPointArray) {
         const curPathEndTime = Math.floor(movementPointArray[movementPointArray.length - 1].time);
@@ -91,7 +92,7 @@ export class Core {
         for (const curRow of parsedConversationFileArray) {
             let tempSpeakerList = []; // create/populate temp list to store strings to test from global core.speakerList
             for (const tempSpeaker of this.speakerList) tempSpeakerList.push(tempSpeaker.name);
-            // If row is good data, test if core.speakerList already has speaker and if not add speaker 
+            // If row is good data, test if core.speakerList already has speaker and if not add speaker
             if (this.coreUtils.conversationRowForType(curRow)) {
                 const speaker = this.coreUtils.cleanFileName(curRow[this.coreUtils.headersConversation[1]]); // get cleaned speaker character
                 if (!tempSpeakerList.includes(speaker)) this.speakerList.push(this.createDisplayData(speaker, true, this.getNextColorInList(this.speakerList.length), this.COLORGRAY));
@@ -100,21 +101,21 @@ export class Core {
     }
 
     createPath(name, movementPointArray, conversationPointArray) {
-        const displayData = this.createDisplayData(name, true, this.getPathModeColor(name), this.COLORGRAY);
+        const path = this.createDisplayData(name, true, this.getPathModeColor(name), this.COLORGRAY);
         return {
-            name: displayData.name, // string name
-            isShowing: displayData.isShowing, // boolean used to indicate if speaker showing in GUI
-            color: displayData.color,
+            name: path.name, // string name
+            enabled: path.enabled, // boolean used to indicate if speaker showing in GUI
+            color: path.color,
             movement: movementPointArray,
             conversation: conversationPointArray
         }
     }
 
-    createDisplayData(name, isShowing, colorPathMode, colorCodeMode) {
+    createDisplayData(name, enabled, colorPathMode, colorCodeMode) {
         return {
             name, // string name
-            isShowing, // toggle display in GUI
-            color: this.createColorDisplayObject(colorPathMode, colorCodeMode) // 
+            enabled, // toggle display in GUI
+            color: this.createColorDisplayObject(colorPathMode, colorCodeMode) //
         }
     }
 

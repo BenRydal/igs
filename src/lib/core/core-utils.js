@@ -1,3 +1,4 @@
+// TODO: Check how this is working with the new user managmeent and how to integrate
 export class CoreUtils {
 
     constructor() {

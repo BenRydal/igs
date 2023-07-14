@@ -32,8 +32,9 @@
 	"dependencies": {
 		"@rollup/plugin-typescript": "^11.1.1",
 		"@tsconfig/svelte": "^4.0.1",
+		"@types/p5": "^1.6.2",
 		"autoprefixer": "^10.4.14",
-		"daisyui": "^2.51.6",
+		"daisyui": "^3.1.7",
 		"p5": "^1.6.0",
 		"p5-svelte": "^3.1.2",
 		"papaparse": "^5.4.1",

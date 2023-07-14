@@ -1,7 +1,7 @@
 /**
  * This class provides a set of custom methods to draw movement data in floorPlan and space-time views of the IGS.
  * Many of the methods address specific browser constraints and balance aesthetic and efficient curve drawing needs
- * For example, using the "line" method in a library like P5 is inefficient and curveVertex increases efficiency significantly but 
+ * For example, using the "line" method in a library like P5 is inefficient and curveVertex increases efficiency significantly but
  * the tradeoff is the need for more customized methods and conditional structures to handle starting/begining lines/shapes
  */
 
@@ -21,7 +21,7 @@ export class DrawMovement {
     }
 
     setData(path) {
-        this.dot = null; // reset 
+        this.dot = null; // reset
         this.sk.noFill(); // important for curveVertex drawing
         this.sk.noStroke(); // reset stroke, updated in later styling methods for stop/movement drawing
         this.style.shade = path.color.pathMode;

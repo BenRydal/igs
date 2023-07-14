@@ -14,14 +14,12 @@ export class FloorPlan {
      */
     update(filePath) {
         this.sk.loadImage(filePath, img => {
-            console.log("Floor Plan Image Loaded");
             this.img = img;
             this.width = img.width;
             this.height = img.height;
             this.sk.loop(); // rerun P5 draw loop after loading image
         }, e => {
             alert("Error loading floor plan image file. Please make sure it is correctly formatted as a PNG or JPG image file.")
-            console.log(e);
         });
     }
 

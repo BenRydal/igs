@@ -30,7 +30,6 @@ export class VideoController {
             }
         } catch (error) {
             alert("Error loading video file. Please make sure your video is formatted correctly as a .MP4 file or if loading an example dataset that you have access to YouTube");
-            console.log(error);
         }
     }
 
@@ -123,7 +122,7 @@ export class VideoController {
     }
     /**
      * Maps a pixel time from screen to a loaded video
-     * Conditional statements adapt for videos that start with same times but can have different lengths 
+     * Conditional statements adapt for videos that start with same times but can have different lengths
      * @param  {Number} value
      */
     mapPixelTimeToVideoTime(value) {
