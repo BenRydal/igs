@@ -5,43 +5,46 @@
  * the tradeoff is the need for more customized methods and conditional structures to handle starting/begining lines/shapes
  */
 
-export class DrawMovement {
+import { DataPoint } from "../../models/dataPoint";
+import { User } from "../../models/user";
 
+export class DrawMovement {
     constructor(sketch, drawUtils) {
         this.sk = sketch;
         this.drawUtils = drawUtils;
-        this.dot = null; // represents user selection dot drawn in both floor plan and space-time views
-        this.isDrawingLine = false; // boolean controls start/end line segment drawing based on code file and GUI selections
+        this.dot = null;
+        this.isDrawingLine = false;
         this.style = {
-            shade: null,
-            thinStroke: 1,
-            fatStroke: 9,
-            stopSize: 10
+          shade: null,
+          thinStroke: 1,
+          fatStroke: 9,
+          stopSize: 10
         }
-    }
+      }
 
-    setData(path) {
-        this.dot = null; // reset
-        this.sk.noFill(); // important for curveVertex drawing
-        this.sk.noStroke(); // reset stroke, updated in later styling methods for stop/movement drawing
-        this.style.shade = path.color.pathMode;
-        this.setDraw(this.sk.PLAN, path.movement);
-        this.setDraw(this.sk.SPACETIME, path.movement);
+      setData(user) {
+        this.dot = null;
+        this.sk.noFill();
+        this.sk.noStroke();
+        this.style.shade = user.color;
+        this.setDraw(this.sk.PLAN, user.dataTrail);
+        this.setDraw(this.sk.SPACETIME, user.dataTrail);
         if (this.dot !== null) this.drawDot(this.dot);
-    }
+      }
 
     /**
      * Organizes segmentation of line drawing to draw lines with varying strokes, thickness etc.
      * NOTE: stops are drawn as circles in floorPlan view
      * NOTE: 2 things determine line segmentation: 1) change from stop to movement and 2) whether point is visible (e.g., selected, highlighted etc.)
      * @param  {Integer} view
-     * @param  {MovementPoint []} movementArray
+     * @param  {DataTrail []} dataTrail
      */
-    setDraw(view, movementArray) {
-        this.isDrawingLine = false; // always reset
-        for (let i = 1; i < movementArray.length; i++) { // start at 1 to allow testing of current and prior indices
-            const p = this.drawUtils.createComparePoint(view, movementArray[i], movementArray[i - 1]); // a compare point consists of current and prior augmented points
-            if (this.drawUtils.isVisible(p.cur.point, p.cur.pos)) {
+    setDraw(view, dataTrail) {
+        this.isDrawingLine = false;
+        const movementArray = Array.from(dataTrail.values());
+        for (let i = 1; i < movementArray.length; i++) {
+          const p = this.drawUtils.createComparePoint(view, movementArray[i], movementArray[i - 1]);
+          if (this.drawUtils.isVisible(p.cur, p.cur.pos)) {
                 if (view === this.sk.SPACETIME) this.recordDot(p.cur);
                 if (p.cur.point.isStopped) this.updateStopDrawing(p, view);
                 else this.updateMovementDrawing(p, p.prior.point.isStopped, this.style.thinStroke);

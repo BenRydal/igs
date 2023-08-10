@@ -10,9 +10,9 @@
   import P5, {type Sketch} from "p5-svelte";
   import Papa from 'papaparse';
 
-  import UserStore from './userStore'
-  import { DataPoint } from './dataPoint'
-  import { User } from './user'
+  import UserStore from '../../stores/userStore'
+  import { DataPoint } from '../../models/dataPoint'
+  import { User } from '../../models/user'
 
 
 	import {
@@ -47,6 +47,39 @@
     users = data;
   });
 
+  async function handleDropdownChange(event: any) {
+    const selectedValue = event.target.value; // Get the selected value
+
+    // Load conversation.csv and parse it
+    const conversationData = await loadConversationData(selectedValue);
+
+    // Load floorplan.png and set it as the background
+    loadFloorplanImage(selectedValue);
+
+    // Load {Name}.csv files and parse them
+    const usersData = await loadUsersData(selectedValue);
+
+    // Update the UserStore and p5.js drawing
+    updateUserDrawing(conversationData, usersData);
+  }
+
+  async function loadConversationData(selectedValue) {
+    // Determine the path based on the selected value
+    const path = `static/data/${selectedValue}/conversation.csv`;
+
+    // Load and parse the CSV using PapaParse
+    const result = await new Promise(resolve => {
+      Papa.parse(path, {
+        download: true,
+        header: true,
+        complete: resolve
+      });
+    });
+
+    return result.data;
+  }
+
+
   const sketch: Sketch = (p5: any) => {
 		p5.preload = () => {
       p5.font = p5.loadFont("/fonts/PlusJakartaSans/VariableFont_wght.ttf");
@@ -80,7 +113,8 @@
     };
 
     p5.draw = () => {
-      // paths = p5.core.pathList
+      console.log("Drawing...")
+      const paths = p5.core.userList.map((user: { dataTrail: any; }) => user.dataTrail);
       p5.background(255);
       p5.translate(-p5.width / 2, -p5.height / 2, 0); // recenter canvas to top left when using WEBGL renderer
 
@@ -116,9 +150,11 @@
         //      Draw all of the conversation
 
         // Check if movement CSV is loaded or if conversation CSV is loaded (or both)
-        // Handle the 3 use cases in which you would want to set those data in for the path.
+        // Handle the 3 use cases in which you would want to syarnet those data in for the path.
+        console.log("Data is loaded - starting to draw...")
 
         if (p5.arrayIsLoaded(p5.core.pathList)) {
+          console.log("Path list is loaded")
           const setPathData = new SetPathData(p5, p5.core.codeList);
           if (p5.arrayIsLoaded(p5.core.speakerList)) setPathData.setMovementAndConversation(p5.core.pathList, p5.core.speakerList);
           else setPathData.setMovement(p5.core.pathList);
@@ -134,6 +170,15 @@
       return p5.mouseX >= x && p5.mouseX <= x + boxWidth && p5.mouseY >= y && p5.mouseY <= y + boxHeight;
     }
 
+    function loadFloorplanImage(selectedValue: string) {
+      // Determine the path based on the selected value
+      const path = `static/data/${selectedValue}/floorplan.png`;
+
+      // Load the image into p5.js
+      p5.loadImage(path, (img: any) => {
+        p5.background(img);
+      });
+    }
 		// /**
     //  * Determines what data is loaded and calls appropriate class drawing methods for that data
     //  */
@@ -206,16 +251,25 @@
     // }
 	};
 
+  const handleDropdownChange = (event: any) => {
+    const selectedValue = event.target.value;
+    loadFloorplanImage(selectedValue);
+  }
+
   // Function to handle file selection and data parsing
   const handleFileSelect = (event: any) => {
     const file = event.target.files[0];
     const fileName = file.name;
+
+    console.log("Parsing file: " + fileName)
 
     Papa.parse(file, {
       header: true,
       dynamicTyping: true,
       complete: (results: any) => handleParsingComplete(results, fileName),
     });
+
+    console.log("File selected: " + fileName);
   };
 
   // Function to handle data parsing completion
@@ -261,6 +315,8 @@
           }
       });
 
+      console.log("Successfully parsed CSV file.")
+
       return users;  // return the updated users
     });
   };
@@ -299,7 +355,7 @@
             <Md3DRotation />
           </div>
 
-          <select id="select-data-dropdown" class="select select-bordered w-full max-w-xs bg-neutral">
+          <select id="select-data-dropdown" class="select select-bordered w-full max-w-xs bg-neutral" on:change={handleDropdownChange}>
             <option disabled selected>-- Select an Example --</option>
             <option value="Example 1">Michael Jordan's Last Shot</option>
             <option value="Example 2">Family Museum Gallery Visit</option>

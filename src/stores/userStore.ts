@@ -1,5 +1,5 @@
 import { writable } from 'svelte/store';
-import type { User } from './user';
+import type { User } from '../models/user';
 
 const UserStore = writable(new Array<User>())
 

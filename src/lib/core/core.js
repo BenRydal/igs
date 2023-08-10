@@ -12,6 +12,11 @@ import { CoreUtils } from './core-utils.js';
 import { ParseMovement } from './parse-movement.js';
 import { ParseConversation } from './parse-conversation.js';
 import { ParseCodes } from './parse-codes.js';
+// import { DataPoint } from '../../routes/sketch/dataPoint.js';
+// import { User } from '../../routes/sketch/user.js';
+
+import { DataPoint } from '../../models/dataPoint';
+import { User } from '../../models/user';
 export class Core {
 
     constructor(sketch) {
@@ -21,6 +26,9 @@ export class Core {
         this.parseConversation = new ParseConversation(this.sk, this.coreUtils);
         this.parseCodes = new ParseCodes(this.sk, this.coreUtils);
         // Core program data
+        /**
+         * @type {any[]}
+         */
         this.userList = []; // Holds user objects for each successfully loaded user file
         // this.speakerList = []; // Holds speaker objects for number of speakers parsed from successfully loaded conversation file
         // this.pathList = []; // Holds path objects for each successfully loaded movement file
@@ -51,13 +59,17 @@ export class Core {
      * @param  {Array} conversationPointArray
      */
     updateMovement(pathName, movementPointArray, conversationPointArray) {
-        this.pathList.push(this.createPath(pathName, movementPointArray, conversationPointArray)); // update data list
-        this.pathList = this.sortByName(this.pathList); // then sort
+        const dataTrail = new Map();
+        movementPointArray.forEach((point, index) => {
+          dataTrail.set(index, new DataPoint("", point.x, point.y)); // Assuming x and y properties are present in the point
+        });
+        this.userList.push(new User(true, pathName, this.getNextColorInList(this.userList.length), dataTrail));
+        this.userList = this.sortByName(this.userList);
         this.setTotalTime(movementPointArray);
-        this.parseCodes.resetCounters(); // must reset code counters if multiple paths are loaded
+        this.parseCodes.resetCounters();
         // this.sk.domController.updateCheckboxes("movement");
         this.sk.loop();
-    }
+      }
 
     /**
      * NOTE: method follows same format as updateMovement with a few minor differences
@@ -71,13 +83,13 @@ export class Core {
         this.sk.loop();
     }
 
-    // updateCodes(codeName) {
-    //     this.codeList.push(this.createDisplayData(codeName, false, this.COLORGRAY, this.getNextColorInList(this.codeList.length)));
-    //     this.clearMovement();
-    //     this.parseMovement.reProcessAllPointArrays();
-    //     // this.sk.domController.updateCheckboxes("codes");
-    //     this.sk.loop();
-    // }
+    updateCodes(codeName) {
+        this.codeList.push(this.createDisplayData(codeName, false, this.COLORGRAY, this.getNextColorInList(this.codeList.length)));
+        this.clearMovement();
+        this.parseMovement.reProcessAllPointArrays();
+        // this.sk.domController.updateCheckboxes("codes");
+        this.sk.loop();
+    }
 
     setTotalTime(movementPointArray) {
         const curPathEndTime = Math.floor(movementPointArray[movementPointArray.length - 1].time);
@@ -164,13 +176,15 @@ export class Core {
 
     sortByName(list) {
         return list.sort((a, b) => (a.name > b.name) ? 1 : -1);
-    }
+      }
 
     clearAll() {
         this.parseMovement.clear();
         this.parseConversation.clear();
         this.parseCodes.clear();
-    }
+        this.userList = [];
+        this.totalTimeInSeconds = 0;
+      }
 
     clearMovement() {
         this.pathList = [];
