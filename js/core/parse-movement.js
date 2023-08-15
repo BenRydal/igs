@@ -58,19 +58,46 @@ export class ParseMovement {
                 }
             }
         }
+        this.updateStopValues(movementPointArray);
+        this.updateStopValues(conversationPointArray);
         return [movementPointArray, conversationPointArray];
     }
 
     /**
      * Represents a location in space and time along a path with other attributes
      */
-    createMovementPoint(curRow, movementPointArray) {
+    createMovementPoint(curRow, movementPointArray) { // TODO: remove??
         return {
             time: curRow[this.coreUtils.headersMovement[0]],
             xPos: curRow[this.coreUtils.headersMovement[1]],
             yPos: curRow[this.coreUtils.headersMovement[2]],
-            isStopped: this.coreUtils.isStopped(curRow, movementPointArray),
+            isStopped: false,
+            stopLength: undefined,
             codes: this.sk.core.parseCodes.getCodeData(curRow[this.coreUtils.headersMovement[0]])
+        }
+    }
+
+    // TODO: this could be moved to main classes to dynamically update, would neat to reset isStopped values in data
+    updateStopValues(data) {
+        const stopFloor = 30;    
+        for (let i = 0; i < data.length; i++) {
+            let cumulativeTime = 0;
+            let j = i;
+            // Check and update cumulative time if consecutive points have the same x and y values
+            while (j < data.length && data[j].xPos === data[i].xPos && data[j].yPos === data[i].yPos) {
+                cumulativeTime = data[j].time - data[i].time;
+                j++;
+            }
+            // If cumulativeTime is greater than stopFloor, set stop values for the sequence
+            if (cumulativeTime >= stopFloor) {
+                if (cumulativeTime > this.sk.core.maxStopLength) this.sk.core.maxStopLength = cumulativeTime;
+                for (let k = i; k < j; k++) {
+                    data[k].isStopped = true;
+                    //if (k === j - 1) data[k].stopLength = cumulativeTime;
+                    data[k].stopLength = data[k].time - data[i].time;
+                }
+            }
+            i = j - 1; // Update i to skip the sequence just processed
         }
     }
 

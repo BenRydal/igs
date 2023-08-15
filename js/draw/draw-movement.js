@@ -12,11 +12,11 @@ export class DrawMovement {
         this.drawUtils = drawUtils;
         this.dot = null; // represents user selection dot drawn in both floor plan and space-time views
         this.isDrawingLine = false; // boolean controls start/end line segment drawing based on code file and GUI selections
+        this.largestStopPixelSize = 50;
         this.style = {
             shade: null,
             thinStroke: 1,
-            fatStroke: 9,
-            stopSize: 10
+            fatStroke: 9
         }
     }
 
@@ -57,7 +57,7 @@ export class DrawMovement {
      */
     updateStopDrawing(p, view) {
         if (view === this.sk.PLAN) {
-            if (!p.prior.point.isStopped) this.drawStopCircle(p); // PriorPoint test makes sure to only draw a stop circle once
+            if (p.cur.point.stopLength) this.drawStopCircle(p); // PriorPoint test makes sure to only draw a stop circle once
         } else this.updateMovementDrawing(p, !p.prior.point.isStopped, this.style.fatStroke);
     }
 
@@ -66,7 +66,7 @@ export class DrawMovement {
      */
     updateMovementDrawing(p, stopTest, stroke) {
         if (!this.isDrawingLine) this.beginLine(p.cur.point.isStopped, p.cur.point.codes.color);
-        if (stopTest || this.isNewCode(p)) this.endThenBeginNewLine(p.prior.pos, stroke, p.cur.point.codes.color);
+        if (stopTest || this.isNewCode(p)) this.endThenBeginNewLine(p.cur.pos, stroke, p.cur.point.codes.color);
         else this.sk.vertex(p.cur.pos.viewXPos, p.cur.pos.floorPlanYPos, p.cur.pos.zPos); // if already drawing fat line, continue it
     }
 
@@ -96,7 +96,8 @@ export class DrawMovement {
      */
     drawStopCircle(p) {
         this.setFillStyle(p.cur.point.codes.color);
-        this.sk.circle(p.cur.pos.viewXPos, p.cur.pos.floorPlanYPos, this.style.stopSize);
+        const stopSize = this.sk.map(p.cur.point.stopLength, 0, this.sk.core.maxStopLength, 5, this.largestStopPixelSize);
+        this.sk.circle(p.cur.pos.viewXPos, p.cur.pos.floorPlanYPos, stopSize);
         this.sk.noFill();
     }
 
