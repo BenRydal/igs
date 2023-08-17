@@ -66,7 +66,10 @@ export class DrawMovement {
      */
     updateMovementDrawing(p, stopTest, stroke) {
         if (!this.isDrawingLine) this.beginLine(p.cur.point.isStopped, p.cur.point.codes.color);
-        if (stopTest || this.isNewCode(p)) this.endThenBeginNewLine(p.cur.pos, stroke, p.cur.point.codes.color);
+        if (stopTest || this.isNewCode(p)) {
+            if (p.prior.point.isStopped) this.endThenBeginNewLine(p.prior.pos, stroke, p.cur.point.codes.color);
+            else this.endThenBeginNewLine(p.cur.pos, stroke, p.cur.point.codes.color);
+        }
         else this.sk.vertex(p.cur.pos.viewXPos, p.cur.pos.floorPlanYPos, p.cur.pos.zPos); // if already drawing fat line, continue it
     }
 
