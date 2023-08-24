@@ -70,18 +70,20 @@ export class DrawUtils {
      * @param  {Integer} view
      * @param  {MovementPoint} curIndex 
      * @param  {MovementPoint} priorIndex 
+     * @param  {Integer} time
+     * @param  {Integer} previousTime
      */
-    createComparePoint(view, curIndex, priorIndex) {
+    createComparePoint(view, curIndex, priorIndex, time, previousTime) {
         return {
-            cur: this.createAugmentPoint(view, curIndex),
-            prior: this.createAugmentPoint(view, priorIndex)
+            cur: this.createAugmentPoint(view, curIndex, time),
+            prior: this.createAugmentPoint(view, priorIndex, previousTime)
         }
     }
 
-    createAugmentPoint(view, point) {
+    createAugmentPoint(view, point, time) {
         return {
             point,
-            pos: this.getScaledMovementPos(point, view)
+            pos: this.getScaledMovementPos(point, view, time)
         }
     }
 
@@ -89,12 +91,14 @@ export class DrawUtils {
      * Returns scaled pixel values for a point to graphical display
      * IMPORTANT: currently view parameter can be either one of 2 constants or "null" for conversation drawing
      * @param  {Movement Or Conversation Point} point
-     * @param  {Integer} view
+     * @param  {Integer} time
      */
-    getSharedPosValues(point) {
-        const timelineXPos = this.sk.sketchController.mapTotalTimeToPixelTime(point.time);
+    getSharedPosValues(point, time) {
+        const timelineXPos = this.sk.sketchController.mapTotalTimeToPixelTime(time);
         const selTimelineXPos = this.sk.sketchController.mapSelectTimeToPixelTime(timelineXPos);
-        const [floorPlanXPos, floorPlanYPos] = this.sk.floorPlan.getScaledXYPos(point.xPos, point.yPos, this.sk.gui.fpContainer.getContainer());
+
+        const [floorPlanXPos, floorPlanYPos] = this.sk.floorPlan.getScaledXYPos(point.x, point.y, this.sk.gui.fpContainer.getContainer());
+
         return {
             timelineXPos,
             selTimelineXPos,
@@ -107,8 +111,8 @@ export class DrawUtils {
      * @param  {MovementPoint} point
      * @param  {Integer} view
      */
-    getScaledMovementPos(point, view) {
-        const pos = this.getSharedPosValues(point);
+    getScaledMovementPos(point, view, time) {
+        const pos = this.getSharedPosValues(point, time);
         return {
             timelineXPos: pos.timelineXPos,
             selTimelineXPos: pos.selTimelineXPos,

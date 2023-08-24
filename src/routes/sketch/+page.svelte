@@ -61,16 +61,28 @@
       // Load floorplan.png and set it as the background
       await loadFloorplanImage(p5Instance, selectedValue);
 
-      const response = await fetch(`data/${selectedValue}/conversation.csv`);
-      const csvRes = await response.text();
+      // const response = await fetch(`data/${selectedValue}/conversation.csv`);
+      // const csvRes = await response.text();
 
-      Papa.parse(csvRes, {
-        header: true,
+      // Papa.parse(csvRes, {
+      //   header: true,
+      //   dynamicTyping: true,
+      //   complete: (results: any) => convertFileToUsers(results, selectedValue),
+      // });
+      
+      // TODO: Edwin to add dynamic user fetching
+      const userResponse = await fetch(`data/${selectedValue}/Jordan.csv`);
+      const csvUser = await userResponse.text();
+
+      Papa.parse(csvUser, {
         dynamicTyping: true,
+        skipEmptyLines: 'greedy',
+        header: true,
+        transformHeader: (h) => {
+            return h.trim().toLowerCase();
+        },
         complete: (results: any) => convertFileToUsers(results, selectedValue),
       });
-
-      console.log("File selected: " + selectedValue);
 
       // // Update the UserStore and p5.js drawing
       // updateUserDrawing(usersData);
@@ -92,7 +104,6 @@
   async function loadConversationData(selectedValue: string) {
     // Determine the path based on the selected value
     const path = `data/${selectedValue}/conversation.csv`;
-    console.log(path)
     // Load and parse the CSV using PapaParse
     const result = await new Promise(resolve => {
       Papa.parse(path, {
@@ -108,8 +119,6 @@
   function loadFloorplanImage(p5Instance: p5, selectedValue: string) {
     // Determine the path based on the selected value
     const path = `data/${selectedValue}/floorplan.png`;
-
-    console.log(path)
 
     // Load the image into p5.js
     // Add logic so that typescript does not complain about
@@ -206,12 +215,12 @@
 
         if (p5.arrayIsLoaded(users)) {
           console.log("Path list is loaded");
-          console.log(users)
           const setPathData = new SetPathData(p5, p5.core.codeList);
           // if (p5.arrayIsLoaded(users)) setPathData.setMovementAndConversation(users, users);
           if (Array.isArray(users) && users.length) {
             console.log("Users is an array and has length")
-            setPathData.setMovementAndConversation(users, users);
+            setPathData.setMovement(users);
+            //setPathData.setMovementAndConversation(users, users);
           }
 
           else setPathData.setMovement(users);
@@ -330,9 +339,6 @@
 
   // Function to handle data parsing completion
   const convertFileToUsers = (results: any, fileName: string) => {
-    console.log('Converting file to users.')
-    console.log(results.data);
-    console.log(fileName);
     const csvData = results.data;
 
     UserStore.update(currentUsers => {
@@ -351,7 +357,10 @@
                 users.push(user);
               }
 
-              if (!user.dataTrail.has(row.time)) {
+              if (user.dataTrail.has(row.time)) {
+                user.dataTrail.get(row.time).x = row.x;
+                user.dataTrail.get(row.time).y = row.y;
+              } else {
                 user.dataTrail.set(row.time, new DataPoint("", row.x, row.y));
               }
           } else if ('code' in row && 'start' in row && 'end' in row) {
@@ -376,7 +385,7 @@
 
       console.log("Successfully parsed CSV file.")
 
-      return users;  // return the updated users
+      return users;
     });
   };
 </script>

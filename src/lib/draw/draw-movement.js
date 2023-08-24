@@ -14,47 +14,33 @@ export class DrawMovement {
         this.dot = null;
         this.isDrawingLine = false;
         this.style = {
-          shade: null,
-          thinStroke: 1,
-          fatStroke: 9,
-          stopSize: 10
+            shade: null,
+            thinStroke: 1,
+            fatStroke: 9,
+            stopSize: 10
         }
-      }
+    }
 
-      setData(user) {
-        console.log(`Setting Data for User: ${user.name}`)
+    setData(user) {
         this.dot = null;
         this.sk.noFill();
         this.sk.noStroke();
         this.style.shade = user.color;
         this.setDraw(this.sk.PLAN, user.dataTrail);
-        this.setDraw(this.sk.SPACETIME, user.dataTrail);
+        //this.setDraw(this.sk.SPACETIME, user.dataTrail);
         if (this.dot !== null) this.drawDot(this.dot);
-      }
+    }
 
-    /**
-     * Organizes segmentation of line drawing to draw lines with varying strokes, thickness etc.
-     * NOTE: stops are drawn as circles in floorPlan view
-     * NOTE: 2 things determine line segmentation: 1) change from stop to movement and 2) whether point is visible (e.g., selected, highlighted etc.)
-     * @param  {Integer} view
-     * @param  {DataTrail []} dataTrail
-     */
     setDraw(view, dataTrail) {
         this.isDrawingLine = false;
-        const movementArray = Array.from(dataTrail.values());
-        console.log(`Drawing ${movementArray.length} Movements`)
 
-        for (let i = 1; i < movementArray.length; i++) {
-            const currentMovement = movementArray[i];
-            const previousMovement = movementArray[i - 1];
-            const comparisonPoint = this.drawUtils.createComparePoint(view, currentMovement, previousMovement);
+        for (let i = 1; i < dataTrail.size; i++) {
+            const currentMovement = Array.from(dataTrail.values())[i]
+            const previousMovement = Array.from(dataTrail.values())[i - 1]
+            const comparisonPoint = this.drawUtils.createComparePoint(view, currentMovement, previousMovement, Array.from(dataTrail.keys())[i], Array.from(dataTrail.keys())[i - 1]);
 
-            console.log("Drawing Movement")
-            // this.drawUtils.isVisible(comparisonPoint.cur, comparisonPoint.cur.pos)
             if (true) {
-                console.log("Drawing Visible")
                 if (view === this.sk.SPACETIME) {
-                    console.log("Drawing SpaceTime")
                     this.recordDot(comparisonPoint.cur);
                 }
 

@@ -17,12 +17,24 @@ export class SetPathData {
         this.drawUtils = new DrawUtils(sketch, codeList);
     }
 
-    setMovement(pathList) {
+    setMovement(users) {
         const drawMovement = new DrawMovement(this.sk, this.drawUtils);
-        for (const path of pathList) {
-            if (path.isShowing) drawMovement.setData(path);
+        for (const user of users) {
+            console.log(`User: ${user}`);
+            console.log(`UserName ${user.name}`);
+            if (user.enabled) drawMovement.setData(user);
         }
+        // for (const path of dataTrail) {
+        //     if (path.isShowing) drawMovement.setData(path);
+        // }
     }
+
+    // setMovement(pathList) {
+    //     const drawMovement = new DrawMovement(this.sk, this.drawUtils);
+    //     for (const path of pathList) {
+    //         if (path.isShowing) drawMovement.setData(path);
+    //     }
+    // }
 
     // setMovementAndConversation(pathList, speakerList) {
     //     const drawConversation = new DrawConversation(this.sk, this.drawUtils);
