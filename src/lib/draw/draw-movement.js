@@ -27,9 +27,24 @@ export class DrawMovement {
         this.sk.noStroke();
         this.style.shade = user.color;
         this.setDraw(this.sk.PLAN, user.dataTrail);
-        //this.setDraw(this.sk.SPACETIME, user.dataTrail);
+        this.setDraw(this.sk.SPACETIME, user.dataTrail);
         if (this.dot !== null) this.drawDot(this.dot);
     }
+
+    // setDraw(view, movementArray) {
+    //     this.isDrawingLine = false; // always reset
+    //     for (let i = 1; i < movementArray.length; i++) { // start at 1 to allow testing of current and prior indices
+    //         const p = this.drawUtils.createComparePoint(view, movementArray[i], movementArray[i - 1]); // a compare point consists of current and prior augmented points
+    //         if (this.drawUtils.isVisible(p.cur.point, p.cur.pos)) {
+    //             if (view === this.sk.SPACETIME) this.recordDot(p.cur);
+    //             if (p.cur.point.isStopped) this.updateStopDrawing(p, view);
+    //             else this.updateMovementDrawing(p, p.prior.point.isStopped, this.style.thinStroke);
+    //         } else {
+    //             if (this.isDrawingLine) this.endLine();
+    //         }
+    //     }
+    //     this.sk.endShape(); // end shape in case still drawing
+    // }
 
     setDraw(view, dataTrail) {
         this.isDrawingLine = false;
@@ -39,18 +54,12 @@ export class DrawMovement {
             const previousMovement = Array.from(dataTrail.values())[i - 1]
             const comparisonPoint = this.drawUtils.createComparePoint(view, currentMovement, previousMovement, Array.from(dataTrail.keys())[i], Array.from(dataTrail.keys())[i - 1]);
 
-            if (true) {
-                if (view === this.sk.SPACETIME) {
-                    this.recordDot(comparisonPoint.cur);
-                }
-
-                if (comparisonPoint.cur.point.isStopped) {
-                    this.updateStopDrawing(comparisonPoint, view);
-                } else {
-                    this.updateMovementDrawing(comparisonPoint, comparisonPoint.prior.point.isStopped, this.style.thinStroke);
-                }
-            } else if (this.isDrawingLine) {
-                this.endLine();
+            if (this.drawUtils.isVisible(comparisonPoint.cur.point, comparisonPoint.cur.pos)) {
+                if (view === this.sk.SPACETIME) this.recordDot(comparisonPoint.cur);
+                if (comparisonPoint.cur.point.isStopped) this.updateStopDrawing(comparisonPoint, view);
+                else this.updateMovementDrawing(comparisonPoint, comparisonPoint.prior.point.isStopped, this.style.thinStroke);
+            } else {
+                if (this.isDrawingLine) this.endLine();
             }
         }
 

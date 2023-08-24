@@ -26,10 +26,9 @@ export class Core {
         this.parseConversation = new ParseConversation(this.sk, this.coreUtils);
         this.parseCodes = new ParseCodes(this.sk, this.coreUtils);
         // Core program data
-        /**
-         * @type {any[]}
-         */
-        this.userList = []; // Holds user objects for each successfully loaded user file
+        this.userList = [];
+        // Holds user objects
+        // for each successfully loaded user file
         // this.speakerList = []; // Holds speaker objects for number of speakers parsed from successfully loaded conversation file
         // this.pathList = []; // Holds path objects for each successfully loaded movement file
         // this.codeList = []; // holds code objects for each successfully loaded code file
@@ -59,17 +58,19 @@ export class Core {
      * @param  {Array} conversationPointArray
      */
     updateMovement(pathName, movementPointArray, conversationPointArray) {
-        const dataTrail = new Map();
-        movementPointArray.forEach((point, index) => {
-          dataTrail.set(index, new DataPoint("", point.x, point.y)); // Assuming x and y properties are present in the point
-        });
-        this.userList.push(new User(true, pathName, this.getNextColorInList(this.userList.length), dataTrail));
-        this.userList = this.sortByName(this.userList);
+        // const dataTrail = new Map();
+        // movementPointArray.forEach((point, index) => {
+        //     dataTrail.set(index, new DataPoint("", point.x, point.y)); // Assuming x and y properties are present in the point
+        // });
+        // this.userList.push(new User(true, pathName, this.getNextColorInList(this.userList.length), dataTrail));
+        // this.userList = this.sortByName(this.userList);
+        // console.log('======================')
+        // console.log(movementPointArray)
         this.setTotalTime(movementPointArray);
-        this.parseCodes.resetCounters();
+        //this.parseCodes.resetCounters();
         // this.sk.domController.updateCheckboxes("movement");
         this.sk.loop();
-      }
+    }
 
     /**
      * NOTE: method follows same format as updateMovement with a few minor differences
@@ -91,9 +92,18 @@ export class Core {
         this.sk.loop();
     }
 
-    setTotalTime(movementPointArray) {
-        const curPathEndTime = Math.floor(movementPointArray[movementPointArray.length - 1].time);
-        if (this.totalTimeInSeconds < curPathEndTime) this.totalTimeInSeconds = curPathEndTime; // update global total time, make sure to floor value as integer
+    // setTotalTime(movementPointArray) {
+    //     const curPathEndTime = Math.floor(movementPointArray[movementPointArray.length - 1].time);
+    //     if (this.totalTimeInSeconds < curPathEndTime) this.totalTimeInSeconds = curPathEndTime; // update global total time, make sure to floor value as integer
+    // }
+
+    // setTotalTime(movementPointArray) {
+    //     const curPathEndTime = Math.floor(movementPointArray[movementPointArray.length - 1].time);
+    //     if (this.totalTimeInSeconds < curPathEndTime) this.totalTimeInSeconds = curPathEndTime; // update global total time, make sure to floor value as integer
+    // }
+
+    setTotalTime(timeValue) {
+        if (this.totalTimeInSeconds < timeValue) this.totalTimeInSeconds = timeValue; // update global total time, make sure to floor value as integer
     }
 
     getTotalTimeInSeconds() {
@@ -176,7 +186,7 @@ export class Core {
 
     sortByName(list) {
         return list.sort((a, b) => (a.name > b.name) ? 1 : -1);
-      }
+    }
 
     clearAll() {
         this.parseMovement.clear();
@@ -184,7 +194,7 @@ export class Core {
         this.parseCodes.clear();
         this.userList = [];
         this.totalTimeInSeconds = 0;
-      }
+    }
 
     clearMovement() {
         this.pathList = [];

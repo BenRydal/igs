@@ -363,6 +363,11 @@
               } else {
                 user.dataTrail.set(row.time, new DataPoint("", row.x, row.y));
               }
+
+              // p5Instance.core.updateMovement(stringName, user.dataTrail, []);
+              p5Instance.core.setTotalTime(row.time);
+
+              
           } else if ('code' in row && 'start' in row && 'end' in row) {
               // code, start, end
               // Here, we're adding the code to all users. If you need to add it to a specific user,
@@ -382,6 +387,7 @@
               user.dataTrail.set(row.time, new DataPoint(row.talk, 0, 0));
           }
       });
+
 
       console.log("Successfully parsed CSV file.")
 
