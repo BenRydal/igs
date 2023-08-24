@@ -6,7 +6,6 @@
  */
 
 import { DataPoint } from "../../models/dataPoint";
-import { User } from "../../models/user";
 
 export class DrawMovement {
     constructor(sketch, drawUtils) {
@@ -23,6 +22,7 @@ export class DrawMovement {
       }
 
       setData(user) {
+        console.log(`Setting Data for User: ${user.name}`)
         this.dot = null;
         this.sk.noFill();
         this.sk.noStroke();
@@ -42,18 +42,35 @@ export class DrawMovement {
     setDraw(view, dataTrail) {
         this.isDrawingLine = false;
         const movementArray = Array.from(dataTrail.values());
+        console.log(`Drawing ${movementArray.length} Movements`)
+
         for (let i = 1; i < movementArray.length; i++) {
-          const p = this.drawUtils.createComparePoint(view, movementArray[i], movementArray[i - 1]);
-          if (this.drawUtils.isVisible(p.cur, p.cur.pos)) {
-                if (view === this.sk.SPACETIME) this.recordDot(p.cur);
-                if (p.cur.point.isStopped) this.updateStopDrawing(p, view);
-                else this.updateMovementDrawing(p, p.prior.point.isStopped, this.style.thinStroke);
-            } else {
-                if (this.isDrawingLine) this.endLine();
+            const currentMovement = movementArray[i];
+            const previousMovement = movementArray[i - 1];
+            const comparisonPoint = this.drawUtils.createComparePoint(view, currentMovement, previousMovement);
+
+            console.log("Drawing Movement")
+            // this.drawUtils.isVisible(comparisonPoint.cur, comparisonPoint.cur.pos)
+            if (true) {
+                console.log("Drawing Visible")
+                if (view === this.sk.SPACETIME) {
+                    console.log("Drawing SpaceTime")
+                    this.recordDot(comparisonPoint.cur);
+                }
+
+                if (comparisonPoint.cur.point.isStopped) {
+                    this.updateStopDrawing(comparisonPoint, view);
+                } else {
+                    this.updateMovementDrawing(comparisonPoint, comparisonPoint.prior.point.isStopped, this.style.thinStroke);
+                }
+            } else if (this.isDrawingLine) {
+                this.endLine();
             }
         }
-        this.sk.endShape(); // end shape in case still drawing
+
+        this.sk.endShape(); // End shape in case still drawing
     }
+
 
     /**
      * Stops are draw as circles in floorPlan view

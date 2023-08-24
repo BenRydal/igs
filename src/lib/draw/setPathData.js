@@ -24,13 +24,24 @@ export class SetPathData {
         }
     }
 
-    setMovementAndConversation(pathList, speakerList) {
+    // setMovementAndConversation(pathList, speakerList) {
+    //     const drawConversation = new DrawConversation(this.sk, this.drawUtils);
+    //     const drawMovement = new DrawMovement(this.sk, this.drawUtils);
+    //     for (const path of pathList) {
+    //         if (path.isShowing) {
+    //             drawConversation.setData(path, speakerList);
+    //             drawMovement.setData(path); // draw after conversation so dot displays on top
+    //         }
+    //     }
+    //     drawConversation.setConversationBubble(); // draw conversation text last so it displays on top
+    // }
+    setMovementAndConversation(userList) {
         const drawConversation = new DrawConversation(this.sk, this.drawUtils);
         const drawMovement = new DrawMovement(this.sk, this.drawUtils);
-        for (const path of pathList) {
-            if (path.isShowing) {
-                drawConversation.setData(path, speakerList);
-                drawMovement.setData(path); // draw after conversation so dot displays on top
+        for (const user of userList) {
+            if (user.enabled) {
+                // drawConversation.setData(user);
+                drawMovement.setData(user); // draw after conversation so dot displays on top
             }
         }
         drawConversation.setConversationBubble(); // draw conversation text last so it displays on top

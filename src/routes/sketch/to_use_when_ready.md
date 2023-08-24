@@ -1,4 +1,4 @@
-{#if selectedTab == 'Talk'}
+<!-- {#if selectedTab == 'Talk'}
 <input class="tab-radio" id="main-tab-3" name="main-group" type="radio">
 <div class="tab-content loop-sketch" id="talk-main-tab">
     <div class="sub-tabs-container button-float">
@@ -94,4 +94,4 @@
     </div>
     <input class="tab-radio" id="sub-tab9-1" name="sub-group8" type="checkbox">
 </div>
-{/if}
+{/if} -->

@@ -11,9 +11,10 @@
   import Papa from 'papaparse';
 
   import UserStore from '../../stores/userStore'
+	import P5Store from '../../stores/p5Store';
+
   import { DataPoint } from '../../models/dataPoint'
   import { User } from '../../models/user'
-
 
 	import {
     Core,
@@ -27,7 +28,7 @@
 		SetPathData,
     AddListeners
 	} from "../../lib";
-	import { get } from 'svelte/store';
+	import type p5 from 'p5';
 
   let files: any = [];
   let selectedTab = "Movement";
@@ -42,31 +43,56 @@
     'Export'
   ]
 
-  let users = [];
+  let users: User[] = [];
+  let p5Instance: p5 | null = null;
+
   UserStore.subscribe(data => {
     users = data;
   });
 
+  P5Store.subscribe((value) => {
+    p5Instance = value;
+  });
+
   async function handleDropdownChange(event: any) {
-    const selectedValue = event.target.value; // Get the selected value
+    if (p5Instance) {
+      const selectedValue = event.target.value; // Get the selected value
 
-    // Load conversation.csv and parse it
-    const conversationData = await loadConversationData(selectedValue);
+      // Load floorplan.png and set it as the background
+      await loadFloorplanImage(p5Instance, selectedValue);
 
-    // Load floorplan.png and set it as the background
-    loadFloorplanImage(selectedValue);
+      const response = await fetch(`data/${selectedValue}/conversation.csv`);
+      const csvRes = await response.text();
 
-    // Load {Name}.csv files and parse them
-    const usersData = await loadUsersData(selectedValue);
+      Papa.parse(csvRes, {
+        header: true,
+        dynamicTyping: true,
+        complete: (results: any) => convertFileToUsers(results, selectedValue),
+      });
 
-    // Update the UserStore and p5.js drawing
-    updateUserDrawing(conversationData, usersData);
+      console.log("File selected: " + selectedValue);
+
+      // // Update the UserStore and p5.js drawing
+      // updateUserDrawing(usersData);
+    } else {
+      // Log properly
+      console.log("p5Instance has not been instantiated yet!");
+    }
   }
 
-  async function loadConversationData(selectedValue) {
-    // Determine the path based on the selected value
-    const path = `static/data/${selectedValue}/conversation.csv`;
+  // userList = []
+  async function loadUsersData(selectedValue: string) {
+    // 1. Load conversation data
 
+    // 2. Load each name.csv data.
+
+    // 3. Load Code CSV data.
+  }
+
+  async function loadConversationData(selectedValue: string) {
+    // Determine the path based on the selected value
+    const path = `data/${selectedValue}/conversation.csv`;
+    console.log(path)
     // Load and parse the CSV using PapaParse
     const result = await new Promise(resolve => {
       Papa.parse(path, {
@@ -79,8 +105,26 @@
     return result.data;
   }
 
+  function loadFloorplanImage(p5Instance: p5, selectedValue: string) {
+    // Determine the path based on the selected value
+    const path = `data/${selectedValue}/floorplan.png`;
+
+    console.log(path)
+
+    // Load the image into p5.js
+    // Add logic so that typescript does not complain about
+    // null possibiltiy
+    p5Instance.loadImage(path, (img) => {
+      p5Instance.floorPlan.img = img;
+      p5Instance.floorPlan.width = img.width;
+      p5Instance.floorPlan.height = img.height;
+      p5Instance.loop();
+    });
+  }
 
   const sketch: Sketch = (p5: any) => {
+    P5Store.set(p5);
+
 		p5.preload = () => {
       p5.font = p5.loadFont("/fonts/PlusJakartaSans/VariableFont_wght.ttf");
     }
@@ -153,11 +197,24 @@
         // Handle the 3 use cases in which you would want to syarnet those data in for the path.
         console.log("Data is loaded - starting to draw...")
 
-        if (p5.arrayIsLoaded(p5.core.pathList)) {
-          console.log("Path list is loaded")
+        // if (p5.arrayIsLoaded(p5.core.pathList)) {
+        //   console.log("Path list is loaded")
+        //   const setPathData = new SetPathData(p5, p5.core.codeList);
+        //   if (p5.arrayIsLoaded(p5.core.speakerList)) setPathData.setMovementAndConversation(p5.core.pathList, p5.core.speakerList);
+        //   else setPathData.setMovement(p5.core.pathList);
+        // }
+
+        if (p5.arrayIsLoaded(users)) {
+          console.log("Path list is loaded");
+          console.log(users)
           const setPathData = new SetPathData(p5, p5.core.codeList);
-          if (p5.arrayIsLoaded(p5.core.speakerList)) setPathData.setMovementAndConversation(p5.core.pathList, p5.core.speakerList);
-          else setPathData.setMovement(p5.core.pathList);
+          // if (p5.arrayIsLoaded(users)) setPathData.setMovementAndConversation(users, users);
+          if (Array.isArray(users) && users.length) {
+            console.log("Users is an array and has length")
+            setPathData.setMovementAndConversation(users, users);
+          }
+
+          else setPathData.setMovement(users);
         }
       }
 
@@ -170,15 +227,6 @@
       return p5.mouseX >= x && p5.mouseX <= x + boxWidth && p5.mouseY >= y && p5.mouseY <= y + boxHeight;
     }
 
-    function loadFloorplanImage(selectedValue: string) {
-      // Determine the path based on the selected value
-      const path = `static/data/${selectedValue}/floorplan.png`;
-
-      // Load the image into p5.js
-      p5.loadImage(path, (img: any) => {
-        p5.background(img);
-      });
-    }
 		// /**
     //  * Determines what data is loaded and calls appropriate class drawing methods for that data
     //  */
@@ -251,10 +299,10 @@
     // }
 	};
 
-  const handleDropdownChange = (event: any) => {
-    const selectedValue = event.target.value;
-    loadFloorplanImage(selectedValue);
-  }
+  // const handleDropdownChange = (event: any) => {
+  //   const selectedValue = event.target.value;
+  //   loadFloorplanImage(selectedValue);
+  // }
 
   // Function to handle file selection and data parsing
   const handleFileSelect = (event: any) => {
@@ -266,14 +314,25 @@
     Papa.parse(file, {
       header: true,
       dynamicTyping: true,
-      complete: (results: any) => handleParsingComplete(results, fileName),
+      skipEmptyLines: 'greedy',
+      transformHeader: (h) => {
+        return h.trim().toLowerCase();
+      },
+      complete: (results: any) => convertFileToUsers(results, fileName),
+      error: (error, file) => {
+        alert("Parsing error with one of your CSV file. Please make sure your file is formatted correctly as a .CSV");
+        console.log(error, file);
+      }
     });
 
     console.log("File selected: " + fileName);
   };
 
   // Function to handle data parsing completion
-  const handleParsingComplete = (results: any, fileName: string) => {
+  const convertFileToUsers = (results: any, fileName: string) => {
+    console.log('Converting file to users.')
+    console.log(results.data);
+    console.log(fileName);
     const csvData = results.data;
 
     UserStore.update(currentUsers => {
@@ -357,10 +416,10 @@
 
           <select id="select-data-dropdown" class="select select-bordered w-full max-w-xs bg-neutral" on:change={handleDropdownChange}>
             <option disabled selected>-- Select an Example --</option>
-            <option value="Example 1">Michael Jordan's Last Shot</option>
-            <option value="Example 2">Family Museum Gallery Visit</option>
-            <option value="Example 3">Classroom Science Lesson</option>
-            <option value="Example 4">Classroom Discussion</option>
+            <option value="example-1">Michael Jordan's Last Shot</option>
+            <option value="example-2">Family Museum Gallery Visit</option>
+            <option value="example-3">Classroom Science Lesson</option>
+            <option value="example-4">Classroom Discussion</option>
           </select>
         </div>
       </div>
