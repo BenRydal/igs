@@ -49,10 +49,24 @@ export class DrawMovement {
     setDraw(view, dataTrail) {
         this.isDrawingLine = false;
 
-        for (let i = 1; i < dataTrail.size; i++) {
-            const currentMovement = Array.from(dataTrail.values())[i]
-            const previousMovement = Array.from(dataTrail.values())[i - 1]
-            const comparisonPoint = this.drawUtils.createComparePoint(view, currentMovement, previousMovement, Array.from(dataTrail.keys())[i], Array.from(dataTrail.keys())[i - 1]);
+        // Convert to arrays only once
+        const dataTrailValues = Array.from(dataTrail.values());
+        const dataTrailKeys = Array.from(dataTrail.keys());
+
+        let comparisonPoint;
+        for (let i = 1, len = dataTrail.size; i < len; i++) {
+            const currentMovement = dataTrailValues[i];
+            const previousMovement = dataTrailValues[i - 1];
+
+            // Consider moving common calculations in `createAugmentPoint` and `getScaledMovementPos`
+            // out of the loop, if they are repeated.
+            comparisonPoint = this.drawUtils.createComparePoint(
+                view,
+                currentMovement,
+                previousMovement,
+                dataTrailKeys[i],
+                dataTrailKeys[i - 1]
+            );
 
             if (this.drawUtils.isVisible(comparisonPoint.cur.point, comparisonPoint.cur.pos)) {
                 if (view === this.sk.SPACETIME) this.recordDot(comparisonPoint.cur);
@@ -65,7 +79,6 @@ export class DrawMovement {
 
         this.sk.endShape(); // End shape in case still drawing
     }
-
 
     /**
      * Stops are draw as circles in floorPlan view
