@@ -1,5 +1,13 @@
 # igs
 
+Get example data genralized/working
+
+Get load data working
+
+Get conversation working
+
+Consider replacing MAP
+
 Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/master/packages/create-svelte).
 
 ## Developing
