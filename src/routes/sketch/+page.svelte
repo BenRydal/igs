@@ -46,6 +46,26 @@
 	let users: User[] = [];
 	let p5Instance: p5 | null = null;
 
+	// TODO: Deal with colours in a more dynamic way so that we can have more than 16 users
+	const colors = [
+		'#D8A7B1',
+		'#B39AB1',
+		'#9AA7B1',
+		'#A7B1B1',
+		'#A7B19A',
+		'#B1A798',
+		'#B1A7B0',
+		'#A798A7',
+		'#D9C8B3',
+		'#D9C8C4',
+		'#B3C4D9',
+		'#B3D9C8',
+		'#C8D9B3',
+		'#C4D9D2',
+		'#D9C4D2',
+		'#D2D9C4'
+	];
+
 	UserStore.subscribe((data) => {
 		users = data;
 	});
@@ -348,11 +368,7 @@
 	const convertFileToUsers = (results: any, fileName: string) => {
 		const csvData = results.data;
 
-		// Check header for x y
-		// Run Movement Data Loading
-		// console.log('+++++++++++');
-		// console.log(csvData[0]);
-
+		// TODO: add additional data tests/checks
 		if ('x' in csvData[0] && 'y' in csvData[0]) {
 			console.log('info: Movement Data');
 			UserStore.update((currentUsers) => {
@@ -364,7 +380,7 @@
 					user = users.find((user) => user.name === userName);
 
 					if (!user) {
-						user = new User(true, userName);
+						user = new User(true, userName, new Map<number, DataPoint>(), colors[users.length]);
 						users.push(user);
 					}
 
@@ -392,9 +408,6 @@
 				return users;
 			});
 		} else if ('speaker' in csvData[0] && 'talk' in csvData[0]) {
-			// console.log('info: Talk Data');
-			// console.log(csvData);
-			// console.log(csvData[0].x && csvData[0].y && csvData[0].time);
 			UserStore.update((currentUsers) => {
 				let users = [...currentUsers]; // clone the current users
 				csvData.forEach((row: any) => {
@@ -402,7 +415,7 @@
 					user = users.find((user) => user.name === row.speaker);
 
 					if (!user) {
-						user = new User(true, row.speaker);
+						user = new User(true, row.speaker, new Map<number, DataPoint>(), colors[users.length]);
 						users.push(user);
 					}
 
