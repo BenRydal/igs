@@ -123,9 +123,9 @@ export class DrawUtils {
         };
     }
 
-    getScaledConversationPos(point) {
-        const pos = this.getSharedPosValues(point);
-        const rectLength = this.sk.constrain(point.talkTurn.length / 2, 3, 175); // 3 and 175 set min and max pixel dimensions
+    getScaledConversationPos(point, time) {
+        const pos = this.getSharedPosValues(point, time);
+        const rectLength = this.sk.constrain(point.speech.length / 2, 3, 175); // 3 and 175 set min and max pixel dimensions
         return {
             timelineXPos: pos.timelineXPos,
             selTimelineXPos: pos.selTimelineXPos,

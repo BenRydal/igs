@@ -17,17 +17,33 @@ export class DrawConversation {
 
     /**
      * Organizes drawing of conversation rects
-     * @param  {Path} path
-     * @param  {[Speaker]} speakerList
+
      */
-    setData(path, speakerList) {
-        for (const point of path.conversation) {
-            const curPos = this.drawUtils.getScaledConversationPos(point);
-            if (this.isTalkTurnSelected(point.talkTurn) && this.drawUtils.isVisible(point, curPos)) {
-                const curSpeaker = this.getSpeakerFromSpeakerList(point.speaker, speakerList); // get speaker object from global list equivalent to the current speaker of point
-                if (this.testSpeakerToDraw(curSpeaker, path.name)) {
-                    if (this.sk.sketchController.getIsPathColorMode()) this.organizeRectDrawing(point, curPos, curSpeaker.color.pathMode);
-                    else this.organizeRectDrawing(point, curPos, point.codes.color);
+    setData(user) {
+        const dataTrail = user.dataTrail;
+        console.log(`Draw Conversation Set Data ========`)
+        console.log(dataTrail);
+
+        // Convert to arrays only once
+        const dataTrailValues = Array.from(dataTrail.values());
+        const dataTrailKeys = Array.from(dataTrail.keys());
+
+        //for (const point of path.conversation) {
+        for (let i = 1, len = dataTrail.size; i < len; i++) {
+            const point = dataTrailValues[i];
+            const time = dataTrailKeys[i];
+            const curPos = this.drawUtils.getScaledConversationPos(point, time);
+            // console.log(point, curPos);
+            //if (point.speech !== "" && this.isTalkTurnSelected(point.speech) && this.drawUtils.isVisible(point, curPos)) {
+            if (point.speech !== "") {
+
+                // const curSpeaker = this.getSpeakerFromSpeakerList(user.name, speakerList); // get speaker object from global list equivalent to the current speaker of point
+                const curSpeaker = user.name;
+
+                // if (this.testSpeakerToDraw(curSpeaker, user.name)) {
+                if (true) {
+                    if (this.sk.sketchController.getIsPathColorMode()) this.organizeRectDrawing(point, curPos, user.color);
+                    else this.organizeRectDrawing(point, curPos, "red");
                 }
             }
         }

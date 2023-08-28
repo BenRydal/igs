@@ -77,22 +77,22 @@
 	// Handles processing of example data. Movement/code CSV files unique to each example
 	async function handleExampleDropdown(event: any) {
 		if (p5Instance) {
+			UserStore.update((currentUsers) => {
+				return [];
+			});
 			const selectedValue = event.target.value;
 			await loadFloorplanImage(p5Instance, selectedValue);
 			await loadCSVData(`data/${selectedValue}/conversation.csv`);
 
+			console.log('==-=-=-=-=-=-=-=-=');
+			console.log(users);
+
 			switch (selectedValue) {
 				case 'example-1':
-					UserStore.update((currentUsers) => {
-						return [];
-					});
 					await loadCSVData(`data/${selectedValue}/jordan.csv`);
 					// await loadCSVData(`data/${selectedValue}/possession.csv`);
 					break;
 				case 'example-2':
-					UserStore.update((currentUsers) => {
-						return [];
-					});
 					await loadCSVData(`data/${selectedValue}/adhir.csv`);
 					await loadCSVData(`data/${selectedValue}/blake.csv`);
 					await loadCSVData(`data/${selectedValue}/jeans.csv`);
@@ -100,18 +100,18 @@
 					await loadCSVData(`data/${selectedValue}/mae.csv`);
 					break;
 				case 'example-3':
-					UserStore.update((currentUsers) => {
-						return [];
-					});
 					await loadCSVData(`data/${selectedValue}/teacher.csv`);
 					break;
 				case 'example-4':
-					UserStore.update((currentUsers) => {
-						return [];
-					});
 					await loadCSVData(`data/${selectedValue}/cassandra.csv`);
+					console.log('cass==-=-=-=-=-=-=-=-=');
+					console.log(users);
 					await loadCSVData(`data/${selectedValue}/mei.csv`);
+					console.log('mei==-=-=-=-=-=-=-=-=');
+					console.log(users);
 					await loadCSVData(`data/${selectedValue}/nathan.csv`);
+					console.log('nathan==-=-=-=-=-=-=-=-=');
+					console.log(users);
 					await loadCSVData(`data/${selectedValue}/sean.csv`);
 					await loadCSVData(`data/${selectedValue}/teacher.csv`);
 					break;
@@ -131,7 +131,10 @@
 			transformHeader: (h) => {
 				return h.trim().toLowerCase();
 			},
-			complete: (results: any) => convertFileToUsers(results, path)
+			complete: (results: any) => {
+				convertFileToUsers(results, path);
+				if (p5Instance) p5Instance.loop();
+			}
 		});
 	}
 
@@ -245,8 +248,8 @@
 					const setPathData = new SetPathData(p5, p5.core.codeList);
 					if (p5.arrayIsLoaded(users)) {
 						// console.log('Users is an array and has length');
-						setPathData.setMovement(users);
-						//setPathData.setMovementAndConversation(users, users);
+						//setPathData.setMovement(users);
+						setPathData.setMovementAndConversation(users);
 					}
 					//  else setPathData.setMovement(users);
 				}
@@ -417,39 +420,52 @@
 		if ('x' in csvData[0] && 'y' in csvData[0]) {
 			console.log(`Length of data: ${csvData.length}`);
 
-			if (csvData.length > 1500) {
-				csvData = normalizeMovementData(csvData);
-			}
+			// if (csvData.length > 1500) {
+			// 	csvData = normalizeMovementData(csvData);
+			// }
 			console.log(`Length of data after normalization: ${csvData.length}`);
 
 			UserStore.update((currentUsers) => {
 				let users = [...currentUsers]; // clone the current users
-				// csvData.forEach((row: any) => {
-				csvData
-					.filter((_: any, index: any) => index % 5 === 0)
-					.forEach((row: any) => {
-						let user = null;
-						// Movement Files
-						const userName = fileName.split('/')[2].slice(0, -4);
-						user = users.find((user) => user.name === userName);
+				csvData.forEach((row: any) => {
+					let user = null;
+					// Movement Files
+					const userName = fileName.split('/')[2].slice(0, -4);
+					user = users.find((user) => user.name == userName.toLowerCase());
+					// console.log('HI=================');
+					// users.forEach((user) => {
+					// 	console.log(user.name == userName.toLowerCase());
+					// });
 
-						if (!user) {
-							user = new User(true, userName, new Map<number, DataPoint>(), colors[users.length]);
-							users.push(user);
-						}
+					// console.log(`User was found to be:`);
+					// console.log(user);
 
-						if (user.dataTrail.has(row.time)) {
-							user.dataTrail.get(row.time).x = row.x;
-							user.dataTrail.get(row.time).y = row.y;
-						} else {
-							user.dataTrail.set(row.time, new DataPoint('', row.x, row.y));
-						}
+					if (!user) {
+						// console.log(`users are:`);
+						// console.log(users);
+						// console.log('User was not found in movement data CSV. Creating a new user.');
+						// console.log(`username is ${userName.toLowerCase()}`);
 
-						// p5Instance.core.updateMovement(stringName, user.dataTrail, []);
-						p5Instance.core.setTotalTime(row.time);
-					});
+						user = new User(
+							true,
+							userName.toLowerCase(),
+							new Map<number, DataPoint>(),
+							colors[users.length]
+						);
+						users.push(user);
+					}
 
-				p5Instance.loop();
+					if (user.dataTrail.has(row.time)) {
+						user.dataTrail.get(row.time).x = row.x;
+						user.dataTrail.get(row.time).y = row.y;
+					} else {
+						user.dataTrail.set(row.time, new DataPoint('', row.x, row.y));
+					}
+
+					// p5Instance.core.updateMovement(stringName, user.dataTrail, []);
+					p5Instance.core.setTotalTime(row.time);
+				});
+
 				return users;
 			});
 		} else if ('code' in csvData[0] && 'start' in csvData[0] && 'end' in csvData[0]) {
@@ -463,17 +479,27 @@
 				return users;
 			});
 		} else if ('speaker' in csvData[0] && 'talk' in csvData[0]) {
+			// console.log('info: loading conversation data');
 			UserStore.update((currentUsers) => {
 				let users = [...currentUsers]; // clone the current users
 				csvData.forEach((row: any) => {
 					let user = null;
-					user = users.find((user) => user.name === row.speaker);
+					// TODO: Find the correct user as the user name and speaker aren't aligned for conversation & movement.
+					user = users.find((user) => user.name == row.speaker.toLowerCase());
+					// console.log('HI=================');
+					// console.log(users);
 
 					if (!user) {
-						user = new User(true, row.speaker, new Map<number, DataPoint>(), colors[users.length]);
+						// console.log('User was not found in conversation data CSV. Creating a new user.');
+						// console.log(`username is ${row.speaker.toLowerCase()}`);
+						user = new User(
+							true,
+							row.speaker.toLowerCase(),
+							new Map<number, DataPoint>(),
+							colors[users.length]
+						);
 						users.push(user);
 					}
-
 					user.dataTrail.set(row.time, new DataPoint(row.talk, 0, 0));
 				});
 
