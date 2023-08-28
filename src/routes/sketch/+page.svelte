@@ -222,9 +222,9 @@
 				(p5.sketchController.getIsAnimate() && !p5.sketchController.getIsAnimatePause()) ||
 				p5.videoController.isLoadedAndIsPlaying() ||
 				p5.handle3D.getIsTransitioning()
-			)
+			) {
 				p5.loop();
-			else p5.noLoop();
+			} else p5.noLoop();
 		};
 
 		p5.dataIsLoaded = (data: any) => {
@@ -395,6 +395,7 @@
 					p5Instance.core.setTotalTime(row.time);
 				});
 
+				p5Instance.loop();
 				return users;
 			});
 		} else if ('code' in csvData[0] && 'start' in csvData[0] && 'end' in csvData[0]) {
