@@ -15,7 +15,7 @@ export class DrawMovement {
         this.isDrawingLine = false;
         this.style = {
             shade: null,
-            thinStroke: 1,
+            thinStroke: 2,
             fatStroke: 9,
             stopSize: 10
         }

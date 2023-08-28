@@ -20,6 +20,7 @@ export class SetPathData {
     setMovement(users) {
         const drawMovement = new DrawMovement(this.sk, this.drawUtils);
         for (const user of users) {
+            console.log(user.enabled)
             if (user.enabled) drawMovement.setData(user);
         }
         // for (const path of dataTrail) {

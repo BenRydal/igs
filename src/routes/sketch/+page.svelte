@@ -79,7 +79,7 @@
 		if (p5Instance) {
 			const selectedValue = event.target.value;
 			await loadFloorplanImage(p5Instance, selectedValue);
-			// await loadCSVData(`data/${selectedValue}/conversation.csv`);
+			await loadCSVData(`data/${selectedValue}/conversation.csv`);
 
 			switch (selectedValue) {
 				case 'example-1':
@@ -364,36 +364,90 @@
 		// console.log('File selected: ' + fileName);
 	};
 
+	const normalizeMovementData = (csvData: any) => {
+		// Remove duplicate points based on x and y
+		const uniqueData = csvData.filter(
+			(value: any, index: any, self: any) =>
+				self.findIndex((item: any) => item.x === value.x && item.y === value.y) === index
+		);
+
+		// Group data by second
+		const groupedData = new Map<number, any[]>();
+
+		uniqueData.forEach((row: any) => {
+			const second = Math.floor(row.time);
+			if (!groupedData.has(second)) {
+				groupedData.set(second, []);
+			}
+			groupedData.get(second).push(row);
+		});
+
+		// Calculate averages and create new data points
+		const normalizedData: any[] = [];
+
+		groupedData.forEach((dataPoints, second) => {
+			const totalCount = dataPoints.length;
+			const timeInterval = 1 / totalCount;
+
+			let averageX = 0;
+			let averageY = 0;
+
+			dataPoints.forEach((point: any) => {
+				averageX += point.x;
+				averageY += point.y;
+			});
+
+			averageX /= totalCount;
+			averageY /= totalCount;
+
+			for (let i = 0; i < totalCount; i++) {
+				const normalizedTime = second + i * timeInterval;
+				normalizedData.push({ time: normalizedTime, x: averageX, y: averageY });
+			}
+		});
+
+		return normalizedData;
+	};
+
 	// Function to handle data parsing completion
 	const convertFileToUsers = (results: any, fileName: string) => {
-		const csvData = results.data;
+		let csvData = results.data;
 
 		// TODO: add additional data tests/checks
 		if ('x' in csvData[0] && 'y' in csvData[0]) {
-			console.log('info: Movement Data');
+			console.log(`Length of data: ${csvData.length}`);
+
+			if (csvData.length > 1500) {
+				csvData = normalizeMovementData(csvData);
+			}
+			console.log(`Length of data after normalization: ${csvData.length}`);
+
 			UserStore.update((currentUsers) => {
 				let users = [...currentUsers]; // clone the current users
-				csvData.forEach((row: any) => {
-					let user = null;
-					// Movement Files
-					const userName = fileName.split('/')[2].slice(0, -4);
-					user = users.find((user) => user.name === userName);
+				// csvData.forEach((row: any) => {
+				csvData
+					.filter((_: any, index: any) => index % 5 === 0)
+					.forEach((row: any) => {
+						let user = null;
+						// Movement Files
+						const userName = fileName.split('/')[2].slice(0, -4);
+						user = users.find((user) => user.name === userName);
 
-					if (!user) {
-						user = new User(true, userName, new Map<number, DataPoint>(), colors[users.length]);
-						users.push(user);
-					}
+						if (!user) {
+							user = new User(true, userName, new Map<number, DataPoint>(), colors[users.length]);
+							users.push(user);
+						}
 
-					if (user.dataTrail.has(row.time)) {
-						user.dataTrail.get(row.time).x = row.x;
-						user.dataTrail.get(row.time).y = row.y;
-					} else {
-						user.dataTrail.set(row.time, new DataPoint('', row.x, row.y));
-					}
+						if (user.dataTrail.has(row.time)) {
+							user.dataTrail.get(row.time).x = row.x;
+							user.dataTrail.get(row.time).y = row.y;
+						} else {
+							user.dataTrail.set(row.time, new DataPoint('', row.x, row.y));
+						}
 
-					// p5Instance.core.updateMovement(stringName, user.dataTrail, []);
-					p5Instance.core.setTotalTime(row.time);
-				});
+						// p5Instance.core.updateMovement(stringName, user.dataTrail, []);
+						p5Instance.core.setTotalTime(row.time);
+					});
 
 				p5Instance.loop();
 				return users;
@@ -425,6 +479,12 @@
 
 				return users;
 			});
+		}
+	};
+
+	const handleCheckboxChange = () => {
+		if (p5Instance) {
+			p5Instance.loop();
 		}
 	};
 </script>
@@ -503,7 +563,13 @@
 							{#each $UserStore as user}
 								<div class="carousel-item align-middle inline-block">
 									<!-- When the below checkbox gets updated, update the path as well if it's selected -->
-									<input type="checkbox" class="checkbox" bind:checked={user.enabled} />
+									<!-- <input type="checkbox" class="checkbox" bind:checked={user.enabled} /> -->
+									<input
+										type="checkbox"
+										class="checkbox"
+										bind:checked={user.enabled}
+										on:change={handleCheckboxChange}
+									/>
 									<label class="m-5">{user.name}</label>
 								</div>
 							{/each}
