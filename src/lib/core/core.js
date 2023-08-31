@@ -64,8 +64,6 @@ export class Core {
         // });
         // this.userList.push(new User(true, pathName, this.getNextColorInList(this.userList.length), dataTrail));
         // this.userList = this.sortByName(this.userList);
-        // console.log('======================')
-        // console.log(movementPointArray)
         this.setTotalTime(movementPointArray);
         //this.parseCodes.resetCounters();
         // this.sk.domController.updateCheckboxes("movement");

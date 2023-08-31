@@ -5,15 +5,17 @@ export class User {
 	name: string; // Name of the user
 	color: string; // Color of the user's trail
 
-	dataTrail: Map<number, DataPoint>; // Data trail of the user
+	// dataTrail: Map<number, DataPoint>; // Data trail of the user
+	dataTrail: DataPoint[]; // Data trail of the user
 	segments: string[];
 
 	constructor(
-		enabled = true,
-		name = '',
-		dataTrail: Map<number, DataPoint> = new Map<number, DataPoint>(),
+		// dataTrail: Map<number, DataPoint> = new Map<number, DataPoint>(),
+		dataTrail: DataPoint[],
 		color: string,
-		segments: string[] = []
+		segments: string[] = [],
+		enabled = true,
+		name = ''
 	) {
 		this.enabled = enabled;
 		this.name = name;

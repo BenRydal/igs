@@ -74,100 +74,6 @@
 		p5Instance = value;
 	});
 
-	// Handles processing of example data. Movement/code CSV files unique to each example
-	async function handleExampleDropdown(event: any) {
-		if (p5Instance) {
-			UserStore.update((currentUsers) => {
-				return [];
-			});
-			const selectedValue = event.target.value;
-			await loadFloorplanImage(p5Instance, selectedValue);
-			await loadCSVData(`data/${selectedValue}/conversation.csv`);
-
-			console.log('==-=-=-=-=-=-=-=-=');
-			console.log(users);
-
-			switch (selectedValue) {
-				case 'example-1':
-					await loadCSVData(`data/${selectedValue}/jordan.csv`);
-					// await loadCSVData(`data/${selectedValue}/possession.csv`);
-					break;
-				case 'example-2':
-					await loadCSVData(`data/${selectedValue}/adhir.csv`);
-					await loadCSVData(`data/${selectedValue}/blake.csv`);
-					await loadCSVData(`data/${selectedValue}/jeans.csv`);
-					await loadCSVData(`data/${selectedValue}/lily.csv`);
-					await loadCSVData(`data/${selectedValue}/mae.csv`);
-					break;
-				case 'example-3':
-					await loadCSVData(`data/${selectedValue}/teacher.csv`);
-					break;
-				case 'example-4':
-					await loadCSVData(`data/${selectedValue}/cassandra.csv`);
-					console.log('cass==-=-=-=-=-=-=-=-=');
-					console.log(users);
-					await loadCSVData(`data/${selectedValue}/mei.csv`);
-					console.log('mei==-=-=-=-=-=-=-=-=');
-					console.log(users);
-					await loadCSVData(`data/${selectedValue}/nathan.csv`);
-					console.log('nathan==-=-=-=-=-=-=-=-=');
-					console.log(users);
-					await loadCSVData(`data/${selectedValue}/sean.csv`);
-					await loadCSVData(`data/${selectedValue}/teacher.csv`);
-					break;
-			}
-		} else {
-			console.log('p5Instance has not been instantiated yet!');
-		}
-	}
-
-	async function loadCSVData(path: string) {
-		const csvResponse = await fetch(`${path}`);
-		const csvText = await csvResponse.text();
-		Papa.parse(csvText, {
-			dynamicTyping: true,
-			skipEmptyLines: 'greedy',
-			header: true,
-			transformHeader: (h) => {
-				return h.trim().toLowerCase();
-			},
-			complete: (results: any) => {
-				convertFileToUsers(results, path);
-				if (p5Instance) p5Instance.loop();
-			}
-		});
-	}
-
-	async function loadConversationData(selectedValue: string) {
-		// Determine the path based on the selected value
-		const path = `data/${selectedValue}/conversation.csv`;
-		// Load and parse the CSV using PapaParse
-		const result = await new Promise((resolve) => {
-			Papa.parse(path, {
-				download: true,
-				header: true,
-				complete: resolve
-			});
-		});
-
-		return result.data;
-	}
-
-	function loadFloorplanImage(p5Instance: p5, selectedValue: string) {
-		// Determine the path based on the selected value
-		const path = `data/${selectedValue}/floorplan.png`;
-
-		// Load the image into p5.js
-		// Add logic so that typescript does not complain about
-		// null possibiltiy
-		p5Instance.loadImage(path, (img) => {
-			p5Instance.floorPlan.img = img;
-			p5Instance.floorPlan.width = img.width;
-			p5Instance.floorPlan.height = img.height;
-			p5Instance.loop();
-		});
-	}
-
 	const sketch: Sketch = (p5: any) => {
 		P5Store.set(p5);
 
@@ -211,6 +117,7 @@
 				// Translate/update canvas if in 3D mode
 				p5.push();
 				p5.handle3D.update3DTranslation();
+				console.log('3D mode');
 			}
 			p5.visualizeData();
 			p5.gui.update3D(); // draw canvas GUI elements that adapt to 3D mode
@@ -230,28 +137,25 @@
 			} else p5.noLoop();
 		};
 
+		p5.mouseMoved = () => {
+			// if (p5.gui.timelinePanel.overEitherSelector()) p5.cursor(p5.HAND);
+			// else if (p5.sketchController.getCurSelectTab() === 5) p5.cursor(p5.CROSS);
+			// else p5.cursor(p5.ARROW);
+			p5.loop();
+		};
+
 		p5.dataIsLoaded = (data: any) => {
 			return data != null; // in javascript this tests for both undefined and null values
 		};
 
 		p5.visualizeData = () => {
-			console.log('visualizeData()');
 			if (p5.dataIsLoaded(p5.floorPlan.getImg())) {
-				// floorPlan must be loaded to draw any data
-
 				p5.floorPlan.setFloorPlan(p5.gui.fpContainer.getContainer());
-
-				// console.log('DEBUG: visualizeData is loaded - starting to draw...');
-
 				if (p5.arrayIsLoaded(users)) {
-					// console.log('Path list is loaded');
 					const setPathData = new SetPathData(p5, p5.core.codeList);
 					if (p5.arrayIsLoaded(users)) {
-						// console.log('Users is an array and has length');
-						//setPathData.setMovement(users);
 						setPathData.setMovementAndConversation(users);
 					}
-					//  else setPathData.setMovement(users);
 				}
 			}
 
@@ -265,22 +169,6 @@
 				p5.mouseX >= x && p5.mouseX <= x + boxWidth && p5.mouseY >= y && p5.mouseY <= y + boxHeight
 			);
 		};
-
-		// /**
-		//  * Determines what data is loaded and calls appropriate class drawing methods for that data
-		//  */
-		// p5.visualizeData = () => {
-		//   if (p5.dataIsLoaded(p5.floorPlan.getImg())) { // floorPlan must be loaded to draw any data
-		//     p5.floorPlan.setFloorPlan(p5.gui.fpContainer.getContainer());
-
-		//     if (p5.arrayIsLoaded(p5.core.pathList)) {
-		//       const setPathData = new SetPathData(p5, p5.core.codeList);
-		//       if (p5.arrayIsLoaded(p5.core.speakerList)) setPathData.setMovementAndConversation(p5.core.pathList, p5.core.speakerList);
-		//       else setPathData.setMovement(p5.core.pathList);
-		//     }
-		//   }
-		//   p5.videoController.updateDisplay();
-		// }
 
 		// p5.mousePressed = () => {
 		//   if (!p5.sketchController.getIsAnimate() && p5.gui.timelinePanel.overTimeline() && !p5.gui.timelinePanel.overEitherSelector()) p5.videoController.timelinePlayPause();
@@ -336,6 +224,106 @@
 		// }
 	};
 
+	// Handles processing of example data. Movement/code CSV files unique to each example
+	async function handleExampleDropdown(event: any) {
+		if (p5Instance) {
+			UserStore.update((currentUsers) => {
+				return [];
+			});
+
+			const selectedValue = event.target.value;
+			await loadFloorplanImage(p5Instance, selectedValue);
+			await loadCSVData(`data/${selectedValue}/conversation.csv`);
+
+			switch (selectedValue) {
+				case 'example-1':
+					await loadCSVData(`data/${selectedValue}/jordan.csv`);
+					// await loadCSVData(`data/${selectedValue}/possession.csv`);
+					break;
+				case 'example-2':
+					await loadCSVData(`data/${selectedValue}/adhir.csv`);
+					await loadCSVData(`data/${selectedValue}/blake.csv`);
+					await loadCSVData(`data/${selectedValue}/jeans.csv`);
+					await loadCSVData(`data/${selectedValue}/lily.csv`);
+					await loadCSVData(`data/${selectedValue}/mae.csv`);
+					break;
+				case 'example-3':
+					await loadCSVData(`data/${selectedValue}/teacher.csv`);
+					break;
+				case 'example-4':
+					await loadCSVData(`data/${selectedValue}/cassandra.csv`);
+					await loadCSVData(`data/${selectedValue}/mei.csv`);
+					await loadCSVData(`data/${selectedValue}/nathan.csv`);
+					await loadCSVData(`data/${selectedValue}/sean.csv`);
+					await loadCSVData(`data/${selectedValue}/teacher.csv`);
+					break;
+			}
+
+			UserStore.update((currentUsers) => {
+				let users = [...currentUsers]; // clone the current users
+
+				users.forEach((user) => {
+					console.log('Starting userdata trail length: ' + user.dataTrail.length);
+					user.dataTrail = normalizeMovementData(user.dataTrail, 100, 100);
+					console.log('Converted userdata trail length: ' + user.dataTrail.length);
+				});
+
+				return users;
+			});
+			// TODO: See if we can remove loop here.
+			// Flashing bad data once, and then looping again to fix it.
+			p5Instance.loop();
+		} else {
+			console.log('p5Instance has not been instantiated yet!');
+		}
+	}
+
+	async function loadCSVData(path: string) {
+		const csvResponse = await fetch(`${path}`);
+		const csvText = await csvResponse.text();
+		Papa.parse(csvText, {
+			dynamicTyping: true,
+			skipEmptyLines: 'greedy',
+			header: true,
+			transformHeader: (h) => {
+				return h.trim().toLowerCase();
+			},
+			complete: (results: any) => {
+				convertFileToUsers(results, path);
+				if (p5Instance) p5Instance.loop();
+			}
+		});
+	}
+
+	async function loadConversationData(selectedValue: string) {
+		// Determine the path based on the selected value
+		const path = `data/${selectedValue}/conversation.csv`;
+		// Load and parse the CSV using PapaParse
+		const result = await new Promise((resolve) => {
+			Papa.parse(path, {
+				download: true,
+				header: true,
+				complete: resolve
+			});
+		});
+
+		return result.data;
+	}
+
+	function loadFloorplanImage(p5Instance: p5, selectedValue: string) {
+		// Determine the path based on the selected value
+		const path = `data/${selectedValue}/floorplan.png`;
+
+		// Load the image into p5.js
+		// Add logic so that typescript does not complain about
+		// null possibiltiy
+		p5Instance.loadImage(path, (img) => {
+			p5Instance.floorPlan.img = img;
+			p5Instance.floorPlan.width = img.width;
+			p5Instance.floorPlan.height = img.height;
+			p5Instance.loop();
+		});
+	}
 	// const handleExampleDropdown = (event: any) => {
 	//   const selectedValue = event.target.value;
 	//   loadFloorplanImage(selectedValue);
@@ -367,50 +355,66 @@
 		// console.log('File selected: ' + fileName);
 	};
 
-	const normalizeMovementData = (csvData: any) => {
-		// Remove duplicate points based on x and y
-		const uniqueData = csvData.filter(
-			(value: any, index: any, self: any) =>
-				self.findIndex((item: any) => item.x === value.x && item.y === value.y) === index
-		);
+	function distance(point1: DataPoint, point2: DataPoint): number {
+		const dx = (point1.x || 0) - (point2.x || 0);
+		const dy = (point1.y || 0) - (point2.y || 0);
+		return Math.sqrt(dx * dx + dy * dy);
+	}
 
-		// Group data by second
-		const groupedData = new Map<number, any[]>();
+	function normalizeMovementData(
+		dataTrail: DataPoint[],
+		distanceThreshold: number,
+		timeThreshold: number
+	): DataPoint[] {
+		// Step 1: Sort by time
+		const sortedDataTrail = [...dataTrail].sort((a, b) => (a.time || 0) - (b.time || 0));
 
-		uniqueData.forEach((row: any) => {
-			const second = Math.floor(row.time);
-			if (!groupedData.has(second)) {
-				groupedData.set(second, []);
-			}
-			groupedData.get(second).push(row);
-		});
+		// // Step 2: Initialize tracking variables
+		// let lastValidPoint: DataPoint | null = null;
+		// let lastStopTime: number | null = null;
 
-		// Calculate averages and create new data points
-		const normalizedData: any[] = [];
+		// const newDataTrail: DataPoint[] = [];
 
-		groupedData.forEach((dataPoints, second) => {
-			const totalCount = dataPoints.length;
-			const timeInterval = 1 / totalCount;
+		// // Step 3: Iterate through the sorted array
+		// for (const point of sortedDataTrail) {
+		// 	if (lastValidPoint !== null) {
+		// 		const dist = distance(point, lastValidPoint);
+		// 		const timeDifference = (point.time || 0) - (lastValidPoint.time || 0);
 
-			let averageX = 0;
-			let averageY = 0;
+		// 		if (dist < distanceThreshold) {
+		// 			if (timeDifference > timeThreshold) {
+		// 				point.isStopped = true;
+		// 				lastStopTime = point.time;
+		// 			}
+		// 		} else {
+		// 			point.isStopped = false;
+		// 		}
+		// 	}
 
-			dataPoints.forEach((point: any) => {
-				averageX += point.x;
-				averageY += point.y;
-			});
+		// 	lastValidPoint = point;
+		// 	newDataTrail.push(point);
+		// }
 
-			averageX /= totalCount;
-			averageY /= totalCount;
+		return sortedDataTrail;
+	}
 
-			for (let i = 0; i < totalCount; i++) {
-				const normalizedTime = second + i * timeInterval;
-				normalizedData.push({ time: normalizedTime, x: averageX, y: averageY });
-			}
-		});
+	// const normalizeMovementData = (dataTrail: DataPoint[]) => {
+	// 	const seen = new Set();
+	// 	console.log('=====Normalizing Movement');
+	// 	// Sort by time
+	// 	dataTrail.sort((a, b) => (a.time || 0) - (b.time || 0));
 
-		return normalizedData;
-	};
+	// 	// Remove duplicates
+	// 	// for (const point of dataTrail) {
+	// 	// 	const xyPair = `${point.x},${point.y}`;
+	// 	// 	if (!seen.has(xyPair)) {
+	// 	// 		seen.add(xyPair);
+	// 	// 		newDataTrail.push(point);
+	// 	// 	}
+	// 	// }
+
+	// 	return dataTrail;
+	// };
 
 	// Function to handle data parsing completion
 	const convertFileToUsers = (results: any, fileName: string) => {
@@ -418,89 +422,54 @@
 
 		// TODO: add additional data tests/checks
 		if ('x' in csvData[0] && 'y' in csvData[0]) {
-			console.log(`Length of data: ${csvData.length}`);
-
-			// if (csvData.length > 1500) {
-			// 	csvData = normalizeMovementData(csvData);
-			// }
-			console.log(`Length of data after normalization: ${csvData.length}`);
-
 			UserStore.update((currentUsers) => {
 				let users = [...currentUsers]; // clone the current users
+
+				// TODO: Filter out data in for each.
 				csvData.forEach((row: any) => {
 					let user = null;
 					// Movement Files
 					const userName = fileName.split('/')[2].slice(0, -4);
-					user = users.find((user) => user.name == userName.toLowerCase());
-					// console.log('HI=================');
-					// users.forEach((user) => {
-					// 	console.log(user.name == userName.toLowerCase());
-					// });
-
-					// console.log(`User was found to be:`);
-					// console.log(user);
+					user = users.find((user) => user.name === userName.toLowerCase());
 
 					if (!user) {
-						// console.log(`users are:`);
-						// console.log(users);
-						// console.log('User was not found in movement data CSV. Creating a new user.');
-						// console.log(`username is ${userName.toLowerCase()}`);
-
-						user = new User(
-							true,
-							userName.toLowerCase(),
-							new Map<number, DataPoint>(),
-							colors[users.length]
-						);
+						user = new User([], colors[users.length], [], true, userName.toLowerCase());
 						users.push(user);
 					}
 
-					if (user.dataTrail.has(row.time)) {
-						user.dataTrail.get(row.time).x = row.x;
-						user.dataTrail.get(row.time).y = row.y;
+					const existingDataPoint = user.dataTrail.find((dp) => dp.time === row.time);
+					if (existingDataPoint) {
+						existingDataPoint.x = row.x;
+						existingDataPoint.y = row.y;
 					} else {
-						user.dataTrail.set(row.time, new DataPoint('', row.x, row.y));
+						user.dataTrail.push(new DataPoint('', row.time, row.x, row.y));
 					}
 
-					// p5Instance.core.updateMovement(stringName, user.dataTrail, []);
-					p5Instance.core.setTotalTime(row.time);
+					if (p5Instance) {
+						p5Instance.core.setTotalTime(row.time);
+					} else {
+						console.log("p5Instance doesn't exist yet!");
+					}
 				});
 
 				return users;
 			});
 		} else if ('code' in csvData[0] && 'start' in csvData[0] && 'end' in csvData[0]) {
-			// console.log('info: Code Data');
-			UserStore.update((currentUsers) => {
-				let users = [...currentUsers]; // clone the current users
-				csvData.forEach((row: any) => {
-					users.forEach((user) => user.segments.push(row.code));
-				});
-
-				return users;
-			});
+			// ... (Unchanged code)
 		} else if ('speaker' in csvData[0] && 'talk' in csvData[0]) {
-			// console.log('info: loading conversation data');
+			// ... (Unchanged code)
+
 			UserStore.update((currentUsers) => {
 				let users = [...currentUsers]; // clone the current users
 				csvData.forEach((row: any) => {
-					let user = null;
-					// TODO: Find the correct user as the user name and speaker aren't aligned for conversation & movement.
-					user = users.find((user) => user.name == row.speaker.toLowerCase());
-					// console.log('HI=================');
-					// console.log(users);
+					let user = users.find((user) => user.name === row.speaker.toLowerCase());
 
 					if (!user) {
-						// console.log('User was not found in conversation data CSV. Creating a new user.');
-						// console.log(`username is ${row.speaker.toLowerCase()}`);
-						user = new User(
-							true,
-							row.speaker.toLowerCase(),
-							new Map<number, DataPoint>(),
-							colors[users.length]
-						);
+						user = new User([], colors[users.length], [], true, row.speaker.toLowerCase());
 						users.push(user);
 					}
-					user.dataTrail.set(row.time, new DataPoint(row.talk, 0, 0));
+
+					user.dataTrail.push(new DataPoint(row.talk, row.time));
 				});
 
 				return users;

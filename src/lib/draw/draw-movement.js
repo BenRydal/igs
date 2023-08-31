@@ -26,8 +26,8 @@ export class DrawMovement {
         this.sk.noFill();
         this.sk.noStroke();
         this.style.shade = user.color;
-        this.setDraw(this.sk.PLAN, user.dataTrail);
-        this.setDraw(this.sk.SPACETIME, user.dataTrail);
+        this.setDraw(this.sk.PLAN, user.dataTrail, user);
+        this.setDraw(this.sk.SPACETIME, user.dataTrail, user);
         if (this.dot !== null) this.drawDot(this.dot);
     }
 
@@ -46,26 +46,27 @@ export class DrawMovement {
     //     this.sk.endShape(); // end shape in case still drawing
     // }
 
-    setDraw(view, dataTrail) {
+    setDraw(view, dataTrail, user) {
         this.isDrawingLine = false;
 
-        // Convert to arrays only once
-        const dataTrailValues = Array.from(dataTrail.values());
-        const dataTrailKeys = Array.from(dataTrail.keys());
+        for (let i = 1; i < dataTrail.length; i++) {
+            const currentMovement = dataTrail[i];
+            const previousMovement = dataTrail[i - 1];
 
-        let comparisonPoint;
-        for (let i = 1, len = dataTrail.size; i < len; i++) {
-            const currentMovement = dataTrailValues[i];
-            const previousMovement = dataTrailValues[i - 1];
+            // TODO: remove in future, or to refactor in a better way 
+            // to handle this edge case
+            if (currentMovement.x === null) continue;
 
-            // Consider moving common calculations in `createAugmentPoint` and `getScaledMovementPos`
-            // out of the loop, if they are repeated.
-            comparisonPoint = this.drawUtils.createComparePoint(
+            // Directly use the time field from each DataPoint object
+            const currentTime = currentMovement.time || 0;
+            const previousTime = previousMovement.time || 0;
+
+            let comparisonPoint = this.drawUtils.createComparePoint(
                 view,
                 currentMovement,
                 previousMovement,
-                dataTrailKeys[i],
-                dataTrailKeys[i - 1]
+                currentTime,
+                previousTime
             );
 
             if (this.drawUtils.isVisible(comparisonPoint.cur.point, comparisonPoint.cur.pos)) {
@@ -79,6 +80,7 @@ export class DrawMovement {
 
         this.sk.endShape(); // End shape in case still drawing
     }
+
 
     /**
      * Stops are draw as circles in floorPlan view

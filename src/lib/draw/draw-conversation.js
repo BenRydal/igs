@@ -21,25 +21,20 @@ export class DrawConversation {
      */
     setData(user) {
         const dataTrail = user.dataTrail;
-        console.log(`Draw Conversation Set Data ========`)
-        console.log(dataTrail);
 
-        // Convert to arrays only once
-        const dataTrailValues = Array.from(dataTrail.values());
-        const dataTrailKeys = Array.from(dataTrail.keys());
+        for (let i = 1; i < dataTrail.length; i++) {
+            const point = dataTrail[i];
+            const time = point.time || 0; // Directly use the time field from each DataPoint object
 
-        //for (const point of path.conversation) {
-        for (let i = 1, len = dataTrail.size; i < len; i++) {
-            const point = dataTrailValues[i];
-            const time = dataTrailKeys[i];
+            if (!point.speech) continue;
+
             const curPos = this.drawUtils.getScaledConversationPos(point, time);
-            // console.log(point, curPos);
-            //if (point.speech !== "" && this.isTalkTurnSelected(point.speech) && this.drawUtils.isVisible(point, curPos)) {
-            if (point.speech !== "") {
 
+            if (point.speech !== "") {
                 // const curSpeaker = this.getSpeakerFromSpeakerList(user.name, speakerList); // get speaker object from global list equivalent to the current speaker of point
                 const curSpeaker = user.name;
 
+                // TODO: Fix the true boolean to reflect what needs to happen here
                 // if (this.testSpeakerToDraw(curSpeaker, user.name)) {
                 if (true) {
                     if (this.sk.sketchController.getIsPathColorMode()) this.organizeRectDrawing(point, curPos, user.color);
@@ -48,6 +43,7 @@ export class DrawConversation {
             }
         }
     }
+
     /**
      * Draws single textbox for user selected conversation
      * NOTE: Must be translated 1 pixel to show text above all other visual elements with WEBGL renderer
@@ -84,8 +80,8 @@ export class DrawConversation {
      * NOTE: if recordConversationBubble is called, that method also sets new strokeWeight to highlight the curRect
      */
     over2DRects(point, curPos) {
-        if (this.sk.overRect(curPos.floorPlanXPos, curPos.adjustYPos, this.rectPixelWidth, curPos.rectLength)) this.recordConversationBubble(point, this.sk.PLAN);
-        else if (this.sk.overRect(curPos.selTimelineXPos, curPos.adjustYPos, this.rectPixelWidth, curPos.rectLength)) this.recordConversationBubble(point, this.sk.SPACETIME);
+        if (this.sk.overRect(curPos.floorPlanXPos, curPos.adjustYPos, this.rectPixelWidth, curPos.rectLength)) this.recordConversationBubble(point.speech, this.sk.PLAN);
+        else if (this.sk.overRect(curPos.selTimelineXPos, curPos.adjustYPos, this.rectPixelWidth, curPos.rectLength)) this.recordConversationBubble(point.speech, this.sk.SPACETIME);
     }
     /**
      * 2D and 3D floorplan rect drawing differs in the value of adjustYPos and positive/negative value of width/height parameters
@@ -118,6 +114,7 @@ export class DrawConversation {
      * @param  {Integer} view
      */
     recordConversationBubble(pointToDraw, view) {
+        console.log(pointToDraw);
         this.conversationBubble.isSelected = true;
         this.conversationBubble.point = pointToDraw;
         this.conversationBubble.view = view;
@@ -137,7 +134,8 @@ export class DrawConversation {
         this.sk.rect(textBox.xPos - textBox.boxSpacing, textBox.adjustYPos - textBox.boxSpacing, textBox.width + 2 * textBox.boxSpacing, textBox.height + (2 * textBox.boxSpacing));
         // Draw Text
         this.sk.fill(0);
-        this.sk.text(point.speaker + ": " + point.talkTurn, textBox.xPos, textBox.adjustYPos, textBox.width, textBox.height);
+        this.sk.text(point, textBox.xPos, textBox.adjustYPos, textBox.width, textBox.height);
+        //this.sk.text(point.speaker + ": " + point.talkTurn, textBox.xPos, textBox.adjustYPos, textBox.width, textBox.height);
         // Cartoon bubble lines
         this.sk.stroke(255);
         this.sk.strokeWeight(2);
