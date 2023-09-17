@@ -19,6 +19,6 @@ export class ParseConversation {
 
     clear() {
         this.parsedFileArray = [];
-        this.sk.core.clearConversation();
+        // this.sk.core.clearConversation();
     }
 }

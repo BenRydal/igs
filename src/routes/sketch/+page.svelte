@@ -1,60 +1,33 @@
 <script lang="ts">
+	import P5, { type Sketch } from 'p5-svelte';
+	import type p5 from 'p5';
 	import MdHelpOutline from 'svelte-icons/md/MdHelpOutline.svelte';
 	import MdCloudUpload from 'svelte-icons/md/MdCloudUpload.svelte';
 	import MdCloudDownload from 'svelte-icons/md/MdCloudDownload.svelte';
 	import MdRotateLeft from 'svelte-icons/md/MdRotateLeft.svelte';
 	import MdRotateRight from 'svelte-icons/md/MdRotateRight.svelte';
-	import MdMenu from 'svelte-icons/md/MdMenu.svelte';
 	import Md3DRotation from 'svelte-icons/md/Md3DRotation.svelte';
 
-	import P5, { type Sketch } from 'p5-svelte';
-	import Papa from 'papaparse';
+	import type { User } from '../../models/user';
 
 	import UserStore from '../../stores/userStore';
 	import P5Store from '../../stores/p5Store';
 
-	import { DataPoint } from '../../models/dataPoint';
-	import { User } from '../../models/user';
+	import * as Constants from '../../lib/constants';
 
+	import { Core } from '$lib';
 	import { igsSketch } from '$lib/p5/igsSketch';
+	import { writable } from 'svelte/store';
+	import IconButton from '$lib/components/IconButton.svelte';
+	import IgsInfoModal from '$lib/components/IGSInfoModal.svelte';
 
-	import type p5 from 'p5';
+	let isModalOpen = writable(false);
 
 	let files: any = [];
-	let selectedTab = 'Movement';
-	let tabOptions = [
-		'Movement',
-		'Talk',
-		'Video',
-		'Animate',
-		'Select',
-		'Floor Plan',
-		'Codes',
-		'Export'
-	];
-
 	let users: User[] = [];
 	let p5Instance: p5 | null = null;
-
-	// TODO: Deal with colours in a more dynamic way so that we can have more than 16 users
-	const colors = [
-		'#D8A7B1',
-		'#B39AB1',
-		'#9AA7B1',
-		'#A7B1B1',
-		'#A7B19A',
-		'#B1A798',
-		'#B1A7B0',
-		'#A798A7',
-		'#D9C8B3',
-		'#D9C8C4',
-		'#B3C4D9',
-		'#B3D9C8',
-		'#C8D9B3',
-		'#C4D9D2',
-		'#D9C4D2',
-		'#D2D9C4'
-	];
+	let selectedTab: string = 'Movement';
+	let core: Core;
 
 	UserStore.subscribe((data) => {
 		users = data;
@@ -62,259 +35,14 @@
 
 	P5Store.subscribe((value) => {
 		p5Instance = value;
+
+		if (p5Instance) {
+			core = new Core(p5Instance);
+		}
 	});
 
-	const sketch: Sketch = (p5: any) => {
+	const sketch: Sketch = (p5: p5) => {
 		igsSketch(p5);
-	};
-
-	// Handles processing of example data. Movement/code CSV files unique to each example
-	async function handleExampleDropdown(event: any) {
-		if (p5Instance) {
-			UserStore.update((currentUsers) => {
-				return [];
-			});
-
-			const selectedValue = event.target.value;
-			await loadFloorplanImage(p5Instance, selectedValue);
-			await loadCSVData(`data/${selectedValue}/conversation.csv`);
-
-			switch (selectedValue) {
-				case 'example-1':
-					await loadCSVData(`data/${selectedValue}/jordan.csv`);
-					// await loadCSVData(`data/${selectedValue}/possession.csv`);
-					break;
-				case 'example-2':
-					await loadCSVData(`data/${selectedValue}/adhir.csv`);
-					await loadCSVData(`data/${selectedValue}/blake.csv`);
-					await loadCSVData(`data/${selectedValue}/jeans.csv`);
-					await loadCSVData(`data/${selectedValue}/lily.csv`);
-					await loadCSVData(`data/${selectedValue}/mae.csv`);
-					break;
-				case 'example-3':
-					await loadCSVData(`data/${selectedValue}/teacher.csv`);
-					break;
-				case 'example-4':
-					await loadCSVData(`data/${selectedValue}/cassandra.csv`);
-					await loadCSVData(`data/${selectedValue}/mei.csv`);
-					await loadCSVData(`data/${selectedValue}/nathan.csv`);
-					await loadCSVData(`data/${selectedValue}/sean.csv`);
-					await loadCSVData(`data/${selectedValue}/teacher.csv`);
-					break;
-			}
-
-			// UserStore.update((currentUsers) => {
-			// 	let users = [...currentUsers]; // clone the current users
-
-			// 	// users.forEach((user) => {
-			// 	// 	// console.log('Starting userdata trail length: ' + user.dataTrail.length);
-			// 	// 	user.dataTrail = normalizeMovementData(user.dataTrail, 100, 100);
-			// 	// 	console.log('Converted userdata trail length: ' + user.dataTrail.length);
-			// 	// });
-
-			// 	return users;
-			// });
-			// TODO: See if we can remove loop here.
-			// Flashing bad data once, and then looping again to fix it.
-			p5Instance.loop();
-		} else {
-			console.log('p5Instance has not been instantiated yet!');
-		}
-	}
-
-	async function loadCSVData(path: string) {
-		const csvResponse = await fetch(`${path}`);
-		const csvText = await csvResponse.text();
-		Papa.parse(csvText, {
-			dynamicTyping: true,
-			skipEmptyLines: 'greedy',
-			header: true,
-			transformHeader: (h) => {
-				return h.trim().toLowerCase();
-			},
-			complete: (results: any) => {
-				convertFileToUsers(results, path);
-				if (p5Instance) p5Instance.loop();
-			}
-		});
-	}
-
-	async function loadConversationData(selectedValue: string) {
-		// Determine the path based on the selected value
-		const path = `data/${selectedValue}/conversation.csv`;
-		// Load and parse the CSV using PapaParse
-		const result = await new Promise((resolve) => {
-			Papa.parse(path, {
-				download: true,
-				header: true,
-				complete: resolve
-			});
-		});
-
-		return result.data;
-	}
-
-	function loadFloorplanImage(p5Instance: p5, selectedValue: string) {
-		// Determine the path based on the selected value
-		const path = `data/${selectedValue}/floorplan.png`;
-
-		// Load the image into p5.js
-		// Add logic so that typescript does not complain about
-		// null possibiltiy
-		p5Instance.loadImage(path, (img) => {
-			p5Instance.floorPlan.img = img;
-			p5Instance.floorPlan.width = img.width;
-			p5Instance.floorPlan.height = img.height;
-			p5Instance.loop();
-		});
-	}
-
-	const handleFileSelect = (event: any) => {
-		const file = event.target.files[0];
-		const fileName = file.name;
-
-		// Papa.parse(file, {
-		// 	header: true,
-		// 	dynamicTyping: true,
-		// 	skipEmptyLines: 'greedy',
-		// 	transformHeader: (h) => {
-		// 		return h.trim().toLowerCase();
-		// 	},
-		// 	complete: (results: any) => convertFileToUsers(results, fileName),
-		// 	error: (error, file) => {
-		// 		alert(
-		// 			'Parsing error with one of your CSV file. Please make sure your file is formatted correctly as a .CSV'
-		// 		);
-		// 	}
-		// });
-	};
-
-	function distance(point1: DataPoint, point2: DataPoint): number {
-		const dx = (point1.x || 0) - (point2.x || 0);
-		const dy = (point1.y || 0) - (point2.y || 0);
-		return Math.sqrt(dx * dx + dy * dy);
-	}
-
-	function normalizeMovementData(
-		dataTrail: DataPoint[],
-		distanceThreshold: number,
-		timeThreshold: number
-	): DataPoint[] {
-		// Step 1: Sort by time
-		const sortedDataTrail = [...dataTrail].sort((a, b) => (a.time || 0) - (b.time || 0));
-
-		// // Step 2: Initialize tracking variables
-		// let lastValidPoint: DataPoint | null = null;
-		// let lastStopTime: number | null = null;
-
-		// const newDataTrail: DataPoint[] = [];
-
-		// // Step 3: Iterate through the sorted array
-		// for (const point of sortedDataTrail) {
-		// 	if (lastValidPoint !== null) {
-		// 		const dist = distance(point, lastValidPoint);
-		// 		const timeDifference = (point.time || 0) - (lastValidPoint.time || 0);
-
-		// 		if (dist < distanceThreshold) {
-		// 			if (timeDifference > timeThreshold) {
-		// 				point.isStopped = true;
-		// 				lastStopTime = point.time;
-		// 			}
-		// 		} else {
-		// 			point.isStopped = false;
-		// 		}
-		// 	}
-
-		// 	lastValidPoint = point;
-		// 	newDataTrail.push(point);
-		// }
-
-		return sortedDataTrail;
-	}
-
-	// const normalizeMovementData = (dataTrail: DataPoint[]) => {
-	// 	const seen = new Set();
-	// 	console.log('=====Normalizing Movement');
-	// 	// Sort by time
-	// 	dataTrail.sort((a, b) => (a.time || 0) - (b.time || 0));
-
-	// 	// Remove duplicates
-	// 	// for (const point of dataTrail) {
-	// 	// 	const xyPair = `${point.x},${point.y}`;
-	// 	// 	if (!seen.has(xyPair)) {
-	// 	// 		seen.add(xyPair);
-	// 	// 		newDataTrail.push(point);
-	// 	// 	}
-	// 	// }
-
-	// 	return dataTrail;
-	// };
-
-	// Function to handle data parsing completion
-	const convertFileToUsers = (results: any, fileName: string) => {
-		let csvData = results.data;
-
-		// TODO: add additional data tests/checks
-		if ('x' in csvData[0] && 'y' in csvData[0]) {
-			UserStore.update((currentUsers) => {
-				let users = [...currentUsers]; // clone the current users
-
-				// TODO: Filter out data in for each.
-				csvData.forEach((row: any) => {
-					let user = null;
-					// Movement Files
-					const userName = fileName.split('/')[2].slice(0, -4);
-					user = users.find((user) => user.name === userName.toLowerCase());
-
-					if (!user) {
-						user = new User([], colors[users.length], [], true, userName.toLowerCase());
-						users.push(user);
-					}
-
-					const existingDataPoint = user.dataTrail.find((dp) => dp.time === row.time);
-					if (existingDataPoint) {
-						existingDataPoint.x = row.x;
-						existingDataPoint.y = row.y;
-					} else {
-						user.dataTrail.push(new DataPoint('', row.time, row.x, row.y));
-					}
-
-					if (p5Instance) {
-						p5Instance.core.setTotalTime(row.time);
-					} else {
-						console.log("p5Instance doesn't exist yet!");
-					}
-				});
-
-				return users;
-			});
-		} else if ('code' in csvData[0] && 'start' in csvData[0] && 'end' in csvData[0]) {
-			// ... (Unchanged code)
-		} else if ('speaker' in csvData[0] && 'talk' in csvData[0]) {
-			// ... (Unchanged code)
-
-			UserStore.update((currentUsers) => {
-				let users = [...currentUsers]; // clone the current users
-				csvData.forEach((row: any) => {
-					let user = users.find((user) => user.name === row.speaker.toLowerCase());
-
-					if (!user) {
-						user = new User([], colors[users.length], [], true, row.speaker.toLowerCase());
-						users.push(user);
-					}
-
-					user.dataTrail.push(new DataPoint(row.talk, row.time));
-				});
-
-				return users;
-			});
-		}
-	};
-
-	const handleCheckboxChange = () => {
-		if (p5Instance) {
-			p5Instance.loop();
-		}
 	};
 </script>
 
@@ -329,38 +57,23 @@
 
 			<div class="flex justify-end flex-1 px-2">
 				<div class="flex items-stretch">
-					<div class="btn icon max-h-8">
-						<MdRotateLeft />
-					</div>
-					<div class="btn icon max-h-8">
-						<MdRotateRight />
-					</div>
-					<div class="btn icon max-h-8">
-						<MdCloudDownload />
-					</div>
+					<IconButton icon={MdRotateLeft} />
+					<IconButton icon={MdRotateRight} />
+					<IconButton icon={MdCloudDownload} />
 					<label class="btn icon max-h-8" for="file-input">
 						<MdCloudUpload />
 					</label>
 
-					<input
-						class="hidden"
-						id="file-input"
-						type="file"
-						bind:files
-						on:change={(event) => handleFileSelect(event)}
-					/>
-					<div id="btn-help" class="btn icon max-h-8">
-						<MdHelpOutline />
-					</div>
+					<input class="hidden" id="file-input" type="file" bind:files />
+					<!-- on:change={(event) => handleFileSelect(event)} -->
+					<!-- <IconButton icon={MdHelpOutline} /> -->
+					<IconButton icon={MdHelpOutline} on:click={() => ($isModalOpen = !$isModalOpen)} />
 
-					<div id="btn-toggle-3d" class="btn icon max-h-8">
-						<Md3DRotation />
-					</div>
-
+					<IconButton id="btn-toggle-3d" icon={Md3DRotation} />
 					<select
 						id="select-data-dropdown"
 						class="select select-bordered w-full max-w-xs bg-neutral"
-						on:change={handleExampleDropdown}
+						on:change={core.handleExampleDropdown}
 					>
 						<option disabled selected>-- Select an Example --</option>
 						<option value="example-1">Michael Jordan's Last Shot</option>
@@ -374,40 +87,45 @@
 
 		<P5 {sketch} />
 
-		<div class="btm-nav">
-			<div>
-				<div class="join w-full">
-					<!-- Align the below objects vertically using tailwind -->
-
+		<div class="btm-nav flex justify-between">
+			<!-- Left Side: Select and Carousel -->
+			<div class="w-1/2">
+				<div class="join w-full flex items-center justify-start">
 					<select
 						bind:value={selectedTab}
 						id="select-data-dropdown"
 						class="select select-bordered max-w-xs bg-neutral text-white dropdown-top"
 					>
-						{#each tabOptions as value}<option {value}>{value}</option>{/each}
+						{#each Constants.TAB_OPTIONS as value}<option {value}>{value}</option>{/each}
 					</select>
 
 					<div class="carousel carousel-center flex mx-5 align-middle">
 						{#if selectedTab == 'Movement'}
 							{#each $UserStore as user}
-								<div class="carousel-item align-middle inline-block">
-									<!-- When the below checkbox gets updated, update the path as well if it's selected -->
-									<!-- <input type="checkbox" class="checkbox" bind:checked={user.enabled} /> -->
+								<div class="carousel-item align-middle inline-flex items-center">
 									<input
+										id="userCheckbox"
 										type="checkbox"
 										class="checkbox"
 										bind:checked={user.enabled}
-										on:change={handleCheckboxChange}
+										on:change={core.handleCheckboxChange}
 									/>
-									<label class="m-5">{user.name}</label>
+									<label class="m-5" for="userCheckbox">{user.name}</label>
 								</div>
 							{/each}
 						{/if}
 					</div>
 				</div>
 			</div>
-			<div />
+
+			<!-- Right Side: Timeline -->
+			<div class="w-1/2 overflow-x-auto">
+				<div style="width: 800px; height: 50px; background: linear-gradient(to right, #eee, #ddd);">
+					<!-- TODO: Timeline logic -->
+				</div>
+			</div>
 		</div>
+
 		<slot />
 	</div>
 	<div class="drawer-side">
@@ -426,40 +144,4 @@
 	</div>
 </div>
 
-<!-- Put this part before </body> tag -->
-<input type="checkbox" checked={false} id="my-modal" class="modal-toggle" />
-<div class="modal">
-	<div class="modal-box max-w-7xl">
-		<div class="hero p-20">
-			<div class="hero-content text-left">
-				<div class="max-w-16">
-					<h1 class="text-5xl font-bold pb-8">INTERACTION GEOGRAPHY SLICER (IGS)</h1>
-					<p class="py-3">
-						Hello! This is a tool to visualize movement, conversation, and video data over space and
-						time. Data are displayed over a floor plan and a timeline and can be viewed in 2D or 3D.
-					</p>
-					<p class="py-3">
-						Use the top menu to visualize different sample datasets or upload your own data. Use the
-						bottom left tabs as well as the timeline to selectively study displayed data. For
-						example, you can toggle individual movement paths and speakers, visualize conversation
-						in different ways, animate data, and play/pause video by clicking anywhere on the
-						timeline.
-					</p>
-					<p class="py-3">
-						For further information, learn how to use and format your data for the IGS
-					</p>
-					<p class="pt-3 pb-6">
-						IGS software is an open-source project built with JavaScript and p5.js licensed under
-						the GNU General Public License Version 2.0. It is developed by Ben Rydal Shapiro and
-						contributors with support from the National Science Foundation. Contribute | Reference |
-						Learn More About Interaction Geography
-					</p>
-					<!-- <button class="btn btn-primary">Get Started</button> -->
-					<div class="modal-action">
-						<label for="my-modal" class="btn btn-primary">Get Started</label>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-</div>
+<IgsInfoModal {isModalOpen} />

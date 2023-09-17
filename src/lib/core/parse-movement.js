@@ -92,6 +92,6 @@ export class ParseMovement {
 
     clear() {
         this.parsedFileArray = [];
-        this.sk.core.clearMovement();
+        // this.sk.core.clearMovement();
     }
 }
