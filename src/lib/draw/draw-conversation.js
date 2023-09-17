@@ -114,7 +114,6 @@ export class DrawConversation {
      * @param  {Integer} view
      */
     recordConversationBubble(pointToDraw, view) {
-        console.log(pointToDraw);
         this.conversationBubble.isSelected = true;
         this.conversationBubble.point = pointToDraw;
         this.conversationBubble.view = view;
@@ -191,7 +190,7 @@ export class DrawConversation {
     }
 
     /**
-     * 
+     *
      * @param  {String} talkTurn
      */
     isTalkTurnSelected(talkTurn) {

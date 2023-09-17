@@ -5,6 +5,7 @@ export class DataPoint {
 	y: number | null;
 	isStopped: boolean;
 	codes: any;
+	weight: number;
 
 	constructor(speech: string, time = null, x = null, y = null) {
 		this.speech = speech;
@@ -17,5 +18,6 @@ export class DataPoint {
 			hasCodeArray: [],
 			color: 'blue'
 		};
+		this.weight = 1;
 	}
 }

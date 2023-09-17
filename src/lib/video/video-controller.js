@@ -149,11 +149,11 @@ export class VideoController {
      * can be created from a file but the data is corrupt in some way
      */
     isPlayerAndDivLoaded() {
-        return (this.sk.dataIsLoaded(this.videoPlayer) && this.isLoaded);
+        return (this.videoPlayer != null && this.isLoaded);
     }
 
     clear() {
-        if (this.sk.dataIsLoaded(this.videoPlayer)) { // if any type of videoPlayer object exists, even if data is corrupt destroy it
+        if (this.videoPlayer != null) { // if any type of videoPlayer object exists, even if data is corrupt destroy it
             this.videoPlayer.destroy();
             this.videoPlayer = null;
             this.isPlaying = false;
