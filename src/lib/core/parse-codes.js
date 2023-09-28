@@ -115,7 +115,7 @@ export class ParseCodes {
 
     clear() {
         this.parsedFileArray = [];
-        this.sk.core.clearCodes();
+        // this.sk.core.clearCodes();
     }
 
     resetCounters() {
