@@ -79,7 +79,7 @@ export class ParseMovement {
 
     // TODO: this could be moved to main classes to dynamically update, would neat to reset isStopped values in data
     updateStopValues(data) {
-        const stopFloor = 30;    
+        const stopFloor = 5;    
         for (let i = 0; i < data.length; i++) {
             let cumulativeTime = 0;
             let j = i;
