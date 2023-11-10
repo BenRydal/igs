@@ -123,6 +123,10 @@ export class Core {
 		}
 	}
 
+	handle3D = () => {
+		this.sketch.handle3D.update();
+	};
+
 	handleExampleDropdown = async (event: any) => {
 		// TODO: Need to adjust p5 typescript defintion to expose
 		// custom attributes & functions

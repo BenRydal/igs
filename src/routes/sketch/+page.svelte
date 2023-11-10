@@ -77,7 +77,13 @@
 					<!-- <IconButton icon={MdHelpOutline} /> -->
 					<IconButton icon={MdHelpOutline} on:click={() => ($isModalOpen = !$isModalOpen)} />
 
-					<IconButton id="btn-toggle-3d" icon={Md3DRotation} />
+					<IconButton
+						id="btn-toggle-3d"
+						icon={Md3DRotation}
+						on:click={() => {
+							core.handle3D();
+						}}
+					/>
 					<select
 						id="select-data-dropdown"
 						class="select select-bordered w-full max-w-xs bg-neutral"
