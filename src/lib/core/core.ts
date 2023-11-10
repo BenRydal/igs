@@ -101,7 +101,11 @@ export class Core {
 	};
 
 	handleExampleDropdown = async (event: any) => {
-		UserStore.update((currentUsers) => {
+		// TODO: Need to adjust p5 typescript defintion to expose
+		// custom attributes & functions
+		this.sketch.core.totalTimeInSeconds = 0;
+
+		UserStore.update(() => {
 			return [];
 		});
 
@@ -132,6 +136,20 @@ export class Core {
 				await this.loadCSVData(`data/${selectedValue}/teacher.csv`);
 				break;
 		}
+
+		// This sorts each user's dataTrail by time
+		UserStore.subscribe((currentUsers) => {
+			currentUsers.map((user) => {
+				user.dataTrail.sort((a, b) => {
+					if (a.time === null) return 1;
+					if (b.time === null) return -1;
+					return a.time - b.time;
+				});
+			});
+		});
+
+		console.log(this.totalTimeInSeconds);
+		console.log('THIS is the total time sec AFTER ^======');
 
 		// Flashing bad data once, and then looping again to fix it.
 		this.sketch.loop();
@@ -173,7 +191,6 @@ export class Core {
 
 		// TODO: add additional data tests/checks
 		if (this.testMovement(results)) {
-			// if ('x' in csvData[0] && 'y' in csvData[0]) {
 			UserStore.update((currentUsers) => {
 				let users = [...currentUsers]; // clone the current users
 
