@@ -58,49 +58,239 @@ export class Core {
 		]; // 12 Class Paired: (Dark) purple, orange, green, blue, red, brown, (Light) lPurple, lOrange, lGreen, lBlue, lRed, yellow
 	}
 
-	/**
-	 * @param  {PapaParse results Array} results
-	 * @param  {File} file
-	 */
-	testPapaParseResultsForProcessing(results: string, file: File) {
-		if (
-			this.coreUtils.testPapaParseResults(
-				results,
-				this.coreUtils.headersMovement,
-				this.coreUtils.movementRowForType
-			)
-		)
-			this.parseMovement.processFile(results, file);
-		else if (
-			this.coreUtils.testPapaParseResults(
-				results,
-				this.coreUtils.headersConversation,
-				this.coreUtils.conversationRowForType
-			)
-		)
-			this.parseConversation.processFile(results, file);
-		// test multiCodeFile before singleCodeFile because it has same headers with one additional header
-		else if (
-			this.coreUtils.testPapaParseResults(
-				results,
-				this.coreUtils.headersMultiCodes,
-				this.coreUtils.multiCodeRowForType
-			)
-		)
-			this.parseCodes.processMultiCodeFile(results);
-		else if (
-			this.coreUtils.testPapaParseResults(
-				results,
-				this.coreUtils.headersSingleCodes,
-				this.coreUtils.codeRowForType
-			)
-		)
-			this.parseCodes.processSingleCodeFile(results, file);
-		else
+	// update global total time, make sure to floor value as integer
+	setTotalTime(timeValue: number) {
+		if (this.totalTimeInSeconds < timeValue) this.totalTimeInSeconds = timeValue;
+	}
+
+	getTotalTimeInSeconds() {
+		return this.totalTimeInSeconds;
+	}
+
+	clearAll() {
+		this.parseMovement.clear();
+		this.parseConversation.clear();
+		this.parseCodes.clear();
+		this.userList = [];
+		this.totalTimeInSeconds = 0;
+	}
+
+	handleFileSelect = (event: Event) => {
+		const input = event.target as HTMLInputElement;
+		const file = input.files ? input.files[0] : null;
+		const fileName = file ? file.name : '';
+
+		if (file) {
+			Papa.parse(file, {
+				header: true,
+				dynamicTyping: true,
+				skipEmptyLines: 'greedy',
+				transformHeader: (h) => {
+					return h.trim().toLowerCase();
+				},
+				complete: (results: any, file: any) => {
+					this.convertFileToUsers(results, fileName);
+				},
+				error: (error, file) => {
+					alert(
+						'Parsing error with one of your CSV files. Please make sure your file is formatted correctly as a .CSV'
+					);
+				}
+			});
+		}
+	};
+
+	handleExampleDropdown = async (event: any) => {
+		UserStore.update((currentUsers) => {
+			return [];
+		});
+
+		const selectedValue = event.target.value;
+		await this.loadFloorplanImage(selectedValue);
+		await this.loadCSVData(`data/${selectedValue}/conversation.csv`);
+
+		switch (selectedValue) {
+			case 'example-1':
+				await this.loadCSVData(`data/${selectedValue}/jordan.csv`);
+				// await loadCSVData(`data/${selectedValue}/possession.csv`);
+				break;
+			case 'example-2':
+				await this.loadCSVData(`data/${selectedValue}/adhir.csv`);
+				await this.loadCSVData(`data/${selectedValue}/blake.csv`);
+				await this.loadCSVData(`data/${selectedValue}/jeans.csv`);
+				await this.loadCSVData(`data/${selectedValue}/lily.csv`);
+				await this.loadCSVData(`data/${selectedValue}/mae.csv`);
+				break;
+			case 'example-3':
+				await this.loadCSVData(`data/${selectedValue}/teacher.csv`);
+				break;
+			case 'example-4':
+				await this.loadCSVData(`data/${selectedValue}/cassandra.csv`);
+				await this.loadCSVData(`data/${selectedValue}/mei.csv`);
+				await this.loadCSVData(`data/${selectedValue}/nathan.csv`);
+				await this.loadCSVData(`data/${selectedValue}/sean.csv`);
+				await this.loadCSVData(`data/${selectedValue}/teacher.csv`);
+				break;
+		}
+
+		// Flashing bad data once, and then looping again to fix it.
+		this.sketch.loop();
+	};
+
+	loadCSVData = async (path: string) => {
+		const csvResponse = await fetch(`${path}`);
+		const csvText = await csvResponse.text();
+		Papa.parse(csvText, {
+			dynamicTyping: true,
+			skipEmptyLines: 'greedy',
+			header: true,
+			transformHeader: (h) => {
+				return h.trim().toLowerCase();
+			},
+			complete: (results: any, file: any) => {
+				this.convertFileToUsers(results, path);
+			}
+		});
+	};
+
+	loadFloorplanImage = (selectedValue: string) => {
+		// Determine the path based on the selected value
+		const path = `data/${selectedValue}/floorplan.png`;
+
+		// Load the image into p5.js
+		// Add logic so that typescript does not complain about
+		// null possibiltiy
+		this.sketch.loadImage(path, (img) => {
+			this.sketch.floorPlan.img = img;
+			this.sketch.floorPlan.width = img.width;
+			this.sketch.floorPlan.height = img.height;
+			this.sketch.loop();
+		});
+	};
+
+	convertFileToUsers = (results: any, fileName: string) => {
+		let csvData = results.data;
+
+		// TODO: add additional data tests/checks
+		if (this.testMovement(results)) {
+			// if ('x' in csvData[0] && 'y' in csvData[0]) {
+			UserStore.update((currentUsers) => {
+				let users = [...currentUsers]; // clone the current users
+
+				// TODO: Filter out data in for each.
+				csvData.forEach((row: any) => {
+					let user = null;
+					// Movement Files
+					const userName = fileName.split('/')[2].slice(0, -4);
+					user = users.find((user) => user.name === userName.toLowerCase());
+
+					if (!user) {
+						user = new User(
+							[],
+							Constants.PATH_COLORS[users.length],
+							[],
+							true,
+							userName.toLowerCase()
+						);
+						users.push(user);
+					}
+
+					const existingDataPoint = user.dataTrail.find((dp) => dp.time === row.time);
+					if (existingDataPoint) {
+						existingDataPoint.x = row.x;
+						existingDataPoint.y = row.y;
+					} else {
+						user.dataTrail.push(new DataPoint('', row.time, row.x, row.y));
+					}
+
+					this.sketch.core.setTotalTime(row.time);
+					// if (this.sketch) {
+					//   this.sketch.core.setTotalTime(row.time);
+					// } else {
+					//   console.log("this.sketch doesn't exist yet!");
+					// }
+				});
+
+				return users;
+			});
+
+			//  Multicode should be tested before singlecode because it has same headers with one additional header
+		} else if (this.testSingleCode(results) || this.testMulticode(results)) {
+			UserStore.update((currentUsers) => {
+				let users = [...currentUsers]; // clone the current users
+				csvData.forEach((row: any) => {
+					users.forEach((user) => user.segments.push(row.code));
+				});
+
+				return users;
+			});
+		} else if (this.testConversation(results)) {
+			UserStore.update((currentUsers) => {
+				let users = [...currentUsers]; // clone the current users
+				csvData.forEach((row: any) => {
+					let user = users.find((user) => user.name === row.speaker.toLowerCase());
+
+					if (!user) {
+						user = new User(
+							[],
+							Constants.PATH_COLORS[users.length],
+							[],
+							true,
+							row.speaker.toLowerCase()
+						);
+						users.push(user);
+					}
+
+					// TODO: Datapoint is not being pushed into the right location
+					// Neeed to follow up and push into the right place in the future.
+					user.dataTrail.push(new DataPoint(row.talk, row.time));
+				});
+
+				return users;
+			});
+		} else {
 			alert(
 				'Error loading CSV file. Please make sure your file is a CSV file formatted with correct column headers'
 			);
-	}
+		}
+	};
+
+	testMovement = (results: any): boolean => {
+		return this.coreUtils.testPapaParseResults(
+			results,
+			this.coreUtils.headersMovement,
+			this.coreUtils.movementRowForType
+		);
+	};
+
+	testConversation = (results: any): boolean => {
+		return this.coreUtils.testPapaParseResults(
+			results,
+			this.coreUtils.headersConversation,
+			this.coreUtils.conversationRowForType
+		);
+	};
+
+	testSingleCode = (results: any): boolean => {
+		return this.coreUtils.testPapaParseResults(
+			results,
+			this.coreUtils.headersSingleCodes,
+			this.coreUtils.codeRowForType
+		);
+	};
+
+	testMulticode = (results: any): boolean => {
+		return this.coreUtils.testPapaParseResults(
+			results,
+			this.coreUtils.headersMultiCodes,
+			this.coreUtils.multiCodeRowForType
+		);
+	};
+	handleCheckboxChange = () => {
+		if (this.sketch) {
+			this.sketch.loop();
+		}
+	};
 
 	/**
 	 * Method to update movement program data and GUI
@@ -151,15 +341,6 @@ export class Core {
 	//     const curPathEndTime = Math.floor(movementPointArray[movementPointArray.length - 1].time);
 	//     if (this.totalTimeInSeconds < curPathEndTime) this.totalTimeInSeconds = curPathEndTime; // update global total time, make sure to floor value as integer
 	// }
-
-	// update global total time, make sure to floor value as integer
-	setTotalTime(timeValue: number) {
-		if (this.totalTimeInSeconds < timeValue) this.totalTimeInSeconds = timeValue;
-	}
-
-	getTotalTimeInSeconds() {
-		return this.totalTimeInSeconds;
-	}
 
 	// setSpeakerList(parsedConversationFileArray) {
 	//     for (const curRow of parsedConversationFileArray) {
@@ -239,200 +420,6 @@ export class Core {
 	//     return list.sort((a, b) => (a.name > b.name) ? 1 : -1);
 	// }
 
-	clearAll() {
-		this.parseMovement.clear();
-		this.parseConversation.clear();
-		this.parseCodes.clear();
-		this.userList = [];
-		this.totalTimeInSeconds = 0;
-	}
-
-	handleFileSelect = (event: Event) => {
-		const input = event.target as HTMLInputElement;
-		const file = input.files ? input.files[0] : null;
-		const fileName = file ? file.name : '';
-
-		if (file) {
-			Papa.parse(file, {
-				header: true,
-				dynamicTyping: true,
-				skipEmptyLines: 'greedy',
-				transformHeader: (h) => {
-					return h.trim().toLowerCase();
-				},
-				complete: (results: any) => this.convertFileToUsers(results, fileName),
-				error: (error, file) => {
-					alert(
-						'Parsing error with one of your CSV files. Please make sure your file is formatted correctly as a .CSV'
-					);
-				}
-			});
-		}
-	};
-
-	handleExampleDropdown = async (event: any) => {
-		UserStore.update((currentUsers) => {
-			return [];
-		});
-
-		const selectedValue = event.target.value;
-		await this.loadFloorplanImage(selectedValue);
-		await this.loadCSVData(`data/${selectedValue}/conversation.csv`);
-
-		switch (selectedValue) {
-			case 'example-1':
-				await this.loadCSVData(`data/${selectedValue}/jordan.csv`);
-				// await loadCSVData(`data/${selectedValue}/possession.csv`);
-				break;
-			case 'example-2':
-				await this.loadCSVData(`data/${selectedValue}/adhir.csv`);
-				await this.loadCSVData(`data/${selectedValue}/blake.csv`);
-				await this.loadCSVData(`data/${selectedValue}/jeans.csv`);
-				await this.loadCSVData(`data/${selectedValue}/lily.csv`);
-				await this.loadCSVData(`data/${selectedValue}/mae.csv`);
-				break;
-			case 'example-3':
-				await this.loadCSVData(`data/${selectedValue}/teacher.csv`);
-				break;
-			case 'example-4':
-				await this.loadCSVData(`data/${selectedValue}/cassandra.csv`);
-				await this.loadCSVData(`data/${selectedValue}/mei.csv`);
-				await this.loadCSVData(`data/${selectedValue}/nathan.csv`);
-				await this.loadCSVData(`data/${selectedValue}/sean.csv`);
-				await this.loadCSVData(`data/${selectedValue}/teacher.csv`);
-				break;
-		}
-
-		// UserStore.update((currentUsers) => {
-		// 	let users = [...currentUsers]; // clone the current users
-
-		// 	// users.forEach((user) => {
-		// 	// 	// console.log('Starting userdata trail length: ' + user.dataTrail.length);
-		// 	// 	user.dataTrail = normalizeMovementData(user.dataTrail, 100, 100);
-		// 	// 	console.log('Converted userdata trail length: ' + user.dataTrail.length);
-		// 	// });
-
-		// 	return users;
-		// });
-		// TODO: See if we can remove loop here.
-		// Flashing bad data once, and then looping again to fix it.
-		this.sketch.loop();
-	};
-
-	loadCSVData = async (path: string) => {
-		const csvResponse = await fetch(`${path}`);
-		const csvText = await csvResponse.text();
-		Papa.parse(csvText, {
-			dynamicTyping: true,
-			skipEmptyLines: 'greedy',
-			header: true,
-			transformHeader: (h) => {
-				return h.trim().toLowerCase();
-			},
-			complete: (results: any) => {
-				this.convertFileToUsers(results, path);
-				// if (this.sketch) this.sketch.loop();
-			}
-		});
-	};
-
-	loadFloorplanImage = (selectedValue: string) => {
-		// Determine the path based on the selected value
-		const path = `data/${selectedValue}/floorplan.png`;
-
-		// Load the image into p5.js
-		// Add logic so that typescript does not complain about
-		// null possibiltiy
-		this.sketch.loadImage(path, (img) => {
-			this.sketch.floorPlan.img = img;
-			this.sketch.floorPlan.width = img.width;
-			this.sketch.floorPlan.height = img.height;
-			this.sketch.loop();
-		});
-	};
-	convertFileToUsers = (results: any, fileName: string) => {
-		let csvData = results.data;
-
-		// TODO: add additional data tests/checks
-		if ('x' in csvData[0] && 'y' in csvData[0]) {
-			UserStore.update((currentUsers) => {
-				let users = [...currentUsers]; // clone the current users
-
-				// TODO: Filter out data in for each.
-				csvData.forEach((row: any) => {
-					let user = null;
-					// Movement Files
-					const userName = fileName.split('/')[2].slice(0, -4);
-					user = users.find((user) => user.name === userName.toLowerCase());
-
-					if (!user) {
-						user = new User(
-							[],
-							Constants.PATH_COLORS[users.length],
-							[],
-							true,
-							userName.toLowerCase()
-						);
-						users.push(user);
-					}
-
-					const existingDataPoint = user.dataTrail.find((dp) => dp.time === row.time);
-					if (existingDataPoint) {
-						existingDataPoint.x = row.x;
-						existingDataPoint.y = row.y;
-					} else {
-						user.dataTrail.push(new DataPoint('', row.time, row.x, row.y));
-					}
-
-					this.sketch.core.setTotalTime(row.time);
-					// if (this.sketch) {
-					//   this.sketch.core.setTotalTime(row.time);
-					// } else {
-					//   console.log("this.sketch doesn't exist yet!");
-					// }
-				});
-
-				return users;
-			});
-		} else if ('code' in csvData[0] && 'start' in csvData[0] && 'end' in csvData[0]) {
-			UserStore.update((currentUsers) => {
-				let users = [...currentUsers]; // clone the current users
-				csvData.forEach((row: any) => {
-					users.forEach((user) => user.segments.push(row.code));
-				});
-
-				return users;
-			});
-		} else if ('speaker' in csvData[0] && 'talk' in csvData[0]) {
-			UserStore.update((currentUsers) => {
-				let users = [...currentUsers]; // clone the current users
-				csvData.forEach((row: any) => {
-					let user = users.find((user) => user.name === row.speaker.toLowerCase());
-
-					if (!user) {
-						user = new User(
-							[],
-							Constants.PATH_COLORS[users.length],
-							[],
-							true,
-							row.speaker.toLowerCase()
-						);
-						users.push(user);
-					}
-
-					user.dataTrail.push(new DataPoint(row.talk, row.time));
-				});
-
-				return users;
-			});
-		}
-	};
-
-	handleCheckboxChange = () => {
-		if (this.sketch) {
-			this.sketch.loop();
-		}
-	};
 	// clearMovement() {
 	//     this.pathList = [];
 	//     this.totalTimeInSeconds = 0;

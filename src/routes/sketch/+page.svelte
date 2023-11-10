@@ -110,6 +110,7 @@
 										bind:checked={user.enabled}
 										on:change={core.handleCheckboxChange}
 									/>
+									<!-- Call the loop directly rather than wrapping with handleCheckboxChange -->
 									<label class="m-5" for="userCheckbox">{user.name}</label>
 								</div>
 							{/each}
