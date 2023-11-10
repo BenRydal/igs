@@ -6,13 +6,10 @@ import {
 	Core,
 	FloorPlan,
 	SketchGUI,
-	DomHandler,
-	DomController,
 	SketchController,
 	Handle3D,
 	VideoController,
-	SetPathData,
-	AddListeners
+	SetPathData
 } from '..';
 
 import type { User } from '../../models/user';
