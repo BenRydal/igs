@@ -64,7 +64,15 @@
 						<MdCloudUpload />
 					</label>
 
-					<input class="hidden" id="file-input" type="file" bind:files />
+					<input
+						class="hidden"
+						id="file-input"
+						multiple
+						accept=".png, .jpg, .jpeg, .csv, .mp4"
+						type="file"
+						bind:files
+						on:change={core.handleFileSelect}
+					/>
 					<!-- on:change={(event) => handleFileSelect(event)} -->
 					<!-- <IconButton icon={MdHelpOutline} /> -->
 					<IconButton icon={MdHelpOutline} on:click={() => ($isModalOpen = !$isModalOpen)} />
