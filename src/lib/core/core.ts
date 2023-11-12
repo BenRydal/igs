@@ -33,7 +33,7 @@ export class Core {
 	COLORGRAY: string;
 	COLOR_LIST: string[];
 
-	constructor(sketch: p5) {
+	constructor(sketch: p5, stuff: string) {
 		this.sketch = sketch;
 		this.coreUtils = new CoreUtils(); // utilities for testing CSV files
 		this.parseMovement = new ParseMovement(this.sketch, this.coreUtils);

@@ -1,6 +1,7 @@
 import P5Store from '../../stores/p5Store';
 import UserStore from '../../stores/userStore';
 import P5, { type Sketch } from 'p5-svelte';
+import { writable } from 'svelte/store';
 
 import {
 	Core,
@@ -15,16 +16,17 @@ import {
 import type { User } from '../../models/user';
 import type p5 from 'p5';
 
+export const totalTime = writable(0);
+
 let users: User[] = [];
-let p5Instance: p5 | null = null;
 
 UserStore.subscribe((data) => {
 	users = data;
 });
 
-P5Store.subscribe((value) => {
-	p5Instance = value;
-});
+// P5Store.subscribe((value) => {
+// 	p5Instance = value;
+// });
 
 export const igsSketch = (p5: any) => {
 	P5Store.set(p5);
@@ -37,13 +39,18 @@ export const igsSketch = (p5: any) => {
 		p5.createCanvas(window.innerWidth, window.innerHeight - 160, p5.WEBGL);
 
 		// Library classes
-		p5.core = new Core(p5);
+		const core = new Core(p5, 'in sketch');
+		P5Store.update((state) => ({ ...state, core }));
+		p5.core = core;
+
 		p5.gui = new SketchGUI(p5);
-		// p5.domHandler = new DomHandler(p5);
-		// p5.domController = new DomController(p5);
 		p5.sketchController = new SketchController(p5);
 		p5.handle3D = new Handle3D(p5, true);
+
+		const videoController = new VideoController(p5);
+		P5Store.update((state) => ({ ...state, videoController }));
 		p5.videoController = new VideoController(p5);
+
 		p5.floorPlan = new FloorPlan(p5);
 
 		// Constants
@@ -56,8 +63,6 @@ export const igsSketch = (p5: any) => {
 		p5.textFont(p5.font);
 		p5.textAlign(p5.LEFT, p5.TOP);
 		p5.smooth();
-
-		// AddListeners(p5);
 	};
 
 	p5.draw = () => {

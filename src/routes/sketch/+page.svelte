@@ -12,10 +12,11 @@
 
 	import UserStore from '../../stores/userStore';
 	import P5Store from '../../stores/p5Store';
+	import { get } from 'svelte/store';
 
 	import * as Constants from '../../lib/constants';
 
-	import { Core } from '$lib';
+	import type { Core } from '$lib/core';
 	import { igsSketch } from '$lib/p5/igsSketch';
 	import { writable } from 'svelte/store';
 	import IconButton from '$lib/components/IconButton.svelte';
@@ -25,25 +26,91 @@
 
 	let files: any = [];
 	let users: User[] = [];
-	let p5Instance: p5 | null = null;
 	let selectedTab: string = 'Movement';
-	let core: Core;
+
+	let maxTime: number;
+	let core: Core | null;
+
+	$: {
+		const state = get(P5Store);
+		core = state.core;
+		maxTime = core ? core.getTotalTimeInSeconds() : 100;
+	}
+
+	$: core = $P5Store.core;
+
+	// Real progress value
+	let value: number = 50;
+
+	// Hover value for the tooltip
+	let hoverValue: number = 0;
+
+	// If hovered then show the tooltip
+	let showTooltip: boolean = false;
+
+	// X coordinate for the tooltip position
+	let tooltipX: number = 0;
 
 	UserStore.subscribe((data) => {
 		users = data;
 	});
 
-	P5Store.subscribe((value) => {
-		p5Instance = value;
-
-		if (p5Instance) {
-			core = new Core(p5Instance);
-		}
-	});
-
 	const sketch: Sketch = (p5: p5) => {
 		igsSketch(p5);
 	};
+
+	function updateTooltip(event: MouseEvent) {
+		const state = get(P5Store);
+		if (!state.core) return;
+		if (!state.videoController) return;
+
+		const rect = (event.currentTarget as HTMLProgressElement).getBoundingClientRect();
+		const progressWidth = rect.width;
+		const mouseX = event.clientX - rect.left; // X position within the progress bar
+		value = state.videoController.getVideoPlayerCurTime();
+		hoverValue = Math.round((mouseX / progressWidth) * state.core.getTotalTimeInSeconds());
+		tooltipX = mouseX;
+		showTooltip = true;
+	}
+
+	function handleFileSelect(event: Event) {
+		const state = get(P5Store);
+		if (state.core) {
+			state.core.handleFileSelect(event);
+		}
+	}
+
+	function handleExampleDropdown(event: Event) {
+		const state = get(P5Store);
+		if (state.core) {
+			state.core.handleExampleDropdown(event);
+		}
+	}
+
+	function handle3D() {
+		const state = get(P5Store);
+		if (state.core) {
+			state.core.handle3D();
+		}
+	}
+
+	function handleCheckboxChange() {
+		const state = get(P5Store);
+		if (state.core) {
+			state.core.handleCheckboxChange();
+		}
+	}
+
+	// Function to hide the tooltip when not hovering
+	function hideTooltip() {
+		showTooltip = false;
+	}
+
+	function formatTime(seconds: number): string {
+		const minutes = Math.floor(seconds / 60);
+		const remainingSeconds = seconds % 60;
+		return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`; // Zero padding for seconds
+	}
 </script>
 
 <div class="drawer">
@@ -54,7 +121,6 @@
 			<div class="flex-1 px-2 lg:flex-none">
 				<label for="my-drawer" class="btn btn-primary drawer-button">Open drawer</label>
 			</div>
-
 			<div class="flex justify-end flex-1 px-2">
 				<div class="flex items-stretch">
 					<IconButton icon={MdRotateLeft} />
@@ -71,23 +137,22 @@
 						accept=".png, .jpg, .jpeg, .csv, .mp4"
 						type="file"
 						bind:files
-						on:change={core.handleFileSelect}
+						on:change={(event) => handleFileSelect(event)}
 					/>
-					<!-- on:change={(event) => handleFileSelect(event)} -->
-					<!-- <IconButton icon={MdHelpOutline} /> -->
+					<IconButton icon={MdHelpOutline} />
 					<IconButton icon={MdHelpOutline} on:click={() => ($isModalOpen = !$isModalOpen)} />
 
 					<IconButton
 						id="btn-toggle-3d"
 						icon={Md3DRotation}
 						on:click={() => {
-							core.handle3D();
+							handle3D();
 						}}
 					/>
 					<select
 						id="select-data-dropdown"
 						class="select select-bordered w-full max-w-xs bg-neutral"
-						on:change={core.handleExampleDropdown}
+						on:change={handleExampleDropdown}
 					>
 						<option disabled selected>-- Select an Example --</option>
 						<option value="example-1">Michael Jordan's Last Shot</option>
@@ -122,7 +187,7 @@
 										type="checkbox"
 										class="checkbox"
 										bind:checked={user.enabled}
-										on:change={core.handleCheckboxChange}
+										on:change={handleCheckboxChange}
 									/>
 									<!-- Call the loop directly rather than wrapping with handleCheckboxChange -->
 									<label class="m-5" for="userCheckbox">{user.name}</label>
@@ -134,10 +199,30 @@
 			</div>
 
 			<!-- Right Side: Timeline -->
-			<div class="w-1/2 overflow-x-auto">
-				<div style="width: 800px; height: 50px; background: linear-gradient(to right, #eee, #ddd);">
-					<!-- TODO: Timeline logic -->
+			<div class="relative p-4 bg-gray-100">
+				<!-- Progress bar -->
+				<div class="w-full bg-white">
+					<progress
+						class="progress progress-primary w-full cursor-pointer"
+						{value}
+						max={maxTime}
+						on:mousemove={updateTooltip}
+						on:mouseleave={hideTooltip}
+					/>
+					<span class="material-symbols-outlined cursor-pointer">play_arrow</span>
 				</div>
+
+				<!-- Tooltip -->
+				{#if showTooltip}
+					<div
+						class="absolute bg-gray-800 text-white text-xs rounded px-2 py-1 tooltip"
+						style="left: {tooltipX}px; bottom: 100%; transform: translateY(-0.5rem);"
+					>
+						{formatTime(hoverValue)}
+						<!-- {hoverValue} -->
+						<!-- {Math.floor(core.getTime())} -->
+					</div>
+				{/if}
 			</div>
 		</div>
 
@@ -160,3 +245,11 @@
 </div>
 
 <IgsInfoModal {isModalOpen} />
+
+<style>
+	/* Ensure the tooltip text is not selectable and doesn't interfere with mouse events */
+	.tooltip {
+		pointer-events: none;
+		user-select: none;
+	}
+</style>
