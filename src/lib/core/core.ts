@@ -250,13 +250,6 @@ export class Core {
 		);
 	};
 
-	// TODO: this method will be removed in future
-	handleCheckboxChange = () => {
-		if (this.sketch) {
-			this.sketch.loop();
-		}
-	};
-
 	updateUsersForMovement = (csvData: any, fileName: string) => {
 		UserStore.update((currentUsers) => {
 			let users = [...currentUsers]; // clone the current users
