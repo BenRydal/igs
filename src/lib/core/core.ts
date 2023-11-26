@@ -200,91 +200,17 @@ export class Core {
 		});
 	};
 
+	// NOTE: multicode should be processed before single code file as headers of multicode have one additional column
 	convertFileToUsers = (results: any, fileName: string) => {
 		let csvData = results.data;
-
-		// TODO: add additional data tests/checks
 		if (this.testMovement(results)) {
-			UserStore.update((currentUsers) => {
-				let users = [...currentUsers]; // clone the current users
-
-				// TODO: Filter out data in for each.
-				csvData.forEach((row: any) => {
-					let user = null;
-					let userName: string = '';
-
-					if (fileName.includes('/')) {
-						userName = fileName.split('/')[2].slice(0, -4);
-					} else {
-						userName = fileName.slice(0, -4);
-					}
-					// Movement Files
-					user = users.find((user) => user.name === userName.toLowerCase());
-
-					if (!user) {
-						user = new User(
-							[],
-							Constants.PATH_COLORS[users.length],
-							[],
-							true,
-							userName.toLowerCase()
-						);
-						users.push(user);
-					}
-
-					const existingDataPoint = user.dataTrail.find((dp) => dp.time === row.time);
-					if (existingDataPoint) {
-						existingDataPoint.x = row.x;
-						existingDataPoint.y = row.y;
-					} else {
-						user.dataTrail.push(new DataPoint('', row.time, row.x, row.y));
-					}
-
-					this.sketch.core.setTotalTime(row.time);
-					// if (this.sketch) {
-					//   this.sketch.core.setTotalTime(row.time);
-					// } else {
-					//   console.log("this.sketch doesn't exist yet!");
-					// }
-				});
-
-				return users;
-			});
-
-			//  Multicode should be tested before singlecode because it has same headers with one additional header
-		} else if (this.testSingleCode(results) || this.testMulticode(results)) {
-			UserStore.update((currentUsers) => {
-				let users = [...currentUsers]; // clone the current users
-				csvData.forEach((row: any) => {
-					users.forEach((user) => user.segments.push(row.code));
-				});
-
-				return users;
-			});
+			this.updateUsersForMovement(csvData, fileName);
+		} else if (this.testMulticode(results)) {
+			this.updateUsersForMultiCodes(csvData, fileName);
+		} else if (this.testSingleCode(results)) {
+			this.updateUsersForSingleCodes(csvData, fileName);
 		} else if (this.testConversation(results)) {
-			UserStore.update((currentUsers) => {
-				let users = [...currentUsers]; // clone the current users
-				csvData.forEach((row: any) => {
-					let user = users.find((user) => user.name === row.speaker.toLowerCase());
-
-					if (!user) {
-						user = new User(
-							[],
-							Constants.PATH_COLORS[users.length],
-							[],
-							true,
-							row.speaker.toLowerCase()
-						);
-						users.push(user);
-					}
-
-					// TODO: Datapoint is not being pushed into the right location
-					// Neeed to follow up and push into the right place in the future.
-					user.dataTrail.push(new DataPoint(row.talk, row.time));
-				});
-
-				return users;
-			});
+			this.updateUsersForConversation(csvData, fileName);
 		} else {
 			alert(
 				'Error loading CSV file. Please make sure your file is a CSV file formatted with correct column headers'
@@ -324,9 +250,98 @@ export class Core {
 		);
 	};
 
+	// TODO: this method will be removed in future
 	handleCheckboxChange = () => {
 		if (this.sketch) {
 			this.sketch.loop();
 		}
+	};
+
+	updateUsersForMovement = (csvData: any, fileName: string) => {
+		UserStore.update((currentUsers) => {
+			let users = [...currentUsers]; // clone the current users
+
+			// TODO: Filter out data in for each.
+			csvData.forEach((row: any) => {
+				let user = null;
+				let userName: string = '';
+
+				if (fileName.includes('/')) {
+					userName = fileName.split('/')[2].slice(0, -4);
+				} else {
+					userName = fileName.slice(0, -4);
+				}
+				// Movement Files
+				user = users.find((user) => user.name === userName.toLowerCase());
+
+				if (!user) {
+					user = new User(
+						[],
+						Constants.PATH_COLORS[users.length],
+						[],
+						true,
+						userName.toLowerCase()
+					);
+					users.push(user);
+				}
+
+				const existingDataPoint = user.dataTrail.find((dp) => dp.time === row.time);
+				if (existingDataPoint) {
+					existingDataPoint.x = row.x;
+					existingDataPoint.y = row.y;
+				} else {
+					user.dataTrail.push(new DataPoint('', row.time, row.x, row.y));
+				}
+
+				this.sketch.core.setTotalTime(row.time);
+			});
+			return users;
+		});
+	};
+
+	updateUsersForMultiCodes = (csvData: any, fileName: string) => {
+		UserStore.update((currentUsers) => {
+			let users = [...currentUsers]; // clone the current users
+			csvData.forEach((row: any) => {
+				users.forEach((user) => user.segments.push(row.code));
+			});
+			return users;
+		});
+	};
+
+	updateUsersForSingleCodes = (csvData: any, fileName: string) => {
+		UserStore.update((currentUsers) => {
+			let users = [...currentUsers]; // clone the current users
+			csvData.forEach((row: any) => {
+				users.forEach((user) => user.segments.push(row.code));
+			});
+			return users;
+		});
+	};
+
+	updateUsersForConversation = (csvData: any, fileName: string) => {
+		UserStore.update((currentUsers) => {
+			let users = [...currentUsers]; // clone the current users
+			csvData.forEach((row: any) => {
+				let user = users.find((user) => user.name === row.speaker.toLowerCase());
+
+				if (!user) {
+					user = new User(
+						[],
+						Constants.PATH_COLORS[users.length],
+						[],
+						true,
+						row.speaker.toLowerCase()
+					);
+					users.push(user);
+				}
+
+				// TODO: Datapoint is not being pushed into the right location
+				// Neeed to follow up and push into the right place in the future.
+				user.dataTrail.push(new DataPoint(row.talk, row.time));
+			});
+
+			return users;
+		});
 	};
 }
