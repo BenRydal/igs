@@ -79,7 +79,8 @@ export class ParseMovement {
 
     // TODO: this could be moved to main classes to dynamically update, would neat to reset isStopped values in data
     updateStopValues(data) {
-        const stopFloor = 5;    
+        const stopFloor = this.sk.domController.getStopSliderValue();  
+        console.log(this.sk.domController.getStopSliderValue());  
         for (let i = 0; i < data.length; i++) {
             let cumulativeTime = 0;
             let j = i;

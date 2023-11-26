@@ -1,4 +1,9 @@
 export function addListeners(sk) {
+
+    document.getElementById("stop-slider").addEventListener("change", function() {
+        sk.zzzUpdateStopValues();
+    });
+      
     // Main Menu Bar
     document.getElementById("data-drop-down-menu").addEventListener("change", sk.domHandler.handleExampleDropDown.bind(sk.domHandler));
     document.getElementById("input-load-files").addEventListener("change", sk.domHandler.handleLoadFileButton.bind(sk.domHandler));
