@@ -186,7 +186,7 @@ export class Core {
 				return h.trim().toLowerCase();
 			},
 			complete: (results: any, file: any) => {
-				this.convertFileToUsers(results, file.name);
+				this.processResultsData(results, file.name);
 			}
 		});
 	};
@@ -201,7 +201,7 @@ export class Core {
 	};
 
 	// NOTE: multicode should be processed before single code file as headers of multicode have one additional column
-	convertFileToUsers = (results: any, fileName: string) => {
+	processResultsData = (results: any, fileName: string) => {
 		let csvData = results.data;
 		if (this.testMovement(results)) {
 			this.updateUsersForMovement(csvData, fileName);
