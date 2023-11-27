@@ -8,12 +8,9 @@
  *
  */
 import Papa from 'papaparse'; // Import this if it's not globally available
-
 import { CoreUtils } from './core-utils.js';
-import { ParseMovement } from './parse-movement.js';
 import { ParseConversation } from './parse-conversation.js';
 import { ParseCodes } from './parse-codes.js';
-
 import { DataPoint } from '../../models/dataPoint.js';
 import { User } from '../../models/user.js';
 // import type { DataPoint } from '../../models/dataPoint.js';
@@ -25,7 +22,6 @@ import * as Constants from '../constants/index.js';
 export class Core {
 	sketch: p5;
 	coreUtils: CoreUtils;
-	parseMovement: ParseMovement;
 	parseConversation: ParseConversation;
 	parseCodes: ParseCodes;
 	userList: User[];
@@ -36,7 +32,6 @@ export class Core {
 	constructor(sketch: p5) {
 		this.sketch = sketch;
 		this.coreUtils = new CoreUtils(); // utilities for testing CSV files
-		this.parseMovement = new ParseMovement(this.sketch, this.coreUtils);
 		this.parseConversation = new ParseConversation(this.sketch, this.coreUtils);
 		this.parseCodes = new ParseCodes(this.sketch, this.coreUtils);
 		this.userList = [];
@@ -73,7 +68,6 @@ export class Core {
 	}
 
 	clearAll() {
-		this.parseMovement.clear();
 		this.parseConversation.clear();
 		this.parseCodes.clear();
 		this.userList = [];
