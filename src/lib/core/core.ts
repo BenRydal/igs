@@ -186,7 +186,7 @@ export class Core {
 				return h.trim().toLowerCase();
 			},
 			complete: (results: any, file: any) => {
-				this.processResultsData(results, file.name);
+				this.processResultsData(results, this.coreUtils.cleanFileName(file.name));
 			}
 		});
 	};
@@ -250,7 +250,7 @@ export class Core {
 		);
 	};
 
-	updateUsersForMovement = (csvData: any, fileName: string) => {
+	updateUsersForMovement = (csvData: any, userName: string) => {
 		UserStore.update((currentUsers) => {
 			let users = [...currentUsers]; // clone the current users
 			for (let i = 1; i < csvData.length; i++) {
@@ -262,23 +262,14 @@ export class Core {
 					this.coreUtils.curTimeIsLarger(row, priorRow)
 				) {
 					let user = null;
-					let userName: string = '';
-
-					if (fileName.includes('/')) {
-						userName = fileName.split('/')[2].slice(0, -4);
-					} else {
-						userName = fileName.slice(0, -4);
-					}
-					// Movement Files
-					user = users.find((user) => user.name === userName.toLowerCase());
-
+					user = users.find((user) => user.name === userName);
 					if (!user) {
 						user = new User(
 							[],
 							Constants.PATH_COLORS[users.length],
 							[],
 							true,
-							userName.toLowerCase()
+							userName
 						);
 						users.push(user);
 					}
