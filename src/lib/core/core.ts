@@ -9,7 +9,6 @@
  */
 import Papa from 'papaparse'; // Import this if it's not globally available
 import { CoreUtils } from './core-utils.js';
-import { ParseConversation } from './parse-conversation.js';
 import { ParseCodes } from './parse-codes.js';
 import { DataPoint } from '../../models/dataPoint.js';
 import { User } from '../../models/user.js';
@@ -22,7 +21,6 @@ import * as Constants from '../constants/index.js';
 export class Core {
 	sketch: p5;
 	coreUtils: CoreUtils;
-	parseConversation: ParseConversation;
 	parseCodes: ParseCodes;
 	userList: User[];
 	totalTimeInSeconds: number;
@@ -32,7 +30,6 @@ export class Core {
 	constructor(sketch: p5) {
 		this.sketch = sketch;
 		this.coreUtils = new CoreUtils(); // utilities for testing CSV files
-		this.parseConversation = new ParseConversation(this.sketch, this.coreUtils);
 		this.parseCodes = new ParseCodes(this.sketch, this.coreUtils);
 		this.userList = [];
 		this.totalTimeInSeconds = 0; // Time value in seconds that all displayed data is set to, set dynamically when updating movement data
@@ -68,7 +65,6 @@ export class Core {
 	}
 
 	clearAll() {
-		this.parseConversation.clear();
 		this.parseCodes.clear();
 		this.userList = [];
 		// this.totalTimeInSeconds = 0;
