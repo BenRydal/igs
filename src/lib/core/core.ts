@@ -75,7 +75,7 @@ export class Core {
 		// this.totalTimeInSeconds = 0;
 	}
 
-	handleFileSelect = async (event: Event) => {
+	handleUserLoadedFiles = async (event: Event) => {
 		this.sketch.core.totalTimeInSeconds = 0;
 
 		UserStore.update(() => {
@@ -109,7 +109,7 @@ export class Core {
 		}
 	};
 
-	async loadLocalFile(folder: string, fileName: string) {
+	async loadLocalExampleDataFile(folder: string, fileName: string) {
 		try {
 			const response = await fetch(folder + fileName);
 			const buffer = await response.arrayBuffer();
@@ -138,29 +138,29 @@ export class Core {
 
 		const selectedValue = event.target.value;
 		await this.loadFloorplanImage(`data/${selectedValue}/floorplan.png`);
-		await this.loadLocalFile(`data/${selectedValue}/`, `conversation.csv`);
+		await this.loadLocalExampleDataFile(`data/${selectedValue}/`, `conversation.csv`);
 
 		switch (selectedValue) {
 			case 'example-1':
-				await this.loadLocalFile(`data/${selectedValue}/`, 'jordan.csv');
-				// await loadLocalFile(`data/${selectedValue}`, `possession.csv`);
+				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, 'jordan.csv');
+				// await loadLocalExampleDataFile(`data/${selectedValue}`, `possession.csv`);
 				break;
 			case 'example-2':
-				await this.loadLocalFile(`data/${selectedValue}/`, `adhir.csv`);
-				await this.loadLocalFile(`data/${selectedValue}/`, `blake.csv`);
-				await this.loadLocalFile(`data/${selectedValue}/`, `jeans.csv`);
-				await this.loadLocalFile(`data/${selectedValue}/`, `lily.csv`);
-				await this.loadLocalFile(`data/${selectedValue}/`, `mae.csv`);
+				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, `adhir.csv`);
+				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, `blake.csv`);
+				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, `jeans.csv`);
+				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, `lily.csv`);
+				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, `mae.csv`);
 				break;
 			case 'example-3':
-				await this.loadLocalFile(`data/${selectedValue}/`, `teacher.csv`);
+				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, `teacher.csv`);
 				break;
 			case 'example-4':
-				await this.loadLocalFile(`data/${selectedValue}/`, `cassandra.csv`);
-				await this.loadLocalFile(`data/${selectedValue}/`, `mei.csv`);
-				await this.loadLocalFile(`data/${selectedValue}/`, `nathan.csv`);
-				await this.loadLocalFile(`data/${selectedValue}/`, `sean.csv`);
-				await this.loadLocalFile(`data/${selectedValue}/`, `teacher.csv`);
+				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, `cassandra.csv`);
+				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, `mei.csv`);
+				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, `nathan.csv`);
+				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, `sean.csv`);
+				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, `teacher.csv`);
 				break;
 		}
 

@@ -71,9 +71,9 @@
 						accept=".png, .jpg, .jpeg, .csv, .mp4"
 						type="file"
 						bind:files
-						on:change={core.handleFileSelect}
+						on:change={core.handleUserLoadedFiles}
 					/>
-					<!-- on:change={(event) => handleFileSelect(event)} -->
+					<!-- on:change={(event) => handleUserLoadedFiles(event)} -->
 					<!-- <IconButton icon={MdHelpOutline} /> -->
 					<IconButton icon={MdHelpOutline} on:click={() => ($isModalOpen = !$isModalOpen)} />
 
