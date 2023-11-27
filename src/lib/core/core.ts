@@ -91,15 +91,7 @@ export class Core {
 
 		for (let i = 0; i < input.files.length; i++) {
 			const file = input.files ? input.files[i] : null;
-			const fileName = file ? file.name : '';
-
-			// TODO: This is where we can control and add video files
-			// or other types of files.
-			if (fileName.includes('png')) {
-				this.loadFloorplanImage(URL.createObjectURL(file));
-			} else {
-				this.loadCSVData(file);
-			}
+			this.testFileTypeForProcessing(file);
 
 			// Sorts each user's data trail by time
 			UserStore.subscribe((currentUsers) => {
@@ -113,6 +105,14 @@ export class Core {
 			});
 		}
 	};
+
+	testFileTypeForProcessing(file: File) {
+		const fileName = file ? file.name.toLowerCase() : '';
+		if (fileName.endsWith(".csv") || file.type === "text/csv") this.loadCSVData(file);
+		else if (fileName.endsWith(".png") || fileName.endsWith(".jpg") || fileName.endsWith(".jpeg") || file.type === "image/png" || file.type === "image/jpg" || file.type === "image/jpeg") this.loadFloorplanImage(URL.createObjectURL(file));
+		// else if (fileName.endsWith(".mp4") || file.type === "video/mp4") this.prepVideoFromFile(URL.createObjectURL(file));
+		else alert("Error loading file. Please make sure your file is an accepted format"); // this should not be possible due to HTML5 accept for file inputs, but in case
+	}
 
 	async loadLocalExampleDataFile(folder: string, fileName: string) {
 		try {
