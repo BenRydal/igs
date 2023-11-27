@@ -251,7 +251,8 @@ export class Core {
 						existingDataPoint.x = row.x;
 						existingDataPoint.y = row.y;
 					} else {
-						user.dataTrail.push(new DataPoint('', row.time, row.x, row.y));
+						// TODO: add or call methods to calculate if isStopped here
+						user.dataTrail.push(new DataPoint('', row.time, row.x, row.y, false));
 					}
 
 					this.sketch.core.setTotalTime(row.time);

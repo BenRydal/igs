@@ -7,17 +7,16 @@ export class DataPoint {
 	codes: any;
 	weight: number;
 
-	constructor(speech: string, time = null, x = null, y = null) {
+	constructor(speech: string, time = null, x = null, y = null, isStopped: boolean) {
 		this.speech = speech;
 		this.time = time;
-
 		this.x = x;
 		this.y = y;
-		this.isStopped = false; // TODO: update with new methods to calculate stops
+		this.isStopped = isStopped;
 		this.codes = {
 			hasCodeArray: [],
 			color: 'blue'
 		};
-		this.weight = 1;
+		this.weight = 1; // TODO: do we need this, aren't line weights set in draw methods?
 	}
 }
