@@ -58,6 +58,11 @@ export class Core {
 		];
 	}
 
+	// TODO: should this move elsewhere?
+	handle3D = () => {
+		this.sketch.handle3D.update();
+	};
+
 	// update global total time, make sure to floor value as integer
 	setTotalTime(timeValue: number) {
 		if (this.totalTimeInSeconds < timeValue) this.totalTimeInSeconds = timeValue;
@@ -122,10 +127,6 @@ export class Core {
 			console.log(error);
 		}
 	}
-
-	handle3D = () => {
-		this.sketch.handle3D.update();
-	};
 
 	handleExampleDropdown = async (event: any) => {
 		// TODO: Need to adjust p5 typescript defintion to expose
