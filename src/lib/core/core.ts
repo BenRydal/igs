@@ -92,17 +92,7 @@ export class Core {
 		for (let i = 0; i < input.files.length; i++) {
 			const file = input.files ? input.files[i] : null;
 			this.testFileTypeForProcessing(file);
-
-			// Sorts each user's data trail by time
-			UserStore.subscribe((currentUsers) => {
-				currentUsers.map((user) => {
-					user.dataTrail.sort((a, b) => {
-						if (a.time === null) return 1;
-						if (b.time === null) return -1;
-						return a.time - b.time;
-					});
-				});
-			});
+			this.sortUserDataByTime();
 		}
 	};
 
@@ -165,16 +155,7 @@ export class Core {
 				break;
 		}
 
-		UserStore.subscribe((currentUsers) => {
-			currentUsers.map((user) => {
-				user.dataTrail.sort((a, b) => {
-					if (a.time === null) return 1;
-					if (b.time === null) return -1;
-					return a.time - b.time;
-				});
-			});
-		});
-		// Flashing bad data once, and then looping again to fix it.
+		this.sortUserDataByTime();
 		this.sketch.loop();
 	};
 
@@ -335,4 +316,16 @@ export class Core {
 			return users;
 		});
 	};
+
+	sortUserDataByTime() {
+		UserStore.subscribe((currentUsers) => {
+			currentUsers.map((user) => {
+				user.dataTrail.sort((a, b) => {
+					if (a.time === null) return 1;
+					if (b.time === null) return -1;
+					return a.time - b.time;
+				});
+			});
+		});
+	}
 }
