@@ -253,41 +253,47 @@ export class Core {
 	updateUsersForMovement = (csvData: any, fileName: string) => {
 		UserStore.update((currentUsers) => {
 			let users = [...currentUsers]; // clone the current users
+			for (let i = 1; i < csvData.length; i++) {
+				const row = csvData[i];
+				const priorRow = csvData[i - 1];
 
-			// TODO: Filter out data in for each.
-			csvData.forEach((row: any) => {
-				let user = null;
-				let userName: string = '';
+				if (
+					this.coreUtils.movementRowForType(row) &&
+					this.coreUtils.curTimeIsLarger(row, priorRow)
+				) {
+					let user = null;
+					let userName: string = '';
 
-				if (fileName.includes('/')) {
-					userName = fileName.split('/')[2].slice(0, -4);
-				} else {
-					userName = fileName.slice(0, -4);
+					if (fileName.includes('/')) {
+						userName = fileName.split('/')[2].slice(0, -4);
+					} else {
+						userName = fileName.slice(0, -4);
+					}
+					// Movement Files
+					user = users.find((user) => user.name === userName.toLowerCase());
+
+					if (!user) {
+						user = new User(
+							[],
+							Constants.PATH_COLORS[users.length],
+							[],
+							true,
+							userName.toLowerCase()
+						);
+						users.push(user);
+					}
+
+					const existingDataPoint = user.dataTrail.find((dp) => dp.time === row.time);
+					if (existingDataPoint) {
+						existingDataPoint.x = row.x;
+						existingDataPoint.y = row.y;
+					} else {
+						user.dataTrail.push(new DataPoint('', row.time, row.x, row.y));
+					}
+
+					this.sketch.core.setTotalTime(row.time);
 				}
-				// Movement Files
-				user = users.find((user) => user.name === userName.toLowerCase());
-
-				if (!user) {
-					user = new User(
-						[],
-						Constants.PATH_COLORS[users.length],
-						[],
-						true,
-						userName.toLowerCase()
-					);
-					users.push(user);
-				}
-
-				const existingDataPoint = user.dataTrail.find((dp) => dp.time === row.time);
-				if (existingDataPoint) {
-					existingDataPoint.x = row.x;
-					existingDataPoint.y = row.y;
-				} else {
-					user.dataTrail.push(new DataPoint('', row.time, row.x, row.y));
-				}
-
-				this.sketch.core.setTotalTime(row.time);
-			});
+			}
 			return users;
 		});
 	};
