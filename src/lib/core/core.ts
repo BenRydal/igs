@@ -12,8 +12,6 @@ import { CoreUtils } from './core-utils.js';
 import { ParseCodes } from './parse-codes.js';
 import { DataPoint } from '../../models/dataPoint.js';
 import { User } from '../../models/user.js';
-// import type { DataPoint } from '../../models/dataPoint.js';
-// import type { User } from '../../models/user.js';
 import type p5 from 'p5';
 import UserStore from '../../stores/userStore';
 import * as Constants from '../constants/index.js';
