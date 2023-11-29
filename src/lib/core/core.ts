@@ -258,7 +258,7 @@ export class Core {
 	// Allows dynamic updating of what constitute stop values/intervals in the program
 	updateStopValues(data) {
 		//const stopFloor = this.sk.domController.getStopSliderValue();
-		const stopFloor = 100; // the interval that constitutes a stop in seconds
+		const stopFloor = 1; // the interval that constitutes a stop in seconds
 		for (let i = 0; i < data.length; i++) {
 			let cumulativeTime = 0;
 			let j = i;
