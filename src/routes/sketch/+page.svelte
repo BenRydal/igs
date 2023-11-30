@@ -71,9 +71,9 @@
 						accept=".png, .jpg, .jpeg, .csv, .mp4"
 						type="file"
 						bind:files
-						on:change={core.handleFileSelect}
+						on:change={core.handleUserLoadedFiles}
 					/>
-					<!-- on:change={(event) => handleFileSelect(event)} -->
+					<!-- on:change={(event) => handleUserLoadedFiles(event)} -->
 					<!-- <IconButton icon={MdHelpOutline} /> -->
 					<IconButton icon={MdHelpOutline} on:click={() => ($isModalOpen = !$isModalOpen)} />
 
@@ -122,9 +122,8 @@
 										type="checkbox"
 										class="checkbox"
 										bind:checked={user.enabled}
-										on:change={core.handleCheckboxChange}
 									/>
-									<!-- Call the loop directly rather than wrapping with handleCheckboxChange -->
+									<!-- TODO: add: on:change={CALL METHOD TO LOOP/RERUN THE SKETCH} -->
 									<label class="m-5" for="userCheckbox">{user.name}</label>
 								</div>
 							{/each}

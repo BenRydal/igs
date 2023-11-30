@@ -56,8 +56,7 @@ export const igsSketch = (p5: any) => {
 		p5.textFont(p5.font);
 		p5.textAlign(p5.LEFT, p5.TOP);
 		p5.smooth();
-
-		// AddListeners(p5);
+		p5.strokeCap(p5.SQUARE);
 	};
 
 	p5.draw = () => {
