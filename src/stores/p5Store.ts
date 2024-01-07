@@ -1,11 +1,12 @@
 import { writable } from 'svelte/store';
 import type { Core } from '$lib/core';
-import type { VideoController } from '$lib';
+import type { SketchController, VideoController } from '$lib';
 
 // Define an interface for your global store state if you're using TypeScript
 export interface P5Store {
 	core: Core | null;
 	videoController: VideoController | null;
+	sketchController: SketchController | null;
 	// Add other properties here as needed
 	// otherProperty: OtherType | null;
 }
@@ -13,7 +14,8 @@ export interface P5Store {
 // Create the initial state
 const initialState: P5Store = {
 	core: null,
-	videoController: null
+	videoController: null,
+	sketchController: null
 	// Initialize other properties here
 	// otherProperty: null,
 };

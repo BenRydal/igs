@@ -79,6 +79,14 @@ export class VideoController {
 		this.videoPlayer.seekTo(videoTime);
 	}
 
+	/**
+	 * Seek to a specific time in the video.
+	 * @param {number} time - The time to seek to in seconds.
+	 */
+	seekTo(time) {
+		this.videoPlayer?.seekTo(time);
+	}
+
 	seekMethodMouse() {
 		const videoTime = Math.floor(
 			this.mapPixelTimeToVideoTime(
@@ -136,6 +144,11 @@ export class VideoController {
 	decreasePlayerSize() {
 		if (this.isPlayerAndDivLoaded()) this.videoPlayer.decreaseSize();
 	}
+
+	getVideoDuration() {
+		return this.videoPlayer.getVideoDuration()
+	}
+
 	/**
 	 * Maps a pixel time from screen to a loaded video
 	 * Conditional statements adapt for videos that start with same times but can have different lengths

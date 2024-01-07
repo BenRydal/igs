@@ -21,6 +21,8 @@
 	import { writable } from 'svelte/store';
 	import IconButton from '$lib/components/IconButton.svelte';
 	import IgsInfoModal from '$lib/components/IGSInfoModal.svelte';
+	import type { VideoController } from '$lib';
+	import TimelinePanel from '$lib/components/TimelinePanel.svelte';
 
 	let isModalOpen = writable(false);
 
@@ -28,8 +30,8 @@
 	let users: User[] = [];
 	let selectedTab: string = 'Movement';
 
-	let maxTime: number;
 	let core: Core | null;
+	let videoController: VideoController | null;
 
 	$: {
 		const state = get(P5Store);
@@ -39,17 +41,24 @@
 
 	$: core = $P5Store.core;
 
-	// Real progress value
-	let value: number = 50;
+	let minTime = 0;
+	let maxTime = 100; // A default value that will be updated
+	let currentTime = 0;
 
-	// Hover value for the tooltip
-	let hoverValue: number = 0;
+	$: {
+			const state = get(P5Store);
+			videoController = state.videoController;
 
-	// If hovered then show the tooltip
-	let showTooltip: boolean = false;
+			if (videoController) {
+				maxTime = videoController.getVideoDuration(); // Assuming this method exists
+				currentTime = videoController.getVideoPlayerCurTime(); // Adjusted method name
+			}
+    }
+	// // If hovered then show the tooltip
+	// let showTooltip: boolean = false;
 
-	// X coordinate for the tooltip position
-	let tooltipX: number = 0;
+	// // X coordinate for the tooltip position
+	// let tooltipX: number = 0;
 
 	UserStore.subscribe((data) => {
 		users = data;
@@ -58,20 +67,6 @@
 	const sketch: Sketch = (p5: p5) => {
 		igsSketch(p5);
 	};
-
-	function updateTooltip(event: MouseEvent) {
-		const state = get(P5Store);
-		if (!state.core) return;
-		if (!state.videoController) return;
-
-		const rect = (event.currentTarget as HTMLProgressElement).getBoundingClientRect();
-		const progressWidth = rect.width;
-		const mouseX = event.clientX - rect.left; // X position within the progress bar
-		value = state.videoController.getVideoPlayerCurTime();
-		hoverValue = Math.round((mouseX / progressWidth) * state.core.getTotalTimeInSeconds());
-		tooltipX = mouseX;
-		showTooltip = true;
-	}
 
 	function handleFileSelect(event: Event) {
 		const state = get(P5Store);
@@ -99,17 +94,6 @@
 		if (state.core) {
 			state.core.handleCheckboxChange();
 		}
-	}
-
-	// Function to hide the tooltip when not hovering
-	function hideTooltip() {
-		showTooltip = false;
-	}
-
-	function formatTime(seconds: number): string {
-		const minutes = Math.floor(seconds / 60);
-		const remainingSeconds = seconds % 60;
-		return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`; // Zero padding for seconds
 	}
 </script>
 
@@ -201,28 +185,11 @@
 			<!-- Right Side: Timeline -->
 			<div class="relative p-4 bg-gray-100">
 				<!-- Progress bar -->
-				<div class="w-full bg-white">
-					<progress
-						class="progress progress-primary w-full cursor-pointer"
-						{value}
-						max={maxTime}
-						on:mousemove={updateTooltip}
-						on:mouseleave={hideTooltip}
-					/>
+				<!-- <div class="w-full bg-white">
+					<input type="range" min={minTime} max={maxTime} bind:value={currentTime} class="range" />
 					<span class="material-symbols-outlined cursor-pointer">play_arrow</span>
-				</div>
-
-				<!-- Tooltip -->
-				{#if showTooltip}
-					<div
-						class="absolute bg-gray-800 text-white text-xs rounded px-2 py-1 tooltip"
-						style="left: {tooltipX}px; bottom: 100%; transform: translateY(-0.5rem);"
-					>
-						{formatTime(hoverValue)}
-						<!-- {hoverValue} -->
-						<!-- {Math.floor(core.getTime())} -->
-					</div>
-				{/if}
+				</div> -->
+				<TimelinePanel></TimelinePanel>
 			</div>
 		</div>
 
@@ -245,11 +212,3 @@
 </div>
 
 <IgsInfoModal {isModalOpen} />
-
-<style>
-	/* Ensure the tooltip text is not selectable and doesn't interfere with mouse events */
-	.tooltip {
-		pointer-events: none;
-		user-select: none;
-	}
-</style>
