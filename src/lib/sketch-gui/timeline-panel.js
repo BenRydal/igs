@@ -55,10 +55,6 @@ export class TimelinePanel {
 		return this.sk.overRect(this.start, this.top, this.length, this.thickness);
 	}
 
-	getTop() {
-		return this.top;
-	}
-
 	getStart() {
 		return this.start;
 	}
