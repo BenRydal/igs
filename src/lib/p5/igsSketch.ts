@@ -146,13 +146,6 @@ export const igsSketch = (p5: any) => {
 	//   p5.loop();
 	// }
 
-	// p5.mouseMoved = () => {
-	//   if (p5.gui.timelinePanel.overEitherSelector()) p5.cursor(p5.HAND);
-	//   else if (p5.sketchController.getCurSelectTab() === 5) p5.cursor(p5.CROSS);
-	//   else p5.cursor(p5.ARROW);
-	//   p5.loop();
-	// }
-
 	// p5.saveCodeFile = () => {
 	//   if (p5.dataIsLoaded(p5.floorPlan.getImg()) && p5.arrayIsLoaded(p5.core.pathList)) {
 	//     const setPathData = new SetPathData(p5, p5.core.codeList);
