@@ -130,7 +130,7 @@ export const igsSketch = (p5: any) => {
 	// }
 
 	// p5.mousePressed = () => {
-	//   if (!p5.sketchController.getIsAnimate() && p5.gui.timelinePanel.overTimeline() && !p5.gui.timelinePanel.overEitherSelector()) p5.videoController.timelinePlayPause();
+	//   if (!p5.sketchController.getIsAnimate() && p5.gui.timelinePanel.overTimeline()) p5.videoController.timelinePlayPause();
 	//   else if (p5.sketchController.getCurSelectTab() === 5 && !p5.handle3D.getIs3DModeOrTransitioning()) p5.gui.highlight.handleMousePressed();
 	//   p5.loop();
 	// }

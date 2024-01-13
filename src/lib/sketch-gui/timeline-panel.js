@@ -63,10 +63,6 @@ export class TimelinePanel {
 		return this.sk.overRect(selector - this.padding, this.top, this.doublePadding, this.thickness);
 	}
 
-	overEitherSelector() {
-		return this.overSelector(this.selectStart) || this.overSelector(this.selectEnd);
-	}
-
 	overAxis(pixelValue) {
 		return pixelValue >= this.selectStart && pixelValue <= this.selectEnd;
 	}
