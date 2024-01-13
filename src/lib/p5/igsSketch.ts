@@ -135,14 +135,8 @@ export const igsSketch = (p5: any) => {
 	//   p5.loop();
 	// }
 
-	// p5.mouseDragged = () => {
-	//   if (!p5.sketchController.getIsAnimate() && p5.gui.timelinePanel.isLockedOrOverTimeline()) p5.gui.timelinePanel.handle();
-	//   p5.loop();
-	// }
-
 	// p5.mouseReleased = () => {
 	//   if (p5.sketchController.getCurSelectTab() === 5 && !p5.handle3D.getIs3DModeOrTransitioning() && !p5.gui.timelinePanel.isLockedOrOverTimeline()) p5.gui.highlight.handleMouseRelease();
-	//   p5.gui.timelinePanel.resetLock(); // reset after handlingHighlight
 	//   p5.loop();
 	// }
 
