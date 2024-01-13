@@ -87,9 +87,6 @@ export const igsSketch = (p5: any) => {
 	};
 
 	p5.mouseMoved = () => {
-		// if (p5.gui.timelinePanel.overEitherSelector()) p5.cursor(p5.HAND);
-		// else if (p5.sketchController.getCurSelectTab() === 5) p5.cursor(p5.CROSS);
-		// else p5.cursor(p5.ARROW);
 		p5.loop();
 	};
 
