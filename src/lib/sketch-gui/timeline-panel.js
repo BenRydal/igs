@@ -1,19 +1,20 @@
 export class TimelinePanel {
 	constructor(sketch) {
 		this.sk = sketch;
+		// these are the x pixel positions of the start and end of the timeline where data is displayed
 		this.start = this.sk.width * 0.5;
 		this.end = this.sk.width * 0.975;
+
+		// these are the x pixel positions of the user selected segments of the timeline that affect scaling of data
+		this.selectStart = this.start;
+		this.selectEnd = this.end;
+
+		// these vars just draw the visual p5 timeline and use to test
 		this.height = this.sk.height * 0.88;
 		this.thickness = this.sk.height / 13;
 		this.top = this.height - this.thickness / 2;
 		this.bottom = this.height + this.thickness / 2;
-		this.selectStart = this.start;
-		this.selectEnd = this.end;
 		this.length = this.end - this.start;
-		this.padding = this.thickness / 4;
-		this.doublePadding = this.thickness / 2;
-		this.isLockedLeft = false;
-		this.isLockedRight = false;
 	}
 
 	// TODO: this method may be useful in future to calculate and display minutes/seconds
@@ -57,10 +58,6 @@ export class TimelinePanel {
 			container.height,
 			zPos
 		);
-	}
-
-	overSelector(selector) {
-		return this.sk.overRect(selector - this.padding, this.top, this.doublePadding, this.thickness);
 	}
 
 	overAxis(pixelValue) {
