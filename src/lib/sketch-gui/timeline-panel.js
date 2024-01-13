@@ -13,7 +13,6 @@ export class TimelinePanel {
 		this.height = this.sk.height * 0.88;
 		this.thickness = this.sk.height / 13;
 		this.top = this.height - this.thickness / 2;
-		this.bottom = this.height + this.thickness / 2;
 		this.length = this.end - this.start;
 	}
 
