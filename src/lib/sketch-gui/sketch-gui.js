@@ -12,11 +12,8 @@ export class SketchGUI {
 	}
 
 	update2D() {
-		//this.timelinePanel.draw();
-		if (this.timelinePanel.overTimeline()) {
-			if (this.sk.handle3D.getIs3DMode()) this.timelinePanel.drawShortSlicer();
-			else this.timelinePanel.drawLongSlicer();
-		}
+		if (this.timelinePanel.overTimeline() && !this.sk.handle3D.getIs3DMode()) this.timelinePanel.drawLongSlicer();
+
 		if (!this.sk.handle3D.getIs3DModeOrTransitioning()) {
 			if (this.sk.sketchController.getCurSelectTab() === 1) this.fpContainer.drawRegionSelector();
 			else if (this.sk.sketchController.getCurSelectTab() === 2) this.fpContainer.drawSlicerSelector();

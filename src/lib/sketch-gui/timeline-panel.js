@@ -35,11 +35,6 @@ export class TimelinePanel {
 		this.sk.line(this.sk.mouseX, 0, this.sk.mouseX, this.height);
 	}
 
-	drawShortSlicer() {
-		this.setSlicerStroke();
-		this.sk.line(this.sk.mouseX, this.top, this.sk.mouseX, this.bottom);
-	}
-
 	draw3DSlicerRect(container, zPos) {
 		this.sk.fill(255, 50);
 		this.sk.stroke(0);
