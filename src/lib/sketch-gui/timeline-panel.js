@@ -79,14 +79,6 @@ export class TimelinePanel {
 		return this.top;
 	}
 
-	getBottom() {
-		return this.bottom;
-	}
-
-	getHeight() {
-		return this.height;
-	}
-
 	getStart() {
 		return this.start;
 	}
