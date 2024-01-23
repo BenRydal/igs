@@ -20,6 +20,7 @@
 	import { writable } from 'svelte/store';
 	import IconButton from '$lib/components/IconButton.svelte';
 	import IgsInfoModal from '$lib/components/IGSInfoModal.svelte';
+	import TimelinePanel from '$lib/components/TimelinePanel.svelte';
 
 	let isModalOpen = writable(false);
 
@@ -84,11 +85,7 @@
 							core.handle3D();
 						}}
 					/>
-					<select
-						id="select-data-dropdown"
-						class="select select-bordered w-full max-w-xs bg-neutral"
-						on:change={core.handleExampleDropdown}
-					>
+					<select id="select-data-dropdown" class="select select-bordered w-full max-w-xs bg-neutral" on:change={core.handleExampleDropdown}>
 						<option disabled selected>-- Select an Example --</option>
 						<option value="example-1">Michael Jordan's Last Shot</option>
 						<option value="example-2">Family Museum Gallery Visit</option>
@@ -105,11 +102,7 @@
 			<!-- Left Side: Select and Carousel -->
 			<div class="w-1/2">
 				<div class="join w-full flex items-center justify-start">
-					<select
-						bind:value={selectedTab}
-						id="select-data-dropdown"
-						class="select select-bordered max-w-xs bg-neutral text-white dropdown-top"
-					>
+					<select bind:value={selectedTab} id="select-data-dropdown" class="select select-bordered max-w-xs bg-neutral text-white dropdown-top">
 						{#each Constants.TAB_OPTIONS as value}<option {value}>{value}</option>{/each}
 					</select>
 
@@ -117,12 +110,7 @@
 						{#if selectedTab == 'Movement'}
 							{#each $UserStore as user}
 								<div class="carousel-item align-middle inline-flex items-center">
-									<input
-										id="userCheckbox"
-										type="checkbox"
-										class="checkbox"
-										bind:checked={user.enabled}
-									/>
+									<input id="userCheckbox" type="checkbox" class="checkbox" bind:checked={user.enabled} />
 									<!-- TODO: add: on:change={CALL METHOD TO LOOP/RERUN THE SKETCH} -->
 									<label class="m-5" for="userCheckbox">{user.name}</label>
 								</div>
@@ -134,9 +122,10 @@
 
 			<!-- Right Side: Timeline -->
 			<div class="w-1/2 overflow-x-auto">
-				<div style="width: 800px; height: 50px; background: linear-gradient(to right, #eee, #ddd);">
-					<!-- TODO: Timeline logic -->
-				</div>
+				<!-- <div style="width: 800px; height: 50px; background: linear-gradient(to right, #eee, #ddd);"> -->
+				<!-- TODO: Timeline logic -->
+				<TimelinePanel />
+				<!-- </div> -->
 			</div>
 		</div>
 
