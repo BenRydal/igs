@@ -1,49 +1,72 @@
 <script lang="ts">
-  import P5Store from '../../stores/p5Store';
-  import { get } from 'svelte/store';
+  import { onMount } from 'svelte';
+  import { writable } from 'svelte/store';
+  import moment from 'moment';
 
-  import type { SketchController } from '..';
+  let timelineLeft = writable(0); // Initial value for first slider
+  let timelineRight = writable(100); // Initial value for second slider
+  let timelineCurr = writable(0);
+  let loaded = false;
 
-  let startTime: number = 0;
-  let endTime: number = 100;
-  let currentTime: number = 0;
-
-  let sketchController: SketchController | null;
-
-  P5Store.subscribe(state => {
-    sketchController = state.sketchController;
-    synchronizeTime();
+  onMount(() => {
+    if (typeof window !== 'undefined') {
+      // Dynamically import the slider only on the client side
+      import('toolcool-range-slider').then(() => {
+        loaded = true;
+        const slider = document.querySelector('tc-range-slider');
+        if (slider) {
+          slider.addEventListener('change', (event) => {
+            // Assuming the event gives you access to both slider values
+            // Update this part according to how your slider's change event works
+            timelineLeft.set(event.target.value1);
+            timelineRight.set(event.target.value2);
+            timelineCurr.set(0);
+          });
+        }
+      });
+    }
   });
 
-  function synchronizeTime() {
-    if (sketchController) {
-      currentTime = sketchController.mapTotalTimeToPixelTime(sketchController.animationCounter);
-    }
+  function handleChange(event) {
+    // Update this part according to how your slider's change event works
+    timelineLeft.set(event.detail.value1);
+    timelineCurr.set(event.detail.value2);
+    timelineRight.set(event.detail.value3);
   }
-
-  function updateTime(value: number) {
-    if (sketchController) {
-      sketchController.animationCounter = sketchController.mapPixelTimeToTotalTime(value);
-      // Trigger sketch update if necessary
-      sketchController.updateAnimation();
-    }
-  }
-
-  $: if (sketchController) {
-    synchronizeTime();
-  }
-
-  // Add more event handlers as needed
 </script>
 
-<div class="w-full bg-white">
-  <input
-    type="range"
-    min={startTime}
-    max={endTime}
-    bind:value={currentTime}
-    on:change={() => updateTime(currentTime)}
-    class="range"
-  />
-  <span class="material-symbols-outlined cursor-pointer">play_arrow</span>
-</div>
+{#if loaded}
+  <div class='flex flex-col w-full h-full py-5'>
+    <tc-range-slider
+      min="0"
+      max="100"
+      value1={$timelineLeft}
+      value2={$timelineCurr}
+      value3={$timelineRight}
+      round="0"
+      slider-width="100%"
+      generate-labels="true"
+      range-dragging="true"
+      pointer-width="25px"
+      pointer-height="25px"
+      pointer-radius="5px"
+      on:change={handleChange}>
+    </tc-range-slider>
+
+    <div class='flex w-full mt-2 justify-between'>
+      <p>{moment($timelineLeft).format('HH:mm:ss')}/{$timelineRight}</p>
+      <p>timelineLeft: {$timelineLeft}</p>
+    </div>
+  </div>
+
+{/if}
+
+
+<style>
+
+
+  :host {
+    width: 100% !important;
+  }
+
+</style>

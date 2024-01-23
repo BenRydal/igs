@@ -35,13 +35,15 @@
 		"@types/p5": "^1.6.2",
 		"autoprefixer": "^10.4.14",
 		"daisyui": "^3.1.7",
+		"moment": "^2.30.1",
 		"p5": "^1.6.0",
 		"p5-svelte": "^3.1.2",
 		"papaparse": "^5.4.1",
 		"postcss": "^8.4.23",
 		"svelte-icons": "^2.1.0",
 		"svelte-preprocess": "^5.0.3",
-		"tailwindcss": "^3.3.2"
+		"tailwindcss": "^3.3.2",
+		"toolcool-range-slider": "^4.0.28"
 	},
 	"packageManager": "yarn@4.0.1"
 }
