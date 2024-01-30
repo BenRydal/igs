@@ -1,65 +1,85 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { writable } from 'svelte/store';
+  import { onMount } from 'svelte';
+	import moment from 'moment';
 
-	let timelineLeft = writable(0); // Initial value for first slider
-	let timelineRight = writable(100); // Initial value for second slider
-	let timelineCurr = writable(0);
-	let loaded = false;
+  import TimelineStore from '../../stores/timelineStore';
 
-	onMount(() => {
-		if (typeof window !== 'undefined') {
-			// Dynamically import the slider only on the client side
-			import('toolcool-range-slider').then(() => {
-				loaded = true;
-				const slider = document.querySelector('tc-range-slider');
-				if (slider) {
-					slider.addEventListener('change', (event) => {
-						// Assuming the event gives you access to both slider values
-						// Update this part according to how your slider's change event works
-						timelineLeft.set(event.target.value1);
-						timelineRight.set(event.target.value2);
-						timelineCurr.set(0);
-					});
-				}
-			});
-		}
-	});
-	function handleChange(event) {
-		// Update this part according to how your slider's change event works
-		timelineLeft.set(event.detail.value1);
-		timelineCurr.set(event.detail.value2);
-		timelineRight.set(event.detail.value3);
+	$: timelineLeft = $TimelineStore.leftMarker;
+	$: timelineRight = $TimelineStore.rightMarker;
+	$: timelineCurr = $TimelineStore.currTime;
+
+	$: formattedLeft = moment.utc(timelineLeft * 1000).format('HH:mm:ss');
+  $: formattedRight = moment.utc(timelineRight * 1000).format('HH:mm:ss');
+  $: formattedCurr = moment.utc(timelineCurr * 1000).format('HH:mm:ss');
+
+  // Subscribe to the store and update local variables reactively
+  TimelineStore.subscribe($TimelineStore => {
+    timelineLeft = $TimelineStore.leftMarker;
+    timelineRight = $TimelineStore.rightMarker;
+    timelineCurr = $TimelineStore.currTime;
+  });
+
+  let loaded = false;
+
+  onMount(() => {
+    if (typeof window !== 'undefined') {
+      // Dynamically import the slider only on the client side
+      import('toolcool-range-slider').then(() => {
+        loaded = true;
+        const slider = document.querySelector('tc-range-slider');
+        if (slider) {
+          slider.addEventListener('change', (event) => {
+            TimelineStore.update(timeline => {
+              timeline.leftMarker = event.target.value1;
+              timeline.currTime = event.target.value2;
+              timeline.rightMarker = event.target.value3;
+              return timeline;
+            });
+          });
+        }
+      });
+    }
+  });
+
+  function handleChange(event) {
+    const { value1, value2, value3 } = event.detail; // This might need adjustment
+    TimelineStore.update(timeline => {
+        timeline.leftMarker = value1;
+        timeline.currTime = value2;
+        timeline.rightMarker = value3;
+        return timeline;
+    });
 	}
+
 </script>
 
 {#if loaded}
-	<div class="flex flex-col w-full h-full py-5">
-		<tc-range-slider
-			min="0"
-			max="100"
-			value1={$timelineLeft}
-			value2={$timelineCurr}
-			value3={$timelineRight}
-			round="0"
-			slider-width="100%"
-			generate-labels="true"
-			range-dragging="true"
-			pointer-width="25px"
-			pointer-height="25px"
-			pointer-radius="5px"
-			on:change={handleChange}
-		/>
+  <div class="flex flex-col w-11/12 h-full py-5">
+    <tc-range-slider
+      min="0"
+      max="100"
+      value1={timelineLeft}
+      value2={timelineCurr}
+      value3={timelineRight}
+      round="0"
+      slider-width="90%"
+      generate-labels="true"
+      range-dragging="true"
+      pointer-width="25px"
+      pointer-height="25px"
+      pointer-radius="5px"
+      on:change={handleChange}
+    />
 
-		<div class="flex w-full mt-2 justify-between">
-			<p>{$timelineLeft}/{$timelineRight}</p>
-			<p>timelineCurrent: {$timelineCurr}</p>
-		</div>
-	</div>
+    <div class="flex w-full mt-2 justify-between">
+      <p>{formattedCurr}/{formattedRight}</p>
+      <p>timelineLeft: {formattedLeft}</p>
+    </div>
+  </div>
 {/if}
 
 <style>
-	:host {
-		width: 100% !important;
-	}
+  :host {
+    width: 100% !important;
+  }
 </style>

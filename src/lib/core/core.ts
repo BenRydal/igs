@@ -14,7 +14,10 @@ import { DataPoint } from '../../models/dataPoint.js';
 import { User } from '../../models/user.js';
 import type p5 from 'p5';
 import UserStore from '../../stores/userStore';
+import TimelineStore from '../../stores/timelineStore';
+
 import * as Constants from '../constants/index.js';
+import { Timeline } from '../../models/timeline.js';
 
 export class Core {
 	sketch: p5;
@@ -25,6 +28,12 @@ export class Core {
 	maxStopLength: number;
 	COLORGRAY: string;
 	COLOR_LIST: string[];
+
+	leftMarker: number;
+	rightMarker: number;
+	startTime: number;
+	endTime: number;
+	currTime: number;
 
 	constructor(sketch: p5) {
 		this.sketch = sketch;
@@ -48,6 +57,11 @@ export class Core {
 			'#fb9a99',
 			'#ffed6f'
 		];
+		this.leftMarker = 0;
+		this.rightMarker = 0;
+		this.startTime = 0;
+		this.endTime = 0;
+		this.currTime = 0;
 	}
 
 	// TODO: should this move elsewhere?
@@ -71,8 +85,6 @@ export class Core {
 	}
 
 	handleUserLoadedFiles = async (event: Event) => {
-		this.sketch.core.totalTimeInSeconds = 0;
-
 		UserStore.update(() => {
 			return [];
 		});
@@ -83,6 +95,21 @@ export class Core {
 			const file = input.files ? input.files[i] : null;
 			this.testFileTypeForProcessing(file);
 		}
+
+		const newTimelineData = {
+      // Determine these values based on your CSV processing logic
+      leftMarker: this.leftMarker,
+      rightMarker: this.rightMarker,
+      startTime: this.startTime,
+      endTime: this.endTime,
+      currTime: this.currTime,
+    };
+
+    TimelineStore.update(timeline => {
+      timeline.updateTimeline(newTimelineData);
+      return timeline;
+    });
+
 	};
 
 	testFileTypeForProcessing(file: File) {
@@ -228,29 +255,46 @@ export class Core {
 	};
 
 	updateUsersForMovement = (csvData: any, userName: string) => {
-		UserStore.update((currentUsers) => {
-			let users = [...currentUsers]; // clone the current users
-			let user = null;
-			user = users.find((user) => user.name === userName);
-			if (!user) {
-				user = new User([], Constants.PATH_COLORS[users.length], [], true, userName);
-				users.push(user);
-			}
-			for (let i = 1; i < csvData.length; i++) {
-				const row = csvData[i];
-				const priorRow = csvData[i - 1];
-				if (
-					this.coreUtils.movementRowForType(row) &&
-					this.coreUtils.curTimeIsLarger(row, priorRow)
-				) {
-					user.dataTrail.push(new DataPoint('', row.time, row.x, row.y, false));
-					this.sketch.core.setTotalTime(row.time);
-				}
-			}
-			this.updateStopValues(user.dataTrail);
-			return users;
-		});
-	};
+    UserStore.update((currentUsers) => {
+        let users = [...currentUsers]; // clone the current users
+        let user = null;
+        user = users.find((user) => user.name === userName);
+        if (!user) {
+            user = new User([], Constants.PATH_COLORS[users.length], [], true, userName);
+            users.push(user);
+        }
+
+        // Assuming the first column is 'time' and it's sorted in ascending order
+        const startTime = csvData[0]?.time; // The time in the first row
+        const endTime = csvData[csvData.length - 1]?.time; // The time in the last row
+
+        for (let i = 1; i < csvData.length; i++) {
+            const row = csvData[i];
+            const priorRow = csvData[i - 1];
+            if (
+                this.coreUtils.movementRowForType(row) &&
+                this.coreUtils.curTimeIsLarger(row, priorRow)
+            ) {
+                user.dataTrail.push(new DataPoint('', row.time, row.x, row.y, false));
+                this.sketch.core.setTotalTime(row.time);
+            }
+        }
+        this.updateStopValues(user.dataTrail);
+
+        TimelineStore.update(timeline => {
+					timeline.updateTimeline({
+							startTime,
+							endTime,
+							leftMarker: startTime,
+							rightMarker: endTime,
+							currTime: startTime // set currTime to startTime
+					});
+					return timeline;
+				});
+
+        return users;
+    });
+};
 
 	// TODO: this could be moved to main classes to dynamically update, would neat to reset isStopped values in data
 	// Allows dynamic updating of what constitute stop values/intervals in the program
