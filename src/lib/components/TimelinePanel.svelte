@@ -7,17 +7,19 @@
 	$: timelineLeft = $TimelineStore.leftMarker;
 	$: timelineRight = $TimelineStore.rightMarker;
 	$: timelineCurr = $TimelineStore.currTime;
+  $: startTime = $TimelineStore.startTime;
+  $: endTime = $TimelineStore.endTime;
 
 	$: formattedLeft = moment.utc(timelineLeft * 1000).format('HH:mm:ss');
   $: formattedRight = moment.utc(timelineRight * 1000).format('HH:mm:ss');
   $: formattedCurr = moment.utc(timelineCurr * 1000).format('HH:mm:ss');
 
-  // Subscribe to the store and update local variables reactively
-  TimelineStore.subscribe($TimelineStore => {
-    timelineLeft = $TimelineStore.leftMarker;
-    timelineRight = $TimelineStore.rightMarker;
-    timelineCurr = $TimelineStore.currTime;
-  });
+  // // Subscribe to the store and update local variables reactively
+  // TimelineStore.subscribe($TimelineStore => {
+  //   timelineLeft = $TimelineStore.leftMarker;
+  //   timelineRight = $TimelineStore.rightMarker;
+  //   timelineCurr = $TimelineStore.currTime;
+  // });
 
   let loaded = false;
 
@@ -56,8 +58,8 @@
 {#if loaded}
   <div class="flex flex-col w-11/12 h-full py-5">
     <tc-range-slider
-      min="0"
-      max="100"
+      min={startTime}
+      max={endTime}
       value1={timelineLeft}
       value2={timelineCurr}
       value3={timelineRight}

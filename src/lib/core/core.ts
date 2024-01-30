@@ -15,9 +15,8 @@ import { User } from '../../models/user.js';
 import type p5 from 'p5';
 import UserStore from '../../stores/userStore';
 import TimelineStore from '../../stores/timelineStore';
-
+import { Timeline } from '../../models/timeline';
 import * as Constants from '../constants/index.js';
-import { Timeline } from '../../models/timeline.js';
 
 export class Core {
 	sketch: p5;
@@ -28,12 +27,6 @@ export class Core {
 	maxStopLength: number;
 	COLORGRAY: string;
 	COLOR_LIST: string[];
-
-	leftMarker: number;
-	rightMarker: number;
-	startTime: number;
-	endTime: number;
-	currTime: number;
 
 	constructor(sketch: p5) {
 		this.sketch = sketch;
@@ -95,21 +88,6 @@ export class Core {
 			const file = input.files ? input.files[i] : null;
 			this.testFileTypeForProcessing(file);
 		}
-
-		const newTimelineData = {
-      // Determine these values based on your CSV processing logic
-      leftMarker: this.leftMarker,
-      rightMarker: this.rightMarker,
-      startTime: this.startTime,
-      endTime: this.endTime,
-      currTime: this.currTime,
-    };
-
-    TimelineStore.update(timeline => {
-      timeline.updateTimeline(newTimelineData);
-      return timeline;
-    });
-
 	};
 
 	testFileTypeForProcessing(file: File) {
@@ -216,85 +194,57 @@ export class Core {
 		} else if (this.testConversation(results)) {
 			this.updateUsersForConversation(csvData, fileName);
 		} else {
-			alert(
-				'Error loading CSV file. Please make sure your file is a CSV file formatted with correct column headers'
-			);
+			alert('Error loading CSV file. Please make sure your file is a CSV file formatted with correct column headers');
 		}
 	};
 
 	testMovement = (results: any): boolean => {
-		return this.coreUtils.testPapaParseResults(
-			results,
-			this.coreUtils.headersMovement,
-			this.coreUtils.movementRowForType
-		);
+		return this.coreUtils.testPapaParseResults(results, this.coreUtils.headersMovement, this.coreUtils.movementRowForType);
 	};
 
 	testConversation = (results: any): boolean => {
-		return this.coreUtils.testPapaParseResults(
-			results,
-			this.coreUtils.headersConversation,
-			this.coreUtils.conversationRowForType
-		);
+		return this.coreUtils.testPapaParseResults(results, this.coreUtils.headersConversation, this.coreUtils.conversationRowForType);
 	};
 
 	testSingleCode = (results: any): boolean => {
-		return this.coreUtils.testPapaParseResults(
-			results,
-			this.coreUtils.headersSingleCodes,
-			this.coreUtils.codeRowForType
-		);
+		return this.coreUtils.testPapaParseResults(results, this.coreUtils.headersSingleCodes, this.coreUtils.codeRowForType);
 	};
 
 	testMulticode = (results: any): boolean => {
-		return this.coreUtils.testPapaParseResults(
-			results,
-			this.coreUtils.headersMultiCodes,
-			this.coreUtils.multiCodeRowForType
-		);
+		return this.coreUtils.testPapaParseResults(results, this.coreUtils.headersMultiCodes, this.coreUtils.multiCodeRowForType);
 	};
 
 	updateUsersForMovement = (csvData: any, userName: string) => {
-    UserStore.update((currentUsers) => {
-        let users = [...currentUsers]; // clone the current users
-        let user = null;
-        user = users.find((user) => user.name === userName);
-        if (!user) {
-            user = new User([], Constants.PATH_COLORS[users.length], [], true, userName);
-            users.push(user);
-        }
+		let endTime = 0;
 
-        // Assuming the first column is 'time' and it's sorted in ascending order
-        const startTime = csvData[0]?.time; // The time in the first row
-        const endTime = csvData[csvData.length - 1]?.time; // The time in the last row
+		UserStore.update((currentUsers) => {
+			let users = [...currentUsers]; // clone the current users
+			let user = null;
+			user = users.find((user) => user.name === userName);
+			if (!user) {
+				user = new User([], Constants.PATH_COLORS[users.length], [], true, userName);
+				users.push(user);
+			}
 
-        for (let i = 1; i < csvData.length; i++) {
-            const row = csvData[i];
-            const priorRow = csvData[i - 1];
-            if (
-                this.coreUtils.movementRowForType(row) &&
-                this.coreUtils.curTimeIsLarger(row, priorRow)
-            ) {
-                user.dataTrail.push(new DataPoint('', row.time, row.x, row.y, false));
-                this.sketch.core.setTotalTime(row.time);
-            }
-        }
-        this.updateStopValues(user.dataTrail);
+			// Assuming the first column is 'time' and it's sorted in ascending order
+			//const startTime = csvData[0]?.time; // The time in the first row
+			//const endTime = csvData[csvData.length - 1]?.time; // The time in the last row
+			if (endTime < csvData[csvData.length - 1]?.time) endTime = csvData[csvData.length - 1]?.time;
 
-        TimelineStore.update(timeline => {
-					timeline.updateTimeline({
-							startTime,
-							endTime,
-							leftMarker: startTime,
-							rightMarker: endTime,
-							currTime: startTime // set currTime to startTime
-					});
-					return timeline;
-				});
+			for (let i = 1; i < csvData.length; i++) {
+				const row = csvData[i];
+				const priorRow = csvData[i - 1];
+				if (this.coreUtils.movementRowForType(row) && this.coreUtils.curTimeIsLarger(row, priorRow)) {
+					user.dataTrail.push(new DataPoint('', row.time, row.x, row.y, false));
+					this.sketch.core.setTotalTime(row.time);
+				}
+			}
+			this.updateStopValues(user.dataTrail);
 
-        return users;
-    });
-};
+			return users;
+		});
+		TimelineStore.set(new Timeline(0, endTime, 0, endTime, 0));
+	};
 
 	// TODO: this could be moved to main classes to dynamically update, would neat to reset isStopped values in data
 	// Allows dynamic updating of what constitute stop values/intervals in the program
@@ -349,13 +299,7 @@ export class Core {
 				let user = users.find((user) => user.name === row.speaker.toLowerCase());
 
 				if (!user) {
-					user = new User(
-						[],
-						Constants.PATH_COLORS[users.length],
-						[],
-						true,
-						row.speaker.toLowerCase()
-					);
+					user = new User([], Constants.PATH_COLORS[users.length], [], true, row.speaker.toLowerCase());
 					users.push(user);
 				}
 				this.addDataPointClosestByTimeInSeconds(user.dataTrail, new DataPoint(row.talk, row.time));
@@ -372,10 +316,7 @@ export class Core {
 		}
 		// Find the index of the data point with the closest time in seconds
 		const closestIndex = dataPoints.reduce((closest, current, index) => {
-			return Math.abs(current.time - newDataPoint.time) <
-				Math.abs(dataPoints[closest].time - newDataPoint.time)
-				? index
-				: closest;
+			return Math.abs(current.time - newDataPoint.time) < Math.abs(dataPoints[closest].time - newDataPoint.time) ? index : closest;
 		}, 0);
 
 		// Decide where to insert - before or after the closest time
