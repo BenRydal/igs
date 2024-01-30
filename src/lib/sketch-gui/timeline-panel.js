@@ -1,3 +1,10 @@
+import TimelineStore from '../../stores/timelineStore';
+
+let timeLine;
+
+TimelineStore.subscribe((data) => {
+	timeLine = data;
+});
 export class TimelinePanel {
 	constructor(sketch) {
 		this.sk = sketch;
@@ -14,13 +21,6 @@ export class TimelinePanel {
 		this.thickness = this.sk.height / 13;
 		this.top = this.height - this.thickness / 2;
 		this.length = this.end - this.start;
-	}
-
-	// TODO: this method may be useful in future to calculate and display minutes/seconds
-	getMinutesAndSeconds(timeInSeconds) {
-		const minutes = Math.floor(timeInSeconds / 60);
-		const seconds = Math.floor(timeInSeconds - minutes * 60);
-		return minutes + ' minutes  ' + seconds + ' seconds';
 	}
 
 	setSlicerStroke() {
@@ -42,7 +42,7 @@ export class TimelinePanel {
 	}
 
 	overAxis(pixelValue) {
-		return pixelValue >= this.selectStart && pixelValue <= this.selectEnd;
+		return pixelValue >= this.getSelectStart() && pixelValue <= this.getSelectEnd();
 	}
 
 	overTimeline() {
@@ -58,11 +58,13 @@ export class TimelinePanel {
 	}
 
 	getSelectStart() {
-		return this.selectStart;
+		return this.sk.sketchController.mapTotalTimeToPixelTime(timeLine.leftMarker);
+		//return this.selectStart;
 	}
 
 	getSelectEnd() {
-		return this.selectEnd;
+		return this.sk.sketchController.mapTotalTimeToPixelTime(timeLine.rightMarker);
+		//return this.selectEnd;
 	}
 
 	getLength() {
