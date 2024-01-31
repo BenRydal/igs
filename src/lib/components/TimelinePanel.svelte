@@ -109,7 +109,7 @@
         value2={timelineCurr}
         value3={timelineRight}
         round="0"
-        slider-width="90%"
+        slider-width="100%"
         generate-labels="true"
         range-dragging="true"
         pointer-width="25px"
