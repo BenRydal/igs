@@ -55,7 +55,7 @@ export class VideoController {
 
 	setVideoScrubbing() {
 		if (this.sk.sketchController.getIsAnimate()) this.seekMethodAnimate();
-		else if (this.sk.gui.timelinePanel.overTimeline()) {
+		else if (this.sk.sketchController.overTimeline()) {
 			this.seekMethodMouse();
 			this.videoPlayer.pause(); // Add to prevent accidental video playing that seems to occur
 		}
@@ -65,10 +65,10 @@ export class VideoController {
 		const videoTime = Math.floor(
 			this.sk.map(
 				this.dotTimeForVideoScrub,
-				this.sk.gui.timelinePanel.getStart(),
-				this.sk.gui.timelinePanel.getEnd(),
-				this.mapPixelTimeToVideoTime(this.sk.gui.timelinePanel.getSelectStart()),
-				this.mapPixelTimeToVideoTime(this.sk.gui.timelinePanel.getSelectEnd())
+				this.sk.sketchController.getTimelineStartXPos(),
+				this.sk.sketchController.getTimelineEndXPos(),
+				this.mapPixelTimeToVideoTime(this.sk.sketchController.getTimelineLeftMarkerXPos()),
+				this.mapPixelTimeToVideoTime(this.sk.sketchController.getTimelineRightMarkerXPos())
 			)
 		);
 		this.videoPlayer.seekTo(videoTime);
@@ -137,8 +137,8 @@ export class VideoController {
 			return Math.floor(
 				this.sk.map(
 					value,
-					this.sk.gui.timelinePanel.getStart(),
-					this.sk.gui.timelinePanel.getEnd(),
+					this.sk.sketchController.getTimelineStartXPos(),
+					this.sk.sketchController.getTimelineEndXPos(),
 					0,
 					Math.floor(this.videoPlayer.getVideoDuration())
 				)
@@ -147,8 +147,8 @@ export class VideoController {
 		else {
 			let mappedTime = this.sk.map(
 				value,
-				this.sk.gui.timelinePanel.getStart(),
-				this.sk.gui.timelinePanel.getEnd(),
+				this.sk.sketchController.getTimelineStartXPos(),
+				this.sk.sketchController.getTimelineEndXPos(),
 				0,
 				Math.floor(this.sk.core.getTotalTimeInSeconds())
 			);

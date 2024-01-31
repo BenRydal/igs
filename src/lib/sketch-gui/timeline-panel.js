@@ -40,28 +40,4 @@ export class TimelinePanel {
 		this.sk.strokeWeight(1);
 		this.sk.quad(0, 0, zPos, container.width, 0, zPos, container.width, container.height, zPos, 0, container.height, zPos);
 	}
-
-	overAxis(pixelValue) {
-		return pixelValue >= this.getSelectStart() && pixelValue <= this.getSelectEnd();
-	}
-
-	overTimeline() {
-		return this.sk.overRect(this.start, this.top, this.length, this.thickness);
-	}
-
-	getStart() {
-		return timeLine.getLeftX();
-	}
-
-	getEnd() {
-		return timeLine.getRightX();
-	}
-
-	getSelectStart() {
-		return this.sk.sketchController.mapTotalTimeToPixelTime(timeLine.getLeftMarker());
-	}
-
-	getSelectEnd() {
-		return this.sk.sketchController.mapTotalTimeToPixelTime(timeLine.getRightMarker());
-	}
 }
