@@ -9,8 +9,8 @@ export class TimelinePanel {
 	constructor(sketch) {
 		this.sk = sketch;
 		// these are the x pixel positions of the start and end of the timeline where data is displayed
-		this.start = this.sk.width * 0.5;
-		this.end = this.sk.width * 0.975;
+		this.start = timeLine.getLeftX();
+		this.end = timeLine.getRightX();
 
 		// these are the x pixel positions of the user selected segments of the timeline that affect scaling of data
 		this.selectStart = this.start;
@@ -50,24 +50,18 @@ export class TimelinePanel {
 	}
 
 	getStart() {
-		return this.start;
+		return timeLine.getLeftX();
 	}
 
 	getEnd() {
-		return this.end;
+		return timeLine.getRightX();
 	}
 
 	getSelectStart() {
-		return this.sk.sketchController.mapTotalTimeToPixelTime(timeLine.leftMarker);
-		//return this.selectStart;
+		return this.sk.sketchController.mapTotalTimeToPixelTime(timeLine.getLeftMarker());
 	}
 
 	getSelectEnd() {
-		return this.sk.sketchController.mapTotalTimeToPixelTime(timeLine.rightMarker);
-		//return this.selectEnd;
-	}
-
-	getLength() {
-		return this.length;
+		return this.sk.sketchController.mapTotalTimeToPixelTime(timeLine.getRightMarker());
 	}
 }

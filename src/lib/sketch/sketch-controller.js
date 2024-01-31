@@ -16,9 +16,12 @@ export class SketchController {
 	}
 
 	updateAnimation(animationIncrementRateDivisor) {
-		const curTimeIntervalInSeconds = this.mapPixelTimeToTotalTime(this.sk.gui.timelinePanel.getSelectEnd()) - this.mapPixelTimeToTotalTime(this.sk.gui.timelinePanel.getSelectStart()); // Get amount of time in seconds currently displayed
+		const curTimeIntervalInSeconds =
+			this.mapPixelTimeToTotalTime(this.sk.gui.timelinePanel.getSelectEnd()) -
+			this.mapPixelTimeToTotalTime(this.sk.gui.timelinePanel.getSelectStart()); // Get amount of time in seconds currently displayed
 		const animationIncrementValue = curTimeIntervalInSeconds / animationIncrementRateDivisor; // set increment value based on that value/divisor to keep constant sketchController.isAnimate speed regardless of time interval selected
-		if (this.animationCounter < this.mapPixelTimeToTotalTime(this.sk.gui.timelinePanel.getSelectEnd())) this.animationCounter += animationIncrementValue;
+		if (this.animationCounter < this.mapPixelTimeToTotalTime(this.sk.gui.timelinePanel.getSelectEnd()))
+			this.animationCounter += animationIncrementValue;
 		else this.setIsAnimate(false);
 	}
 
@@ -34,7 +37,13 @@ export class SketchController {
 	}
 
 	mapPixelTimeToSelectTime(value) {
-		return this.sk.map(value, this.sk.gui.timelinePanel.getStart(), this.sk.gui.timelinePanel.getEnd(), this.sk.gui.timelinePanel.getSelectStart(), this.sk.gui.timelinePanel.getSelectEnd());
+		return this.sk.map(
+			value,
+			this.sk.gui.timelinePanel.getStart(),
+			this.sk.gui.timelinePanel.getEnd(),
+			this.sk.gui.timelinePanel.getSelectStart(),
+			this.sk.gui.timelinePanel.getSelectEnd()
+		);
 	}
 
 	mapToSelectTimeThenPixelTime(value) {
@@ -42,12 +51,25 @@ export class SketchController {
 	}
 
 	mapSelectTimeToPixelTime(value) {
-		if (this.sk.handle3D.getIs3DMode()) return this.sk.map(value, this.sk.gui.timelinePanel.getSelectStart(), this.sk.gui.timelinePanel.getSelectEnd(), this.sk.height / 10, this.sk.height / 1.6);
+		if (this.sk.handle3D.getIs3DMode())
+			return this.sk.map(
+				value,
+				this.sk.gui.timelinePanel.getSelectStart(),
+				this.sk.gui.timelinePanel.getSelectEnd(),
+				this.sk.height / 10,
+				this.sk.height / 1.6
+			);
 		else return this.mapSelectTimeToPixelTime2D(value);
 	}
 
 	mapSelectTimeToPixelTime2D(value) {
-		return this.sk.map(value, this.sk.gui.timelinePanel.getSelectStart(), this.sk.gui.timelinePanel.getSelectEnd(), this.sk.gui.timelinePanel.getStart(), this.sk.gui.timelinePanel.getEnd());
+		return this.sk.map(
+			value,
+			this.sk.gui.timelinePanel.getSelectStart(),
+			this.sk.gui.timelinePanel.getSelectEnd(),
+			this.sk.gui.timelinePanel.getStart(),
+			this.sk.gui.timelinePanel.getEnd()
+		);
 	}
 
 	// maps value from time in seconds from data to time in pixels on timeline
@@ -130,6 +152,7 @@ export class SketchController {
 	getCurConversationRectWidth() {
 		const maxRectWidth = 10;
 		const curScaledRectWidth = this.sk.map(this.sk.core.getTotalTimeInSeconds(), 0, 3600, maxRectWidth, 1, true);
-		return this.sk.map(this.sk.gui.timelinePanel.getSelectEnd() - this.sk.gui.timelinePanel.getSelectStart(), 0, this.sk.gui.timelinePanel.getLength(), maxRectWidth, curScaledRectWidth);
+		const timelineLength = this.sk.gui.timelinePanel.getSelectEnd() - this.sk.gui.timelinePanel.getSelectStart();
+		return this.sk.map(timelineLength, 0, timelineLength, maxRectWidth, curScaledRectWidth);
 	}
 }

@@ -7,7 +7,7 @@ export class SketchGUI {
 		this.sk = sketch;
 		this.displayBottom = this.sk.height;
 		this.timelinePanel = new TimelinePanel(this.sk);
-		this.fpContainer = new FloorPlanContainer(this.sk, this.timelinePanel.getStart(), this.timelinePanel.getEnd(), this.displayBottom);
+		this.fpContainer = new FloorPlanContainer(this.sk, this.timelinePanel.getStart(), this.displayBottom);
 		this.highlight = new Highlight(this.sk, this.displayBottom);
 	}
 
