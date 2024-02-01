@@ -1,8 +1,5 @@
 import P5Store from '../../stores/p5Store';
 import UserStore from '../../stores/userStore';
-import TimelineStore from '../../stores/timelineStore';
-
-import P5, { type Sketch } from 'p5-svelte';
 
 import { Core, FloorPlan, SketchGUI, SketchController, Handle3D, VideoController, SetPathData } from '..';
 
