@@ -159,7 +159,6 @@ export class Core {
 				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, `teacher.csv`);
 				break;
 		}
-		this.sketch.loop();
 	};
 
 	loadCSVData = async (file: File) => {
@@ -172,6 +171,7 @@ export class Core {
 			},
 			complete: (results: any, file: any) => {
 				this.processResultsData(results, this.coreUtils.cleanFileName(file.name));
+				this.sketch.loop();
 			}
 		});
 	};
@@ -246,14 +246,14 @@ export class Core {
 
 			return users;
 		});
-		TimelineStore.update(timeline => {
-      timeline.setCurrTime(0);
+		TimelineStore.update((timeline) => {
+			timeline.setCurrTime(0);
 			timeline.setStartTime(0);
 			timeline.setEndTime(endTime);
 			timeline.setLeftMarker(0);
 			timeline.setRightMarker(endTime);
-      return timeline;
-    });
+			return timeline;
+		});
 	};
 
 	// TODO: this could be moved to main classes to dynamically update, would neat to reset isStopped values in data
