@@ -33,7 +33,7 @@ export class SketchGUI {
 
 	drawLongSlicer() {
 		this.setSlicerStroke();
-		this.sk.line(this.sk.mouseX, 0, this.sk.mouseX, this.height);
+		this.sk.line(this.sk.mouseX, 0, this.sk.mouseX, this.displayBottom);
 	}
 
 	draw3DSlicerRect(container, zPos) {

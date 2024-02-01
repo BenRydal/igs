@@ -178,7 +178,9 @@ export class SketchController {
 	}
 
 	overTimeline() {
-		return false; // TODO: update this for new timeline x/y positions
+		// TODO: update this for new timeline x/y positions
+		const pixelValue = this.sk.mouseX;
+		return pixelValue >= this.getTimelineLeftMarkerXPos() && pixelValue <= this.getTimelineRightMarkerXPos();
 		// return this.sk.overRect(this.start, this.top, this.length, this.thickness);
 	}
 }
