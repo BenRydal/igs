@@ -1,25 +1,49 @@
 <script lang="ts">
-  import { onMount, onDestroy } from 'svelte';
-	import moment from 'moment';
-
+  import { onMount, onDestroy, tick } from 'svelte';
+  import moment from 'moment';
   import TimelineStore from '../../stores/timelineStore';
 
-	$: timelineLeft = $TimelineStore.getLeftMarker();
-	$: timelineRight = $TimelineStore.getRightMarker();
-	$: timelineCurr = $TimelineStore.getCurrTime();
+  // Reactive declarations for store values
+  $: timelineLeft = $TimelineStore.getLeftMarker();
+  $: timelineRight = $TimelineStore.getRightMarker();
+  $: timelineCurr = $TimelineStore.getCurrTime();
   $: startTime = $TimelineStore.getStartTime();
   $: endTime = $TimelineStore.getEndTime();
   $: leftX = $TimelineStore.getLeftX();
   $: rightX = $TimelineStore.getRightX();
 
-	$: formattedLeft = moment.utc(timelineLeft * 1000).format('HH:mm:ss');
+  // Formatting times for display
+  $: formattedLeft = moment.utc(timelineLeft * 1000).format('HH:mm:ss');
   $: formattedRight = moment.utc(timelineRight * 1000).format('HH:mm:ss');
   $: formattedCurr = moment.utc(timelineCurr * 1000).format('HH:mm:ss');
 
-  let loaded = false;
   let sliderContainer: HTMLDivElement;
+  let loaded = false;
 
-  // Used to properly type the event used in HandleChange below
+  /**
+   * Updates the X positions based on the current dimensions of the slider container.
+   * This function is called whenever the window is resized or the slider container is mounted.
+   */
+  const updateXPositions = (): void => {
+    if (!sliderContainer) {
+      console.warn('Slider container not available.');
+      loaded = false; // Ensure loaded is false if sliderContainer is not available
+      return;
+    }
+
+    const rect = sliderContainer.getBoundingClientRect();
+    const leftX = rect.left;
+    const rightX = rect.right;
+
+    TimelineStore.update(timeline => {
+      timeline.updateXPositions({ leftX, rightX });
+      return timeline;
+    });
+
+    loaded = true; // Set loaded to true after successful update
+  };
+
+  // Used to properly type the event used in handleChange
   interface SliderChangeEvent extends Event {
     detail: {
       value1: number;
@@ -28,30 +52,41 @@
     };
   }
 
-  onMount(() => {
+  /**
+   * Handles changes in the range slider, updating the timeline markers and X positions accordingly.
+   * @param {SliderChangeEvent} event - The event object emitted by the range slider on change.
+   */
+  const handleChange = (event: SliderChangeEvent): void => {
+    const { value1, value2, value3 } = event.detail;
+    if (value1 === timelineLeft && value2 === timelineCurr && value3 === timelineRight) {
+      return;
+    }
+
+    TimelineStore.update(timeline => {
+      timeline.setLeftMarker(value1);
+      timeline.setCurrTime(value2);
+      timeline.setRightMarker(value3);
+      updateXPositions();
+      return timeline;
+    });
+  };
+
+  onMount(async () => {
     if (typeof window !== 'undefined') {
       // Dynamically import the slider only on the client side
-      import('toolcool-range-slider').then(() => {
+      import('toolcool-range-slider').then(async () => {
         loaded = true;
         const slider = document.querySelector('tc-range-slider');
         if (slider) {
           slider.addEventListener('change', (event: Event) => {
-            const target = event.target as HTMLInputElement; // Cast event.target to the proper element type, adjust if it's not HTMLInputElement
-            if (target && 'value1' in target && 'value2' in target && 'value3' in target) {
-              // Now you can safely use target.value1, target.value2, and target.value3
-              TimelineStore.update(timeline => {
-                timeline.setLeftMarker(Number(target['value1']));
-                timeline.setCurrTime(Number(target['value2']));
-                timeline.setRightMarker(Number(target['value3']));
-                return timeline;
-              });
-            }
+            handleChange(event as SliderChangeEvent);
           });
         }
+        await tick();
+        updateXPositions();
       });
 
       window.addEventListener('resize', updateXPositions);
-      updateXPositions();
     }
   });
 
@@ -59,43 +94,6 @@
     if (typeof window === 'undefined') return;
     window.removeEventListener('resize', updateXPositions);
   });
-
-  const updateXPositions = () => {
-    if (sliderContainer) {
-      const rect = sliderContainer.getBoundingClientRect();
-      const leftX = rect.left; // X position of the left edge of the slider container
-      const rightX = rect.right; // X position of the right edge of the slider container
-
-      TimelineStore.update(timeline => {
-        timeline.updateXPositions({ leftX, rightX });
-        return timeline;
-      });
-    }
-  };
-
-
-  function handleChange(event: SliderChangeEvent) {
-    if (event.detail.value1 === timelineLeft && event.detail.value2 === timelineCurr && event.detail.value3 === timelineRight) {
-      return;
-    }
-
-    const { value1, value2, value3 } = event.detail;
-    TimelineStore.update(timeline => {
-      timeline.setLeftMarker(value1);
-      timeline.setCurrTime(value2);
-      timeline.setRightMarker(value3);
-
-      if (sliderContainer) {
-        const rect = sliderContainer.getBoundingClientRect();
-        const leftX = rect.left; // X position of the left edge of the slider container
-        const rightX = rect.right; // X position of the right edge of the slider container
-
-        timeline.updateXPositions({ leftX, rightX });
-      }
-      return timeline;
-    });
-  }
-
 </script>
 
 {#if loaded}
