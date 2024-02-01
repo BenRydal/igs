@@ -2,6 +2,13 @@
   import { onMount, onDestroy, tick } from 'svelte';
   import moment from 'moment';
   import TimelineStore from '../../stores/timelineStore';
+  import P5Store from '../../stores/p5Store';
+
+  let p5Instance;
+
+  P5Store.subscribe((value) => {
+		p5Instance = value;
+	});
 
   // Reactive declarations for store values
   $: timelineLeft = $TimelineStore.getLeftMarker();
@@ -40,6 +47,7 @@
       return timeline;
     });
 
+    if (p5Instance) p5Instance.loop(); // loop after any update once sketch is defined
     loaded = true; // Set loaded to true after successful update
   };
 
