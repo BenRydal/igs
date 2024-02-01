@@ -17,6 +17,38 @@ body {
     width: 100%;
 }
 
+#data-drop-down-menu {
+    -webkit-appearance: none;  /* Removes default chrome and safari style */
+    -moz-appearance: none;  /* Removes default style Firefox */
+    appearance: none;  /* Removes default browser style*/
+    font-size: 1em;
+    font-weight: 300;
+    color: #333; /* Dark grey color for text */
+    background-color: white;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><path fill="%23333" d="M5 8l5 5 5-5z"/></svg>'); /* Custom arrow */
+    background-repeat: no-repeat, repeat;
+    background-position: right .7em top 50%, 0 0;
+    background-size: 1em auto, 100%;
+    border: 1px solid #ddd; /* Light grey border */
+    border-radius: 5px; /* Rounded corners */
+    padding: 8px 20px 8px 8px; /* Padding for text and arrow */
+    cursor: pointer;
+}
+
+#data-drop-down-menu:hover {
+    border-color: #bbb; /* Slightly darker border on hover */
+}
+
+#data-drop-down-menu:focus {
+    border-color: #999; /* Even darker border for focus */
+    outline: none; /* Removes the default focus outline */
+}
+
+/* Optional: Add a transition for smooth effect */
+#data-drop-down-menu {
+    transition: border-color 0.3s ease;
+}
+
 .main-menu-bar {
     text-align: center;
     margin-bottom: 10px;
@@ -32,14 +64,26 @@ body {
     z-index: -1;
 }
 
-.main-menu-bar__input+label {
+.main-menu-bar__input + label {
     font-size: 1em;
-    font-weight: 300;
-    color: black;
-    background-color: white;
+    font-weight: 500; /* Slightly bolder */
+    color: white; /* Change text color */
+    background-color:#817c81; /* A pleasant blue */
     display: inline-block;
-    border: 1px solid black;
-    padding: 5px;
+    border: none;
+    padding: 10px 15px; /* More padding for a larger button */
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer; /* Cursor changes to pointer to indicate it's clickable */
+}
+
+.main-menu-bar__input + label:hover,
+.main-menu-bar__input + label:active {
+    background-color: #ccc; /* Darker shade on hover and active */
+}
+
+/* Optional: Add a transition for smooth effect */
+.main-menu-bar__input + label {
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 /* Display none for hiding load data buttons on program start */
