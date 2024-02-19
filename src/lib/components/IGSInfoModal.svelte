@@ -7,9 +7,9 @@
 	<input type="checkbox" bind:checked={$isModalOpen} id="my-modal" class="modal-toggle" />
 	<div class="modal">
 		<div class="modal-box max-w-7xl">
-			<div class="hero p-20">
+			<div class="hero p-10">
 				<div class="hero-content text-left">
-					<div class="max-w-16">
+					<div class="">
 						<h1 class="text-5xl font-bold pb-8">INTERACTION GEOGRAPHY SLICER (IGS)</h1>
 						<p class="py-3">
 							Hello! This is a tool to visualize movement, conversation, and video data over space
@@ -34,7 +34,7 @@
 						</p>
 						<!-- <button class="btn btn-primary">Get Started</button> -->
 						<div class="modal-action">
-							<button class="btn btn-primary" on:click={() => ($isModalOpen = false)}>
+							<button class="btn btn-[#f6f5f3]" on:click={() => ($isModalOpen = false)}>
 								<label for="my-modal">Get Started</label>
 							</button>
 						</div>

@@ -2,7 +2,7 @@
   import "../app.css";
 </script>
 
-<div class="navbar min-h-16 bg-neutral text-base-100">
+<!-- <div class="navbar min-h-16 bg-neutral text-base-100">
   <div class="flex-1 px-2 lg:flex-none">
     <a class="text-lg font-bold" href="/">IGS</a>
   </div>
@@ -22,6 +22,6 @@
       <a class="btn btn-ghost rounded-btn" href="/settings">Settings</a>
     </div>
   </div>
-</div>
+</div> -->
 
 <slot />
