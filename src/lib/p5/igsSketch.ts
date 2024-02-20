@@ -25,7 +25,12 @@ export const igsSketch = (p5: any) => {
 	};
 
 	p5.setup = () => {
-		p5.createCanvas(window.innerWidth, window.innerHeight, p5.WEBGL);
+		const navbarHeight = (document.querySelector('.navbar') as HTMLElement).offsetHeight;
+		const bottomNavHeight = (document.querySelector('.btm-nav') as HTMLElement).offsetHeight;
+
+		const availableHeight = window.innerHeight - navbarHeight - bottomNavHeight;
+
+		p5.createCanvas(window.innerWidth, availableHeight, p5.WEBGL);
 
 		p5.core = new Core(p5);
 		p5.sketchController = new SketchController(p5);
@@ -48,7 +53,7 @@ export const igsSketch = (p5: any) => {
 	};
 
 	p5.draw = () => {
-		p5.background(255);
+		p5.background(246, 245, 243);
 		p5.translate(-p5.width / 2, -p5.height / 2, 0); // recenter canvas to top left when using WEBGL renderer
 
 		if (p5.handle3D.getIs3DModeOrTransitioning()) {
@@ -103,7 +108,12 @@ export const igsSketch = (p5: any) => {
 	};
 
 	p5.windowResized = () => {
-		p5.resizeCanvas(window.innerWidth, window.innerHeight);
+		const navbarHeight = (document.querySelector('.navbar') as HTMLElement).offsetHeight;
+		const bottomNavHeight = (document.querySelector('.btm-nav') as HTMLElement).offsetHeight;
+
+		const availableHeight = window.innerHeight - navbarHeight - bottomNavHeight;
+
+		p5.resizeCanvas(window.innerWidth, availableHeight);
 		p5.gui = new SketchGUI(p5); // update GUI vars
 		p5.GUITEXTSIZE = p5.width / 70;
 		p5.textSize(p5.GUITEXTSIZE);
