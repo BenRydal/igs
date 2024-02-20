@@ -1,18 +1,7 @@
 import P5Store from '../../stores/p5Store';
 import UserStore from '../../stores/userStore';
-import TimelineStore from '../../stores/timelineStore';
 
-import P5, { type Sketch } from 'p5-svelte';
-
-import {
-	Core,
-	FloorPlan,
-	SketchGUI,
-	SketchController,
-	Handle3D,
-	VideoController,
-	SetPathData
-} from '..';
+import { Core, FloorPlan, SketchGUI, SketchController, Handle3D, VideoController, SetPathData } from '..';
 
 import type { User } from '../../models/user';
 import type p5 from 'p5';
@@ -36,14 +25,11 @@ export const igsSketch = (p5: any) => {
 	};
 
 	p5.setup = () => {
-		p5.createCanvas(window.innerWidth, window.innerHeight - 160, p5.WEBGL);
+		p5.createCanvas(window.innerWidth, window.innerHeight, p5.WEBGL);
 
-		// Library classes
 		p5.core = new Core(p5);
-		p5.gui = new SketchGUI(p5);
-		// p5.domHandler = new DomHandler(p5);
-		// p5.domController = new DomController(p5);
 		p5.sketchController = new SketchController(p5);
+		p5.gui = new SketchGUI(p5);
 		p5.handle3D = new Handle3D(p5, true);
 		p5.videoController = new VideoController(p5);
 		p5.floorPlan = new FloorPlan(p5);
@@ -113,13 +99,11 @@ export const igsSketch = (p5: any) => {
 	// TODO: This needs to be moved eventually
 	// Used by `timeline-panel.js` to determine whether to draw the timeline
 	p5.overRect = (x: number, y: number, boxWidth: number, boxHeight: number) => {
-		return (
-			p5.mouseX >= x && p5.mouseX <= x + boxWidth && p5.mouseY >= y && p5.mouseY <= y + boxHeight
-		);
+		return p5.mouseX >= x && p5.mouseX <= x + boxWidth && p5.mouseY >= y && p5.mouseY <= y + boxHeight;
 	};
 
 	p5.windowResized = () => {
-		p5.resizeCanvas(window.innerWidth - 100, window.innerHeight - 100);
+		p5.resizeCanvas(window.innerWidth, window.innerHeight);
 		p5.gui = new SketchGUI(p5); // update GUI vars
 		p5.GUITEXTSIZE = p5.width / 70;
 		p5.textSize(p5.GUITEXTSIZE);

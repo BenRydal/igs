@@ -7,16 +7,19 @@
  * Each time CSV file is successfully loaded and parsed, domController is called to update GUI elements
  *
  */
-import Papa from 'papaparse'; // Import this if it's not globally available
+import type p5 from 'p5';
+import Papa from 'papaparse';
+
 import { CoreUtils } from './core-utils.js';
 import { ParseCodes } from './parse-codes.js';
+
 import { DataPoint } from '../../models/dataPoint.js';
 import { User } from '../../models/user.js';
-import type p5 from 'p5';
-import UserStore from '../../stores/userStore';
-import TimelineStore from '../../stores/timelineStore';
 import { Timeline } from '../../models/timeline';
 import * as Constants from '../constants/index.js';
+
+import UserStore from '../../stores/userStore';
+import TimelineStore from '../../stores/timelineStore';
 
 export class Core {
 	sketch: p5;
@@ -156,7 +159,6 @@ export class Core {
 				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, `teacher.csv`);
 				break;
 		}
-		this.sketch.loop();
 	};
 
 	loadCSVData = async (file: File) => {
@@ -169,6 +171,7 @@ export class Core {
 			},
 			complete: (results: any, file: any) => {
 				this.processResultsData(results, this.coreUtils.cleanFileName(file.name));
+				this.sketch.loop();
 			}
 		});
 	};
@@ -243,7 +246,14 @@ export class Core {
 
 			return users;
 		});
-		TimelineStore.set(new Timeline(0, endTime, 0, endTime, 0));
+		TimelineStore.update((timeline) => {
+			timeline.setCurrTime(0);
+			timeline.setStartTime(0);
+			timeline.setEndTime(endTime);
+			timeline.setLeftMarker(0);
+			timeline.setRightMarker(endTime);
+			return timeline;
+		});
 	};
 
 	// TODO: this could be moved to main classes to dynamically update, would neat to reset isStopped values in data
