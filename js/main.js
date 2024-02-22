@@ -86,6 +86,15 @@ const igs = new p5((sk) => {
         sk.loop();
     }
 
+    sk.zzzUpdateStopValues = function() {
+        for (const path of sk.core.pathList) {
+            for (const point of path.movement) point.isStopped = false; // clear exisiting values first, then update
+            for (const point of path.conversation) point.isStopped = false;
+            sk.core.parseMovement.updateStopValues(path.movement);
+            sk.core.parseMovement.updateStopValues(path.conversation);
+        }
+    }
+
     sk.mouseDragged = function() {
         if (!sk.sketchController.getIsAnimate() && sk.gui.timelinePanel.isLockedOrOverTimeline()) sk.gui.timelinePanel.handle();
         sk.loop();

@@ -25,6 +25,7 @@ export class Core {
         this.pathList = []; // Holds path objects for each successfully loaded movement file
         this.codeList = []; // holds code objects for each successfully loaded code file
         this.totalTimeInSeconds = 0; // Time value in seconds that all displayed data is set to, set dynamically when updating movement data
+        this.maxStopLength = 0; // Time value in seconds of longest length of a single stop
         this.COLORGRAY = "#A9A9A9"; // should match representation of data in GUI
         this.COLOR_LIST = ['#6a3d9a', '#ff7f00', '#33a02c', '#1f78b4', '#e31a1c', '#b15928', '#cab2d6', '#fdbf6f', '#b2df8a', '#a6cee3', '#fb9a99', '#ffed6f']; // 12 Class Paired: (Dark) purple, orange, green, blue, red, brown, (Light) lPurple, lOrange, lGreen, lBlue, lRed, yellow
     }
@@ -174,6 +175,7 @@ export class Core {
     clearMovement() {
         this.pathList = [];
         this.totalTimeInSeconds = 0;
+        this.maxStopLength = 0;
     }
 
     clearConversation() {

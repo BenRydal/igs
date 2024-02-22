@@ -28,9 +28,9 @@
             <select id="data-drop-down-menu" name="drop-down-menu">
                 <option disabled selected value> -- Select an Option -- </option>
                 <option value="Load Data">LOAD DATA</option>
-                <option value="Example 1">EXAMPLE 1: MICHAEL JORDAN'S LAST SHOT</option>
-                <option value="Example 2">EXAMPLE 2: FAMILY MUSEUM GALLERY VISIT</option>
-                <option value="Example 3">EXAMPLE 3: CLASSROOM SCIENCE LESSON</option>
+                <option value="Example 1">EXAMPLE 1: JORDAN'S LAST SHOT</option>
+                <option value="Example 2">EXAMPLE 2: MUSEUM GALLERY VISIT</option>
+                <option value="Example 3">EXAMPLE 3: SCIENCE LESSON</option>
                 <option value="Example 4">EXAMPLE 4: CLASSROOM DISCUSSION</option>
             </select>
             <input type="file" name="input-files" id="input-load-files" class="main-menu-bar__input js-main-menu-bar__load-files--display" multiple accept=".png, .jpg, .jpeg, .csv, .mp4">
@@ -40,7 +40,7 @@
             <button type="button" id="3D-button" class="main-menu-bar__input"></button>
             <label for="3D-button" title="Toggle 2D and 3D Views">2D/3D</label>
             <button type="button" id="how-to-button" class="main-menu-bar__input"></button>
-            <label for="how-to-button" title="Learn How To Use This Tool">HOW TO USE</label>
+            <label for="how-to-button" title="Learn How To Use This Tool">?</label>
         </form>
     </div>
 
@@ -146,6 +146,7 @@
                 <label for="sub-tab6-4" title="Highlight only movement">Movement</label>
                 <label for="sub-tab6-5" title="Highlight only stops">Stops</label>
                 <label for="sub-tab6-6" title="Drag to select rectangular regions of data in 2D View. Hold option key to select multiple regions.">Highlight</label>
+                <input class="slider" id="stop-slider" type="range" min="1" max="100" value="1">
             </div>
             <input class="tab-radio" id="sub-tab6-1" name="sub-group6" type="radio">
             <input class="tab-radio" id="sub-tab6-2" name="sub-group6" type="radio">

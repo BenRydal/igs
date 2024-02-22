@@ -209,4 +209,9 @@ export class DomController {
         const animateSlider = document.getElementById("animate-speed-slider");
         return animateSlider.max - animateSlider.value;
     }
+
+    getStopSliderValue() {
+        const animateSlider = document.getElementById("stop-slider");
+        return animateSlider.value;
+    }
 }
