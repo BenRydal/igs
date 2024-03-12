@@ -4,7 +4,12 @@
   import TimelineStore from '../../stores/timelineStore';
   import P5Store from '../../stores/p5Store';
 
-  let p5Instance;
+  // import MdPlayArrow from 'svelte-icons/md/MdPlayArrow.svelte'
+	// import IconButton from '$lib/components/IconButton.svelte';
+  import type p5 from 'p5';
+
+  let isAnimating = false;
+  let p5Instance: p5 | null = null;
 
   P5Store.subscribe((value) => {
 		p5Instance = value;
@@ -27,6 +32,16 @@
   let sliderContainer: HTMLDivElement;
   let loaded = false;
 
+  const toggleAnimation = () => {
+    isAnimating = !isAnimating;
+    if (p5Instance) {
+      if (isAnimating) {
+        p5Instance.loop();
+      } else {
+        p5Instance.noLoop();
+      }
+    }
+  };
   /**
    * Updates the X positions based on the current dimensions of the slider container.
    * This function is called whenever the window is resized or the slider container is mounted.
@@ -125,10 +140,19 @@
       />
     </div>
 
-    <div class="flex w-full mt-2 justify-between">
+    <div class="flex w-full mt-2 items-center">
+      <button on:click={toggleAnimation} class="play-pause-btn mr-4">
+        {#if isAnimating}
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
+            <path fill-rule="evenodd" d="M6.75 5.25a.75.75 0 01.75-.75H9a.75.75 0 01.75.75v13.5a.75.75 0 01-.75.75H7.5a.75.75 0 01-.75-.75V5.25zm7.5 0A.75.75 0 0115 4.5h1.5a.75.75 0 01.75.75v13.5a.75.75 0 01-.75.75H15a.75.75 0 01-.75-.75V5.25z" clip-rule="evenodd" />
+          </svg>
+        {:else}
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
+            <path fill-rule="evenodd" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z" clip-rule="evenodd" />
+          </svg>
+        {/if}
+      </button>
       <p>{formattedCurr}/{formattedRight}</p>
-      <p>timelineLeft: {formattedLeft}</p>
-      <p>leftX: {leftX} | rightX: {rightX}</p>
     </div>
   </div>
 {/if}
@@ -137,4 +161,23 @@
   :host {
     width: 100% !important;
   }
+
+  .play-pause-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 50%;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+
+  .play-pause-btn:hover {
+    background-color: #f0f0f0;
+  }
+
 </style>

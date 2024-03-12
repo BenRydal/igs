@@ -7,6 +7,7 @@
 	import MdRotateLeft from 'svelte-icons/md/MdRotateLeft.svelte';
 	import MdRotateRight from 'svelte-icons/md/MdRotateRight.svelte';
 	import Md3DRotation from 'svelte-icons/md/Md3DRotation.svelte';
+	import MdPlayArrow from 'svelte-icons/md/MdPlayArrow.svelte'
 
 	import type { User } from '../../models/user';
 
@@ -134,39 +135,38 @@ function stopScrolling(): void {
 
 	<div class="btm-nav flex justify-between">
   <!-- Left Side: Select and Carousel -->
-	<div class="w-1/2 bg-[#f6f5f3]">
-		<div class="join w-full flex items-center justify-start">
-			<select bind:value={selectedTab} id="select-data-dropdown" class="select select-bordered max-w-xs bg-neutral text-white dropdown-top">
-				{#each Constants.TAB_OPTIONS as value}<option {value}>{value}</option>{/each}
-			</select>
+		<div class="w-1/2 bg-[#f6f5f3]">
+			<div class="join w-full flex items-center justify-start">
+				<select bind:value={selectedTab} id="select-data-dropdown" class="select select-bordered max-w-xs bg-neutral text-white dropdown-top">
+					{#each Constants.TAB_OPTIONS as value}<option {value}>{value}</option>{/each}
+				</select>
 
-			<div class="flex items-center w-full">
-				<button class="btn flex-shrink-0" on:mousedown={() => startScrolling('left')} on:mouseup={stopScrolling} on:mouseleave={stopScrolling} on:touchstart={() => startScrolling('left')} on:touchend={stopScrolling}>
-					<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-					</svg>
-				</button>
+				<div class="flex items-center w-full">
+					<button class="btn flex-shrink-0" on:mousedown={() => startScrolling('left')} on:mouseup={stopScrolling} on:mouseleave={stopScrolling} on:touchstart={() => startScrolling('left')} on:touchend={stopScrolling}>
+						<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+						</svg>
+					</button>
 
-				<div class="carousel carousel-center overflow-x-auto flex-grow mx-5">
-					{#if selectedTab == 'Movement'}
-						{#each $UserStore as user}
-							<div class="carousel-item inline-flex items-center">
-								<input id="userCheckbox" type="checkbox" class="checkbox" bind:checked={user.enabled} />
-								<label class="m-5" for="userCheckbox">{user.name}</label>
-							</div>
-						{/each}
-					{/if}
+					<div class="carousel carousel-center overflow-x-auto flex-grow mx-5">
+						{#if selectedTab == 'Movement'}
+							{#each $UserStore as user}
+								<div class="carousel-item inline-flex items-center">
+									<input id="userCheckbox" type="checkbox" class="checkbox" bind:checked={user.enabled} />
+									<label class="m-5" for="userCheckbox">{user.name}</label>
+								</div>
+							{/each}
+						{/if}
+					</div>
+
+					<button class="btn flex-shrink-0" on:mousedown={() => startScrolling('right')} on:mouseup={stopScrolling} on:mouseleave={stopScrolling} on:touchstart={() => startScrolling('right')} on:touchend={stopScrolling}>
+						<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+						</svg>
+					</button>
 				</div>
-
-				<button class="btn flex-shrink-0" on:mousedown={() => startScrolling('right')} on:mouseup={stopScrolling} on:mouseleave={stopScrolling} on:touchstart={() => startScrolling('right')} on:touchend={stopScrolling}>
-					<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-					</svg>
-				</button>
 			</div>
 		</div>
-	</div>
-
 
 		<!-- Right Side: Timeline -->
 		<div class="w-1/2 overflow-x-auto bg-[#f6f5f3]">
@@ -184,11 +184,11 @@ function stopScrolling(): void {
 
 <style>
 	.navbar {
-		height: 64px; /* Adjust based on your navbar's height */
+		height: 64px;
 	}
 
 	.btm-nav {
-		height: 64px; /* Adjust based on your bottom nav's height */
+		height: 100px;
 	}
 
 </style>
