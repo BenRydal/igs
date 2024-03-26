@@ -165,6 +165,10 @@ export class SketchController {
 		return timeLine.getRightX();
 	}
 
+	getTimelineCurrTime() {
+		return timeLine.getCurrTime();
+	}
+
 	getTimelineLeftMarkerXPos() {
 		return this.sk.sketchController.mapTotalTimeToPixelTime(timeLine.getLeftMarker());
 	}

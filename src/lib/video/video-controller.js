@@ -75,8 +75,7 @@ export class VideoController {
 	}
 
 	seekMethodMouse() {
-		const videoTime = Math.floor(this.mapPixelTimeToVideoTime(this.sk.sketchController.mapPixelTimeToSelectTime(this.sk.mouseX)));
-		this.videoPlayer.seekTo(videoTime);
+		this.videoPlayer.seekTo(this.sk.sketchController.getTimelineCurrTime());
 	}
 
 	toggleShowVideo() {
