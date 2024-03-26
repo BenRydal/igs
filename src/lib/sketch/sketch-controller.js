@@ -14,13 +14,11 @@ TimelineStore.subscribe((data) => {
 export class SketchController {
 	constructor(sketch) {
 		this.sk = sketch;
-		this.isAnimate = false;
 		this.isAlignTalk = false;
 		this.isAllTalk = true;
 		this.isPathColorMode = true;
 		this.curSelectTab = 0; // 5 options: None, Region, Slice, Moving, Stopped
 		this.wordToSearch = ''; // String value to dynamically search words in conversation
-		this.animationCounter = 0; // counter to synchronize animation across all data
 	}
 
 	updateAnimation() {
@@ -34,7 +32,7 @@ export class SketchController {
 				timeLine.setCurrTime(timeToSet);
 				return timeline;
 			});
-		} else this.setIsAnimate(false);
+		} else timeLine.setIsAnimating(false);
 	}
 
 	mapPixelTimeToTotalTime(value) {
@@ -76,12 +74,8 @@ export class SketchController {
 		return this.sk.map(value, 0, this.sk.core.getTotalTimeInSeconds(), this.getTimelineStartXPos(), this.getTimelineEndXPos());
 	}
 
-	setIsAnimate(value) {
-		this.isAnimate = value;
-	}
-
 	getIsAnimate() {
-		return this.isAnimate;
+		return timeLine.getIsAnimating();
 	}
 
 	setIsAllTalk(value) {
