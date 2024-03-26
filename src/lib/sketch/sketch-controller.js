@@ -22,17 +22,26 @@ export class SketchController {
 	}
 
 	updateAnimation() {
-		const animationRate = 0.05; // TODO: this would get a value from the animation slider in the interface
-		let timeToSet = 0;
-		if (timeLine.getCurrTime() < timeLine.getEndTime()) {
-			if (this.sk.videoController.isLoadedAndIsPlaying()) timeToSet = this.sk.videoController.getVideoPlayerCurTime();
-			else timeToSet = timeLine.getCurrTime() + animationRate;
+		if (timeLine.getCurrTime() < timeLine.getEndTime()) this.continueAnimation();
+		else this.endAnimation();
+	}
 
-			TimelineStore.update((timeline) => {
-				timeLine.setCurrTime(timeToSet);
-				return timeline;
-			});
-		} else timeLine.setIsAnimating(false);
+	continueAnimation() {
+		let timeToSet = 0;
+		const animationRate = 0.05; // TODO: this would get a value from the animation slider in the interface
+		if (this.sk.videoController.isLoadedAndIsPlaying()) timeToSet = this.sk.videoController.getVideoPlayerCurTime();
+		else timeToSet = timeLine.getCurrTime() + animationRate;
+		TimelineStore.update((timeline) => {
+			timeLine.setCurrTime(timeToSet);
+			return timeline;
+		});
+	}
+
+	endAnimation() {
+		TimelineStore.update((timeline) => {
+			timeline.setIsAnimating(false);
+			return timeline;
+		});
 	}
 
 	mapPixelTimeToTotalTime(value) {

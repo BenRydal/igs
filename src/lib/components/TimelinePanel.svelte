@@ -33,14 +33,14 @@
   let loaded = false;
 
   const toggleAnimation = () => {
-    isAnimating = !isAnimating;
+    TimelineStore.update(timeline => {
+      timeline.setIsAnimating(!timeline.getIsAnimating());
+      return timeline;
+    });
+
     if (p5Instance) {
         p5Instance.videoController.timelinePlayPause();
-      if (isAnimating) {
         p5Instance.loop();
-      } else {
-        p5Instance.noLoop();
-      }
     }
   };
   /**
