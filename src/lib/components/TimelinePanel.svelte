@@ -35,6 +35,7 @@
   const toggleAnimation = () => {
     isAnimating = !isAnimating;
     if (p5Instance) {
+      p5Instance.videoController.timelinePlayPause();
       if (isAnimating) {
         p5Instance.loop();
       } else {

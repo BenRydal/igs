@@ -127,7 +127,6 @@ export class Core {
 	 * @param  {MP4 File} input
 	 */
 	prepVideoFromFile(fileLocation) {
-		this.sketch.videoController.clear();
 		this.sketch.videoController.createVideoPlayer('File', {
 			fileName: fileLocation
 		});
@@ -137,6 +136,7 @@ export class Core {
 		// TODO: Need to adjust p5 typescript defintion to expose
 		// custom attributes & functions
 		this.sketch.core.totalTimeInSeconds = 0;
+		this.sketch.videoController.clear();
 
 		UserStore.update(() => {
 			return [];
