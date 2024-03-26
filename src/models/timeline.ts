@@ -4,6 +4,8 @@ interface TimelineData {
 	startTime?: number;
 	endTime?: number;
 	currTime?: number;
+	leftX?: number;
+	rightX?: number;
 }
 
 export class Timeline {

@@ -39,6 +39,8 @@ export class VideoController {
 	videoPlayerReady() {
 		this.isLoaded = true;
 		this.toggleShowVideo();
+		// this.videoPlayer.hide();
+		// this.isShowing = false;
 		this.sk.loop();
 	}
 
