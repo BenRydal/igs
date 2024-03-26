@@ -7,7 +7,6 @@
 	import MdRotateLeft from 'svelte-icons/md/MdRotateLeft.svelte';
 	import MdRotateRight from 'svelte-icons/md/MdRotateRight.svelte';
 	import Md3DRotation from 'svelte-icons/md/Md3DRotation.svelte';
-	import MdPlayArrow from 'svelte-icons/md/MdPlayArrow.svelte'
 
 	import type { User } from '../../models/user';
 
@@ -45,41 +44,53 @@
 		igsSketch(p5);
 	};
 
-  let isModalOpen = writable(false);
+	let isModalOpen = writable(false);
 
-  let scrollInterval: ReturnType<typeof setInterval> | null = null;
+	let scrollInterval: ReturnType<typeof setInterval> | null = null;
 
-function startScrolling(direction: 'left' | 'right'): void {
-	const carousel = document.querySelector('.carousel');
-	if (carousel) {
-		const scrollAmount = direction === 'left' ? -100 : 100;
-		scrollInterval = setInterval(() => {
-			carousel.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-		}, 100); // Adjust the interval time (100 ms) as needed
-	}
-}
-
-function stopScrolling(): void {
-	if (scrollInterval) {
-		clearInterval(scrollInterval);
-		scrollInterval = null;
+	/**
+	 * Starts scrolling the carousel in the specified direction.
+	 * @param direction The scroll direction ('left' or 'right').
+	 */
+	function startScrolling(direction: 'left' | 'right'): void {
+		const carousel = document.querySelector('.carousel');
+		if (carousel) {
+			const scrollAmount = direction === 'left' ? -100 : 100;
+			scrollInterval = setInterval(() => {
+				carousel.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+			}, 100);
+		}
 	}
 
+	/**
+	 * Stops scrolling the carousel.
+	 */
+	function stopScrolling(): void {
+		if (scrollInterval) {
+			clearInterval(scrollInterval);
+			scrollInterval = null;
+		}
+	}
+
+	/**
+	 * Scrolls the carousel to the left.
+	 */
 	function scrollLeft() {
-    const carousel = document.querySelector('.carousel');
-    if (carousel) {
+		const carousel = document.querySelector('.carousel');
+		if (carousel) {
 			carousel.scrollBy({ left: -100, behavior: 'smooth' });
-    }
+		}
 	}
 
+	/**
+	 * Scrolls the carousel to the right.
+	 */
 	function scrollRight() {
 		const carousel = document.querySelector('.carousel');
 		if (carousel) {
 			carousel.scrollBy({ left: 100, behavior: 'smooth' });
 		}
 	}
-}
-
 </script>
 
 <div class="drawer">
@@ -153,7 +164,7 @@ function stopScrolling(): void {
 							{#each $UserStore as user}
 								<div class="carousel-item inline-flex items-center">
 									<input id="userCheckbox" type="checkbox" class="checkbox" bind:checked={user.enabled} />
-									<label class="m-5" for="userCheckbox">{user.name}</label>
+									<label class="m-5 capitalize" for="userCheckbox">{user.name}</label>
 								</div>
 							{/each}
 						{/if}
@@ -190,5 +201,4 @@ function stopScrolling(): void {
 	.btm-nav {
 		height: 100px;
 	}
-
 </style>

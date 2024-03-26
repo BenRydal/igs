@@ -12,6 +12,6 @@
 <style>
   #main-hero {
     background-image: url(/images/appexample.png);
-    min-height: calc(100vh - 4em);
+    min-height: calc(100vh);
   }
 </style>
