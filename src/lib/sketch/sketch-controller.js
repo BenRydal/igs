@@ -14,29 +14,34 @@ TimelineStore.subscribe((data) => {
 export class SketchController {
 	constructor(sketch) {
 		this.sk = sketch;
-		this.isAnimate = false;
-		this.isAnimatePause = false;
 		this.isAlignTalk = false;
 		this.isAllTalk = true;
 		this.isPathColorMode = true;
 		this.curSelectTab = 0; // 5 options: None, Region, Slice, Moving, Stopped
 		this.wordToSearch = ''; // String value to dynamically search words in conversation
-		this.animationCounter = 0; // counter to synchronize animation across all data
 	}
 
-	updateAnimation(animationIncrementRateDivisor) {
-		const curTimeIntervalInSeconds =
-			this.mapPixelTimeToTotalTime(this.getTimelineRightMarkerXPos()) - this.mapPixelTimeToTotalTime(this.getTimelineLeftMarkerXPos()); // Get amount of time in seconds currently displayed
-		const animationIncrementValue = curTimeIntervalInSeconds / animationIncrementRateDivisor; // set increment value based on that value/divisor to keep constant sketchController.isAnimate speed regardless of time interval selected
-		if (this.animationCounter < this.mapPixelTimeToTotalTime(this.getTimelineRightMarkerXPos())) this.animationCounter += animationIncrementValue;
-		else this.setIsAnimate(false);
+	updateAnimation() {
+		if (timeLine.getCurrTime() < timeLine.getEndTime()) this.continueAnimation();
+		else this.endAnimation();
 	}
 
-	startEndAnimation() {
-		if (this.isAnimate) this.animationCounter = this.mapPixelTimeToTotalTime(this.getTimelineRightMarkerXPos());
-		else this.animationCounter = this.mapPixelTimeToTotalTime(this.getTimelineLeftMarkerXPos());
-		this.setIsAnimate(!this.isAnimate);
-		this.setIsAnimatePause(false);
+	continueAnimation() {
+		let timeToSet = 0;
+		const animationRate = 0.05; // TODO: this would get a value from the animation slider in the interface
+		if (this.sk.videoController.isLoadedAndIsPlaying()) timeToSet = this.sk.videoController.getVideoPlayerCurTime();
+		else timeToSet = timeLine.getCurrTime() + animationRate;
+		TimelineStore.update((timeline) => {
+			timeLine.setCurrTime(timeToSet);
+			return timeline;
+		});
+	}
+
+	endAnimation() {
+		TimelineStore.update((timeline) => {
+			timeline.setIsAnimating(false);
+			return timeline;
+		});
 	}
 
 	mapPixelTimeToTotalTime(value) {
@@ -78,24 +83,8 @@ export class SketchController {
 		return this.sk.map(value, 0, this.sk.core.getTotalTimeInSeconds(), this.getTimelineStartXPos(), this.getTimelineEndXPos());
 	}
 
-	setIsAnimate(value) {
-		this.isAnimate = value;
-	}
-
-	setIsAnimatePause(value) {
-		this.isAnimatePause = value;
-	}
-
-	toggleIsAnimatePause() {
-		this.isAnimatePause = !this.isAnimatePause;
-	}
-
 	getIsAnimate() {
-		return this.isAnimate;
-	}
-
-	getIsAnimatePause() {
-		return this.isAnimatePause;
+		return timeLine.getIsAnimating();
 	}
 
 	setIsAllTalk(value) {
@@ -163,6 +152,10 @@ export class SketchController {
 
 	getTimelineEndXPos() {
 		return timeLine.getRightX();
+	}
+
+	getTimelineCurrTime() {
+		return timeLine.getCurrTime();
 	}
 
 	getTimelineLeftMarkerXPos() {

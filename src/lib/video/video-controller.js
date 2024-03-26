@@ -14,7 +14,6 @@ export class VideoController {
 		this.isPlaying = false;
 		this.isShowing = false;
 		this.isLoaded = false; // this is an additional boolean to test if video successfully loaded
-		this.dotTimeForVideoScrub = null; // Set in draw movement data and used to display correct video frame when scrubbing video
 	}
 
 	createVideoPlayer(platform, params) {
@@ -40,6 +39,8 @@ export class VideoController {
 	videoPlayerReady() {
 		this.isLoaded = true;
 		this.toggleShowVideo();
+		// this.videoPlayer.hide();
+		// this.isShowing = false;
 		this.sk.loop();
 	}
 
@@ -48,35 +49,18 @@ export class VideoController {
 	 */
 	updateDisplay() {
 		if (this.isPlayerAndDivLoaded() && this.isShowing) {
-			this.videoPlayer.updatePos(this.sk.mouseX, this.sk.mouseY, 50, this.sk.gui.timelinePanel.displayBottom());
+			this.videoPlayer.updatePos(this.sk.mouseX, this.sk.mouseY, 50, 0);
 			if (!this.isPlaying) this.setVideoScrubbing();
 		}
 	}
 
 	setVideoScrubbing() {
-		if (this.sk.sketchController.getIsAnimate()) this.seekMethodAnimate();
-		else if (this.sk.sketchController.overTimeline()) {
-			this.seekMethodMouse();
-			this.videoPlayer.pause(); // Add to prevent accidental video playing that seems to occur
-		}
-	}
-
-	seekMethodAnimate() {
-		const videoTime = Math.floor(
-			this.sk.map(
-				this.dotTimeForVideoScrub,
-				this.sk.sketchController.getTimelineStartXPos(),
-				this.sk.sketchController.getTimelineEndXPos(),
-				this.mapPixelTimeToVideoTime(this.sk.sketchController.getTimelineLeftMarkerXPos()),
-				this.mapPixelTimeToVideoTime(this.sk.sketchController.getTimelineRightMarkerXPos())
-			)
-		);
-		this.videoPlayer.seekTo(videoTime);
+		this.seekMethodMouse();
+		this.videoPlayer.pause(); // Add to prevent accidental video playing that seems to occur
 	}
 
 	seekMethodMouse() {
-		const videoTime = Math.floor(this.mapPixelTimeToVideoTime(this.sk.sketchController.mapPixelTimeToSelectTime(this.sk.mouseX)));
-		this.videoPlayer.seekTo(videoTime);
+		this.videoPlayer.seekTo(this.sk.sketchController.getTimelineCurrTime());
 	}
 
 	toggleShowVideo() {
@@ -103,13 +87,6 @@ export class VideoController {
 		}
 	}
 
-	buttonPlayPause() {
-		if (this.isPlayerAndDivLoaded() && this.isShowing && !this.sk.sketchController.getIsAnimate()) {
-			if (this.isPlaying) this.pause();
-			else this.play();
-		}
-	}
-
 	pause() {
 		this.videoPlayer.pause();
 		this.isPlaying = false;
@@ -127,41 +104,9 @@ export class VideoController {
 	decreasePlayerSize() {
 		if (this.isPlayerAndDivLoaded()) this.videoPlayer.decreaseSize();
 	}
-	/**
-	 * Maps a pixel time from screen to a loaded video
-	 * Conditional statements adapt for videos that start with same times but can have different lengths
-	 * @param  {Number} value
-	 */
-	mapPixelTimeToVideoTime(value) {
-		if (!this.sk.arrayIsLoaded(this.sk.core.pathList))
-			return Math.floor(
-				this.sk.map(
-					value,
-					this.sk.sketchController.getTimelineStartXPos(),
-					this.sk.sketchController.getTimelineEndXPos(),
-					0,
-					Math.floor(this.videoPlayer.getVideoDuration())
-				)
-			);
-		// must floor vPos to prevent double finite error
-		else {
-			let mappedTime = this.sk.map(
-				value,
-				this.sk.sketchController.getTimelineStartXPos(),
-				this.sk.sketchController.getTimelineEndXPos(),
-				0,
-				Math.floor(this.sk.core.getTotalTimeInSeconds())
-			);
-			return this.sk.constrain(mappedTime, 0, Math.floor(this.videoPlayer.getVideoDuration()));
-		}
-	}
 
 	getVideoPlayerCurTime() {
 		return this.videoPlayer.getCurrentTime();
-	}
-
-	setDotTimeForVideoScrub(timePos) {
-		this.dotTimeForVideoScrub = timePos;
 	}
 
 	isLoadedAndIsPlaying() {
@@ -176,8 +121,8 @@ export class VideoController {
 	}
 
 	clear() {
+		// if any type of videoPlayer object exists, even if data is corrupt destroy it
 		if (this.videoPlayer != null) {
-			// if any type of videoPlayer object exists, even if data is corrupt destroy it
 			this.videoPlayer.destroy();
 			this.videoPlayer = null;
 			this.isPlaying = false;

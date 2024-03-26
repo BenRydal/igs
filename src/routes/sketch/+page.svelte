@@ -120,6 +120,15 @@ function stopScrolling(): void {
 						core.handle3D();
 					}}
 				/>
+
+				<IconButton
+					id="btn-toggle-video"
+					icon={Md3DRotation}
+					tooltip={"Show/Hide Video"}
+					on:click={() => {
+						p5Instance.videoController.toggleShowVideo();
+					}}
+				/>
 				<select id="select-data-dropdown" class="select select-bordered w-full max-w-xs bg-[#f6f5f3] text-black" on:change={core.handleExampleDropdown}>
 					<option disabled selected>-- Select an Example --</option>
 					<option value="example-1">Michael Jordan's Last Shot</option>
