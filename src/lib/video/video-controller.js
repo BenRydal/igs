@@ -85,13 +85,6 @@ export class VideoController {
 		}
 	}
 
-	buttonPlayPause() {
-		if (this.isPlayerAndDivLoaded() && this.isShowing && !this.sk.sketchController.getIsAnimate()) {
-			if (this.isPlaying) this.pause();
-			else this.play();
-		}
-	}
-
 	pause() {
 		this.videoPlayer.pause();
 		this.isPlaying = false;

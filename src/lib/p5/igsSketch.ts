@@ -66,7 +66,7 @@ export const igsSketch = (p5: any) => {
 
 		if (p5.handle3D.getIs3DModeOrTransitioning()) p5.pop();
 		p5.gui.update2D(); // draw all other canvas GUI elements in 2D mode
-		if (p5.sketchController.getIsAnimate()) p5.sketchController.updateAnimation(p5.domController.getAnimateSliderValue());
+		if (p5.sketchController.getIsAnimate()) p5.sketchController.updateAnimation();
 		// Determine whether to re-run draw loop depending on user adjustable modes
 		// Might not be running because of not being able to sense if the data is being tracked and such.
 		if (p5.sketchController.getIsAnimate() || p5.videoController.isLoadedAndIsPlaying() || p5.handle3D.getIsTransitioning()) {

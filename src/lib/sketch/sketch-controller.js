@@ -23,12 +23,18 @@ export class SketchController {
 		this.animationCounter = 0; // counter to synchronize animation across all data
 	}
 
-	updateAnimation(animationIncrementRateDivisor) {
-		const curTimeIntervalInSeconds =
-			this.mapPixelTimeToTotalTime(this.getTimelineRightMarkerXPos()) - this.mapPixelTimeToTotalTime(this.getTimelineLeftMarkerXPos()); // Get amount of time in seconds currently displayed
-		const animationIncrementValue = curTimeIntervalInSeconds / animationIncrementRateDivisor; // set increment value based on that value/divisor to keep constant sketchController.isAnimate speed regardless of time interval selected
-		if (this.animationCounter < this.mapPixelTimeToTotalTime(this.getTimelineRightMarkerXPos())) this.animationCounter += animationIncrementValue;
-		else this.setIsAnimate(false);
+	updateAnimation() {
+		const animationRate = 0.05; // TODO: this would get a value from the animation slider in the interface
+		let timeToSet = 0;
+		if (timeLine.getCurrTime() < timeLine.getEndTime()) {
+			if (this.sk.videoController.isLoadedAndIsPlaying()) timeToSet = this.sk.videoController.getVideoPlayerCurTime();
+			else timeToSet = timeLine.getCurrTime() + animationRate;
+
+			TimelineStore.update((timeline) => {
+				timeLine.setCurrTime(timeToSet);
+				return timeline;
+			});
+		} else this.setIsAnimate(false);
 	}
 
 	mapPixelTimeToTotalTime(value) {
