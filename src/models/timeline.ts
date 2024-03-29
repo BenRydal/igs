@@ -4,6 +4,9 @@ interface TimelineData {
 	startTime?: number;
 	endTime?: number;
 	currTime?: number;
+	leftX?: number;
+	rightX?: number;
+	isAnimating?: boolean;
 }
 
 export class Timeline {
@@ -14,6 +17,7 @@ export class Timeline {
 	private currTime: number;
 	private leftX: number;
 	private rightX: number;
+	private isAnimating: boolean;
 
 	constructor(
 		leftMarker: number = 0,
@@ -22,7 +26,8 @@ export class Timeline {
 		endTime: number = 0,
 		currTime: number = 0,
 		leftX: number = 0,
-		rightX: number = 0
+		rightX: number = 0,
+		isAnimating: boolean = false
 	) {
 		this.leftMarker = leftMarker;
 		this.rightMarker = rightMarker;
@@ -31,6 +36,7 @@ export class Timeline {
 		this.currTime = currTime;
 		this.leftX = leftX;
 		this.rightX = rightX;
+		this.isAnimating = isAnimating;
 	}
 
 	updateTimeline({ leftMarker, rightMarker, startTime, endTime, currTime }: TimelineData) {
@@ -92,5 +98,17 @@ export class Timeline {
 
 	setCurrTime(currTime: number) {
 		this.currTime = currTime;
+	}
+
+	getIsAnimating() {
+		return this.isAnimating;
+	}
+
+	setIsAnimating(isAnimating: boolean) {
+		this.isAnimating = isAnimating;
+	}
+
+	updateIsAnimating() {
+		this.isAnimating = !this.isAnimating;
 	}
 }

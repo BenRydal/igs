@@ -105,7 +105,7 @@ export class Core {
 			file.type === 'image/jpeg'
 		)
 			this.loadFloorplanImage(URL.createObjectURL(file));
-		// else if (fileName.endsWith(".mp4") || file.type === "video/mp4") this.prepVideoFromFile(URL.createObjectURL(file));
+		else if (fileName.endsWith('.mp4') || file.type === 'video/mp4') this.prepVideoFromFile(URL.createObjectURL(file));
 		else alert('Error loading file. Please make sure your file is an accepted format'); // this should not be possible due to HTML5 accept for file inputs, but in case
 	}
 
@@ -123,10 +123,20 @@ export class Core {
 		}
 	}
 
+	/**
+	 * @param  {MP4 File} input
+	 */
+	prepVideoFromFile(fileLocation) {
+		this.sketch.videoController.createVideoPlayer('File', {
+			fileName: fileLocation
+		});
+	}
+
 	handleExampleDropdown = async (event: any) => {
 		// TODO: Need to adjust p5 typescript defintion to expose
 		// custom attributes & functions
 		this.sketch.core.totalTimeInSeconds = 0;
+		this.sketch.videoController.clear();
 
 		UserStore.update(() => {
 			return [];
@@ -140,6 +150,7 @@ export class Core {
 			case 'example-1':
 				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, 'jordan.csv');
 				// await loadLocalExampleDataFile(`data/${selectedValue}`, `possession.csv`);
+				this.sketch.videoController.createVideoPlayer('Youtube', { videoId: 'iiMjfVOj8po' });
 				break;
 			case 'example-2':
 				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, `adhir.csv`);
@@ -147,9 +158,11 @@ export class Core {
 				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, `jeans.csv`);
 				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, `lily.csv`);
 				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, `mae.csv`);
+				this.sketch.videoController.createVideoPlayer('Youtube', { videoId: 'pWJ3xNk1Zpg' });
 				break;
 			case 'example-3':
 				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, `teacher.csv`);
+				this.sketch.videoController.createVideoPlayer('Youtube', { videoId: 'Iu0rxb-xkMk' });
 				break;
 			case 'example-4':
 				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, `cassandra.csv`);
@@ -157,6 +170,7 @@ export class Core {
 				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, `nathan.csv`);
 				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, `sean.csv`);
 				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, `teacher.csv`);
+				this.sketch.videoController.createVideoPlayer('Youtube', { videoId: 'OJSZCK4GPQY' });
 				break;
 		}
 	};

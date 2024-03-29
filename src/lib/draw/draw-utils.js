@@ -2,6 +2,15 @@
  * This class holds different utility and helper methods used in draw movement and conversation classes
  * It centralizes decisions about what points to show and not show and is coupled with the sketchController/gui classes
  */
+
+import TimelineStore from '../../stores/timelineStore';
+
+let timeLine;
+
+TimelineStore.subscribe((data) => {
+	timeLine = data;
+});
+
 export class DrawUtils {
 	constructor(sketch, codeList) {
 		this.sk = sketch;
@@ -19,9 +28,9 @@ export class DrawUtils {
 		return this.sk.sketchController.overAxis(pixelTime) && this.isShowingInAnimation(pixelTime);
 	}
 
+	// TODO: Revisit to determine best approach here--could just return true if you want to show all data while animating
 	isShowingInAnimation(value) {
-		if (this.sk.sketchController.getIsAnimate())
-			return this.sk.sketchController.animationCounter > this.sk.sketchController.mapPixelTimeToTotalTime(value);
+		if (this.sk.sketchController.getIsAnimate()) return this.sk.sketchController.mapPixelTimeToTotalTime(value) < timeLine.getCurrTime();
 		else return true;
 	}
 

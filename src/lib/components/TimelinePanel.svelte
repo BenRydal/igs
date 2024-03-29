@@ -8,7 +8,6 @@
 	// import IconButton from '$lib/components/IconButton.svelte';
   import type p5 from 'p5';
 
-  let isAnimating = false;
   let p5Instance: p5 | null = null;
 
   P5Store.subscribe((value) => {
@@ -23,6 +22,7 @@
   $: endTime = $TimelineStore.getEndTime();
   $: leftX = $TimelineStore.getLeftX();
   $: rightX = $TimelineStore.getRightX();
+  $: isAnimating = $TimelineStore.getIsAnimating();
 
   // Formatting times for display
   $: formattedLeft = moment.utc(timelineLeft * 1000).format('HH:mm:ss');
@@ -33,13 +33,14 @@
   let loaded = false;
 
   const toggleAnimation = () => {
-    isAnimating = !isAnimating;
+    TimelineStore.update(timeline => {
+      timeline.setIsAnimating(!timeline.getIsAnimating());
+      return timeline;
+    });
+
     if (p5Instance) {
-      if (isAnimating) {
+        p5Instance.videoController.timelinePlayPause();
         p5Instance.loop();
-      } else {
-        p5Instance.noLoop();
-      }
     }
   };
   /**

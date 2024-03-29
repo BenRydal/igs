@@ -171,7 +171,6 @@ export class DrawMovement {
 		const newDot = this.getNewDot(augmentPoint, this.dot);
 		if (newDot !== null) {
 			this.dot = newDot;
-			this.sk.videoController.setDotTimeForVideoScrub(this.dot.timePos);
 		}
 	}
 
