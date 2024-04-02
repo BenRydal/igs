@@ -39,9 +39,13 @@ export class VideoController {
 	videoPlayerReady() {
 		this.isLoaded = true;
 		this.toggleShowVideo();
-		// this.videoPlayer.hide();
-		// this.isShowing = false;
+		this.videoPlayer.hide();
+		this.isShowing = false;
 		this.sk.loop();
+	}
+
+	getIsShowing() {
+		return this.isShowing;
 	}
 
 	/**
@@ -64,14 +68,17 @@ export class VideoController {
 	}
 
 	toggleShowVideo() {
+		console.log("toggleShowVideo is running")
 		if (this.isPlayerAndDivLoaded()) {
 			if (this.isShowing) {
 				this.pause();
 				this.videoPlayer.hide();
 				this.isShowing = false;
+				console.log("video is hidden isShowing: ", this.isShowing)
 			} else {
 				this.videoPlayer.show();
 				this.isShowing = true;
+				console.log("video is shown: ", this.isShowing)
 			}
 		}
 	}

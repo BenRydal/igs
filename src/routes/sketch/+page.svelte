@@ -7,7 +7,8 @@
 	import MdRotateLeft from 'svelte-icons/md/MdRotateLeft.svelte';
 	import MdRotateRight from 'svelte-icons/md/MdRotateRight.svelte';
 	import Md3DRotation from 'svelte-icons/md/Md3DRotation.svelte';
-	import MdPlayArrow from 'svelte-icons/md/MdPlayArrow.svelte'
+	import MdVideocam from 'svelte-icons/md/MdVideocam.svelte'
+	import MdVideocamOff from 'svelte-icons/md/MdVideocamOff.svelte'
 
 	import type { User } from '../../models/user';
 
@@ -120,10 +121,30 @@ function stopScrolling(): void {
 						core.handle3D();
 					}}
 				/>
+<!--
+				{#if p5Instance != null && p5Instance.videoController.getIsShowing() }
+					<IconButton
+						id="btn-toggle-video"
+						icon={MdVideocam}
+						tooltip={"Show/Hide Video"}
+						on:click={() => {
+							p5Instance.videoController.toggleShowVideo();
+						}}
+					/>
+				{:else}
+					<IconButton
+						id="btn-toggle-video"
+						icon={MdVideocamOff}
+						tooltip={"Show/Hide Video"}
+						on:click={() => {
+							p5Instance.videoController.toggleShowVideo();
+						}}
+					/>
+				{/if} -->
 
 				<IconButton
 					id="btn-toggle-video"
-					icon={Md3DRotation}
+					icon={MdVideocam}
 					tooltip={"Show/Hide Video"}
 					on:click={() => {
 						p5Instance.videoController.toggleShowVideo();
