@@ -68,17 +68,14 @@ export class VideoController {
 	}
 
 	toggleShowVideo() {
-		console.log("toggleShowVideo is running")
 		if (this.isPlayerAndDivLoaded()) {
 			if (this.isShowing) {
 				this.pause();
 				this.videoPlayer.hide();
 				this.isShowing = false;
-				console.log("video is hidden isShowing: ", this.isShowing)
 			} else {
 				this.videoPlayer.show();
 				this.isShowing = true;
-				console.log("video is shown: ", this.isShowing)
 			}
 		}
 	}
