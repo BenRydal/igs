@@ -14,6 +14,7 @@
 
 	import UserStore from '../../stores/userStore';
 	import P5Store from '../../stores/p5Store';
+  import VideoStore from '../../stores/videoStore';
 
 	import * as Constants from '../../lib/constants';
 
@@ -29,6 +30,13 @@
 	let p5Instance: p5 | null = null;
 	let selectedTab: string = 'Movement';
 	let core: Core;
+	let isVideoShowing = false;
+  let isVideoPlaying = false;
+
+	VideoStore.subscribe((value) => {
+    isVideoShowing = value.isShowing;
+    isVideoPlaying = value.isPlaying;
+  });
 
 	UserStore.subscribe((data) => {
 		users = data;
@@ -50,37 +58,33 @@
 
   let scrollInterval: ReturnType<typeof setInterval> | null = null;
 
-function startScrolling(direction: 'left' | 'right'): void {
-	const carousel = document.querySelector('.carousel');
-	if (carousel) {
-		const scrollAmount = direction === 'left' ? -100 : 100;
-		scrollInterval = setInterval(() => {
-			carousel.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-		}, 100); // Adjust the interval time (100 ms) as needed
-	}
-}
-
-function stopScrolling(): void {
-	if (scrollInterval) {
-		clearInterval(scrollInterval);
-		scrollInterval = null;
-	}
-
-	function scrollLeft() {
-    const carousel = document.querySelector('.carousel');
-    if (carousel) {
-			carousel.scrollBy({ left: -100, behavior: 'smooth' });
-    }
-	}
-
-	function scrollRight() {
+	function startScrolling(direction: 'left' | 'right'): void {
 		const carousel = document.querySelector('.carousel');
 		if (carousel) {
-			carousel.scrollBy({ left: 100, behavior: 'smooth' });
+			const scrollAmount = direction === 'left' ? -100 : 100;
+			scrollInterval = setInterval(() => {
+				carousel.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+			}, 100); // Adjust the interval time (100 ms) as needed
 		}
 	}
-}
 
+	function stopScrolling(): void {
+		if (scrollInterval) {
+			clearInterval(scrollInterval);
+			scrollInterval = null;
+		}
+	}
+
+	function toggleVideo() {
+    if (p5Instance && p5Instance.videoController) {
+      p5Instance.videoController.toggleShowVideo();
+      VideoStore.update((value) => {
+        value.isShowing = p5Instance.videoController.isShowing;
+        value.isPlaying = p5Instance.videoController.isPlaying;
+        return value;
+      });
+    }
+  }
 </script>
 
 <div class="drawer">
@@ -121,35 +125,22 @@ function stopScrolling(): void {
 						core.handle3D();
 					}}
 				/>
-<!--
-				{#if p5Instance != null && p5Instance.videoController.getIsShowing() }
-					<IconButton
-						id="btn-toggle-video"
-						icon={MdVideocam}
-						tooltip={"Show/Hide Video"}
-						on:click={() => {
-							p5Instance.videoController.toggleShowVideo();
-						}}
-					/>
-				{:else}
-					<IconButton
-						id="btn-toggle-video"
-						icon={MdVideocamOff}
-						tooltip={"Show/Hide Video"}
-						on:click={() => {
-							p5Instance.videoController.toggleShowVideo();
-						}}
-					/>
-				{/if} -->
 
-				<IconButton
-					id="btn-toggle-video"
-					icon={MdVideocam}
-					tooltip={"Show/Hide Video"}
-					on:click={() => {
-						p5Instance.videoController.toggleShowVideo();
-					}}
-				/>
+		{#if isVideoShowing}
+			<IconButton
+				id="btn-toggle-video"
+				icon={MdVideocam}
+				tooltip={"Show/Hide Video"}
+				on:click={toggleVideo}
+			/>
+		{:else}
+			<IconButton
+				id="btn-toggle-video"
+				icon={MdVideocamOff}
+				tooltip={"Show/Hide Video"}
+				on:click={toggleVideo}
+			/>
+		{/if}
 				<select id="select-data-dropdown" class="select select-bordered w-full max-w-xs bg-[#f6f5f3] text-black" on:change={core.handleExampleDropdown}>
 					<option disabled selected>-- Select an Example --</option>
 					<option value="example-1">Michael Jordan's Last Shot</option>

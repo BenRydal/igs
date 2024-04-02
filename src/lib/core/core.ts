@@ -30,6 +30,11 @@ export class Core {
 	maxStopLength: number;
 	COLORGRAY: string;
 	COLOR_LIST: string[];
+	leftMarker: number;
+	rightMarker: number;
+	startTime: number;
+	endTime: number;
+	currTime: number;
 
 	constructor(sketch: p5) {
 		this.sketch = sketch;
