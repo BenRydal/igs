@@ -39,8 +39,8 @@ export class VideoController {
 	videoPlayerReady() {
 		this.isLoaded = true;
 		this.toggleShowVideo();
-		// this.videoPlayer.hide();
-		// this.isShowing = false;
+		this.videoPlayer.hide();
+		this.isShowing = false;
 		this.sk.loop();
 	}
 
@@ -64,17 +64,17 @@ export class VideoController {
 	}
 
 	toggleShowVideo() {
-		if (this.isPlayerAndDivLoaded()) {
-			if (this.isShowing) {
-				this.pause();
-				this.videoPlayer.hide();
-				this.isShowing = false;
-			} else {
-				this.videoPlayer.show();
-				this.isShowing = true;
-			}
-		}
-	}
+    if (this.isPlayerAndDivLoaded()) {
+      if (this.isShowing) {
+        this.pause();
+        this.videoPlayer.hide();
+        this.isShowing = false;
+      } else {
+        this.videoPlayer.show();
+        this.isShowing = true;
+      }
+    }
+  }
 
 	// 2 playPause video methods differ with respect to tests and seekTo method call
 	timelinePlayPause() {
@@ -95,14 +95,6 @@ export class VideoController {
 	play() {
 		this.videoPlayer.play();
 		this.isPlaying = true;
-	}
-
-	increasePlayerSize() {
-		if (this.isPlayerAndDivLoaded()) this.videoPlayer.increaseSize();
-	}
-
-	decreasePlayerSize() {
-		if (this.isPlayerAndDivLoaded()) this.videoPlayer.decreaseSize();
 	}
 
 	getVideoPlayerCurTime() {
