@@ -28,25 +28,13 @@ export class Core {
 	sketch: p5;
 	coreUtils: CoreUtils;
 	parseCodes: ParseCodes;
-	userList: User[];
 	maxStopLength: number;
-	leftMarker: number;
-	rightMarker: number;
-	startTime: number;
-	endTime: number;
-	currTime: number;
 
 	constructor(sketch: p5) {
 		this.sketch = sketch;
 		this.coreUtils = new CoreUtils(); // utilities for testing CSV files
 		this.parseCodes = new ParseCodes(this.sketch, this.coreUtils);
-		this.userList = [];
 		this.maxStopLength = 0; // Longest stop length in seconds, set dynamically when updating movement data
-		this.leftMarker = 0;
-		this.rightMarker = 0;
-		this.startTime = 0;
-		this.endTime = 0;
-		this.currTime = 0;
 	}
 
 	// TODO: should this move elsewhere?
@@ -56,7 +44,6 @@ export class Core {
 
 	clearAll() {
 		this.parseCodes.clear();
-		this.userList = [];
 	}
 
 	handleUserLoadedFiles = async (event: Event) => {
