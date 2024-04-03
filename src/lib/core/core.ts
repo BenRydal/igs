@@ -15,18 +15,20 @@ import { ParseCodes } from './parse-codes.js';
 
 import { DataPoint } from '../../models/dataPoint.js';
 import { User } from '../../models/user.js';
-import { Timeline } from '../../models/timeline';
 import * as Constants from '../constants/index.js';
 
 import UserStore from '../../stores/userStore';
 import TimelineStore from '../../stores/timelineStore';
+let timeline;
+TimelineStore.subscribe((data) => {
+	timeline = data;
+});
 
 export class Core {
 	sketch: p5;
 	coreUtils: CoreUtils;
 	parseCodes: ParseCodes;
 	userList: User[];
-	totalTimeInSeconds: number;
 	maxStopLength: number;
 	COLORGRAY: string;
 	COLOR_LIST: string[];
@@ -41,7 +43,6 @@ export class Core {
 		this.coreUtils = new CoreUtils(); // utilities for testing CSV files
 		this.parseCodes = new ParseCodes(this.sketch, this.coreUtils);
 		this.userList = [];
-		this.totalTimeInSeconds = 0; // Time value in seconds that all displayed data is set to, set dynamically when updating movement data
 		this.maxStopLength = 0; // Longest stop length in seconds, set dynamically when updating movement data
 		this.COLORGRAY = '#A9A9A9'; // should match representation of data in GUI
 		this.COLOR_LIST = [
@@ -70,19 +71,9 @@ export class Core {
 		this.sketch.handle3D.update();
 	};
 
-	// update global total time, make sure to floor value as integer
-	setTotalTime(timeValue: number) {
-		if (this.totalTimeInSeconds < timeValue) this.totalTimeInSeconds = timeValue;
-	}
-
-	getTotalTimeInSeconds() {
-		return this.totalTimeInSeconds;
-	}
-
 	clearAll() {
 		this.parseCodes.clear();
 		this.userList = [];
-		// this.totalTimeInSeconds = 0;
 	}
 
 	handleUserLoadedFiles = async (event: Event) => {
@@ -140,7 +131,6 @@ export class Core {
 	handleExampleDropdown = async (event: any) => {
 		// TODO: Need to adjust p5 typescript defintion to expose
 		// custom attributes & functions
-		this.sketch.core.totalTimeInSeconds = 0;
 		this.sketch.videoController.clear();
 
 		UserStore.update(() => {
@@ -258,7 +248,6 @@ export class Core {
 				const priorRow = csvData[i - 1];
 				if (this.coreUtils.movementRowForType(row) && this.coreUtils.curTimeIsLarger(row, priorRow)) {
 					user.dataTrail.push(new DataPoint('', row.time, row.x, row.y, false));
-					this.sketch.core.setTotalTime(row.time);
 				}
 			}
 			this.updateStopValues(user.dataTrail);
