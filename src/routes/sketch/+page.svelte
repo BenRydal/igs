@@ -96,8 +96,27 @@
 
 		<div class="flex justify-end flex-1 px-2">
 			<div class="flex items-stretch">
-				<IconButton icon={MdRotateLeft} tooltip={"Rotate Left"}/>
-				<IconButton icon={MdRotateRight} tooltip={"Rotate Right"}/>
+
+				<IconButton 
+					id="btn-rotate-left"	
+					icon={MdRotateLeft} 
+					tooltip={"Rotate Left"}
+					on:click={() => {
+						p5Instance.floorPlan.setRotateLeft();
+						p5Instance.loop();
+					}}
+				/>
+
+				<IconButton 
+					id="btn-rotate-left"	
+					icon={MdRotateRight} 
+					tooltip={"Rotate Right"}
+					on:click={() => {
+						p5Instance.floorPlan.setRotateRight();
+						p5Instance.loop();
+					}}
+				/>
+				
 				<IconButton icon={MdCloudDownload} tooltip={"Download your Data"}/>
 				<div data-tip="Upload" class="tooltip tooltip-bottom btn capitalize icon max-h-8 bg-[#f6f5f3] border-[#f6f5f3]" role="button" tabindex="0" on:click on:keydown>
 					<label for="file-input">
