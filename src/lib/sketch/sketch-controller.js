@@ -45,7 +45,7 @@ export class SketchController {
 	}
 
 	mapPixelTimeToTotalTime(value) {
-		return this.sk.map(value, this.getTimelineStartXPos(), this.getTimelineEndXPos(), 0, this.sk.core.getTotalTimeInSeconds());
+		return this.sk.map(value, this.getTimelineStartXPos(), this.getTimelineEndXPos(), 0, timeLine.getEndTime());
 	}
 
 	mapPixelTimeToSelectTime(value) {
@@ -80,7 +80,7 @@ export class SketchController {
 
 	// maps value from time in seconds from data to time in pixels on timeline
 	mapTotalTimeToPixelTime(value) {
-		return this.sk.map(value, 0, this.sk.core.getTotalTimeInSeconds(), this.getTimelineStartXPos(), this.getTimelineEndXPos());
+		return this.sk.map(value, 0, timeLine.getEndTime(), this.getTimelineStartXPos(), this.getTimelineEndXPos());
 	}
 
 	getIsAnimate() {
@@ -141,7 +141,7 @@ export class SketchController {
 	 */
 	getCurConversationRectWidth() {
 		const maxRectWidth = 10;
-		const curScaledRectWidth = this.sk.map(this.sk.core.getTotalTimeInSeconds(), 0, 3600, maxRectWidth, 1, true);
+		const curScaledRectWidth = this.sk.map(timeLine.getEndTime(), 0, 3600, maxRectWidth, 1, true);
 		const timelineLength = this.getTimelineRightMarkerXPos() - this.getTimelineLeftMarkerXPos();
 		return this.sk.map(timelineLength, 0, timelineLength, maxRectWidth, curScaledRectWidth);
 	}
