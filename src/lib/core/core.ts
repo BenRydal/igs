@@ -30,8 +30,6 @@ export class Core {
 	parseCodes: ParseCodes;
 	userList: User[];
 	maxStopLength: number;
-	COLORGRAY: string;
-	COLOR_LIST: string[];
 	leftMarker: number;
 	rightMarker: number;
 	startTime: number;
@@ -44,21 +42,6 @@ export class Core {
 		this.parseCodes = new ParseCodes(this.sketch, this.coreUtils);
 		this.userList = [];
 		this.maxStopLength = 0; // Longest stop length in seconds, set dynamically when updating movement data
-		this.COLORGRAY = '#A9A9A9'; // should match representation of data in GUI
-		this.COLOR_LIST = [
-			'#6a3d9a',
-			'#ff7f00',
-			'#33a02c',
-			'#1f78b4',
-			'#e31a1c',
-			'#b15928',
-			'#cab2d6',
-			'#fdbf6f',
-			'#b2df8a',
-			'#a6cee3',
-			'#fb9a99',
-			'#ffed6f'
-		];
 		this.leftMarker = 0;
 		this.rightMarker = 0;
 		this.startTime = 0;
