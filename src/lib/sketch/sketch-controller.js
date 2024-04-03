@@ -5,10 +5,10 @@ It also holds various mapping methods that map data values from different classe
 
 import TimelineStore from '../../stores/timelineStore';
 
-let timeLine;
+let timeline;
 
 TimelineStore.subscribe((data) => {
-	timeLine = data;
+	timeline = data;
 });
 
 export class SketchController {
@@ -22,7 +22,7 @@ export class SketchController {
 	}
 
 	updateAnimation() {
-		if (timeLine.getCurrTime() < timeLine.getEndTime()) this.continueAnimation();
+		if (timeline.getCurrTime() < timeline.getEndTime()) this.continueAnimation();
 		else this.endAnimation();
 	}
 
@@ -30,9 +30,9 @@ export class SketchController {
 		let timeToSet = 0;
 		const animationRate = 0.05; // TODO: this would get a value from the animation slider in the interface
 		if (this.sk.videoController.isLoadedAndIsPlaying()) timeToSet = this.sk.videoController.getVideoPlayerCurTime();
-		else timeToSet = timeLine.getCurrTime() + animationRate;
+		else timeToSet = timeline.getCurrTime() + animationRate;
 		TimelineStore.update((timeline) => {
-			timeLine.setCurrTime(timeToSet);
+			timeline.setCurrTime(timeToSet);
 			return timeline;
 		});
 	}
@@ -45,7 +45,7 @@ export class SketchController {
 	}
 
 	mapPixelTimeToTotalTime(value) {
-		return this.sk.map(value, this.getTimelineStartXPos(), this.getTimelineEndXPos(), 0, timeLine.getEndTime());
+		return this.sk.map(value, this.getTimelineStartXPos(), this.getTimelineEndXPos(), 0, timeline.getEndTime());
 	}
 
 	mapPixelTimeToSelectTime(value) {
@@ -80,11 +80,11 @@ export class SketchController {
 
 	// maps value from time in seconds from data to time in pixels on timeline
 	mapTotalTimeToPixelTime(value) {
-		return this.sk.map(value, 0, timeLine.getEndTime(), this.getTimelineStartXPos(), this.getTimelineEndXPos());
+		return this.sk.map(value, 0, timeline.getEndTime(), this.getTimelineStartXPos(), this.getTimelineEndXPos());
 	}
 
 	getIsAnimate() {
-		return timeLine.getIsAnimating();
+		return timeline.getIsAnimating();
 	}
 
 	setIsAllTalk(value) {
@@ -141,29 +141,29 @@ export class SketchController {
 	 */
 	getCurConversationRectWidth() {
 		const maxRectWidth = 10;
-		const curScaledRectWidth = this.sk.map(timeLine.getEndTime(), 0, 3600, maxRectWidth, 1, true);
+		const curScaledRectWidth = this.sk.map(timeline.getEndTime(), 0, 3600, maxRectWidth, 1, true);
 		const timelineLength = this.getTimelineRightMarkerXPos() - this.getTimelineLeftMarkerXPos();
 		return this.sk.map(timelineLength, 0, timelineLength, maxRectWidth, curScaledRectWidth);
 	}
 
 	getTimelineStartXPos() {
-		return timeLine.getLeftX();
+		return timeline.getLeftX();
 	}
 
 	getTimelineEndXPos() {
-		return timeLine.getRightX();
+		return timeline.getRightX();
 	}
 
 	getTimelineCurrTime() {
-		return timeLine.getCurrTime();
+		return timeline.getCurrTime();
 	}
 
 	getTimelineLeftMarkerXPos() {
-		return this.sk.sketchController.mapTotalTimeToPixelTime(timeLine.getLeftMarker());
+		return this.sk.sketchController.mapTotalTimeToPixelTime(timeline.getLeftMarker());
 	}
 
 	getTimelineRightMarkerXPos() {
-		return this.sk.sketchController.mapTotalTimeToPixelTime(timeLine.getRightMarker());
+		return this.sk.sketchController.mapTotalTimeToPixelTime(timeline.getRightMarker());
 	}
 
 	overAxis(pixelValue) {
