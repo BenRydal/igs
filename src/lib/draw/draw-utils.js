@@ -5,10 +5,10 @@
 
 import TimelineStore from '../../stores/timelineStore';
 
-let timeLine;
+let timeline;
 
 TimelineStore.subscribe((data) => {
-	timeLine = data;
+	timeline = data;
 });
 
 export class DrawUtils {
@@ -30,7 +30,7 @@ export class DrawUtils {
 
 	// TODO: Revisit to determine best approach here--could just return true if you want to show all data while animating
 	isShowingInAnimation(value) {
-		if (this.sk.sketchController.getIsAnimate()) return this.sk.sketchController.mapPixelTimeToTotalTime(value) < timeLine.getCurrTime();
+		if (this.sk.sketchController.getIsAnimate()) return this.sk.sketchController.mapPixelTimeToTotalTime(value) < timeline.getCurrTime();
 		else return true;
 	}
 
