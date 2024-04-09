@@ -1,3 +1,19 @@
+const USER_COLORS = [
+  '#FF0000', // Red
+  '#00FF00', // Green
+  '#0000FF', // Blue
+  '#FFFF00', // Yellow
+  '#FF00FF', // Magenta
+  '#00FFFF', // Cyan
+  '#800000', // Maroon
+  '#808000', // Olive
+  '#008000', // Green (dark)
+  '#800080', // Purple
+  '#008080', // Teal
+  '#000080', // Navy
+  // Add more colors as needed
+];
+
 /**
  * This class holds core program data and associated parsing methods from processed CSV files.
  * Separate parsing classes for movement, conversation, and code CSV files test parsed data from PapaParse
@@ -200,11 +216,12 @@ export class Core {
 		let endTime = 0;
 
 		UserStore.update((currentUsers) => {
-			let users = [...currentUsers]; // clone the current users
-			let user = null;
-			user = users.find((user) => user.name === userName);
+			let users = [...currentUsers];
+			let user = users.find((user) => user.name === userName);
 			if (!user) {
-				user = new User([], Constants.PATH_COLORS[users.length], [], true, userName);
+				const availableColors = USER_COLORS.filter((color) => !users.some((u) => u.color === color));
+				const userColor = availableColors.length > 0 ? availableColors[0] : '#000000'; // Default to black if no more unique colors available
+				user = new User([], userColor, [], true, userName);
 				users.push(user);
 			}
 
@@ -282,12 +299,14 @@ export class Core {
 
 	updateUsersForConversation = (csvData: any, fileName: string) => {
 		UserStore.update((currentUsers) => {
-			let users = [...currentUsers]; // clone the current users
+			let users = [...currentUsers];
 			csvData.forEach((row: any) => {
 				let user = users.find((user) => user.name === row.speaker.toLowerCase());
 
 				if (!user) {
-					user = new User([], Constants.PATH_COLORS[users.length], [], true, row.speaker.toLowerCase());
+					const availableColors = USER_COLORS.filter((color) => !users.some((u) => u.color === color));
+					const userColor = availableColors.length > 0 ? availableColors[0] : '#000000'; // Default to black if no more unique colors available
+					user = new User([], userColor, [], true, row.speaker.toLowerCase());
 					users.push(user);
 				}
 				this.addDataPointClosestByTimeInSeconds(user.dataTrail, new DataPoint(row.talk, row.time));

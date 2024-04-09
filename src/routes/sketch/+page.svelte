@@ -61,10 +61,10 @@
 	function startScrolling(direction: 'left' | 'right'): void {
 		const carousel = document.querySelector('.carousel');
 		if (carousel) {
-			const scrollAmount = direction === 'left' ? -100 : 100;
+			const scrollAmount = direction === 'left' ? -100 : carousel.clientWidth + 80;
 			scrollInterval = setInterval(() => {
 				carousel.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-			}, 100); // Adjust the interval time (100 ms) as needed
+			}, 5); // Adjust the interval time (100 ms) as needed
 		}
 	}
 
@@ -97,9 +97,9 @@
 		<div class="flex justify-end flex-1 px-2">
 			<div class="flex items-stretch">
 
-				<IconButton 
-					id="btn-rotate-left"	
-					icon={MdRotateLeft} 
+				<IconButton
+					id="btn-rotate-left"
+					icon={MdRotateLeft}
 					tooltip={"Rotate Left"}
 					on:click={() => {
 						p5Instance.floorPlan.setRotateLeft();
@@ -107,16 +107,16 @@
 					}}
 				/>
 
-				<IconButton 
-					id="btn-rotate-left"	
-					icon={MdRotateRight} 
+				<IconButton
+					id="btn-rotate-left"
+					icon={MdRotateRight}
 					tooltip={"Rotate Right"}
 					on:click={() => {
 						p5Instance.floorPlan.setRotateRight();
 						p5Instance.loop();
 					}}
 				/>
-				
+
 				<IconButton icon={MdCloudDownload} tooltip={"Download your Data"}/>
 				<div data-tip="Upload" class="tooltip tooltip-bottom btn capitalize icon max-h-8 bg-[#f6f5f3] border-[#f6f5f3]" role="button" tabindex="0" on:click on:keydown>
 					<label for="file-input">
@@ -191,9 +191,14 @@
 					<div class="carousel carousel-center overflow-x-auto flex-grow mx-5">
 						{#if selectedTab == 'Movement'}
 							{#each $UserStore as user}
-								<div class="carousel-item inline-flex items-center">
-									<input id="userCheckbox" type="checkbox" class="checkbox" bind:checked={user.enabled} />
-									<label class="m-5" for="userCheckbox">{user.name}</label>
+								<div class="carousel-item inline-flex items-center mr-2">
+									<div class="flex items-center">
+										<input id="userCheckbox-{user.name}" type="checkbox" class="checkbox" bind:checked={user.enabled} />
+										<label for="userCheckbox-{user.name}" class="flex items-center ml-1 mr-4">
+											<div class="w-4 h-4 rounded-full mr-2" style="background-color: {user.color};" />
+											{user.name}
+										</label>
+									</div>
 								</div>
 							{/each}
 						{/if}
