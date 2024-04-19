@@ -187,12 +187,9 @@ export class Core {
 			let users = [...currentUsers];
 			let user = users.find((user) => user.name === userName);
 			if (!user) {
-				const availableColors = USER_COLORS.filter((color) => !users.some((u) => u.color === color));
-				const userColor = availableColors.length > 0 ? availableColors[0] : '#000000'; // Default to black if no more unique colors available
-				user = new User([], userColor, [], true, userName);
+				user = this.createNewUser(users, userName);
 				users.push(user);
 			}
-
 			// Assuming the first column is 'time' and it's sorted in ascending order
 			//const startTime = csvData[0]?.time; // The time in the first row
 			//const endTime = csvData[csvData.length - 1]?.time; // The time in the last row
@@ -209,6 +206,7 @@ export class Core {
 
 			return users;
 		});
+
 		TimelineStore.update((timeline) => {
 			timeline.setCurrTime(0);
 			timeline.setStartTime(0);
@@ -218,6 +216,27 @@ export class Core {
 			return timeline;
 		});
 	};
+
+	updateUsersForConversation = (csvData: any, fileName: string) => {
+		UserStore.update((currentUsers) => {
+			let users = [...currentUsers];
+			csvData.forEach((row: any) => {
+				let user = users.find((user) => user.name === row.speaker.toLowerCase());
+				if (!user) {
+					user = this.createNewUser(users, row.speaker.toLowerCase());
+					users.push(user);
+				}
+				this.addDataPointClosestByTimeInSeconds(user.dataTrail, new DataPoint(row.talk, row.time));
+			});
+			return users;
+		});
+	};
+
+	createNewUser(users: User[], userName: string) {
+		const availableColors = USER_COLORS.filter((color) => !users.some((u) => u.color === color));
+		const userColor = availableColors.length > 0 ? availableColors[0] : '#000000'; // Default to black if no more unique colors available
+		return new User([], userColor, [], true, userName);
+	}
 
 	// TODO: this could be moved to main classes to dynamically update, would neat to reset isStopped values in data
 	// Allows dynamic updating of what constitute stop values/intervals in the program
@@ -261,25 +280,6 @@ export class Core {
 			csvData.forEach((row: any) => {
 				users.forEach((user) => user.segments.push(row.code));
 			});
-			return users;
-		});
-	};
-
-	updateUsersForConversation = (csvData: any, fileName: string) => {
-		UserStore.update((currentUsers) => {
-			let users = [...currentUsers];
-			csvData.forEach((row: any) => {
-				let user = users.find((user) => user.name === row.speaker.toLowerCase());
-
-				if (!user) {
-					const availableColors = USER_COLORS.filter((color) => !users.some((u) => u.color === color));
-					const userColor = availableColors.length > 0 ? availableColors[0] : '#000000'; // Default to black if no more unique colors available
-					user = new User([], userColor, [], true, row.speaker.toLowerCase());
-					users.push(user);
-				}
-				this.addDataPointClosestByTimeInSeconds(user.dataTrail, new DataPoint(row.talk, row.time));
-			});
-
 			return users;
 		});
 	};
