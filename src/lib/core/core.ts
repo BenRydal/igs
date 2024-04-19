@@ -1,17 +1,17 @@
 const USER_COLORS = [
-  '#FF0000', // Red
-  '#00FF00', // Green
-  '#0000FF', // Blue
-  '#FFFF00', // Yellow
-  '#FF00FF', // Magenta
-  '#00FFFF', // Cyan
-  '#800000', // Maroon
-  '#808000', // Olive
-  '#008000', // Green (dark)
-  '#800080', // Purple
-  '#008080', // Teal
-  '#000080', // Navy
-  // Add more colors as needed
+	'#6a3d9a', // Dark Purple
+	'#ff7f00', // Dark Orange
+	'#33a02c', // Dark Green
+	'#1f78b4', // Dark Blue
+	'#e31a1c', // Dark Red
+	'#b15928', // Dark Brown
+	'#cab2d6', // Light Purple
+	'#fdbf6f', // Light Orange
+	'#b2df8a', //Light Green
+	'#a6cee3', //Light Blue
+	'#fb9a99', //Light Red
+	'#ffed6f' //Yellow
+	// Add more colors as needed
 ];
 
 /**
