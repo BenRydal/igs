@@ -254,7 +254,7 @@ export class Core {
 			// If cumulativeTime is greater than stopFloor, set stop values for the sequence
 			if (cumulativeTime >= stopFloor) {
 				if (cumulativeTime > this.maxStopLength) this.maxStopLength = cumulativeTime;
-				for (let k = i; k < j; k++) {
+				for (let k = i + 1; k < j; k++) {
 					data[k].isStopped = true;
 					//if (k === j - 1) data[k].stopLength = cumulativeTime;
 					data[k].stopLength = data[k].time - data[i].time;
