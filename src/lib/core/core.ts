@@ -166,34 +166,18 @@ export class Core {
 
 	// NOTE: multicode should be processed before single code file as headers of multicode have one additional column
 	processResultsData = (results: any, fileName: string) => {
-		let csvData = results.data;
-		if (this.testMovement(results)) {
+		const csvData = results.data;
+		if (this.coreUtils.testMovement(results)) {
 			this.updateUsersForMovement(csvData, fileName);
-		} else if (this.testMulticode(results)) {
+		} else if (this.coreUtils.testMulticode(results)) {
 			this.updateUsersForMultiCodes(csvData, fileName);
-		} else if (this.testSingleCode(results)) {
+		} else if (this.coreUtils.testSingleCode(results)) {
 			this.updateUsersForSingleCodes(csvData, fileName);
-		} else if (this.testConversation(results)) {
+		} else if (this.coreUtils.testConversation(results)) {
 			this.updateUsersForConversation(csvData, fileName);
 		} else {
 			alert('Error loading CSV file. Please make sure your file is a CSV file formatted with correct column headers');
 		}
-	};
-
-	testMovement = (results: any): boolean => {
-		return this.coreUtils.testPapaParseResults(results, this.coreUtils.headersMovement, this.coreUtils.movementRowForType);
-	};
-
-	testConversation = (results: any): boolean => {
-		return this.coreUtils.testPapaParseResults(results, this.coreUtils.headersConversation, this.coreUtils.conversationRowForType);
-	};
-
-	testSingleCode = (results: any): boolean => {
-		return this.coreUtils.testPapaParseResults(results, this.coreUtils.headersSingleCodes, this.coreUtils.codeRowForType);
-	};
-
-	testMulticode = (results: any): boolean => {
-		return this.coreUtils.testPapaParseResults(results, this.coreUtils.headersMultiCodes, this.coreUtils.multiCodeRowForType);
 	};
 
 	updateUsersForMovement = (csvData: any, userName: string) => {
