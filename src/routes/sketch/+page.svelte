@@ -141,7 +141,7 @@
 					icon={Md3DRotation}
 					tooltip={"Toggle 3D"}
 					on:click={() => {
-						core.handle3D();
+						p5Instance.handle3D.update();
 					}}
 				/>
 

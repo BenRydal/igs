@@ -4,6 +4,7 @@ export class DataPoint {
 	x: number | null;
 	y: number | null;
 	isStopped: boolean;
+	stopLength: number;
 	codes: any;
 	weight: number;
 
@@ -13,6 +14,7 @@ export class DataPoint {
 		this.x = x;
 		this.y = y;
 		this.isStopped = isStopped;
+		this.stopLength = 0; // TODO: initialize to 0, could pass value as well so just check this is best way to do it
 		this.codes = {
 			hasCodeArray: [],
 			color: 'blue'

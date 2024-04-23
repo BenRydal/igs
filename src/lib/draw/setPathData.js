@@ -11,30 +11,29 @@ import { DrawUtils } from './draw-utils.js';
 import { CreateCodeFile } from './create-code-file.js';
 
 export class SetPathData {
+	constructor(sketch) {
+		this.sk = sketch;
+		this.drawUtils = new DrawUtils(sketch);
+	}
 
-    constructor(sketch, codeList) {
-        this.sk = sketch;
-        this.drawUtils = new DrawUtils(sketch, codeList);
-    }
+	setMovementAndConversation(userList) {
+		const drawConversation = new DrawConversation(this.sk, this.drawUtils);
+		const drawMovement = new DrawMovement(this.sk, this.drawUtils);
 
-    setMovementAndConversation(userList) {
-        const drawConversation = new DrawConversation(this.sk, this.drawUtils);
-        const drawMovement = new DrawMovement(this.sk, this.drawUtils);
+		for (const user of userList) {
+			if (user.enabled) {
+				drawConversation.setData(user);
+				drawMovement.setData(user); // draw after conversation so dot displays on top
+			}
+		}
+		drawConversation.setConversationBubble(); // draw conversation text last so it displays on top
+	}
 
-        for (const user of userList) {
-            if (user.enabled) {
-                drawConversation.setData(user);
-                drawMovement.setData(user); // draw after conversation so dot displays on top
-            }
-        }
-        drawConversation.setConversationBubble(); // draw conversation text last so it displays on top
-    }
-
-    // Prepares a code file for all selected data for every path showing in GUI
-    setCodeFile(pathList) {
-        const createCodeFile = new CreateCodeFile(this.sk, this.drawUtils);
-        for (const path of pathList) {
-            if (path.isShowing) createCodeFile.create(path);
-        }
-    }
+	// Prepares a code file for all selected data for every path showing in GUI
+	setCodeFile(pathList) {
+		const createCodeFile = new CreateCodeFile(this.sk, this.drawUtils);
+		for (const path of pathList) {
+			if (path.isShowing) createCodeFile.create(path);
+		}
+	}
 }

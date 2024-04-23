@@ -11,11 +11,11 @@ export class DrawMovement {
 		this.drawUtils = drawUtils;
 		this.dot = null;
 		this.isDrawingLine = false;
+		this.largestStopPixelSize = 50;
 		this.style = {
 			shade: null,
 			thinStroke: 1,
-			fatStroke: 9,
-			stopSize: 10
+			fatStroke: 9
 		};
 	}
 
@@ -92,7 +92,8 @@ export class DrawMovement {
 	 */
 	drawStopCircle(p) {
 		this.setFillStyle(p.cur.point.codes.color);
-		this.sk.circle(p.cur.pos.viewXPos, p.cur.pos.floorPlanYPos, this.style.stopSize);
+		const stopSize = this.sk.map(p.cur.point.stopLength, 0, this.sk.sketchController.maxStopLength, 5, this.largestStopPixelSize);
+		this.sk.circle(p.cur.pos.viewXPos, p.cur.pos.floorPlanYPos, stopSize);
 		this.sk.noFill();
 	}
 

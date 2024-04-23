@@ -32,7 +32,6 @@ export const igsSketch = (p5: any) => {
 
 		p5.createCanvas(window.innerWidth, availableHeight, p5.WEBGL);
 
-		p5.core = new Core(p5);
 		p5.sketchController = new SketchController(p5);
 		p5.gui = new SketchGUI(p5);
 		p5.handle3D = new Handle3D(p5, true);
@@ -86,7 +85,7 @@ export const igsSketch = (p5: any) => {
 		if (p5.dataIsLoaded(p5.floorPlan.getImg())) {
 			p5.floorPlan.setFloorPlan(p5.gui.fpContainer.getContainer());
 			if (p5.arrayIsLoaded(users)) {
-				const setPathData = new SetPathData(p5, p5.core.codeList);
+				const setPathData = new SetPathData(p5);
 				if (p5.arrayIsLoaded(users)) {
 					setPathData.setMovementAndConversation(users);
 				}
@@ -138,7 +137,6 @@ export const igsSketch = (p5: any) => {
 	//   }
 	// }
 
-	// Used in core.js for tracking path and such
 	p5.arrayIsLoaded = (data: any) => {
 		return Array.isArray(data) && data.length;
 	};

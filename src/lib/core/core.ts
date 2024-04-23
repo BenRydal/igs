@@ -27,23 +27,12 @@ TimelineStore.subscribe((data) => {
 export class Core {
 	sketch: p5;
 	coreUtils: CoreUtils;
-	parseCodes: ParseCodes;
-	maxStopLength: number;
+	//parseCodes: ParseCodes;
 
 	constructor(sketch: p5) {
 		this.sketch = sketch;
 		this.coreUtils = new CoreUtils(); // utilities for testing CSV files
-		this.parseCodes = new ParseCodes(this.sketch, this.coreUtils);
-		this.maxStopLength = 0; // Longest stop length in seconds, set dynamically when updating movement data
-	}
-
-	// TODO: should this move elsewhere?
-	handle3D = () => {
-		this.sketch.handle3D.update();
-	};
-
-	clearAll() {
-		this.parseCodes.clear();
+		//this.parseCodes = new ParseCodes(this.sketch, this.coreUtils);
 	}
 
 	handleUserLoadedFiles = async (event: Event) => {
@@ -238,8 +227,8 @@ export class Core {
 		return new User([], userColor, [], true, userName);
 	}
 
-	// TODO: this could be moved to main classes to dynamically update, would neat to reset isStopped values in data
-	// Allows dynamic updating of what constitute stop values/intervals in the program
+	// // TODO: this could be moved to main classes to dynamically update, would neat to reset isStopped values in data
+	// // Allows dynamic updating of what constitute stop values/intervals in the program
 	updateStopValues(data) {
 		//const stopFloor = this.sk.domController.getStopSliderValue();
 		const stopFloor = 1; // the interval that constitutes a stop in seconds
@@ -253,11 +242,13 @@ export class Core {
 			}
 			// If cumulativeTime is greater than stopFloor, set stop values for the sequence
 			if (cumulativeTime >= stopFloor) {
-				if (cumulativeTime > this.maxStopLength) this.maxStopLength = cumulativeTime;
+				if (cumulativeTime > this.sketch.sketchController.getMaxStopLength()) this.sketch.sketchController.setMaxStopLength(cumulativeTime);
 				for (let k = i + 1; k < j; k++) {
 					data[k].isStopped = true;
-					//if (k === j - 1) data[k].stopLength = cumulativeTime;
-					data[k].stopLength = data[k].time - data[i].time;
+					data[k].stopLength = cumulativeTime; // TODO: can't seem to get the below to work to increment stopLegnth for each stop to show correclty in draw methods drawStopCircle
+					// //if (k === j - 1) data[k].stopLength = cumulativeTime;
+					// data[k].stopLength = data[k].time - data[i].time;
+					// console.log(data[k].stopLength);
 				}
 			}
 			i = j - 1; // Update i to skip the sequence just processed

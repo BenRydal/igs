@@ -14,6 +14,7 @@ TimelineStore.subscribe((data) => {
 export class SketchController {
 	constructor(sketch) {
 		this.sk = sketch;
+		this.maxStopLength = 0;
 		this.isAlignTalk = false;
 		this.isAllTalk = true;
 		this.isPathColorMode = true;
@@ -175,5 +176,13 @@ export class SketchController {
 		const pixelValue = this.sk.mouseX;
 		return pixelValue >= this.getTimelineLeftMarkerXPos() && pixelValue <= this.getTimelineRightMarkerXPos();
 		// return this.sk.overRect(this.start, this.top, this.length, this.thickness);
+	}
+
+	getMaxStopLength() {
+		return this.maxStopLength;
+	}
+
+	setMaxStopLength(value) {
+		this.maxStopLength = value;
 	}
 }
