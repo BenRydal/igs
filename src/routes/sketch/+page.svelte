@@ -14,7 +14,7 @@
 
 	import UserStore from '../../stores/userStore';
 	import P5Store from '../../stores/p5Store';
-  import VideoStore from '../../stores/videoStore';
+ 	import VideoStore from '../../stores/videoStore';
 
 	import * as Constants from '../../lib/constants';
 
@@ -31,11 +31,11 @@
 	let selectedTab: string = 'Movement';
 	let core: Core;
 	let isVideoShowing = false;
-  let isVideoPlaying = false;
+  	let isVideoPlaying = false;
 
 	VideoStore.subscribe((value) => {
-    isVideoShowing = value.isShowing;
-    isVideoPlaying = value.isPlaying;
+		isVideoShowing = value.isShowing;
+		isVideoPlaying = value.isPlaying;
   });
 
 	UserStore.subscribe((data) => {
@@ -76,15 +76,16 @@
 	}
 
 	function toggleVideo() {
-    if (p5Instance && p5Instance.videoController) {
-      p5Instance.videoController.toggleShowVideo();
-      VideoStore.update((value) => {
-        value.isShowing = p5Instance.videoController.isShowing;
-        value.isPlaying = p5Instance.videoController.isPlaying;
-        return value;
-      });
-    }
+		if (p5Instance && p5Instance.videoController) {
+			p5Instance.videoController.toggleShowVideo();
+			VideoStore.update((value) => {
+				value.isShowing = p5Instance.videoController.isShowing;
+				value.isPlaying = p5Instance.videoController.isPlaying;
+				return value;
+			});
+		}
   }
+
 </script>
 
 <div class="drawer">
