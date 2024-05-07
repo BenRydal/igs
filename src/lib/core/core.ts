@@ -260,23 +260,18 @@ export class Core {
 			let users = [...currentUsers]; // clone the current users
 			const usedColors = new Set();
 
-			// For each row in the Code CSV
 			csvData.forEach((row: any) => {
 				const code = row.code;
 				const startTime = parseFloat(row.start);
 				const endTime = parseFloat(row.end);
 
-				// Find an available color for the code
 				let color = USER_COLORS.find((c) => !usedColors.has(c));
 				if (!color) {
-					// If no more unique colors available, default to black
 					color = '#000000';
 				}
 				usedColors.add(color);
 
-				// For each user in the users array
 				users.forEach((user) => {
-					// Update datapoints FROM the start and TO the end time to include the code
 					user.dataTrail.forEach((dataPoint) => {
 						if (dataPoint.time !== null && dataPoint.time >= startTime && dataPoint.time <= endTime) {
 							dataPoint.codes[code] = color;
