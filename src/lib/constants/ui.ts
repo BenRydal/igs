@@ -1,4 +1,4 @@
-export const TAB_OPTIONS = ['Movement'];
+export const TAB_OPTIONS = ['Movement', 'Talk'];
 
 export const USER_COLORS = [
 	'#6a3d9a', // Dark Purple

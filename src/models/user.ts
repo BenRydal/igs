@@ -10,7 +10,6 @@ export class User {
 	segments: string[];
 
 	constructor(
-		// dataTrail: Map<number, DataPoint> = new Map<number, DataPoint>(),
 		dataTrail: DataPoint[],
 		color: string,
 		segments: string[] = [],

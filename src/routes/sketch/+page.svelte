@@ -7,14 +7,14 @@
 	import MdRotateLeft from 'svelte-icons/md/MdRotateLeft.svelte';
 	import MdRotateRight from 'svelte-icons/md/MdRotateRight.svelte';
 	import Md3DRotation from 'svelte-icons/md/Md3DRotation.svelte';
-	import MdVideocam from 'svelte-icons/md/MdVideocam.svelte'
-	import MdVideocamOff from 'svelte-icons/md/MdVideocamOff.svelte'
+	import MdVideocam from 'svelte-icons/md/MdVideocam.svelte';
+	import MdVideocamOff from 'svelte-icons/md/MdVideocamOff.svelte';
 
 	import type { User } from '../../models/user';
 
 	import UserStore from '../../stores/userStore';
 	import P5Store from '../../stores/p5Store';
- 	import VideoStore from '../../stores/videoStore';
+	import VideoStore from '../../stores/videoStore';
 
 	import * as Constants from '../../lib/constants';
 
@@ -31,12 +31,12 @@
 	let selectedTab: string = 'Movement';
 	let core: Core;
 	let isVideoShowing = false;
-  	let isVideoPlaying = false;
+	let isVideoPlaying = false;
 
 	VideoStore.subscribe((value) => {
 		isVideoShowing = value.isShowing;
 		isVideoPlaying = value.isPlaying;
-  });
+	});
 
 	UserStore.subscribe((data) => {
 		users = data;
@@ -54,9 +54,10 @@
 		igsSketch(p5);
 	};
 
-  let isModalOpen = writable(false);
+	let isModalOpen = writable(false);
+	let showSpeechPopup: { [key: string]: boolean } = {};
 
-  let scrollInterval: ReturnType<typeof setInterval> | null = null;
+	let scrollInterval: ReturnType<typeof setInterval> | null = null;
 
 	function startScrolling(direction: 'left' | 'right'): void {
 		const carousel = document.querySelector('.carousel');
@@ -84,8 +85,7 @@
 				return value;
 			});
 		}
-  }
-
+	}
 </script>
 
 <div class="drawer">
@@ -97,11 +97,10 @@
 
 		<div class="flex justify-end flex-1 px-2">
 			<div class="flex items-stretch">
-
 				<IconButton
 					id="btn-rotate-left"
 					icon={MdRotateLeft}
-					tooltip={"Rotate Left"}
+					tooltip={'Rotate Left'}
 					on:click={() => {
 						p5Instance.floorPlan.setRotateLeft();
 						p5Instance.loop();
@@ -111,15 +110,22 @@
 				<IconButton
 					id="btn-rotate-left"
 					icon={MdRotateRight}
-					tooltip={"Rotate Right"}
+					tooltip={'Rotate Right'}
 					on:click={() => {
 						p5Instance.floorPlan.setRotateRight();
 						p5Instance.loop();
 					}}
 				/>
 
-				<IconButton icon={MdCloudDownload} tooltip={"Download your Data"}/>
-				<div data-tip="Upload" class="tooltip tooltip-bottom btn capitalize icon max-h-8 bg-[#f6f5f3] border-[#f6f5f3]" role="button" tabindex="0" on:click on:keydown>
+				<IconButton icon={MdCloudDownload} tooltip={'Download your Data'} />
+				<div
+					data-tip="Upload"
+					class="tooltip tooltip-bottom btn capitalize icon max-h-8 bg-[#f6f5f3] border-[#f6f5f3]"
+					role="button"
+					tabindex="0"
+					on:click
+					on:keydown
+				>
 					<label for="file-input">
 						<MdCloudUpload />
 					</label>
@@ -135,33 +141,27 @@
 					on:change={core.handleUserLoadedFiles}
 				/>
 
-				<IconButton icon={MdHelpOutline} tooltip={"Help"} on:click={() => ($isModalOpen = !$isModalOpen)} />
+				<IconButton icon={MdHelpOutline} tooltip={'Help'} on:click={() => ($isModalOpen = !$isModalOpen)} />
 
 				<IconButton
 					id="btn-toggle-3d"
 					icon={Md3DRotation}
-					tooltip={"Toggle 3D"}
+					tooltip={'Toggle 3D'}
 					on:click={() => {
 						p5Instance.handle3D.update();
 					}}
 				/>
 
-		{#if isVideoShowing}
-			<IconButton
-				id="btn-toggle-video"
-				icon={MdVideocam}
-				tooltip={"Show/Hide Video"}
-				on:click={toggleVideo}
-			/>
-		{:else}
-			<IconButton
-				id="btn-toggle-video"
-				icon={MdVideocamOff}
-				tooltip={"Show/Hide Video"}
-				on:click={toggleVideo}
-			/>
-		{/if}
-				<select id="select-data-dropdown" class="select select-bordered w-full max-w-xs bg-[#f6f5f3] text-black" on:change={core.handleExampleDropdown}>
+				{#if isVideoShowing}
+					<IconButton id="btn-toggle-video" icon={MdVideocam} tooltip={'Show/Hide Video'} on:click={toggleVideo} />
+				{:else}
+					<IconButton id="btn-toggle-video" icon={MdVideocamOff} tooltip={'Show/Hide Video'} on:click={toggleVideo} />
+				{/if}
+				<select
+					id="select-data-dropdown"
+					class="select select-bordered w-full max-w-xs bg-[#f6f5f3] text-black"
+					on:change={core.handleExampleDropdown}
+				>
 					<option disabled selected>-- Select an Example --</option>
 					<option value="example-1">Michael Jordan's Last Shot</option>
 					<option value="example-2">Family Museum Gallery Visit</option>
@@ -175,7 +175,7 @@
 	<P5 {sketch} />
 
 	<div class="btm-nav flex justify-between">
-  <!-- Left Side: Select and Carousel -->
+		<!-- Left Side: Select and Carousel -->
 		<div class="w-1/2 bg-[#f6f5f3]">
 			<div class="join w-full flex items-center justify-start">
 				<select bind:value={selectedTab} id="select-data-dropdown" class="select select-bordered max-w-xs bg-neutral text-white dropdown-top">
@@ -183,7 +183,14 @@
 				</select>
 
 				<div class="flex items-center w-full">
-					<button class="btn flex-shrink-0" on:mousedown={() => startScrolling('left')} on:mouseup={stopScrolling} on:mouseleave={stopScrolling} on:touchstart={() => startScrolling('left')} on:touchend={stopScrolling}>
+					<button
+						class="btn flex-shrink-0"
+						on:mousedown={() => startScrolling('left')}
+						on:mouseup={stopScrolling}
+						on:mouseleave={stopScrolling}
+						on:touchstart={() => startScrolling('left')}
+						on:touchend={stopScrolling}
+					>
 						<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
 						</svg>
@@ -196,16 +203,75 @@
 									<div class="flex items-center">
 										<input id="userCheckbox-{user.name}" type="checkbox" class="checkbox" bind:checked={user.enabled} />
 										<label for="userCheckbox-{user.name}" class="flex items-center ml-1 mr-4">
-											<div class="w-4 h-4 rounded-full mr-2" style="background-color: {user.color};" />
+											<!-- <div class="w-4 h-4 rounded-full mr-2" style="background-color: {user.color};" /> -->
+											<input type="color" class="color-picker" bind:value={user.color} />
 											{user.name}
 										</label>
 									</div>
 								</div>
 							{/each}
+						{:else if selectedTab == 'Talk'}
+							{#each $UserStore as user}
+								{#if user.dataTrail.some((dp) => dp.speech)}
+									<div class="carousel-item inline-flex items-center mr-2">
+										<div class="flex items-center">
+											<input id="userCheckbox-{user.name}" type="checkbox" class="checkbox" bind:checked={user.enabled} />
+											<label for="userCheckbox-{user.name}" class="flex items-center ml-1 mr-4">
+												<input type="color" class="color-picker" bind:value={user.color} />
+												{user.name}
+											</label>
+											<button class="btn btn-sm" on:click={() => (showSpeechPopup[user.name] = !showSpeechPopup[user.name])}>View Speech</button>
+										</div>
+									</div>
+
+									{#if showSpeechPopup[user.name]}
+										<div class="modal modal-open">
+											<div class="modal-box">
+												<h3 class="font-bold text-lg">{user.name}'s Speech Datapoints</h3>
+												<div class="overflow-x-auto">
+													<table class="table w-full">
+														<thead>
+															<tr>
+																<th>Time</th>
+																<th>Speech</th>
+															</tr>
+														</thead>
+														<tbody>
+															{#each user.dataTrail
+																.filter((dp) => dp.speech)
+																.sort((a, b) => {
+																	if (a.time === null && b.time === null) return 0;
+																	if (a.time === null) return 1;
+																	if (b.time === null) return -1;
+																	return a.time - b.time;
+																}) as datapoint}
+																<tr>
+																	<td>{datapoint.time}</td>
+																	<td>{datapoint.speech}</td>
+																</tr>
+															{/each}
+														</tbody>
+													</table>
+												</div>
+												<div class="modal-action">
+													<button class="btn" on:click={() => (showSpeechPopup[user.name] = false)}>Close</button>
+												</div>
+											</div>
+										</div>
+									{/if}
+								{/if}
+							{/each}
 						{/if}
 					</div>
 
-					<button class="btn flex-shrink-0" on:mousedown={() => startScrolling('right')} on:mouseup={stopScrolling} on:mouseleave={stopScrolling} on:touchstart={() => startScrolling('right')} on:touchend={stopScrolling}>
+					<button
+						class="btn flex-shrink-0"
+						on:mousedown={() => startScrolling('right')}
+						on:mouseup={stopScrolling}
+						on:mouseleave={stopScrolling}
+						on:touchstart={() => startScrolling('right')}
+						on:touchend={stopScrolling}
+					>
 						<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
 						</svg>
@@ -237,4 +303,11 @@
 		height: 100px;
 	}
 
+	.color-picker {
+		width: 30px;
+		height: 30px;
+		border: none;
+		border-radius: 50%;
+		cursor: pointer;
+	}
 </style>
