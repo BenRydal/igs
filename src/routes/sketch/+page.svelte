@@ -262,49 +262,7 @@
 									{/if}
 								{/if}
 							{/each}
-						{:else if selectedTab == 'Code'}
-							{#each Array.from(new Set($UserStore.flatMap((user) => user.segments))) as code}
-								<div class="carousel-item inline-flex items-center mr-2">
-									<div class="flex items-center" />
-								</div>
-								<button class="btn btn-sm" on:click={() => (showCodePopup[code] = !showCodePopup[code])}>{code}</button>
-
-								{#if showCodePopup[code]}
-									<div class="modal modal-open">
-										<div class="modal-box">
-											<h3 class="font-bold text-lg">Code: {code}</h3>
-											<div class="overflow-x-auto">
-												<table class="table w-full">
-													<thead>
-														<tr>
-															<th>User</th>
-															<th>Start Time</th>
-															<th>End Time</th>
-														</tr>
-													</thead>
-													<tbody>
-														{#each $UserStore as user}
-															{#each user.dataTrail as datapoint}
-																{#if datapoint.codes && datapoint.codes[code]}
-																	<tr>
-																		<td>{user.name}</td>
-																		<td>{datapoint.time}</td>
-																		<!-- <td>{datapoint.time + datapoint.stopLength}</td> -->
-																	</tr>
-																{/if}
-															{/each}
-														{/each}
-													</tbody>
-												</table>
-											</div>
-											<div class="modal-action">
-												<button class="btn" on:click={() => (showCodePopup[code] = false)}>Close</button>
-											</div>
-										</div>
-									</div>
-								{/if}
-							{/each}
-						{/if}
+						{:else if selectedTab == 'Code'}{/if}
 					</div>
 
 					<button
