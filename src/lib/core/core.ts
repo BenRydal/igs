@@ -11,7 +11,6 @@ import type p5 from 'p5';
 import Papa from 'papaparse';
 
 import { CoreUtils } from './core-utils.js';
-import { ParseCodes } from './parse-codes.js';
 
 import { DataPoint } from '../../models/dataPoint.js';
 import { User } from '../../models/user.js';
@@ -27,12 +26,10 @@ TimelineStore.subscribe((data) => {
 export class Core {
 	sketch: p5;
 	coreUtils: CoreUtils;
-	//parseCodes: ParseCodes;
 
 	constructor(sketch: p5) {
 		this.sketch = sketch;
 		this.coreUtils = new CoreUtils(); // utilities for testing CSV files
-		//this.parseCodes = new ParseCodes(this.sketch, this.coreUtils);
 	}
 
 	handleUserLoadedFiles = async (event: Event) => {
