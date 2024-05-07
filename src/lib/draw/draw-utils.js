@@ -12,9 +12,8 @@ TimelineStore.subscribe((data) => {
 });
 
 export class DrawUtils {
-	constructor(sketch, codeList) {
+	constructor(sketch) {
 		this.sk = sketch;
-		this.codeList = codeList;
 	}
 
 	/**
@@ -40,14 +39,14 @@ export class DrawUtils {
 	 * @param  {MovementPoint} point
 	 */
 	isShowingInCodeList(codesArray) {
-		if (this.sk.arrayIsLoaded(this.codeList)) {
-			for (let j = 0; j < this.codeList.length; j++) {
-				if (this.codeList[j].isShowing) {
-					if (codesArray[j]) continue;
-					else return false;
-				}
-			}
-		}
+		// if (this.sk.arrayIsLoaded(this.codeList)) {
+		// 	for (let j = 0; j < this.codeList.length; j++) {
+		// 		if (this.codeList[j].isShowing) {
+		// 			if (codesArray[j]) continue;
+		// 			else return false;
+		// 		}
+		// 	}
+		// }
 		return true;
 	}
 

@@ -5,19 +5,17 @@
  * the tradeoff is the need for more customized methods and conditional structures to handle starting/begining lines/shapes
  */
 
-import { DataPoint } from '../../models/dataPoint';
-
 export class DrawMovement {
 	constructor(sketch, drawUtils) {
 		this.sk = sketch;
 		this.drawUtils = drawUtils;
 		this.dot = null;
 		this.isDrawingLine = false;
+		this.largestStopPixelSize = 50;
 		this.style = {
 			shade: null,
 			thinStroke: 1,
-			fatStroke: 9,
-			stopSize: 10
+			fatStroke: 9
 		};
 	}
 
@@ -26,43 +24,19 @@ export class DrawMovement {
 		this.sk.noFill();
 		this.sk.noStroke();
 		this.style.shade = user.color;
-		this.setDraw(this.sk.PLAN, user.dataTrail, user);
-		this.setDraw(this.sk.SPACETIME, user.dataTrail, user);
+		this.setDraw(this.sk.PLAN, user.dataTrail);
+		this.setDraw(this.sk.SPACETIME, user.dataTrail);
 		if (this.dot !== null) this.drawDot(this.dot);
 	}
 
-	// setDraw(view, movementArray) {
-	//     this.isDrawingLine = false; // always reset
-	//     for (let i = 1; i < movementArray.length; i++) { // start at 1 to allow testing of current and prior indices
-	//         const p = this.drawUtils.createComparePoint(view, movementArray[i], movementArray[i - 1]); // a compare point consists of current and prior augmented points
-	//         if (this.drawUtils.isVisible(p.cur.point, p.cur.pos)) {
-	//             if (view === this.sk.SPACETIME) this.recordDot(p.cur);
-	//             if (p.cur.point.isStopped) this.updateStopDrawing(p, view);
-	//             else this.updateMovementDrawing(p, p.prior.point.isStopped, this.style.thinStroke);
-	//         } else {
-	//             if (this.isDrawingLine) this.endLine();
-	//         }
-	//     }
-	//     this.sk.endShape(); // end shape in case still drawing
-	// }
-
-	setDraw(view, dataTrail, user) {
+	setDraw(view, dataTrail) {
 		this.isDrawingLine = false;
-
 		for (let i = 1; i < dataTrail.length; i++) {
 			const currentMovement = dataTrail[i];
 			const previousMovement = dataTrail[i - 1];
+			if (currentMovement.x === null) continue; // TODO: This is a temporary fix for points that have conversation values but no x/y positions
 
-			// TODO: remove in future, or to refactor in a better way
-			// to handle this edge case
-			if (currentMovement.x === null) continue;
-
-			// Directly use the time field from each DataPoint object
-			const currentTime = currentMovement.time || 0;
-			const previousTime = previousMovement.time || 0;
-
-			let comparisonPoint = this.drawUtils.createComparePoint(view, currentMovement, previousMovement, currentTime, previousTime);
-
+			let comparisonPoint = this.drawUtils.createComparePoint(view, currentMovement, previousMovement, currentMovement.time, previousMovement.time);
 			if (this.drawUtils.isVisible(comparisonPoint.cur.point, comparisonPoint.cur.pos)) {
 				if (view === this.sk.SPACETIME) this.recordDot(comparisonPoint.cur);
 				if (comparisonPoint.cur.point.isStopped) this.updateStopDrawing(comparisonPoint, view);
@@ -71,7 +45,6 @@ export class DrawMovement {
 				if (this.isDrawingLine) this.endLine();
 			}
 		}
-
 		this.sk.endShape(); // End shape in case still drawing
 	}
 
@@ -119,7 +92,8 @@ export class DrawMovement {
 	 */
 	drawStopCircle(p) {
 		this.setFillStyle(p.cur.point.codes.color);
-		this.sk.circle(p.cur.pos.viewXPos, p.cur.pos.floorPlanYPos, this.style.stopSize);
+		const stopSize = this.sk.map(p.cur.point.stopLength, 0, this.sk.sketchController.maxStopLength, 5, this.largestStopPixelSize);
+		this.sk.circle(p.cur.pos.viewXPos, p.cur.pos.floorPlanYPos, stopSize);
 		this.sk.noFill();
 	}
 

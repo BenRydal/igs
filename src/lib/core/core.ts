@@ -1,19 +1,3 @@
-const USER_COLORS = [
-  '#FF0000', // Red
-  '#00FF00', // Green
-  '#0000FF', // Blue
-  '#FFFF00', // Yellow
-  '#FF00FF', // Magenta
-  '#00FFFF', // Cyan
-  '#800000', // Maroon
-  '#808000', // Olive
-  '#008000', // Green (dark)
-  '#800080', // Purple
-  '#008080', // Teal
-  '#000080', // Navy
-  // Add more colors as needed
-];
-
 /**
  * This class holds core program data and associated parsing methods from processed CSV files.
  * Separate parsing classes for movement, conversation, and code CSV files test parsed data from PapaParse
@@ -31,7 +15,7 @@ import { ParseCodes } from './parse-codes.js';
 
 import { DataPoint } from '../../models/dataPoint.js';
 import { User } from '../../models/user.js';
-import * as Constants from '../constants/index.js';
+import { USER_COLORS } from '../constants/index.js';
 
 import UserStore from '../../stores/userStore';
 import TimelineStore from '../../stores/timelineStore';
@@ -43,23 +27,12 @@ TimelineStore.subscribe((data) => {
 export class Core {
 	sketch: p5;
 	coreUtils: CoreUtils;
-	parseCodes: ParseCodes;
-	maxStopLength: number;
+	//parseCodes: ParseCodes;
 
 	constructor(sketch: p5) {
 		this.sketch = sketch;
 		this.coreUtils = new CoreUtils(); // utilities for testing CSV files
-		this.parseCodes = new ParseCodes(this.sketch, this.coreUtils);
-		this.maxStopLength = 0; // Longest stop length in seconds, set dynamically when updating movement data
-	}
-
-	// TODO: should this move elsewhere?
-	handle3D = () => {
-		this.sketch.handle3D.update();
-	};
-
-	clearAll() {
-		this.parseCodes.clear();
+		//this.parseCodes = new ParseCodes(this.sketch, this.coreUtils);
 	}
 
 	handleUserLoadedFiles = async (event: Event) => {
@@ -182,34 +155,18 @@ export class Core {
 
 	// NOTE: multicode should be processed before single code file as headers of multicode have one additional column
 	processResultsData = (results: any, fileName: string) => {
-		let csvData = results.data;
-		if (this.testMovement(results)) {
+		const csvData = results.data;
+		if (this.coreUtils.testMovement(results)) {
 			this.updateUsersForMovement(csvData, fileName);
-		} else if (this.testMulticode(results)) {
+		} else if (this.coreUtils.testMulticode(results)) {
 			this.updateUsersForMultiCodes(csvData, fileName);
-		} else if (this.testSingleCode(results)) {
+		} else if (this.coreUtils.testSingleCode(results)) {
 			this.updateUsersForSingleCodes(csvData, fileName);
-		} else if (this.testConversation(results)) {
+		} else if (this.coreUtils.testConversation(results)) {
 			this.updateUsersForConversation(csvData, fileName);
 		} else {
 			alert('Error loading CSV file. Please make sure your file is a CSV file formatted with correct column headers');
 		}
-	};
-
-	testMovement = (results: any): boolean => {
-		return this.coreUtils.testPapaParseResults(results, this.coreUtils.headersMovement, this.coreUtils.movementRowForType);
-	};
-
-	testConversation = (results: any): boolean => {
-		return this.coreUtils.testPapaParseResults(results, this.coreUtils.headersConversation, this.coreUtils.conversationRowForType);
-	};
-
-	testSingleCode = (results: any): boolean => {
-		return this.coreUtils.testPapaParseResults(results, this.coreUtils.headersSingleCodes, this.coreUtils.codeRowForType);
-	};
-
-	testMulticode = (results: any): boolean => {
-		return this.coreUtils.testPapaParseResults(results, this.coreUtils.headersMultiCodes, this.coreUtils.multiCodeRowForType);
 	};
 
 	updateUsersForMovement = (csvData: any, userName: string) => {
@@ -219,12 +176,9 @@ export class Core {
 			let users = [...currentUsers];
 			let user = users.find((user) => user.name === userName);
 			if (!user) {
-				const availableColors = USER_COLORS.filter((color) => !users.some((u) => u.color === color));
-				const userColor = availableColors.length > 0 ? availableColors[0] : '#000000'; // Default to black if no more unique colors available
-				user = new User([], userColor, [], true, userName);
+				user = this.createNewUser(users, userName);
 				users.push(user);
 			}
-
 			// Assuming the first column is 'time' and it's sorted in ascending order
 			//const startTime = csvData[0]?.time; // The time in the first row
 			//const endTime = csvData[csvData.length - 1]?.time; // The time in the last row
@@ -241,6 +195,7 @@ export class Core {
 
 			return users;
 		});
+
 		TimelineStore.update((timeline) => {
 			timeline.setCurrTime(0);
 			timeline.setStartTime(0);
@@ -251,8 +206,29 @@ export class Core {
 		});
 	};
 
-	// TODO: this could be moved to main classes to dynamically update, would neat to reset isStopped values in data
-	// Allows dynamic updating of what constitute stop values/intervals in the program
+	updateUsersForConversation = (csvData: any, fileName: string) => {
+		UserStore.update((currentUsers) => {
+			let users = [...currentUsers];
+			csvData.forEach((row: any) => {
+				let user = users.find((user) => user.name === row.speaker.toLowerCase());
+				if (!user) {
+					user = this.createNewUser(users, row.speaker.toLowerCase());
+					users.push(user);
+				}
+				this.addDataPointClosestByTimeInSeconds(user.dataTrail, new DataPoint(row.talk, row.time));
+			});
+			return users;
+		});
+	};
+
+	createNewUser(users: User[], userName: string) {
+		const availableColors = USER_COLORS.filter((color) => !users.some((u) => u.color === color));
+		const userColor = availableColors.length > 0 ? availableColors[0] : '#000000'; // Default to black if no more unique colors available
+		return new User([], userColor, [], true, userName);
+	}
+
+	// // TODO: this could be moved to main classes to dynamically update, would neat to reset isStopped values in data
+	// // Allows dynamic updating of what constitute stop values/intervals in the program
 	updateStopValues(data) {
 		//const stopFloor = this.sk.domController.getStopSliderValue();
 		const stopFloor = 1; // the interval that constitutes a stop in seconds
@@ -266,11 +242,13 @@ export class Core {
 			}
 			// If cumulativeTime is greater than stopFloor, set stop values for the sequence
 			if (cumulativeTime >= stopFloor) {
-				if (cumulativeTime > this.maxStopLength) this.maxStopLength = cumulativeTime;
-				for (let k = i; k < j; k++) {
+				if (cumulativeTime > this.sketch.sketchController.getMaxStopLength()) this.sketch.sketchController.setMaxStopLength(cumulativeTime);
+				for (let k = i + 1; k < j; k++) {
 					data[k].isStopped = true;
-					//if (k === j - 1) data[k].stopLength = cumulativeTime;
-					data[k].stopLength = data[k].time - data[i].time;
+					data[k].stopLength = cumulativeTime; // TODO: can't seem to get the below to work to increment stopLegnth for each stop to show correclty in draw methods drawStopCircle
+					// //if (k === j - 1) data[k].stopLength = cumulativeTime;
+					// data[k].stopLength = data[k].time - data[i].time;
+					// console.log(data[k].stopLength);
 				}
 			}
 			i = j - 1; // Update i to skip the sequence just processed
@@ -293,25 +271,6 @@ export class Core {
 			csvData.forEach((row: any) => {
 				users.forEach((user) => user.segments.push(row.code));
 			});
-			return users;
-		});
-	};
-
-	updateUsersForConversation = (csvData: any, fileName: string) => {
-		UserStore.update((currentUsers) => {
-			let users = [...currentUsers];
-			csvData.forEach((row: any) => {
-				let user = users.find((user) => user.name === row.speaker.toLowerCase());
-
-				if (!user) {
-					const availableColors = USER_COLORS.filter((color) => !users.some((u) => u.color === color));
-					const userColor = availableColors.length > 0 ? availableColors[0] : '#000000'; // Default to black if no more unique colors available
-					user = new User([], userColor, [], true, row.speaker.toLowerCase());
-					users.push(user);
-				}
-				this.addDataPointClosestByTimeInSeconds(user.dataTrail, new DataPoint(row.talk, row.time));
-			});
-
 			return users;
 		});
 	};
