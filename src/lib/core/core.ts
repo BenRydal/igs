@@ -100,7 +100,7 @@ export class Core {
 		switch (selectedValue) {
 			case 'example-1':
 				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, 'jordan.csv');
-				// await loadLocalExampleDataFile(`data/${selectedValue}`, `possession.csv`);
+				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, 'possession.csv');
 				this.sketch.videoController.createVideoPlayer('Youtube', { videoId: 'iiMjfVOj8po' });
 				break;
 			case 'example-2':
@@ -255,9 +255,33 @@ export class Core {
 	updateUsersForMultiCodes = (csvData: any, fileName: string) => {
 		UserStore.update((currentUsers) => {
 			let users = [...currentUsers]; // clone the current users
+			const usedColors = new Set();
+
+			// For each row in the Code CSV
 			csvData.forEach((row: any) => {
-				users.forEach((user) => user.segments.push(row.code));
+				const code = row.code;
+				const startTime = parseFloat(row.start);
+				const endTime = parseFloat(row.end);
+
+				// Find an available color for the code
+				let color = USER_COLORS.find((c) => !usedColors.has(c));
+				if (!color) {
+					// If no more unique colors available, default to black
+					color = '#000000';
+				}
+				usedColors.add(color);
+
+				// For each user in the users array
+				users.forEach((user) => {
+					// Update datapoints FROM the start and TO the end time to include the code
+					user.dataTrail.forEach((dataPoint) => {
+						if (dataPoint.time !== null && dataPoint.time >= startTime && dataPoint.time <= endTime) {
+							dataPoint.codes[code] = color;
+						}
+					});
+				});
 			});
+
 			return users;
 		});
 	};
