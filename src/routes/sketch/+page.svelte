@@ -24,6 +24,16 @@
 	import IconButton from '$lib/components/IconButton.svelte';
 	import IgsInfoModal from '$lib/components/IGSInfoModal.svelte';
 	import TimelinePanel from '$lib/components/TimelinePanel.svelte';
+	import DataPointTable from '$lib/components/DataPointTable.svelte';
+
+	import CodeStore from '../../stores/codeStore';
+
+	let showDataPopup = false;
+	let expandedUsers: { [key: string]: boolean } = {};
+
+	function toggleUserExpansion(userName: string) {
+		expandedUsers[userName] = !expandedUsers[userName];
+	}
 
 	let files: any = [];
 	let users: User[] = [];
@@ -94,6 +104,7 @@
 	<div class="navbar min-h-16 bg-[#f6f5f3] text-base-100">
 		<div class="flex-1 px-2 lg:flex-none">
 			<a class="text-lg font-bold" href="/">IGS</a>
+			<button class="btn btn-sm ml-4" on:click={() => (showDataPopup = true)}>Show Data</button>
 		</div>
 
 		<div class="flex justify-end flex-1 px-2">
@@ -174,6 +185,42 @@
 	</div>
 
 	<P5 {sketch} />
+
+	{#if showDataPopup}
+		<div class="modal modal-open">
+			<div class="modal-box">
+				<h3 class="font-bold text-lg">Data</h3>
+				<div class="overflow-x-auto">
+					<h4 class="font-bold">Codes:</h4>
+					<ul>
+						{#each $CodeStore as code}
+							<li>{code}</li>
+						{/each}
+					</ul>
+
+					<h4 class="font-bold mt-4">Users:</h4>
+					{#each $UserStore as user}
+						<div class="mb-4">
+							<button class="btn btn-sm" on:click={() => toggleUserExpansion(user.name)}>
+								{user.name}
+							</button>
+							{#if expandedUsers[user.name]}
+								<div class="ml-4">
+									<p>Color: {user.color}</p>
+									<p>Enabled: {user.enabled}</p>
+									<h5 class="font-bold">Data Points:</h5>
+									<DataPointTable dataPoints={user.dataTrail} />
+								</div>
+							{/if}
+						</div>
+					{/each}
+				</div>
+				<div class="modal-action">
+					<button class="btn" on:click={() => (showDataPopup = false)}>Close</button>
+				</div>
+			</div>
+		</div>
+	{/if}
 
 	<div class="btm-nav flex justify-between">
 		<!-- Left Side: Select and Carousel -->
@@ -310,5 +357,9 @@
 		border: none;
 		border-radius: 50%;
 		cursor: pointer;
+	}
+
+	.modal-box {
+		max-width: 50%;
 	}
 </style>
