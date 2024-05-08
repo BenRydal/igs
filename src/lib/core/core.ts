@@ -17,10 +17,16 @@ import { User } from '../../models/user.js';
 import { USER_COLORS } from '../constants/index.js';
 
 import UserStore from '../../stores/userStore';
+import CodeStore from '../../stores/codeStore.js';
 import TimelineStore from '../../stores/timelineStore';
+
 let timeline;
 TimelineStore.subscribe((data) => {
 	timeline = data;
+});
+
+CodeStore.subscribe((data) => {
+	console.log(data);
 });
 
 export class Core {
@@ -221,7 +227,7 @@ export class Core {
 	createNewUser(users: User[], userName: string) {
 		const availableColors = USER_COLORS.filter((color) => !users.some((u) => u.color === color));
 		const userColor = availableColors.length > 0 ? availableColors[0] : '#000000'; // Default to black if no more unique colors available
-		return new User([], userColor, [], true, userName);
+		return new User([], userColor, true, userName);
 	}
 
 	// // TODO: this could be moved to main classes to dynamically update, would neat to reset isStopped values in data
@@ -255,38 +261,69 @@ export class Core {
 	updateUsersForMultiCodes = (csvData: any, fileName: string) => {
 		UserStore.update((currentUsers) => {
 			let users = [...currentUsers]; // clone the current users
-			const usedColors = new Set();
 
+			// Create a Set to store unique code names
+			const uniqueCodes = new Set<string>();
+
+			// For each row in the Code CSV
 			csvData.forEach((row: any) => {
 				const code = row.code;
 				const startTime = parseFloat(row.start);
 				const endTime = parseFloat(row.end);
 
-				let color = USER_COLORS.find((c) => !usedColors.has(c));
-				if (!color) {
-					color = '#000000';
-				}
-				usedColors.add(color);
+				uniqueCodes.add(code); // Add the code name to the Set
 
+				// For each user in the users array
 				users.forEach((user) => {
-					user.dataTrail.forEach((dataPoint) => {
-						if (dataPoint.time !== null && dataPoint.time >= startTime && dataPoint.time <= endTime) {
-							dataPoint.codes[code] = color;
+					// Find the first data point with time >= startTime
+					const startIndex = user.dataTrail.findIndex((dataPoint) => dataPoint.time !== null && dataPoint.time >= startTime);
+
+					// Find the last data point with time <= endTime
+					const endIndex = user.dataTrail.findLastIndex((dataPoint) => dataPoint.time !== null && dataPoint.time <= endTime);
+
+					// Update datapoints FROM the start and TO the end time to include the code
+					for (let i = startIndex; i <= endIndex; i++) {
+						if (!user.dataTrail[i].codes.includes(code)) {
+							user.dataTrail[i].codes.push(code);
 						}
-					});
+					}
 				});
 			});
+
+			// Update the CodeStore with the unique code names
+			CodeStore.update(() => Array.from(uniqueCodes));
 
 			return users;
 		});
 	};
 
+	// @Ben TODO: You will need to adjust this for the single code file name
+	// and header names
 	updateUsersForSingleCodes = (csvData: any, fileName: string) => {
 		UserStore.update((currentUsers) => {
 			let users = [...currentUsers]; // clone the current users
+
+			// For each row in the Code CSV
 			csvData.forEach((row: any) => {
-				users.forEach((user) => user.segments.push(row.code));
+				const code = row.code;
+				const time = parseFloat(row.time);
+
+				// For each user in the users array
+				users.forEach((user) => {
+					// Find the closest datapoint by time
+					const closestDataPoint = user.dataTrail.reduce((closest, current) => {
+						if (current.time === null) return closest;
+						return Math.abs(current.time - time) < Math.abs(closest.time - time) ? current : closest;
+					});
+
+					// Add the code to the closest datapoint
+					if (!closestDataPoint.codes.includes(code)) {
+						closestDataPoint.codes.push(code);
+					}
+				});
 			});
+
+			console.log('2Ending with users: ', users);
 			return users;
 		});
 	};

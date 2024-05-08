@@ -7,19 +7,11 @@ export class User {
 
 	// dataTrail: Map<number, DataPoint>; // Data trail of the user
 	dataTrail: DataPoint[]; // Data trail of the user
-	segments: string[];
 
-	constructor(
-		dataTrail: DataPoint[],
-		color: string,
-		segments: string[] = [],
-		enabled = true,
-		name = ''
-	) {
+	constructor(dataTrail: DataPoint[], color: string, enabled = true, name = '') {
 		this.enabled = enabled;
 		this.name = name;
 		this.color = color;
 		this.dataTrail = dataTrail;
-		this.segments = segments;
 	}
 }
