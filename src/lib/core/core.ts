@@ -119,6 +119,7 @@ export class Core {
 				break;
 			case 'example-3':
 				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, `teacher.csv`);
+				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, 'lesson-graph.csv');
 				this.sketch.videoController.createVideoPlayer('Youtube', { videoId: 'Iu0rxb-xkMk' });
 				break;
 			case 'example-4':
@@ -280,7 +281,8 @@ export class Core {
 
 					// Find the last data point with time <= endTime
 					const endIndex = user.dataTrail.findLastIndex((dataPoint) => dataPoint.time !== null && dataPoint.time <= endTime);
-
+					if (startIndex === -1 || endIndex === -1) return;
+					console.log(user, startIndex, endIndex);
 					// Update datapoints FROM the start and TO the end time to include the code
 					for (let i = startIndex; i <= endIndex; i++) {
 						if (!user.dataTrail[i].codes.includes(code)) {
