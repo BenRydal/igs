@@ -194,7 +194,7 @@
 					<h4 class="font-bold">Codes:</h4>
 					<ul>
 						{#each $CodeStore as code}
-							<li>{code}</li>
+							<li>{code.code}</li>
 						{/each}
 					</ul>
 

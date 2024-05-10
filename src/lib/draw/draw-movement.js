@@ -61,8 +61,8 @@ export class DrawMovement {
 	 * NOTE: stopTest can vary depending on if this method is called when updatingStopDrawing
 	 */
 	updateMovementDrawing(p, stopTest, stroke) {
-		if (!this.isDrawingLine) this.beginLine(p.cur.point.isStopped, p.cur.point.codes.color);
-		if (stopTest || this.isNewCode(p)) this.endThenBeginNewLine(p.prior.pos, stroke, p.cur.point.codes.color);
+		if (!this.isDrawingLine) this.beginLine(p.cur.point.isStopped, this.drawUtils.zzzSetCodeColor(p.cur.point.codes));
+		if (stopTest || this.isNewCode(p)) this.endThenBeginNewLine(p.prior.pos, stroke, this.drawUtils.zzzSetCodeColor(p.cur.point.codes));
 		else this.sk.vertex(p.cur.pos.viewXPos, p.cur.pos.floorPlanYPos, p.cur.pos.zPos); // if already drawing fat line, continue it
 	}
 
@@ -91,7 +91,7 @@ export class DrawMovement {
 	 * @param  {ComparePoint} p
 	 */
 	drawStopCircle(p) {
-		this.setFillStyle(p.cur.point.codes.color);
+		this.setFillStyle(this.drawUtils.zzzSetCodeColor(p.cur.point.codes));
 		const stopSize = this.sk.map(p.cur.point.stopLength, 0, this.sk.sketchController.maxStopLength, 5, this.largestStopPixelSize);
 		this.sk.circle(p.cur.pos.viewXPos, p.cur.pos.floorPlanYPos, stopSize);
 		this.sk.noFill();
@@ -102,7 +102,8 @@ export class DrawMovement {
 	 * @param  {ComparePoint} p
 	 */
 	isNewCode(p) {
-		return p.cur.point.codes.color !== p.prior.point.codes.color;
+		return JSON.stringify(p.cur.point.codes) !== JSON.stringify(p.prior.point.codes);
+		//return p.cur.point.codes.color !== p.prior.point.codes.color;
 	}
 
 	drawDot(curDot) {
@@ -161,7 +162,7 @@ export class DrawMovement {
 			augmentedPoint.pos.zPos,
 			augmentedPoint.pos.selTimelineXPos,
 			this.sk.sketchController.mapToSelectTimeThenPixelTime(this.sk.mouseX),
-			augmentedPoint.point.codes.color
+			this.drawUtils.zzzSetCodeColor(augmentedPoint.point.codes)
 		];
 		if (this.sk.sketchController.getIsAnimate()) {
 			return this.createDot(xPos, yPos, zPos, timePos, codeColor, null); // there is no length to compare when animating so just pass null to emphasize this

@@ -264,25 +264,23 @@ export class Core {
 			let users = [...currentUsers]; // clone the current users
 
 			// Create a Set to store unique code names
-			const uniqueCodes = new Set<string>();
+			const uniqueCodes = [];
 
 			// For each row in the Code CSV
 			csvData.forEach((row: any) => {
-				const code = row.code;
+				const code = row.code.toLowerCase();
+				if (!uniqueCodes.includes(code)) uniqueCodes.push(code); // Add the code name to the Set
 				const startTime = parseFloat(row.start);
 				const endTime = parseFloat(row.end);
 
-				uniqueCodes.add(code); // Add the code name to the Set
-
-				// For each user in the users array
+				//For each user in the users array
 				users.forEach((user) => {
 					// Find the first data point with time >= startTime
 					const startIndex = user.dataTrail.findIndex((dataPoint) => dataPoint.time !== null && dataPoint.time >= startTime);
 
 					// Find the last data point with time <= endTime
 					const endIndex = user.dataTrail.findLastIndex((dataPoint) => dataPoint.time !== null && dataPoint.time <= endTime);
-					if (startIndex === -1 || endIndex === -1) return;
-					console.log(user, startIndex, endIndex);
+					if (startIndex === -1 || endIndex === -1) return; // TODO: can have/deal with good StartIndex but bad endIndex
 					// Update datapoints FROM the start and TO the end time to include the code
 					for (let i = startIndex; i <= endIndex; i++) {
 						if (!user.dataTrail[i].codes.includes(code)) {
@@ -292,43 +290,52 @@ export class Core {
 				});
 			});
 
-			// Update the CodeStore with the unique code names
-			CodeStore.update(() => Array.from(uniqueCodes));
+			CodeStore.update((currentEntries) => {
+				// Create an array of new entries with colors assigned
+				const newEntries = uniqueCodes.map((code, index) => ({
+					code: code,
+					color: USER_COLORS[index % USER_COLORS.length] // Use modulo to cycle through colors
+				}));
 
+				// Combine the current entries with the new entries and return the result
+				return [...currentEntries, ...newEntries];
+			});
+
+			// console.log(user.dataTrail);
 			return users;
 		});
 	};
 
 	// @Ben TODO: You will need to adjust this for the single code file name
 	// and header names
-	updateUsersForSingleCodes = (csvData: any, fileName: string) => {
-		UserStore.update((currentUsers) => {
-			let users = [...currentUsers]; // clone the current users
+	// updateUsersForSingleCodes = (csvData: any, fileName: string) => {
+	// 	UserStore.update((currentUsers) => {
+	// 		let users = [...currentUsers]; // clone the current users
 
-			// For each row in the Code CSV
-			csvData.forEach((row: any) => {
-				const code = row.code;
-				const time = parseFloat(row.time);
+	// 		// For each row in the Code CSV
+	// 		csvData.forEach((row: any) => {
+	// 			const code = row.code;
+	// 			const time = parseFloat(row.time);
 
-				// For each user in the users array
-				users.forEach((user) => {
-					// Find the closest datapoint by time
-					const closestDataPoint = user.dataTrail.reduce((closest, current) => {
-						if (current.time === null) return closest;
-						return Math.abs(current.time - time) < Math.abs(closest.time - time) ? current : closest;
-					});
+	// 			// For each user in the users array
+	// 			users.forEach((user) => {
+	// 				// Find the closest datapoint by time
+	// 				const closestDataPoint = user.dataTrail.reduce((closest, current) => {
+	// 					if (current.time === null) return closest;
+	// 					return Math.abs(current.time - time) < Math.abs(closest.time - time) ? current : closest;
+	// 				});
 
-					// Add the code to the closest datapoint
-					if (!closestDataPoint.codes.includes(code)) {
-						closestDataPoint.codes.push(code);
-					}
-				});
-			});
+	// 				// Add the code to the closest datapoint
+	// 				if (!closestDataPoint.codes.includes(code)) {
+	// 					closestDataPoint.codes.push(code);
+	// 				}
+	// 			});
+	// 		});
 
-			console.log('2Ending with users: ', users);
-			return users;
-		});
-	};
+	// 		console.log('2Ending with users: ', users);
+	// 		return users;
+	// 	});
+	// };
 
 	addDataPointClosestByTimeInSeconds(dataPoints, newDataPoint) {
 		if (dataPoints.length === 0) {

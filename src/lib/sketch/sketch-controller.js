@@ -17,7 +17,7 @@ export class SketchController {
 		this.maxStopLength = 0;
 		this.isAlignTalk = false;
 		this.isAllTalk = true;
-		this.isPathColorMode = true;
+		this.isPathColorMode = false;
 		this.curSelectTab = 0; // 5 options: None, Region, Slice, Moving, Stopped
 		this.wordToSearch = ''; // String value to dynamically search words in conversation
 	}

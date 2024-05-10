@@ -11,16 +11,54 @@ TimelineStore.subscribe((data) => {
 	timeline = data;
 });
 
+import { get } from 'svelte/store';
+import CodeStore from '../../stores/codeStore';
+
+CodeStore.subscribe((data) => {
+	console.log(data);
+});
+
 export class DrawUtils {
 	constructor(sketch) {
 		this.sk = sketch;
+	}
+
+	zzzSetCodeColor(searchCodes) {
+		const entries = get(CodeStore);
+		let matchedEntries = entries.filter((e) => searchCodes.includes(e.code));
+		if (matchedEntries.length > 1) {
+			console.log(matchedEntries);
+			return '#000000';
+		} else if (matchedEntries.length === 1) {
+			return matchedEntries[0].color;
+		} else {
+			console.log('No matching color found');
+			return '#111111';
+		}
+	}
+
+	/**
+	 * This method tests if a point is showing for all selected codes from codeList
+	 * IMPLEMENTATION: Iterate through codeList and return false if: for any of codes that are true in codeList a code at curPoint is false
+	 * @param  {MovementPoint} point
+	 */
+	isShowingInCodeList(codesArray) {
+		//return codesArray.includes('class seatwork') || codesArray.includes('independent seatwork');
+
+		// TODO: update here to select only codes that are enabled
+		const entries = get(CodeStore); // This retrieves the array of CodeEntry objects
+		const codesToCheck = entries.map((entry) => entry.code); // Extracts the 'code' properties into an array
+
+		return codesToCheck.some((code) => codesArray.includes(code));
+
+		//return true;
 	}
 
 	/**
 	 * Holds tests for determining if point is visible (e.g., selected, highlighted)
 	 */
 	isVisible(point, curPos) {
-		return this.isShowingInGUI(curPos.timelineXPos) && this.selectMode(curPos, point.isStopped) && this.isShowingInCodeList(point.codes.hasCodeArray);
+		return this.isShowingInGUI(curPos.timelineXPos) && this.selectMode(curPos, point.isStopped) && this.isShowingInCodeList(point.codes);
 	}
 
 	isShowingInGUI(pixelTime) {
@@ -31,23 +69,6 @@ export class DrawUtils {
 	isShowingInAnimation(value) {
 		if (this.sk.sketchController.getIsAnimate()) return this.sk.sketchController.mapPixelTimeToTotalTime(value) < timeline.getCurrTime();
 		else return true;
-	}
-
-	/**
-	 * This method tests if a point is showing for all selected codes from codeList
-	 * IMPLEMENTATION: Iterate through codeList and return false if: for any of codes that are true in codeList a code at curPoint is false
-	 * @param  {MovementPoint} point
-	 */
-	isShowingInCodeList(codesArray) {
-		// if (this.sk.arrayIsLoaded(this.codeList)) {
-		// 	for (let j = 0; j < this.codeList.length; j++) {
-		// 		if (this.codeList[j].isShowing) {
-		// 			if (codesArray[j]) continue;
-		// 			else return false;
-		// 		}
-		// 	}
-		// }
-		return true;
 	}
 
 	/**
