@@ -187,8 +187,17 @@
 	<P5 {sketch} />
 
 	{#if showDataPopup}
-		<div class="modal modal-open">
-			<div class="modal-box">
+		<div
+			class="modal modal-open"
+			on:click|self={() => (showDataPopup = false)}
+			on:keydown={(e) => {
+				if (e.key === 'Escape') showDataPopup = false;
+			}}
+		>
+			<div class="modal-box relative">
+				<button class="btn btn-sm btn-circle absolute right-2 top-2" on:click={() => (showDataPopup = false)}>
+					<span class="material-symbols-outlined">close</span>
+				</button>
 				<h3 class="font-bold text-lg">Data</h3>
 				<div class="overflow-x-auto">
 					<h4 class="font-bold">Codes:</h4>
@@ -273,8 +282,17 @@
 									</div>
 
 									{#if showSpeechPopup[user.name]}
-										<div class="modal modal-open">
-											<div class="modal-box">
+										<div
+											class="modal modal-open"
+											on:click|self={() => (showSpeechPopup[user.name] = false)}
+											on:keydown={(e) => {
+												if (e.key === 'Escape') showDataPopup = false;
+											}}
+										>
+											<div class="modal-box relative">
+												<button class="btn btn-sm btn-circle absolute right-2 top-2" on:click={() => (showSpeechPopup[user.name] = false)}>
+													<span class="material-symbols-outlined">close</span>
+												</button>
 												<h3 class="font-bold text-lg">{user.name}'s Speech Datapoints</h3>
 												<div class="overflow-x-auto">
 													<table class="table w-full">
@@ -361,5 +379,9 @@
 
 	.modal-box {
 		max-width: 50%;
+	}
+
+	.material-symbols-outlined {
+		font-size: 18px;
 	}
 </style>

@@ -99,6 +99,10 @@ export class Core {
 			return [];
 		});
 
+		CodeStore.update(() => {
+			return [];
+		});
+
 		const selectedValue = event.target.value;
 		await this.loadFloorplanImage(`data/${selectedValue}/floorplan.png`);
 		await this.loadLocalExampleDataFile(`data/${selectedValue}/`, `conversation.csv`);
