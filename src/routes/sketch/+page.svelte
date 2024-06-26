@@ -231,127 +231,58 @@
 		</div>
 	{/if}
 
+	<!-- TODO: @Ben see resources here:
+   https://daisyui.com/components/dropdown/#dropdown-top--aligns-to-end
+   -->
 	<div class="btm-nav flex justify-between">
 		<!-- Left Side: Select and Carousel -->
-		<div class="w-1/2 bg-[#f6f5f3]">
-			<div class="join w-full flex items-center justify-start">
-				<select bind:value={selectedTab} id="select-data-dropdown" class="select select-bordered max-w-xs bg-neutral text-white dropdown-top">
-					{#each Constants.TAB_OPTIONS as value}<option {value}>{value}</option>{/each}
-				</select>
+		<!-- <div class="w-1/2 overflow-x-auto bg-[#f6f5f3]">
+			<div class="carousel carousel-center max-w-full p-4 space-x-4">
+				{#each users as user, index}
+					<details class="dropdown dropdown-top carousel-item z-100">
+						<summary class="m-1 btn">{user.name}</summary>
+						<ul class="p-2 shadow menu dropdown-content z-[1] bg-base-100 rounded-box w-52">
+							<li>
+								<button class="btn" on:click={() => core.handleUserVisibility(user.name)}>
+									{user.enabled ? 'Hide' : 'Show'}
+								</button>
+							</li>
+							<li>
+								<button class="btn" on:click={() => core.handleUserColor(user.name)}> Change Color </button>
+							</li>
+							<li>
+								<button class="btn" on:click={() => core.handleUserSpeech(user.name)}>
+									{showSpeechPopup[user.name] ? 'Hide' : 'Show'} Speech
+								</button>
+							</li>
+							<li>
+								<button class="btn" on:click={() => core.handleUserCode(user.name)}>
+									{showCodePopup[user.name] ? 'Hide' : 'Show'} Code
+								</button>
+							</li>
+						</ul>
+					</details>
+				{/each}
+			</div>
+		</div> -->
 
-				<div class="flex items-center w-full">
-					<button
-						class="btn flex-shrink-0"
-						on:mousedown={() => startScrolling('left')}
-						on:mouseup={stopScrolling}
-						on:mouseleave={stopScrolling}
-						on:touchstart={() => startScrolling('left')}
-						on:touchend={stopScrolling}
-					>
-						<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-						</svg>
-					</button>
-
-					<div class="carousel carousel-center overflow-x-auto flex-grow mx-5">
-						{#if selectedTab == 'Movement'}
-							{#each $UserStore as user}
-								<div class="carousel-item inline-flex items-center mr-2">
-									<div class="flex items-center">
-										<input id="userCheckbox-{user.name}" type="checkbox" class="checkbox" bind:checked={user.enabled} />
-										<label for="userCheckbox-{user.name}" class="flex items-center ml-1 mr-4">
-											<!-- <div class="w-4 h-4 rounded-full mr-2" style="background-color: {user.color};" /> -->
-											<input type="color" class="color-picker" bind:value={user.color} />
-											{user.name}
-										</label>
-									</div>
-								</div>
-							{/each}
-						{:else if selectedTab == 'Talk'}
-							{#each $UserStore as user}
-								{#if user.dataTrail.some((dp) => dp.speech)}
-									<div class="carousel-item inline-flex items-center mr-2">
-										<div class="flex items-center">
-											<input id="userCheckbox-{user.name}" type="checkbox" class="checkbox" bind:checked={user.enabled} />
-											<label for="userCheckbox-{user.name}" class="flex items-center ml-1 mr-4">
-												<input type="color" class="color-picker" bind:value={user.color} />
-												{user.name}
-											</label>
-											<button class="btn btn-sm" on:click={() => (showSpeechPopup[user.name] = !showSpeechPopup[user.name])}>View Speech</button>
-										</div>
-									</div>
-
-									{#if showSpeechPopup[user.name]}
-										<div
-											class="modal modal-open"
-											on:click|self={() => (showSpeechPopup[user.name] = false)}
-											on:keydown={(e) => {
-												if (e.key === 'Escape') showDataPopup = false;
-											}}
-										>
-											<div class="modal-box relative">
-												<button class="btn btn-sm btn-circle absolute right-2 top-2" on:click={() => (showSpeechPopup[user.name] = false)}>
-													<span class="material-symbols-outlined">close</span>
-												</button>
-												<h3 class="font-bold text-lg">{user.name}'s Speech Datapoints</h3>
-												<div class="overflow-x-auto">
-													<table class="table w-full">
-														<thead>
-															<tr>
-																<th>Time</th>
-																<th>Speech</th>
-															</tr>
-														</thead>
-														<tbody>
-															{#each user.dataTrail
-																.filter((dp) => dp.speech)
-																.sort((a, b) => {
-																	if (a.time === null && b.time === null) return 0;
-																	if (a.time === null) return 1;
-																	if (b.time === null) return -1;
-																	return a.time - b.time;
-																}) as datapoint}
-																<tr>
-																	<td>{datapoint.time}</td>
-																	<td>{datapoint.speech}</td>
-																</tr>
-															{/each}
-														</tbody>
-													</table>
-												</div>
-												<div class="modal-action">
-													<button class="btn" on:click={() => (showSpeechPopup[user.name] = false)}>Close</button>
-												</div>
-											</div>
-										</div>
-									{/if}
-								{/if}
-							{/each}
-						{:else if selectedTab == 'Code'}{/if}
+		<div class="w-1/2 overflow-x-auto bg-[#f6f5f3]">
+			<div class="flex space-x-4">
+				{#each users as user, index}
+					<div class="dropdown dropdown-top dropdown-end">
+						<div tabindex={index} role="button" class="btn">{user.name}</div>
+						<ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
+							<li><a>Item 1</a></li>
+							<li><a>Item 2</a></li>
+						</ul>
 					</div>
-
-					<button
-						class="btn flex-shrink-0"
-						on:mousedown={() => startScrolling('right')}
-						on:mouseup={stopScrolling}
-						on:mouseleave={stopScrolling}
-						on:touchstart={() => startScrolling('right')}
-						on:touchend={stopScrolling}
-					>
-						<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-						</svg>
-					</button>
-				</div>
+				{/each}
 			</div>
 		</div>
 
 		<!-- Right Side: Timeline -->
 		<div class="w-1/2 overflow-x-auto bg-[#f6f5f3]">
-			<!-- <div style="width: 800px; height: 50px; background: linear-gradient(to right, #eee, #ddd);"> -->
-			<!-- TODO: Timeline logic -->
 			<TimelinePanel />
-			<!-- </div> -->
 		</div>
 	</div>
 
