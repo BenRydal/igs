@@ -1801,6 +1801,7 @@ __metadata:
     svelte: "npm:^3.54.0"
     svelte-check: "npm:^3.3.2"
     svelte-icons: "npm:^2.1.0"
+    svelte-portal: "npm:^2.2.1"
     svelte-preprocess: "npm:^5.0.3"
     tailwindcss: "npm:^3.3.2"
     toolcool-range-slider: "npm:^4.0.28"
@@ -3139,6 +3140,13 @@ __metadata:
   version: 2.1.0
   resolution: "svelte-icons@npm:2.1.0"
   checksum: 1150b9f67302e3b3b2b7d403d5695a5e11d3f77a10393516b719ce3b306e9a300a0fc02be9ff328a2488723feccdad7709329a97c7d43d55605ab00566a482f2
+  languageName: node
+  linkType: hard
+
+"svelte-portal@npm:^2.2.1":
+  version: 2.2.1
+  resolution: "svelte-portal@npm:2.2.1"
+  checksum: 95c66824edf174b9868d10ecb4a886da6ad938b13280c1d843de0e9f2f2580c3a71ae1ee695bc7920c111898c6444d8245e998dab7424dd70af9ba97c3585b95
   languageName: node
   linkType: hard
 

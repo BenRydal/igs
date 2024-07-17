@@ -41,6 +41,7 @@
         "papaparse": "^5.4.1",
         "postcss": "^8.4.23",
         "svelte-icons": "^2.1.0",
+        "svelte-portal": "^2.2.1",
         "svelte-preprocess": "^5.0.3",
         "tailwindcss": "^3.3.2",
         "toolcool-range-slider": "^4.0.28"
