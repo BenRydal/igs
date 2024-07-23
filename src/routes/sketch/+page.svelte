@@ -9,14 +9,15 @@
 	import Md3DRotation from 'svelte-icons/md/Md3DRotation.svelte';
 	import MdVideocam from 'svelte-icons/md/MdVideocam.svelte';
 	import MdVideocamOff from 'svelte-icons/md/MdVideocamOff.svelte';
+	import { onMount, onDestroy } from 'svelte';
+	import MdChevronLeft from 'svelte-icons/md/MdChevronLeft.svelte';
+	import MdChevronRight from 'svelte-icons/md/MdChevronRight.svelte';
 
 	import type { User } from '../../models/user';
 
 	import UserStore from '../../stores/userStore';
 	import P5Store from '../../stores/p5Store';
 	import VideoStore from '../../stores/videoStore';
-
-	import * as Constants from '../../lib/constants';
 
 	import { Core } from '$lib';
 	import { igsSketch } from '$lib/p5/igsSketch';
@@ -38,7 +39,6 @@
 	let files: any = [];
 	let users: User[] = [];
 	let p5Instance: p5 | null = null;
-	let selectedTab: string = 'Movement';
 	let core: Core;
 	let isVideoShowing = false;
 	let isVideoPlaying = false;
@@ -65,27 +65,6 @@
 	};
 
 	let isModalOpen = writable(false);
-	let showSpeechPopup: { [key: string]: boolean } = {};
-	let showCodePopup: { [code: string]: boolean } = {};
-
-	let scrollInterval: ReturnType<typeof setInterval> | null = null;
-
-	function startScrolling(direction: 'left' | 'right'): void {
-		const carousel = document.querySelector('.carousel');
-		if (carousel) {
-			const scrollAmount = direction === 'left' ? -100 : carousel.clientWidth + 80;
-			scrollInterval = setInterval(() => {
-				carousel.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-			}, 5); // Adjust the interval time (100 ms) as needed
-		}
-	}
-
-	function stopScrolling(): void {
-		if (scrollInterval) {
-			clearInterval(scrollInterval);
-			scrollInterval = null;
-		}
-	}
 
 	function toggleVideo() {
 		if (p5Instance && p5Instance.videoController) {
@@ -228,10 +207,33 @@
 {/if}
 
 <div class="btm-nav flex justify-between">
-	<div class="w-1/2 overflow-x-overflow bg-[#f6f5f3]">
+	<div class="w-1/2 overflow-x-overflow bg-[#f6f5f3] items-start">
 		<div class="flex space-x-4">
+			<div class="dropdown dropdown-top">
+				<div tabindex={0} role="button" class="btn">Codes</div>
+				<ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
+					{#each $CodeStore as code, index}
+						<li><h3 class="pointer-events-none">{code.code.toUpperCase()}</h3></li>
+						<li>
+							<div class="flex items-center">
+								<input id="codeCheckbox-{code.code}" type="checkbox" class="checkbox" bind:checked={code.enabled} />
+								Enabled
+							</div>
+						</li>
+						<li>
+							<div class="flex items-center">
+								<input type="color" class="color-picker max-w-[24px] max-h-[28px]" bind:value={code.color} />
+								Color
+							</div>
+						</li>
+						{#if index !== $CodeStore.length - 1}
+							<div class="divider" />
+						{/if}
+					{/each}
+				</ul>
+			</div>
 			{#each $UserStore as user}
-				<div class="dropdown dropdown-top dropdown-end">
+				<div class="dropdown dropdown-top">
 					<div tabindex={0} role="button" class="btn">{user.name}</div>
 					<ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
 						<li>
@@ -242,10 +244,8 @@
 						</li>
 						<li>
 							<div class="flex items-center">
-								<label for="userCheckbox-{user.name}" class="flex items-center ml-1 mr-4">
-									<input type="color" class="color-picker" bind:value={user.color} />
-									Color
-								</label>
+								<input type="color" class="color-picker max-w-[24px] max-h-[28px]" bind:value={user.color} />
+								Color
 							</div>
 						</li>
 					</ul>
@@ -265,9 +265,6 @@
 <IgsInfoModal {isModalOpen} />
 
 <style>
-	.navbar {
-		height: 64px;
-	}
 	.color-picker {
 		width: 30px;
 		height: 30px;

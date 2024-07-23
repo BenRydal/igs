@@ -1,6 +1,7 @@
 import { writable } from 'svelte/store';
 
 interface CodeEntry {
+	enabled: boolean;
 	code: string;
 	color: string;
 }

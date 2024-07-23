@@ -27,7 +27,7 @@ export class DrawUtils {
 		const entries = get(CodeStore);
 		let matchedEntries = entries.filter((e) => searchCodes.includes(e.code));
 		if (matchedEntries.length > 1) {
-			console.log(matchedEntries);
+			// console.log(matchedEntries);
 			return '#000000';
 		} else if (matchedEntries.length === 1) {
 			return matchedEntries[0].color;
