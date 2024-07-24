@@ -3,12 +3,18 @@ This class holds variables that control program flow and are dynamically updated
 It also holds various mapping methods that map data values from different classes across the program
 */
 
+import ConfigStore from '../../stores/configStore';
 import TimelineStore from '../../stores/timelineStore';
 
 let timeline;
+let isPathColorMode;
 
 TimelineStore.subscribe((data) => {
 	timeline = data;
+});
+
+ConfigStore.subscribe((data) => {
+	isPathColorMode = data.isPathColorMode;
 });
 
 export class SketchController {
@@ -17,7 +23,6 @@ export class SketchController {
 		this.maxStopLength = 0;
 		this.isAlignTalk = false;
 		this.isAllTalk = true;
-		this.isPathColorMode = false;
 		this.curSelectTab = 0; // 5 options: None, Region, Slice, Moving, Stopped
 		this.wordToSearch = ''; // String value to dynamically search words in conversation
 	}
@@ -108,16 +113,10 @@ export class SketchController {
 		this.isAllTalk = !this.isAllTalk;
 	}
 
+	// TODO: This logic is flipped due to some interaction
+	// with the ConfigStore value.
 	getIsPathColorMode() {
-		return this.isPathColorMode;
-	}
-
-	toggleIsPathColorMode() {
-		this.isPathColorMode = !this.isPathColorMode;
-	}
-
-	setIsPathColorMode(value) {
-		this.isPathColorMode = value;
+		return !isPathColorMode;
 	}
 
 	getCurSelectTab() {

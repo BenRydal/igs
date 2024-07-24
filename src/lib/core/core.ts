@@ -19,6 +19,7 @@ import { USER_COLORS } from '../constants/index.js';
 import UserStore from '../../stores/userStore';
 import CodeStore from '../../stores/codeStore.js';
 import TimelineStore from '../../stores/timelineStore';
+import ConfigStore from '../../stores/configStore.js';
 
 let timeline;
 TimelineStore.subscribe((data) => {
@@ -167,14 +168,35 @@ export class Core {
 		if (this.coreUtils.testMovement(results)) {
 			this.updateUsersForMovement(csvData, fileName);
 		} else if (this.coreUtils.testMulticode(results)) {
+			ConfigStore.update((currentConfig) => {
+				return {
+					...currentConfig,
+					dataHasCodes: true
+				};
+			});
 			this.updateUsersForMultiCodes(csvData, fileName);
 		} else if (this.coreUtils.testSingleCode(results)) {
+			ConfigStore.update((currentConfig) => {
+				return {
+					...currentConfig,
+					dataHasCodes: true
+				};
+			});
 			this.updateUsersForSingleCodes(csvData, fileName);
 		} else if (this.coreUtils.testConversation(results)) {
 			this.updateUsersForConversation(csvData, fileName);
 		} else {
 			alert('Error loading CSV file. Please make sure your file is a CSV file formatted with correct column headers');
 		}
+
+		// Sort all the users' data trails by time
+		UserStore.update((currentUsers) => {
+			let users = [...currentUsers];
+			users.forEach((user) => {
+				user.dataTrail.sort((a, b) => (a.time > b.time ? 1 : -1));
+			});
+			return users;
+		});
 	};
 
 	updateUsersForMovement = (csvData: any, userName: string) => {

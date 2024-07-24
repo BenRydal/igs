@@ -4,6 +4,9 @@
  */
 
 import TimelineStore from '../../stores/timelineStore';
+import { get } from 'svelte/store';
+import CodeStore from '../../stores/codeStore';
+import ConfigStore from '../../stores/configStore';
 
 let timeline;
 
@@ -11,11 +14,14 @@ TimelineStore.subscribe((data) => {
 	timeline = data;
 });
 
-import { get } from 'svelte/store';
-import CodeStore from '../../stores/codeStore';
+let isPathColorMode = false;
 
 CodeStore.subscribe((data) => {
 	console.log(data);
+});
+
+ConfigStore.subscribe((data) => {
+	isPathColorMode = data.isPathColorMode;
 });
 
 export class DrawUtils {
@@ -23,17 +29,16 @@ export class DrawUtils {
 		this.sk = sketch;
 	}
 
-	zzzSetCodeColor(searchCodes) {
+	setCodeColor(searchCodes) {
 		const entries = get(CodeStore);
 		let matchedEntries = entries.filter((e) => searchCodes.includes(e.code));
-		if (matchedEntries.length > 1) {
-			// console.log(matchedEntries);
-			return '#000000';
-		} else if (matchedEntries.length === 1) {
+
+		if (matchedEntries.length === 1) {
 			return matchedEntries[0].color;
-		} else {
-			console.log('No matching color found');
-			return '#111111';
+		} else if (matchedEntries.length > 1) {
+			// TODO: If we find a new way to manage multiple codes, this is where
+			// that change would be. Currently default multiple codes to black.
+			return '#000000';
 		}
 	}
 
@@ -43,15 +48,12 @@ export class DrawUtils {
 	 * @param  {MovementPoint} point
 	 */
 	isShowingInCodeList(codesArray) {
-		//return codesArray.includes('class seatwork') || codesArray.includes('independent seatwork');
+		if (!isPathColorMode) return true;
 
-		// TODO: update here to select only codes that are enabled
 		const entries = get(CodeStore); // This retrieves the array of CodeEntry objects
 		const codesToCheck = entries.map((entry) => entry.code); // Extracts the 'code' properties into an array
 
 		return codesToCheck.some((code) => codesArray.includes(code));
-
-		//return true;
 	}
 
 	/**

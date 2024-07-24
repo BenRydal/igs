@@ -31,10 +31,29 @@ export class DrawMovement {
 
 	setDraw(view, dataTrail) {
 		this.isDrawingLine = false;
+
 		for (let i = 1; i < dataTrail.length; i++) {
 			const currentMovement = dataTrail[i];
-			const previousMovement = dataTrail[i - 1];
-			if (currentMovement.x === null) continue; // TODO: This is a temporary fix for points that have conversation values but no x/y positions
+			let previousMovement = dataTrail[i - 1];
+
+			// If current point is null, continue to next iteration
+			if (currentMovement.x === null || currentMovement.y === null) {
+				continue;
+			}
+
+			// If previous point is null, find the last valid point
+			if (previousMovement.x === null || previousMovement.y === null) {
+				for (let j = i - 1; j >= 0; j--) {
+					if (dataTrail[j].x !== null && dataTrail[j].y !== null) {
+						previousMovement = dataTrail[j];
+						break;
+					}
+				}
+				// If no valid previous point found, use current point as both
+				if (previousMovement.x === null || previousMovement.y === null) {
+					previousMovement = currentMovement;
+				}
+			}
 
 			let comparisonPoint = this.drawUtils.createComparePoint(view, currentMovement, previousMovement, currentMovement.time, previousMovement.time);
 			if (this.drawUtils.isVisible(comparisonPoint.cur.point, comparisonPoint.cur.pos)) {
@@ -61,8 +80,8 @@ export class DrawMovement {
 	 * NOTE: stopTest can vary depending on if this method is called when updatingStopDrawing
 	 */
 	updateMovementDrawing(p, stopTest, stroke) {
-		if (!this.isDrawingLine) this.beginLine(p.cur.point.isStopped, this.drawUtils.zzzSetCodeColor(p.cur.point.codes));
-		if (stopTest || this.isNewCode(p)) this.endThenBeginNewLine(p.prior.pos, stroke, this.drawUtils.zzzSetCodeColor(p.cur.point.codes));
+		if (!this.isDrawingLine) this.beginLine(p.cur.point.isStopped, this.drawUtils.setCodeColor(p.cur.point.codes));
+		if (stopTest || this.isNewCode(p)) this.endThenBeginNewLine(p.prior.pos, stroke, this.drawUtils.setCodeColor(p.cur.point.codes));
 		else this.sk.vertex(p.cur.pos.viewXPos, p.cur.pos.floorPlanYPos, p.cur.pos.zPos); // if already drawing fat line, continue it
 	}
 
@@ -91,7 +110,7 @@ export class DrawMovement {
 	 * @param  {ComparePoint} p
 	 */
 	drawStopCircle(p) {
-		this.setFillStyle(this.drawUtils.zzzSetCodeColor(p.cur.point.codes));
+		this.setFillStyle(this.drawUtils.setCodeColor(p.cur.point.codes));
 		const stopSize = this.sk.map(p.cur.point.stopLength, 0, this.sk.sketchController.maxStopLength, 5, this.largestStopPixelSize);
 		this.sk.circle(p.cur.pos.viewXPos, p.cur.pos.floorPlanYPos, stopSize);
 		this.sk.noFill();
@@ -162,7 +181,7 @@ export class DrawMovement {
 			augmentedPoint.pos.zPos,
 			augmentedPoint.pos.selTimelineXPos,
 			this.sk.sketchController.mapToSelectTimeThenPixelTime(this.sk.mouseX),
-			this.drawUtils.zzzSetCodeColor(augmentedPoint.point.codes)
+			this.drawUtils.setCodeColor(augmentedPoint.point.codes)
 		];
 		if (this.sk.sketchController.getIsAnimate()) {
 			return this.createDot(xPos, yPos, zPos, timePos, codeColor, null); // there is no length to compare when animating so just pass null to emphasize this

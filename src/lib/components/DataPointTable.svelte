@@ -4,7 +4,7 @@
 	export let dataPoints: DataPoint[];
 </script>
 
-<div class="overflow-x-auto">
+<div class="overflow-x-auto mt-2">
 	<table class="table w-full">
 		<thead>
 			<tr>

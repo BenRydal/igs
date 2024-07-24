@@ -28,6 +28,7 @@
 	import DataPointTable from '$lib/components/DataPointTable.svelte';
 
 	import CodeStore from '../../stores/codeStore';
+	import ConfigStore from '../../stores/configStore';
 
 	let showDataPopup = false;
 	let expandedUsers: { [key: string]: boolean } = {};
@@ -42,6 +43,11 @@
 	let core: Core;
 	let isVideoShowing = false;
 	let isVideoPlaying = false;
+	let isPathColorMode = false;
+
+	ConfigStore.subscribe((value) => {
+		isPathColorMode = value.isPathColorMode;
+	});
 
 	VideoStore.subscribe((value) => {
 		isVideoShowing = value.isShowing;
@@ -76,15 +82,23 @@
 			});
 		}
 	}
+
+	function capitalizeEachWord(sentence: string) {
+		return sentence
+			.split(' ')
+			.map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+			.join(' ');
+	}
 </script>
 
 <div class="navbar min-h-16 bg-[#f6f5f3] text-base-100">
 	<div class="flex-1 px-2 lg:flex-none">
-		<a class="text-lg font-bold" href="/">IGS</a>
-		<button class="btn btn-sm ml-4" on:click={() => (showDataPopup = true)}>Show Data</button>
+		<a class="text-lg font-bold text-black" href="/">IGS</a>
 	</div>
 
 	<div class="flex justify-end flex-1 px-2">
+		<button class="btn btn-sm ml-4" on:click={() => (showDataPopup = true)}>Show Data</button>
+
 		<div class="flex items-stretch">
 			<IconButton
 				id="btn-rotate-left"
@@ -169,35 +183,64 @@
 			if (e.key === 'Escape') showDataPopup = false;
 		}}
 	>
-		<div class="modal-box relative">
-			<button class="btn btn-sm btn-circle absolute right-2 top-2" on:click={() => (showDataPopup = false)}>
-				<span class="material-symbols-outlined">close</span>
-			</button>
-			<h3 class="font-bold text-lg">Data</h3>
-			<div class="overflow-x-auto">
-				<h4 class="font-bold">Codes:</h4>
-				<ul>
-					{#each $CodeStore as code}
-						<li>{code.code}</li>
-					{/each}
-				</ul>
+		<div class="modal-box w-11/12 max-w-5xl">
+			<div class="flex justify-between">
+				<div class="flex flex-col">
+					<h3 class="font-bold text-lg">Data Explorer</h3>
+					<p>
+						Here you will find information on the data that you have uploaded. This includes the codes that have been used, and the users that have
+						been tracked. You can also enable or disable the movement and speech of each user, and change the color of their path.
+					</p>
+				</div>
 
-				<h4 class="font-bold mt-4">Users:</h4>
-				{#each $UserStore as user}
-					<div class="mb-4">
-						<button class="btn btn-sm" on:click={() => toggleUserExpansion(user.name)}>
-							{user.name}
-						</button>
-						{#if expandedUsers[user.name]}
-							<div class="ml-4">
-								<p>Color: {user.color}</p>
-								<p>Enabled: {user.enabled}</p>
-								<h5 class="font-bold">Data Points:</h5>
-								<DataPointTable dataPoints={user.dataTrail} />
-							</div>
-						{/if}
+				<button class="btn btn-circle btn-sm" on:click={() => (showDataPopup = false)}>
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+					</svg>
+				</button>
+			</div>
+
+			<div class="overflow-x-auto">
+				<div class="flex flex-col">
+					<div class="flex-col my-4">
+						<h4 class="font-bold my-2">Codes:</h4>
+						<div class="grid grid-cols-5 gap-4">
+							{#each $CodeStore as code}
+								<div class="badge badge-neutral">{code.code}</div>
+							{/each}
+						</div>
 					</div>
-				{/each}
+
+					<h4 class="font-bold">Users:</h4>
+					{#each $UserStore as user}
+						<div class="my-4">
+							<div tabindex="0" class="text-primary-content bg-[#e6e4df] collapse" aria-controls="collapse-content-{user.name}" role="button">
+								<input type="checkbox" class="peer" />
+								<div class="collapse-title font-semibold">{capitalizeEachWord(user.name)}</div>
+
+								<div class="collapse-content">
+									<div class="flex flex-col">
+										<div class="flex">
+											<h2 class="font-medium">Color:</h2>
+											<!-- TODO: Set badge colour to be user colour -->
+											<div class="badge ml-2">{user.color}</div>
+										</div>
+										<div class="flex">
+											<h2 class="font-medium">Enabled</h2>
+											{#if user.enabled}
+												<div class="badge badge-success ml-2">{user.enabled}</div>
+											{:else}
+												<div class="badge badge-error ml-2">{user.enabled}</div>
+											{/if}
+										</div>
+									</div>
+									<h2 class="font-medium">Data Points:</h2>
+									<DataPointTable dataPoints={user.dataTrail} />
+								</div>
+							</div>
+						</div>
+					{/each}
+				</div>
 			</div>
 			<div class="modal-action">
 				<button class="btn" on:click={() => (showDataPopup = false)}>Close</button>
@@ -206,40 +249,59 @@
 	</div>
 {/if}
 
-<div class="btm-nav flex justify-between">
-	<div class="w-1/2 overflow-x-overflow bg-[#f6f5f3] items-start">
+<div class="btm-nav flex justify-between min-h-20">
+	<div class="w-1/2 overflow-x-overflow bg-[#f6f5f3] items-start px-8">
 		<div class="flex space-x-4">
-			<div class="dropdown dropdown-top">
-				<div tabindex={0} role="button" class="btn">Codes</div>
-				<ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
-					{#each $CodeStore as code, index}
-						<li><h3 class="pointer-events-none">{code.code.toUpperCase()}</h3></li>
-						<li>
-							<div class="flex items-center">
-								<input id="codeCheckbox-{code.code}" type="checkbox" class="checkbox" bind:checked={code.enabled} />
-								Enabled
-							</div>
-						</li>
-						<li>
-							<div class="flex items-center">
-								<input type="color" class="color-picker max-w-[24px] max-h-[28px]" bind:value={code.color} />
-								Color
-							</div>
-						</li>
-						{#if index !== $CodeStore.length - 1}
-							<div class="divider" />
-						{/if}
-					{/each}
-				</ul>
-			</div>
-			{#each $UserStore as user}
+			{#if $ConfigStore.dataHasCodes}
 				<div class="dropdown dropdown-top">
-					<div tabindex={0} role="button" class="btn">{user.name}</div>
+					<div tabindex={0} role="button" class="btn">Codes</div>
 					<ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
 						<li>
 							<div class="flex items-center">
+								<input id="codeCheckbox-all" type="checkbox" class="checkbox" />
+								Select All
+							</div>
+							<div class="flex items-center">
+								<!-- This updates the config store's isPathColorMode -->
+								<input id="codeCheckbox-all" type="checkbox" class="checkbox" bind:checked={$ConfigStore.isPathColorMode} />
+								Color by Codes
+							</div>
+						</li>
+						{#each $CodeStore as code, index}
+							<li><h3 class="pointer-events-none">{code.code.toUpperCase()}</h3></li>
+							<li>
+								<div class="flex items-center">
+									<input id="codeCheckbox-{code.code}" type="checkbox" class="checkbox" bind:checked={code.enabled} />
+									Enabled
+								</div>
+							</li>
+							<li>
+								<div class="flex items-center">
+									<input type="color" class="color-picker max-w-[24px] max-h-[28px]" bind:value={code.color} />
+									Color
+								</div>
+							</li>
+							{#if index !== $CodeStore.length - 1}
+								<div class="divider" />
+							{/if}
+						{/each}
+					</ul>
+				</div>
+			{/if}
+			{#each $UserStore as user}
+				<div class="dropdown dropdown-top">
+					<div tabindex={0} role="button" class="btn">{user.name}</div>
+					<ul tabindex={0} class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
+						<li>
+							<div class="flex items-center">
 								<input id="userCheckbox-{user.name}" type="checkbox" class="checkbox" bind:checked={user.enabled} />
-								Enabled
+								Movement
+							</div>
+						</li>
+						<li>
+							<div class="flex items-center">
+								<input id="userCheckbox-{user.name}" type="checkbox" class="checkbox" bind:checked={user.conversation_enabled} />
+								Speech
 							</div>
 						</li>
 						<li>
@@ -247,6 +309,10 @@
 								<input type="color" class="color-picker max-w-[24px] max-h-[28px]" bind:value={user.color} />
 								Color
 							</div>
+						</li>
+						<li>
+							<div class="flex items-center">Transcripts</div>
+							<!-- this should go through the user's datatrail and then show a daisyui table of all the text -->
 						</li>
 					</ul>
 				</div>
