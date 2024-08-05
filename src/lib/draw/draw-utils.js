@@ -48,18 +48,18 @@ export class DrawUtils {
 	 * @param  {MovementPoint} point
 	 */
 	isShowingInCodeList(codesArray) {
-		if (!isPathColorMode) return true;
+		if (codesArray.length === 0) return true;
 
-		const entries = get(CodeStore); // This retrieves the array of CodeEntry objects
-		const codesToCheck = entries.map((entry) => entry.code); // Extracts the 'code' properties into an array
-
-		return codesToCheck.some((code) => codesArray.includes(code));
+		const entries = get(CodeStore);
+		// Retrieve the array of CodeEntry objects
+		return entries.some((entry) => codesArray.includes(entry.code) && entry.enabled);
+		// Check if any entry code is in codesArray and is enabled }
 	}
-
 	/**
 	 * Holds tests for determining if point is visible (e.g., selected, highlighted)
 	 */
 	isVisible(point, curPos) {
+		// And
 		return this.isShowingInGUI(curPos.timelineXPos) && this.selectMode(curPos, point.isStopped) && this.isShowingInCodeList(point.codes);
 	}
 

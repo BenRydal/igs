@@ -320,7 +320,8 @@ export class Core {
 				// Create an array of new entries with colors assigned
 				const newEntries = uniqueCodes.map((code, index) => ({
 					code: code,
-					color: USER_COLORS[index % USER_COLORS.length] // Use modulo to cycle through colors
+					color: USER_COLORS[index % USER_COLORS.length], // Use modulo to cycle through colors
+					enabled: true
 				}));
 
 				// Combine the current entries with the new entries and return the result

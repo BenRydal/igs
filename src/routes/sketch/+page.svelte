@@ -32,6 +32,7 @@
 
 	let showDataPopup = false;
 	let expandedUsers: { [key: string]: boolean } = {};
+	let stopLength = 300;
 
 	function toggleUserExpansion(userName: string) {
 		expandedUsers[userName] = !expandedUsers[userName];
@@ -97,6 +98,21 @@
 	</div>
 
 	<div class="flex justify-end flex-1 px-2">
+		<div class="dropdown">
+			<div tabindex="0" role="button" class="btn m-1">Click</div>
+			<ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
+				<li><a>Circle</a></li>
+				<li><a>Slice</a></li>
+				<li><a>Movement</a></li>
+				<li><a>Stops</a></li>
+				<li><a>Highlight</a></li>
+				<li><a>Reset</a></li>
+				<span class="divider" />
+				<li class="cursor-none"><p>Stop Length: {stopLength}</p></li>
+				<input type="range" min="0" max="100" value="40" class="range" />
+			</ul>
+		</div>
+
 		<button class="btn btn-sm ml-4" on:click={() => (showDataPopup = true)}>Show Data</button>
 
 		<div class="flex items-stretch">

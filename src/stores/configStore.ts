@@ -9,7 +9,15 @@ import { writable } from 'svelte/store';
 // Whether or not the data imported contains any code files
 const ConfigStore = writable({
 	isPathColorMode: false,
-	dataHasCodes: false
+	dataHasCodes: false,
+	// options under additional options
+	circleToggle: false,
+	sliceToggle: false,
+	movementToggle: false,
+	stopsToggle: false,
+	highlightToggle: false,
+	stopLengthValue: 0,
+	stopLengthMax: 0
 });
 
 export default ConfigStore;
