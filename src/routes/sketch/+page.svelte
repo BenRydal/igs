@@ -32,8 +32,6 @@
 
 	let showDataPopup = false;
 	let expandedUsers: { [key: string]: boolean } = {};
-	let stopLength = 300;
-
 	function toggleUserExpansion(userName: string) {
 		expandedUsers[userName] = !expandedUsers[userName];
 	}
@@ -45,9 +43,11 @@
 	let isVideoShowing = false;
 	let isVideoPlaying = false;
 	let isPathColorMode = false;
+	let maxStopLength = 0;
 
 	ConfigStore.subscribe((value) => {
 		isPathColorMode = value.isPathColorMode;
+		maxStopLength = value.maxStopLength;
 	});
 
 	VideoStore.subscribe((value) => {
@@ -92,24 +92,88 @@
 	}
 </script>
 
-<div class="navbar min-h-16 bg-[#f6f5f3] text-base-100">
+<div class="navbar min-h-16 bg-[#f6f5f3]">
 	<div class="flex-1 px-2 lg:flex-none">
 		<a class="text-lg font-bold text-black" href="/">IGS</a>
 	</div>
 
 	<div class="flex justify-end flex-1 px-2">
 		<div class="dropdown">
-			<div tabindex="0" role="button" class="btn m-1">Click</div>
-			<ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
-				<li><a>Circle</a></li>
-				<li><a>Slice</a></li>
-				<li><a>Movement</a></li>
-				<li><a>Stops</a></li>
-				<li><a>Highlight</a></li>
-				<li><a>Reset</a></li>
+			<div tabindex="0" role="button" class="btn m-1">Select</div>
+			<ul tabindex="0" class="dropdown-content menu rounded-box z-[1] w-52 p-2 shadow">
+				<!-- TODO: @Ben  -->
+				<!-- On click, update configStore's curSelectTab to a number based on list item -->
+				<li
+					on:click={() =>
+						ConfigStore.update((value) => {
+							value.curSelectTab = 0;
+							return value;
+						})}
+				>
+					<a>None</a>
+				</li>
+				<li
+					on:click={() =>
+						ConfigStore.update((value) => {
+							value.curSelectTab = 1;
+							return value;
+						})}
+				>
+					<a>Circle</a>
+				</li>
+				<li
+					on:click={() =>
+						ConfigStore.update((value) => {
+							value.curSelectTab = 2;
+							return value;
+						})}
+				>
+					<a>Slice</a>
+				</li>
+				<li
+					on:click={() =>
+						ConfigStore.update((value) => {
+							value.curSelectTab = 3;
+							return value;
+						})}
+				>
+					<a>Movement</a>
+				</li>
+				<li
+					on:click={() =>
+						ConfigStore.update((value) => {
+							value.curSelectTab = 4;
+							return value;
+						})}
+				>
+					<a>Stops</a>
+				</li>
+				<li
+					on:click={() =>
+						ConfigStore.update((value) => {
+							value.curSelectTab = 5;
+							return value;
+						})}
+				>
+					<a>Highlight</a>
+				</li>
+
 				<span class="divider" />
-				<li class="cursor-none"><p>Stop Length: {stopLength}</p></li>
-				<input type="range" min="0" max="100" value="40" class="range" />
+				<li class="cursor-none"><p>Stop Length: {maxStopLength}</p></li>
+				<!-- Input slider must update the config store's maxStopLength value -->
+				<input
+					type="range"
+					min="0"
+					max="300"
+					value={maxStopLength}
+					class="range"
+					on:input={(e) =>
+						ConfigStore.update((value) => {
+							value.maxStopLength = e.target.value;
+							return value;
+						})}
+				/>
+				<!-- <input type="range" min="0" max="100" value={stopLength} class="range" /> -->
 			</ul>
 		</div>
 

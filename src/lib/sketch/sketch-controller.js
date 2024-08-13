@@ -8,6 +8,7 @@ import TimelineStore from '../../stores/timelineStore';
 
 let timeline;
 let isPathColorMode;
+let curSelectTab;
 
 TimelineStore.subscribe((data) => {
 	timeline = data;
@@ -15,12 +16,12 @@ TimelineStore.subscribe((data) => {
 
 ConfigStore.subscribe((data) => {
 	isPathColorMode = data.isPathColorMode;
+	curSelectTab = data.curSelectTab;
 });
 
 export class SketchController {
 	constructor(sketch) {
 		this.sk = sketch;
-		this.maxStopLength = 0;
 		this.isAlignTalk = false;
 		this.isAllTalk = true;
 		this.curSelectTab = 0; // 5 options: None, Region, Slice, Moving, Stopped
@@ -119,12 +120,9 @@ export class SketchController {
 		return !isPathColorMode;
 	}
 
+	// Get the updated confgi store value
 	getCurSelectTab() {
-		return this.curSelectTab;
-	}
-
-	setCurSelectTab(value) {
-		this.curSelectTab = value;
+		return curSelectTab;
 	}
 
 	setWordToSearch(value) {
@@ -175,13 +173,5 @@ export class SketchController {
 		const pixelValue = this.sk.mouseX;
 		return pixelValue >= this.getTimelineLeftMarkerXPos() && pixelValue <= this.getTimelineRightMarkerXPos();
 		// return this.sk.overRect(this.start, this.top, this.length, this.thickness);
-	}
-
-	getMaxStopLength() {
-		return this.maxStopLength;
-	}
-
-	setMaxStopLength(value) {
-		this.maxStopLength = value;
 	}
 }

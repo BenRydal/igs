@@ -22,12 +22,18 @@ import TimelineStore from '../../stores/timelineStore';
 import ConfigStore from '../../stores/configStore.js';
 
 let timeline;
+let maxStopLength;
+
 TimelineStore.subscribe((data) => {
 	timeline = data;
 });
 
 CodeStore.subscribe((data) => {
 	console.log(data);
+});
+
+ConfigStore.subscribe((data) => {
+	maxStopLength = data.maxStopLength;
 });
 
 export class Core {
@@ -105,34 +111,34 @@ export class Core {
 		});
 
 		const selectedValue = event.target.value;
-		await this.loadFloorplanImage(`data/${selectedValue}/floorplan.png`);
-		await this.loadLocalExampleDataFile(`data/${selectedValue}/`, `conversation.csv`);
+		await this.loadFloorplanImage(`/data/${selectedValue}/floorplan.png`);
+		await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `conversation.csv`);
 
 		switch (selectedValue) {
 			case 'example-1':
-				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, 'jordan.csv');
-				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, 'possession.csv');
+				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, 'jordan.csv');
+				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, 'possession.csv');
 				this.sketch.videoController.createVideoPlayer('Youtube', { videoId: 'iiMjfVOj8po' });
 				break;
 			case 'example-2':
-				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, `adhir.csv`);
-				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, `blake.csv`);
-				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, `jeans.csv`);
-				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, `lily.csv`);
-				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, `mae.csv`);
+				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `adhir.csv`);
+				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `blake.csv`);
+				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `jeans.csv`);
+				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `lily.csv`);
+				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `mae.csv`);
 				this.sketch.videoController.createVideoPlayer('Youtube', { videoId: 'pWJ3xNk1Zpg' });
 				break;
 			case 'example-3':
-				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, `teacher.csv`);
-				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, 'lesson-graph.csv');
+				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `teacher.csv`);
+				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, 'lesson-graph.csv');
 				this.sketch.videoController.createVideoPlayer('Youtube', { videoId: 'Iu0rxb-xkMk' });
 				break;
 			case 'example-4':
-				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, `cassandra.csv`);
-				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, `mei.csv`);
-				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, `nathan.csv`);
-				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, `sean.csv`);
-				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, `teacher.csv`);
+				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `cassandra.csv`);
+				await this.loadLocalExampleDataFile(`//data/${selectedValue}/`, `mei.csv`);
+				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `nathan.csv`);
+				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `sean.csv`);
+				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `teacher.csv`);
 				this.sketch.videoController.createVideoPlayer('Youtube', { videoId: 'OJSZCK4GPQY' });
 				break;
 		}
@@ -270,9 +276,19 @@ export class Core {
 				cumulativeTime = data[j].time - data[i].time;
 				j++;
 			}
+
 			// If cumulativeTime is greater than stopFloor, set stop values for the sequence
 			if (cumulativeTime >= stopFloor) {
-				if (cumulativeTime > this.sketch.sketchController.getMaxStopLength()) this.sketch.sketchController.setMaxStopLength(cumulativeTime);
+				if (cumulativeTime > maxStopLength) {
+					maxStopLength = cumulativeTime;
+					ConfigStore.update((currentConfig) => {
+						return {
+							...currentConfig,
+							maxStopLength: maxStopLength
+						};
+					});
+				}
+
 				for (let k = i + 1; k < j; k++) {
 					data[k].isStopped = true;
 					data[k].stopLength = cumulativeTime; // TODO: can't seem to get the below to work to increment stopLegnth for each stop to show correclty in draw methods drawStopCircle

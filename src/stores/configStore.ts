@@ -11,13 +11,15 @@ const ConfigStore = writable({
 	isPathColorMode: false,
 	dataHasCodes: false,
 	// options under additional options
-	circleToggle: false,
-	sliceToggle: false,
-	movementToggle: false,
-	stopsToggle: false,
-	highlightToggle: false,
-	stopLengthValue: 0,
-	stopLengthMax: 0
+
+	// For now just check the number
+	curSelectTab: 0,
+	// circleToggle: false,
+	// sliceToggle: false,
+	// movementToggle: false,
+	// stopsToggle: false,
+	// highlightToggle: false,
+	maxStopLength: 0
 });
 
 export default ConfigStore;

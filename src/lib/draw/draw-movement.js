@@ -1,9 +1,17 @@
+import ConfigStore from '../../stores/configStore';
+
 /**
  * This class provides a set of custom methods to draw movement data in floorPlan and space-time views of the IGS.
  * Many of the methods address specific browser constraints and balance aesthetic and efficient curve drawing needs
  * For example, using the "line" method in a library like P5 is inefficient and curveVertex increases efficiency significantly but
  * the tradeoff is the need for more customized methods and conditional structures to handle starting/begining lines/shapes
  */
+
+let maxStopLength;
+
+ConfigStore.subscribe((data) => {
+	maxStopLength = data.maxStopLength;
+});
 
 export class DrawMovement {
 	constructor(sketch, drawUtils) {
@@ -111,7 +119,7 @@ export class DrawMovement {
 	 */
 	drawStopCircle(p) {
 		this.setFillStyle(this.drawUtils.setCodeColor(p.cur.point.codes));
-		const stopSize = this.sk.map(p.cur.point.stopLength, 0, this.sk.sketchController.maxStopLength, 5, this.largestStopPixelSize);
+		const stopSize = this.sk.map(p.cur.point.stopLength, 0, maxStopLength, 5, this.largestStopPixelSize);
 		this.sk.circle(p.cur.pos.viewXPos, p.cur.pos.floorPlanYPos, stopSize);
 		this.sk.noFill();
 	}
