@@ -6,6 +6,9 @@ import { Core, FloorPlan, SketchGUI, SketchController, Handle3D, VideoController
 import type { User } from '../../models/user';
 import type p5 from 'p5';
 
+import ConfigStore, { type ConfigStoreType } from '../../stores/configStore';
+import { get } from 'svelte/store';
+
 let users: User[] = [];
 let p5Instance: p5 | null = null;
 
@@ -120,12 +123,14 @@ export const igsSketch = (p5: any) => {
 	};
 
 	p5.mousePressed = () => {
-		if (p5.sketchController.getCurSelectTab() === 5 && !p5.handle3D.getIs3DModeOrTransitioning()) p5.gui.highlight.handleMousePressed();
+		const config = get(ConfigStore);
+		if (config.highlightToggle && !p5.handle3D.getIs3DModeOrTransitioning()) p5.gui.highlight.handleMousePressed();
 		p5.loop();
 	};
 
 	p5.mouseReleased = () => {
-		if (p5.sketchController.getCurSelectTab() === 5 && !p5.handle3D.getIs3DModeOrTransitioning()) p5.gui.highlight.handleMouseRelease();
+		const config = get(ConfigStore);
+		if (config.highlightToggle && !p5.handle3D.getIs3DModeOrTransitioning()) p5.gui.highlight.handleMouseRelease();
 		p5.loop();
 	};
 

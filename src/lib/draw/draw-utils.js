@@ -4,9 +4,10 @@
  */
 
 import TimelineStore from '../../stores/timelineStore';
-import { get } from 'svelte/store';
 import CodeStore from '../../stores/codeStore';
 import ConfigStore from '../../stores/configStore';
+
+import { get } from 'svelte/store';
 
 let timeline;
 
@@ -73,35 +74,32 @@ export class DrawUtils {
 		else return true;
 	}
 
-	/**
-	 * @param  {Movement/Conversation Pos Object} curPos
-	 * @param  {boolean} pointIsStopped
-	 */
 	selectMode(curPos, isStopped) {
-		switch (this.sk.sketchController.getCurSelectTab()) {
-			case 0:
-				return true;
-			case 1:
-				if (this.sk.handle3D.getIs3DModeOrTransitioning()) return true;
-				else
-					return (
-						this.sk.gui.fpContainer.overCursor(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos) &&
-						this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos)
-					);
-			case 2:
-				if (this.sk.handle3D.getIs3DModeOrTransitioning()) return true;
-				else
-					return (
-						this.sk.gui.fpContainer.overSlicer(curPos.floorPlanXPos, curPos.selTimelineXPos) &&
-						this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos)
-					);
-			case 3:
-				return !isStopped && this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos);
-			case 4:
-				return isStopped && this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos);
-			case 5:
-				return this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.timelineXPos);
+		const config = get(ConfigStore);
+		if (config.circleToggle) {
+			if (this.sk.handle3D.getIs3DModeOrTransitioning()) return true;
+			else
+				return (
+					this.sk.gui.fpContainer.overCursor(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos) &&
+					this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos)
+				);
+		} else if (config.sliceToggle) {
+			if (this.sk.handle3D.getIs3DModeOrTransitioning()) return true;
+			else
+				return (
+					this.sk.gui.fpContainer.overSlicer(curPos.floorPlanXPos, curPos.selTimelineXPos) &&
+					this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos)
+				);
+		} else if (config.movementToggle) {
+			return !isStopped && this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos);
+		} else if (config.stopsToggle) {
+			return isStopped && this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos);
+		} else if (config.highlightToggle) {
+			return this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.timelineXPos);
 		}
+
+		// If nothing is selected we just return true
+		return true;
 	}
 
 	/**

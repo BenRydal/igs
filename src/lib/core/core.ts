@@ -28,10 +28,6 @@ TimelineStore.subscribe((data) => {
 	timeline = data;
 });
 
-CodeStore.subscribe((data) => {
-	console.log(data);
-});
-
 ConfigStore.subscribe((data) => {
 	maxStopLength = data.maxStopLength;
 });
@@ -39,10 +35,12 @@ ConfigStore.subscribe((data) => {
 export class Core {
 	sketch: p5;
 	coreUtils: CoreUtils;
+	maxStopLength: number;
 
 	constructor(sketch: p5) {
 		this.sketch = sketch;
-		this.coreUtils = new CoreUtils(); // utilities for testing CSV files
+		this.coreUtils = new CoreUtils();
+		this.maxStopLength = 0;
 	}
 
 	handleUserLoadedFiles = async (event: Event) => {
@@ -100,6 +98,10 @@ export class Core {
 	handleExampleDropdown = async (event: any) => {
 		// TODO: Need to adjust p5 typescript defintion to expose
 		// custom attributes & functions
+
+		this.maxStopLength = 0;
+		this.updateConfigStore();
+
 		this.sketch.videoController.clear();
 
 		UserStore.update(() => {
@@ -263,42 +265,43 @@ export class Core {
 		return new User([], userColor, true, userName);
 	}
 
-	// // TODO: this could be moved to main classes to dynamically update, would neat to reset isStopped values in data
-	// // Allows dynamic updating of what constitute stop values/intervals in the program
 	updateStopValues(data) {
-		//const stopFloor = this.sk.domController.getStopSliderValue();
-		const stopFloor = 1; // the interval that constitutes a stop in seconds
+		const stopFloor = 1;
+		let maxStopLength = 0;
+
 		for (let i = 0; i < data.length; i++) {
 			let cumulativeTime = 0;
 			let j = i;
-			// Check and update cumulative time if consecutive points have the same x and y values
 			while (j < data.length && data[j].x === data[i].x && data[j].y === data[i].y) {
 				cumulativeTime = data[j].time - data[i].time;
 				j++;
 			}
 
-			// If cumulativeTime is greater than stopFloor, set stop values for the sequence
 			if (cumulativeTime >= stopFloor) {
 				if (cumulativeTime > maxStopLength) {
 					maxStopLength = cumulativeTime;
-					ConfigStore.update((currentConfig) => {
-						return {
-							...currentConfig,
-							maxStopLength: maxStopLength
-						};
-					});
 				}
 
 				for (let k = i + 1; k < j; k++) {
 					data[k].isStopped = true;
-					data[k].stopLength = cumulativeTime; // TODO: can't seem to get the below to work to increment stopLegnth for each stop to show correclty in draw methods drawStopCircle
-					// //if (k === j - 1) data[k].stopLength = cumulativeTime;
-					// data[k].stopLength = data[k].time - data[i].time;
-					// console.log(data[k].stopLength);
+					data[k].stopLength = cumulativeTime;
 				}
 			}
-			i = j - 1; // Update i to skip the sequence just processed
+			i = j - 1;
 		}
+
+		ConfigStore.update((store) => ({
+			...store,
+			maxStopLength: Math.max(store.maxStopLength, maxStopLength),
+			currentMaxStopLength: Math.min(store.currentMaxStopLength, maxStopLength)
+		}));
+	}
+
+	updateConfigStore() {
+		ConfigStore.update((currentConfig) => ({
+			...currentConfig,
+			maxStopLength: this.maxStopLength
+		}));
 	}
 
 	updateUsersForMultiCodes = (csvData: any, fileName: string) => {
@@ -344,7 +347,6 @@ export class Core {
 				return [...currentEntries, ...newEntries];
 			});
 
-			// console.log(user.dataTrail);
 			return users;
 		});
 	};
@@ -375,7 +377,6 @@ export class Core {
 	// 			});
 	// 		});
 
-	// 		console.log('2Ending with users: ', users);
 	// 		return users;
 	// 	});
 	// };

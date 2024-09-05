@@ -1,6 +1,9 @@
 import { FloorPlanContainer } from './floorplan-container.js';
 import { Highlight } from './highlight.js';
 
+import ConfigStore from '../../stores/configStore';
+import { get } from 'svelte/store';
+
 export class SketchGUI {
 	constructor(sketch) {
 		this.sk = sketch;
@@ -10,11 +13,12 @@ export class SketchGUI {
 	}
 
 	update2D() {
+		const config = get(ConfigStore);
 		if (this.sk.sketchController.overTimeline() && !this.sk.handle3D.getIs3DMode()) this.drawLongSlicer();
 
 		if (!this.sk.handle3D.getIs3DModeOrTransitioning()) {
-			if (this.sk.sketchController.getCurSelectTab() === 1) this.fpContainer.drawRegionSelector();
-			else if (this.sk.sketchController.getCurSelectTab() === 2) this.fpContainer.drawSlicerSelector();
+			if (config.circleToggle) this.fpContainer.drawRegionSelector();
+			else if (config.sliceToggle) this.fpContainer.drawSlicerSelector();
 		}
 	}
 

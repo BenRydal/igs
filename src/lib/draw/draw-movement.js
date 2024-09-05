@@ -1,4 +1,5 @@
 import ConfigStore from '../../stores/configStore';
+import { get } from 'svelte/store';
 
 /**
  * This class provides a set of custom methods to draw movement data in floorPlan and space-time views of the IGS.
@@ -25,6 +26,11 @@ export class DrawMovement {
 			thinStroke: 1,
 			fatStroke: 9
 		};
+		this.maxStopLength = 0;
+
+		ConfigStore.subscribe((data) => {
+			this.maxStopLength = data.maxStopLength;
+		});
 	}
 
 	setData(user) {
@@ -119,7 +125,7 @@ export class DrawMovement {
 	 */
 	drawStopCircle(p) {
 		this.setFillStyle(this.drawUtils.setCodeColor(p.cur.point.codes));
-		const stopSize = this.sk.map(p.cur.point.stopLength, 0, maxStopLength, 5, this.largestStopPixelSize);
+		const stopSize = this.sk.map(p.cur.point.stopLength, 0, this.maxStopLength, 5, this.largestStopPixelSize);
 		this.sk.circle(p.cur.pos.viewXPos, p.cur.pos.floorPlanYPos, stopSize);
 		this.sk.noFill();
 	}

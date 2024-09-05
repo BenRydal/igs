@@ -6,6 +6,8 @@ It also holds various mapping methods that map data values from different classe
 import ConfigStore from '../../stores/configStore';
 import TimelineStore from '../../stores/timelineStore';
 
+import { get } from 'svelte/store';
+
 let timeline;
 let isPathColorMode;
 let curSelectTab;
@@ -24,7 +26,6 @@ export class SketchController {
 		this.sk = sketch;
 		this.isAlignTalk = false;
 		this.isAllTalk = true;
-		this.curSelectTab = 0; // 5 options: None, Region, Slice, Moving, Stopped
 		this.wordToSearch = ''; // String value to dynamically search words in conversation
 	}
 
@@ -49,6 +50,16 @@ export class SketchController {
 			timeline.setIsAnimating(false);
 			return timeline;
 		});
+	}
+
+	getSelectedMode() {
+		const config = get(ConfigStore);
+		if (config.circleToggle) return 'circle';
+		if (config.sliceToggle) return 'slice';
+		if (config.movementToggle) return 'movement';
+		if (config.stopsToggle) return 'stops';
+		if (config.highlightToggle) return 'highlight';
+		return 'none';
 	}
 
 	mapPixelTimeToTotalTime(value) {

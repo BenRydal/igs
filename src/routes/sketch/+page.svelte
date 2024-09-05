@@ -9,9 +9,7 @@
 	import Md3DRotation from 'svelte-icons/md/Md3DRotation.svelte';
 	import MdVideocam from 'svelte-icons/md/MdVideocam.svelte';
 	import MdVideocamOff from 'svelte-icons/md/MdVideocamOff.svelte';
-	import { onMount, onDestroy } from 'svelte';
-	import MdChevronLeft from 'svelte-icons/md/MdChevronLeft.svelte';
-	import MdChevronRight from 'svelte-icons/md/MdChevronRight.svelte';
+	import MdCheck from 'svelte-icons/md/MdCheck.svelte';
 
 	import type { User } from '../../models/user';
 
@@ -29,6 +27,10 @@
 
 	import CodeStore from '../../stores/codeStore';
 	import ConfigStore from '../../stores/configStore';
+	import type { ConfigStoreType } from '../../stores/configStore';
+
+	const toggleOptions = ['circleToggle', 'sliceToggle', 'movementToggle', 'stopsToggle', 'highlightToggle'] as const;
+	type ToggleKey = (typeof toggleOptions)[number];
 
 	let showDataPopup = false;
 	let expandedUsers: { [key: string]: boolean } = {};
@@ -71,7 +73,7 @@
 		igsSketch(p5);
 	};
 
-	let isModalOpen = writable(false);
+	let isModalOpen = writable(true);
 
 	function toggleVideo() {
 		if (p5Instance && p5Instance.videoController) {
@@ -90,6 +92,33 @@
 			.map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
 			.join(' ');
 	}
+
+	// TODO: Sync this with the capitalizeEachWord function
+	function capitalizeFirstLetter(string: string) {
+		return string.charAt(0).toUpperCase() + string.slice(1);
+	}
+
+	function handleStopLengthChange(e: Event) {
+		const target = e.target as HTMLInputElement;
+		ConfigStore.update((value) => ({
+			...value,
+			currentMaxStopLength: parseFloat(target.value)
+		}));
+	}
+
+	function toggleSelection(selection: ToggleKey) {
+		ConfigStore.update((store: ConfigStoreType) => {
+			const updatedStore = { ...store };
+			toggleOptions.forEach((key) => {
+				if (key.endsWith('Toggle')) {
+					updatedStore[key] = key === selection ? !updatedStore[key] : false;
+				}
+			});
+			return updatedStore;
+		});
+	}
+
+	$: formattedStopLength = $ConfigStore.currentMaxStopLength.toFixed(2);
 </script>
 
 <div class="navbar min-h-16 bg-[#f6f5f3]">
@@ -99,81 +128,33 @@
 
 	<div class="flex justify-end flex-1 px-2">
 		<div class="dropdown">
-			<div tabindex="0" role="button" class="btn m-1">Select</div>
-			<ul tabindex="0" class="dropdown-content menu rounded-box z-[1] w-52 p-2 shadow">
-				<!-- TODO: @Ben  -->
-				<!-- On click, update configStore's curSelectTab to a number based on list item -->
-				<li
-					on:click={() =>
-						ConfigStore.update((value) => {
-							value.curSelectTab = 0;
-							return value;
-						})}
-				>
-					<a>None</a>
-				</li>
-				<li
-					on:click={() =>
-						ConfigStore.update((value) => {
-							value.curSelectTab = 1;
-							return value;
-						})}
-				>
-					<a>Circle</a>
-				</li>
-				<li
-					on:click={() =>
-						ConfigStore.update((value) => {
-							value.curSelectTab = 2;
-							return value;
-						})}
-				>
-					<a>Slice</a>
-				</li>
-				<li
-					on:click={() =>
-						ConfigStore.update((value) => {
-							value.curSelectTab = 3;
-							return value;
-						})}
-				>
-					<a>Movement</a>
-				</li>
-				<li
-					on:click={() =>
-						ConfigStore.update((value) => {
-							value.curSelectTab = 4;
-							return value;
-						})}
-				>
-					<a>Stops</a>
-				</li>
-				<li
-					on:click={() =>
-						ConfigStore.update((value) => {
-							value.curSelectTab = 5;
-							return value;
-						})}
-				>
-					<a>Highlight</a>
-				</li>
+			<div class="tooltip tooltip-bottom" data-tip="This changes the mouse to visualize different hovers over the data.">
+				<div tabindex="0" role="button" class="btn btn-sm ml-4">Select</div>
+			</div>
 
+			<ul tabindex="0" class="dropdown-content menu rounded-box z-[1] w-52 p-2 shadow bg-base-100">
+				{#each toggleOptions as toggle}
+					<li on:click={() => toggleSelection(toggle)}>
+						<a>
+							{#if $ConfigStore[toggle]}
+								<div class="w-4 h-4 mr-2"><MdCheck /></div>
+							{:else}
+								<div class="w-4 h-4 mr-2" />
+							{/if}
+							{capitalizeFirstLetter(toggle.replace('Toggle', ''))}
+						</a>
+					</li>
+				{/each}
 				<span class="divider" />
-				<li class="cursor-none"><p>Stop Length: {maxStopLength}</p></li>
-				<!-- Input slider must update the config store's maxStopLength value -->
+				<li class="cursor-none"><p>Stop Length: {formattedStopLength}</p></li>
 				<input
 					type="range"
 					min="0"
-					max="300"
-					value={maxStopLength}
+					max={$ConfigStore.maxStopLength}
+					value={$ConfigStore.currentMaxStopLength}
 					class="range"
-					on:input={(e) =>
-						ConfigStore.update((value) => {
-							value.maxStopLength = e.target.value;
-							return value;
-						})}
+					on:input={handleStopLengthChange}
 				/>
-				<!-- <input type="range" min="0" max="100" value={stopLength} class="range" /> -->
 			</ul>
 		</div>
 
