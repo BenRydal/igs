@@ -17,19 +17,30 @@ import { User } from '../../models/user.js';
 import { USER_COLORS } from '../constants/index.js';
 
 import UserStore from '../../stores/userStore';
+import CodeStore from '../../stores/codeStore.js';
 import TimelineStore from '../../stores/timelineStore';
+import ConfigStore from '../../stores/configStore.js';
+
 let timeline;
+let maxStopLength;
+
 TimelineStore.subscribe((data) => {
 	timeline = data;
+});
+
+ConfigStore.subscribe((data) => {
+	maxStopLength = data.maxStopLength;
 });
 
 export class Core {
 	sketch: p5;
 	coreUtils: CoreUtils;
+	maxStopLength: number;
 
 	constructor(sketch: p5) {
 		this.sketch = sketch;
-		this.coreUtils = new CoreUtils(); // utilities for testing CSV files
+		this.coreUtils = new CoreUtils();
+		this.maxStopLength = 0;
 	}
 
 	handleUserLoadedFiles = async (event: Event) => {
@@ -87,40 +98,49 @@ export class Core {
 	handleExampleDropdown = async (event: any) => {
 		// TODO: Need to adjust p5 typescript defintion to expose
 		// custom attributes & functions
+
+		this.maxStopLength = 0;
+		this.updateConfigStore();
+
 		this.sketch.videoController.clear();
 
 		UserStore.update(() => {
 			return [];
 		});
 
+		CodeStore.update(() => {
+			return [];
+		});
+
 		const selectedValue = event.target.value;
-		await this.loadFloorplanImage(`data/${selectedValue}/floorplan.png`);
-		await this.loadLocalExampleDataFile(`data/${selectedValue}/`, `conversation.csv`);
+		await this.loadFloorplanImage(`/data/${selectedValue}/floorplan.png`);
+		await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `conversation.csv`);
 
 		switch (selectedValue) {
 			case 'example-1':
-				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, 'jordan.csv');
-				// await loadLocalExampleDataFile(`data/${selectedValue}`, `possession.csv`);
+				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, 'jordan.csv');
+				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, 'possession.csv');
 				this.sketch.videoController.createVideoPlayer('Youtube', { videoId: 'iiMjfVOj8po' });
 				break;
 			case 'example-2':
-				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, `adhir.csv`);
-				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, `blake.csv`);
-				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, `jeans.csv`);
-				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, `lily.csv`);
-				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, `mae.csv`);
+				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `adhir.csv`);
+				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `blake.csv`);
+				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `jeans.csv`);
+				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `lily.csv`);
+				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `mae.csv`);
 				this.sketch.videoController.createVideoPlayer('Youtube', { videoId: 'pWJ3xNk1Zpg' });
 				break;
 			case 'example-3':
-				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, `teacher.csv`);
+				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `teacher.csv`);
+				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, 'lesson-graph.csv');
 				this.sketch.videoController.createVideoPlayer('Youtube', { videoId: 'Iu0rxb-xkMk' });
 				break;
 			case 'example-4':
-				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, `cassandra.csv`);
-				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, `mei.csv`);
-				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, `nathan.csv`);
-				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, `sean.csv`);
-				await this.loadLocalExampleDataFile(`data/${selectedValue}/`, `teacher.csv`);
+				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `cassandra.csv`);
+				await this.loadLocalExampleDataFile(`//data/${selectedValue}/`, `mei.csv`);
+				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `nathan.csv`);
+				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `sean.csv`);
+				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `teacher.csv`);
 				this.sketch.videoController.createVideoPlayer('Youtube', { videoId: 'OJSZCK4GPQY' });
 				break;
 		}
@@ -156,14 +176,35 @@ export class Core {
 		if (this.coreUtils.testMovement(results)) {
 			this.updateUsersForMovement(csvData, fileName);
 		} else if (this.coreUtils.testMulticode(results)) {
+			ConfigStore.update((currentConfig) => {
+				return {
+					...currentConfig,
+					dataHasCodes: true
+				};
+			});
 			this.updateUsersForMultiCodes(csvData, fileName);
 		} else if (this.coreUtils.testSingleCode(results)) {
+			ConfigStore.update((currentConfig) => {
+				return {
+					...currentConfig,
+					dataHasCodes: true
+				};
+			});
 			this.updateUsersForSingleCodes(csvData, fileName);
 		} else if (this.coreUtils.testConversation(results)) {
 			this.updateUsersForConversation(csvData, fileName);
 		} else {
 			alert('Error loading CSV file. Please make sure your file is a CSV file formatted with correct column headers');
 		}
+
+		// Sort all the users' data trails by time
+		UserStore.update((currentUsers) => {
+			let users = [...currentUsers];
+			users.forEach((user) => {
+				user.dataTrail.sort((a, b) => (a.time > b.time ? 1 : -1));
+			});
+			return users;
+		});
 	};
 
 	updateUsersForMovement = (csvData: any, userName: string) => {
@@ -221,56 +262,124 @@ export class Core {
 	createNewUser(users: User[], userName: string) {
 		const availableColors = USER_COLORS.filter((color) => !users.some((u) => u.color === color));
 		const userColor = availableColors.length > 0 ? availableColors[0] : '#000000'; // Default to black if no more unique colors available
-		return new User([], userColor, [], true, userName);
+		return new User([], userColor, true, userName);
 	}
 
-	// // TODO: this could be moved to main classes to dynamically update, would neat to reset isStopped values in data
-	// // Allows dynamic updating of what constitute stop values/intervals in the program
 	updateStopValues(data) {
-		//const stopFloor = this.sk.domController.getStopSliderValue();
-		const stopFloor = 1; // the interval that constitutes a stop in seconds
+		const stopFloor = 1;
+		let maxStopLength = 0;
+
 		for (let i = 0; i < data.length; i++) {
 			let cumulativeTime = 0;
 			let j = i;
-			// Check and update cumulative time if consecutive points have the same x and y values
 			while (j < data.length && data[j].x === data[i].x && data[j].y === data[i].y) {
 				cumulativeTime = data[j].time - data[i].time;
 				j++;
 			}
-			// If cumulativeTime is greater than stopFloor, set stop values for the sequence
+
 			if (cumulativeTime >= stopFloor) {
-				if (cumulativeTime > this.sketch.sketchController.getMaxStopLength()) this.sketch.sketchController.setMaxStopLength(cumulativeTime);
+				if (cumulativeTime > maxStopLength) {
+					maxStopLength = cumulativeTime;
+				}
+
 				for (let k = i + 1; k < j; k++) {
 					data[k].isStopped = true;
-					data[k].stopLength = cumulativeTime; // TODO: can't seem to get the below to work to increment stopLegnth for each stop to show correclty in draw methods drawStopCircle
-					// //if (k === j - 1) data[k].stopLength = cumulativeTime;
-					// data[k].stopLength = data[k].time - data[i].time;
-					// console.log(data[k].stopLength);
+					data[k].stopLength = cumulativeTime;
 				}
 			}
-			i = j - 1; // Update i to skip the sequence just processed
+			i = j - 1;
 		}
+
+		ConfigStore.update((store) => ({
+			...store,
+			maxStopLength: Math.max(store.maxStopLength, maxStopLength),
+			currentMaxStopLength: Math.min(store.currentMaxStopLength, maxStopLength)
+		}));
+	}
+
+	updateConfigStore() {
+		ConfigStore.update((currentConfig) => ({
+			...currentConfig,
+			maxStopLength: this.maxStopLength
+		}));
 	}
 
 	updateUsersForMultiCodes = (csvData: any, fileName: string) => {
 		UserStore.update((currentUsers) => {
 			let users = [...currentUsers]; // clone the current users
+
+			// Create a Set to store unique code names
+			const uniqueCodes = [];
+
+			// For each row in the Code CSV
 			csvData.forEach((row: any) => {
-				users.forEach((user) => user.segments.push(row.code));
+				const code = row.code.toLowerCase();
+				if (!uniqueCodes.includes(code)) uniqueCodes.push(code); // Add the code name to the Set
+				const startTime = parseFloat(row.start);
+				const endTime = parseFloat(row.end);
+
+				//For each user in the users array
+				users.forEach((user) => {
+					// Find the first data point with time >= startTime
+					const startIndex = user.dataTrail.findIndex((dataPoint) => dataPoint.time !== null && dataPoint.time >= startTime);
+
+					// Find the last data point with time <= endTime
+					const endIndex = user.dataTrail.findLastIndex((dataPoint) => dataPoint.time !== null && dataPoint.time <= endTime);
+					if (startIndex === -1 || endIndex === -1) return; // TODO: can have/deal with good StartIndex but bad endIndex
+					// Update datapoints FROM the start and TO the end time to include the code
+					for (let i = startIndex; i <= endIndex; i++) {
+						if (!user.dataTrail[i].codes.includes(code)) {
+							user.dataTrail[i].codes.push(code);
+						}
+					}
+				});
 			});
+
+			CodeStore.update((currentEntries) => {
+				// Create an array of new entries with colors assigned
+				const newEntries = uniqueCodes.map((code, index) => ({
+					code: code,
+					color: USER_COLORS[index % USER_COLORS.length], // Use modulo to cycle through colors
+					enabled: true
+				}));
+
+				// Combine the current entries with the new entries and return the result
+				return [...currentEntries, ...newEntries];
+			});
+
 			return users;
 		});
 	};
 
-	updateUsersForSingleCodes = (csvData: any, fileName: string) => {
-		UserStore.update((currentUsers) => {
-			let users = [...currentUsers]; // clone the current users
-			csvData.forEach((row: any) => {
-				users.forEach((user) => user.segments.push(row.code));
-			});
-			return users;
-		});
-	};
+	// @Ben TODO: You will need to adjust this for the single code file name
+	// and header names
+	// updateUsersForSingleCodes = (csvData: any, fileName: string) => {
+	// 	UserStore.update((currentUsers) => {
+	// 		let users = [...currentUsers]; // clone the current users
+
+	// 		// For each row in the Code CSV
+	// 		csvData.forEach((row: any) => {
+	// 			const code = row.code;
+	// 			const time = parseFloat(row.time);
+
+	// 			// For each user in the users array
+	// 			users.forEach((user) => {
+	// 				// Find the closest datapoint by time
+	// 				const closestDataPoint = user.dataTrail.reduce((closest, current) => {
+	// 					if (current.time === null) return closest;
+	// 					return Math.abs(current.time - time) < Math.abs(closest.time - time) ? current : closest;
+	// 				});
+
+	// 				// Add the code to the closest datapoint
+	// 				if (!closestDataPoint.codes.includes(code)) {
+	// 					closestDataPoint.codes.push(code);
+	// 				}
+	// 			});
+	// 		});
+
+	// 		return users;
+	// 	});
+	// };
 
 	addDataPointClosestByTimeInSeconds(dataPoints, newDataPoint) {
 		if (dataPoints.length === 0) {

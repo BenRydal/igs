@@ -9,6 +9,7 @@
 	import Md3DRotation from 'svelte-icons/md/Md3DRotation.svelte';
 	import MdVideocam from 'svelte-icons/md/MdVideocam.svelte';
 	import MdVideocamOff from 'svelte-icons/md/MdVideocamOff.svelte';
+	import MdCheck from 'svelte-icons/md/MdCheck.svelte';
 
 	import type { User } from '../../models/user';
 
@@ -16,22 +17,40 @@
 	import P5Store from '../../stores/p5Store';
 	import VideoStore from '../../stores/videoStore';
 
-	import * as Constants from '../../lib/constants';
-
 	import { Core } from '$lib';
 	import { igsSketch } from '$lib/p5/igsSketch';
 	import { writable } from 'svelte/store';
 	import IconButton from '$lib/components/IconButton.svelte';
 	import IgsInfoModal from '$lib/components/IGSInfoModal.svelte';
 	import TimelinePanel from '$lib/components/TimelinePanel.svelte';
+	import DataPointTable from '$lib/components/DataPointTable.svelte';
+
+	import CodeStore from '../../stores/codeStore';
+	import ConfigStore from '../../stores/configStore';
+	import type { ConfigStoreType } from '../../stores/configStore';
+
+	const toggleOptions = ['circleToggle', 'sliceToggle', 'movementToggle', 'stopsToggle', 'highlightToggle'] as const;
+	type ToggleKey = (typeof toggleOptions)[number];
+
+	let showDataPopup = false;
+	let expandedUsers: { [key: string]: boolean } = {};
+	function toggleUserExpansion(userName: string) {
+		expandedUsers[userName] = !expandedUsers[userName];
+	}
 
 	let files: any = [];
 	let users: User[] = [];
 	let p5Instance: p5 | null = null;
-	let selectedTab: string = 'Movement';
 	let core: Core;
 	let isVideoShowing = false;
 	let isVideoPlaying = false;
+	let isPathColorMode = false;
+	let maxStopLength = 0;
+
+	ConfigStore.subscribe((value) => {
+		isPathColorMode = value.isPathColorMode;
+		maxStopLength = value.maxStopLength;
+	});
 
 	VideoStore.subscribe((value) => {
 		isVideoShowing = value.isShowing;
@@ -54,27 +73,7 @@
 		igsSketch(p5);
 	};
 
-	let isModalOpen = writable(false);
-	let showSpeechPopup: { [key: string]: boolean } = {};
-
-	let scrollInterval: ReturnType<typeof setInterval> | null = null;
-
-	function startScrolling(direction: 'left' | 'right'): void {
-		const carousel = document.querySelector('.carousel');
-		if (carousel) {
-			const scrollAmount = direction === 'left' ? -100 : carousel.clientWidth + 80;
-			scrollInterval = setInterval(() => {
-				carousel.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-			}, 5); // Adjust the interval time (100 ms) as needed
-		}
-	}
-
-	function stopScrolling(): void {
-		if (scrollInterval) {
-			clearInterval(scrollInterval);
-			scrollInterval = null;
-		}
-	}
+	let isModalOpen = writable(true);
 
 	function toggleVideo() {
 		if (p5Instance && p5Instance.videoController) {
@@ -86,228 +85,326 @@
 			});
 		}
 	}
+
+	function capitalizeEachWord(sentence: string) {
+		return sentence
+			.split(' ')
+			.map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+			.join(' ');
+	}
+
+	// TODO: Sync this with the capitalizeEachWord function
+	function capitalizeFirstLetter(string: string) {
+		return string.charAt(0).toUpperCase() + string.slice(1);
+	}
+
+	function handleStopLengthChange(e: Event) {
+		const target = e.target as HTMLInputElement;
+		ConfigStore.update((value) => ({
+			...value,
+			currentMaxStopLength: parseFloat(target.value)
+		}));
+	}
+
+	function toggleSelection(selection: ToggleKey) {
+		ConfigStore.update((store: ConfigStoreType) => {
+			const updatedStore = { ...store };
+			toggleOptions.forEach((key) => {
+				if (key.endsWith('Toggle')) {
+					updatedStore[key] = key === selection ? !updatedStore[key] : false;
+				}
+			});
+			return updatedStore;
+		});
+	}
+
+	$: formattedStopLength = $ConfigStore.currentMaxStopLength.toFixed(2);
 </script>
 
-<div class="drawer">
-	<input id="my-drawer" type="checkbox" class="drawer-toggle" />
-	<div class="navbar min-h-16 bg-[#f6f5f3] text-base-100">
-		<div class="flex-1 px-2 lg:flex-none">
-			<a class="text-lg font-bold" href="/">IGS</a>
-		</div>
-
-		<div class="flex justify-end flex-1 px-2">
-			<div class="flex items-stretch">
-				<IconButton
-					id="btn-rotate-left"
-					icon={MdRotateLeft}
-					tooltip={'Rotate Left'}
-					on:click={() => {
-						p5Instance.floorPlan.setRotateLeft();
-						p5Instance.loop();
-					}}
-				/>
-
-				<IconButton
-					id="btn-rotate-left"
-					icon={MdRotateRight}
-					tooltip={'Rotate Right'}
-					on:click={() => {
-						p5Instance.floorPlan.setRotateRight();
-						p5Instance.loop();
-					}}
-				/>
-
-				<IconButton icon={MdCloudDownload} tooltip={'Download your Data'} />
-				<div
-					data-tip="Upload"
-					class="tooltip tooltip-bottom btn capitalize icon max-h-8 bg-[#f6f5f3] border-[#f6f5f3]"
-					role="button"
-					tabindex="0"
-					on:click
-					on:keydown
-				>
-					<label for="file-input">
-						<MdCloudUpload />
-					</label>
-				</div>
-
-				<input
-					class="hidden"
-					id="file-input"
-					multiple
-					accept=".png, .jpg, .jpeg, .csv, .mp4"
-					type="file"
-					bind:files
-					on:change={core.handleUserLoadedFiles}
-				/>
-
-				<IconButton icon={MdHelpOutline} tooltip={'Help'} on:click={() => ($isModalOpen = !$isModalOpen)} />
-
-				<IconButton
-					id="btn-toggle-3d"
-					icon={Md3DRotation}
-					tooltip={'Toggle 3D'}
-					on:click={() => {
-						p5Instance.handle3D.update();
-					}}
-				/>
-
-				{#if isVideoShowing}
-					<IconButton id="btn-toggle-video" icon={MdVideocam} tooltip={'Show/Hide Video'} on:click={toggleVideo} />
-				{:else}
-					<IconButton id="btn-toggle-video" icon={MdVideocamOff} tooltip={'Show/Hide Video'} on:click={toggleVideo} />
-				{/if}
-				<select
-					id="select-data-dropdown"
-					class="select select-bordered w-full max-w-xs bg-[#f6f5f3] text-black"
-					on:change={core.handleExampleDropdown}
-				>
-					<option disabled selected>-- Select an Example --</option>
-					<option value="example-1">Michael Jordan's Last Shot</option>
-					<option value="example-2">Family Museum Gallery Visit</option>
-					<option value="example-3">Classroom Science Lesson</option>
-					<option value="example-4">Classroom Discussion</option>
-				</select>
-			</div>
-		</div>
+<div class="navbar min-h-16 bg-[#f6f5f3]">
+	<div class="flex-1 px-2 lg:flex-none">
+		<a class="text-lg font-bold text-black" href="/">IGS</a>
 	</div>
 
+	<div class="flex justify-end flex-1 px-2">
+		<div class="dropdown">
+			<div class="tooltip tooltip-bottom" data-tip="This changes the mouse to visualize different hovers over the data.">
+				<div tabindex="0" role="button" class="btn btn-sm ml-4">Select</div>
+			</div>
+
+			<ul tabindex="0" class="dropdown-content menu rounded-box z-[1] w-52 p-2 shadow bg-base-100">
+				{#each toggleOptions as toggle}
+					<li on:click={() => toggleSelection(toggle)}>
+						<a>
+							{#if $ConfigStore[toggle]}
+								<div class="w-4 h-4 mr-2"><MdCheck /></div>
+							{:else}
+								<div class="w-4 h-4 mr-2" />
+							{/if}
+							{capitalizeFirstLetter(toggle.replace('Toggle', ''))}
+						</a>
+					</li>
+				{/each}
+				<span class="divider" />
+				<li class="cursor-none"><p>Stop Length: {formattedStopLength}</p></li>
+				<input
+					type="range"
+					min="0"
+					max={$ConfigStore.maxStopLength}
+					value={$ConfigStore.currentMaxStopLength}
+					class="range"
+					on:input={handleStopLengthChange}
+				/>
+			</ul>
+		</div>
+
+		<button class="btn btn-sm ml-4" on:click={() => (showDataPopup = true)}>Show Data</button>
+
+		<div class="flex items-stretch">
+			<IconButton
+				id="btn-rotate-left"
+				icon={MdRotateLeft}
+				tooltip={'Rotate Left'}
+				on:click={() => {
+					p5Instance.floorPlan.setRotateLeft();
+					p5Instance.loop();
+				}}
+			/>
+
+			<IconButton
+				id="btn-rotate-left"
+				icon={MdRotateRight}
+				tooltip={'Rotate Right'}
+				on:click={() => {
+					p5Instance.floorPlan.setRotateRight();
+					p5Instance.loop();
+				}}
+			/>
+
+			<IconButton icon={MdCloudDownload} tooltip={'Download your Data'} />
+			<div
+				data-tip="Upload"
+				class="tooltip tooltip-bottom btn capitalize icon max-h-8 bg-[#f6f5f3] border-[#f6f5f3]"
+				role="button"
+				tabindex="0"
+				on:click
+				on:keydown
+			>
+				<label for="file-input">
+					<MdCloudUpload />
+				</label>
+			</div>
+
+			<input
+				class="hidden"
+				id="file-input"
+				multiple
+				accept=".png, .jpg, .jpeg, .csv, .mp4"
+				type="file"
+				bind:files
+				on:change={core.handleUserLoadedFiles}
+			/>
+
+			<IconButton icon={MdHelpOutline} tooltip={'Help'} on:click={() => ($isModalOpen = !$isModalOpen)} />
+
+			<IconButton
+				id="btn-toggle-3d"
+				icon={Md3DRotation}
+				tooltip={'Toggle 3D'}
+				on:click={() => {
+					p5Instance.handle3D.update();
+				}}
+			/>
+
+			{#if isVideoShowing}
+				<IconButton id="btn-toggle-video" icon={MdVideocam} tooltip={'Show/Hide Video'} on:click={toggleVideo} />
+			{:else}
+				<IconButton id="btn-toggle-video" icon={MdVideocamOff} tooltip={'Show/Hide Video'} on:click={toggleVideo} />
+			{/if}
+			<select id="select-data-dropdown" class="select select-bordered w-full max-w-xs bg-[#f6f5f3] text-black" on:change={core.handleExampleDropdown}>
+				<option disabled selected>-- Select an Example --</option>
+				<option value="example-1">Michael Jordan's Last Shot</option>
+				<option value="example-2">Family Museum Gallery Visit</option>
+				<option value="example-3">Classroom Science Lesson</option>
+				<option value="example-4">Classroom Discussion</option>
+			</select>
+		</div>
+	</div>
+</div>
+
+<div class="h-10">
 	<P5 {sketch} />
+</div>
 
-	<div class="btm-nav flex justify-between">
-		<!-- Left Side: Select and Carousel -->
-		<div class="w-1/2 bg-[#f6f5f3]">
-			<div class="join w-full flex items-center justify-start">
-				<select bind:value={selectedTab} id="select-data-dropdown" class="select select-bordered max-w-xs bg-neutral text-white dropdown-top">
-					{#each Constants.TAB_OPTIONS as value}<option {value}>{value}</option>{/each}
-				</select>
+{#if showDataPopup}
+	<div
+		class="modal modal-open"
+		on:click|self={() => (showDataPopup = false)}
+		on:keydown={(e) => {
+			if (e.key === 'Escape') showDataPopup = false;
+		}}
+	>
+		<div class="modal-box w-11/12 max-w-5xl">
+			<div class="flex justify-between">
+				<div class="flex flex-col">
+					<h3 class="font-bold text-lg">Data Explorer</h3>
+					<p>
+						Here you will find information on the data that you have uploaded. This includes the codes that have been used, and the users that have
+						been tracked. You can also enable or disable the movement and speech of each user, and change the color of their path.
+					</p>
+				</div>
 
-				<div class="flex items-center w-full">
-					<button
-						class="btn flex-shrink-0"
-						on:mousedown={() => startScrolling('left')}
-						on:mouseup={stopScrolling}
-						on:mouseleave={stopScrolling}
-						on:touchstart={() => startScrolling('left')}
-						on:touchend={stopScrolling}
-					>
-						<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-						</svg>
-					</button>
+				<button class="btn btn-circle btn-sm" on:click={() => (showDataPopup = false)}>
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+					</svg>
+				</button>
+			</div>
 
-					<div class="carousel carousel-center overflow-x-auto flex-grow mx-5">
-						{#if selectedTab == 'Movement'}
-							{#each $UserStore as user}
-								<div class="carousel-item inline-flex items-center mr-2">
-									<div class="flex items-center">
-										<input id="userCheckbox-{user.name}" type="checkbox" class="checkbox" bind:checked={user.enabled} />
-										<label for="userCheckbox-{user.name}" class="flex items-center ml-1 mr-4">
-											<!-- <div class="w-4 h-4 rounded-full mr-2" style="background-color: {user.color};" /> -->
-											<input type="color" class="color-picker" bind:value={user.color} />
-											{user.name}
-										</label>
-									</div>
-								</div>
+			<div class="overflow-x-auto">
+				<div class="flex flex-col">
+					<div class="flex-col my-4">
+						<h4 class="font-bold my-2">Codes:</h4>
+						<div class="grid grid-cols-5 gap-4">
+							{#each $CodeStore as code}
+								<div class="badge badge-neutral">{code.code}</div>
 							{/each}
-						{:else if selectedTab == 'Talk'}
-							{#each $UserStore as user}
-								{#if user.dataTrail.some((dp) => dp.speech)}
-									<div class="carousel-item inline-flex items-center mr-2">
-										<div class="flex items-center">
-											<input id="userCheckbox-{user.name}" type="checkbox" class="checkbox" bind:checked={user.enabled} />
-											<label for="userCheckbox-{user.name}" class="flex items-center ml-1 mr-4">
-												<input type="color" class="color-picker" bind:value={user.color} />
-												{user.name}
-											</label>
-											<button class="btn btn-sm" on:click={() => (showSpeechPopup[user.name] = !showSpeechPopup[user.name])}>View Speech</button>
-										</div>
-									</div>
-
-									{#if showSpeechPopup[user.name]}
-										<div class="modal modal-open">
-											<div class="modal-box">
-												<h3 class="font-bold text-lg">{user.name}'s Speech Datapoints</h3>
-												<div class="overflow-x-auto">
-													<table class="table w-full">
-														<thead>
-															<tr>
-																<th>Time</th>
-																<th>Speech</th>
-															</tr>
-														</thead>
-														<tbody>
-															{#each user.dataTrail
-																.filter((dp) => dp.speech)
-																.sort((a, b) => {
-																	if (a.time === null && b.time === null) return 0;
-																	if (a.time === null) return 1;
-																	if (b.time === null) return -1;
-																	return a.time - b.time;
-																}) as datapoint}
-																<tr>
-																	<td>{datapoint.time}</td>
-																	<td>{datapoint.speech}</td>
-																</tr>
-															{/each}
-														</tbody>
-													</table>
-												</div>
-												<div class="modal-action">
-													<button class="btn" on:click={() => (showSpeechPopup[user.name] = false)}>Close</button>
-												</div>
-											</div>
-										</div>
-									{/if}
-								{/if}
-							{/each}
-						{/if}
+						</div>
 					</div>
 
-					<button
-						class="btn flex-shrink-0"
-						on:mousedown={() => startScrolling('right')}
-						on:mouseup={stopScrolling}
-						on:mouseleave={stopScrolling}
-						on:touchstart={() => startScrolling('right')}
-						on:touchend={stopScrolling}
-					>
-						<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-						</svg>
-					</button>
+					<h4 class="font-bold">Users:</h4>
+					{#each $UserStore as user}
+						<div class="my-4">
+							<div tabindex="0" class="text-primary-content bg-[#e6e4df] collapse" aria-controls="collapse-content-{user.name}" role="button">
+								<input type="checkbox" class="peer" />
+								<div class="collapse-title font-semibold">{capitalizeEachWord(user.name)}</div>
+
+								<div class="collapse-content">
+									<div class="flex flex-col">
+										<div class="flex">
+											<h2 class="font-medium">Color:</h2>
+											<!-- TODO: Set badge colour to be user colour -->
+											<div class="badge ml-2">{user.color}</div>
+										</div>
+										<div class="flex">
+											<h2 class="font-medium">Enabled</h2>
+											{#if user.enabled}
+												<div class="badge badge-success ml-2">{user.enabled}</div>
+											{:else}
+												<div class="badge badge-error ml-2">{user.enabled}</div>
+											{/if}
+										</div>
+									</div>
+									<h2 class="font-medium">Data Points:</h2>
+									<DataPointTable dataPoints={user.dataTrail} />
+								</div>
+							</div>
+						</div>
+					{/each}
 				</div>
 			</div>
+			<div class="modal-action">
+				<button class="btn" on:click={() => (showDataPopup = false)}>Close</button>
+			</div>
 		</div>
+	</div>
+{/if}
 
-		<!-- Right Side: Timeline -->
-		<div class="w-1/2 overflow-x-auto bg-[#f6f5f3]">
-			<!-- <div style="width: 800px; height: 50px; background: linear-gradient(to right, #eee, #ddd);"> -->
-			<!-- TODO: Timeline logic -->
-			<TimelinePanel />
-			<!-- </div> -->
+<div class="btm-nav flex justify-between min-h-20">
+	<div class="w-1/2 overflow-x-overflow bg-[#f6f5f3] items-start px-8">
+		<div class="flex space-x-4">
+			{#if $ConfigStore.dataHasCodes}
+				<div class="dropdown dropdown-top">
+					<div tabindex={0} role="button" class="btn">Codes</div>
+					<ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
+						<li>
+							<div class="flex items-center">
+								<input id="codeCheckbox-all" type="checkbox" class="checkbox" />
+								Select All
+							</div>
+							<div class="flex items-center">
+								<!-- This updates the config store's isPathColorMode -->
+								<input id="codeCheckbox-all" type="checkbox" class="checkbox" bind:checked={$ConfigStore.isPathColorMode} />
+								Color by Codes
+							</div>
+						</li>
+						{#each $CodeStore as code, index}
+							<li><h3 class="pointer-events-none">{code.code.toUpperCase()}</h3></li>
+							<li>
+								<div class="flex items-center">
+									<input id="codeCheckbox-{code.code}" type="checkbox" class="checkbox" bind:checked={code.enabled} />
+									Enabled
+								</div>
+							</li>
+							<li>
+								<div class="flex items-center">
+									<input type="color" class="color-picker max-w-[24px] max-h-[28px]" bind:value={code.color} />
+									Color
+								</div>
+							</li>
+							{#if index !== $CodeStore.length - 1}
+								<div class="divider" />
+							{/if}
+						{/each}
+					</ul>
+				</div>
+			{/if}
+			{#each $UserStore as user}
+				<div class="dropdown dropdown-top">
+					<div tabindex={0} role="button" class="btn">{user.name}</div>
+					<ul tabindex={0} class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
+						<li>
+							<div class="flex items-center">
+								<input id="userCheckbox-{user.name}" type="checkbox" class="checkbox" bind:checked={user.enabled} />
+								Movement
+							</div>
+						</li>
+						<li>
+							<div class="flex items-center">
+								<input id="userCheckbox-{user.name}" type="checkbox" class="checkbox" bind:checked={user.conversation_enabled} />
+								Speech
+							</div>
+						</li>
+						<li>
+							<div class="flex items-center">
+								<input type="color" class="color-picker max-w-[24px] max-h-[28px]" bind:value={user.color} />
+								Color
+							</div>
+						</li>
+						<li>
+							<div class="flex items-center">Transcripts</div>
+							<!-- this should go through the user's datatrail and then show a daisyui table of all the text -->
+						</li>
+					</ul>
+				</div>
+			{/each}
 		</div>
 	</div>
 
-	<slot />
+	<!-- Right Side: Timeline -->
+	<div class="w-1/2 overflow-x-auto bg-[#f6f5f3]">
+		<TimelinePanel />
+	</div>
 </div>
+
+<slot />
 
 <IgsInfoModal {isModalOpen} />
 
 <style>
-	.navbar {
-		height: 64px;
-	}
-
-	.btm-nav {
-		height: 100px;
-	}
-
 	.color-picker {
 		width: 30px;
 		height: 30px;
 		border: none;
 		border-radius: 50%;
 		cursor: pointer;
+	}
+
+	.modal-box {
+		max-width: 50%;
+	}
+
+	.material-symbols-outlined {
+		font-size: 18px;
 	}
 </style>

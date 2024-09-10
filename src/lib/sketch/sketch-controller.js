@@ -3,22 +3,29 @@ This class holds variables that control program flow and are dynamically updated
 It also holds various mapping methods that map data values from different classes across the program
 */
 
+import ConfigStore from '../../stores/configStore';
 import TimelineStore from '../../stores/timelineStore';
 
+import { get } from 'svelte/store';
+
 let timeline;
+let isPathColorMode;
+let curSelectTab;
 
 TimelineStore.subscribe((data) => {
 	timeline = data;
 });
 
+ConfigStore.subscribe((data) => {
+	isPathColorMode = data.isPathColorMode;
+	curSelectTab = data.curSelectTab;
+});
+
 export class SketchController {
 	constructor(sketch) {
 		this.sk = sketch;
-		this.maxStopLength = 0;
 		this.isAlignTalk = false;
 		this.isAllTalk = true;
-		this.isPathColorMode = true;
-		this.curSelectTab = 0; // 5 options: None, Region, Slice, Moving, Stopped
 		this.wordToSearch = ''; // String value to dynamically search words in conversation
 	}
 
@@ -43,6 +50,16 @@ export class SketchController {
 			timeline.setIsAnimating(false);
 			return timeline;
 		});
+	}
+
+	getSelectedMode() {
+		const config = get(ConfigStore);
+		if (config.circleToggle) return 'circle';
+		if (config.sliceToggle) return 'slice';
+		if (config.movementToggle) return 'movement';
+		if (config.stopsToggle) return 'stops';
+		if (config.highlightToggle) return 'highlight';
+		return 'none';
 	}
 
 	mapPixelTimeToTotalTime(value) {
@@ -108,24 +125,15 @@ export class SketchController {
 		this.isAllTalk = !this.isAllTalk;
 	}
 
+	// TODO: This logic is flipped due to some interaction
+	// with the ConfigStore value.
 	getIsPathColorMode() {
-		return this.isPathColorMode;
+		return !isPathColorMode;
 	}
 
-	toggleIsPathColorMode() {
-		this.isPathColorMode = !this.isPathColorMode;
-	}
-
-	setIsPathColorMode(value) {
-		this.isPathColorMode = value;
-	}
-
+	// Get the updated confgi store value
 	getCurSelectTab() {
-		return this.curSelectTab;
-	}
-
-	setCurSelectTab(value) {
-		this.curSelectTab = value;
+		return curSelectTab;
 	}
 
 	setWordToSearch(value) {
@@ -176,13 +184,5 @@ export class SketchController {
 		const pixelValue = this.sk.mouseX;
 		return pixelValue >= this.getTimelineLeftMarkerXPos() && pixelValue <= this.getTimelineRightMarkerXPos();
 		// return this.sk.overRect(this.start, this.top, this.length, this.thickness);
-	}
-
-	getMaxStopLength() {
-		return this.maxStopLength;
-	}
-
-	setMaxStopLength(value) {
-		this.maxStopLength = value;
 	}
 }

@@ -4,6 +4,10 @@
  */
 
 import TimelineStore from '../../stores/timelineStore';
+import CodeStore from '../../stores/codeStore';
+import ConfigStore from '../../stores/configStore';
+
+import { get } from 'svelte/store';
 
 let timeline;
 
@@ -11,16 +15,53 @@ TimelineStore.subscribe((data) => {
 	timeline = data;
 });
 
+let isPathColorMode = false;
+
+CodeStore.subscribe((data) => {
+	console.log(data);
+});
+
+ConfigStore.subscribe((data) => {
+	isPathColorMode = data.isPathColorMode;
+});
+
 export class DrawUtils {
 	constructor(sketch) {
 		this.sk = sketch;
 	}
 
+	setCodeColor(searchCodes) {
+		const entries = get(CodeStore);
+		let matchedEntries = entries.filter((e) => searchCodes.includes(e.code));
+
+		if (matchedEntries.length === 1) {
+			return matchedEntries[0].color;
+		} else if (matchedEntries.length > 1) {
+			// TODO: If we find a new way to manage multiple codes, this is where
+			// that change would be. Currently default multiple codes to black.
+			return '#000000';
+		}
+	}
+
+	/**
+	 * This method tests if a point is showing for all selected codes from codeList
+	 * IMPLEMENTATION: Iterate through codeList and return false if: for any of codes that are true in codeList a code at curPoint is false
+	 * @param  {MovementPoint} point
+	 */
+	isShowingInCodeList(codesArray) {
+		if (codesArray.length === 0) return true;
+
+		const entries = get(CodeStore);
+		// Retrieve the array of CodeEntry objects
+		return entries.some((entry) => codesArray.includes(entry.code) && entry.enabled);
+		// Check if any entry code is in codesArray and is enabled }
+	}
 	/**
 	 * Holds tests for determining if point is visible (e.g., selected, highlighted)
 	 */
 	isVisible(point, curPos) {
-		return this.isShowingInGUI(curPos.timelineXPos) && this.selectMode(curPos, point.isStopped) && this.isShowingInCodeList(point.codes.hasCodeArray);
+		// And
+		return this.isShowingInGUI(curPos.timelineXPos) && this.selectMode(curPos, point.isStopped) && this.isShowingInCodeList(point.codes);
 	}
 
 	isShowingInGUI(pixelTime) {
@@ -33,52 +74,32 @@ export class DrawUtils {
 		else return true;
 	}
 
-	/**
-	 * This method tests if a point is showing for all selected codes from codeList
-	 * IMPLEMENTATION: Iterate through codeList and return false if: for any of codes that are true in codeList a code at curPoint is false
-	 * @param  {MovementPoint} point
-	 */
-	isShowingInCodeList(codesArray) {
-		// if (this.sk.arrayIsLoaded(this.codeList)) {
-		// 	for (let j = 0; j < this.codeList.length; j++) {
-		// 		if (this.codeList[j].isShowing) {
-		// 			if (codesArray[j]) continue;
-		// 			else return false;
-		// 		}
-		// 	}
-		// }
-		return true;
-	}
-
-	/**
-	 * @param  {Movement/Conversation Pos Object} curPos
-	 * @param  {boolean} pointIsStopped
-	 */
 	selectMode(curPos, isStopped) {
-		switch (this.sk.sketchController.getCurSelectTab()) {
-			case 0:
-				return true;
-			case 1:
-				if (this.sk.handle3D.getIs3DModeOrTransitioning()) return true;
-				else
-					return (
-						this.sk.gui.fpContainer.overCursor(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos) &&
-						this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos)
-					);
-			case 2:
-				if (this.sk.handle3D.getIs3DModeOrTransitioning()) return true;
-				else
-					return (
-						this.sk.gui.fpContainer.overSlicer(curPos.floorPlanXPos, curPos.selTimelineXPos) &&
-						this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos)
-					);
-			case 3:
-				return !isStopped && this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos);
-			case 4:
-				return isStopped && this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos);
-			case 5:
-				return this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.timelineXPos);
+		const config = get(ConfigStore);
+		if (config.circleToggle) {
+			if (this.sk.handle3D.getIs3DModeOrTransitioning()) return true;
+			else
+				return (
+					this.sk.gui.fpContainer.overCursor(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos) &&
+					this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos)
+				);
+		} else if (config.sliceToggle) {
+			if (this.sk.handle3D.getIs3DModeOrTransitioning()) return true;
+			else
+				return (
+					this.sk.gui.fpContainer.overSlicer(curPos.floorPlanXPos, curPos.selTimelineXPos) &&
+					this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos)
+				);
+		} else if (config.movementToggle) {
+			return !isStopped && this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos);
+		} else if (config.stopsToggle) {
+			return isStopped && this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos);
+		} else if (config.highlightToggle) {
+			return this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.timelineXPos);
 		}
+
+		// If nothing is selected we just return true
+		return true;
 	}
 
 	/**

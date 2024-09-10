@@ -6,6 +6,9 @@ import { Core, FloorPlan, SketchGUI, SketchController, Handle3D, VideoController
 import type { User } from '../../models/user';
 import type p5 from 'p5';
 
+import ConfigStore, { type ConfigStoreType } from '../../stores/configStore';
+import { get } from 'svelte/store';
+
 let users: User[] = [];
 let p5Instance: p5 | null = null;
 
@@ -115,27 +118,28 @@ export const igsSketch = (p5: any) => {
 		p5.loop();
 	};
 
-	// p5.overCircle = (x: number, y: number, diameter: number) => {
-	//   return p5.sqrt(p5.sq(x - p5.mouseX) + p5.sq(y - p5.mouseY)) < diameter / 2;
-	// }
+	p5.overCircle = (x: number, y: number, diameter: number) => {
+		return p5.sqrt(p5.sq(x - p5.mouseX) + p5.sq(y - p5.mouseY)) < diameter / 2;
+	};
 
-	// p5.mousePressed = () => {
-	//   if (!p5.sketchController.getIsAnimate() && p5.gui.timelinePanel.overTimeline()) p5.videoController.timelinePlayPause();
-	//   else if (p5.sketchController.getCurSelectTab() === 5 && !p5.handle3D.getIs3DModeOrTransitioning()) p5.gui.highlight.handleMousePressed();
-	//   p5.loop();
-	// }
+	p5.mousePressed = () => {
+		const config = get(ConfigStore);
+		if (config.highlightToggle && !p5.handle3D.getIs3DModeOrTransitioning()) p5.gui.highlight.handleMousePressed();
+		p5.loop();
+	};
 
-	// p5.mouseReleased = () => {
-	//   if (p5.sketchController.getCurSelectTab() === 5 && !p5.handle3D.getIs3DModeOrTransitioning() && !p5.gui.timelinePanel.isLockedOrOverTimeline()) p5.gui.highlight.handleMouseRelease();
-	//   p5.loop();
-	// }
+	p5.mouseReleased = () => {
+		const config = get(ConfigStore);
+		if (config.highlightToggle && !p5.handle3D.getIs3DModeOrTransitioning()) p5.gui.highlight.handleMouseRelease();
+		p5.loop();
+	};
 
 	// p5.saveCodeFile = () => {
-	//   if (p5.dataIsLoaded(p5.floorPlan.getImg()) && p5.arrayIsLoaded(p5.core.pathList)) {
-	//     const setPathData = new SetPathData(p5, p5.core.codeList);
-	//     setPathData.setCodeFile(p5.core.pathList);
-	//   }
-	// }
+	// 	if (p5.dataIsLoaded(p5.floorPlan.getImg()) && p5.arrayIsLoaded(p5.core.pathList)) {
+	// 		const setPathData = new SetPathData(p5, p5.core.codeList);
+	// 		setPathData.setCodeFile(p5.core.pathList);
+	// 	}
+	// };
 
 	p5.arrayIsLoaded = (data: any) => {
 		return Array.isArray(data) && data.length;
