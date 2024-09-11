@@ -265,9 +265,12 @@ export class Core {
 		return new User([], userColor, true, userName);
 	}
 
+	// For the drawing methods in program we need to know:
+	// 1) the duration of the longest stop segment in all the data
+	// 2) ability to calculate whether a datapoint is stopped and how long it is stopped for
+
 	updateStopValues(data) {
-		const stopFloor = 1;
-		let maxStopLength = 0;
+		let curMaxStopLength = 0;
 
 		for (let i = 0; i < data.length; i++) {
 			let cumulativeTime = 0;
@@ -277,23 +280,20 @@ export class Core {
 				j++;
 			}
 
-			if (cumulativeTime >= stopFloor) {
-				if (cumulativeTime > maxStopLength) {
-					maxStopLength = cumulativeTime;
-				}
+			if (cumulativeTime > curMaxStopLength) {
+				curMaxStopLength = cumulativeTime;
+			}
 
-				for (let k = i + 1; k < j; k++) {
-					data[k].isStopped = true;
-					data[k].stopLength = cumulativeTime;
-				}
+			for (let k = i + 1; k < j; k++) {
+				data[k].stopLength = cumulativeTime;
 			}
 			i = j - 1;
 		}
 
 		ConfigStore.update((store) => ({
 			...store,
-			maxStopLength: Math.max(store.maxStopLength, maxStopLength),
-			currentMaxStopLength: Math.min(store.currentMaxStopLength, maxStopLength)
+			maxStopLength: Math.max(store.maxStopLength, curMaxStopLength),
+			currentMaxStopLength: Math.min(store.currentMaxStopLength, curMaxStopLength)
 		}));
 	}
 

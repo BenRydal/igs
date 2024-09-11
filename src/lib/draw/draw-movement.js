@@ -26,11 +26,6 @@ export class DrawMovement {
 			thinStroke: 1,
 			fatStroke: 9
 		};
-		this.maxStopLength = 0;
-
-		ConfigStore.subscribe((data) => {
-			this.maxStopLength = data.maxStopLength;
-		});
 	}
 
 	setData(user) {
@@ -70,10 +65,10 @@ export class DrawMovement {
 			}
 
 			let comparisonPoint = this.drawUtils.createComparePoint(view, currentMovement, previousMovement, currentMovement.time, previousMovement.time);
-			if (this.drawUtils.isVisible(comparisonPoint.cur.point, comparisonPoint.cur.pos)) {
+			if (this.drawUtils.isVisible(comparisonPoint.cur.point, comparisonPoint.cur.pos, this.isStopped(comparisonPoint.cur.point.stopLength))) {
 				if (view === this.sk.SPACETIME) this.recordDot(comparisonPoint.cur);
-				if (comparisonPoint.cur.point.isStopped) this.updateStopDrawing(comparisonPoint, view);
-				else this.updateMovementDrawing(comparisonPoint, comparisonPoint.prior.point.isStopped, this.style.thinStroke);
+				if (this.isStopped(comparisonPoint.cur.point.stopLength)) this.updateStopDrawing(comparisonPoint, view);
+				else this.updateMovementDrawing(comparisonPoint, this.isStopped(comparisonPoint.prior.point.stopLength), this.style.thinStroke);
 			} else {
 				if (this.isDrawingLine) this.endLine();
 			}
@@ -81,20 +76,25 @@ export class DrawMovement {
 		this.sk.endShape(); // End shape in case still drawing
 	}
 
+	isStopped(stopLength) {
+		const userSetStopDuration = 5;
+		return stopLength >= userSetStopDuration;
+	}
+
 	/**
 	 * Stops are draw as circles in floorPlan view
 	 */
 	updateStopDrawing(p, view) {
 		if (view === this.sk.PLAN) {
-			if (!p.prior.point.isStopped) this.drawStopCircle(p); // PriorPoint test makes sure to only draw a stop circle once
-		} else this.updateMovementDrawing(p, !p.prior.point.isStopped, this.style.fatStroke);
+			if (!this.isStopped(p.prior.point.stopLength)) this.drawStopCircle(p); // PriorPoint test makes sure to only draw a stop circle once
+		} else this.updateMovementDrawing(p, !this.isStopped(p.prior.point.stopLength), this.style.fatStroke);
 	}
 
 	/**
 	 * NOTE: stopTest can vary depending on if this method is called when updatingStopDrawing
 	 */
 	updateMovementDrawing(p, stopTest, stroke) {
-		if (!this.isDrawingLine) this.beginLine(p.cur.point.isStopped, this.drawUtils.setCodeColor(p.cur.point.codes));
+		if (!this.isDrawingLine) this.beginLine(this.isStopped(p.cur.point.stopLength), this.drawUtils.setCodeColor(p.cur.point.codes));
 		if (stopTest || this.isNewCode(p)) this.endThenBeginNewLine(p.prior.pos, stroke, this.drawUtils.setCodeColor(p.cur.point.codes));
 		else this.sk.vertex(p.cur.pos.viewXPos, p.cur.pos.floorPlanYPos, p.cur.pos.zPos); // if already drawing fat line, continue it
 	}
@@ -125,7 +125,7 @@ export class DrawMovement {
 	 */
 	drawStopCircle(p) {
 		this.setFillStyle(this.drawUtils.setCodeColor(p.cur.point.codes));
-		const stopSize = this.sk.map(p.cur.point.stopLength, 0, this.maxStopLength, 5, this.largestStopPixelSize);
+		const stopSize = this.sk.map(p.cur.point.stopLength, 0, maxStopLength, 5, this.largestStopPixelSize);
 		this.sk.circle(p.cur.pos.viewXPos, p.cur.pos.floorPlanYPos, stopSize);
 		this.sk.noFill();
 	}

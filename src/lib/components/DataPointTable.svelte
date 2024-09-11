@@ -24,7 +24,6 @@
 					<td>{dataPoint.speech}</td>
 					<td>{dataPoint.x}</td>
 					<td>{dataPoint.y}</td>
-					<td>{dataPoint.isStopped}</td>
 					<td>{dataPoint.stopLength}</td>
 					<td>{dataPoint.codes.join(', ')}</td>
 				</tr>
