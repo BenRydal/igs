@@ -132,30 +132,47 @@
 				<div tabindex="0" role="button" class="btn btn-sm ml-4">Select</div>
 			</div>
 
-			<ul tabindex="0" class="dropdown-content menu rounded-box z-[1] w-52 p-2 shadow bg-base-100">
-				{#each toggleOptions as toggle}
-					<li on:click={() => toggleSelection(toggle)}>
-						<a>
-							{#if $ConfigStore[toggle]}
-								<div class="w-4 h-4 mr-2"><MdCheck /></div>
-							{:else}
-								<div class="w-4 h-4 mr-2" />
-							{/if}
-							{capitalizeFirstLetter(toggle.replace('Toggle', ''))}
-						</a>
+			<div role="menu" aria-labelledby="dropdownMenuButton">
+				<ul class="dropdown-content menu rounded-box z-[1] w-52 p-2 shadow bg-base-100">
+					{#each toggleOptions as toggle}
+						<li role="menuitem">
+							<button
+								on:click={() => toggleSelection(toggle)}
+								on:keydown={(e) => {
+									if (e.key === 'Enter' || e.key === ' ') {
+										e.preventDefault();
+										toggleSelection(toggle);
+									}
+								}}
+								class="w-full text-left flex items-center"
+							>
+								<div class="w-4 h-4 mr-2">
+									{#if $ConfigStore[toggle]}
+										<MdCheck />
+									{/if}
+								</div>
+								{capitalizeFirstLetter(toggle.replace('Toggle', ''))}
+							</button>
+						</li>
+					{/each}
+					<li role="separator" class="divider" />
+					<li role="menuitem" class="cursor-none">
+						<p>Stop Length: {formattedStopLength}</p>
 					</li>
-				{/each}
-				<span class="divider" />
-				<li class="cursor-none"><p>Stop Length: {formattedStopLength}</p></li>
-				<input
-					type="range"
-					min="0"
-					max={$ConfigStore.maxStopLength}
-					value={$ConfigStore.currentMaxStopLength}
-					class="range"
-					on:input={handleStopLengthChange}
-				/>
-			</ul>
+					<li role="menuitem">
+						<label for="stopLengthRange" class="sr-only">Adjust stop length</label>
+						<input
+							id="stopLengthRange"
+							type="range"
+							min="0"
+							max={$ConfigStore.maxStopLength}
+							value={$ConfigStore.currentMaxStopLength}
+							class="range"
+							on:input={handleStopLengthChange}
+						/>
+					</li>
+				</ul>
+			</div>
 		</div>
 
 		<button class="btn btn-sm ml-4" on:click={() => (showDataPopup = true)}>Show Data</button>
@@ -311,78 +328,76 @@
 {/if}
 
 <div class="btm-nav flex justify-between min-h-20">
-	<div class="w-1/2 overflow-x-overflow bg-[#f6f5f3] items-start px-8">
-		<div class="flex space-x-4">
-			{#if $ConfigStore.dataHasCodes}
-				<div class="dropdown dropdown-top">
-					<div tabindex={0} role="button" class="btn">Codes</div>
-					<ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
+	<div class="flex flex-1 flex-row justify-start items-center bg-[#f6f5f3] items-start px-8">
+		{#if $ConfigStore.dataHasCodes}
+			<div class="dropdown dropdown-top">
+				<div tabindex={0} role="button" class="btn">Codes</div>
+				<ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
+					<li>
+						<div class="flex items-center">
+							<input id="codeCheckbox-all" type="checkbox" class="checkbox" />
+							Select All
+						</div>
+						<div class="flex items-center">
+							<!-- This updates the config store's isPathColorMode -->
+							<input id="codeCheckbox-all" type="checkbox" class="checkbox" bind:checked={$ConfigStore.isPathColorMode} />
+							Color by Codes
+						</div>
+					</li>
+					{#each $CodeStore as code, index}
+						<li><h3 class="pointer-events-none">{code.code.toUpperCase()}</h3></li>
 						<li>
 							<div class="flex items-center">
-								<input id="codeCheckbox-all" type="checkbox" class="checkbox" />
-								Select All
-							</div>
-							<div class="flex items-center">
-								<!-- This updates the config store's isPathColorMode -->
-								<input id="codeCheckbox-all" type="checkbox" class="checkbox" bind:checked={$ConfigStore.isPathColorMode} />
-								Color by Codes
-							</div>
-						</li>
-						{#each $CodeStore as code, index}
-							<li><h3 class="pointer-events-none">{code.code.toUpperCase()}</h3></li>
-							<li>
-								<div class="flex items-center">
-									<input id="codeCheckbox-{code.code}" type="checkbox" class="checkbox" bind:checked={code.enabled} />
-									Enabled
-								</div>
-							</li>
-							<li>
-								<div class="flex items-center">
-									<input type="color" class="color-picker max-w-[24px] max-h-[28px]" bind:value={code.color} />
-									Color
-								</div>
-							</li>
-							{#if index !== $CodeStore.length - 1}
-								<div class="divider" />
-							{/if}
-						{/each}
-					</ul>
-				</div>
-			{/if}
-			{#each $UserStore as user}
-				<div class="dropdown dropdown-top">
-					<div tabindex={0} role="button" class="btn">{user.name}</div>
-					<ul tabindex={0} class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
-						<li>
-							<div class="flex items-center">
-								<input id="userCheckbox-{user.name}" type="checkbox" class="checkbox" bind:checked={user.enabled} />
-								Movement
+								<input id="codeCheckbox-{code.code}" type="checkbox" class="checkbox" bind:checked={code.enabled} />
+								Enabled
 							</div>
 						</li>
 						<li>
 							<div class="flex items-center">
-								<input id="userCheckbox-{user.name}" type="checkbox" class="checkbox" bind:checked={user.conversation_enabled} />
-								Speech
-							</div>
-						</li>
-						<li>
-							<div class="flex items-center">
-								<input type="color" class="color-picker max-w-[24px] max-h-[28px]" bind:value={user.color} />
+								<input type="color" class="color-picker max-w-[24px] max-h-[28px]" bind:value={code.color} />
 								Color
 							</div>
 						</li>
-						<li>
-							<div class="flex items-center">Transcripts</div>
-							<!-- this should go through the user's datatrail and then show a daisyui table of all the text -->
-						</li>
-					</ul>
-				</div>
-			{/each}
-		</div>
+						{#if index !== $CodeStore.length - 1}
+							<div class="divider" />
+						{/if}
+					{/each}
+				</ul>
+			</div>
+		{/if}
+		{#each $UserStore as user}
+			<div class="dropdown dropdown-top">
+				<div tabindex={0} role="button" class="btn">{user.name}</div>
+				<ul tabindex={0} class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
+					<li>
+						<div class="flex items-center">
+							<input id="userCheckbox-{user.name}" type="checkbox" class="checkbox" bind:checked={user.enabled} />
+							Movement
+						</div>
+					</li>
+					<li>
+						<div class="flex items-center">
+							<input id="userCheckbox-{user.name}" type="checkbox" class="checkbox" bind:checked={user.conversation_enabled} />
+							Speech
+						</div>
+					</li>
+					<li>
+						<div class="flex items-center">
+							<input type="color" class="color-picker max-w-[24px] max-h-[28px]" bind:value={user.color} />
+							Color
+						</div>
+					</li>
+					<li>
+						<div class="flex items-center">Transcripts</div>
+						<!-- this should go through the user's datatrail and then show a daisyui table of all the text -->
+					</li>
+				</ul>
+			</div>
+		{/each}
 	</div>
 
 	<!-- Right Side: Timeline -->
-	<div class="w-1/2 overflow-x-auto bg-[#f6f5f3]">
+	<div class="flex-1 bg-[#f6f5f3]">
 		<TimelinePanel />
 	</div>
 </div>
@@ -398,13 +413,5 @@
 		border: none;
 		border-radius: 50%;
 		cursor: pointer;
-	}
-
-	.modal-box {
-		max-width: 50%;
-	}
-
-	.material-symbols-outlined {
-		font-size: 18px;
 	}
 </style>
