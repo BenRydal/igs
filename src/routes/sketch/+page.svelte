@@ -102,7 +102,7 @@
 		const target = e.target as HTMLInputElement;
 		ConfigStore.update((value) => ({
 			...value,
-			currentMaxStopLength: parseFloat(target.value)
+			stopSliderValue: parseFloat(target.value)
 		}));
 	}
 
@@ -118,7 +118,7 @@
 		});
 	}
 
-	$: formattedStopLength = $ConfigStore.currentMaxStopLength.toFixed(2);
+	$: formattedStopLength = $ConfigStore.stopSliderValue.toFixed(2);
 </script>
 
 <div class="navbar min-h-16 bg-[#f6f5f3]">
@@ -166,7 +166,7 @@
 							type="range"
 							min="1"
 							max={$ConfigStore.maxStopLength}
-							value={$ConfigStore.currentMaxStopLength}
+							value={$ConfigStore.stopSliderValue}
 							class="range"
 							on:input={handleStopLengthChange}
 						/>

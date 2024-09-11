@@ -9,7 +9,7 @@ export interface ConfigStoreType {
 	stopsToggle: boolean;
 	highlightToggle: boolean;
 	maxStopLength: number;
-	currentMaxStopLength: number;
+	stopSliderValue: number;
 }
 
 const initialConfig: ConfigStoreType = {
@@ -21,7 +21,7 @@ const initialConfig: ConfigStoreType = {
 	stopsToggle: false,
 	highlightToggle: false,
 	maxStopLength: 0,
-	currentMaxStopLength: 1
+	stopSliderValue: 1
 };
 
 const ConfigStore = writable<ConfigStoreType>(initialConfig);
