@@ -35,12 +35,10 @@ ConfigStore.subscribe((data) => {
 export class Core {
 	sketch: p5;
 	coreUtils: CoreUtils;
-	maxStopLength: number;
 
 	constructor(sketch: p5) {
 		this.sketch = sketch;
 		this.coreUtils = new CoreUtils();
-		this.maxStopLength = 0;
 	}
 
 	handleUserLoadedFiles = async (event: Event) => {
@@ -99,8 +97,10 @@ export class Core {
 		// TODO: Need to adjust p5 typescript defintion to expose
 		// custom attributes & functions
 
-		this.maxStopLength = 0;
-		this.updateConfigStore();
+		ConfigStore.update((store) => ({
+			...store,
+			maxStopLength: 0
+		}));
 
 		this.sketch.videoController.clear();
 
@@ -294,13 +294,6 @@ export class Core {
 			...store,
 			maxStopLength: Math.max(store.maxStopLength, curMaxStopLength),
 			currentMaxStopLength: Math.min(store.currentMaxStopLength, curMaxStopLength)
-		}));
-	}
-
-	updateConfigStore() {
-		ConfigStore.update((currentConfig) => ({
-			...currentConfig,
-			maxStopLength: this.maxStopLength
 		}));
 	}
 
