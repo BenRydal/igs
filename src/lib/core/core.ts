@@ -292,8 +292,7 @@ export class Core {
 
 		ConfigStore.update((store) => ({
 			...store,
-			maxStopLength: Math.max(store.maxStopLength, curMaxStopLength),
-			currentMaxStopLength: Math.min(store.currentMaxStopLength, curMaxStopLength)
+			maxStopLength: Math.max(store.maxStopLength, curMaxStopLength)
 		}));
 	}
 

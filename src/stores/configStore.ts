@@ -21,7 +21,7 @@ const initialConfig: ConfigStoreType = {
 	stopsToggle: false,
 	highlightToggle: false,
 	maxStopLength: 0,
-	currentMaxStopLength: 0
+	currentMaxStopLength: 1
 };
 
 const ConfigStore = writable<ConfigStoreType>(initialConfig);

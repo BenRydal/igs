@@ -164,7 +164,7 @@
 						<input
 							id="stopLengthRange"
 							type="range"
-							min="0"
+							min="1"
 							max={$ConfigStore.maxStopLength}
 							value={$ConfigStore.currentMaxStopLength}
 							class="range"

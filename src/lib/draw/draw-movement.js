@@ -8,10 +8,11 @@ import { get } from 'svelte/store';
  * the tradeoff is the need for more customized methods and conditional structures to handle starting/begining lines/shapes
  */
 
-let maxStopLength;
+let maxStopLength, currentMaxStopLength;
 
 ConfigStore.subscribe((data) => {
 	maxStopLength = data.maxStopLength;
+	currentMaxStopLength = data.currentMaxStopLength;
 });
 
 export class DrawMovement {
@@ -77,8 +78,7 @@ export class DrawMovement {
 	}
 
 	isStopped(stopLength) {
-		const userSetStopDuration = 5;
-		return stopLength >= userSetStopDuration;
+		return stopLength >= currentMaxStopLength;
 	}
 
 	/**
