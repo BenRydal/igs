@@ -47,6 +47,7 @@ export class Core {
 			const file = input.files ? input.files[i] : null;
 			this.testFileTypeForProcessing(file);
 		}
+		input.value = ''; // reset input value so you can load same file(s) again in browser
 	};
 
 	testFileTypeForProcessing(file: File) {
