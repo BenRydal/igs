@@ -21,8 +21,7 @@ import CodeStore from '../../stores/codeStore.js';
 import TimelineStore from '../../stores/timelineStore';
 import ConfigStore from '../../stores/configStore.js';
 
-let timeline;
-let maxStopLength;
+let timeline, maxStopLength;
 
 TimelineStore.subscribe((data) => {
 	timeline = data;
@@ -42,12 +41,8 @@ export class Core {
 	}
 
 	handleUserLoadedFiles = async (event: Event) => {
-		UserStore.update(() => {
-			return [];
-		});
-
+		this.clearExistingData();
 		const input = event.target as HTMLInputElement;
-
 		for (let i = 0; i < input.files.length; i++) {
 			const file = input.files ? input.files[i] : null;
 			this.testFileTypeForProcessing(file);
@@ -103,14 +98,7 @@ export class Core {
 		}));
 
 		this.sketch.videoController.clear();
-
-		UserStore.update(() => {
-			return [];
-		});
-
-		CodeStore.update(() => {
-			return [];
-		});
+		this.clearExistingData();
 
 		const selectedValue = event.target.value;
 		await this.loadFloorplanImage(`/data/${selectedValue}/floorplan.png`);
@@ -265,10 +253,6 @@ export class Core {
 		return new User([], userColor, true, userName);
 	}
 
-	// For the drawing methods in program we need to know:
-	// 1) the duration of the longest stop segment in all the data
-	// 2) ability to calculate whether a datapoint is stopped and how long it is stopped for
-
 	updateStopValues(data) {
 		let curMaxStopLength = 0;
 
@@ -342,6 +326,17 @@ export class Core {
 			return users;
 		});
 	};
+
+	clearExistingData() {
+		console.log('Clearing existing data');
+		UserStore.update(() => {
+			return [];
+		});
+
+		CodeStore.update(() => {
+			return [];
+		});
+	}
 
 	// @Ben TODO: You will need to adjust this for the single code file name
 	// and header names
