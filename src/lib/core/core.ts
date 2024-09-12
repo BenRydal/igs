@@ -35,12 +35,10 @@ ConfigStore.subscribe((data) => {
 export class Core {
 	sketch: p5;
 	coreUtils: CoreUtils;
-	maxStopLength: number;
 
 	constructor(sketch: p5) {
 		this.sketch = sketch;
 		this.coreUtils = new CoreUtils();
-		this.maxStopLength = 0;
 	}
 
 	handleUserLoadedFiles = async (event: Event) => {
@@ -99,8 +97,10 @@ export class Core {
 		// TODO: Need to adjust p5 typescript defintion to expose
 		// custom attributes & functions
 
-		this.maxStopLength = 0;
-		this.updateConfigStore();
+		ConfigStore.update((store) => ({
+			...store,
+			maxStopLength: 0
+		}));
 
 		this.sketch.videoController.clear();
 
@@ -265,9 +265,12 @@ export class Core {
 		return new User([], userColor, true, userName);
 	}
 
+	// For the drawing methods in program we need to know:
+	// 1) the duration of the longest stop segment in all the data
+	// 2) ability to calculate whether a datapoint is stopped and how long it is stopped for
+
 	updateStopValues(data) {
-		const stopFloor = 1;
-		let maxStopLength = 0;
+		let curMaxStopLength = 0;
 
 		for (let i = 0; i < data.length; i++) {
 			let cumulativeTime = 0;
@@ -277,30 +280,19 @@ export class Core {
 				j++;
 			}
 
-			if (cumulativeTime >= stopFloor) {
-				if (cumulativeTime > maxStopLength) {
-					maxStopLength = cumulativeTime;
-				}
+			if (cumulativeTime > curMaxStopLength) {
+				curMaxStopLength = cumulativeTime;
+			}
 
-				for (let k = i + 1; k < j; k++) {
-					data[k].isStopped = true;
-					data[k].stopLength = cumulativeTime;
-				}
+			for (let k = i + 1; k < j; k++) {
+				data[k].stopLength = cumulativeTime;
 			}
 			i = j - 1;
 		}
 
 		ConfigStore.update((store) => ({
 			...store,
-			maxStopLength: Math.max(store.maxStopLength, maxStopLength),
-			currentMaxStopLength: Math.min(store.currentMaxStopLength, maxStopLength)
-		}));
-	}
-
-	updateConfigStore() {
-		ConfigStore.update((currentConfig) => ({
-			...currentConfig,
-			maxStopLength: this.maxStopLength
+			maxStopLength: Math.max(store.maxStopLength, curMaxStopLength)
 		}));
 	}
 

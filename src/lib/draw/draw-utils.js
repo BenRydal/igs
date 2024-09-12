@@ -59,9 +59,9 @@ export class DrawUtils {
 	/**
 	 * Holds tests for determining if point is visible (e.g., selected, highlighted)
 	 */
-	isVisible(point, curPos) {
+	isVisible(point, curPos, isStopped) {
 		// And
-		return this.isShowingInGUI(curPos.timelineXPos) && this.selectMode(curPos, point.isStopped) && this.isShowingInCodeList(point.codes);
+		return this.isShowingInGUI(curPos.timelineXPos) && this.selectMode(curPos, isStopped) && this.isShowingInCodeList(point.codes);
 	}
 
 	isShowingInGUI(pixelTime) {

@@ -90,19 +90,6 @@ export class CoreUtils {
 		return Number.parseFloat(curRow[this.headersMovement[0]]).toFixed(1) > Number.parseFloat(priorRow[this.headersMovement[0]]).toFixed(1);
 	}
 
-	movementTimeIsLarger(movementTime, curRow) {
-		return movementTime >= curRow[this.headersConversation[0]];
-	}
-
-	isStopped(curRow, movementPointArray) {
-		if (movementPointArray.length === 0) return true; // if it has not been filled, return true for isStopped value
-		else return this.pointsHaveSamePosition(curRow, movementPointArray[movementPointArray.length - 1]);
-	}
-
-	pointsHaveSamePosition(curRow, lastMovementPoint) {
-		return curRow[this.headersMovement[1]] === lastMovementPoint.xPos && curRow[this.headersMovement[2]] === lastMovementPoint.yPos;
-	}
-
 	/**
 	 * Used to compare and add new data to core data lists from CSV file names and data
 	 * @param  {String} s
