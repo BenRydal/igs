@@ -8,7 +8,6 @@ import TimelineStore from '../../stores/timelineStore';
 
 let timeline;
 let isPathColorMode;
-let curSelectTab;
 
 TimelineStore.subscribe((data) => {
 	timeline = data;
@@ -16,7 +15,6 @@ TimelineStore.subscribe((data) => {
 
 ConfigStore.subscribe((data) => {
 	isPathColorMode = data.isPathColorMode;
-	curSelectTab = data.curSelectTab;
 });
 
 export class SketchController {
