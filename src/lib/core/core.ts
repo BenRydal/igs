@@ -305,10 +305,7 @@ export class Core {
 
 				// If a valid closest point was found, update the current dataPoint's x and y
 				if (closestIndex !== -1) {
-					const closestPoint = dataPoints[closestIndex];
-					dataPoint.x = closestPoint.x;
-					dataPoint.y = closestPoint.y;
-					dataPoint.stopLength = closestPoint.stopLength;
+					this.copyDataPointAttributes(dataPoints[closestIndex], dataPoint);
 				}
 			}
 		});
@@ -326,17 +323,19 @@ export class Core {
 
 		// Decide where to insert - before or after the closest time
 		if (dataPoints[closestIndex].time < newDataPoint.time) {
-			newDataPoint.x = dataPoints[closestIndex].x;
-			newDataPoint.y = dataPoints[closestIndex].y;
-			newDataPoint.stopLength = dataPoints[closestIndex].stopLength;
+			this.copyDataPointAttributes(dataPoints[closestIndex], newDataPoint);
 			dataPoints.splice(closestIndex, 0, newDataPoint);
 		} else {
-			newDataPoint.x = dataPoints[closestIndex].x;
-			newDataPoint.y = dataPoints[closestIndex].y;
-			newDataPoint.stopLength = dataPoints[closestIndex].stopLength;
+			this.copyDataPointAttributes(dataPoints[closestIndex], newDataPoint);
 			dataPoints.splice(closestIndex + 1, 0, newDataPoint);
 		}
 	}
+
+	copyDataPointAttributes = (sourceDataPoint, targetDataPoint) => {
+		targetDataPoint.x = sourceDataPoint.x;
+		targetDataPoint.y = sourceDataPoint.y;
+		targetDataPoint.stopLength = sourceDataPoint.stopLength;
+	};
 
 	updateUsersForMultiCodes = (csvData: any, fileName: string) => {
 		UserStore.update((currentUsers) => {
