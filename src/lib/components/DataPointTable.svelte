@@ -12,7 +12,6 @@
 				<th>Speech</th>
 				<th>X</th>
 				<th>Y</th>
-				<th>Stopped</th>
 				<th>Stop Length</th>
 				<th>Codes</th>
 			</tr>
