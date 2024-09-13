@@ -41,7 +41,7 @@ export class Core {
 	}
 
 	handleUserLoadedFiles = async (event: Event) => {
-		this.clearExistingData();
+		//this.clearExistingData();
 		const input = event.target as HTMLInputElement;
 		for (let i = 0; i < input.files.length; i++) {
 			const file = input.files ? input.files[i] : null;
@@ -206,9 +206,6 @@ export class Core {
 				user = this.createNewUser(users, userName);
 				users.push(user);
 			}
-			// Assuming the first column is 'time' and it's sorted in ascending order
-			//const startTime = csvData[0]?.time; // The time in the first row
-			//const endTime = csvData[csvData.length - 1]?.time; // The time in the last row
 			if (endTime < csvData[csvData.length - 1]?.time) endTime = csvData[csvData.length - 1]?.time;
 
 			for (let i = 1; i < csvData.length; i++) {
@@ -218,8 +215,8 @@ export class Core {
 					user.dataTrail.push(new DataPoint('', row.time, row.x, row.y, false));
 				}
 			}
+			this.integrateConversation(user.dataTrail);
 			this.updateStopValues(user.dataTrail);
-
 			return users;
 		});
 
@@ -255,7 +252,7 @@ export class Core {
 	}
 
 	updateStopValues(data) {
-		let curMaxStopLength = 0;
+		let curMaxStopLength = 0; // holds length of stop for each calculated stop segment
 
 		for (let i = 0; i < data.length; i++) {
 			let cumulativeTime = 0;
@@ -274,7 +271,6 @@ export class Core {
 			}
 			i = j - 1;
 		}
-
 		ConfigStore.update((store) => ({
 			...store,
 			maxStopLength: Math.max(store.maxStopLength, curMaxStopLength)
@@ -369,6 +365,31 @@ export class Core {
 	// 	});
 	// };
 
+	integrateConversation(dataPoints) {
+		dataPoints.forEach((dataPoint) => {
+			if (dataPoint.speech !== '') {
+				// Find the nearest data point with valid x and y coordinates
+				const closestIndex = dataPoints.reduce((closestIndex, currentPoint, index) => {
+					// Skip points without valid x and y values
+					if (currentPoint.x == null || currentPoint.y == null) return closestIndex;
+
+					// If no closest point yet or the current point is closer in time, update the closest index
+					const isCurrentCloser =
+						closestIndex === -1 || Math.abs(currentPoint.time - dataPoint.time) < Math.abs(dataPoints[closestIndex].time - dataPoint.time);
+
+					return isCurrentCloser ? index : closestIndex;
+				}, -1); // Start with -1 to indicate no valid closest point has been found yet
+
+				// If a valid closest point was found, update the current dataPoint's x and y
+				if (closestIndex !== -1) {
+					const closestPoint = dataPoints[closestIndex];
+					dataPoint.x = closestPoint.x;
+					dataPoint.y = closestPoint.y;
+				}
+			}
+		});
+	}
+
 	addDataPointClosestByTimeInSeconds(dataPoints, newDataPoint) {
 		if (dataPoints.length === 0) {
 			dataPoints.push(newDataPoint);
@@ -381,8 +402,12 @@ export class Core {
 
 		// Decide where to insert - before or after the closest time
 		if (dataPoints[closestIndex].time < newDataPoint.time) {
+			newDataPoint.x = dataPoints[closestIndex].x;
+			newDataPoint.y = dataPoints[closestIndex].y;
 			dataPoints.splice(closestIndex, 0, newDataPoint);
 		} else {
+			newDataPoint.x = dataPoints[closestIndex].x;
+			newDataPoint.y = dataPoints[closestIndex].y;
 			dataPoints.splice(closestIndex + 1, 0, newDataPoint);
 		}
 	}
