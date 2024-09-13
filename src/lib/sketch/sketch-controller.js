@@ -3,11 +3,8 @@ This class holds variables that control program flow and are dynamically updated
 It also holds various mapping methods that map data values from different classes across the program
 */
 
-import { space } from 'postcss/lib/list';
 import ConfigStore from '../../stores/configStore';
 import TimelineStore from '../../stores/timelineStore';
-
-import { get } from 'svelte/store';
 
 let timeline;
 let isPathColorMode;
