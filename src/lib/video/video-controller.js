@@ -6,6 +6,13 @@
  */
 
 import { YoutubePlayer, P5FilePlayer } from '../video/video-player.js';
+import TimelineStore from '../../stores/timelineStore';
+
+let timeline;
+
+TimelineStore.subscribe((data) => {
+	timeline = data;
+});
 
 export class VideoController {
 	constructor(sketch) {
@@ -61,21 +68,21 @@ export class VideoController {
 	}
 
 	seekMethodMouse() {
-		this.videoPlayer.seekTo(this.sk.sketchController.getTimelineCurrTime());
+		this.videoPlayer.seekTo(timeline.getCurrTime());
 	}
 
 	toggleShowVideo() {
-    if (this.isPlayerAndDivLoaded()) {
-      if (this.isShowing) {
-        this.pause();
-        this.videoPlayer.hide();
-        this.isShowing = false;
-      } else {
-        this.videoPlayer.show();
-        this.isShowing = true;
-      }
-    }
-  }
+		if (this.isPlayerAndDivLoaded()) {
+			if (this.isShowing) {
+				this.pause();
+				this.videoPlayer.hide();
+				this.isShowing = false;
+			} else {
+				this.videoPlayer.show();
+				this.isShowing = true;
+			}
+		}
+	}
 
 	// 2 playPause video methods differ with respect to tests and seekTo method call
 	timelinePlayPause() {

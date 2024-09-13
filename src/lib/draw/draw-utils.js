@@ -160,8 +160,8 @@ export class DrawUtils {
 		};
 	}
 
-	getScaledConversationPos(point, time) {
-		const pos = this.getSharedPosValues(point, time);
+	getScaledConversationPos(point) {
+		const pos = this.getSharedPosValues(point, point.time);
 		const rectLength = this.sk.constrain(point.speech.length / 2, 3, 175); // 3 and 175 set min and max pixel dimensions
 		return {
 			timelineXPos: pos.timelineXPos,

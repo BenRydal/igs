@@ -6,11 +6,8 @@ It also holds various mapping methods that map data values from different classe
 import ConfigStore from '../../stores/configStore';
 import TimelineStore from '../../stores/timelineStore';
 
-import { get } from 'svelte/store';
-
 let timeline;
 let isPathColorMode;
-let curSelectTab;
 
 TimelineStore.subscribe((data) => {
 	timeline = data;
@@ -18,7 +15,6 @@ TimelineStore.subscribe((data) => {
 
 ConfigStore.subscribe((data) => {
 	isPathColorMode = data.isPathColorMode;
-	curSelectTab = data.curSelectTab;
 });
 
 export class SketchController {
@@ -52,28 +48,12 @@ export class SketchController {
 		});
 	}
 
-	getSelectedMode() {
-		const config = get(ConfigStore);
-		if (config.circleToggle) return 'circle';
-		if (config.sliceToggle) return 'slice';
-		if (config.movementToggle) return 'movement';
-		if (config.stopsToggle) return 'stops';
-		if (config.highlightToggle) return 'highlight';
-		return 'none';
-	}
-
 	mapPixelTimeToTotalTime(value) {
-		return this.sk.map(value, this.getTimelineStartXPos(), this.getTimelineEndXPos(), 0, timeline.getEndTime());
+		return this.sk.map(value, timeline.getLeftX(), timeline.getRightX(), 0, timeline.getEndTime());
 	}
 
 	mapPixelTimeToSelectTime(value) {
-		return this.sk.map(
-			value,
-			this.getTimelineStartXPos(),
-			this.getTimelineEndXPos(),
-			this.getTimelineLeftMarkerXPos(),
-			this.getTimelineRightMarkerXPos()
-		);
+		return this.sk.map(value, timeline.getLeftX(), timeline.getRightX(), this.getTimelineLeftMarkerXPos(), this.getTimelineRightMarkerXPos());
 	}
 
 	mapToSelectTimeThenPixelTime(value) {
@@ -81,59 +61,38 @@ export class SketchController {
 	}
 
 	mapSelectTimeToPixelTime(value) {
+		const spaceTimeCubeBottom = this.sk.height / 10;
+		const spaceTimeCubeTop = this.sk.height / 1.6;
 		if (this.sk.handle3D.getIs3DMode())
-			return this.sk.map(value, this.getTimelineLeftMarkerXPos(), this.getTimelineRightMarkerXPos(), this.sk.height / 10, this.sk.height / 1.6);
+			return this.sk.map(value, this.getTimelineLeftMarkerXPos(), this.getTimelineRightMarkerXPos(), spaceTimeCubeBottom, spaceTimeCubeTop);
 		else return this.mapSelectTimeToPixelTime2D(value);
 	}
 
 	mapSelectTimeToPixelTime2D(value) {
-		return this.sk.map(
-			value,
-			this.getTimelineLeftMarkerXPos(),
-			this.getTimelineRightMarkerXPos(),
-			this.getTimelineStartXPos(),
-			this.getTimelineEndXPos()
-		);
+		return this.sk.map(value, this.getTimelineLeftMarkerXPos(), this.getTimelineRightMarkerXPos(), timeline.getLeftX(), timeline.getRightX());
 	}
 
 	// maps value from time in seconds from data to time in pixels on timeline
 	mapTotalTimeToPixelTime(value) {
-		return this.sk.map(value, 0, timeline.getEndTime(), this.getTimelineStartXPos(), this.getTimelineEndXPos());
+		return this.sk.map(value, 0, timeline.getEndTime(), timeline.getLeftX(), timeline.getRightX());
 	}
 
 	getIsAnimate() {
 		return timeline.getIsAnimating();
 	}
 
-	setIsAllTalk(value) {
-		this.isAllTalk = value;
-	}
-
 	getIsAllTalk() {
 		return this.isAllTalk;
-	}
-
-	toggleIsAlignTalk() {
-		this.isAlignTalk = !this.isAlignTalk;
 	}
 
 	getIsAlignTalk() {
 		return this.isAlignTalk;
 	}
 
-	toggleIsAllTalk() {
-		this.isAllTalk = !this.isAllTalk;
-	}
-
 	// TODO: This logic is flipped due to some interaction
 	// with the ConfigStore value.
 	getIsPathColorMode() {
 		return !isPathColorMode;
-	}
-
-	// Get the updated confgi store value
-	getCurSelectTab() {
-		return curSelectTab;
 	}
 
 	setWordToSearch(value) {
@@ -155,24 +114,12 @@ export class SketchController {
 		return this.sk.map(timelineLength, 0, timelineLength, maxRectWidth, curScaledRectWidth);
 	}
 
-	getTimelineStartXPos() {
-		return timeline.getLeftX();
-	}
-
-	getTimelineEndXPos() {
-		return timeline.getRightX();
-	}
-
-	getTimelineCurrTime() {
-		return timeline.getCurrTime();
-	}
-
 	getTimelineLeftMarkerXPos() {
-		return this.sk.sketchController.mapTotalTimeToPixelTime(timeline.getLeftMarker());
+		return this.mapTotalTimeToPixelTime(timeline.getLeftMarker());
 	}
 
 	getTimelineRightMarkerXPos() {
-		return this.sk.sketchController.mapTotalTimeToPixelTime(timeline.getRightMarker());
+		return this.mapTotalTimeToPixelTime(timeline.getRightMarker());
 	}
 
 	overAxis(pixelValue) {
