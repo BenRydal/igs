@@ -52,16 +52,6 @@ export class SketchController {
 		});
 	}
 
-	getSelectedMode() {
-		const config = get(ConfigStore);
-		if (config.circleToggle) return 'circle';
-		if (config.sliceToggle) return 'slice';
-		if (config.movementToggle) return 'movement';
-		if (config.stopsToggle) return 'stops';
-		if (config.highlightToggle) return 'highlight';
-		return 'none';
-	}
-
 	mapPixelTimeToTotalTime(value) {
 		return this.sk.map(value, this.getTimelineStartXPos(), this.getTimelineEndXPos(), 0, timeline.getEndTime());
 	}
@@ -105,35 +95,18 @@ export class SketchController {
 		return timeline.getIsAnimating();
 	}
 
-	setIsAllTalk(value) {
-		this.isAllTalk = value;
-	}
-
 	getIsAllTalk() {
 		return this.isAllTalk;
-	}
-
-	toggleIsAlignTalk() {
-		this.isAlignTalk = !this.isAlignTalk;
 	}
 
 	getIsAlignTalk() {
 		return this.isAlignTalk;
 	}
 
-	toggleIsAllTalk() {
-		this.isAllTalk = !this.isAllTalk;
-	}
-
 	// TODO: This logic is flipped due to some interaction
 	// with the ConfigStore value.
 	getIsPathColorMode() {
 		return !isPathColorMode;
-	}
-
-	// Get the updated confgi store value
-	getCurSelectTab() {
-		return curSelectTab;
 	}
 
 	setWordToSearch(value) {
