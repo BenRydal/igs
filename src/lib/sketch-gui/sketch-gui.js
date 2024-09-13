@@ -1,14 +1,20 @@
 import { FloorPlanContainer } from './floorplan-container.js';
 import { Highlight } from './highlight.js';
-
+import TimelineStore from '../../stores/timelineStore';
 import ConfigStore from '../../stores/configStore';
 import { get } from 'svelte/store';
+
+let timeline;
+
+TimelineStore.subscribe((data) => {
+	timeline = data;
+});
 
 export class SketchGUI {
 	constructor(sketch) {
 		this.sk = sketch;
 		this.displayBottom = this.sk.height;
-		this.fpContainer = new FloorPlanContainer(this.sk, this.sk.sketchController.getTimelineStartXPos(), this.displayBottom);
+		this.fpContainer = new FloorPlanContainer(this.sk, timeline.getLeftX(), this.displayBottom);
 		this.highlight = new Highlight(this.sk, this.displayBottom);
 	}
 
