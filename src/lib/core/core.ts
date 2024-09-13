@@ -277,53 +277,6 @@ export class Core {
 		}));
 	}
 
-	updateUsersForMultiCodes = (csvData: any, fileName: string) => {
-		UserStore.update((currentUsers) => {
-			let users = [...currentUsers]; // clone the current users
-
-			// Create a Set to store unique code names
-			const uniqueCodes = [];
-
-			// For each row in the Code CSV
-			csvData.forEach((row: any) => {
-				const code = row.code.toLowerCase();
-				if (!uniqueCodes.includes(code)) uniqueCodes.push(code); // Add the code name to the Set
-				const startTime = parseFloat(row.start);
-				const endTime = parseFloat(row.end);
-
-				//For each user in the users array
-				users.forEach((user) => {
-					// Find the first data point with time >= startTime
-					const startIndex = user.dataTrail.findIndex((dataPoint) => dataPoint.time !== null && dataPoint.time >= startTime);
-
-					// Find the last data point with time <= endTime
-					const endIndex = user.dataTrail.findLastIndex((dataPoint) => dataPoint.time !== null && dataPoint.time <= endTime);
-					if (startIndex === -1 || endIndex === -1) return; // TODO: can have/deal with good StartIndex but bad endIndex
-					// Update datapoints FROM the start and TO the end time to include the code
-					for (let i = startIndex; i <= endIndex; i++) {
-						if (!user.dataTrail[i].codes.includes(code)) {
-							user.dataTrail[i].codes.push(code);
-						}
-					}
-				});
-			});
-
-			CodeStore.update((currentEntries) => {
-				// Create an array of new entries with colors assigned
-				const newEntries = uniqueCodes.map((code, index) => ({
-					code: code,
-					color: USER_COLORS[index % USER_COLORS.length], // Use modulo to cycle through colors
-					enabled: true
-				}));
-
-				// Combine the current entries with the new entries and return the result
-				return [...currentEntries, ...newEntries];
-			});
-
-			return users;
-		});
-	};
-
 	clearExistingData() {
 		console.log('Clearing existing data');
 		UserStore.update(() => {
@@ -334,36 +287,6 @@ export class Core {
 			return [];
 		});
 	}
-
-	// @Ben TODO: You will need to adjust this for the single code file name
-	// and header names
-	// updateUsersForSingleCodes = (csvData: any, fileName: string) => {
-	// 	UserStore.update((currentUsers) => {
-	// 		let users = [...currentUsers]; // clone the current users
-
-	// 		// For each row in the Code CSV
-	// 		csvData.forEach((row: any) => {
-	// 			const code = row.code;
-	// 			const time = parseFloat(row.time);
-
-	// 			// For each user in the users array
-	// 			users.forEach((user) => {
-	// 				// Find the closest datapoint by time
-	// 				const closestDataPoint = user.dataTrail.reduce((closest, current) => {
-	// 					if (current.time === null) return closest;
-	// 					return Math.abs(current.time - time) < Math.abs(closest.time - time) ? current : closest;
-	// 				});
-
-	// 				// Add the code to the closest datapoint
-	// 				if (!closestDataPoint.codes.includes(code)) {
-	// 					closestDataPoint.codes.push(code);
-	// 				}
-	// 			});
-	// 		});
-
-	// 		return users;
-	// 	});
-	// };
 
 	integrateConversation(dataPoints) {
 		dataPoints.forEach((dataPoint) => {
@@ -385,6 +308,7 @@ export class Core {
 					const closestPoint = dataPoints[closestIndex];
 					dataPoint.x = closestPoint.x;
 					dataPoint.y = closestPoint.y;
+					dataPoint.stopLength = closestPoint.stopLength;
 				}
 			}
 		});
@@ -404,11 +328,89 @@ export class Core {
 		if (dataPoints[closestIndex].time < newDataPoint.time) {
 			newDataPoint.x = dataPoints[closestIndex].x;
 			newDataPoint.y = dataPoints[closestIndex].y;
+			newDataPoint.stopLength = dataPoints[closestIndex].stopLength;
 			dataPoints.splice(closestIndex, 0, newDataPoint);
 		} else {
 			newDataPoint.x = dataPoints[closestIndex].x;
 			newDataPoint.y = dataPoints[closestIndex].y;
+			newDataPoint.stopLength = dataPoints[closestIndex].stopLength;
 			dataPoints.splice(closestIndex + 1, 0, newDataPoint);
 		}
 	}
+
+	updateUsersForMultiCodes = (csvData: any, fileName: string) => {
+		UserStore.update((currentUsers) => {
+			let users = [...currentUsers]; // clone the current users
+			const uniqueCodes: string[] = [];
+
+			// Process each row in CSV
+			csvData.forEach((row: any) => {
+				const code = row.code.toLowerCase();
+				if (!uniqueCodes.includes(code)) uniqueCodes.push(code);
+				const startTime = parseFloat(row.start);
+				const endTime = parseFloat(row.end);
+
+				// Update the data trail for each user with the code
+				this.updateDataTrailSegmentsWithCodes(users, code, startTime, endTime);
+			});
+
+			// Update the CodeStore with the unique codes
+			this.updateCodeStore(uniqueCodes);
+
+			return users;
+		});
+	};
+
+	updateUsersForSingleCodes = (csvData: any, fileName: string) => {
+		UserStore.update((currentUsers) => {
+			let users = [...currentUsers]; // clone the current users
+			const code = fileName;
+			const uniqueCodes = [code]; // Single code
+
+			csvData.forEach((row: any) => {
+				const startTime = parseFloat(row.start);
+				const endTime = parseFloat(row.end);
+
+				// Update the data trail for each user with the code
+				this.updateDataTrailSegmentsWithCodes(users, code, startTime, endTime);
+			});
+
+			// Update the CodeStore with the single code
+			this.updateCodeStore(uniqueCodes);
+
+			return users;
+		});
+	};
+
+	updateDataTrailSegmentsWithCodes = (users: any[], code: string, startTime: number, endTime: number) => {
+		users.forEach((user) => {
+			// Find the first data point with time >= startTime
+			const startIndex = user.dataTrail.findIndex((dataPoint) => dataPoint.time !== null && dataPoint.time >= startTime);
+
+			// Find the last data point with time <= endTime
+			const endIndex = user.dataTrail.findLastIndex((dataPoint) => dataPoint.time !== null && dataPoint.time <= endTime);
+
+			if (startIndex === -1 || endIndex === -1) return;
+
+			// Update datapoints FROM the start and TO the end time to include the code
+			for (let i = startIndex; i <= endIndex; i++) {
+				if (!user.dataTrail[i].codes.includes(code)) {
+					user.dataTrail[i].codes.push(code);
+				}
+			}
+		});
+	};
+
+	updateCodeStore = (uniqueCodes: string[]) => {
+		CodeStore.update((currentEntries) => {
+			const newEntries = uniqueCodes.map((code, index) => ({
+				code: code,
+				color: USER_COLORS[index % USER_COLORS.length], // Cycle through colors
+				enabled: true
+			}));
+
+			// Combine current entries with new entries
+			return [...currentEntries, ...newEntries];
+		});
+	};
 }
