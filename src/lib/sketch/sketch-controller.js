@@ -20,8 +20,6 @@ ConfigStore.subscribe((data) => {
 export class SketchController {
 	constructor(sketch) {
 		this.sk = sketch;
-		this.isAlignTalk = false;
-		this.isAllTalk = true;
 		this.wordToSearch = ''; // String value to dynamically search words in conversation
 	}
 
@@ -50,14 +48,6 @@ export class SketchController {
 
 	getIsAnimate() {
 		return timeline.getIsAnimating();
-	}
-
-	getIsAllTalk() {
-		return this.isAllTalk;
-	}
-
-	getIsAlignTalk() {
-		return this.isAlignTalk;
 	}
 
 	// TODO: This logic is flipped due to some interaction

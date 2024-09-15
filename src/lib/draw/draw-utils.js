@@ -15,14 +15,11 @@ TimelineStore.subscribe((data) => {
 	timeline = data;
 });
 
-let isPathColorMode = false;
-
-CodeStore.subscribe((data) => {
-	console.log(data);
-});
+let isPathColorMode, isAlignTalk;
 
 ConfigStore.subscribe((data) => {
 	isPathColorMode = data.isPathColorMode;
+	isAlignTalk = data.isAlignTalk;
 });
 
 export class DrawUtils {
@@ -193,7 +190,7 @@ export class DrawUtils {
 	 * Adjusts Y positioning of conversation rectangles correctly for align and 3 D views
 	 */
 	getConversationAdjustYPos(floorPlanYPos, rectLength) {
-		if (this.sk.sketchController.getIsAlignTalk()) {
+		if (isAlignTalk) {
 			if (this.sk.handle3D.getIs3DMode()) return this.sk.gui.fpContainer.getContainer().height;
 			else return 0;
 		} else if (this.sk.handle3D.getIs3DMode()) {

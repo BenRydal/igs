@@ -11,10 +11,12 @@ TimelineStore.subscribe((data) => {
  * This class holds drawing methods specific to drawing conversation rectangles and text depending on user interaction
  */
 
-let stopSliderValue;
+let stopSliderValue, isAllTalk, isAlignTalk;
 
 ConfigStore.subscribe((data) => {
 	stopSliderValue = data.stopSliderValue;
+	isAllTalk = data.isAllTalk;
+	isAlignTalk = data.isAlignTalk;
 });
 
 export class DrawConversation {
@@ -110,7 +112,7 @@ export class DrawConversation {
 
 	drawSpaceTime3DRects(curPos) {
 		const translateZoom = Math.abs(this.sk.handle3D.getCurTranslatePos().zoom);
-		if (this.sk.sketchController.getIsAlignTalk())
+		if (isAlignTalk)
 			this.sk.quad(
 				0,
 				translateZoom,
@@ -221,7 +223,7 @@ export class DrawConversation {
 	 * @param  {Char} pathName
 	 */
 	testSpeakerToDraw(speaker, pathName) {
-		return speaker != null && speaker.isShowing && (this.sk.sketchController.getIsAllTalk() || speaker.name === pathName);
+		return speaker != null && speaker.isShowing && (isAllTalk || speaker.name === pathName);
 	}
 
 	/**
