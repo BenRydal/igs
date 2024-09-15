@@ -43,7 +43,8 @@ export class DrawConversation {
 				const curPos = this.drawUtils.getScaledConversationPos(point);
 				if (this.drawUtils.isVisible(point, curPos, this.isStopped(point.stopLength))) {
 					if (!isPathColorMode) this.organizeRectDrawing(point, curPos, user.color);
-					else this.organizeRectDrawing(point, curPos, 'red');
+					//else this.organizeRectDrawing(point, curPos, 'red');
+					else this.organizeRectDrawing(point, curPos, this.drawUtils.setCodeColor(point.codes));
 				}
 			}
 		}

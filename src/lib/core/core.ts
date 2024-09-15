@@ -335,6 +335,7 @@ export class Core {
 		targetDataPoint.x = sourceDataPoint.x;
 		targetDataPoint.y = sourceDataPoint.y;
 		targetDataPoint.stopLength = sourceDataPoint.stopLength;
+		targetDataPoint.codes = sourceDataPoint.codes;
 	};
 
 	updateUsersForMultiCodes = (csvData: any, fileName: string) => {

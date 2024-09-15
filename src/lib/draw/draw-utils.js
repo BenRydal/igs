@@ -37,14 +37,12 @@ export class DrawUtils {
 			// TODO: If we find a new way to manage multiple codes, this is where
 			// that change would be. Currently default multiple codes to black.
 			return '#000000';
+		} else {
+			//console.log('No matching codes found');
+			return '#000000'; // Default color if no codes match
 		}
 	}
 
-	/**
-	 * This method tests if a point is showing for all selected codes from codeList
-	 * IMPLEMENTATION: Iterate through codeList and return false if: for any of codes that are true in codeList a code at curPoint is false
-	 * @param  {MovementPoint} point
-	 */
 	isShowingInCodeList(codesArray) {
 		if (codesArray.length === 0) return true;
 
@@ -53,11 +51,8 @@ export class DrawUtils {
 		return entries.some((entry) => codesArray.includes(entry.code) && entry.enabled);
 		// Check if any entry code is in codesArray and is enabled }
 	}
-	/**
-	 * Holds tests for determining if point is visible (e.g., selected, highlighted)
-	 */
+
 	isVisible(point, curPos, isStopped) {
-		// And
 		return this.isShowingInGUI(curPos.timelineXPos) && this.selectMode(curPos, isStopped) && this.isShowingInCodeList(point.codes);
 	}
 
