@@ -11,13 +11,14 @@ TimelineStore.subscribe((data) => {
  * This class holds drawing methods specific to drawing conversation rectangles and text depending on user interaction
  */
 
-let stopSliderValue, isAllTalk, isAlignTalk, wordToSearch;
+let stopSliderValue, isAllTalk, isAlignTalk, wordToSearch, isPathColorMode;
 
 ConfigStore.subscribe((data) => {
 	stopSliderValue = data.stopSliderValue;
 	isAllTalk = data.isAllTalk;
 	isAlignTalk = data.isAlignTalk;
 	wordToSearch = data.wordToSearch;
+	isPathColorMode = data.isPathColorMode;
 });
 
 export class DrawConversation {
@@ -41,7 +42,7 @@ export class DrawConversation {
 				// TODO: Fix the true boolean to reflect what needs to happen here
 				const curPos = this.drawUtils.getScaledConversationPos(point);
 				if (this.drawUtils.isVisible(point, curPos, this.isStopped(point.stopLength))) {
-					if (this.sk.sketchController.getIsPathColorMode()) this.organizeRectDrawing(point, curPos, user.color);
+					if (!isPathColorMode) this.organizeRectDrawing(point, curPos, user.color);
 					else this.organizeRectDrawing(point, curPos, 'red');
 				}
 			}

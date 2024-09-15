@@ -14,11 +14,12 @@ TimelineStore.subscribe((data) => {
  * the tradeoff is the need for more customized methods and conditional structures to handle starting/begining lines/shapes
  */
 
-let maxStopLength, stopSliderValue;
+let maxStopLength, stopSliderValue, isPathColorMode;
 
 ConfigStore.subscribe((data) => {
 	maxStopLength = data.maxStopLength;
 	stopSliderValue = data.stopSliderValue;
+	isPathColorMode = data.isPathColorMode;
 });
 
 export class DrawMovement {
@@ -168,12 +169,12 @@ export class DrawMovement {
 
 	setLineStyle(weight, color) {
 		this.sk.strokeWeight(weight);
-		if (this.sk.sketchController.getIsPathColorMode()) this.sk.stroke(this.style.shade);
+		if (!isPathColorMode) this.sk.stroke(this.style.shade);
 		else this.sk.stroke(color);
 	}
 
 	setFillStyle(color) {
-		if (this.sk.sketchController.getIsPathColorMode()) this.sk.fill(this.style.shade);
+		if (!isPathColorMode) this.sk.fill(this.style.shade);
 		else this.sk.fill(color);
 	}
 

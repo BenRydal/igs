@@ -49,12 +49,6 @@ export class SketchController {
 		return timeline.getIsAnimating();
 	}
 
-	// TODO: This logic is flipped due to some interaction
-	// with the ConfigStore value.
-	getIsPathColorMode() {
-		return !isPathColorMode;
-	}
-
 	mapToSelectTimeThenPixelTime(value) {
 		return this.mapSelectTimeToPixelTime(timeline.mapPixelTimeToSelectTime(value));
 	}
