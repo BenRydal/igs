@@ -11,12 +11,13 @@ TimelineStore.subscribe((data) => {
  * This class holds drawing methods specific to drawing conversation rectangles and text depending on user interaction
  */
 
-let stopSliderValue, isAllTalk, isAlignTalk;
+let stopSliderValue, isAllTalk, isAlignTalk, wordToSearch;
 
 ConfigStore.subscribe((data) => {
 	stopSliderValue = data.stopSliderValue;
 	isAllTalk = data.isAllTalk;
 	isAlignTalk = data.isAlignTalk;
+	wordToSearch = data.wordToSearch;
 });
 
 export class DrawConversation {
@@ -243,7 +244,6 @@ export class DrawConversation {
 	 * @param  {String} talkTurn
 	 */
 	isTalkTurnSelected(talkTurn) {
-		const wordToSearch = this.sk.sketchController.getWordToSearch();
 		if (!wordToSearch) return true; // Always return true if empty/no value
 		else {
 			const escape = wordToSearch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string

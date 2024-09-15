@@ -12,6 +12,7 @@ export interface ConfigStoreType {
 	stopSliderValue: number;
 	isAlignTalk: boolean;
 	isAllTalk: boolean;
+	wordToSearch: string;
 }
 
 const initialConfig: ConfigStoreType = {
@@ -25,7 +26,8 @@ const initialConfig: ConfigStoreType = {
 	maxStopLength: 0,
 	stopSliderValue: 1,
 	isAlignTalk: true,
-	isAllTalk: true
+	isAllTalk: true,
+	wordToSearch: ''
 };
 
 const ConfigStore = writable<ConfigStoreType>(initialConfig);

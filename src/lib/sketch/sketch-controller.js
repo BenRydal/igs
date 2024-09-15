@@ -20,7 +20,6 @@ ConfigStore.subscribe((data) => {
 export class SketchController {
 	constructor(sketch) {
 		this.sk = sketch;
-		this.wordToSearch = ''; // String value to dynamically search words in conversation
 	}
 
 	updateAnimation() {
@@ -54,14 +53,6 @@ export class SketchController {
 	// with the ConfigStore value.
 	getIsPathColorMode() {
 		return !isPathColorMode;
-	}
-
-	setWordToSearch(value) {
-		this.wordToSearch = value;
-	}
-
-	getWordToSearch() {
-		return this.wordToSearch;
 	}
 
 	mapToSelectTimeThenPixelTime(value) {
