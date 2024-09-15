@@ -48,35 +48,6 @@ export class SketchController {
 		});
 	}
 
-	mapPixelTimeToTotalTime(value) {
-		return this.sk.map(value, timeline.getLeftX(), timeline.getRightX(), 0, timeline.getEndTime());
-	}
-
-	mapPixelTimeToSelectTime(value) {
-		return this.sk.map(value, timeline.getLeftX(), timeline.getRightX(), this.getTimelineLeftMarkerXPos(), this.getTimelineRightMarkerXPos());
-	}
-
-	mapToSelectTimeThenPixelTime(value) {
-		return this.mapSelectTimeToPixelTime(this.mapPixelTimeToSelectTime(value));
-	}
-
-	mapSelectTimeToPixelTime(value) {
-		const spaceTimeCubeBottom = this.sk.height / 10;
-		const spaceTimeCubeTop = this.sk.height / 1.6;
-		if (this.sk.handle3D.getIs3DMode())
-			return this.sk.map(value, this.getTimelineLeftMarkerXPos(), this.getTimelineRightMarkerXPos(), spaceTimeCubeBottom, spaceTimeCubeTop);
-		else return this.mapSelectTimeToPixelTime2D(value);
-	}
-
-	mapSelectTimeToPixelTime2D(value) {
-		return this.sk.map(value, this.getTimelineLeftMarkerXPos(), this.getTimelineRightMarkerXPos(), timeline.getLeftX(), timeline.getRightX());
-	}
-
-	// maps value from time in seconds from data to time in pixels on timeline
-	mapTotalTimeToPixelTime(value) {
-		return this.sk.map(value, 0, timeline.getEndTime(), timeline.getLeftX(), timeline.getRightX());
-	}
-
 	getIsAnimate() {
 		return timeline.getIsAnimating();
 	}
@@ -103,33 +74,15 @@ export class SketchController {
 		return this.wordToSearch;
 	}
 
-	/**
-	 * Returns pixel width for drawing conversation rectangles based on curTotalTime of data, user timeline selection, and maxRectWidth
-	 * NOTE: curScaledRectWidth parameters 0-3600 scale pixels to 1 hour which works well and the map method maps to the inverse of 1 and maxRectWidth to properly adjust scaling/thickness of rects when user interacts with timeline
-	 */
-	getCurConversationRectWidth() {
-		const maxRectWidth = 10;
-		const curScaledRectWidth = this.sk.map(timeline.getEndTime(), 0, 3600, maxRectWidth, 1, true);
-		const timelineLength = this.getTimelineRightMarkerXPos() - this.getTimelineLeftMarkerXPos();
-		return this.sk.map(timelineLength, 0, timelineLength, maxRectWidth, curScaledRectWidth);
+	mapToSelectTimeThenPixelTime(value) {
+		return this.mapSelectTimeToPixelTime(timeline.mapPixelTimeToSelectTime(value));
 	}
 
-	getTimelineLeftMarkerXPos() {
-		return this.mapTotalTimeToPixelTime(timeline.getLeftMarker());
-	}
-
-	getTimelineRightMarkerXPos() {
-		return this.mapTotalTimeToPixelTime(timeline.getRightMarker());
-	}
-
-	overAxis(pixelValue) {
-		return pixelValue >= this.getTimelineLeftMarkerXPos() && pixelValue <= this.getTimelineRightMarkerXPos();
-	}
-
-	overTimeline() {
-		// TODO: update this for new timeline x/y positions
-		const pixelValue = this.sk.mouseX;
-		return pixelValue >= this.getTimelineLeftMarkerXPos() && pixelValue <= this.getTimelineRightMarkerXPos();
-		// return this.sk.overRect(this.start, this.top, this.length, this.thickness);
+	mapSelectTimeToPixelTime(value) {
+		const spaceTimeCubeBottom = this.sk.height / 10;
+		const spaceTimeCubeTop = this.sk.height / 1.6;
+		if (this.sk.handle3D.getIs3DMode())
+			return this.sk.map(value, timeline.getTimelineLeftMarkerXPos(), timeline.getTimelineRightMarkerXPos(), spaceTimeCubeBottom, spaceTimeCubeTop);
+		else return timeline.mapSelectTimeToPixelTime2D(value);
 	}
 }

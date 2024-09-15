@@ -65,12 +65,12 @@ export class DrawUtils {
 	}
 
 	isShowingInGUI(pixelTime) {
-		return this.sk.sketchController.overAxis(pixelTime) && this.isShowingInAnimation(pixelTime);
+		return timeline.overAxis(pixelTime) && this.isShowingInAnimation(pixelTime);
 	}
 
 	// TODO: Revisit to determine best approach here--could just return true if you want to show all data while animating
 	isShowingInAnimation(value) {
-		if (this.sk.sketchController.getIsAnimate()) return this.sk.sketchController.mapPixelTimeToTotalTime(value) < timeline.getCurrTime();
+		if (this.sk.sketchController.getIsAnimate()) return timeline.mapPixelTimeToTotalTime(value) < timeline.getCurrTime();
 		else return true;
 	}
 
@@ -131,7 +131,7 @@ export class DrawUtils {
 	 * @param  {Integer} time
 	 */
 	getSharedPosValues(point, time) {
-		const timelineXPos = this.sk.sketchController.mapTotalTimeToPixelTime(time);
+		const timelineXPos = timeline.mapTotalTimeToPixelTime(time);
 		const selTimelineXPos = this.sk.sketchController.mapSelectTimeToPixelTime(timelineXPos);
 
 		const [floorPlanXPos, floorPlanYPos] = this.sk.floorPlan.getScaledXYPos(point.x, point.y, this.sk.gui.fpContainer.getContainer());

@@ -1,4 +1,11 @@
 import ConfigStore from '../../stores/configStore';
+import TimelineStore from '../../stores/timelineStore';
+
+let timeline;
+
+TimelineStore.subscribe((data) => {
+	timeline = data;
+});
 
 /**
  * This class holds drawing methods specific to drawing conversation rectangles and text depending on user interaction
@@ -14,7 +21,7 @@ export class DrawConversation {
 	constructor(sketch, drawUtils) {
 		this.sk = sketch;
 		this.drawUtils = drawUtils;
-		this.rectPixelWidth = this.sk.sketchController.getCurConversationRectWidth(); // width needs to be dynamically updated when new data is loaded and timeline scaling is changed by user
+		this.rectPixelWidth = timeline.getCurConversationRectWidth(); // width needs to be dynamically updated when new data is loaded and timeline scaling is changed by user
 		this.conversationBubble = {
 			// represents user selected conversation
 			isSelected: false,

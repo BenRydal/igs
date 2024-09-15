@@ -1,5 +1,11 @@
 import ConfigStore from '../../stores/configStore';
-import { get } from 'svelte/store';
+import TimelineStore from '../../stores/timelineStore';
+
+let timeline;
+
+TimelineStore.subscribe((data) => {
+	timeline = data;
+});
 
 /**
  * This class provides a set of custom methods to draw movement data in floorPlan and space-time views of the IGS.
@@ -200,11 +206,11 @@ export class DrawMovement {
 		if (this.sk.sketchController.getIsAnimate()) {
 			return this.createDot(xPos, yPos, zPos, timePos, codeColor, null); // there is no length to compare when animating so just pass null to emphasize this
 		} else if (this.sk.videoController.isLoadedAndIsPlaying()) {
-			const videoPixelTime = this.sk.sketchController.mapTotalTimeToPixelTime(this.sk.videoController.getVideoPlayerCurTime());
+			const videoPixelTime = timeline.mapTotalTimeToPixelTime(this.sk.videoController.getVideoPlayerCurTime());
 			const videoSelectTime = this.sk.sketchController.mapSelectTimeToPixelTime(videoPixelTime);
 			if (this.compareToCurDot(videoSelectTime, timePos, curDot))
 				return this.createDot(xPos, yPos, zPos, timePos, codeColor, Math.abs(videoSelectTime - timePos));
-		} else if (this.sk.sketchController.overTimeline() && this.compareToCurDot(map3DMouse, timePos, curDot)) {
+		} else if (timeline.overTimeline(this.sk.mouseX) && this.compareToCurDot(map3DMouse, timePos, curDot)) {
 			return this.createDot(xPos, yPos, zPos, map3DMouse, codeColor, Math.abs(map3DMouse - timePos));
 		}
 		return null;

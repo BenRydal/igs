@@ -1,3 +1,11 @@
+import TimelineStore from '../../stores/timelineStore';
+
+let timeline;
+
+TimelineStore.subscribe((data) => {
+	timeline = data;
+});
+
 export class Highlight {
 	constructor(sketch, bottomBounds) {
 		this.sk = sketch;
@@ -70,7 +78,7 @@ export class Highlight {
 	 * @param  {HighlightRect} highlightRect
 	 */
 	drawHighlightRects(highlightRect) {
-		if (this.sk.handle3D.getIs3DMode() && this.sk.sketchController.overAxis(highlightRect.xPos)) {
+		if (this.sk.handle3D.getIs3DMode() && timeline.overAxis(highlightRect.xPos)) {
 			this.draw3DHighlightRect(highlightRect);
 		} else {
 			this.sk.rect(highlightRect.xPos, highlightRect.yPos, highlightRect.width, highlightRect.height);
@@ -85,6 +93,7 @@ export class Highlight {
 		// Map method maintains highlight rect scaling if user adjusts timeline
 		const zPosStart = this.sk.sketchController.mapToSelectTimeThenPixelTime(highlightRect.xPos);
 		const zPosEnd = this.sk.sketchController.mapToSelectTimeThenPixelTime(highlightRect.xPos + highlightRect.width);
+
 		const span = this.sk.gui.fpContainer.getContainer().width; // span 3D rects full span of floor plan container
 		// cube top
 		this.sk.quad(
@@ -141,9 +150,9 @@ export class Highlight {
 	 * NOTE: If in 3D mode, you need to first test if highlightRect was selected on floor plan or timeline
 	 */
 	overHighlightRect(highlightRect, xPos, yPos, xPosTimeToMap) {
-		const xPosTime = this.sk.sketchController.mapSelectTimeToPixelTime2D(xPosTimeToMap); // Map method maintains highlight rect scaling if user adjusts timeline, make sure to test 2D only
+		const xPosTime = timeline.mapSelectTimeToPixelTime2D(xPosTimeToMap); // Map method maintains highlight rect scaling if user adjusts timeline, make sure to test 2D only
 		if (this.sk.handle3D.getIs3DMode()) {
-			if (this.sk.sketchController.overAxis(highlightRect.xPos)) return this.betweenX(xPosTime, highlightRect) && this.betweenY(yPos, highlightRect);
+			if (timeline.overAxis(highlightRect.xPos)) return this.betweenX(xPosTime, highlightRect) && this.betweenY(yPos, highlightRect);
 			else return this.betweenX(xPos, highlightRect) && this.betweenY(yPos, highlightRect);
 		} else {
 			return (this.betweenX(xPos, highlightRect) || this.betweenX(xPosTime, highlightRect)) && this.betweenY(yPos, highlightRect);
