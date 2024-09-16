@@ -1,20 +1,31 @@
 import ConfigStore from '../../stores/configStore';
+import TimelineStore from '../../stores/timelineStore';
+
+let timeline;
+
+TimelineStore.subscribe((data) => {
+	timeline = data;
+});
 
 /**
  * This class holds drawing methods specific to drawing conversation rectangles and text depending on user interaction
  */
 
-let stopSliderValue;
+let stopSliderValue, isAllTalk, isAlignTalk, wordToSearch, isPathColorMode;
 
 ConfigStore.subscribe((data) => {
 	stopSliderValue = data.stopSliderValue;
+	isAllTalk = data.isAllTalk;
+	isAlignTalk = data.isAlignTalk;
+	wordToSearch = data.wordToSearch;
+	isPathColorMode = data.isPathColorMode;
 });
 
 export class DrawConversation {
 	constructor(sketch, drawUtils) {
 		this.sk = sketch;
 		this.drawUtils = drawUtils;
-		this.rectPixelWidth = this.sk.sketchController.getCurConversationRectWidth(); // width needs to be dynamically updated when new data is loaded and timeline scaling is changed by user
+		this.rectPixelWidth = timeline.getCurConversationRectWidth(); // width needs to be dynamically updated when new data is loaded and timeline scaling is changed by user
 		this.conversationBubble = {
 			// represents user selected conversation
 			isSelected: false,
@@ -31,8 +42,9 @@ export class DrawConversation {
 				// TODO: Fix the true boolean to reflect what needs to happen here
 				const curPos = this.drawUtils.getScaledConversationPos(point);
 				if (this.drawUtils.isVisible(point, curPos, this.isStopped(point.stopLength))) {
-					if (this.sk.sketchController.getIsPathColorMode()) this.organizeRectDrawing(point, curPos, user.color);
-					else this.organizeRectDrawing(point, curPos, 'red');
+					if (!isPathColorMode) this.organizeRectDrawing(point, curPos, user.color);
+					//else this.organizeRectDrawing(point, curPos, 'red');
+					else this.organizeRectDrawing(point, curPos, this.drawUtils.setCodeColor(point.codes));
 				}
 			}
 		}
@@ -103,7 +115,7 @@ export class DrawConversation {
 
 	drawSpaceTime3DRects(curPos) {
 		const translateZoom = Math.abs(this.sk.handle3D.getCurTranslatePos().zoom);
-		if (this.sk.sketchController.getIsAlignTalk())
+		if (isAlignTalk)
 			this.sk.quad(
 				0,
 				translateZoom,
@@ -214,7 +226,7 @@ export class DrawConversation {
 	 * @param  {Char} pathName
 	 */
 	testSpeakerToDraw(speaker, pathName) {
-		return speaker != null && speaker.isShowing && (this.sk.sketchController.getIsAllTalk() || speaker.name === pathName);
+		return speaker != null && speaker.isShowing && (isAllTalk || speaker.name === pathName);
 	}
 
 	/**
@@ -234,7 +246,6 @@ export class DrawConversation {
 	 * @param  {String} talkTurn
 	 */
 	isTalkTurnSelected(talkTurn) {
-		const wordToSearch = this.sk.sketchController.getWordToSearch();
 		if (!wordToSearch) return true; // Always return true if empty/no value
 		else {
 			const escape = wordToSearch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string

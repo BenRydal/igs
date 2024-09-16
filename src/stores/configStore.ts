@@ -10,6 +10,9 @@ export interface ConfigStoreType {
 	highlightToggle: boolean;
 	maxStopLength: number;
 	stopSliderValue: number;
+	isAlignTalk: boolean;
+	isAllTalk: boolean;
+	wordToSearch: string;
 }
 
 const initialConfig: ConfigStoreType = {
@@ -21,7 +24,10 @@ const initialConfig: ConfigStoreType = {
 	stopsToggle: false,
 	highlightToggle: false,
 	maxStopLength: 0,
-	stopSliderValue: 1
+	stopSliderValue: 1,
+	isAlignTalk: true,
+	isAllTalk: true,
+	wordToSearch: ''
 };
 
 const ConfigStore = writable<ConfigStoreType>(initialConfig);

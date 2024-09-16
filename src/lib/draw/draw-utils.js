@@ -15,14 +15,11 @@ TimelineStore.subscribe((data) => {
 	timeline = data;
 });
 
-let isPathColorMode = false;
-
-CodeStore.subscribe((data) => {
-	console.log(data);
-});
+let isPathColorMode, isAlignTalk;
 
 ConfigStore.subscribe((data) => {
 	isPathColorMode = data.isPathColorMode;
+	isAlignTalk = data.isAlignTalk;
 });
 
 export class DrawUtils {
@@ -40,14 +37,12 @@ export class DrawUtils {
 			// TODO: If we find a new way to manage multiple codes, this is where
 			// that change would be. Currently default multiple codes to black.
 			return '#000000';
+		} else {
+			//console.log('No matching codes found');
+			return '#808080'; // Default color if no codes match
 		}
 	}
 
-	/**
-	 * This method tests if a point is showing for all selected codes from codeList
-	 * IMPLEMENTATION: Iterate through codeList and return false if: for any of codes that are true in codeList a code at curPoint is false
-	 * @param  {MovementPoint} point
-	 */
 	isShowingInCodeList(codesArray) {
 		if (codesArray.length === 0) return true;
 
@@ -56,21 +51,18 @@ export class DrawUtils {
 		return entries.some((entry) => codesArray.includes(entry.code) && entry.enabled);
 		// Check if any entry code is in codesArray and is enabled }
 	}
-	/**
-	 * Holds tests for determining if point is visible (e.g., selected, highlighted)
-	 */
+
 	isVisible(point, curPos, isStopped) {
-		// And
 		return this.isShowingInGUI(curPos.timelineXPos) && this.selectMode(curPos, isStopped) && this.isShowingInCodeList(point.codes);
 	}
 
 	isShowingInGUI(pixelTime) {
-		return this.sk.sketchController.overAxis(pixelTime) && this.isShowingInAnimation(pixelTime);
+		return timeline.overAxis(pixelTime) && this.isShowingInAnimation(pixelTime);
 	}
 
 	// TODO: Revisit to determine best approach here--could just return true if you want to show all data while animating
 	isShowingInAnimation(value) {
-		if (this.sk.sketchController.getIsAnimate()) return this.sk.sketchController.mapPixelTimeToTotalTime(value) < timeline.getCurrTime();
+		if (this.sk.sketchController.getIsAnimate()) return timeline.mapPixelTimeToTotalTime(value) < timeline.getCurrTime();
 		else return true;
 	}
 
@@ -131,7 +123,7 @@ export class DrawUtils {
 	 * @param  {Integer} time
 	 */
 	getSharedPosValues(point, time) {
-		const timelineXPos = this.sk.sketchController.mapTotalTimeToPixelTime(time);
+		const timelineXPos = timeline.mapTotalTimeToPixelTime(time);
 		const selTimelineXPos = this.sk.sketchController.mapSelectTimeToPixelTime(timelineXPos);
 
 		const [floorPlanXPos, floorPlanYPos] = this.sk.floorPlan.getScaledXYPos(point.x, point.y, this.sk.gui.fpContainer.getContainer());
@@ -193,7 +185,7 @@ export class DrawUtils {
 	 * Adjusts Y positioning of conversation rectangles correctly for align and 3 D views
 	 */
 	getConversationAdjustYPos(floorPlanYPos, rectLength) {
-		if (this.sk.sketchController.getIsAlignTalk()) {
+		if (isAlignTalk) {
 			if (this.sk.handle3D.getIs3DMode()) return this.sk.gui.fpContainer.getContainer().height;
 			else return 0;
 		} else if (this.sk.handle3D.getIs3DMode()) {
