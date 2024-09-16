@@ -39,7 +39,7 @@ export class DrawUtils {
 			return '#000000';
 		} else {
 			//console.log('No matching codes found');
-			return '#000000'; // Default color if no codes match
+			return '#808080'; // Default color if no codes match
 		}
 	}
 
