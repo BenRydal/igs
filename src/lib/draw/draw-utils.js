@@ -1,25 +1,21 @@
 /**
  * This class holds different utility and helper methods used in draw movement and conversation classes
- * It centralizes decisions about what points to show and not show and is coupled with the sketchController/gui classes
  */
 
 import TimelineStore from '../../stores/timelineStore';
 import CodeStore from '../../stores/codeStore';
 import ConfigStore from '../../stores/configStore';
-
 import { get } from 'svelte/store';
 
-let timeline;
+let timeline, stopSliderValue, isAlignTalk;
 
 TimelineStore.subscribe((data) => {
 	timeline = data;
 });
 
-let isPathColorMode, isAlignTalk;
-
 ConfigStore.subscribe((data) => {
-	isPathColorMode = data.isPathColorMode;
 	isAlignTalk = data.isAlignTalk;
+	stopSliderValue = data.stopSliderValue;
 });
 
 export class DrawUtils {
@@ -52,8 +48,12 @@ export class DrawUtils {
 		// Check if any entry code is in codesArray and is enabled }
 	}
 
-	isVisible(point, curPos, isStopped) {
-		return this.isShowingInGUI(curPos.timelineXPos) && this.selectMode(curPos, isStopped) && this.isShowingInCodeList(point.codes);
+	isVisible(point, curPos, stopLength) {
+		return this.isShowingInGUI(curPos.timelineXPos) && this.selectMode(curPos, this.isStopped(stopLength)) && this.isShowingInCodeList(point.codes);
+	}
+
+	isStopped(stopLength) {
+		return stopLength >= stopSliderValue;
 	}
 
 	isShowingInGUI(pixelTime) {
@@ -66,7 +66,7 @@ export class DrawUtils {
 		else return true;
 	}
 
-	selectMode(curPos, isStopped) {
+	selectMode(curPos, pointIsStopped) {
 		const config = get(ConfigStore);
 		if (config.circleToggle) {
 			if (this.sk.handle3D.getIs3DModeOrTransitioning()) return true;
@@ -83,9 +83,9 @@ export class DrawUtils {
 					this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos)
 				);
 		} else if (config.movementToggle) {
-			return !isStopped && this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos);
+			return !pointIsStopped && this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos);
 		} else if (config.stopsToggle) {
-			return isStopped && this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos);
+			return pointIsStopped && this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos);
 		} else if (config.highlightToggle) {
 			return this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.timelineXPos);
 		}

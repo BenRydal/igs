@@ -8,13 +8,6 @@
 import { DrawMovement } from './draw-movement.js';
 import { DrawConversation } from './draw-conversation.js';
 import { DrawUtils } from './draw-utils.js';
-import ConfigStore from '../../stores/configStore';
-
-let stopSliderValue;
-
-ConfigStore.subscribe((data) => {
-	stopSliderValue = data.stopSliderValue;
-});
 
 export class SetPathData {
 	constructor(sketch) {
@@ -37,10 +30,6 @@ export class SetPathData {
 		drawConversation.setConversationBubble(); // draw conversation text last so it displays on top
 	}
 
-	isStopped(stopLength) {
-		return stopLength >= stopSliderValue;
-	}
-
 	getCodeFileArrays(dataTrail) {
 		// Ensure the array has at least two elements
 		if (dataTrail.length < 2) {
@@ -56,7 +45,7 @@ export class SetPathData {
 			let previousMovement = dataTrail[i - 1];
 			const comparisonPoint = this.drawUtils.createComparePoint(this.sk.PLAN, currentMovement, previousMovement);
 
-			if (this.drawUtils.isVisible(comparisonPoint.cur.point, comparisonPoint.cur.pos, this.isStopped(comparisonPoint.cur.point.stopLength))) {
+			if (this.drawUtils.isVisible(comparisonPoint.cur.point, comparisonPoint.cur.pos, comparisonPoint.cur.point.stopLength)) {
 				if (isRecordingCode === false) {
 					isRecordingCode = true;
 					startTimesArray.push(comparisonPoint.cur.point.time);
