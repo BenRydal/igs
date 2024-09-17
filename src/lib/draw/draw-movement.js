@@ -14,11 +14,10 @@ TimelineStore.subscribe((data) => {
  * the tradeoff is the need for more customized methods and conditional structures to handle starting/begining lines/shapes
  */
 
-let maxStopLength, stopSliderValue, isPathColorMode;
+let maxStopLength, isPathColorMode;
 
 ConfigStore.subscribe((data) => {
 	maxStopLength = data.maxStopLength;
-	stopSliderValue = data.stopSliderValue;
 	isPathColorMode = data.isPathColorMode;
 });
 
