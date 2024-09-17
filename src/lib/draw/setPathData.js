@@ -8,7 +8,13 @@
 import { DrawMovement } from './draw-movement.js';
 import { DrawConversation } from './draw-conversation.js';
 import { DrawUtils } from './draw-utils.js';
-import { CreateCodeFile } from './create-code-file.js';
+import ConfigStore from '../../stores/configStore';
+
+let stopSliderValue;
+
+ConfigStore.subscribe((data) => {
+	stopSliderValue = data.stopSliderValue;
+});
 
 export class SetPathData {
 	constructor(sketch) {
@@ -31,11 +37,39 @@ export class SetPathData {
 		drawConversation.setConversationBubble(); // draw conversation text last so it displays on top
 	}
 
-	// Prepares a code file for all selected data for every path showing in GUI
-	setCodeFile(pathList) {
-		const createCodeFile = new CreateCodeFile(this.sk, this.drawUtils);
-		for (const path of pathList) {
-			if (path.isShowing) createCodeFile.create(path);
+	isStopped(stopLength) {
+		return stopLength >= stopSliderValue;
+	}
+
+	getCodeFileArrays(dataTrail) {
+		// Ensure the array has at least two elements
+		if (dataTrail.length < 2) {
+			console.error('dataTrail must contain at least two elements.');
+			return [[], []];
 		}
+
+		let startTimesArray = [];
+		let endTimesArray = [];
+		let isRecordingCode = false;
+		for (let i = 1; i < dataTrail.length; i++) {
+			const currentMovement = dataTrail[i];
+			let previousMovement = dataTrail[i - 1];
+			const comparisonPoint = this.drawUtils.createComparePoint(this.sk.PLAN, currentMovement, previousMovement);
+
+			if (this.drawUtils.isVisible(comparisonPoint.cur.point, comparisonPoint.cur.pos, this.isStopped(comparisonPoint.cur.point.stopLength))) {
+				if (isRecordingCode === false) {
+					isRecordingCode = true;
+					startTimesArray.push(comparisonPoint.cur.point.time);
+				}
+			} else {
+				if (isRecordingCode === true) {
+					isRecordingCode = false;
+					endTimesArray.push(comparisonPoint.prior.point.time);
+				}
+			}
+			// For last point if still recording
+			if (i === dataTrail.length - 1 && isRecordingCode === true) endTimesArray.push(comparisonPoint.cur.point.time);
+		}
+		return [startTimesArray, endTimesArray];
 	}
 }

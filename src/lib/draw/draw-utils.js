@@ -102,10 +102,10 @@ export class DrawUtils {
 	 * @param  {Integer} time
 	 * @param  {Integer} previousTime
 	 */
-	createComparePoint(view, curIndex, priorIndex, time, previousTime) {
+	createComparePoint(view, curIndex, priorIndex) {
 		return {
-			cur: this.createAugmentPoint(view, curIndex, time),
-			prior: this.createAugmentPoint(view, priorIndex, previousTime)
+			cur: this.createAugmentPoint(view, curIndex, curIndex.time),
+			prior: this.createAugmentPoint(view, priorIndex, priorIndex.time)
 		};
 	}
 

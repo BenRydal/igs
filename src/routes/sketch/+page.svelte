@@ -198,7 +198,8 @@
 				}}
 			/>
 
-			<IconButton icon={MdCloudDownload} tooltip={'Download your Data'} />
+			<IconButton icon={MdCloudDownload} tooltip={'Download your Data'} on:click={() => (p5Instance.saveCodeFile())}/>
+			
 			<div
 				data-tip="Upload"
 				class="tooltip tooltip-bottom btn capitalize icon max-h-8 bg-[#f6f5f3] border-[#f6f5f3]"

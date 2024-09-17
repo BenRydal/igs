@@ -72,7 +72,7 @@ export class DrawMovement {
 				}
 			}
 
-			let comparisonPoint = this.drawUtils.createComparePoint(view, currentMovement, previousMovement, currentMovement.time, previousMovement.time);
+			let comparisonPoint = this.drawUtils.createComparePoint(view, currentMovement, previousMovement);
 			if (this.drawUtils.isVisible(comparisonPoint.cur.point, comparisonPoint.cur.pos, this.isStopped(comparisonPoint.cur.point.stopLength))) {
 				if (view === this.sk.SPACETIME) this.recordDot(comparisonPoint.cur);
 				if (this.isStopped(comparisonPoint.cur.point.stopLength)) this.updateStopDrawing(comparisonPoint, view);

@@ -89,9 +89,7 @@ export const igsSketch = (p5: any) => {
 			p5.floorPlan.setFloorPlan(p5.gui.fpContainer.getContainer());
 			if (p5.arrayIsLoaded(users)) {
 				const setPathData = new SetPathData(p5);
-				if (p5.arrayIsLoaded(users)) {
-					setPathData.setMovementAndConversation(users);
-				}
+				setPathData.setMovementAndConversation(users);
 			}
 		}
 
@@ -134,14 +132,34 @@ export const igsSketch = (p5: any) => {
 		p5.loop();
 	};
 
-	// p5.saveCodeFile = () => {
-	// 	if (p5.dataIsLoaded(p5.floorPlan.getImg()) && p5.arrayIsLoaded(p5.core.pathList)) {
-	// 		const setPathData = new SetPathData(p5, p5.core.codeList);
-	// 		setPathData.setCodeFile(p5.core.pathList);
-	// 	}
-	// };
+	p5.saveCodeFile = () => {
+		if (p5.dataIsLoaded(p5.floorPlan.getImg()) && p5.arrayIsLoaded(users)) {
+			const setPathData = new SetPathData(p5);
+			for (const user of users) {
+				if (user.enabled) {
+					const [startTimeArray, endTimeArray] = setPathData.getCodeFileArrays(user.dataTrail);
+					const tableData = p5.writeTable(startTimeArray, endTimeArray);
+					p5.saveTable(tableData, user.name, 'csv');
+					break; // Save only the first enabled user
+				}
+			}
+		}
+	};
 
 	p5.arrayIsLoaded = (data: any) => {
 		return Array.isArray(data) && data.length;
+	};
+
+	p5.writeTable = (startTimesArray: any, endTimesArray: any) => {
+		const headers = ['start', 'end'];
+		const table = new p5.Table();
+		table.addColumn(headers[0]);
+		table.addColumn(headers[1]);
+		for (let i = 0; i < startTimesArray.length; i++) {
+			const newRow = table.addRow();
+			newRow.setNum(headers[0], startTimesArray[i]);
+			newRow.setNum(headers[1], endTimesArray[i]);
+		}
+		return table;
 	};
 };
