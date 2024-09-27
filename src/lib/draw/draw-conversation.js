@@ -11,10 +11,9 @@ TimelineStore.subscribe((data) => {
  * This class holds drawing methods specific to drawing conversation rectangles and text depending on user interaction
  */
 
-let allToggle, alignToggle, wordToSearch, isPathColorMode;
+let alignToggle, wordToSearch, isPathColorMode;
 
 ConfigStore.subscribe((data) => {
-	allToggle = data.allToggle;
 	alignToggle = data.alignToggle;
 	wordToSearch = data.wordToSearch;
 	isPathColorMode = data.isPathColorMode;
@@ -38,7 +37,6 @@ export class DrawConversation {
 		for (let i = 1; i < dataTrail.length; i++) {
 			const point = dataTrail[i];
 			if (point.speech !== '') {
-				// TODO: Fix the true boolean to reflect what needs to happen here
 				const curPos = this.drawUtils.getScaledConversationPos(point);
 				if (this.drawUtils.isVisible(point, curPos, point.stopLength)) {
 					if (!isPathColorMode) this.organizeRectDrawing(point, curPos, user.color);

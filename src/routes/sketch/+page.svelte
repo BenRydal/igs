@@ -31,7 +31,7 @@
 
 	const filterToggleOptions = ['movementToggle', 'stopsToggle'] as const;
 	const selectToggleOptions = ['circleToggle', 'sliceToggle', 'highlightToggle'] as const;
-	const conversationToggleOptions = ['alignToggle', 'allToggle'] as const;
+	const conversationToggleOptions = ['alignToggle'] as const;
 
 	let showDataPopup = false;
 	let expandedUsers: { [key: string]: boolean } = {};

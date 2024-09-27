@@ -11,7 +11,6 @@ export interface ConfigStoreType {
 	maxStopLength: number;
 	stopSliderValue: number;
 	alignToggle: boolean;
-	allToggle: boolean;
 	wordToSearch: string;
 }
 
@@ -26,7 +25,6 @@ const initialConfig: ConfigStoreType = {
 	maxStopLength: 0,
 	stopSliderValue: 1,
 	alignToggle: true,
-	allToggle: true,
 	wordToSearch: ''
 };
 
