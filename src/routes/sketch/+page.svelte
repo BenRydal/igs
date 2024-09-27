@@ -29,8 +29,8 @@
 	import ConfigStore from '../../stores/configStore';
 	import type { ConfigStoreType } from '../../stores/configStore';
 
-	const toggleOptions = ['circleToggle', 'sliceToggle', 'movementToggle', 'stopsToggle', 'highlightToggle'] as const;
-	type ToggleKey = (typeof toggleOptions)[number];
+	const filterToggleOptions = ['movementToggle', 'stopsToggle'] as const;
+	const selectToggleOptions = ['circleToggle', 'sliceToggle', 'highlightToggle'] as const;
 
 	let showDataPopup = false;
 	let expandedUsers: { [key: string]: boolean } = {};
@@ -106,7 +106,7 @@
 		}));
 	}
 
-	function toggleSelection(selection: ToggleKey) {
+	function toggleSelection(selection: ToggleKey, toggleOptions: ToggleKey[]) {
 		ConfigStore.update((store: ConfigStoreType) => {
 			const updatedStore = { ...store };
 			toggleOptions.forEach((key) => {
@@ -129,19 +129,19 @@
 	<div class="flex justify-end flex-1 px-2">
 		<div class="dropdown">
 			<div class="tooltip tooltip-bottom" data-tip="This changes the mouse to visualize different hovers over the data.">
-				<div tabindex="0" role="button" class="btn btn-sm ml-4">Select</div>
+				<div tabindex="0" role="button" class="btn btn-sm ml-4">Filter</div>
 			</div>
 
 			<div role="menu" aria-labelledby="dropdownMenuButton">
 				<ul class="dropdown-content menu rounded-box z-[1] w-52 p-2 shadow bg-base-100">
-					{#each toggleOptions as toggle}
+					{#each filterToggleOptions as toggle}
 						<li role="menuitem">
 							<button
-								on:click={() => toggleSelection(toggle)}
+								on:click={() => toggleSelection(toggle, filterToggleOptions)}
 								on:keydown={(e) => {
 									if (e.key === 'Enter' || e.key === ' ') {
 										e.preventDefault();
-										toggleSelection(toggle);
+										toggleSelection(toggle, filterToggleOptions);
 									}
 								}}
 								class="w-full text-left flex items-center"
@@ -155,7 +155,6 @@
 							</button>
 						</li>
 					{/each}
-					<li role="separator" class="divider" />
 					<li role="menuitem" class="cursor-none">
 						<p>Stop Length: {formattedStopLength}</p>
 					</li>
@@ -171,6 +170,38 @@
 							on:input={handleStopLengthChange}
 						/>
 					</li>
+				</ul>
+			</div>
+		</div>
+
+		<div class="dropdown">
+			<div class="tooltip tooltip-bottom" data-tip="This changes the mouse to visualize different hovers over the data.">
+				<div tabindex="0" role="button" class="btn btn-sm ml-4">Select</div>
+			</div>
+
+			<div role="menu" aria-labelledby="dropdownMenuButton">
+				<ul class="dropdown-content menu rounded-box z-[1] w-52 p-2 shadow bg-base-100">
+					{#each selectToggleOptions as toggle}
+						<li role="menuitem">
+							<button
+								on:click={() => toggleSelection(toggle, selectToggleOptions)}
+								on:keydown={(e) => {
+									if (e.key === 'Enter' || e.key === ' ') {
+										e.preventDefault();
+										toggleSelection(toggle, selectToggleOptions);
+									}
+								}}
+								class="w-full text-left flex items-center"
+							>
+								<div class="w-4 h-4 mr-2">
+									{#if $ConfigStore[toggle]}
+										<MdCheck />
+									{/if}
+								</div>
+								{capitalizeFirstLetter(toggle.replace('Toggle', ''))}
+							</button>
+						</li>
+					{/each}
 				</ul>
 			</div>
 		</div>
