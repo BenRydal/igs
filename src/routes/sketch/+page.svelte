@@ -262,8 +262,8 @@
 				}}
 			/>
 
-			<IconButton icon={MdCloudDownload} tooltip={'Download your Data'} on:click={() => (p5Instance.saveCodeFile())}/>
-			
+			<IconButton icon={MdCloudDownload} tooltip={'Download your Data'} on:click={() => p5Instance.saveCodeFile()} />
+
 			<div
 				data-tip="Upload"
 				class="tooltip tooltip-bottom btn capitalize icon max-h-8 bg-[#f6f5f3] border-[#f6f5f3]"
@@ -397,7 +397,7 @@
 		{#if $ConfigStore.dataHasCodes}
 			<div class="dropdown dropdown-top">
 				<div tabindex={0} role="button" class="btn">Codes</div>
-				<ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
+				<ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-64 p-2 shadow h-100 overflow-y-scroll flex-nowrap">
 					<li>
 						<div class="flex items-center">
 							<input id="codeCheckbox-all" type="checkbox" class="checkbox" />
