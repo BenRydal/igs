@@ -31,6 +31,7 @@
 
 	const filterToggleOptions = ['movementToggle', 'stopsToggle'] as const;
 	const selectToggleOptions = ['circleToggle', 'sliceToggle', 'highlightToggle'] as const;
+	const conversationToggleOptions = ['alignToggle', 'allToggle'] as const;
 
 	let showDataPopup = false;
 	let expandedUsers: { [key: string]: boolean } = {};
@@ -189,6 +190,38 @@
 									if (e.key === 'Enter' || e.key === ' ') {
 										e.preventDefault();
 										toggleSelection(toggle, selectToggleOptions);
+									}
+								}}
+								class="w-full text-left flex items-center"
+							>
+								<div class="w-4 h-4 mr-2">
+									{#if $ConfigStore[toggle]}
+										<MdCheck />
+									{/if}
+								</div>
+								{capitalizeFirstLetter(toggle.replace('Toggle', ''))}
+							</button>
+						</li>
+					{/each}
+				</ul>
+			</div>
+		</div>
+
+		<div class="dropdown">
+			<div class="tooltip tooltip-bottom" data-tip="This changes the mouse to visualize different hovers over the data.">
+				<div tabindex="0" role="button" class="btn btn-sm ml-4">Talk</div>
+			</div>
+
+			<div role="menu" aria-labelledby="dropdownMenuButton">
+				<ul class="dropdown-content menu rounded-box z-[1] w-52 p-2 shadow bg-base-100">
+					{#each conversationToggleOptions as toggle}
+						<li role="menuitem">
+							<button
+								on:click={() => toggleSelection(toggle, conversationToggleOptions)}
+								on:keydown={(e) => {
+									if (e.key === 'Enter' || e.key === ' ') {
+										e.preventDefault();
+										toggleSelection(toggle, conversationToggleOptions);
 									}
 								}}
 								class="w-full text-left flex items-center"

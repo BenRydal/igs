@@ -11,11 +11,11 @@ TimelineStore.subscribe((data) => {
  * This class holds drawing methods specific to drawing conversation rectangles and text depending on user interaction
  */
 
-let isAllTalk, isAlignTalk, wordToSearch, isPathColorMode;
+let allToggle, alignToggle, wordToSearch, isPathColorMode;
 
 ConfigStore.subscribe((data) => {
-	isAllTalk = data.isAllTalk;
-	isAlignTalk = data.isAlignTalk;
+	allToggle = data.allToggle;
+	alignToggle = data.alignToggle;
 	wordToSearch = data.wordToSearch;
 	isPathColorMode = data.isPathColorMode;
 });
@@ -42,7 +42,6 @@ export class DrawConversation {
 				const curPos = this.drawUtils.getScaledConversationPos(point);
 				if (this.drawUtils.isVisible(point, curPos, point.stopLength)) {
 					if (!isPathColorMode) this.organizeRectDrawing(point, curPos, user.color);
-					//else this.organizeRectDrawing(point, curPos, 'red');
 					else this.organizeRectDrawing(point, curPos, this.drawUtils.setCodeColor(point.codes));
 				}
 			}
@@ -110,7 +109,7 @@ export class DrawConversation {
 
 	drawSpaceTime3DRects(curPos) {
 		const translateZoom = Math.abs(this.sk.handle3D.getCurTranslatePos().zoom);
-		if (isAlignTalk)
+		if (alignToggle)
 			this.sk.quad(
 				0,
 				translateZoom,
@@ -212,28 +211,6 @@ export class DrawConversation {
 			textBox.yDif = textBox.height + textBox.boxSpacing;
 		}
 		return textBox;
-	}
-
-	/**
-	 * Tests whether to draw selected speaker
-	 * Speaker must be showing and either program on all talk mode or speaker matches pathname
-	 * @param  {Char} speaker
-	 * @param  {Char} pathName
-	 */
-	testSpeakerToDraw(speaker, pathName) {
-		return speaker != null && speaker.isShowing && (isAllTalk || speaker.name === pathName);
-	}
-
-	/**
-	 * Returns speaker object based from global speaker list if it matches passed character paramater
-	 * Returns null if no match found
-	 * @param  {Char} curSpeaker
-	 */
-	getSpeakerFromSpeakerList(curSpeaker, speakerList) {
-		for (const speaker of speakerList) {
-			if (speaker.name === curSpeaker) return speaker;
-		}
-		return null;
 	}
 
 	/**

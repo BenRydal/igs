@@ -7,14 +7,14 @@ import CodeStore from '../../stores/codeStore';
 import ConfigStore from '../../stores/configStore';
 import { get } from 'svelte/store';
 
-let timeline, stopSliderValue, isAlignTalk;
+let timeline, stopSliderValue, alignToggle;
 
 TimelineStore.subscribe((data) => {
 	timeline = data;
 });
 
 ConfigStore.subscribe((data) => {
-	isAlignTalk = data.isAlignTalk;
+	alignToggle = data.alignToggle;
 	stopSliderValue = data.stopSliderValue;
 });
 
@@ -185,7 +185,7 @@ export class DrawUtils {
 	 * Adjusts Y positioning of conversation rectangles correctly for align and 3 D views
 	 */
 	getConversationAdjustYPos(floorPlanYPos, rectLength) {
-		if (isAlignTalk) {
+		if (alignToggle) {
 			if (this.sk.handle3D.getIs3DMode()) return this.sk.gui.fpContainer.getContainer().height;
 			else return 0;
 		} else if (this.sk.handle3D.getIs3DMode()) {

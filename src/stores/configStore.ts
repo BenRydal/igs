@@ -10,8 +10,8 @@ export interface ConfigStoreType {
 	highlightToggle: boolean;
 	maxStopLength: number;
 	stopSliderValue: number;
-	isAlignTalk: boolean;
-	isAllTalk: boolean;
+	alignToggle: boolean;
+	allToggle: boolean;
 	wordToSearch: string;
 }
 
@@ -25,8 +25,8 @@ const initialConfig: ConfigStoreType = {
 	highlightToggle: false,
 	maxStopLength: 0,
 	stopSliderValue: 1,
-	isAlignTalk: true,
-	isAllTalk: true,
+	alignToggle: true,
+	allToggle: true,
 	wordToSearch: ''
 };
 
