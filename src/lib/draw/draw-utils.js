@@ -40,12 +40,15 @@ export class DrawUtils {
 	}
 
 	isShowingInCodeList(codesArray) {
-		if (codesArray.length === 0) return true;
-
 		const entries = get(CodeStore);
-		// Retrieve the array of CodeEntry objects
-		return entries.some((entry) => codesArray.includes(entry.code) && entry.enabled);
-		// Check if any entry code is in codesArray and is enabled }
+
+		if (codesArray.length === 0) {
+			// Handle data points with no codes
+			const noCodesEntry = entries.find((entry) => entry.code === 'no codes');
+			return noCodesEntry ? noCodesEntry.enabled : true;
+		} else {
+			return entries.some((entry) => codesArray.includes(entry.code) && entry.enabled);
+		}
 	}
 
 	isVisible(point, curPos, stopLength) {

@@ -75,6 +75,15 @@
 	};
 
 	let isModalOpen = writable(true);
+	$: selectAllCodes = $CodeStore.every((code) => code.enabled);
+
+	$: sortedCodes = [...$CodeStore].sort((a, b) => {
+		if (a.code.toLowerCase() === 'no codes') return 1;
+		if (b.code.toLowerCase() === 'no codes') return -1;
+		return a.code.localeCompare(b.code);
+	});
+
+	$: formattedStopLength = $ConfigStore.stopSliderValue.toFixed(2);
 
 	function toggleVideo() {
 		if (p5Instance && p5Instance.videoController) {
@@ -115,11 +124,77 @@
 					updatedStore[key] = key === selection ? !updatedStore[key] : false;
 				}
 			});
+			p5Instance?.loop();
 			return updatedStore;
 		});
+		p5Instance?.loop();
 	}
 
-	$: formattedStopLength = $ConfigStore.stopSliderValue.toFixed(2);
+	function toggleSelectAllCodes() {
+		const allEnabled = $CodeStore.every((code) => code.enabled);
+		CodeStore.update((codes) => codes.map((code) => ({ ...code, enabled: !allEnabled })));
+		p5Instance.loop();
+	}
+
+	function clearMovementData() {
+		UserStore.update(() => []);
+		p5Instance.loop();
+	}
+
+	function clearConversationData() {
+		UserStore.update((users) =>
+			users.map((user) => {
+				user.dataTrail = user.dataTrail.map((dataPoint) => {
+					dataPoint.speech = '';
+					return dataPoint;
+				});
+				return user;
+			})
+		);
+		p5Instance.loop();
+	}
+
+	function clearCodeData() {
+		CodeStore.update(() => []);
+		UserStore.update((users) =>
+			users.map((user) => {
+				user.dataTrail = user.dataTrail.map((dataPoint) => {
+					dataPoint.codes = [];
+					return dataPoint;
+				});
+				return user;
+			})
+		);
+
+		ConfigStore.update((currentConfig) => ({
+			...currentConfig,
+			dataHasCodes: false
+		}));
+
+		p5Instance.loop();
+	}
+
+	function clearAllData() {
+		UserStore.update(() => []);
+		CodeStore.update(() => []);
+		p5Instance.loop();
+	}
+
+	function clickOutside(node) {
+		const handleClick = (event) => {
+			if (!node.contains(event.target)) {
+				node.removeAttribute('open');
+			}
+		};
+
+		document.addEventListener('click', handleClick, true);
+
+		return {
+			destroy() {
+				document.removeEventListener('click', handleClick, true);
+			}
+		};
+	}
 </script>
 
 <div class="navbar min-h-16 bg-[#f6f5f3]">
@@ -128,118 +203,104 @@
 	</div>
 
 	<div class="flex justify-end flex-1 px-2">
-		<div class="dropdown">
-			<div class="tooltip tooltip-bottom" data-tip="This changes the mouse to visualize different hovers over the data.">
-				<div tabindex="0" role="button" class="btn btn-sm ml-4">Filter</div>
-			</div>
-
-			<div role="menu" aria-labelledby="dropdownMenuButton">
-				<ul class="dropdown-content menu rounded-box z-[1] w-52 p-2 shadow bg-base-100">
-					{#each filterToggleOptions as toggle}
-						<li role="menuitem">
-							<button
-								on:click={() => toggleSelection(toggle, filterToggleOptions)}
-								on:keydown={(e) => {
-									if (e.key === 'Enter' || e.key === ' ') {
-										e.preventDefault();
-										toggleSelection(toggle, filterToggleOptions);
-									}
-								}}
-								class="w-full text-left flex items-center"
-							>
-								<div class="w-4 h-4 mr-2">
-									{#if $ConfigStore[toggle]}
-										<MdCheck />
-									{/if}
-								</div>
-								{capitalizeFirstLetter(toggle.replace('Toggle', ''))}
-							</button>
-						</li>
-					{/each}
-					<li role="menuitem" class="cursor-none">
-						<p>Stop Length: {formattedStopLength}</p>
+		<details class="dropdown" use:clickOutside>
+			<summary
+				class="btn btn-sm ml-4 tooltip tooltip-bottom flex items-center justify-center"
+				data-tip="This changes the mouse to visualize different hovers over the data."
+			>
+				Filter
+			</summary>
+			<ul class="menu dropdown-content rounded-box z-[1] w-52 p-2 shadow bg-base-100">
+				{#each filterToggleOptions as toggle}
+					<li>
+						<button on:click={() => toggleSelection(toggle, filterToggleOptions)} class="w-full text-left flex items-center">
+							<div class="w-4 h-4 mr-2">
+								{#if $ConfigStore[toggle]}
+									<MdCheck />
+								{/if}
+							</div>
+							{capitalizeFirstLetter(toggle.replace('Toggle', ''))}
+						</button>
 					</li>
-					<li role="menuitem">
-						<label for="stopLengthRange" class="sr-only">Adjust stop length</label>
-						<input
-							id="stopLengthRange"
-							type="range"
-							min="1"
-							max={$ConfigStore.maxStopLength}
-							value={$ConfigStore.stopSliderValue}
-							class="range"
-							on:input={handleStopLengthChange}
-						/>
+				{/each}
+				<li class="cursor-none">
+					<p>Stop Length: {formattedStopLength}</p>
+				</li>
+				<li>
+					<label for="stopLengthRange" class="sr-only">Adjust stop length</label>
+					<input
+						id="stopLengthRange"
+						type="range"
+						min="1"
+						max={$ConfigStore.maxStopLength}
+						value={$ConfigStore.stopSliderValue}
+						class="range"
+						on:input={handleStopLengthChange}
+					/>
+				</li>
+			</ul>
+		</details>
+
+		<!-- Select Dropdown -->
+		<details class="dropdown" use:clickOutside>
+			<summary
+				class="btn btn-sm ml-4 tooltip tooltip-bottom flex items-center justify-center"
+				data-tip="This changes the mouse to visualize different hovers over the data."
+			>
+				Select
+			</summary>
+			<ul class="menu dropdown-content rounded-box z-[1] w-52 p-2 shadow bg-base-100">
+				{#each selectToggleOptions as toggle}
+					<li>
+						<button on:click={() => toggleSelection(toggle, selectToggleOptions)} class="w-full text-left flex items-center">
+							<div class="w-4 h-4 mr-2">
+								{#if $ConfigStore[toggle]}
+									<MdCheck />
+								{/if}
+							</div>
+							{capitalizeFirstLetter(toggle.replace('Toggle', ''))}
+						</button>
 					</li>
-				</ul>
-			</div>
-		</div>
+				{/each}
+			</ul>
+		</details>
 
-		<div class="dropdown">
-			<div class="tooltip tooltip-bottom" data-tip="This changes the mouse to visualize different hovers over the data.">
-				<div tabindex="0" role="button" class="btn btn-sm ml-4">Select</div>
-			</div>
+		<!-- Talk Dropdown -->
+		<details class="dropdown" use:clickOutside>
+			<summary
+				class="btn btn-sm ml-4 tooltip tooltip-bottom flex items-center justify-center"
+				data-tip="This changes the mouse to visualize different hovers over the data."
+			>
+				Talk
+			</summary>
+			<ul class="menu dropdown-content rounded-box z-[1] w-52 p-2 shadow bg-base-100">
+				{#each conversationToggleOptions as toggle}
+					<li>
+						<button on:click={() => toggleSelection(toggle, conversationToggleOptions)} class="w-full text-left flex items-center">
+							<div class="w-4 h-4 mr-2">
+								{#if $ConfigStore[toggle]}
+									<MdCheck />
+								{/if}
+							</div>
+							{capitalizeFirstLetter(toggle.replace('Toggle', ''))}
+						</button>
+					</li>
+				{/each}
+			</ul>
+		</details>
 
-			<div role="menu" aria-labelledby="dropdownMenuButton">
-				<ul class="dropdown-content menu rounded-box z-[1] w-52 p-2 shadow bg-base-100">
-					{#each selectToggleOptions as toggle}
-						<li role="menuitem">
-							<button
-								on:click={() => toggleSelection(toggle, selectToggleOptions)}
-								on:keydown={(e) => {
-									if (e.key === 'Enter' || e.key === ' ') {
-										e.preventDefault();
-										toggleSelection(toggle, selectToggleOptions);
-									}
-								}}
-								class="w-full text-left flex items-center"
-							>
-								<div class="w-4 h-4 mr-2">
-									{#if $ConfigStore[toggle]}
-										<MdCheck />
-									{/if}
-								</div>
-								{capitalizeFirstLetter(toggle.replace('Toggle', ''))}
-							</button>
-						</li>
-					{/each}
-				</ul>
-			</div>
-		</div>
+		<!-- Clear Data Dropdown -->
+		<details class="dropdown" use:clickOutside>
+			<summary class="btn btn-sm ml-4">Clear Data</summary>
+			<ul class="menu dropdown-content rounded-box z-[1] w-52 p-2 shadow bg-base-100">
+				<li><button on:click={clearMovementData}>Clear Movement Data</button></li>
+				<li><button on:click={clearConversationData}>Clear Conversation Data</button></li>
+				<li><button on:click={clearCodeData}>Clear Code Data</button></li>
+				<li><button on:click={clearAllData}>Clear All Data</button></li>
+			</ul>
+		</details>
 
-		<div class="dropdown">
-			<div class="tooltip tooltip-bottom" data-tip="This changes the mouse to visualize different hovers over the data.">
-				<div tabindex="0" role="button" class="btn btn-sm ml-4">Talk</div>
-			</div>
-
-			<div role="menu" aria-labelledby="dropdownMenuButton">
-				<ul class="dropdown-content menu rounded-box z-[1] w-52 p-2 shadow bg-base-100">
-					{#each conversationToggleOptions as toggle}
-						<li role="menuitem">
-							<button
-								on:click={() => toggleSelection(toggle, conversationToggleOptions)}
-								on:keydown={(e) => {
-									if (e.key === 'Enter' || e.key === ' ') {
-										e.preventDefault();
-										toggleSelection(toggle, conversationToggleOptions);
-									}
-								}}
-								class="w-full text-left flex items-center"
-							>
-								<div class="w-4 h-4 mr-2">
-									{#if $ConfigStore[toggle]}
-										<MdCheck />
-									{/if}
-								</div>
-								{capitalizeFirstLetter(toggle.replace('Toggle', ''))}
-							</button>
-						</li>
-					{/each}
-				</ul>
-			</div>
-		</div>
-
-		<button class="btn btn-sm ml-4" on:click={() => (showDataPopup = true)}>Show Data</button>
+		<button class="btn btn-sm ml-4" on:click={() => (showDataPopup = true)}>Data Explorer</button>
 
 		<div class="flex items-stretch">
 			<IconButton
@@ -264,9 +325,10 @@
 
 			<IconButton icon={MdCloudDownload} tooltip={'Download your Data'} on:click={() => p5Instance.saveCodeFile()} />
 
+			<!-- TODO: Need to move this logic into the IconButton component eventually -->
 			<div
 				data-tip="Upload"
-				class="tooltip tooltip-bottom btn capitalize icon max-h-8 bg-[#f6f5f3] border-[#f6f5f3]"
+				class="tooltip tooltip-bottom btn capitalize icon max-h-8 max-w-16 bg-[#f6f5f3] border-[#f6f5f3] flex items-center justify-center"
 				role="button"
 				tabindex="0"
 				on:click
@@ -395,21 +457,27 @@
 <div class="btm-nav flex justify-between min-h-20">
 	<div class="flex flex-1 flex-row justify-start items-center bg-[#f6f5f3] items-start px-8">
 		{#if $ConfigStore.dataHasCodes}
-			<div class="dropdown dropdown-top">
-				<div tabindex={0} role="button" class="btn">Codes</div>
-				<ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-64 p-2 shadow h-100 overflow-y-scroll flex-nowrap">
+			<details class="dropdown dropdown-top">
+				<summary class="btn">Codes</summary>
+				<ul class="menu dropdown-content p-2 bg-base-100 rounded-box w-64 max-h-[75vh] overflow-y-auto">
 					<li>
 						<div class="flex items-center">
-							<input id="codeCheckbox-all" type="checkbox" class="checkbox" />
-							Select All
+							<input
+								id="codeCheckbox-all"
+								type="checkbox"
+								class="checkbox"
+								checked={$CodeStore.every((code) => code.enabled)}
+								on:change={toggleSelectAllCodes}
+							/>
+							Enable All
 						</div>
 						<div class="flex items-center">
-							<!-- This updates the config store's isPathColorMode -->
 							<input id="codeCheckbox-all" type="checkbox" class="checkbox" bind:checked={$ConfigStore.isPathColorMode} />
 							Color by Codes
 						</div>
+						<div class="divider" />
 					</li>
-					{#each $CodeStore as code, index}
+					{#each sortedCodes as code, index}
 						<li><h3 class="pointer-events-none">{code.code.toUpperCase()}</h3></li>
 						<li>
 							<div class="flex items-center">
@@ -423,17 +491,18 @@
 								Color
 							</div>
 						</li>
-						{#if index !== $CodeStore.length - 1}
+						{#if index !== sortedCodes.length - 1}
 							<div class="divider" />
 						{/if}
 					{/each}
 				</ul>
-			</div>
+			</details>
 		{/if}
+		<!-- Users Dropdowns -->
 		{#each $UserStore as user}
-			<div class="dropdown dropdown-top">
-				<div tabindex={0} role="button" class="btn">{user.name}</div>
-				<ul tabindex={0} class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
+			<details class="dropdown dropdown-top">
+				<summary class="btn">{user.name}</summary>
+				<ul class="menu dropdown-content bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
 					<li>
 						<div class="flex items-center">
 							<input id="userCheckbox-{user.name}" type="checkbox" class="checkbox" bind:checked={user.enabled} />
@@ -452,12 +521,9 @@
 							Color
 						</div>
 					</li>
-					<li>
-						<div class="flex items-center">Transcripts</div>
-						<!-- this should go through the user's datatrail and then show a daisyui table of all the text -->
-					</li>
+					<!-- Add Transcripts section if needed -->
 				</ul>
-			</div>
+			</details>
 		{/each}
 	</div>
 

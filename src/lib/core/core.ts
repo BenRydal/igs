@@ -34,6 +34,7 @@ ConfigStore.subscribe((data) => {
 export class Core {
 	sketch: p5;
 	coreUtils: CoreUtils;
+	codeData: { code: string; startTime: number; endTime: number }[] = [];
 
 	constructor(sketch: p5) {
 		this.sketch = sketch;
@@ -164,29 +165,21 @@ export class Core {
 		const csvData = results.data;
 		if (this.coreUtils.testMovement(results)) {
 			this.updateUsersForMovement(csvData, fileName);
+			this.reapplyCodesToUsers();
 		} else if (this.coreUtils.testMulticode(results)) {
-			ConfigStore.update((currentConfig) => {
-				return {
-					...currentConfig,
-					dataHasCodes: true
-				};
-			});
 			this.updateUsersForMultiCodes(csvData, fileName);
+			// No need to call reapplyCodesToUsers here because it's called inside updateUsersForMultiCodes
 		} else if (this.coreUtils.testSingleCode(results)) {
-			ConfigStore.update((currentConfig) => {
-				return {
-					...currentConfig,
-					dataHasCodes: true
-				};
-			});
 			this.updateUsersForSingleCodes(csvData, fileName);
+			// No need to call reapplyCodesToUsers here because it's called inside updateUsersForSingleCodes
 		} else if (this.coreUtils.testConversation(results)) {
 			this.updateUsersForConversation(csvData, fileName);
+			this.reapplyCodesToUsers();
 		} else {
 			alert('Error loading CSV file. Please make sure your file is a CSV file formatted with correct column headers');
 		}
 
-		// Sort all the users' data trails by time
+		// Sort users' data trails by time
 		UserStore.update((currentUsers) => {
 			let users = [...currentUsers];
 			users.forEach((user) => {
@@ -286,6 +279,13 @@ export class Core {
 		CodeStore.update(() => {
 			return [];
 		});
+
+		this.codeData = [];
+
+		ConfigStore.update((currentConfig) => ({
+			...currentConfig,
+			dataHasCodes: false
+		}));
 	}
 
 	integrateConversation(dataPoints) {
@@ -339,47 +339,60 @@ export class Core {
 	};
 
 	updateUsersForMultiCodes = (csvData: any, fileName: string) => {
+		const uniqueCodes: string[] = [];
+
+		// Process each row in CSV
+		csvData.forEach((row: any) => {
+			const code = row.code.toLowerCase();
+			if (!uniqueCodes.includes(code)) uniqueCodes.push(code);
+			const startTime = parseFloat(row.start);
+			const endTime = parseFloat(row.end);
+
+			// Store the code data
+			this.codeData.push({ code, startTime, endTime });
+		});
+
+		// Update the CodeStore with the unique codes
+		this.updateCodeStore(uniqueCodes);
+
+		// Reapply codes to users
+		this.reapplyCodesToUsers();
+	};
+
+	reapplyCodesToUsers = () => {
 		UserStore.update((currentUsers) => {
-			let users = [...currentUsers]; // clone the current users
-			const uniqueCodes: string[] = [];
+			let users = [...currentUsers];
 
-			// Process each row in CSV
-			csvData.forEach((row: any) => {
-				const code = row.code.toLowerCase();
-				if (!uniqueCodes.includes(code)) uniqueCodes.push(code);
-				const startTime = parseFloat(row.start);
-				const endTime = parseFloat(row.end);
-
-				// Update the data trail for each user with the code
-				this.updateDataTrailSegmentsWithCodes(users, code, startTime, endTime);
+			// Clear codes in users
+			users.forEach((user) => {
+				user.dataTrail.forEach((dataPoint) => {
+					dataPoint.codes = [];
+				});
 			});
 
-			// Update the CodeStore with the unique codes
-			this.updateCodeStore(uniqueCodes);
+			// Reapply codes
+			this.codeData.forEach((codeEntry) => {
+				const { code, startTime, endTime } = codeEntry;
+				this.updateDataTrailSegmentsWithCodes(users, code, startTime, endTime);
+			});
 
 			return users;
 		});
 	};
 
 	updateUsersForSingleCodes = (csvData: any, fileName: string) => {
-		UserStore.update((currentUsers) => {
-			let users = [...currentUsers]; // clone the current users
-			const code = fileName;
-			const uniqueCodes = [code]; // Single code
+		const codeName = fileName.replace(/\.[^/.]+$/, '').toLowerCase();
+		const uniqueCodes = [codeName];
 
-			csvData.forEach((row: any) => {
-				const startTime = parseFloat(row.start);
-				const endTime = parseFloat(row.end);
-
-				// Update the data trail for each user with the code
-				this.updateDataTrailSegmentsWithCodes(users, code, startTime, endTime);
-			});
-
-			// Update the CodeStore with the single code
-			this.updateCodeStore(uniqueCodes);
-
-			return users;
+		csvData.forEach((row: any) => {
+			const startTime = parseFloat(row.start);
+			const endTime = parseFloat(row.end);
+			this.codeData.push({ code: codeName, startTime, endTime });
 		});
+
+		this.updateCodeStore(uniqueCodes);
+
+		this.reapplyCodesToUsers();
 	};
 
 	updateDataTrailSegmentsWithCodes = (users: any[], code: string, startTime: number, endTime: number) => {
@@ -403,14 +416,30 @@ export class Core {
 
 	updateCodeStore = (uniqueCodes: string[]) => {
 		CodeStore.update((currentEntries) => {
-			const newEntries = uniqueCodes.map((code, index) => ({
-				code: code,
-				color: USER_COLORS[index % USER_COLORS.length], // Cycle through colors
-				enabled: true
-			}));
+			// TODO: @Ben - this is the attempt to deal with data points that do NOT have codes.
+			if (!currentEntries.some((entry) => entry.code === 'no codes')) {
+				currentEntries.unshift({
+					code: 'no codes',
+					color: '#808080',
+					enabled: true
+				});
+			}
 
-			// Combine current entries with new entries
+			const existingCodes = currentEntries.map((entry) => entry.code);
+			const newEntries = uniqueCodes
+				.filter((code) => !existingCodes.includes(code))
+				.map((code, index) => ({
+					code,
+					color: USER_COLORS[(index + currentEntries.length) % USER_COLORS.length],
+					enabled: true
+				}));
+
 			return [...currentEntries, ...newEntries];
 		});
+
+		ConfigStore.update((currentConfig) => ({
+			...currentConfig,
+			dataHasCodes: true
+		}));
 	};
 }
