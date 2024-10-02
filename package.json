@@ -13,6 +13,7 @@
     },
     "devDependencies": {
         "@sveltejs/adapter-auto": "^2.0.0",
+        "@sveltejs/adapter-static": "^3.0.5",
         "@sveltejs/kit": "^1.5.0",
         "@types/papaparse": "^5.3.7",
         "@typescript-eslint/eslint-plugin": "^5.45.0",
@@ -31,6 +32,7 @@
     "type": "module",
     "dependencies": {
         "@rollup/plugin-typescript": "^11.1.1",
+        "@sveltejs/adapter-vercel": "^5.4.4",
         "@tsconfig/svelte": "^4.0.1",
         "@types/p5": "^1.6.2",
         "autoprefixer": "^10.4.14",
