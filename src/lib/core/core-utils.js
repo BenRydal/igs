@@ -86,10 +86,6 @@ export class CoreUtils {
 		);
 	}
 
-	curTimeIsLarger(curRow, priorRow) {
-		return Number.parseFloat(curRow[this.headersMovement[0]]).toFixed(1) > Number.parseFloat(priorRow[this.headersMovement[0]]).toFixed(1);
-	}
-
 	/**
 	 * Used to compare and add new data to core data lists from CSV file names and data
 	 * @param  {String} s
