@@ -1,0 +1,241 @@
+html * {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+*,
+*:hover {
+    transition: all .3s;
+}
+
+html,
+body {
+    max-width: 100%;
+    overflow-x: hidden;
+    color: white;
+    background: white;
+    height: 100%;
+    width: 100%;
+}
+
+#data-drop-down-menu {
+    -webkit-appearance: none;  /* Removes default chrome and safari style */
+    -moz-appearance: none;  /* Removes default style Firefox */
+    appearance: none;  /* Removes default browser style*/
+    font-size: 1em;
+    font-weight: 300;
+    color: #333; /* Dark grey color for text */
+    background-color: white;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><path fill="%23333" d="M5 8l5 5 5-5z"/></svg>'); /* Custom arrow */
+    background-repeat: no-repeat, repeat;
+    background-position: right .7em top 50%, 0 0;
+    background-size: 1em auto, 100%;
+    border: 1px solid #ddd; /* Light grey border */
+    border-radius: 5px; /* Rounded corners */
+    padding: 8px 20px 8px 8px; /* Padding for text and arrow */
+    cursor: pointer;
+}
+
+#data-drop-down-menu:hover {
+    border-color: #bbb; /* Slightly darker border on hover */
+}
+
+#data-drop-down-menu:focus {
+    border-color: #999; /* Even darker border for focus */
+    outline: none; /* Removes the default focus outline */
+}
+
+/* Optional: Add a transition for smooth effect */
+#data-drop-down-menu {
+    transition: border-color 0.3s ease;
+}
+
+.main-menu-bar {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+
+.main-menu-bar__input {
+    width: 0.1px;
+    height: 0.1px;
+    opacity: 0;
+    overflow: hidden;
+    position: absolute;
+    z-index: -1;
+}
+
+.main-menu-bar__input + label {
+    font-size: 1em;
+    font-weight: 500; /* Slightly bolder */
+    color: white; /* Change text color */
+    background-color:#817c81; /* A pleasant blue */
+    display: inline-block;
+    border: none;
+    padding: 10px 15px; /* More padding for a larger button */
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer; /* Cursor changes to pointer to indicate it's clickable */
+}
+
+.main-menu-bar__input + label:hover,
+.main-menu-bar__input + label:active {
+    background-color: #ccc; /* Darker shade on hover and active */
+}
+
+/* Optional: Add a transition for smooth effect */
+.main-menu-bar__input + label {
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Display none for hiding load data buttons on program start */
+.js-main-menu-bar__load-files--display+label {
+    display: none;
+}
+
+.p5-container {
+    position: relative;
+}
+
+.how-to-container {
+    position: absolute;
+    top: 6vh;
+    width: 70vw;
+    height: 70vh;
+    border: 2px solid black;
+    right: 0;
+    left: 0;
+    margin: auto;
+    /* Use rgba to not effect text opacity */
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.how-to-container__title {
+    color: black;
+    padding: 1.5vw;
+    text-transform: uppercase;
+    text-align: center;
+    font-size: 1.75vw;
+    font-weight: bold;
+}
+
+.how-to-container__text {
+    color: black;
+    padding-right: 3vw;
+    padding-left: 3vw;
+    text-align: left;
+    line-height: 1.6;
+    font-size: 1.3vw;
+    text-align: justify;
+}
+
+.how-to-container__credits {
+    color: black;
+    padding-top: 1.5vh;
+    padding-right: 3vw;
+    padding-left: 3vw;
+    text-align: left;
+    line-height: 1.6;
+    font-size: 1vw;
+    font-style: italic;
+    text-align: justify;
+}
+
+
+
+.main-tab-container {
+    position: absolute;
+    max-width: 48%;
+    top: 90%;
+}
+
+/* Main Tabs */
+label {
+    background-color: #817c81;
+    color: #ffffff;
+    display: inline-block;
+    cursor: pointer;
+    padding: 8px;
+    font-size: 14px;
+}
+
+label:hover {
+    background-color: #ccc;
+}
+
+.tab-radio {
+    display: none;
+}
+
+/* Tabs behavior, hidden if not checked/clicked */
+.sub-tab-content,
+.tab-content {
+    display: none;
+}
+
+.tab-radio:checked+.tab-content,
+.tab-radio:checked+.sub-tab-content {
+    display: block;
+}
+
+/* Sub-tabs */
+.sub-tabs-container label {
+    background-color: #f3f4fa;
+    color: #030700;
+    border: 1px solid #ddd;
+}
+
+/* Tabs Content */
+.tab-content {
+    padding: 10px;
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+}
+
+.tab-content label:hover {
+    background-color: #ffffff;
+}
+
+.button-float {
+    float: right;
+}
+
+.tab-checkbox {
+    background-color: #ffffff;
+    color: black;
+    position: relative;
+    padding-left: 35px;
+    cursor: pointer;
+    font-size: 18px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* Hide browser's default checkbox */
+.tab-checkbox input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+/* Create a custom checkbox */
+.checkmark {
+    position: absolute;
+    top: 12;
+    left: 0;
+    height: 20px;
+    width: 20px;
+}
+
+/* Create a custom colorpicker */
+.colorpicker {
+    position: absolute;
+    background-color: #817c81;
+    top: 12;
+    left: 0;
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+}

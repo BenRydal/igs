@@ -1,43 +1,30 @@
-# igs
+# Interaction Geography Slicer (IGS)
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/master/packages/create-svelte).
+Hi there! This is a repository for the Interaction Geography Slicer (IGS), an open-source space-time cube system to dynamically visualize movement, conversation, and audio/video data over space and time.
 
-## Developing
+IGS Features:
 
-Once you've created a project and installed dependencies with `yarn install`, start a development server:
+- **Browser-based:** Everything in your browser.
+- **Visualizations:** Create dynamic 2D/3D space-time visualizations at different scales.
+- **Mix multi-modal data sources:** Explore movement, conversation and video data independently or simultaneously in the same visualization.
+- **Use in qualitative and quantitative projects:** Supports projects spanning micro-ethnographic analysis of phenomena such as gesture; reflective professional practice in classrooms; and larger scale analysis of urban mobility.
+- **Future features:** We are rapidly developing and expanding IGS features and collaborators in this effort are welcome.
 
-```bash
-yarn run dev
+![repo](./images/coverImage.png)
 
-# or start the server and open the app in a new browser tab
-yarn run dev -- --open
-```
+## Get started
 
-## Building
+- For more information on the IGS and how to format, collect, or transcribe your data for use in this tool please visit: [Interaction Geography Slicer](https://www.benrydal.com/software/igs)
 
-To create a production version of your app:
+## Reporting bugs & contributing code
 
-```bash
-yarn run build
-```
+- We are rapidly developing and expanding IGS features and collaborators in this effort are welcome.
+- If you have found a bug, you can file it under the “issues” tab. You can also request new features here.
 
-You can preview the production build with `yarn run preview`.
+## Credits
 
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+This project has been generously supported by the National Science Foundation. This software uses the YouTube Video Player API and the PapaParse library by Matt Holt for CSV file processing. Classroom discussion example data is used with special permission from Mathematics Teaching and Learning to Teach (MTLT), University of Michigan. (2010). Sean Numbers-Ofala. Classroom science lesson data is made possible by the researchers and teachers who created The Third International Mathematics and Science Study (TIMSS) 1999 Video Study. Rogers Hall and David Owens have been key contributors to ideas important to this work. Christine Hsieh and Edwin Zhao contributed early discussions and ideas for a video player interface. IGS software was originally developed by Ben Rydal Shapiro at Vanderbilt University as part of his dissertation titled Interaction Geography & the Learning Sciences. Copyright (C) 2018 Ben Rydal Shapiro, and contributors. To reference or read more about this work please see [HERE](https://etd.library.vanderbilt.edu/available/etd-03212018-140140/unrestricted/Shapiro_Dissertation.pdf)
 
-## TODO List
+## License
 
-### High Priority
-
-- Remove old/dead code
-- Optimize/add comments new methods
-- code files
-- video files
-- loading own data
-- Basic UI functions--e.g., move timeline into interface, sync up buttons with animations
-
-### Lower priority
-
-- reducing data/normalizing data on load
-- Logging
-- add tests for bad data
+This software is written in JavaScript and p5.js and licensed under the GNU General Public License Version 2.0. See the GNU General Public License included with this software for more details.

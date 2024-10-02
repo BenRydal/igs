@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Interaction Geography Slicer (IGS): Visualizing Interaction over Space and Time</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A dynamic visualization tool to visualize movement, conversation, and audiovisual data over space and time.">
+    <meta name="keywords" content="Visualization, Interaction Geography Slicer, Video">
+    <meta name="robots" content="index, follow">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="language" content="English">
+    <meta name="author" content="Ben Rydal Shapiro">
+    <script src="https://cdn.jsdelivr.net/npm/p5@0.10.2/lib/p5.js"></script>
+    <script type="text/javascript" src="https://www.youtube.com/iframe_api"></script>
+    <script src="libs/papaparse.min.js"></script>
+    <script type="module" src="./js/main.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/input.css">
+    <link rel="stylesheet" type="text/css" href="css/slider.css">
+    <link rel="apple-touch-icon" sizes="180x180" href="images/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="images/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="images/favicon/favicon-16x16.png">
+    <link rel="manifest" href="images/favicon/site.webmanifest">
+</head>
+
+<body>
+    <div class="main-menu-bar">
+        <form action="/action_page.php">
+            <select id="data-drop-down-menu" name="drop-down-menu">
+                <option disabled selected value> -- Select an Option -- </option>
+                <option value="Load Data">LOAD DATA</option>
+                <option value="Example 1">EXAMPLE 1: JORDAN'S LAST SHOT</option>
+                <option value="Example 2">EXAMPLE 2: MUSEUM GALLERY VISIT</option>
+                <option value="Example 3">EXAMPLE 3: SCIENCE LESSON</option>
+                <option value="Example 4">EXAMPLE 4: CLASSROOM DISCUSSION</option>
+            </select>
+            <input type="file" name="input-files" id="input-load-files" class="main-menu-bar__input js-main-menu-bar__load-files--display" multiple accept=".png, .jpg, .jpeg, .csv, .mp4">
+            <label for="input-load-files" class="js-main-menu-bar__load-files--display" title="Load Files in the following formats: Floor Plan (PNG/JPG), Movement (CSV), Conversation (CSV), Code (CSV), Video (MP4)">LOAD FILES</label>
+            <button type="button" id="clear-button" class="main-menu-bar__input js-main-menu-bar__load-files--display"></button>
+            <label for="clear-button" class="js-main-menu-bar__load-files--display" title="Clear All Loaded Data">CLEAR</label>
+            <button type="button" id="3D-button" class="main-menu-bar__input"></button>
+            <label for="3D-button" title="Toggle 2D and 3D Views">2D/3D</label>
+            <button type="button" id="how-to-button" class="main-menu-bar__input"></button>
+            <label for="how-to-button" title="Learn How To Use This Tool">?</label>
+        </form>
+    </div>
+
+    <div class="p5-container" id="sketch-holder">
+        <div class="how-to-container">
+            <h1 class="how-to-container__title">Interaction Geography Slicer (IGS)</h1>
+            <p class="how-to-container__text">
+                Hello! This is a tool to visualize movement, conversation, and video data over space
+                and time. Data are displayed over a floor plan and a timeline and can be viewed in 2D or 3D.
+            </p>
+            <p class="how-to-container__text">
+                Use the top menu to visualize different sample datasets or upload your own data. Use the bottom
+                left tabs as well as the timeline to selectively study displayed data. For example, you can toggle
+                individual movement paths and speakers, visualize conversation in different ways, animate data, and
+                play/pause video by clicking anywhere on the timeline.
+            </p>
+            <p class="how-to-container__text">
+                For further information, <a href="https://benrydal.com/software/igs">learn how to use and format your
+                    data for the IGS</a>
+            </p>
+            <p class="how-to-container__credits">
+                IGS software is an open-source project built with JavaScript and p5.js licensed under the GNU General Public License Version 2.0. It is developed by Ben Rydal Shapiro and contributors with support from the National Science Foundation.
+                <a href="https://github.com/BenRydal/igs">Contribute</a> |
+                <a href="https://par.nsf.gov/servlets/purl/10074100">Reference</a> |
+                <a href="https://www.benrydal.com/interactiongeography">Learn More About Interaction Geography</a>
+            </p>
+        </div>
+    </div>
+
+    <div class="main-tab-container">
+        <div class="top-tabs-container">
+            <label for="main-tab-1">MOVEMENT</label>
+            <label for="main-tab-3">TALK</label>
+            <label for="main-tab-4">VIDEO</label>
+            <label for="main-tab-5">ANIMATE</label>
+            <label for="main-tab-6">SELECT</label>
+            <label for="main-tab-7">FLOOR PLAN</label>
+            <label for="main-tab-8">CODES</label>
+            <label for="main-tab-9">EXPORT</label>
+        </div>
+
+        <!-- TAB 1 MOVEMENT -->
+        <input class="tab-radio" id="main-tab-1" name="main-group" type="radio" checked="checked">
+        <div class="tab-content" id="movement-main-tab">
+            <div class="sub-tabs-container button-float">
+                <label for="sub-tab1-1" title="Click to change and set colors">Change Color</label>
+            </div>
+            <!-- Sub Tabs -->
+            <input class="tab-radio js-color-change" id="sub-tab1-1" name="sub-group1" type="checkbox">
+        </div>
+
+        <!-- TAB 2 TALK -->
+        <input class="tab-radio" id="main-tab-3" name="main-group" type="radio">
+        <div class="tab-content loop-sketch" id="talk-main-tab">
+            <div class="sub-tabs-container button-float">
+                <input type="search" id="sub-tab3-1" name="search-input" placeholder="Search">
+                <label for="sub-tab3-2" title="Align talk along top">Align</label>
+                <label for="sub-tab3-3" title="Show talk by all speakers along each movement path">All On
+                    Path</label>
+                <label for="sub-tab3-4" title="Click to change and set colors">Change
+                    Color</label>
+            </div>
+            <input class="tab-radio" id="sub-tab3-2" name="sub-group3" type="checkbox">
+            <input class="tab-radio" id="sub-tab3-3" name="sub-group3" type="checkbox">
+            <input class="tab-radio js-color-change" id="sub-tab3-4" name="sub-group3" type="checkbox">
+        </div>
+
+        <!-- TAB 3 VIDEO -->
+        <input class="tab-radio" id="main-tab-4" name="main-group" type="radio">
+        <div class="tab-content loop-sketch">
+            <div class="sub-tabs-container">
+                <label for="sub-tab4-1">Show/Hide</label>
+                <label for="sub-tab4-2">Play/Pause</label>
+                <label for="sub-tab4-3">+</label>
+                <label for="sub-tab4-4">-</label>
+            </div>
+            <input class="tab-radio" id="sub-tab4-1" name="sub-group4" type="checkbox">
+            <input class="tab-radio" id="sub-tab4-2" name="sub-group4" type="checkbox">
+            <input class="tab-radio" id="sub-tab4-3" name="sub-group4" type="checkbox">
+            <input class="tab-radio" id="sub-tab4-4" name="sub-group4" type="checkbox">
+        </div>
+
+        <!-- TAB 5 ANIMATE -->
+        <input class="tab-radio" id="main-tab-5" name="main-group" type="radio">
+        <div class="tab-content loop-sketch">
+            <div class="sub-tabs-container">
+                <label for="sub-tab5-1">Start/End</label>
+                <label for="sub-tab5-2">Play/Pause</label>
+                <!-- <label class= "zzzTest" for="animate-speed-slider">Speed</label> -->
+                <input class="slider" id="animate-speed-slider" type="range" min="100" max="8000" value="4000">
+            </div>
+            <input class="tab-radio" id="sub-tab5-1" name="sub-group5" type="checkbox">
+            <input class="tab-radio" id="sub-tab5-2" name="sub-group5" type="checkbox">
+        </div>
+
+        <!-- TAB 6 SELECT -->
+        <input class="tab-radio" id="main-tab-6" name="main-group" type="radio">
+        <div class="tab-content loop-sketch">
+            <div class="sub-tabs-container">
+                <label for="sub-tab6-1" title="Reset selectors">Reset</label>
+                <label for="sub-tab6-2" title="Hover to highlight circular regions of data (2D only)">Circle</label>
+                <label for="sub-tab6-3" title="Hover to highlight rectangular slices of data (2D only)">Slice</label>
+                <label for="sub-tab6-4" title="Highlight only movement">Movement</label>
+                <label for="sub-tab6-5" title="Highlight only stops">Stops</label>
+                <label for="sub-tab6-6" title="Drag to select rectangular regions of data in 2D View. Hold option key to select multiple regions.">Highlight</label>
+                <input class="slider" id="stop-slider" type="range" min="1" max="100" value="1">
+            </div>
+            <input class="tab-radio" id="sub-tab6-1" name="sub-group6" type="radio">
+            <input class="tab-radio" id="sub-tab6-2" name="sub-group6" type="radio">
+            <input class="tab-radio" id="sub-tab6-3" name="sub-group6" type="radio">
+            <input class="tab-radio" id="sub-tab6-4" name="sub-group6" type="radio">
+            <input class="tab-radio" id="sub-tab6-5" name="sub-group6" type="radio">
+            <input class="tab-radio" id="sub-tab6-6" name="sub-group6" type="radio">
+        </div>
+
+        <!-- TAB 7 FLOOR PLAN-->
+        <input class="tab-radio" id="main-tab-7" name="main-group" type="radio">
+        <div class="tab-content loop-sketch">
+            <div class="sub-tabs-container">
+                <label for="sub-tab7-1">Rotate Left</label>
+                <label for="sub-tab7-2">Rotate Right</label>
+            </div>
+            <input class="tab-radio" id="sub-tab7-1" name="sub-group7" type="checkbox">
+            <input class="tab-radio" id="sub-tab7-2" name="sub-group7" type="checkbox">
+        </div>
+
+        <!-- TAB 8 CODES -->
+        <input class="tab-radio" id="main-tab-8" name="main-group" type="radio">
+        <div class="tab-content loop-sketch" id="codes-main-tab">
+            <div class="sub-tabs-container button-float">
+                <label for="sub-tab8-1" title="Color data by codes files (grey = no code and black = multiple codes)">Color
+                    By Codes</label>
+                <label for="sub-tab8-2" style="display: none" title="Click to change and set colors">Change
+                    Color</label>
+            </div>
+            <input class="tab-radio" id="sub-tab8-1" name="sub-group8" type="checkbox">
+            <input class="tab-radio js-color-change" id="sub-tab8-2" name="sub-group8" type="checkbox">
+        </div>
+
+        <!-- TAB 9 EXPORT -->
+        <input class="tab-radio" id="main-tab-9" name="main-group" type="radio">
+        <div class="tab-content loop-sketch">
+            <div class="sub-tabs-container">
+                <label for="sub-tab9-1" title="Click to create code files from selected/displayed data">Code File</label>
+            </div>
+            <input class="tab-radio" id="sub-tab9-1" name="sub-group8" type="checkbox">
+        </div>
+    </div>
+</body>
+
+</html>
