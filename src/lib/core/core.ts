@@ -127,7 +127,7 @@ export class Core {
 				break;
 			case 'example-4':
 				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `cassandra.csv`);
-				await this.loadLocalExampleDataFile(`//data/${selectedValue}/`, `mei.csv`);
+				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `mei.csv`);
 				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `nathan.csv`);
 				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `sean.csv`);
 				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `teacher.csv`);
@@ -201,13 +201,24 @@ export class Core {
 			}
 			if (endTime < csvData[csvData.length - 1]?.time) endTime = csvData[csvData.length - 1]?.time;
 
-			for (let i = 1; i < csvData.length; i++) {
-				const row = csvData[i];
-				const priorRow = csvData[i - 1];
-				if (this.coreUtils.movementRowForType(row) && this.coreUtils.curTimeIsLarger(row, priorRow)) {
-					user.dataTrail.push(new DataPoint('', row.time, row.x, row.y, false));
+			// TODO: Formalize the data optimization here as an option in the future
+			// Adjusting the i step will change the specificity of the data points
+			// Add a settings block so that we can control sensitivity of the data points and loading.
+			if (csvData.length > 500) {
+				console.log('========================');
+				for (let i = 1; i < csvData.length; i += 5) {
+					const row = csvData[i];
+
+					user.dataTrail.push(new DataPoint('', row.time, row.x, row.y));
+				}
+			} else {
+				for (let i = 1; i < csvData.length; i++) {
+					const row = csvData[i];
+
+					user.dataTrail.push(new DataPoint('', row.time, row.x, row.y));
 				}
 			}
+
 			this.integrateConversation(user.dataTrail);
 			this.updateStopValues(user.dataTrail);
 			return users;
@@ -288,8 +299,8 @@ export class Core {
 		}));
 	}
 
-	integrateConversation(dataPoints) {
-		dataPoints.forEach((dataPoint) => {
+	integrateConversation(dataPoints: DataPoint[]) {
+		dataPoints.forEach((dataPoint: DataPoint) => {
 			if (dataPoint.speech !== '') {
 				// Find the nearest data point with valid x and y coordinates
 				const closestIndex = dataPoints.reduce((closestIndex, currentPoint, index) => {
@@ -297,6 +308,9 @@ export class Core {
 					if (currentPoint.x == null || currentPoint.y == null) return closestIndex;
 
 					// If no closest point yet or the current point is closer in time, update the closest index
+					if (currentPoint.time === null) return closestIndex;
+					if (dataPoint.time === null) return closestIndex;
+
 					const isCurrentCloser =
 						closestIndex === -1 || Math.abs(currentPoint.time - dataPoint.time) < Math.abs(dataPoints[closestIndex].time - dataPoint.time);
 
@@ -331,14 +345,29 @@ export class Core {
 		}
 	}
 
-	copyDataPointAttributes = (sourceDataPoint, targetDataPoint) => {
+	copyDataPointAttributes = (sourceDataPoint: DataPoint, targetDataPoint: DataPoint) => {
 		targetDataPoint.x = sourceDataPoint.x;
 		targetDataPoint.y = sourceDataPoint.y;
 		targetDataPoint.stopLength = sourceDataPoint.stopLength;
 		targetDataPoint.codes = sourceDataPoint.codes;
 	};
 
-	updateUsersForMultiCodes = (csvData: any, fileName: string) => {
+	updateUsersForSingleCodes = (csvData: any, fileName: string) => {
+		const codeName = fileName.replace(/\.[^/.]+$/, '').toLowerCase();
+		const uniqueCodes = [codeName];
+
+		csvData.forEach((row: any) => {
+			const startTime = parseFloat(row.start);
+			const endTime = parseFloat(row.end);
+			this.codeData.push({ code: codeName, startTime, endTime });
+		});
+
+		this.updateCodeStore(uniqueCodes);
+
+		this.reapplyCodesToUsers();
+	};
+
+	updateUsersForMultiCodes = (csvData: any) => {
 		const uniqueCodes: string[] = [];
 
 		// Process each row in CSV
@@ -378,21 +407,6 @@ export class Core {
 
 			return users;
 		});
-	};
-
-	updateUsersForSingleCodes = (csvData: any, fileName: string) => {
-		const codeName = fileName.replace(/\.[^/.]+$/, '').toLowerCase();
-		const uniqueCodes = [codeName];
-
-		csvData.forEach((row: any) => {
-			const startTime = parseFloat(row.start);
-			const endTime = parseFloat(row.end);
-			this.codeData.push({ code: codeName, startTime, endTime });
-		});
-
-		this.updateCodeStore(uniqueCodes);
-
-		this.reapplyCodesToUsers();
 	};
 
 	updateDataTrailSegmentsWithCodes = (users: any[], code: string, startTime: number, endTime: number) => {
