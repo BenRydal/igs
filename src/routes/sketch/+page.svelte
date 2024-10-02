@@ -457,9 +457,9 @@
 <div class="btm-nav flex justify-between min-h-20">
 	<div class="flex flex-1 flex-row justify-start items-center bg-[#f6f5f3] items-start px-8">
 		{#if $ConfigStore.dataHasCodes}
-			<details class="dropdown dropdown-top">
+			<details class="dropdown dropdown-top" use:clickOutside>
 				<summary class="btn">Codes</summary>
-				<ul class="menu dropdown-content p-2 bg-base-100 rounded-box w-64 max-h-[75vh] overflow-y-auto">
+				<ul class="menu dropdown-content p-2 bg-base-100 rounded-box w-64 max-h-[75vh] overflow-y-auto flex-nowrap">
 					<li>
 						<div class="flex items-center">
 							<input
@@ -500,7 +500,7 @@
 		{/if}
 		<!-- Users Dropdowns -->
 		{#each $UserStore as user}
-			<details class="dropdown dropdown-top">
+			<details class="dropdown dropdown-top" use:clickOutside>
 				<summary class="btn">{user.name}</summary>
 				<ul class="menu dropdown-content bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
 					<li>
