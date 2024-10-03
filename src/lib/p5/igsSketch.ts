@@ -55,7 +55,7 @@ export const igsSketch = (p5: any) => {
 	};
 
 	p5.draw = () => {
-		p5.background(246, 245, 243);
+		p5.background(255);
 		p5.translate(-p5.width / 2, -p5.height / 2, 0); // recenter canvas to top left when using WEBGL renderer
 
 		if (p5.handle3D.getIs3DModeOrTransitioning()) {
