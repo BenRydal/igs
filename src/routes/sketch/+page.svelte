@@ -47,7 +47,7 @@
 	let isVideoPlaying = false;
 	let isPathColorMode = false;
 	let maxStopLength = 0;
-
+	let test = '';
 	ConfigStore.subscribe((value) => {
 		isPathColorMode = value.isPathColorMode;
 		maxStopLength = value.maxStopLength;
