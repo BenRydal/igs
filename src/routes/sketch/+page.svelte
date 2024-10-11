@@ -206,7 +206,7 @@
 		<details class="dropdown" use:clickOutside>
 			<summary
 				class="btn btn-sm ml-4 tooltip tooltip-bottom flex items-center justify-center"
-				data-tip="This changes the mouse to visualize different hovers over the data."
+				data-tip="Filter data in different ways"
 			>
 				Filter
 			</summary>
@@ -245,7 +245,7 @@
 		<details class="dropdown" use:clickOutside>
 			<summary
 				class="btn btn-sm ml-4 tooltip tooltip-bottom flex items-center justify-center"
-				data-tip="This changes the mouse to visualize different hovers over the data."
+				data-tip="Select data in the 2D view in different ways."
 			>
 				Select
 			</summary>
@@ -269,7 +269,7 @@
 		<details class="dropdown" use:clickOutside>
 			<summary
 				class="btn btn-sm ml-4 tooltip tooltip-bottom flex items-center justify-center"
-				data-tip="This changes the mouse to visualize different hovers over the data."
+				data-tip="Adjust how conversation is displayed"
 			>
 				Talk
 			</summary>
@@ -291,12 +291,16 @@
 
 		<!-- Clear Data Dropdown -->
 		<details class="dropdown" use:clickOutside>
-			<summary class="btn btn-sm ml-4">Clear Data</summary>
+			<summary 
+				class="btn btn-sm ml-4 tooltip tooltip-bottom flex items-center justify-center" 
+				data-tip="Clear displayed data">
+				Clear Data
+			</summary>
 			<ul class="menu dropdown-content rounded-box z-[1] w-52 p-2 shadow bg-base-100">
-				<li><button on:click={clearMovementData}>Clear Movement Data</button></li>
-				<li><button on:click={clearConversationData}>Clear Conversation Data</button></li>
-				<li><button on:click={clearCodeData}>Clear Code Data</button></li>
-				<li><button on:click={clearAllData}>Clear All Data</button></li>
+				<li><button on:click={clearMovementData}>Movement</button></li>
+				<li><button on:click={clearConversationData}>Conversation</button></li>
+				<li><button on:click={clearCodeData}>Codes</button></li>
+				<li><button on:click={clearAllData}>All Data</button></li>
 			</ul>
 		</details>
 
