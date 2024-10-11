@@ -327,7 +327,7 @@
 				}}
 			/>
 
-			<IconButton icon={MdCloudDownload} tooltip={'Download your Data'} on:click={() => p5Instance.saveCodeFile()} />
+			<IconButton icon={MdCloudDownload} tooltip={'Download Code File'} on:click={() => p5Instance.saveCodeFile()} />
 			<!-- TODO: Need to move this logic into the IconButton component eventually -->
 			<div
 				data-tip="Upload"
