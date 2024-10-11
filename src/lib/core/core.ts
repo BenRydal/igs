@@ -195,32 +195,42 @@ export class Core {
 		UserStore.update((currentUsers) => {
 			let users = [...currentUsers];
 			let user = users.find((user) => user.name === userName);
+
 			if (!user) {
 				user = this.createNewUser(users, userName);
 				users.push(user);
 			}
-			if (endTime < csvData[csvData.length - 1]?.time) endTime = csvData[csvData.length - 1]?.time;
 
-			// TODO: Formalize the data optimization here as an option in the future
-			// Adjusting the i step will change the specificity of the data points
-			// Add a settings block so that we can control sensitivity of the data points and loading.
-			if (csvData.length > 500) {
-				console.log('========================');
-				for (let i = 1; i < csvData.length; i += 5) {
-					const row = csvData[i];
+			const lastTime = csvData[csvData.length - 1]?.time;
+			if (endTime < lastTime) endTime = lastTime;
 
+			// Define the sampling interval in seconds for larger datasets
+			const samplingInterval = 0.5;
+
+			// Define a threshold for small datasets in rows
+			const smallDatasetThreshold = 3000;
+
+			// Check if the dataset is small
+			if (csvData.length <= smallDatasetThreshold) {
+				// If it's a small dataset, sample all data points
+				csvData.forEach((row) => {
 					user.dataTrail.push(new DataPoint('', row.time, row.x, row.y));
-				}
+				});
 			} else {
-				for (let i = 1; i < csvData.length; i++) {
-					const row = csvData[i];
+				// For larger datasets, apply time-based sampling
+				let lastSampledTime = csvData[0]?.time; // Start with the time of the first row
 
-					user.dataTrail.push(new DataPoint('', row.time, row.x, row.y));
-				}
+				csvData.forEach((row) => {
+					if (row.time - lastSampledTime >= samplingInterval) {
+						user.dataTrail.push(new DataPoint('', row.time, row.x, row.y));
+						lastSampledTime = row.time; // Update the last sampled time
+					}
+				});
 			}
 
 			this.integrateConversation(user.dataTrail);
 			this.updateStopValues(user.dataTrail);
+
 			return users;
 		});
 
