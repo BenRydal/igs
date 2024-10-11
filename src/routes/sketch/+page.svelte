@@ -197,7 +197,7 @@
 	}
 </script>
 
-<div class="navbar min-h-16 bg-[#f6f5f3]">
+<div class="navbar min-h-16 bg-[#ffffff]">
 	<div class="flex-1 px-2 lg:flex-none">
 		<a class="text-lg font-bold text-black" href="/">IGS</a>
 	</div>
@@ -324,11 +324,10 @@
 			/>
 
 			<IconButton icon={MdCloudDownload} tooltip={'Download your Data'} on:click={() => p5Instance.saveCodeFile()} />
-
 			<!-- TODO: Need to move this logic into the IconButton component eventually -->
 			<div
 				data-tip="Upload"
-				class="tooltip tooltip-bottom btn capitalize icon max-h-8 max-w-16 bg-[#f6f5f3] border-[#f6f5f3] flex items-center justify-center"
+				class="tooltip tooltip-bottom btn capitalize icon max-h-8 max-w-16 bg-[#ffffff] border-[#ffffff] flex items-center justify-center"
 				role="button"
 				tabindex="0"
 				on:click
@@ -365,7 +364,7 @@
 			{:else}
 				<IconButton id="btn-toggle-video" icon={MdVideocamOff} tooltip={'Show/Hide Video'} on:click={toggleVideo} />
 			{/if}
-			<select id="select-data-dropdown" class="select select-bordered w-full max-w-xs bg-[#f6f5f3] text-black" on:change={core.handleExampleDropdown}>
+			<select id="select-data-dropdown" class="select select-bordered w-full max-w-xs bg-[#ffffff] text-black" on:change={core.handleExampleDropdown}>
 				<option disabled selected>-- Select an Example --</option>
 				<option value="example-1">Michael Jordan's Last Shot</option>
 				<option value="example-2">Family Museum Gallery Visit</option>
