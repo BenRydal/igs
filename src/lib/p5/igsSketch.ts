@@ -43,7 +43,6 @@ export const igsSketch = (p5: any) => {
 
 		// Constants
 		p5.PLAN = 0;
-		p5.SPACE_TIME = 0;
 		p5.GUI_TEXT_SIZE = p5.width / 70;
 
 		// STYLES
