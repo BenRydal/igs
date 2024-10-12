@@ -199,7 +199,7 @@
 
 <div class="navbar min-h-16 bg-[#ffffff]">
 	<div class="flex-1 px-2 lg:flex-none">
-		<a class="text-lg font-bold text-black" href="/">IGS</a>
+		<a class="text-2xl font-bold text-black italic " href="/">IGS</a>
 	</div>
 
 	<div class="flex justify-end flex-1 px-2">
