@@ -42,7 +42,7 @@ export class Core {
 	}
 
 	handleUserLoadedFiles = async (event: Event) => {
-		//this.clearExistingData();
+		this.clearExistingData();
 		const input = event.target as HTMLInputElement;
 		for (let i = 0; i < input.files.length; i++) {
 			const file = input.files ? input.files[i] : null;
@@ -99,7 +99,6 @@ export class Core {
 			maxStopLength: 0
 		}));
 
-		this.sketch.videoController.clear();
 		this.clearExistingData();
 
 		const selectedValue = event.target.value;
@@ -291,24 +290,6 @@ export class Core {
 		}));
 	}
 
-	clearExistingData() {
-		console.log('Clearing existing data');
-		UserStore.update(() => {
-			return [];
-		});
-
-		CodeStore.update(() => {
-			return [];
-		});
-
-		this.codeData = [];
-
-		ConfigStore.update((currentConfig) => ({
-			...currentConfig,
-			dataHasCodes: false
-		}));
-	}
-
 	integrateConversation(dataPoints: DataPoint[]) {
 		dataPoints.forEach((dataPoint: DataPoint) => {
 			if (dataPoint.speech !== '') {
@@ -466,4 +447,23 @@ export class Core {
 			dataHasCodes: true
 		}));
 	};
+
+	clearExistingData() {
+		console.log('Clearing existing data');
+		this.sketch.videoController.clear();
+		UserStore.update(() => {
+			return [];
+		});
+
+		CodeStore.update(() => {
+			return [];
+		});
+
+		this.codeData = [];
+
+		ConfigStore.update((currentConfig) => ({
+			...currentConfig,
+			dataHasCodes: false
+		}));
+	}
 }
