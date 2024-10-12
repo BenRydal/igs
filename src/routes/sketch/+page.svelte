@@ -357,7 +357,7 @@
 			<IconButton
 				id="btn-toggle-3d"
 				icon={Md3DRotation}
-				tooltip={'Toggle 3D'}
+				tooltip={'Toggle 2D/3D'}
 				on:click={() => {
 					p5Instance.handle3D.update();
 				}}
