@@ -83,7 +83,7 @@
 		return a.code.localeCompare(b.code);
 	});
 
-	$: formattedStopLength = $ConfigStore.stopSliderValue.toFixed(2);
+	$: formattedStopLength = $ConfigStore.stopSliderValue.toFixed(0);
 
 	function toggleVideo() {
 		if (p5Instance && p5Instance.videoController) {
@@ -224,7 +224,7 @@
 					</li>
 				{/each}
 				<li class="cursor-none">
-					<p>Stop Length: {formattedStopLength}</p>
+					<p>Stop Length: {formattedStopLength} sec</p>
 				</li>
 				<li>
 					<label for="stopLengthRange" class="sr-only">Adjust stop length</label>
