@@ -91,8 +91,8 @@ export class Highlight {
 	 */
 	draw3DHighlightRect(highlightRect) {
 		// Map method maintains highlight rect scaling if user adjusts timeline
-		const zPosStart = this.sk.sketchController.mapToSelectTimeThenPixelTime(highlightRect.xPos);
-		const zPosEnd = this.sk.sketchController.mapToSelectTimeThenPixelTime(highlightRect.xPos + highlightRect.width);
+		const zPosStart = this.sk.mapToSelectTimeThenPixelTime(highlightRect.xPos);
+		const zPosEnd = this.sk.mapToSelectTimeThenPixelTime(highlightRect.xPos + highlightRect.width);
 
 		const span = this.sk.gui.fpContainer.getContainer().width; // span 3D rects full span of floor plan container
 		// cube top

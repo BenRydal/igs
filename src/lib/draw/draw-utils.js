@@ -65,7 +65,7 @@ export class DrawUtils {
 
 	// TODO: Revisit to determine best approach here--could just return true if you want to show all data while animating
 	isShowingInAnimation(value) {
-		if (this.sk.sketchController.getIsAnimate()) return timeline.mapPixelTimeToTotalTime(value) < timeline.getCurrTime();
+		if (timeline.getIsAnimating()) return timeline.mapPixelTimeToTotalTime(value) < timeline.getCurrTime();
 		else return true;
 	}
 
@@ -127,7 +127,7 @@ export class DrawUtils {
 	 */
 	getSharedPosValues(point, time) {
 		const timelineXPos = timeline.mapTotalTimeToPixelTime(time);
-		const selTimelineXPos = this.sk.sketchController.mapSelectTimeToPixelTime(timelineXPos);
+		const selTimelineXPos = this.sk.mapSelectTimeToPixelTime(timelineXPos);
 
 		const [floorPlanXPos, floorPlanYPos] = this.sk.floorPlan.getScaledXYPos(point.x, point.y, this.sk.gui.fpContainer.getContainer());
 

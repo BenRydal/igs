@@ -196,14 +196,14 @@ export class DrawMovement {
 			augmentedPoint.pos.floorPlanYPos,
 			augmentedPoint.pos.zPos,
 			augmentedPoint.pos.selTimelineXPos,
-			this.sk.sketchController.mapToSelectTimeThenPixelTime(this.sk.mouseX),
+			this.sk.mapToSelectTimeThenPixelTime(this.sk.mouseX),
 			this.drawUtils.setCodeColor(augmentedPoint.point.codes)
 		];
-		if (this.sk.sketchController.getIsAnimate()) {
+		if (timeline.getIsAnimating()) {
 			return this.createDot(xPos, yPos, zPos, timePos, codeColor, null); // there is no length to compare when animating so just pass null to emphasize this
 		} else if (this.sk.videoController.isLoadedAndIsPlaying()) {
 			const videoPixelTime = timeline.mapTotalTimeToPixelTime(this.sk.videoController.getVideoPlayerCurTime());
-			const videoSelectTime = this.sk.sketchController.mapSelectTimeToPixelTime(videoPixelTime);
+			const videoSelectTime = this.sk.mapSelectTimeToPixelTime(videoPixelTime);
 			if (this.compareToCurDot(videoSelectTime, timePos, curDot))
 				return this.createDot(xPos, yPos, zPos, timePos, codeColor, Math.abs(videoSelectTime - timePos));
 		} else if (timeline.overTimeline(this.sk.mouseX) && this.compareToCurDot(map3DMouse, timePos, curDot)) {
