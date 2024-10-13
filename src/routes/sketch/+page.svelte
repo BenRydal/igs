@@ -136,6 +136,54 @@
 		p5Instance.loop();
 	}
 
+	function clickOutside(node) {
+		const handleClick = (event) => {
+			if (!node.contains(event.target)) {
+				node.removeAttribute('open');
+			}
+		};
+
+		document.addEventListener('click', handleClick, true);
+
+		return {
+			destroy() {
+				document.removeEventListener('click', handleClick, true);
+			}
+		};
+	}
+
+	function updateUserLoadedFiles(event) {
+		clearAllData();
+		core.handleUserLoadedFiles(event);
+		p5Instance.loop();
+	}
+
+	function updateExampleDataDropDown(event) {
+		clearAllData();
+		core.handleExampleDropdown(event);
+		p5Instance.loop();
+	}
+
+	function clearAllData() {
+		console.log('Clearing all data');
+		p5Instance.videoController.clear();
+		UserStore.update(() => {
+			return [];
+		});
+
+		CodeStore.update(() => {
+			return [];
+		});
+
+		core.codeData = [];
+
+		ConfigStore.update((currentConfig) => ({
+			...currentConfig,
+			dataHasCodes: false
+		}));
+		p5Instance.loop();
+	}
+
 	function clearMovementData() {
 		UserStore.update(() => []);
 		p5Instance.loop();
@@ -155,7 +203,10 @@
 	}
 
 	function clearCodeData() {
-		CodeStore.update(() => []);
+		CodeStore.update(() => {
+			return [];
+		});
+		core.codeData = [];
 		UserStore.update((users) =>
 			users.map((user) => {
 				user.dataTrail = user.dataTrail.map((dataPoint) => {
@@ -170,30 +221,7 @@
 			...currentConfig,
 			dataHasCodes: false
 		}));
-
 		p5Instance.loop();
-	}
-
-	function clearAllData() {
-		UserStore.update(() => []);
-		CodeStore.update(() => []);
-		p5Instance.loop();
-	}
-
-	function clickOutside(node) {
-		const handleClick = (event) => {
-			if (!node.contains(event.target)) {
-				node.removeAttribute('open');
-			}
-		};
-
-		document.addEventListener('click', handleClick, true);
-
-		return {
-			destroy() {
-				document.removeEventListener('click', handleClick, true);
-			}
-		};
 	}
 </script>
 
@@ -349,7 +377,7 @@
 				accept=".png, .jpg, .jpeg, .csv, .mp4"
 				type="file"
 				bind:files
-				on:change={core.handleUserLoadedFiles}
+				on:change={updateUserLoadedFiles}
 			/>
 
 			<IconButton icon={MdHelpOutline} tooltip={'Help'} on:click={() => ($isModalOpen = !$isModalOpen)} />
@@ -368,7 +396,7 @@
 			{:else}
 				<IconButton id="btn-toggle-video" icon={MdVideocamOff} tooltip={'Show/Hide Video'} on:click={toggleVideo} />
 			{/if}
-			<select id="select-data-dropdown" class="select select-bordered w-full max-w-xs bg-[#ffffff] text-black" on:change={core.handleExampleDropdown}>
+			<select id="select-data-dropdown" class="select select-bordered w-full max-w-xs bg-[#ffffff] text-black" on:change={updateExampleDataDropDown}>
 				<option disabled selected>-- Select an Example --</option>
 				<option value="example-1">Michael Jordan's Last Shot</option>
 				<option value="example-2">Family Museum Gallery Visit</option>

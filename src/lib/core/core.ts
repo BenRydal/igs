@@ -42,7 +42,6 @@ export class Core {
 	}
 
 	handleUserLoadedFiles = async (event: Event) => {
-		this.clearExistingData();
 		const input = event.target as HTMLInputElement;
 		for (let i = 0; i < input.files.length; i++) {
 			const file = input.files ? input.files[i] : null;
@@ -98,8 +97,6 @@ export class Core {
 			...store,
 			maxStopLength: 0
 		}));
-
-		this.clearExistingData();
 
 		const selectedValue = event.target.value;
 		await this.loadFloorplanImage(`/data/${selectedValue}/floorplan.png`);
@@ -447,23 +444,4 @@ export class Core {
 			dataHasCodes: true
 		}));
 	};
-
-	clearExistingData() {
-		console.log('Clearing existing data');
-		this.sketch.videoController.clear();
-		UserStore.update(() => {
-			return [];
-		});
-
-		CodeStore.update(() => {
-			return [];
-		});
-
-		this.codeData = [];
-
-		ConfigStore.update((currentConfig) => ({
-			...currentConfig,
-			dataHasCodes: false
-		}));
-	}
 }
