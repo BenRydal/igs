@@ -1,29 +1,23 @@
 import P5Store from '../../stores/p5Store';
 import UserStore from '../../stores/userStore';
 import TimelineStore from '../../stores/timelineStore';
-
-import { Core, FloorPlan, SketchGUI, Handle3D, VideoController, SetPathData } from '..';
-
+import ConfigStore from '../../stores/configStore';
 import type { User } from '../../models/user';
-import type p5 from 'p5';
-
-import ConfigStore, { type ConfigStoreType } from '../../stores/configStore';
-import { get } from 'svelte/store';
+import { FloorPlan, SketchGUI, Handle3D, VideoController, SetPathData } from '..';
 
 let users: User[] = [];
-let p5Instance: p5 | null = null;
-let timeline;
+let timeline, highlightToggle;
 
 TimelineStore.subscribe((data) => {
 	timeline = data;
 });
 
-UserStore.subscribe((data) => {
-	users = data;
+ConfigStore.subscribe((data) => {
+	highlightToggle = data.highlightToggle;
 });
 
-P5Store.subscribe((value) => {
-	p5Instance = value;
+UserStore.subscribe((data) => {
+	users = data;
 });
 
 export const igsSketch = (p5: any) => {
@@ -124,14 +118,12 @@ export const igsSketch = (p5: any) => {
 	};
 
 	p5.mousePressed = () => {
-		const config = get(ConfigStore);
-		if (config.highlightToggle && !p5.handle3D.getIs3DModeOrTransitioning()) p5.gui.highlight.handleMousePressed();
+		if (highlightToggle && !p5.handle3D.getIs3DModeOrTransitioning()) p5.gui.highlight.handleMousePressed();
 		p5.loop();
 	};
 
 	p5.mouseReleased = () => {
-		const config = get(ConfigStore);
-		if (config.highlightToggle && !p5.handle3D.getIs3DModeOrTransitioning()) p5.gui.highlight.handleMouseRelease();
+		if (highlightToggle && !p5.handle3D.getIs3DModeOrTransitioning()) p5.gui.highlight.handleMouseRelease();
 		p5.loop();
 	};
 
