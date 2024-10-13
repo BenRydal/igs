@@ -1,4 +1,3 @@
-export * from './floorplan/floorplan';
 export * from './core';
 export { SetPathData } from './draw';
 export * from './floorplan';
