@@ -83,7 +83,7 @@
 		return a.code.localeCompare(b.code);
 	});
 
-	$: formattedStopLength = $ConfigStore.stopSliderValue.toFixed(2);
+	$: formattedStopLength = $ConfigStore.stopSliderValue.toFixed(0);
 
 	function toggleVideo() {
 		if (p5Instance && p5Instance.videoController) {
@@ -136,6 +136,54 @@
 		p5Instance.loop();
 	}
 
+	function clickOutside(node) {
+		const handleClick = (event) => {
+			if (!node.contains(event.target)) {
+				node.removeAttribute('open');
+			}
+		};
+
+		document.addEventListener('click', handleClick, true);
+
+		return {
+			destroy() {
+				document.removeEventListener('click', handleClick, true);
+			}
+		};
+	}
+
+	function updateUserLoadedFiles(event) {
+		clearAllData();
+		core.handleUserLoadedFiles(event);
+		p5Instance.loop();
+	}
+
+	function updateExampleDataDropDown(event) {
+		clearAllData();
+		core.handleExampleDropdown(event);
+		p5Instance.loop();
+	}
+
+	function clearAllData() {
+		console.log('Clearing all data');
+		p5Instance.videoController.clear();
+		UserStore.update(() => {
+			return [];
+		});
+
+		CodeStore.update(() => {
+			return [];
+		});
+
+		core.codeData = [];
+
+		ConfigStore.update((currentConfig) => ({
+			...currentConfig,
+			dataHasCodes: false
+		}));
+		p5Instance.loop();
+	}
+
 	function clearMovementData() {
 		UserStore.update(() => []);
 		p5Instance.loop();
@@ -155,7 +203,10 @@
 	}
 
 	function clearCodeData() {
-		CodeStore.update(() => []);
+		CodeStore.update(() => {
+			return [];
+		});
+		core.codeData = [];
 		UserStore.update((users) =>
 			users.map((user) => {
 				user.dataTrail = user.dataTrail.map((dataPoint) => {
@@ -170,43 +221,19 @@
 			...currentConfig,
 			dataHasCodes: false
 		}));
-
 		p5Instance.loop();
-	}
-
-	function clearAllData() {
-		UserStore.update(() => []);
-		CodeStore.update(() => []);
-		p5Instance.loop();
-	}
-
-	function clickOutside(node) {
-		const handleClick = (event) => {
-			if (!node.contains(event.target)) {
-				node.removeAttribute('open');
-			}
-		};
-
-		document.addEventListener('click', handleClick, true);
-
-		return {
-			destroy() {
-				document.removeEventListener('click', handleClick, true);
-			}
-		};
 	}
 </script>
 
-<div class="navbar min-h-16 bg-[#f6f5f3]">
+<div class="navbar min-h-16 bg-[#ffffff]">
 	<div class="flex-1 px-2 lg:flex-none">
-		<a class="text-lg font-bold text-black" href="/">IGS</a>
+		<a class="text-2xl font-bold text-black italic " href="/">IGS</a>
 	</div>
 
 	<div class="flex justify-end flex-1 px-2">
 		<details class="dropdown" use:clickOutside>
 			<summary
 				class="btn btn-sm ml-4 tooltip tooltip-bottom flex items-center justify-center"
-				data-tip="This changes the mouse to visualize different hovers over the data."
 			>
 				Filter
 			</summary>
@@ -224,7 +251,7 @@
 					</li>
 				{/each}
 				<li class="cursor-none">
-					<p>Stop Length: {formattedStopLength}</p>
+					<p>Stop Length: {formattedStopLength} sec</p>
 				</li>
 				<li>
 					<label for="stopLengthRange" class="sr-only">Adjust stop length</label>
@@ -245,7 +272,6 @@
 		<details class="dropdown" use:clickOutside>
 			<summary
 				class="btn btn-sm ml-4 tooltip tooltip-bottom flex items-center justify-center"
-				data-tip="This changes the mouse to visualize different hovers over the data."
 			>
 				Select
 			</summary>
@@ -269,7 +295,6 @@
 		<details class="dropdown" use:clickOutside>
 			<summary
 				class="btn btn-sm ml-4 tooltip tooltip-bottom flex items-center justify-center"
-				data-tip="This changes the mouse to visualize different hovers over the data."
 			>
 				Talk
 			</summary>
@@ -291,12 +316,16 @@
 
 		<!-- Clear Data Dropdown -->
 		<details class="dropdown" use:clickOutside>
-			<summary class="btn btn-sm ml-4">Clear Data</summary>
+			<summary 
+				class="btn btn-sm ml-4 tooltip tooltip-bottom flex items-center justify-center" 
+				>
+				Clear Data
+			</summary>
 			<ul class="menu dropdown-content rounded-box z-[1] w-52 p-2 shadow bg-base-100">
-				<li><button on:click={clearMovementData}>Clear Movement Data</button></li>
-				<li><button on:click={clearConversationData}>Clear Conversation Data</button></li>
-				<li><button on:click={clearCodeData}>Clear Code Data</button></li>
-				<li><button on:click={clearAllData}>Clear All Data</button></li>
+				<li><button on:click={clearMovementData}>Movement</button></li>
+				<li><button on:click={clearConversationData}>Conversation</button></li>
+				<li><button on:click={clearCodeData}>Codes</button></li>
+				<li><button on:click={clearAllData}>All Data</button></li>
 			</ul>
 		</details>
 
@@ -323,12 +352,11 @@
 				}}
 			/>
 
-			<IconButton icon={MdCloudDownload} tooltip={'Download your Data'} on:click={() => p5Instance.saveCodeFile()} />
-
+			<IconButton icon={MdCloudDownload} tooltip={'Download Code File'} on:click={() => p5Instance.saveCodeFile()} />
 			<!-- TODO: Need to move this logic into the IconButton component eventually -->
 			<div
 				data-tip="Upload"
-				class="tooltip tooltip-bottom btn capitalize icon max-h-8 max-w-16 bg-[#f6f5f3] border-[#f6f5f3] flex items-center justify-center"
+				class="tooltip tooltip-bottom btn capitalize icon max-h-8 max-w-16 bg-[#ffffff] border-[#ffffff] flex items-center justify-center"
 				role="button"
 				tabindex="0"
 				on:click
@@ -346,7 +374,7 @@
 				accept=".png, .jpg, .jpeg, .csv, .mp4"
 				type="file"
 				bind:files
-				on:change={core.handleUserLoadedFiles}
+				on:change={updateUserLoadedFiles}
 			/>
 
 			<IconButton icon={MdHelpOutline} tooltip={'Help'} on:click={() => ($isModalOpen = !$isModalOpen)} />
@@ -354,7 +382,7 @@
 			<IconButton
 				id="btn-toggle-3d"
 				icon={Md3DRotation}
-				tooltip={'Toggle 3D'}
+				tooltip={'Toggle 2D/3D'}
 				on:click={() => {
 					p5Instance.handle3D.update();
 				}}
@@ -365,7 +393,7 @@
 			{:else}
 				<IconButton id="btn-toggle-video" icon={MdVideocamOff} tooltip={'Show/Hide Video'} on:click={toggleVideo} />
 			{/if}
-			<select id="select-data-dropdown" class="select select-bordered w-full max-w-xs bg-[#f6f5f3] text-black" on:change={core.handleExampleDropdown}>
+			<select id="select-data-dropdown" class="select select-bordered w-full max-w-xs bg-[#ffffff] text-black" on:change={updateExampleDataDropDown}>
 				<option disabled selected>-- Select an Example --</option>
 				<option value="example-1">Michael Jordan's Last Shot</option>
 				<option value="example-2">Family Museum Gallery Visit</option>
@@ -531,7 +559,7 @@
 								bind:checked={user.conversation_enabled}
 								on:click={() => p5Instance?.loop()}
 							/>
-							Speech
+							Talk
 						</div>
 					</li>
 					<li>

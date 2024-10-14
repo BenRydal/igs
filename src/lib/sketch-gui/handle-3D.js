@@ -9,7 +9,7 @@ export class Handle3D {
 		this.translate = {
 			zoom: -(this.sk.height / 1.5),
 			xPos: this.sk.width / 4,
-			yPos: this.sk.height / 1.75,
+			yPos: this.sk.height / 1.65,
 			rotateX: this.sk.PI / 2.3
 		};
 		this.curTranslatePos = {

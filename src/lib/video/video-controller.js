@@ -56,8 +56,7 @@ export class VideoController {
 	 */
 	updateDisplay() {
 		if (this.isPlayerAndDivLoaded() && this.isShowing) {
-			this.videoPlayer.updatePos(this.sk.mouseX, this.sk.mouseY, 60, 0);
-
+			this.videoPlayer.updatePos(this.sk.mouseX, this.sk.mouseY, 60, this.sk.height);
 			if (!this.isPlaying) this.setVideoScrubbing();
 		}
 	}

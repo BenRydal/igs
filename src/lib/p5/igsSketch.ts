@@ -1,23 +1,23 @@
 import P5Store from '../../stores/p5Store';
 import UserStore from '../../stores/userStore';
-
-import { Core, FloorPlan, SketchGUI, SketchController, Handle3D, VideoController, SetPathData } from '..';
-
+import TimelineStore from '../../stores/timelineStore';
+import ConfigStore from '../../stores/configStore';
 import type { User } from '../../models/user';
-import type p5 from 'p5';
-
-import ConfigStore, { type ConfigStoreType } from '../../stores/configStore';
-import { get } from 'svelte/store';
+import { FloorPlan, SketchGUI, Handle3D, VideoController, SetPathData } from '..';
 
 let users: User[] = [];
-let p5Instance: p5 | null = null;
+let timeline, highlightToggle;
+
+TimelineStore.subscribe((data) => {
+	timeline = data;
+});
+
+ConfigStore.subscribe((data) => {
+	highlightToggle = data.highlightToggle;
+});
 
 UserStore.subscribe((data) => {
 	users = data;
-});
-
-P5Store.subscribe((value) => {
-	p5Instance = value;
 });
 
 export const igsSketch = (p5: any) => {
@@ -34,8 +34,6 @@ export const igsSketch = (p5: any) => {
 		const availableHeight = window.innerHeight - navbarHeight - bottomNavHeight;
 
 		p5.createCanvas(window.innerWidth, availableHeight, p5.WEBGL);
-
-		p5.sketchController = new SketchController(p5);
 		p5.gui = new SketchGUI(p5);
 		p5.handle3D = new Handle3D(p5, true);
 		p5.videoController = new VideoController(p5);
@@ -43,7 +41,6 @@ export const igsSketch = (p5: any) => {
 
 		// Constants
 		p5.PLAN = 0;
-		p5.SPACE_TIME = 0;
 		p5.GUI_TEXT_SIZE = p5.width / 70;
 
 		// STYLES
@@ -55,7 +52,7 @@ export const igsSketch = (p5: any) => {
 	};
 
 	p5.draw = () => {
-		p5.background(246, 245, 243);
+		p5.background(255);
 		p5.translate(-p5.width / 2, -p5.height / 2, 0); // recenter canvas to top left when using WEBGL renderer
 
 		if (p5.handle3D.getIs3DModeOrTransitioning()) {
@@ -68,10 +65,10 @@ export const igsSketch = (p5: any) => {
 
 		if (p5.handle3D.getIs3DModeOrTransitioning()) p5.pop();
 		p5.gui.update2D(); // draw all other canvas GUI elements in 2D mode
-		if (p5.sketchController.getIsAnimate()) p5.sketchController.updateAnimation();
+		if (timeline.getIsAnimating()) p5.updateAnimation();
 		// Determine whether to re-run draw loop depending on user adjustable modes
 		// Might not be running because of not being able to sense if the data is being tracked and such.
-		if (p5.sketchController.getIsAnimate() || p5.videoController.isLoadedAndIsPlaying() || p5.handle3D.getIsTransitioning()) {
+		if (timeline.getIsAnimating() || p5.videoController.isLoadedAndIsPlaying() || p5.handle3D.getIsTransitioning()) {
 			p5.loop();
 		} else p5.noLoop();
 	};
@@ -121,14 +118,12 @@ export const igsSketch = (p5: any) => {
 	};
 
 	p5.mousePressed = () => {
-		const config = get(ConfigStore);
-		if (config.highlightToggle && !p5.handle3D.getIs3DModeOrTransitioning()) p5.gui.highlight.handleMousePressed();
+		if (highlightToggle && !p5.handle3D.getIs3DModeOrTransitioning()) p5.gui.highlight.handleMousePressed();
 		p5.loop();
 	};
 
 	p5.mouseReleased = () => {
-		const config = get(ConfigStore);
-		if (config.highlightToggle && !p5.handle3D.getIs3DModeOrTransitioning()) p5.gui.highlight.handleMouseRelease();
+		if (highlightToggle && !p5.handle3D.getIs3DModeOrTransitioning()) p5.gui.highlight.handleMouseRelease();
 		p5.loop();
 	};
 
@@ -161,5 +156,40 @@ export const igsSketch = (p5: any) => {
 			newRow.setNum(headers[1], endTimesArray[i]);
 		}
 		return table;
+	};
+
+	p5.updateAnimation = () => {
+		if (timeline.getCurrTime() < timeline.getEndTime()) p5.continueAnimation();
+		else p5.endAnimation();
+	};
+
+	p5.continueAnimation = () => {
+		let timeToSet = 0;
+		const animationRate = 0.05; // TODO: this would get a value from the animation slider in the interface
+		if (p5.videoController.isLoadedAndIsPlaying()) timeToSet = p5.videoController.getVideoPlayerCurTime();
+		else timeToSet = timeline.getCurrTime() + animationRate;
+		TimelineStore.update((timeline) => {
+			timeline.setCurrTime(timeToSet);
+			return timeline;
+		});
+	};
+
+	p5.endAnimation = () => {
+		TimelineStore.update((timeline) => {
+			timeline.setIsAnimating(false);
+			return timeline;
+		});
+	};
+
+	p5.mapToSelectTimeThenPixelTime = (value) => {
+		return p5.mapSelectTimeToPixelTime(timeline.mapPixelTimeToSelectTime(value));
+	};
+
+	p5.mapSelectTimeToPixelTime = (value) => {
+		const spaceTimeCubeBottom = p5.height / 10;
+		const spaceTimeCubeTop = p5.height / 1.6;
+		if (p5.handle3D.getIs3DMode())
+			return p5.map(value, timeline.getTimelineLeftMarkerXPos(), timeline.getTimelineRightMarkerXPos(), spaceTimeCubeBottom, spaceTimeCubeTop);
+		else return timeline.mapSelectTimeToPixelTime2D(value);
 	};
 };
