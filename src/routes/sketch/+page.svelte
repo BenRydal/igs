@@ -559,7 +559,7 @@
 								bind:checked={user.conversation_enabled}
 								on:click={() => p5Instance?.loop()}
 							/>
-							Speech
+							Talk
 						</div>
 					</li>
 					<li>
