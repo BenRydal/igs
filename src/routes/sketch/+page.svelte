@@ -234,7 +234,6 @@
 		<details class="dropdown" use:clickOutside>
 			<summary
 				class="btn btn-sm ml-4 tooltip tooltip-bottom flex items-center justify-center"
-				data-tip="Filter data in different ways"
 			>
 				Filter
 			</summary>
@@ -273,7 +272,6 @@
 		<details class="dropdown" use:clickOutside>
 			<summary
 				class="btn btn-sm ml-4 tooltip tooltip-bottom flex items-center justify-center"
-				data-tip="Select data in the 2D view in different ways."
 			>
 				Select
 			</summary>
@@ -297,7 +295,6 @@
 		<details class="dropdown" use:clickOutside>
 			<summary
 				class="btn btn-sm ml-4 tooltip tooltip-bottom flex items-center justify-center"
-				data-tip="Adjust how conversation is displayed"
 			>
 				Talk
 			</summary>
@@ -321,7 +318,7 @@
 		<details class="dropdown" use:clickOutside>
 			<summary 
 				class="btn btn-sm ml-4 tooltip tooltip-bottom flex items-center justify-center" 
-				data-tip="Clear displayed data">
+				>
 				Clear Data
 			</summary>
 			<ul class="menu dropdown-content rounded-box z-[1] w-52 p-2 shadow bg-base-100">
