@@ -2,7 +2,7 @@
 	<div class="hero-overlay bg-opacity-90" />
 	<div class="hero-content text-center text-neutral-content">
 		<div class="max-w-md text-white">
-			<h1 class="mb-5 text-5xl font-bold text-default">The Interaction Geography Slicer</h1>
+			<h1 class="mb-5 text-5xl font-bold text-default">Interaction Geography Slicer</h1>
 			<p class="mb-5 text-xl">
 				An open-source tool to dynamically visualize movement, conversation, and
 				video data over space and time.
@@ -14,7 +14,7 @@
 
 <style>
 	#main-hero {
-		background-image: url(/images/appexample.png);
+		background-image: url(/images/igs-background.png);
 		min-height: calc(100vh);
 	}
 </style>
