@@ -22,6 +22,8 @@ import TimelineStore from '../../stores/timelineStore';
 import ConfigStore from '../../stores/configStore.js';
 
 let timeline, maxStopLength;
+let samplingInterval = 0.5;
+let smallDataThreshold = 3000;
 
 TimelineStore.subscribe((data) => {
 	timeline = data;
@@ -29,6 +31,8 @@ TimelineStore.subscribe((data) => {
 
 ConfigStore.subscribe((data) => {
 	maxStopLength = data.maxStopLength;
+	samplingInterval = data.samplingInterval;
+	smallDataThreshold = data.smallDataThreshold;
 });
 
 export class Core {
@@ -200,26 +204,17 @@ export class Core {
 			const lastTime = csvData[csvData.length - 1]?.time;
 			if (endTime < lastTime) endTime = lastTime;
 
-			// Define the sampling interval in seconds for larger datasets
-			const samplingInterval = 0.5;
-
-			// Define a threshold for small datasets in rows
-			const smallDatasetThreshold = 3000;
-
-			// Check if the dataset is small
-			if (csvData.length <= smallDatasetThreshold) {
-				// If it's a small dataset, sample all data points
+			// Use samplingInterval and smallDataThreshold from ConfigStore
+			if (csvData.length <= smallDataThreshold) {
 				csvData.forEach((row) => {
 					user.dataTrail.push(new DataPoint('', row.time, row.x, row.y));
 				});
 			} else {
-				// For larger datasets, apply time-based sampling
-				let lastSampledTime = csvData[0]?.time; // Start with the time of the first row
-
+				let lastSampledTime = csvData[0]?.time;
 				csvData.forEach((row) => {
 					if (row.time - lastSampledTime >= samplingInterval) {
 						user.dataTrail.push(new DataPoint('', row.time, row.x, row.y));
-						lastSampledTime = row.time; // Update the last sampled time
+						lastSampledTime = row.time;
 					}
 				});
 			}

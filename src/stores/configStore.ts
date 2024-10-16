@@ -12,6 +12,9 @@ export interface ConfigStoreType {
 	stopSliderValue: number;
 	alignToggle: boolean;
 	wordToSearch: string;
+	animationRate: number;
+	samplingInterval: number;
+	smallDataThreshold: number;
 }
 
 const initialConfig: ConfigStoreType = {
@@ -25,7 +28,10 @@ const initialConfig: ConfigStoreType = {
 	maxStopLength: 0,
 	stopSliderValue: 1,
 	alignToggle: true,
-	wordToSearch: ''
+	wordToSearch: '',
+	animationRate: 0.05,
+	samplingInterval: 0.5,
+	smallDataThreshold: 3000
 };
 
 const ConfigStore = writable<ConfigStoreType>(initialConfig);
