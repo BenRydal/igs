@@ -7,6 +7,7 @@ import { FloorPlan, SketchGUI, Handle3D, VideoController, SetPathData } from '..
 
 let users: User[] = [];
 let timeline, highlightToggle;
+let animationRate = 0.05;
 
 TimelineStore.subscribe((data) => {
 	timeline = data;
@@ -14,6 +15,7 @@ TimelineStore.subscribe((data) => {
 
 ConfigStore.subscribe((data) => {
 	highlightToggle = data.highlightToggle;
+	animationRate = data.animationRate; // Subscribe to animationRate
 });
 
 UserStore.subscribe((data) => {
@@ -165,9 +167,12 @@ export const igsSketch = (p5: any) => {
 
 	p5.continueAnimation = () => {
 		let timeToSet = 0;
-		const animationRate = 0.05; // TODO: this would get a value from the animation slider in the interface
-		if (p5.videoController.isLoadedAndIsPlaying()) timeToSet = p5.videoController.getVideoPlayerCurTime();
-		else timeToSet = timeline.getCurrTime() + animationRate;
+		// Use animationRate from ConfigStore
+		if (p5.videoController.isLoadedAndIsPlaying()) {
+			timeToSet = p5.videoController.getVideoPlayerCurTime();
+		} else {
+			timeToSet = timeline.getCurrTime() + animationRate;
+		}
 		TimelineStore.update((timeline) => {
 			timeline.setCurrTime(timeToSet);
 			return timeline;

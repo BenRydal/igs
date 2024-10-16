@@ -1,5 +1,7 @@
 <script lang="ts">
 	import P5, { type Sketch } from 'p5-svelte';
+	import { get } from 'svelte/store';
+
 	import type p5 from 'p5';
 	import MdHelpOutline from 'svelte-icons/md/MdHelpOutline.svelte';
 	import MdCloudUpload from 'svelte-icons/md/MdCloudUpload.svelte';
@@ -10,6 +12,7 @@
 	import MdVideocam from 'svelte-icons/md/MdVideocam.svelte';
 	import MdVideocamOff from 'svelte-icons/md/MdVideocamOff.svelte';
 	import MdCheck from 'svelte-icons/md/MdCheck.svelte';
+	import MdSettings from 'svelte-icons/md/MdSettings.svelte';
 
 	import type { User } from '../../models/user';
 
@@ -39,6 +42,9 @@
 		expandedUsers[userName] = !expandedUsers[userName];
 	}
 
+	let showSettings = false;
+	let currentConfig: ConfigStoreType;
+
 	let files: any = [];
 	let users: User[] = [];
 	let p5Instance: p5 | null = null;
@@ -49,9 +55,15 @@
 	let maxStopLength = 0;
 	let test = '';
 	ConfigStore.subscribe((value) => {
-		isPathColorMode = value.isPathColorMode;
-		maxStopLength = value.maxStopLength;
+		currentConfig = value;
 	});
+
+	function handleConfigChange(key: keyof ConfigStoreType, value: any) {
+		ConfigStore.update((store) => ({
+			...store,
+			[key]: value
+		}));
+	}
 
 	VideoStore.subscribe((value) => {
 		isVideoShowing = value.isShowing;
@@ -227,16 +239,12 @@
 
 <div class="navbar min-h-16 bg-[#ffffff]">
 	<div class="flex-1 px-2 lg:flex-none">
-		<a class="text-2xl font-bold text-black italic " href="/">IGS</a>
+		<a class="text-2xl font-bold text-black italic" href="/">IGS</a>
 	</div>
 
 	<div class="flex justify-end flex-1 px-2">
 		<details class="dropdown" use:clickOutside>
-			<summary
-				class="btn btn-sm ml-4 tooltip tooltip-bottom flex items-center justify-center"
-			>
-				Filter
-			</summary>
+			<summary class="btn btn-sm ml-4 tooltip tooltip-bottom flex items-center justify-center"> Filter </summary>
 			<ul class="menu dropdown-content rounded-box z-[1] w-52 p-2 shadow bg-base-100">
 				{#each filterToggleOptions as toggle}
 					<li>
@@ -270,11 +278,7 @@
 
 		<!-- Select Dropdown -->
 		<details class="dropdown" use:clickOutside>
-			<summary
-				class="btn btn-sm ml-4 tooltip tooltip-bottom flex items-center justify-center"
-			>
-				Select
-			</summary>
+			<summary class="btn btn-sm ml-4 tooltip tooltip-bottom flex items-center justify-center"> Select </summary>
 			<ul class="menu dropdown-content rounded-box z-[1] w-52 p-2 shadow bg-base-100">
 				{#each selectToggleOptions as toggle}
 					<li>
@@ -293,11 +297,7 @@
 
 		<!-- Talk Dropdown -->
 		<details class="dropdown" use:clickOutside>
-			<summary
-				class="btn btn-sm ml-4 tooltip tooltip-bottom flex items-center justify-center"
-			>
-				Talk
-			</summary>
+			<summary class="btn btn-sm ml-4 tooltip tooltip-bottom flex items-center justify-center"> Talk </summary>
 			<ul class="menu dropdown-content rounded-box z-[1] w-52 p-2 shadow bg-base-100">
 				{#each conversationToggleOptions as toggle}
 					<li>
@@ -316,11 +316,7 @@
 
 		<!-- Clear Data Dropdown -->
 		<details class="dropdown" use:clickOutside>
-			<summary 
-				class="btn btn-sm ml-4 tooltip tooltip-bottom flex items-center justify-center" 
-				>
-				Clear Data
-			</summary>
+			<summary class="btn btn-sm ml-4 tooltip tooltip-bottom flex items-center justify-center"> Clear Data </summary>
 			<ul class="menu dropdown-content rounded-box z-[1] w-52 p-2 shadow bg-base-100">
 				<li><button on:click={clearMovementData}>Movement</button></li>
 				<li><button on:click={clearConversationData}>Conversation</button></li>
@@ -388,6 +384,8 @@
 				}}
 			/>
 
+			<IconButton icon={MdSettings} tooltip={'Settings'} on:click={() => (showSettings = true)} />
+
 			{#if isVideoShowing}
 				<IconButton id="btn-toggle-video" icon={MdVideocam} tooltip={'Show/Hide Video'} on:click={toggleVideo} />
 			{:else}
@@ -407,6 +405,78 @@
 <div class="h-10">
 	<P5 {sketch} />
 </div>
+
+{#if showSettings}
+	<div
+		class="modal modal-open"
+		on:click|self={() => (showSettings = false)}
+		on:keydown={(e) => {
+			if (e.key === 'Escape') showSettings = false;
+		}}
+	>
+		<div class="modal-box w-11/12 max-w-md">
+			<div class="flex justify-between mb-4">
+				<h3 class="font-bold text-lg">Settings</h3>
+				<button class="btn btn-circle btn-sm" on:click={() => (showSettings = false)}>
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+					</svg>
+				</button>
+			</div>
+
+			<div class="flex flex-col space-y-4">
+				<!-- Animation Rate -->
+				<div class="flex flex-col">
+					<label for="animationRate" class="font-medium">Animation Rate: {currentConfig.animationRate}</label>
+					<input
+						id="animationRate"
+						type="range"
+						min="0.01"
+						max="1"
+						step="0.01"
+						bind:value={currentConfig.animationRate}
+						on:input={(e) => handleConfigChange('animationRate', parseFloat(e.target.value))}
+						class="range range-primary"
+					/>
+				</div>
+
+				<!-- Sampling Interval -->
+				<div class="flex flex-col">
+					<label for="samplingInterval" class="font-medium">Sampling Interval: {currentConfig.samplingInterval} sec</label>
+					<input
+						id="samplingInterval"
+						type="range"
+						min="0.1"
+						max="5"
+						step="0.1"
+						bind:value={currentConfig.samplingInterval}
+						on:input={(e) => handleConfigChange('samplingInterval', parseFloat(e.target.value))}
+						class="range range-primary"
+					/>
+				</div>
+
+				<!-- Small Data Threshold -->
+				<div class="flex flex-col">
+					<label for="smallDataThreshold" class="font-medium">Small Data Threshold: {currentConfig.smallDataThreshold}</label>
+					<input
+						id="smallDataThreshold"
+						type="range"
+						min="500"
+						max="10000"
+						step="100"
+						bind:value={currentConfig.smallDataThreshold}
+						on:input={(e) => handleConfigChange('smallDataThreshold', parseInt(e.target.value))}
+						class="range range-primary"
+					/>
+				</div>
+			</div>
+
+			<div class="modal-action">
+				<button class="btn" on:click={() => (showSettings = false)}>Close</button>
+			</div>
+		</div>
+	</div>
+{/if}
 
 {#if showDataPopup}
 	<div
@@ -455,7 +525,6 @@
 									<div class="flex flex-col">
 										<div class="flex">
 											<h2 class="font-medium">Color:</h2>
-											<!-- TODO: Set badge colour to be user colour -->
 											<div class="badge ml-2">{user.color}</div>
 										</div>
 										<div class="flex">
