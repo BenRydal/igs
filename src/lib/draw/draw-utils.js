@@ -41,7 +41,6 @@ export class DrawUtils {
 
 	isShowingInCodeList(codesArray) {
 		const entries = get(CodeStore);
-
 		if (codesArray.length === 0) {
 			// Handle data points with no codes
 			const noCodesEntry = entries.find((entry) => entry.code === 'no codes');
@@ -63,7 +62,6 @@ export class DrawUtils {
 		return timeline.overAxis(pixelTime) && this.isShowingInAnimation(pixelTime);
 	}
 
-	// TODO: Revisit to determine best approach here--could just return true if you want to show all data while animating
 	isShowingInAnimation(value) {
 		if (timeline.getIsAnimating()) return timeline.mapPixelTimeToTotalTime(value) < timeline.getCurrTime();
 		else return true;
@@ -113,9 +111,7 @@ export class DrawUtils {
 	getSharedPosValues(point, time) {
 		const timelineXPos = timeline.mapTotalTimeToPixelTime(time);
 		const selTimelineXPos = this.sk.mapSelectTimeToPixelTime(timelineXPos);
-
 		const [floorPlanXPos, floorPlanYPos] = this.sk.floorPlan.getScaledXYPos(point.x, point.y, this.sk.gui.fpContainer.getContainer());
-
 		return {
 			timelineXPos,
 			selTimelineXPos,
