@@ -97,21 +97,6 @@ export class DrawUtils {
 		return true;
 	}
 
-	/**
-	 * A compare point is an object with two augmented points
-	 * @param  {Integer} view
-	 * @param  {MovementPoint} curIndex
-	 * @param  {MovementPoint} priorIndex
-	 * @param  {Integer} time
-	 * @param  {Integer} previousTime
-	 */
-	createComparePoint(view, curIndex, priorIndex) {
-		return {
-			cur: this.createAugmentPoint(view, curIndex, curIndex.time),
-			prior: this.createAugmentPoint(view, priorIndex, priorIndex.time)
-		};
-	}
-
 	createAugmentPoint(view, point, time) {
 		return {
 			point,
