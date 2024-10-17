@@ -68,30 +68,32 @@ export class DrawUtils {
 	}
 
 	selectMode(curPos, pointIsStopped) {
-		const config = get(ConfigStore);
-		if (config.circleToggle) {
-			if (this.sk.handle3D.getIs3DModeOrTransitioning()) return true;
-			else
-				return (
-					this.sk.gui.fpContainer.overCursor(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos) &&
-					this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos)
-				);
-		} else if (config.sliceToggle) {
-			if (this.sk.handle3D.getIs3DModeOrTransitioning()) return true;
-			else
-				return (
-					this.sk.gui.fpContainer.overSlicer(curPos.floorPlanXPos, curPos.selTimelineXPos) &&
-					this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos)
-				);
-		} else if (config.movementToggle) {
-			return !pointIsStopped && this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos);
-		} else if (config.stopsToggle) {
-			return pointIsStopped && this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos);
-		} else if (config.highlightToggle) {
-			return this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.timelineXPos);
+		const { circleToggle, sliceToggle, movementToggle, stopsToggle, highlightToggle } = get(ConfigStore);
+		const { floorPlanXPos, floorPlanYPos, selTimelineXPos, timelineXPos } = curPos;
+		const is3DMode = this.sk.handle3D.getIs3DModeOrTransitioning();
+
+		if (circleToggle) {
+			if (is3DMode) return true;
+			return this.sk.gui.fpContainer.overCursor(floorPlanXPos, floorPlanYPos, selTimelineXPos);
 		}
 
-		// If nothing is selected we just return true
+		if (sliceToggle) {
+			if (is3DMode) return true;
+			return this.sk.gui.fpContainer.overSlicer(floorPlanXPos, selTimelineXPos);
+		}
+
+		if (movementToggle) {
+			return !pointIsStopped;
+		}
+
+		if (stopsToggle) {
+			return pointIsStopped;
+		}
+
+		if (highlightToggle) {
+			return this.sk.gui.highlight.overHighlightArray(floorPlanXPos, floorPlanYPos, timelineXPos);
+		}
+
 		return true;
 	}
 
