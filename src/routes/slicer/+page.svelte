@@ -63,6 +63,7 @@
 			...store,
 			[key]: value
 		}));
+		p5Instance?.loop();
 	}
 
 	VideoStore.subscribe((value) => {
@@ -126,6 +127,7 @@
 			...value,
 			stopSliderValue: parseFloat(target.value)
 		}));
+		p5Instance?.loop(); // Trigger redraw
 	}
 
 	function toggleSelection(selection: ToggleKey, toggleOptions: ToggleKey[]) {
@@ -235,6 +237,18 @@
 		}));
 		p5Instance.loop();
 	}
+
+	function handleWordSearch(event) {
+		const newWord = event.target.value.trim();
+		ConfigStore.update((config) => ({
+			...config,
+			wordToSearch: newWord
+		}));
+		// Trigger a redraw of the P5 sketch
+		if (p5Instance) {
+			p5Instance.loop();
+		}
+	}
 </script>
 
 <div class="navbar min-h-16 bg-[#ffffff]">
@@ -299,6 +313,7 @@
 		<details class="dropdown" use:clickOutside>
 			<summary class="btn btn-sm ml-4 tooltip tooltip-bottom flex items-center justify-center"> Talk </summary>
 			<ul class="menu dropdown-content rounded-box z-[1] w-52 p-2 shadow bg-base-100">
+				<input type="text" placeholder="Search conversations..." on:input={(e) => handleWordSearch(e)} class="input input-bordered w-full" />
 				{#each conversationToggleOptions as toggle}
 					<li>
 						<button on:click={() => toggleSelection(toggle, conversationToggleOptions)} class="w-full text-left flex items-center">
@@ -325,8 +340,6 @@
 			</ul>
 		</details>
 
-		<button class="btn btn-sm ml-4" on:click={() => (showDataPopup = true)}>Data Explorer</button>
-
 		<div class="flex items-stretch">
 			<IconButton
 				id="btn-rotate-left"
@@ -347,6 +360,12 @@
 					p5Instance.loop();
 				}}
 			/>
+
+			{#if isVideoShowing}
+				<IconButton id="btn-toggle-video" icon={MdVideocam} tooltip={'Show/Hide Video'} on:click={toggleVideo} />
+			{:else}
+				<IconButton id="btn-toggle-video" icon={MdVideocamOff} tooltip={'Show/Hide Video'} on:click={toggleVideo} />
+			{/if}
 
 			<IconButton icon={MdCloudDownload} tooltip={'Download Code File'} on:click={() => p5Instance.saveCodeFile()} />
 			<!-- TODO: Need to move this logic into the IconButton component eventually -->
@@ -373,8 +392,6 @@
 				on:change={updateUserLoadedFiles}
 			/>
 
-			<IconButton icon={MdHelpOutline} tooltip={'Help'} on:click={() => ($isModalOpen = !$isModalOpen)} />
-
 			<IconButton
 				id="btn-toggle-3d"
 				icon={Md3DRotation}
@@ -384,13 +401,10 @@
 				}}
 			/>
 
+			<IconButton icon={MdHelpOutline} tooltip={'Help'} on:click={() => ($isModalOpen = !$isModalOpen)} />
+
 			<IconButton icon={MdSettings} tooltip={'Settings'} on:click={() => (showSettings = true)} />
 
-			{#if isVideoShowing}
-				<IconButton id="btn-toggle-video" icon={MdVideocam} tooltip={'Show/Hide Video'} on:click={toggleVideo} />
-			{:else}
-				<IconButton id="btn-toggle-video" icon={MdVideocamOff} tooltip={'Show/Hide Video'} on:click={toggleVideo} />
-			{/if}
 			<select id="select-data-dropdown" class="select select-bordered w-full max-w-xs bg-[#ffffff] text-black" on:change={updateExampleDataDropDown}>
 				<option disabled selected>-- Select an Example --</option>
 				<option value="example-1">Michael Jordan's Last Shot</option>
@@ -415,6 +429,8 @@
 		}}
 	>
 		<div class="modal-box w-11/12 max-w-md">
+			<button class="btn btn-sm ml-4" on:click={() => (showDataPopup = true)}>Data Explorer</button>
+
 			<div class="flex justify-between mb-4">
 				<h3 class="font-bold text-lg">Settings</h3>
 				<button class="btn btn-circle btn-sm" on:click={() => (showSettings = false)}>
@@ -560,22 +576,24 @@
 					<li>
 						<div class="flex items-center">
 							<input
-								id="codeCheckbox-all"
+								id="enableAllCodes"
 								type="checkbox"
 								class="checkbox"
 								checked={$CodeStore.every((code) => code.enabled)}
-								on:change={toggleSelectAllCodes}
-								on:click={() => p5Instance?.loop()}
+								on:change={() => {
+									toggleSelectAllCodes();
+									p5Instance?.loop();
+								}}
 							/>
 							Enable All
 						</div>
 						<div class="flex items-center">
 							<input
-								id="codeCheckbox-all"
+								id="colorByCodes"
 								type="checkbox"
 								class="checkbox"
 								bind:checked={$ConfigStore.isPathColorMode}
-								on:click={() => p5Instance?.loop()}
+								on:change={() => p5Instance?.loop()}
 							/>
 							Color by Codes
 						</div>
@@ -590,14 +608,14 @@
 									type="checkbox"
 									class="checkbox"
 									bind:checked={code.enabled}
-									on:click={() => p5Instance?.loop()}
+									on:change={() => p5Instance?.loop()}
 								/>
 								Enabled
 							</div>
 						</li>
 						<li>
 							<div class="flex items-center">
-								<input type="color" class="color-picker max-w-[24px] max-h-[28px]" bind:value={code.color} on:click={() => p5Instance?.loop()} />
+								<input type="color" class="color-picker max-w-[24px] max-h-[28px]" bind:value={code.color} on:change={() => p5Instance?.loop()} />
 								Color
 							</div>
 						</li>
@@ -608,6 +626,7 @@
 				</ul>
 			</details>
 		{/if}
+
 		<!-- Users Dropdowns -->
 		{#each $UserStore as user}
 			<details class="dropdown dropdown-top" use:clickOutside>
