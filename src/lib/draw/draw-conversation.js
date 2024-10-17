@@ -36,7 +36,7 @@ export class DrawConversation {
 		const dataTrail = user.dataTrail;
 		for (let i = 1; i < dataTrail.length; i++) {
 			const point = dataTrail[i];
-			if (point.speech !== '') {
+			if (point.speech !== '' && this.isTalkTurnSelected(point.speech)) {
 				const curPos = this.drawUtils.getScaledConversationPos(point);
 				if (this.drawUtils.isVisible(point, curPos, point.stopLength)) {
 					if (!isPathColorMode) this.organizeRectDrawing(point, curPos, user.color);
@@ -216,11 +216,14 @@ export class DrawConversation {
 	 * @param  {String} talkTurn
 	 */
 	isTalkTurnSelected(talkTurn) {
-		if (!wordToSearch) return true; // Always return true if empty/no value
-		else {
-			const escape = wordToSearch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
-			if (wordToSearch.length === 1) return new RegExp(escape, 'i').test(talkTurn); // case insensitive regex test
-			else return new RegExp('\\b' + escape + '\\b', 'i').test(talkTurn); // \\b for whole word test
+		if (!wordToSearch) return true;
+
+		const escape = wordToSearch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+
+		if (wordToSearch.length === 1) {
+			return new RegExp(escape, 'i').test(talkTurn);
 		}
+
+		return new RegExp('\\b' + escape + '\\b', 'i').test(talkTurn); // \\b for whole word test
 	}
 }
