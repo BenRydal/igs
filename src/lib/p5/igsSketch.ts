@@ -43,6 +43,7 @@ export const igsSketch = (p5: any) => {
 
 		// Constants
 		p5.PLAN = 0;
+		p5.SPACETIME = 1;
 		p5.GUI_TEXT_SIZE = p5.width / 70;
 
 		// STYLES
@@ -132,13 +133,22 @@ export const igsSketch = (p5: any) => {
 	p5.saveCodeFile = () => {
 		if (p5.dataIsLoaded(p5.floorPlan.getImg()) && p5.arrayIsLoaded(users)) {
 			const setPathData = new SetPathData(p5);
+			let dataSaved = false; // Flag to track if data was saved
 			for (const user of users) {
 				if (user.enabled) {
 					const [startTimeArray, endTimeArray] = setPathData.getCodeFileArrays(user.dataTrail);
-					const tableData = p5.writeTable(startTimeArray, endTimeArray);
-					p5.saveTable(tableData, user.name, 'csv');
-					break; // Save only the first enabled user
+					if (startTimeArray.length > 0 && endTimeArray.length > 0) {
+						const tableData = p5.writeTable(startTimeArray, endTimeArray);
+						p5.saveTable(tableData, user.name, 'csv');
+						dataSaved = true; // Set flag to true if data is saved
+						break; // Save only the first enabled user
+					}
 				}
+			}
+			// If no data was saved, show the alert
+			if (!dataSaved) {
+				alert('There is no data to include in a code file');
+				console.log('There is no data to include in a code file');
 			}
 		}
 	};

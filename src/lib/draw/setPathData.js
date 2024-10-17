@@ -41,23 +41,21 @@ export class SetPathData {
 		let endTimesArray = [];
 		let isRecordingCode = false;
 		for (let i = 1; i < dataTrail.length; i++) {
-			const currentMovement = dataTrail[i];
-			let previousMovement = dataTrail[i - 1];
-			const comparisonPoint = this.drawUtils.createComparePoint(this.sk.PLAN, currentMovement, previousMovement);
-
-			if (this.drawUtils.isVisible(comparisonPoint.cur.point, comparisonPoint.cur.pos, comparisonPoint.cur.point.stopLength)) {
+			const point = dataTrail[i];
+			const augmentedPoint = this.drawUtils.createAugmentPoint(this.sk.PLAN, point, point.time);
+			if (this.drawUtils.isVisible(augmentedPoint.point, augmentedPoint.pos, augmentedPoint.point.stopLength)) {
 				if (isRecordingCode === false) {
 					isRecordingCode = true;
-					startTimesArray.push(comparisonPoint.cur.point.time);
+					startTimesArray.push(point.time);
 				}
 			} else {
 				if (isRecordingCode === true) {
 					isRecordingCode = false;
-					endTimesArray.push(comparisonPoint.prior.point.time);
+					endTimesArray.push(dataTrail[i - 1].time); // previous point time
 				}
 			}
 			// For last point if still recording
-			if (i === dataTrail.length - 1 && isRecordingCode === true) endTimesArray.push(comparisonPoint.cur.point.time);
+			if (i === dataTrail.length - 1 && isRecordingCode === true) endTimesArray.push(point.time);
 		}
 		return [startTimesArray, endTimesArray];
 	}

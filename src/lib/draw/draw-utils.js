@@ -41,7 +41,6 @@ export class DrawUtils {
 
 	isShowingInCodeList(codesArray) {
 		const entries = get(CodeStore);
-
 		if (codesArray.length === 0) {
 			// Handle data points with no codes
 			const noCodesEntry = entries.find((entry) => entry.code === 'no codes');
@@ -63,53 +62,39 @@ export class DrawUtils {
 		return timeline.overAxis(pixelTime) && this.isShowingInAnimation(pixelTime);
 	}
 
-	// TODO: Revisit to determine best approach here--could just return true if you want to show all data while animating
 	isShowingInAnimation(value) {
 		if (timeline.getIsAnimating()) return timeline.mapPixelTimeToTotalTime(value) < timeline.getCurrTime();
 		else return true;
 	}
 
 	selectMode(curPos, pointIsStopped) {
-		const config = get(ConfigStore);
-		if (config.circleToggle) {
-			if (this.sk.handle3D.getIs3DModeOrTransitioning()) return true;
-			else
-				return (
-					this.sk.gui.fpContainer.overCursor(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos) &&
-					this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos)
-				);
-		} else if (config.sliceToggle) {
-			if (this.sk.handle3D.getIs3DModeOrTransitioning()) return true;
-			else
-				return (
-					this.sk.gui.fpContainer.overSlicer(curPos.floorPlanXPos, curPos.selTimelineXPos) &&
-					this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos)
-				);
-		} else if (config.movementToggle) {
-			return !pointIsStopped && this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos);
-		} else if (config.stopsToggle) {
-			return pointIsStopped && this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.selTimelineXPos);
-		} else if (config.highlightToggle) {
-			return this.sk.gui.highlight.overHighlightArray(curPos.floorPlanXPos, curPos.floorPlanYPos, curPos.timelineXPos);
+		const { circleToggle, sliceToggle, movementToggle, stopsToggle, highlightToggle } = get(ConfigStore);
+		const { floorPlanXPos, floorPlanYPos, selTimelineXPos, timelineXPos } = curPos;
+		const is3DMode = this.sk.handle3D.getIs3DModeOrTransitioning();
+
+		if (circleToggle) {
+			if (is3DMode) return true;
+			return this.sk.gui.fpContainer.overCursor(floorPlanXPos, floorPlanYPos, selTimelineXPos);
 		}
 
-		// If nothing is selected we just return true
-		return true;
-	}
+		if (sliceToggle) {
+			if (is3DMode) return true;
+			return this.sk.gui.fpContainer.overSlicer(floorPlanXPos, selTimelineXPos);
+		}
 
-	/**
-	 * A compare point is an object with two augmented points
-	 * @param  {Integer} view
-	 * @param  {MovementPoint} curIndex
-	 * @param  {MovementPoint} priorIndex
-	 * @param  {Integer} time
-	 * @param  {Integer} previousTime
-	 */
-	createComparePoint(view, curIndex, priorIndex) {
-		return {
-			cur: this.createAugmentPoint(view, curIndex, curIndex.time),
-			prior: this.createAugmentPoint(view, priorIndex, priorIndex.time)
-		};
+		if (movementToggle) {
+			return !pointIsStopped;
+		}
+
+		if (stopsToggle) {
+			return pointIsStopped;
+		}
+
+		if (highlightToggle) {
+			return this.sk.gui.highlight.overHighlightArray(floorPlanXPos, floorPlanYPos, timelineXPos);
+		}
+
+		return true;
 	}
 
 	createAugmentPoint(view, point, time) {
@@ -128,9 +113,7 @@ export class DrawUtils {
 	getSharedPosValues(point, time) {
 		const timelineXPos = timeline.mapTotalTimeToPixelTime(time);
 		const selTimelineXPos = this.sk.mapSelectTimeToPixelTime(timelineXPos);
-
 		const [floorPlanXPos, floorPlanYPos] = this.sk.floorPlan.getScaledXYPos(point.x, point.y, this.sk.gui.fpContainer.getContainer());
-
 		return {
 			timelineXPos,
 			selTimelineXPos,
