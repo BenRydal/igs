@@ -17,11 +17,12 @@
 							and filtering data, watching video, and rescaling data with the interactive timeline.
 						</p>
 						<div class="flex flex-row justify-center flex-wrap gap-4 my-2">
-							<a href="https://youtu.be/hewU4GKRoSs" target="_blank" class="btn bg-gray-300 text-black">IGS Demonstration Video</a>
-							<a href="https://www.benrydal.com/software/igs" target="_blank" class="btn bg-gray-300 text-black">Collecting and Formatting Data</a>
-							<a href="https://www.benrydal.com/interactiongeography" target="_blank" class="btn bg-gray-300 text-black">More About Interaction Geography</a>
-							<a href="https://github.com/BenRydal/igs" target="_blank" class="btn bg-gray-300 text-black">Contribute to IGS project</a>
-							<a href="https://link.springer.com/article/10.1007/s11412-017-9264-8" target="_blank" class="btn bg-gray-300 text-black">Reference IGS for a publication</a>
+							<a href="https://youtu.be/hewU4GKRoSs" target="_blank" class="btn bg-gray-300 text-black">Watch Demo Video</a>
+							<a href="https://www.benrydal.com/software/igs" target="_blank" class="btn bg-gray-300 text-black">Data Collection/Formatting Guide</a>
+							<a href="https://www.benrydal.com/interactiongeography" target="_blank" class="btn bg-gray-300 text-black">Learn About Interaction Geography</a>
+							<a href="https://github.com/BenRydal/igs" target="_blank" class="btn bg-gray-300 text-black">Contribute</a>
+							<!-- <a href="https://link.springer.com/article/10.1007/s11412-017-9264-8" target="_blank" class="btn bg-gray-300 text-black">Reference</a> -->
+							<a href="https://journals.sagepub.com/doi/abs/10.3102/0013189X241238698" target="_blank" class="btn bg-gray-300 text-black">Reference</a>
 						</div>
 						<p class="pt-3 pb-6 italic text-center">
 							IGS software is an open-source project built with Svelte, JavaScript and p5.js licensed under the GNU General Public License Version 2.0. It is
