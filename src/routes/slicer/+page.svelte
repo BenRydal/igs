@@ -454,7 +454,6 @@
 		}}
 	>
 		<div class="modal-box w-11/12 max-w-md">
-			<button class="btn btn-sm ml-4" on:click={() => (showDataPopup = true)}>Data Explorer</button>
 
 			<div class="flex justify-between mb-4">
 				<h3 class="font-bold text-lg">Settings</h3>
@@ -542,6 +541,10 @@
 				</div>
 			</div>
 
+			<div class="flex flex-col mt-4">
+				<button class="btn btn-sm ml-4" on:click={() => (showDataPopup = true)}>Data Explorer</button>
+			</div>
+
 			<div class="modal-action">
 				<button class="btn" on:click={() => (showSettings = false)}>Close</button>
 			</div>
@@ -562,8 +565,7 @@
 				<div class="flex flex-col">
 					<h3 class="font-bold text-lg">Data Explorer</h3>
 					<p>
-						Here you will find information on the data that you have uploaded. This includes the codes that have been used, and the users that have
-						been tracked. You can also enable or disable the movement and speech of each user, and change the color of their path.
+						Here you will find detailed information on the data that you have uploaded.
 					</p>
 				</div>
 
