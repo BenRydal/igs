@@ -510,6 +510,36 @@
 						class="range range-primary"
 					/>
 				</div>
+
+				<!-- Movement StrokeWeight -->
+				<div class="flex flex-col">
+					<label for="movementStrokeWeight" class="font-medium">Movement Line Weight: {currentConfig.movementStrokeWeight}</label>
+					<input
+						id="movementStrokeWeight"
+						type="range"
+						min="1"
+						max="20"
+						step="1"
+						bind:value={currentConfig.movementStrokeWeight}
+						on:input={(e) => handleConfigChange('movementStrokeWeight', parseInt(e.target.value))}
+						class="range range-primary"
+					/>
+				</div>
+
+				<!-- Stop StrokeWeight -->
+				<div class="flex flex-col">
+					<label for="stopStrokeWeight" class="font-medium">Stop Line Weight: {currentConfig.stopStrokeWeight}</label>
+					<input
+						id="stopStrokeWeight"
+						type="range"
+						min="1"
+						max="20"
+						step="1"
+						bind:value={currentConfig.stopStrokeWeight}
+						on:input={(e) => handleConfigChange('stopStrokeWeight', parseInt(e.target.value))}
+						class="range range-primary"
+					/>
+				</div>
 			</div>
 
 			<div class="modal-action">

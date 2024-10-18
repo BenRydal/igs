@@ -16,6 +16,8 @@ export interface ConfigStoreType {
 	samplingInterval: number;
 	smallDataThreshold: number;
 	conversationRectWidth: number;
+	movementStrokeWeight: number;
+	stopStrokeWeight: number;
 }
 
 const initialConfig: ConfigStoreType = {
@@ -33,7 +35,9 @@ const initialConfig: ConfigStoreType = {
 	animationRate: 0.05,
 	samplingInterval: 0.5,
 	smallDataThreshold: 3000,
-	conversationRectWidth: 5
+	conversationRectWidth: 5,
+	movementStrokeWeight: 1,
+	stopStrokeWeight: 9
 };
 
 const ConfigStore = writable<ConfigStoreType>(initialConfig);
