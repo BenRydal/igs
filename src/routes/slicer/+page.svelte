@@ -385,6 +385,15 @@
 				}}
 			/>
 
+			<IconButton
+				id="btn-toggle-3d"
+				icon={Md3DRotation}
+				tooltip={'Toggle 2D/3D'}
+				on:click={() => {
+					p5Instance.handle3D.update();
+				}}
+			/>
+
 			{#if isVideoShowing}
 				<IconButton id="btn-toggle-video" icon={MdVideocam} tooltip={'Show/Hide Video'} on:click={toggleVideo} />
 			{:else}
@@ -414,15 +423,6 @@
 				type="file"
 				bind:files
 				on:change={updateUserLoadedFiles}
-			/>
-
-			<IconButton
-				id="btn-toggle-3d"
-				icon={Md3DRotation}
-				tooltip={'Toggle 2D/3D'}
-				on:click={() => {
-					p5Instance.handle3D.update();
-				}}
 			/>
 
 			<IconButton icon={MdHelpOutline} tooltip={'Help'} on:click={() => ($isModalOpen = !$isModalOpen)} />
