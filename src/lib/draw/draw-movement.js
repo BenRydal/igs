@@ -28,7 +28,6 @@ export class DrawMovement {
 	setData(user) {
 		this.dot = null;
 		this.sk.noFill();
-		this.sk.noStroke(); // ?
 		this.shade = user.color;
 		this.setDraw(user.dataTrail);
 		if (this.dot !== null) this.drawDot(this.dot);
