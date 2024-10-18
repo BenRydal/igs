@@ -355,11 +355,12 @@
 
 		<!-- Clear Data Dropdown -->
 		<details class="dropdown" use:clickOutside>
-			<summary class="btn btn-sm ml-4 tooltip tooltip-bottom flex items-center justify-center"> Clear Data </summary>
+			<summary class="btn btn-sm ml-4 tooltip tooltip-bottom flex items-center justify-center"> Clear </summary>
 			<ul class="menu dropdown-content rounded-box z-[1] w-52 p-2 shadow bg-base-100">
 				<li><button on:click={clearMovementData}>Movement</button></li>
 				<li><button on:click={clearConversationData}>Conversation</button></li>
 				<li><button on:click={clearCodeData}>Codes</button></li>
+				<li><button on:click={() => p5Instance.videoController.clear()}>Video</button></li>
 				<li><button on:click={clearAllData}>All Data</button></li>
 			</ul>
 		</details>
