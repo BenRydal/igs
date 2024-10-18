@@ -596,7 +596,7 @@
 	<div class="flex flex-1 flex-row justify-start items-center bg-[#f6f5f3] items-start px-8">
 		{#if $ConfigStore.dataHasCodes}
 			<details class="dropdown dropdown-top" use:clickOutside>
-				<summary class="btn">Codes</summary>
+				<summary class="btn">CODES</summary>
 				<ul class="menu dropdown-content p-2 bg-base-100 rounded-box w-64 max-h-[75vh] overflow-y-auto flex-nowrap">
 					<li>
 						<div class="flex items-center">
