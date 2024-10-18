@@ -30,7 +30,6 @@ export class DrawMovement {
 		this.sk.noFill();
 		this.sk.noStroke(); // ?
 		this.shade = user.color;
-		this.sk.strokeCap(this.sk.SQUARE);
 		this.setDraw(user.dataTrail);
 		if (this.dot !== null) this.drawDot(this.dot);
 	}

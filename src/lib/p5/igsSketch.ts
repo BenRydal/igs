@@ -50,7 +50,7 @@ export const igsSketch = (p5: any) => {
 		p5.textSize(p5.GUI_TEXT_SIZE);
 		p5.textFont(p5.font);
 		p5.textAlign(p5.LEFT, p5.TOP);
-		p5.smooth();
+		//p5.smooth();
 		p5.strokeCap(p5.SQUARE);
 	};
 
