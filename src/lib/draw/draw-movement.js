@@ -7,11 +7,13 @@ TimelineStore.subscribe((data) => {
 	timeline = data;
 });
 
-let maxStopLength, isPathColorMode;
+let maxStopLength, isPathColorMode, movementStrokeWeight, stopStrokeWeight;
 
 ConfigStore.subscribe((data) => {
 	maxStopLength = data.maxStopLength;
 	isPathColorMode = data.isPathColorMode;
+	movementStrokeWeight = data.movementStrokeWeight;
+	stopStrokeWeight = data.stopStrokeWeight;
 });
 
 export class DrawMovement {
@@ -20,18 +22,13 @@ export class DrawMovement {
 		this.drawUtils = drawUtils;
 		this.dot = null;
 		this.largestStopPixelSize = 50;
-		this.style = {
-			shade: null,
-			thinStroke: 1,
-			fatStroke: 9
-		};
+		this.shade = null;
 	}
 
 	setData(user) {
 		this.dot = null;
 		this.sk.noFill();
-		this.sk.noStroke(); // ?
-		this.style.shade = user.color;
+		this.shade = user.color;
 		this.setDraw(user.dataTrail);
 		if (this.dot !== null) this.drawDot(this.dot);
 	}
@@ -114,19 +111,19 @@ export class DrawMovement {
 	setLineStyles(stopLength, codes) {
 		this.setStroke(this.drawUtils.setCodeColor(codes));
 		if (this.drawUtils.isStopped(stopLength)) {
-			this.sk.strokeWeight(this.style.fatStroke);
+			this.sk.strokeWeight(stopStrokeWeight);
 		} else {
-			this.sk.strokeWeight(this.style.thinStroke);
+			this.sk.strokeWeight(movementStrokeWeight);
 		}
 	}
 
 	setFill(color) {
-		if (!isPathColorMode) this.sk.fill(this.style.shade);
+		if (!isPathColorMode) this.sk.fill(this.shade);
 		else this.sk.fill(color);
 	}
 
 	setStroke(color) {
-		if (!isPathColorMode) this.sk.stroke(this.style.shade);
+		if (!isPathColorMode) this.sk.stroke(this.shade);
 		else this.sk.stroke(color);
 	}
 

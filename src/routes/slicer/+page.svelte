@@ -130,6 +130,15 @@
 		p5Instance?.loop(); // Trigger redraw
 	}
 
+	function handleRectWidthChange(e: Event) {
+		const target = e.target as HTMLInputElement;
+		ConfigStore.update((value) => ({
+			...value,
+			conversationRectWidth: parseFloat(target.value)
+		}));
+		p5Instance?.loop(); // Trigger redraw
+	}
+
 	function toggleSelection(selection: ToggleKey, toggleOptions: ToggleKey[]) {
 		ConfigStore.update((store: ConfigStoreType) => {
 			const updatedStore = { ...store };
@@ -313,7 +322,6 @@
 		<details class="dropdown" use:clickOutside>
 			<summary class="btn btn-sm ml-4 tooltip tooltip-bottom flex items-center justify-center"> Talk </summary>
 			<ul class="menu dropdown-content rounded-box z-[1] w-52 p-2 shadow bg-base-100">
-				<input type="text" placeholder="Search conversations..." on:input={(e) => handleWordSearch(e)} class="input input-bordered w-full" />
 				{#each conversationToggleOptions as toggle}
 					<li>
 						<button on:click={() => toggleSelection(toggle, conversationToggleOptions)} class="w-full text-left flex items-center">
@@ -326,16 +334,33 @@
 						</button>
 					</li>
 				{/each}
+				<li class="cursor-none">
+					<p>Rect width: {$ConfigStore.conversationRectWidth} pixels</p>
+				</li>
+				<li>
+					<label for="rectWidthRange" class="sr-only">Adjust rect width</label>
+					<input
+						id="rectWidthRange"
+						type="range"
+						min="1"
+						max="30"
+						value={$ConfigStore.conversationRectWidth}
+						class="range"
+						on:input={handleRectWidthChange}
+					/>
+				</li>
+				<input type="text" placeholder="Search conversations..." on:input={(e) => handleWordSearch(e)} class="input input-bordered w-full" />
 			</ul>
 		</details>
 
 		<!-- Clear Data Dropdown -->
 		<details class="dropdown" use:clickOutside>
-			<summary class="btn btn-sm ml-4 tooltip tooltip-bottom flex items-center justify-center"> Clear Data </summary>
+			<summary class="btn btn-sm ml-4 tooltip tooltip-bottom flex items-center justify-center"> Clear </summary>
 			<ul class="menu dropdown-content rounded-box z-[1] w-52 p-2 shadow bg-base-100">
 				<li><button on:click={clearMovementData}>Movement</button></li>
 				<li><button on:click={clearConversationData}>Conversation</button></li>
 				<li><button on:click={clearCodeData}>Codes</button></li>
+				<li><button on:click={() => p5Instance.videoController.clear()}>Video</button></li>
 				<li><button on:click={clearAllData}>All Data</button></li>
 			</ul>
 		</details>
@@ -358,6 +383,15 @@
 				on:click={() => {
 					p5Instance.floorPlan.setRotateRight();
 					p5Instance.loop();
+				}}
+			/>
+
+			<IconButton
+				id="btn-toggle-3d"
+				icon={Md3DRotation}
+				tooltip={'Toggle 2D/3D'}
+				on:click={() => {
+					p5Instance.handle3D.update();
 				}}
 			/>
 
@@ -392,15 +426,6 @@
 				on:change={updateUserLoadedFiles}
 			/>
 
-			<IconButton
-				id="btn-toggle-3d"
-				icon={Md3DRotation}
-				tooltip={'Toggle 2D/3D'}
-				on:click={() => {
-					p5Instance.handle3D.update();
-				}}
-			/>
-
 			<IconButton icon={MdHelpOutline} tooltip={'Help'} on:click={() => ($isModalOpen = !$isModalOpen)} />
 
 			<IconButton icon={MdSettings} tooltip={'Settings'} on:click={() => (showSettings = true)} />
@@ -429,7 +454,6 @@
 		}}
 	>
 		<div class="modal-box w-11/12 max-w-md">
-			<button class="btn btn-sm ml-4" on:click={() => (showDataPopup = true)}>Data Explorer</button>
 
 			<div class="flex justify-between mb-4">
 				<h3 class="font-bold text-lg">Settings</h3>
@@ -485,6 +509,40 @@
 						class="range range-primary"
 					/>
 				</div>
+
+				<!-- Movement StrokeWeight -->
+				<div class="flex flex-col">
+					<label for="movementStrokeWeight" class="font-medium">Movement Line Weight: {currentConfig.movementStrokeWeight}</label>
+					<input
+						id="movementStrokeWeight"
+						type="range"
+						min="1"
+						max="20"
+						step="1"
+						bind:value={currentConfig.movementStrokeWeight}
+						on:input={(e) => handleConfigChange('movementStrokeWeight', parseInt(e.target.value))}
+						class="range range-primary"
+					/>
+				</div>
+
+				<!-- Stop StrokeWeight -->
+				<div class="flex flex-col">
+					<label for="stopStrokeWeight" class="font-medium">Stop Line Weight: {currentConfig.stopStrokeWeight}</label>
+					<input
+						id="stopStrokeWeight"
+						type="range"
+						min="1"
+						max="20"
+						step="1"
+						bind:value={currentConfig.stopStrokeWeight}
+						on:input={(e) => handleConfigChange('stopStrokeWeight', parseInt(e.target.value))}
+						class="range range-primary"
+					/>
+				</div>
+			</div>
+
+			<div class="flex flex-col mt-4">
+				<button class="btn btn-sm ml-4" on:click={() => (showDataPopup = true)}>Data Explorer</button>
 			</div>
 
 			<div class="modal-action">
@@ -507,8 +565,7 @@
 				<div class="flex flex-col">
 					<h3 class="font-bold text-lg">Data Explorer</h3>
 					<p>
-						Here you will find information on the data that you have uploaded. This includes the codes that have been used, and the users that have
-						been tracked. You can also enable or disable the movement and speech of each user, and change the color of their path.
+						Here you will find detailed information on the data that you have uploaded.
 					</p>
 				</div>
 
@@ -571,7 +628,7 @@
 	<div class="flex flex-1 flex-row justify-start items-center bg-[#f6f5f3] items-start px-8">
 		{#if $ConfigStore.dataHasCodes}
 			<details class="dropdown dropdown-top" use:clickOutside>
-				<summary class="btn">Codes</summary>
+				<summary class="btn">CODES</summary>
 				<ul class="menu dropdown-content p-2 bg-base-100 rounded-box w-64 max-h-[75vh] overflow-y-auto flex-nowrap">
 					<li>
 						<div class="flex items-center">
