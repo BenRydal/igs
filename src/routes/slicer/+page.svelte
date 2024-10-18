@@ -130,6 +130,15 @@
 		p5Instance?.loop(); // Trigger redraw
 	}
 
+	function handleRectWidthChange(e: Event) {
+		const target = e.target as HTMLInputElement;
+		ConfigStore.update((value) => ({
+			...value,
+			conversationRectWidth: parseFloat(target.value)
+		}));
+		p5Instance?.loop(); // Trigger redraw
+	}
+
 	function toggleSelection(selection: ToggleKey, toggleOptions: ToggleKey[]) {
 		ConfigStore.update((store: ConfigStoreType) => {
 			const updatedStore = { ...store };
@@ -313,7 +322,6 @@
 		<details class="dropdown" use:clickOutside>
 			<summary class="btn btn-sm ml-4 tooltip tooltip-bottom flex items-center justify-center"> Talk </summary>
 			<ul class="menu dropdown-content rounded-box z-[1] w-52 p-2 shadow bg-base-100">
-				<input type="text" placeholder="Search conversations..." on:input={(e) => handleWordSearch(e)} class="input input-bordered w-full" />
 				{#each conversationToggleOptions as toggle}
 					<li>
 						<button on:click={() => toggleSelection(toggle, conversationToggleOptions)} class="w-full text-left flex items-center">
@@ -326,6 +334,22 @@
 						</button>
 					</li>
 				{/each}
+				<li class="cursor-none">
+					<p>Rect width: {$ConfigStore.conversationRectWidth} pixels</p>
+				</li>
+				<li>
+					<label for="rectWidthRange" class="sr-only">Adjust rect width</label>
+					<input
+						id="rectWidthRange"
+						type="range"
+						min="1"
+						max="30"
+						value={$ConfigStore.conversationRectWidth}
+						class="range"
+						on:input={handleRectWidthChange}
+					/>
+				</li>
+				<input type="text" placeholder="Search conversations..." on:input={(e) => handleWordSearch(e)} class="input input-bordered w-full" />
 			</ul>
 		</details>
 

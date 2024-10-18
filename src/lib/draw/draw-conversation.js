@@ -11,19 +11,19 @@ TimelineStore.subscribe((data) => {
  * This class holds drawing methods specific to drawing conversation rectangles and text depending on user interaction
  */
 
-let alignToggle, wordToSearch, isPathColorMode;
+let alignToggle, wordToSearch, isPathColorMode, conversationRectWidth;
 
 ConfigStore.subscribe((data) => {
 	alignToggle = data.alignToggle;
 	wordToSearch = data.wordToSearch;
 	isPathColorMode = data.isPathColorMode;
+	conversationRectWidth = data.conversationRectWidth;
 });
 
 export class DrawConversation {
 	constructor(sketch, drawUtils) {
 		this.sk = sketch;
 		this.drawUtils = drawUtils;
-		this.rectPixelWidth = timeline.getCurConversationRectWidth(); // width needs to be dynamically updated when new data is loaded and timeline scaling is changed by user
 		this.conversationBubble = {
 			// represents user selected conversation
 			isSelected: false,
@@ -82,27 +82,27 @@ export class DrawConversation {
 	 * NOTE: if recordConversationBubble is called, that method also sets new strokeWeight to highlight the curRect
 	 */
 	over2DRects(point, curPos) {
-		if (this.sk.overRect(curPos.floorPlanXPos, curPos.adjustYPos, this.rectPixelWidth, curPos.rectLength))
+		if (this.sk.overRect(curPos.floorPlanXPos, curPos.adjustYPos, conversationRectWidth, curPos.rectLength))
 			this.recordConversationBubble(point.speech, this.sk.PLAN);
-		else if (this.sk.overRect(curPos.selTimelineXPos, curPos.adjustYPos, this.rectPixelWidth, curPos.rectLength))
+		else if (this.sk.overRect(curPos.selTimelineXPos, curPos.adjustYPos, conversationRectWidth, curPos.rectLength))
 			this.recordConversationBubble(point.speech, this.sk.SPACETIME);
 	}
 	/**
 	 * 2D and 3D floorplan rect drawing differs in the value of adjustYPos and positive/negative value of width/height parameters
 	 */
 	drawFloorPlan2DRects(curPos) {
-		this.sk.rect(curPos.floorPlanXPos, curPos.adjustYPos, this.rectPixelWidth, curPos.rectLength);
+		this.sk.rect(curPos.floorPlanXPos, curPos.adjustYPos, conversationRectWidth, curPos.rectLength);
 	}
 
 	drawFloorPlan3DRects(curPos) {
-		this.sk.rect(curPos.floorPlanXPos, curPos.adjustYPos, -this.rectPixelWidth, -curPos.rectLength);
+		this.sk.rect(curPos.floorPlanXPos, curPos.adjustYPos, -conversationRectWidth, -curPos.rectLength);
 	}
 
 	/**
 	 * 2D and 3D Spacetime rect drawing differs in drawing of rect or quad shapes and zoom parameter
 	 */
 	drawSpaceTime2DRects(curPos) {
-		this.sk.rect(curPos.selTimelineXPos, curPos.adjustYPos, this.rectPixelWidth, curPos.rectLength);
+		this.sk.rect(curPos.selTimelineXPos, curPos.adjustYPos, conversationRectWidth, curPos.rectLength);
 	}
 
 	drawSpaceTime3DRects(curPos) {
@@ -117,10 +117,10 @@ export class DrawConversation {
 				curPos.selTimelineXPos,
 				curPos.rectLength,
 				translateZoom,
-				curPos.selTimelineXPos + this.rectPixelWidth,
+				curPos.selTimelineXPos + conversationRectWidth,
 				0,
 				translateZoom,
-				curPos.selTimelineXPos + this.rectPixelWidth
+				curPos.selTimelineXPos + conversationRectWidth
 			);
 		else
 			this.sk.quad(
@@ -132,10 +132,10 @@ export class DrawConversation {
 				curPos.selTimelineXPos,
 				curPos.floorPlanXPos + curPos.rectLength,
 				curPos.adjustYPos,
-				curPos.selTimelineXPos + this.rectPixelWidth,
+				curPos.selTimelineXPos + conversationRectWidth,
 				curPos.floorPlanXPos,
 				curPos.adjustYPos,
-				curPos.selTimelineXPos + this.rectPixelWidth
+				curPos.selTimelineXPos + conversationRectWidth
 			);
 	}
 

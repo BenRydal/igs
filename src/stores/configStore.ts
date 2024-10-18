@@ -15,6 +15,7 @@ export interface ConfigStoreType {
 	animationRate: number;
 	samplingInterval: number;
 	smallDataThreshold: number;
+	conversationRectWidth: number;
 }
 
 const initialConfig: ConfigStoreType = {
@@ -31,7 +32,8 @@ const initialConfig: ConfigStoreType = {
 	wordToSearch: '',
 	animationRate: 0.05,
 	samplingInterval: 0.5,
-	smallDataThreshold: 3000
+	smallDataThreshold: 3000,
+	conversationRectWidth: 5
 };
 
 const ConfigStore = writable<ConfigStoreType>(initialConfig);

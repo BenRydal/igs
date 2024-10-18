@@ -142,28 +142,13 @@ export class Timeline {
 		// return this.sk.overRect(this.start, this.top, this.length, this.thickness);
 	}
 
-	/**
-	 * Returns pixel width for drawing conversation rectangles based on curTotalTime of data, user timeline selection, and maxRectWidth
-	 * NOTE: curScaledRectWidth parameters 0-3600 scale pixels to 1 hour which works well and the map method maps to the inverse of 1 and maxRectWidth to properly adjust scaling/thickness of rects when user interacts with timeline
-	 */
-	getCurConversationRectWidth() {
-		const maxRectWidth = 10;
-		const curScaledRectWidth = this.map(this.getEndTime(), 0, 3600, maxRectWidth, 1, true);
-		const timelineLength = this.getTimelineRightMarkerXPos() - this.getTimelineLeftMarkerXPos();
-		return this.map(timelineLength, 0, timelineLength, maxRectWidth, curScaledRectWidth);
-	}
-
 	// Implementation of Helper function from P5 library to map a value from one range to another
 	map(value, start1, stop1, start2, stop2, withinBounds = false) {
 		// Perform the mapping
 		let newval = ((value - start1) / (stop1 - start1)) * (stop2 - start2) + start2;
-
-		// If withinBounds is true, constrain the value within [start2, stop2]
 		if (withinBounds) {
 			return this.constrain(newval, start2, stop2);
 		}
-
-		// Return the mapped value without clamping
 		return newval;
 	}
 
