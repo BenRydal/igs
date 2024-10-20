@@ -676,7 +676,7 @@
 				<ul class="menu dropdown-content bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
 					<li>
 						<div class="flex items-center">
-							<input id="userCheckbox-{user.name}" type="checkbox" class="checkbox" bind:checked={user.enabled} on:click={() => p5Instance?.loop()} />
+							<input id="userCheckbox-{user.name}" type="checkbox" class="checkbox" bind:checked={user.enabled} on:change={() => p5Instance?.loop()} />
 							Movement
 						</div>
 					</li>
@@ -687,7 +687,7 @@
 								type="checkbox"
 								class="checkbox"
 								bind:checked={user.conversation_enabled}
-								on:click={() => p5Instance?.loop()}
+								on:change={() => p5Instance?.loop()}
 							/>
 							Talk
 						</div>
