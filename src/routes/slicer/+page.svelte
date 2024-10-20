@@ -176,7 +176,7 @@
 	}
 
 	function updateUserLoadedFiles(event) {
-		clearAllData();
+		//clearAllData();
 		core.handleUserLoadedFiles(event);
 		p5Instance.loop();
 	}
@@ -199,6 +199,7 @@
 		});
 
 		core.codeData = [];
+		core.conversationData = [];
 
 		ConfigStore.update((currentConfig) => ({
 			...currentConfig,
@@ -222,6 +223,7 @@
 				return user;
 			})
 		);
+		core.conversationData = [];
 		p5Instance.loop();
 	}
 

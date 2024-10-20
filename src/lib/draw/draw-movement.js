@@ -34,7 +34,6 @@ export class DrawMovement {
 	}
 
 	setDraw(dataTrail) {
-		if (!dataTrail[0].x || !dataTrail[0].y) return;
 		this.sk.beginShape();
 		for (let i = 0; i < dataTrail.length; i++) {
 			let point = dataTrail[i];

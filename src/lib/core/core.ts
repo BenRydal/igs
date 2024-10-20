@@ -1,12 +1,3 @@
-/**
- * This class holds core program data and associated parsing methods from processed CSV files.
- * Separate parsing classes for movement, conversation, and code CSV files test parsed data from PapaParse
- * results and generate different data structures
- * These data structures are integrated into a Path object which is the central data structure for the IGS
- * Original data from each CSV file is stored within each parsing class for re-processing as new data is loaded
- * Each time CSV file is successfully loaded and parsed, domController is called to update GUI elements
- *
- */
 import type p5 from 'p5';
 import Papa from 'papaparse';
 
@@ -20,10 +11,10 @@ import UserStore from '../../stores/userStore';
 import CodeStore from '../../stores/codeStore.js';
 import TimelineStore from '../../stores/timelineStore';
 import ConfigStore from '../../stores/configStore.js';
+import { get } from 'svelte/store';
 
 let timeline, maxStopLength;
-let samplingInterval = 0.5;
-let smallDataThreshold = 3000;
+let samplingInterval, smallDataThreshold;
 
 TimelineStore.subscribe((data) => {
 	timeline = data;
@@ -39,6 +30,7 @@ export class Core {
 	sketch: p5;
 	coreUtils: CoreUtils;
 	codeData: { code: string; startTime: number; endTime: number }[] = [];
+	conversationData: any[] = [];
 
 	constructor(sketch: p5) {
 		this.sketch = sketch;
@@ -94,9 +86,6 @@ export class Core {
 	}
 
 	handleExampleDropdown = async (event: any) => {
-		// TODO: Need to adjust p5 typescript defintion to expose
-		// custom attributes & functions
-
 		ConfigStore.update((store) => ({
 			...store,
 			maxStopLength: 0
@@ -104,12 +93,12 @@ export class Core {
 
 		const selectedValue = event.target.value;
 		await this.loadFloorplanImage(`/data/${selectedValue}/floorplan.png`);
-		await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `conversation.csv`);
 
 		switch (selectedValue) {
 			case 'example-1':
 				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, 'jordan.csv');
 				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, 'possession.csv');
+				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `conversation.csv`);
 				this.sketch.videoController.createVideoPlayer('Youtube', { videoId: 'iiMjfVOj8po' });
 				break;
 			case 'example-2':
@@ -118,11 +107,13 @@ export class Core {
 				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `jeans.csv`);
 				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `lily.csv`);
 				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `mae.csv`);
+				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `conversation.csv`);
 				this.sketch.videoController.createVideoPlayer('Youtube', { videoId: 'pWJ3xNk1Zpg' });
 				break;
 			case 'example-3':
 				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `teacher.csv`);
 				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, 'lesson-graph.csv');
+				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `conversation.csv`);
 				this.sketch.videoController.createVideoPlayer('Youtube', { videoId: 'Iu0rxb-xkMk' });
 				break;
 			case 'example-4':
@@ -131,6 +122,7 @@ export class Core {
 				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `nathan.csv`);
 				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `sean.csv`);
 				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `teacher.csv`);
+				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `conversation.csv`);
 				this.sketch.videoController.createVideoPlayer('Youtube', { videoId: 'OJSZCK4GPQY' });
 				break;
 		}
@@ -165,29 +157,32 @@ export class Core {
 		const csvData = results.data;
 		if (this.coreUtils.testMovement(results)) {
 			this.updateUsersForMovement(csvData, fileName);
-			this.reapplyCodesToUsers();
 		} else if (this.coreUtils.testMulticode(results)) {
-			this.updateUsersForMultiCodes(csvData, fileName);
-			// No need to call reapplyCodesToUsers here because it's called inside updateUsersForMultiCodes
+			this.updateUsersForMultiCodes(csvData);
 		} else if (this.coreUtils.testSingleCode(results)) {
 			this.updateUsersForSingleCodes(csvData, fileName);
-			// No need to call reapplyCodesToUsers here because it's called inside updateUsersForSingleCodes
 		} else if (this.coreUtils.testConversation(results)) {
-			this.updateUsersForConversation(csvData, fileName);
-			this.reapplyCodesToUsers();
+			// only process conversation if their is at least one user's movement data loaded
+			if (this.isAnyUserMovementLoaded()) this.updateUsersForConversation(csvData);
 		} else {
 			alert('Error loading CSV file. Please make sure your file is a CSV file formatted with correct column headers');
 		}
 
-		// Sort users' data trails by time
 		UserStore.update((currentUsers) => {
-			let users = [...currentUsers];
+			const users = [...currentUsers];
 			users.forEach((user) => {
 				user.dataTrail.sort((a, b) => (a.time > b.time ? 1 : -1));
+				this.updateStopValues(user.dataTrail);
+				this.updateCodeValues(user.dataTrail);
 			});
 			return users;
 		});
 	};
+
+	isAnyUserMovementLoaded() {
+		const users = get(UserStore);
+		return users.some((user) => user.movementIsLoaded);
+	}
 
 	updateUsersForMovement = (csvData: any, userName: string) => {
 		let endTime = 0;
@@ -200,7 +195,7 @@ export class Core {
 				user = this.createNewUser(users, userName);
 				users.push(user);
 			}
-
+			user.movementIsLoaded = true;
 			const lastTime = csvData[csvData.length - 1]?.time;
 			if (endTime < lastTime) endTime = lastTime;
 
@@ -218,36 +213,97 @@ export class Core {
 					}
 				});
 			}
-
-			this.integrateConversation(user.dataTrail);
-			this.updateStopValues(user.dataTrail);
-
 			return users;
 		});
-
-		TimelineStore.update((timeline) => {
-			timeline.setCurrTime(0);
-			timeline.setStartTime(0);
-			timeline.setEndTime(endTime);
-			timeline.setLeftMarker(0);
-			timeline.setRightMarker(endTime);
-			return timeline;
-		});
+		this.updateTimelineValues(endTime);
 	};
 
-	updateUsersForConversation = (csvData: any, fileName: string) => {
+	updateUsersForConversation = (csvData: any) => {
 		UserStore.update((currentUsers) => {
-			let users = [...currentUsers];
+			const users = [...currentUsers];
+			const allUsersMovementData = this.getAllUsersMovementData(users);
 			csvData.forEach((row: any) => {
-				let user = users.find((user) => user.name === row.speaker.toLowerCase());
-				if (!user) {
-					user = this.createNewUser(users, row.speaker.toLowerCase());
-					users.push(user);
+				let curUser = users.find((curUser) => curUser.name === row.speaker.toLowerCase());
+
+				if (!curUser) {
+					curUser = this.createNewUser(users, row.speaker.toLowerCase());
+					users.push(curUser);
 				}
-				this.addDataPointClosestByTimeInSeconds(user.dataTrail, new DataPoint(row.talk, row.time));
+				curUser.conversationIsLoaded = true;
+
+				// If the current conversation turn has movement loaded, use that dataTrail to get coordinate data and add the DataPoint
+				// Or else, use allUsersMovementData to get coordinate data and then add the DataPoint to the current user's dataTrail
+				if (curUser.movementIsLoaded) {
+					this.addDataPointClosestByTimeInSeconds(curUser.dataTrail, new DataPoint(row.talk, row.time), curUser.dataTrail);
+					console.log('fileName matched');
+				} else {
+					this.addDataPointClosestByTimeInSeconds(curUser.dataTrail, new DataPoint(row.talk, row.time), allUsersMovementData);
+					console.log('no match');
+				}
 			});
 			return users;
 		});
+	};
+
+	// Collect valid data points with x and y coordinates across all users' dataTrails to process conversation data
+	getAllUsersMovementData = (users) => {
+		const validPoints = [];
+		users.forEach((user) => {
+			user.dataTrail.forEach((point) => {
+				if (point.x != null && point.y != null) {
+					validPoints.push(point);
+				}
+			});
+		});
+		return validPoints.sort((a, b) => a.time - b.time); // Ensure it's sorted by time for binary search later
+	};
+
+	addDataPointClosestByTimeInSeconds(dataTrail: DataPoint[], newDataPoint: DataPoint, validPointsWithCoordinates: DataPoint[]) {
+		this.addMissingCoordinates(newDataPoint, validPointsWithCoordinates);
+		dataTrail.push(newDataPoint);
+	}
+
+	addMissingCoordinates(newDataPoint: DataPoint, validPointsWithCoordinates: DataPoint[]) {
+		const closestDataPoint = this.findClosestPoint(newDataPoint, validPointsWithCoordinates);
+		if (closestDataPoint) {
+			this.copyDataPointAttributes(closestDataPoint, newDataPoint);
+		} else {
+			newDataPoint.x = 0;
+			newDataPoint.y = 0;
+			console.log('No valid data points with x and y found to copy');
+		}
+	}
+
+	// Implementation of binary search
+	findClosestPoint(dataPoint: DataPoint, validPoints: DataPoint[]) {
+		const targetTime = dataPoint.time;
+		if (validPoints.length === 0) {
+			console.log('Valid data points array empty');
+			return null;
+		}
+
+		let left = 0,
+			right = validPoints.length - 1;
+
+		while (left <= right) {
+			const mid = Math.floor((left + right) / 2);
+			if (validPoints[mid].time === targetTime) return validPoints[mid];
+			validPoints[mid].time < targetTime ? (left = mid + 1) : (right = mid - 1);
+		}
+
+		// Handle out-of-bounds cases
+		if (left >= validPoints.length) return validPoints[right];
+		if (right < 0) return validPoints[left];
+
+		// Return the closest of the two
+		return Math.abs(validPoints[left].time - targetTime) < Math.abs(validPoints[right].time - targetTime) ? validPoints[left] : validPoints[right];
+	}
+
+	copyDataPointAttributes = (sourceDataPoint: DataPoint, targetDataPoint: DataPoint) => {
+		targetDataPoint.x = sourceDataPoint.x;
+		targetDataPoint.y = sourceDataPoint.y;
+		targetDataPoint.stopLength = sourceDataPoint.stopLength;
+		targetDataPoint.codes = sourceDataPoint.codes;
 	};
 
 	createNewUser(users: User[], userName: string) {
@@ -256,7 +312,7 @@ export class Core {
 		return new User([], userColor, true, userName);
 	}
 
-	updateStopValues(data) {
+	updateStopValues(data: DataPoint[]) {
 		let curMaxStopLength = 0; // holds length of stop for each calculated stop segment
 
 		for (let i = 0; i < data.length; i++) {
@@ -282,59 +338,6 @@ export class Core {
 		}));
 	}
 
-	integrateConversation(dataPoints: DataPoint[]) {
-		dataPoints.forEach((dataPoint: DataPoint) => {
-			if (dataPoint.speech !== '') {
-				// Find the nearest data point with valid x and y coordinates
-				const closestIndex = dataPoints.reduce((closestIndex, currentPoint, index) => {
-					// Skip points without valid x and y values
-					if (currentPoint.x == null || currentPoint.y == null) return closestIndex;
-
-					// If no closest point yet or the current point is closer in time, update the closest index
-					if (currentPoint.time === null) return closestIndex;
-					if (dataPoint.time === null) return closestIndex;
-
-					const isCurrentCloser =
-						closestIndex === -1 || Math.abs(currentPoint.time - dataPoint.time) < Math.abs(dataPoints[closestIndex].time - dataPoint.time);
-
-					return isCurrentCloser ? index : closestIndex;
-				}, -1); // Start with -1 to indicate no valid closest point has been found yet
-
-				// If a valid closest point was found, update the current dataPoint's x and y
-				if (closestIndex !== -1) {
-					this.copyDataPointAttributes(dataPoints[closestIndex], dataPoint);
-				}
-			}
-		});
-	}
-
-	addDataPointClosestByTimeInSeconds(dataPoints, newDataPoint) {
-		if (dataPoints.length === 0) {
-			dataPoints.push(newDataPoint);
-			return;
-		}
-		// Find the index of the data point with the closest time in seconds
-		const closestIndex = dataPoints.reduce((closest, current, index) => {
-			return Math.abs(current.time - newDataPoint.time) < Math.abs(dataPoints[closest].time - newDataPoint.time) ? index : closest;
-		}, 0);
-
-		// Decide where to insert - before or after the closest time
-		if (dataPoints[closestIndex].time < newDataPoint.time) {
-			this.copyDataPointAttributes(dataPoints[closestIndex], newDataPoint);
-			dataPoints.splice(closestIndex, 0, newDataPoint);
-		} else {
-			this.copyDataPointAttributes(dataPoints[closestIndex], newDataPoint);
-			dataPoints.splice(closestIndex + 1, 0, newDataPoint);
-		}
-	}
-
-	copyDataPointAttributes = (sourceDataPoint: DataPoint, targetDataPoint: DataPoint) => {
-		targetDataPoint.x = sourceDataPoint.x;
-		targetDataPoint.y = sourceDataPoint.y;
-		targetDataPoint.stopLength = sourceDataPoint.stopLength;
-		targetDataPoint.codes = sourceDataPoint.codes;
-	};
-
 	updateUsersForSingleCodes = (csvData: any, fileName: string) => {
 		const codeName = fileName.replace(/\.[^/.]+$/, '').toLowerCase();
 		const uniqueCodes = [codeName];
@@ -346,74 +349,62 @@ export class Core {
 		});
 
 		this.updateCodeStore(uniqueCodes);
-
-		this.reapplyCodesToUsers();
 	};
 
 	updateUsersForMultiCodes = (csvData: any) => {
 		const uniqueCodes: string[] = [];
 
-		// Process each row in CSV
 		csvData.forEach((row: any) => {
 			const code = row.code.toLowerCase();
 			if (!uniqueCodes.includes(code)) uniqueCodes.push(code);
 			const startTime = parseFloat(row.start);
 			const endTime = parseFloat(row.end);
-
-			// Store the code data
 			this.codeData.push({ code, startTime, endTime });
 		});
-
-		// Update the CodeStore with the unique codes
 		this.updateCodeStore(uniqueCodes);
-
-		// Reapply codes to users
-		this.reapplyCodesToUsers();
 	};
 
-	reapplyCodesToUsers = () => {
-		UserStore.update((currentUsers) => {
-			let users = [...currentUsers];
-
-			// Clear codes in users
-			users.forEach((user) => {
-				user.dataTrail.forEach((dataPoint) => {
-					dataPoint.codes = [];
-				});
-			});
-
-			// Reapply codes
-			this.codeData.forEach((codeEntry) => {
-				const { code, startTime, endTime } = codeEntry;
-				this.updateDataTrailSegmentsWithCodes(users, code, startTime, endTime);
-			});
-
-			return users;
+	updateTimelineValues = (endTime: number) => {
+		TimelineStore.update((timeline) => {
+			timeline.setCurrTime(0);
+			timeline.setStartTime(0);
+			timeline.setEndTime(endTime);
+			timeline.setLeftMarker(0);
+			timeline.setRightMarker(endTime);
+			return timeline;
 		});
 	};
 
-	updateDataTrailSegmentsWithCodes = (users: any[], code: string, startTime: number, endTime: number) => {
-		users.forEach((user) => {
-			// Find the first data point with time >= startTime
-			const startIndex = user.dataTrail.findIndex((dataPoint) => dataPoint.time !== null && dataPoint.time >= startTime);
+	updateCodeValues = (dataPoints: DataPoint[]) => {
+		dataPoints.forEach((dataPoint) => {
+			dataPoint.codes = [];
+		});
 
-			// Find the last data point with time <= endTime
-			const endIndex = user.dataTrail.findLastIndex((dataPoint) => dataPoint.time !== null && dataPoint.time <= endTime);
+		this.codeData.forEach((codeEntry) => {
+			const { code, startTime, endTime } = codeEntry;
+			this.updateDataTrailSegmentsWithCodes(dataPoints, code, startTime, endTime);
+		});
+	};
 
-			if (startIndex === -1 || endIndex === -1) return;
+	updateDataTrailSegmentsWithCodes = (dataPoints: DataPoint[], code: string, startTime: number, endTime: number) => {
+		// Find the first data point with time >= startTime
+		const startIndex = dataPoints.findIndex((dataPoint) => dataPoint.time !== null && dataPoint.time >= startTime);
 
-			// Update datapoints FROM the start and TO the end time to include the code
-			for (let i = startIndex; i <= endIndex; i++) {
-				if (!user.dataTrail[i].codes.includes(code)) {
-					user.dataTrail[i].codes.push(code);
-				}
+		// Find the last data point with time <= endTime
+		const endIndex = dataPoints.findLastIndex((dataPoint) => dataPoint.time !== null && dataPoint.time <= endTime);
+
+		if (startIndex === -1 || endIndex === -1) return;
+
+		// Update datapoints FROM the start and TO the end time to include the code
+		for (let i = startIndex; i <= endIndex; i++) {
+			if (!dataPoints[i].codes.includes(code)) {
+				dataPoints[i].codes.push(code);
 			}
-		});
+		}
 	};
 
 	updateCodeStore = (uniqueCodes: string[]) => {
 		CodeStore.update((currentEntries) => {
-			// TODO: @Ben - this is the attempt to deal with data points that do NOT have codes.
 			if (!currentEntries.some((entry) => entry.code === 'no codes')) {
 				currentEntries.unshift({
 					code: 'no codes',
