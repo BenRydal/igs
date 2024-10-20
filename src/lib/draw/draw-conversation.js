@@ -34,7 +34,7 @@ export class DrawConversation {
 
 	setData(user) {
 		const dataTrail = user.dataTrail;
-		for (let i = 1; i < dataTrail.length; i++) {
+		for (let i = 0; i < dataTrail.length; i++) {
 			const point = dataTrail[i];
 			if (point.speech !== '' && this.isTalkTurnSelected(point.speech)) {
 				const curPos = this.drawUtils.getScaledConversationPos(point);
