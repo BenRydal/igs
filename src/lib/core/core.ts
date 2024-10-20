@@ -259,7 +259,16 @@ export class Core {
 
 	addDataPointClosestByTimeInSeconds(dataTrail: DataPoint[], newDataPoint: DataPoint, validPointsWithCoordinates: DataPoint[]) {
 		this.addMissingCoordinates(newDataPoint, validPointsWithCoordinates);
-		dataTrail.push(newDataPoint);
+
+		// Find the correct position to insert the new point to maintain time order
+		const insertIndex = dataTrail.findIndex((point) => point.time > newDataPoint.time);
+		if (insertIndex === -1) {
+			// If no point has a later time, append the new point to the end
+			dataTrail.push(newDataPoint);
+		} else {
+			// Insert the new point at the correct index to maintain time order
+			dataTrail.splice(insertIndex, 0, newDataPoint);
+		}
 	}
 
 	addMissingCoordinates(newDataPoint: DataPoint, validPointsWithCoordinates: DataPoint[]) {
@@ -302,7 +311,7 @@ export class Core {
 		targetDataPoint.x = sourceDataPoint.x;
 		targetDataPoint.y = sourceDataPoint.y;
 		targetDataPoint.stopLength = sourceDataPoint.stopLength;
-		targetDataPoint.codes = sourceDataPoint.codes;
+		targetDataPoint.codes = [...sourceDataPoint.codes]; // Ensure codes array is copied properly
 	};
 
 	createNewUser(users: User[], userName: string) {
