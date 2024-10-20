@@ -30,7 +30,6 @@ export class Core {
 	sketch: p5;
 	coreUtils: CoreUtils;
 	codeData: { code: string; startTime: number; endTime: number }[] = [];
-	conversationData: any[] = [];
 
 	constructor(sketch: p5) {
 		this.sketch = sketch;

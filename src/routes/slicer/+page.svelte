@@ -199,7 +199,6 @@
 		});
 
 		core.codeData = [];
-		core.conversationData = [];
 
 		ConfigStore.update((currentConfig) => ({
 			...currentConfig,
@@ -223,7 +222,6 @@
 				return user;
 			})
 		);
-		core.conversationData = [];
 		p5Instance.loop();
 	}
 
