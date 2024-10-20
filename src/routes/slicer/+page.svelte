@@ -58,14 +58,6 @@
 		currentConfig = value;
 	});
 
-	function handleConfigChange(key: keyof ConfigStoreType, value: any) {
-		ConfigStore.update((store) => ({
-			...store,
-			[key]: value
-		}));
-		p5Instance?.loop();
-	}
-
 	VideoStore.subscribe((value) => {
 		isVideoShowing = value.isShowing;
 		isVideoPlaying = value.isPlaying;
@@ -121,22 +113,21 @@
 		return string.charAt(0).toUpperCase() + string.slice(1);
 	}
 
-	function handleStopLengthChange(e: Event) {
+	function handleConfigChangeFromInput(e: Event, key: keyof ConfigStoreType) {
 		const target = e.target as HTMLInputElement;
 		ConfigStore.update((value) => ({
 			...value,
-			stopSliderValue: parseFloat(target.value)
+			[key]: parseFloat(target.value)
 		}));
 		p5Instance?.loop(); // Trigger redraw
 	}
 
-	function handleRectWidthChange(e: Event) {
-		const target = e.target as HTMLInputElement;
-		ConfigStore.update((value) => ({
-			...value,
-			conversationRectWidth: parseFloat(target.value)
+	function handleConfigChange(key: keyof ConfigStoreType, value: any) {
+		ConfigStore.update((store) => ({
+			...store,
+			[key]: value
 		}));
-		p5Instance?.loop(); // Trigger redraw
+		p5Instance?.loop();
 	}
 
 	function toggleSelection(selection: ToggleKey, toggleOptions: ToggleKey[]) {
@@ -293,7 +284,7 @@
 						max={$ConfigStore.maxStopLength}
 						value={$ConfigStore.stopSliderValue}
 						class="range"
-						on:input={handleStopLengthChange}
+						on:input={(e) => handleConfigChangeFromInput(e, 'stopSliderValue')}
 					/>
 				</li>
 			</ul>
@@ -346,7 +337,7 @@
 						max="30"
 						value={$ConfigStore.conversationRectWidth}
 						class="range"
-						on:input={handleRectWidthChange}
+						on:input={(e) => handleConfigChangeFromInput(e, 'conversationRectWidth')}
 					/>
 				</li>
 				<input type="text" placeholder="Search conversations..." on:input={(e) => handleWordSearch(e)} class="input input-bordered w-full" />
