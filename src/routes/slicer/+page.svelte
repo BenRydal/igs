@@ -1,6 +1,5 @@
 <script lang="ts">
 	import P5, { type Sketch } from 'p5-svelte';
-	import { get } from 'svelte/store';
 
 	import type p5 from 'p5';
 	import MdHelpOutline from 'svelte-icons/md/MdHelpOutline.svelte';
@@ -37,11 +36,6 @@
 	const conversationToggleOptions = ['alignToggle'] as const;
 
 	let showDataPopup = false;
-	let expandedUsers: { [key: string]: boolean } = {};
-	function toggleUserExpansion(userName: string) {
-		expandedUsers[userName] = !expandedUsers[userName];
-	}
-
 	let showSettings = false;
 	let currentConfig: ConfigStoreType;
 
