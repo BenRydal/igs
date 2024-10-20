@@ -34,7 +34,6 @@ export class DrawMovement {
 	}
 
 	setDraw(dataTrail) {
-		this.sk.beginShape();
 		for (let i = 0; i < dataTrail.length; i++) {
 			let point = dataTrail[i];
 			let augmentedPoint = this.getAugmentedPoint(this.sk.PLAN, point);
@@ -48,7 +47,6 @@ export class DrawMovement {
 				i = segmentEnd; // Skip ahead to the end of the segment
 			}
 		}
-		this.sk.endShape();
 	}
 
 	// Find the end of the segment where stopLength or codes change
