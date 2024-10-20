@@ -138,7 +138,7 @@ export class Timeline {
 
 	overTimeline(pixelValue) {
 		// TODO: update this for new timeline x/y positions
-		return pixelValue >= this.getTimelineLeftMarkerXPos() && pixelValue <= this.getTimelineRightMarkerXPos();
+		return pixelValue >= this.leftX && pixelValue <= this.rightX;
 		// return this.sk.overRect(this.start, this.top, this.length, this.thickness);
 	}
 
