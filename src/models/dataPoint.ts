@@ -11,7 +11,7 @@ export class DataPoint {
 		this.time = time;
 		this.x = x;
 		this.y = y;
-		this.stopLength = 0; // TODO: initialize to 0, could pass value as well so just check this is best way to do it
+		this.stopLength = 0;
 		this.codes = [];
 	}
 }
