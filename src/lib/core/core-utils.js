@@ -1,4 +1,3 @@
-// TODO: Check how this is working with the new user managmeent and how to integrate
 export class CoreUtils {
 	constructor() {
 		// NOTE: All headers must be lowercase as input data tables are converted to lowercase when loaded using PapaParse transformHeaders method
