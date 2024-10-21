@@ -46,9 +46,6 @@
 	let core: Core;
 	let isVideoShowing = false;
 	let isVideoPlaying = false;
-	let isPathColorMode = false;
-	let maxStopLength = 0;
-	let test = '';
 	let timeline;
 	
 	ConfigStore.subscribe((value) => {
@@ -84,7 +81,6 @@
 	};
 
 	let isModalOpen = writable(true);
-	$: selectAllCodes = $CodeStore.every((code) => code.enabled);
 
 	$: sortedCodes = [...$CodeStore].sort((a, b) => {
 		if (a.code.toLowerCase() === 'no codes') return 1;
