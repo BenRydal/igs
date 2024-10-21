@@ -176,7 +176,7 @@
 	}
 
 	function updateUserLoadedFiles(event) {
-		clearAllData();
+		//clearAllData();
 		core.handleUserLoadedFiles(event);
 		p5Instance.loop();
 	}

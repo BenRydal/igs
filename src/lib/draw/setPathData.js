@@ -20,10 +20,10 @@ export class SetPathData {
 		const drawMovement = new DrawMovement(this.sk, this.drawUtils);
 
 		for (const user of userList) {
-			if (user.conversation_enabled) {
+			if (user.conversation_enabled && user.conversationIsLoaded) {
 				drawConversation.setData(user);
 			}
-			if (user.enabled) {
+			if (user.enabled && user.movementIsLoaded) {
 				drawMovement.setData(user); // draw after conversation so dot displays on top
 			}
 		}
