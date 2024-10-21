@@ -56,9 +56,6 @@
 		timeline = value;
 	});
 
-	let endTime = $TimelineStore.getEndTime(); // Initialize endTime using the timeline from the store
-
-
 	VideoStore.subscribe((value) => {
 		isVideoShowing = value.isShowing;
 		isVideoPlaying = value.isPlaying;
@@ -537,7 +534,7 @@
 					<input
 						id="inputSeconds"
 						type="text"
-						bind:value={endTime}
+						bind:value={timeline.endTime}
 						on:input={(e) => {
 							let value = parseInt(e.target.value.replace(/\D/g, '')) || 0;
 							TimelineStore.update((timeline) => {
