@@ -30,6 +30,7 @@
 	import CodeStore from '../../stores/codeStore';
 	import ConfigStore from '../../stores/configStore';
 	import type { ConfigStoreType } from '../../stores/configStore';
+	import TimelineStore from '../../stores/timelineStore';
 
 	const filterToggleOptions = ['movementToggle', 'stopsToggle'] as const;
 	const selectToggleOptions = ['circleToggle', 'sliceToggle', 'highlightToggle'] as const;
@@ -48,9 +49,18 @@
 	let isPathColorMode = false;
 	let maxStopLength = 0;
 	let test = '';
+	let timeline;
+	
 	ConfigStore.subscribe((value) => {
 		currentConfig = value;
 	});
+
+	TimelineStore.subscribe((value) => {
+		timeline = value;
+	});
+
+	let endTime = $TimelineStore.getEndTime(); // Initialize endTime using the timeline from the store
+
 
 	VideoStore.subscribe((value) => {
 		isVideoShowing = value.isShowing;
@@ -522,6 +532,28 @@
 						bind:value={currentConfig.stopStrokeWeight}
 						on:input={(e) => handleConfigChange('stopStrokeWeight', parseInt(e.target.value))}
 						class="range range-primary"
+					/>
+				</div>
+
+				<!-- Text Input for Seconds (Numeric Only) -->
+				<div class="flex flex-col">
+					<label for="inputSeconds" class="font-medium">End Time (seconds)</label>
+					<input
+						id="inputSeconds"
+						type="text"
+						bind:value={endTime}
+						on:input={(e) => {
+							let value = parseInt(e.target.value.replace(/\D/g, '')) || 0;
+							TimelineStore.update((timeline) => {
+								timeline.setCurrTime(0);
+								timeline.setStartTime(0);
+								timeline.setEndTime(value);
+								timeline.setLeftMarker(0);
+								timeline.setRightMarker(value);
+								return timeline;
+							});
+						}}
+						class="input input-bordered"
 					/>
 				</div>
 			</div>
