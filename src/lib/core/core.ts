@@ -13,8 +13,7 @@ import TimelineStore from '../../stores/timelineStore';
 import ConfigStore from '../../stores/configStore.js';
 import { get } from 'svelte/store';
 
-let timeline, maxStopLength;
-let samplingInterval, smallDataThreshold;
+let timeline, maxStopLength, samplingInterval, smallDataThreshold;
 
 TimelineStore.subscribe((data) => {
 	timeline = data;
@@ -234,10 +233,8 @@ export class Core {
 				// Or else, use allUsersMovementData to get coordinate data and then add the DataPoint to the current user's dataTrail
 				if (curUser.movementIsLoaded) {
 					this.addDataPointClosestByTimeInSeconds(curUser.dataTrail, new DataPoint(row.talk, row.time), curUser.dataTrail);
-					console.log('fileName matched');
 				} else {
 					this.addDataPointClosestByTimeInSeconds(curUser.dataTrail, new DataPoint(row.talk, row.time), allUsersMovementData);
-					console.log('no match');
 				}
 			});
 			return users;

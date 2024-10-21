@@ -137,9 +137,7 @@ export class Timeline {
 	}
 
 	overTimeline(pixelValue) {
-		// TODO: update this for new timeline x/y positions
-		return pixelValue >= this.getTimelineLeftMarkerXPos() && pixelValue <= this.getTimelineRightMarkerXPos();
-		// return this.sk.overRect(this.start, this.top, this.length, this.thickness);
+		return pixelValue >= this.leftX && pixelValue <= this.rightX;
 	}
 
 	// Implementation of Helper function from P5 library to map a value from one range to another

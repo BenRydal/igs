@@ -1,6 +1,5 @@
 <script lang="ts">
 	import P5, { type Sketch } from 'p5-svelte';
-	import { get } from 'svelte/store';
 
 	import type p5 from 'p5';
 	import MdHelpOutline from 'svelte-icons/md/MdHelpOutline.svelte';
@@ -31,17 +30,13 @@
 	import CodeStore from '../../stores/codeStore';
 	import ConfigStore from '../../stores/configStore';
 	import type { ConfigStoreType } from '../../stores/configStore';
+	import TimelineStore from '../../stores/timelineStore';
 
 	const filterToggleOptions = ['movementToggle', 'stopsToggle'] as const;
 	const selectToggleOptions = ['circleToggle', 'sliceToggle', 'highlightToggle'] as const;
 	const conversationToggleOptions = ['alignToggle'] as const;
 
 	let showDataPopup = false;
-	let expandedUsers: { [key: string]: boolean } = {};
-	function toggleUserExpansion(userName: string) {
-		expandedUsers[userName] = !expandedUsers[userName];
-	}
-
 	let showSettings = false;
 	let currentConfig: ConfigStoreType;
 
@@ -54,17 +49,18 @@
 	let isPathColorMode = false;
 	let maxStopLength = 0;
 	let test = '';
+	let timeline;
+	
 	ConfigStore.subscribe((value) => {
 		currentConfig = value;
 	});
 
-	function handleConfigChange(key: keyof ConfigStoreType, value: any) {
-		ConfigStore.update((store) => ({
-			...store,
-			[key]: value
-		}));
-		p5Instance?.loop();
-	}
+	TimelineStore.subscribe((value) => {
+		timeline = value;
+	});
+
+	let endTime = $TimelineStore.getEndTime(); // Initialize endTime using the timeline from the store
+
 
 	VideoStore.subscribe((value) => {
 		isVideoShowing = value.isShowing;
@@ -121,22 +117,21 @@
 		return string.charAt(0).toUpperCase() + string.slice(1);
 	}
 
-	function handleStopLengthChange(e: Event) {
+	function handleConfigChangeFromInput(e: Event, key: keyof ConfigStoreType) {
 		const target = e.target as HTMLInputElement;
 		ConfigStore.update((value) => ({
 			...value,
-			stopSliderValue: parseFloat(target.value)
+			[key]: parseFloat(target.value)
 		}));
 		p5Instance?.loop(); // Trigger redraw
 	}
 
-	function handleRectWidthChange(e: Event) {
-		const target = e.target as HTMLInputElement;
-		ConfigStore.update((value) => ({
-			...value,
-			conversationRectWidth: parseFloat(target.value)
+	function handleConfigChange(key: keyof ConfigStoreType, value: any) {
+		ConfigStore.update((store) => ({
+			...store,
+			[key]: value
 		}));
-		p5Instance?.loop(); // Trigger redraw
+		p5Instance?.loop();
 	}
 
 	function toggleSelection(selection: ToggleKey, toggleOptions: ToggleKey[]) {
@@ -293,7 +288,7 @@
 						max={$ConfigStore.maxStopLength}
 						value={$ConfigStore.stopSliderValue}
 						class="range"
-						on:input={handleStopLengthChange}
+						on:input={(e) => handleConfigChangeFromInput(e, 'stopSliderValue')}
 					/>
 				</li>
 			</ul>
@@ -346,7 +341,7 @@
 						max="30"
 						value={$ConfigStore.conversationRectWidth}
 						class="range"
-						on:input={handleRectWidthChange}
+						on:input={(e) => handleConfigChangeFromInput(e, 'conversationRectWidth')}
 					/>
 				</li>
 				<input type="text" placeholder="Search conversations..." on:input={(e) => handleWordSearch(e)} class="input input-bordered w-full" />
@@ -539,6 +534,28 @@
 						class="range range-primary"
 					/>
 				</div>
+
+				<!-- Text Input for Seconds (Numeric Only) -->
+				<div class="flex flex-col">
+					<label for="inputSeconds" class="font-medium">End Time (seconds)</label>
+					<input
+						id="inputSeconds"
+						type="text"
+						bind:value={endTime}
+						on:input={(e) => {
+							let value = parseInt(e.target.value.replace(/\D/g, '')) || 0;
+							TimelineStore.update((timeline) => {
+								timeline.setCurrTime(0);
+								timeline.setStartTime(0);
+								timeline.setEndTime(value);
+								timeline.setLeftMarker(0);
+								timeline.setRightMarker(value);
+								return timeline;
+							});
+						}}
+						class="input input-bordered"
+					/>
+				</div>
 			</div>
 
 			<div class="flex flex-col mt-4">
@@ -691,7 +708,7 @@
 				<ul class="menu dropdown-content bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
 					<li>
 						<div class="flex items-center">
-							<input id="userCheckbox-{user.name}" type="checkbox" class="checkbox" bind:checked={user.enabled} on:click={() => p5Instance?.loop()} />
+							<input id="userCheckbox-{user.name}" type="checkbox" class="checkbox" bind:checked={user.enabled} on:change={() => p5Instance?.loop()} />
 							Movement
 						</div>
 					</li>
@@ -702,7 +719,7 @@
 								type="checkbox"
 								class="checkbox"
 								bind:checked={user.conversation_enabled}
-								on:click={() => p5Instance?.loop()}
+								on:change={() => p5Instance?.loop()}
 							/>
 							Talk
 						</div>
