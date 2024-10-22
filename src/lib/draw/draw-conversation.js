@@ -1,11 +1,4 @@
 import ConfigStore from '../../stores/configStore';
-import TimelineStore from '../../stores/timelineStore';
-
-let timeline;
-
-TimelineStore.subscribe((data) => {
-	timeline = data;
-});
 
 /**
  * This class holds drawing methods specific to drawing conversation rectangles and text depending on user interaction
@@ -153,61 +146,67 @@ export class DrawConversation {
 		this.sk.strokeWeight(4);
 	}
 
-	/**
-	 * Draws textbox and cartoon "bubble" for user selected conversation
-	 * Sets box dimensions based on size of conversation turn/text
-	 */
 	drawTextBox(point) {
-		const textBox = this.addTextBoxParams(this.getTextBoxParams(), point.talkTurn);
+		const textBox = this.getTextBoxParams(point);
+		this.drawTextBoxBackground(textBox);
+		this.drawBoxText(point, textBox);
+		this.drawCartoonBubble(textBox);
+	}
+
+	drawBoxText(point, textBox) {
+		const topBottomSpacing = textBox.boxSpacing / 2;
+		this.sk.fill(0);
+		this.sk.text(point, textBox.xPos, textBox.adjustYPos + topBottomSpacing, textBox.width, textBox.height);
+	}
+
+	drawTextBoxBackground(textBox) {
+		this.sk.fill(255, 200);
 		this.sk.stroke(0);
 		this.sk.strokeWeight(1);
-		this.sk.fill(255, 200);
 		this.sk.rect(
 			textBox.xPos - textBox.boxSpacing,
 			textBox.adjustYPos - textBox.boxSpacing,
 			textBox.width + 2 * textBox.boxSpacing,
 			textBox.height + 2 * textBox.boxSpacing
 		);
-		// Draw Text
-		this.sk.fill(0);
-		this.sk.text(point, textBox.xPos, textBox.adjustYPos, textBox.width, textBox.height);
-		//this.sk.text(point.speaker + ": " + point.talkTurn, textBox.xPos, textBox.adjustYPos, textBox.width, textBox.height);
-		// Cartoon bubble lines
+	}
+
+	drawCartoonBubble(textBox) {
+		const mouseX = this.sk.mouseX;
+		const mouseY = this.sk.mouseY;
+
 		this.sk.stroke(255);
 		this.sk.strokeWeight(2);
 		this.sk.line(
-			this.sk.mouseX - textBox.rectSpacing,
+			mouseX - textBox.rectSpacing,
 			textBox.adjustYPos + textBox.yDif,
-			this.sk.mouseX - textBox.rectSpacing / 2,
+			mouseX - textBox.rectSpacing / 2,
 			textBox.adjustYPos + textBox.yDif
-		); // white line to hide black rect under cartoon bubble
+		);
+
 		this.sk.stroke(0);
 		this.sk.strokeWeight(1);
-		this.sk.line(this.sk.mouseX, this.sk.mouseY, this.sk.mouseX - textBox.rectSpacing, textBox.adjustYPos + textBox.yDif);
-		this.sk.line(this.sk.mouseX, this.sk.mouseY, this.sk.mouseX - textBox.rectSpacing / 2, textBox.adjustYPos + textBox.yDif);
+		this.sk.line(mouseX, mouseY, mouseX - textBox.rectSpacing, textBox.adjustYPos + textBox.yDif);
+		this.sk.line(mouseX, mouseY, mouseX - textBox.rectSpacing / 2, textBox.adjustYPos + textBox.yDif);
 	}
 
-	getTextBoxParams() {
-		return {
+	getTextBoxParams(point) {
+		const textBox = {
 			width: this.sk.width / 3,
 			textLeading: this.sk.width / 57,
-			boxSpacing: this.sk.width / 141, // general textBox spacing variable
-			rectSpacing: this.sk.width / 28.2 // distance from text rectangle of textbox
+			boxSpacing: this.sk.width / 141,
+			rectSpacing: this.sk.width / 28.2
 		};
-	}
 
-	addTextBoxParams(textBox, talkTurn) {
-		textBox.height = textBox.textLeading * Math.ceil(this.sk.textWidth(talkTurn) / textBox.width);
+		const textWidth = this.sk.textWidth(point);
+		const lines = Math.ceil(textWidth / textBox.width);
+		const topBottomSpacing = textBox.boxSpacing / 2; // Less spacing at the top and bottom
+		textBox.height = lines * (textBox.textLeading + textBox.boxSpacing) - 2 * topBottomSpacing;
 		textBox.xPos = this.sk.constrain(this.sk.mouseX - textBox.width / 2, textBox.boxSpacing, this.sk.width - textBox.width - 2 * textBox.boxSpacing);
-		if (this.sk.mouseY < this.sk.height / 2) {
-			//if top half of screen, text box below rectangle
-			textBox.adjustYPos = this.sk.mouseY + textBox.rectSpacing;
-			textBox.yDif = -textBox.boxSpacing;
-		} else {
-			//if bottom half of screen, text box above rectangle
-			textBox.adjustYPos = this.sk.mouseY - textBox.rectSpacing - textBox.height;
-			textBox.yDif = textBox.height + textBox.boxSpacing;
-		}
+		const isTopHalf = this.sk.mouseY < this.sk.height / 2;
+		textBox.adjustYPos = isTopHalf ? this.sk.mouseY + textBox.rectSpacing : this.sk.mouseY - textBox.rectSpacing - textBox.height;
+		textBox.yDif = isTopHalf ? -textBox.boxSpacing : textBox.height + textBox.boxSpacing;
+
 		return textBox;
 	}
 
@@ -217,13 +216,10 @@ export class DrawConversation {
 	 */
 	isTalkTurnSelected(talkTurn) {
 		if (!wordToSearch) return true;
-
 		const escape = wordToSearch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
-
 		if (wordToSearch.length === 1) {
 			return new RegExp(escape, 'i').test(talkTurn);
 		}
-
 		return new RegExp('\\b' + escape + '\\b', 'i').test(talkTurn); // \\b for whole word test
 	}
 }
