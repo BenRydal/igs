@@ -9,6 +9,10 @@
 	</div>
 </div>
 
+<svelte:head>
+  <title>Interaction Geography</title>
+</svelte:head>
+
 <style>
 	#main-hero {
 		background-image: url(/images/igs-background.png);

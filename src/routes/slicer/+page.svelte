@@ -47,7 +47,7 @@
 	let isVideoShowing = false;
 	let isVideoPlaying = false;
 	let timeline;
-	
+
 	ConfigStore.subscribe((value) => {
 		currentConfig = value;
 	});
@@ -247,6 +247,10 @@
 		}
 	}
 </script>
+
+<svelte:head>
+  <title>IGS</title>
+</svelte:head>
 
 <div class="navbar min-h-16 bg-[#ffffff]">
 	<div class="flex-1 px-2 lg:flex-none">
