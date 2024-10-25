@@ -22,7 +22,7 @@ Welcome to **Interaction Geography Slicer (IGS)!** The IGS is an open-source too
 - **Svelte**: A lightweight and powerful framework for building fast, interactive web applications.
 - **Papa Parse**: Used for fast CSV data parsing in JavaScript.
 - **p5.js**: For generating the custom visualizations of movement and conversation.
-- **Tailwind CSS**: For visually appealing user interface
+- **Tailwind CSS**: For visually appealing user interface.
 
 ## Installation & Setup
 
@@ -66,7 +66,7 @@ If you encounter any issues or have suggestions, feel free to open an issue or u
 
 ## Credits
 
-- **Developed by**: [Ben Rydal Shapiro], [Edwin Zhao] and contributors.
+- **Developed by**: Ben Rydal Shapiro, Edwin Zhao, and contributors.
 - **Supported by**: This project was generously supported by the National Science Foundation.
 - **Collaborators**: Special thanks to Rogers Hall, David Owens, Christine Hsieh, Lani Horn, Brette Garner, Lizi Metts, and the TAU and SLaM research groups for feedback and discussions supporting this work.
 - **Data Sources**:
