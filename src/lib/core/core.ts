@@ -25,6 +25,45 @@ ConfigStore.subscribe((data) => {
 	smallDataThreshold = data.smallDataThreshold;
 });
 
+const examples = {
+	'example-1': {
+		files: ['jordan.csv', 'possession.csv', 'conversation.csv'],
+		videoId: 'iiMjfVOj8po'
+	},
+	'example-2': {
+		files: ['adhir.csv', 'blake.csv', 'jeans.csv', 'lily.csv', 'mae.csv', 'conversation.csv'],
+		videoId: 'pWJ3xNk1Zpg'
+	},
+	'example-3': {
+		files: ['teacher.csv', 'lesson-graph.csv', 'conversation.csv'],
+		videoId: 'Iu0rxb-xkMk'
+	},
+	'example-4': {
+		files: ['cassandra.csv', 'mei.csv', 'nathan.csv', 'sean.csv', 'teacher.csv', 'conversation.csv'],
+		videoId: 'OJSZCK4GPQY'
+	},
+	'example-5': {
+		files: ['teacher.csv', 'lesson-graph.csv', 'conversation.csv'],
+		videoId: 'xrisdnH5GmQ'
+	},
+	'example-6': {
+		files: ['teacher.csv', 'lesson-graph.csv', 'conversation.csv'],
+		videoId: 'nLDXU2c0vLw'
+	},
+	'example-7': {
+		files: ['teacher.csv', 'lesson-graph.csv', 'conversation.csv'],
+		videoId: '5Eg1fJ-ZpQs'
+	},
+	'example-8': {
+		files: ['teacher.csv', 'lesson-graph.csv', 'conversation.csv'],
+		videoId: 'gPb_ST74bpg'
+	},
+	'example-9': {
+		files: ['teacher.csv', 'lesson-graph.csv', 'conversation.csv'],
+		videoId: 'P5Lxj2nfGzc'
+	}
+};
+
 export class Core {
 	sketch: p5;
 	coreUtils: CoreUtils;
@@ -88,41 +127,17 @@ export class Core {
 			...store,
 			maxStopLength: 0
 		}));
-
 		const selectedValue = event.target.value;
-		await this.loadFloorplanImage(`/data/${selectedValue}/floorplan.png`);
-
-		switch (selectedValue) {
-			case 'example-1':
-				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, 'jordan.csv');
-				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, 'possession.csv');
-				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `conversation.csv`);
-				this.sketch.videoController.createVideoPlayer('Youtube', { videoId: 'iiMjfVOj8po' });
-				break;
-			case 'example-2':
-				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `adhir.csv`);
-				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `blake.csv`);
-				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `jeans.csv`);
-				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `lily.csv`);
-				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `mae.csv`);
-				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `conversation.csv`);
-				this.sketch.videoController.createVideoPlayer('Youtube', { videoId: 'pWJ3xNk1Zpg' });
-				break;
-			case 'example-3':
-				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `teacher.csv`);
-				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, 'lesson-graph.csv');
-				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `conversation.csv`);
-				this.sketch.videoController.createVideoPlayer('Youtube', { videoId: 'Iu0rxb-xkMk' });
-				break;
-			case 'example-4':
-				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `cassandra.csv`);
-				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `mei.csv`);
-				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `nathan.csv`);
-				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `sean.csv`);
-				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `teacher.csv`);
-				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, `conversation.csv`);
-				this.sketch.videoController.createVideoPlayer('Youtube', { videoId: 'OJSZCK4GPQY' });
-				break;
+		const selectedExample = examples[selectedValue];
+		if (selectedExample) {
+			const { files, videoId } = selectedExample;
+			await this.loadFloorplanImage(`/data/${selectedValue}/floorplan.png`);
+			for (const file of files) {
+				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, file);
+			}
+			if (videoId) {
+				this.sketch.videoController.createVideoPlayer('Youtube', { videoId });
+			}
 		}
 	};
 

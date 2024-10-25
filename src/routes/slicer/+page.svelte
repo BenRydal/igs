@@ -35,9 +35,31 @@
 	const filterToggleOptions = ['movementToggle', 'stopsToggle'] as const;
 	const selectToggleOptions = ['circleToggle', 'sliceToggle', 'highlightToggle'] as const;
 	const conversationToggleOptions = ['alignToggle'] as const;
+	let selectedDropDownOption = '';
+	const dropdownOptions = [
+        { label: "Sports", items: [
+            { value: "example-1", label: "Michael Jordan's Last Shot" },
+        ]},
+        { label: "Museums", items: [
+            { value: "example-2", label: "Family Gallery Visit" },
+        ]},
+		{ label: "Classrooms", items: [
+            { value: "example-3", label: "Classroom Science Lesson" },
+            { value: "example-4", label: "Classroom Discussion" }
+        ]},
+		{ label: "TIMSS 1999 Video Study", items: [
+            { value: "example-3", label: "U.S. Science Lesson (weather)" },
+            { value: "example-5", label: "Czech Republic Science Lesson (density)" },
+			{ value: "example-6", label: "Japan Math Lesson (angles)" },
+            { value: "example-7", label: "U.S. Math Lesson (linear equations)" },
+			{ value: "example-8", label: "U.S. Science Lesson (rocks)" },
+            { value: "example-9", label: "Netherlands Math Lesson (pythagorean theorem)" }
+        ]},
+    ];
 
 	let showDataPopup = false;
 	let showSettings = false;
+	let showDataDropDown = false;
 	let currentConfig: ConfigStoreType;
 
 	let files: any = [];
@@ -422,13 +444,35 @@
 
 			<IconButton icon={MdSettings} tooltip={'Settings'} on:click={() => (showSettings = true)} />
 
-			<select id="select-data-dropdown" class="select select-bordered w-full max-w-xs bg-[#ffffff] text-black" on:change={updateExampleDataDropDown}>
-				<option disabled selected>-- Select an Example --</option>
-				<option value="example-1">Michael Jordan's Last Shot</option>
-				<option value="example-2">Family Museum Gallery Visit</option>
-				<option value="example-3">Classroom Science Lesson</option>
-				<option value="example-4">Classroom Discussion</option>
-			</select>
+				<div class="relative inline-block text-left">
+					<button 
+					on:click={() => showDataDropDown = !showDataDropDown} 
+					class="flex justify-between w-full rounded border border-gray-300 p-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring focus:ring-indigo-500">
+					{selectedDropDownOption || '-- Select an Example --'}
+					<div class={`ml-2 transition-transform duration-300 ${showDataDropDown ? 'rotate-0' : 'rotate-180'}`}>
+					<span class="block w-3 h-3 border-l border-t border-gray-700 transform rotate-45"></span>
+					</div>
+				</button>
+				
+				{#if showDataDropDown}
+					<div class="absolute z-10 mt-2 w-full rounded-md bg-white shadow-lg max-h-[75vh] overflow-y-auto">
+					<ul class="py-1" role="menu" aria-orientation="vertical">
+						{#each dropdownOptions as group}
+						<li class="px-4 py-2 font-semibold text-gray-600">{group.label}</li>
+						{#each group.items as item}
+							<li>
+							<button 
+								on:click={() => { updateExampleDataDropDown({ target: { value: item.value } }); showDataDropDown = false; selectedDropDownOption = item.label; }}
+								class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left">
+								{item.label}
+							</button>
+							</li>
+						{/each}
+						{/each}
+					</ul>
+					</div>
+				{/if}
+			</div>
 		</div>
 	</div>
 </div>
