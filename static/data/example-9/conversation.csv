@@ -1,0 +1,725 @@
+﻿time,speaker,talk
+1,Teacher, 
+4,Single student,A lot.
+5,New student,Yes?
+8,Single student,I really don't understand it.
+10,New student,"Teacher, aren't we allowed to (inaudible)?"
+11,Teacher,Yes.
+16,Teacher,"Yes, yes, yes, yes."
+17,New student,I said just leave it.
+22,Teacher,"Okay, ladies and gentlemen. Ravi, your punishment lines?"
+24,New student,"Oh, yes."
+26,Teacher,"As first thing, before I forget again."
+27,New student,(inaudible) that too?
+29,Teacher,I have already shown that one. He already had that neatly signed off. The rest of you also grab your things.
+37,Teacher,"Where are you coming- oh, you already went. Okay."
+46,New student,Wasn't that twice then?
+47,New student,Once.
+48,New student,"Twice we were supposed to, didn't we? Oh."
+57,Teacher,Yup! Very good. Very good.
+65,Teacher,"Okay. Um, like I said yesterday, today we will begin with Pythagoras. Which one of you ever heard of Pyth- Pythagoras?"
+78,New student,Uh...
+79,Teacher,Uncle Pete.
+80,New student,"Pete, Pete, Pete."
+81,Teacher,"Tell us, what do you know about it?"
+83,New student,It's a gentleman.
+84,New student,"A squared plus B squared, equals C squared."
+85,Teacher,You know the equation A squared plus B squared equals C squared. Who else can say more about it?
+89,New student,"Uh, I think this guy was a Greek."
+92,Teacher,"The, uh, this gentleman was Greek."
+93,New student,Yup.
+94,Teacher,"Or at least during that time period, somewhere in that region."
+97,Teacher,Okay. Does anyone know when you would use the Pythagoras' theorem and what you would use it for?
+103,New student,"Yes, in a diagram."
+104,Teacher,In a diagram. You obviously have a diagram. I am crazy about diagrams.
+108,New student,(inaudible)
+109,Teacher,"Something about triangles, indeed. Well, let's take another look."
+115,Teacher,What well-known triangles do we know? We have different types of triangles.
+119,New student,Right-angled.
+120,Teacher,We have a right-angled triangle.
+121,New student,Isosceles.
+127,Teacher,What is a characteristic of a right-angled triangle?
+130,New student,"It has, it has one-"
+133,Teacher,Ruben?
+134,New student,It has a right angle.
+135,Teacher,"In any case, it has a right angle."
+140,Teacher,You can see that by the little symbol. What other kinds of triangles do we have?
+144,New student,An isosceles triangle.
+145,Teacher,An isosceles triangle.
+151,Teacher,What is characteristic of an isosceles triangle?
+154,Single student,Two equal sides.
+155,Teacher,"Two equal sides. Like this, for instance. I will just name the sides that are equal, for example A, the other one B. Meaning:"
+167,Teacher,"if I fill in a number for A, then I have to use the same number for every A I come across."
+172,Teacher,What else do I know about an isosceles triangle?
+177,Teacher,"If I look at angles, for example? Maarten."
+178,New student,That A and B are equal.
+180,Teacher,A and B are equal in size. Very good. And I have another special triangle. Which one?
+187,New student,Equally shaped.
+188,Teacher,An equilateral triangle.
+189,Single student,Oh.
+195,Teacher,What is characteristic of an equilateral triangle? Julie.
+198,New student,All sides are equal.
+199,Teacher,"All the sides are equal, all three sides."
+209,Teacher,So one could say: all the sides are A. Would there be anything else I can mention about an equilateral triangle?
+215,New student,"Um, all angles are equal."
+218,Teacher,All angles are equal. And can we tell how wide they are?
+221,Single student,"Yes, 180 divided by three."
+222,Teacher,One hundred eighty divided by three and that is?
+225,Single student,Sixty.
+226,Teacher,Sixty.
+231,Teacher,"Okay. So as we noticed before, we use Pythagoras in a triangle. But I have three types of triangles."
+239,Teacher,And we only use Pythagoras in a right-angled triangle. So we are going to continue with a right-angled triangle.
+246,Teacher,And the other triangles you will come across at some point later in the chapter.
+249,Teacher,Because you will be making right-angled triangles from these- or in these. Which enables you to cal- calculate things.
+259,Teacher,Another thing we noticed yesterday-
+263,Teacher,"No, let me first pick up something else. I'll go- I'll return to the right-angled triangle."
+270,Teacher,Except I placed it on its side.
+273,Teacher,"We know that the edges of a triangle- or any figure- are called ""sides""."
+278,Teacher,"In a right-angled triangle, this side is attached to a right angle. So what should we call this side? A right-angled side."
+287,Teacher,Yes? Because this side is attached to a right angle so you call that a right-angled side.
+300,Teacher,Do we have any other right-angled side in there?
+302,New student,Yes.
+303,Teacher,"Yes, all the way on the other side. That one is attached to the right angle as well, therefore you call that a right-angled side as well."
+319,Teacher,"Then I still have one side left. It isn't so obvious because it is laying flat. But if you see this triangle, what can we call that side?"
+328,New student,The long side.
+329,Teacher,The long side. That is correct. Or in a different way?
+333,New student,The right side?
+334,Teacher,"It is actually at an angle. If you see it in such an- like a diagonal- so you call this the sloped side or the hypotenuse, is what you call this one."
+345,Teacher,"These are just names, you know, you may also keep calling this ""the long side"", no problem."
+350,Teacher,"Okay, with Pythagoras, soon, once we have gotten to know Pythagoras, we will use Pythagoras to calculate the sides."
+358,Teacher,"Because all we know now about a triangle and the size of its side, is when we measure it."
+363,Teacher,"However, those triangular protractors, how exact are they really?"
+367,Teacher,"We know from, uh, the drawing of your number line, from, for example, of the square root of five-"
+374,Teacher,"Well, you can't really measure that exactly."
+376,Teacher,Because the square root of five had such an odd number behind the point. And still we can calculate things in the end with Pythagoras.
+386,Teacher,"Yesterday we saw, when I have a square, with a surface of, say, 37,"
+395,Teacher,"we could calculate, or at least determine how large the side was of such a square."
+400,Teacher,"And we were actually able to do that quite precisely. Namely, Maarten?"
+404,New student,The square root of 37.
+405,Teacher,"The square root of 37. Okay, so that's ""when I know the surface area of a square, how do I determine the sides again?"" Okay, very well."
+419,Teacher,That is already kind of what's explained in assignment one.
+423,Teacher,This has to do with assignment two. That diagram is shown at assignment two.
+432,Teacher,We have here- I am just going to skip several parts of exercise two because we will not do all that.
+438,Teacher,We have a large square here: O E F G. As well as a square that is tilted at a corner: square A B C D.
+449,Teacher,"I would like to know what the size the lengths are of the square A B C D,"
+454,Teacher,for example what's the length of A B. We can't measure it and yet we are able to calculate it right now.
+461,Teacher,"Because we have seen that once I knew the surface area of a square, I was able to determine the sides."
+466,Teacher,So I would like to calculate what the surface area is of the square A B C D. How can we do that? By which method? Rene?
+475,New student,"Well, I think you have to up on top of the large square- oh, no, that's something you don't know-"
+481,Teacher,"Yes, though."
+482,Single student,"Yes, then you have to, uh, remove those angles- or, uh, yes, well, that's how you get the small square."
+487,Teacher,Very good. You have to calculate the surface area of the large square: O E F G.
+492,Teacher,"And then you take the surface areas of the triangles, you subtract that. Very well."
+497,Teacher,"What is the surface area of the large square, of the O E F G?"
+508,Teacher,How much?
+510,New student,"Uh, nine centimeters squared."
+511,Teacher,"Nine- well, what the unit is I don't know, I didn't specify that. But if it were shown in centimeters, then you're right."
+517,Teacher,Right now I don't have a unit. Therefore the total surface area is indeed nine.
+520,Teacher,"Namely three by three, or you can just count the squares- that gives us nine."
+525,Teacher,So we're told that we have to remove the surface areas of the triangles. What is the surface area of one of those triangles?
+530,Teacher,How do we calculate that again?
+534,Teacher,Willem?
+535,New student,I don't know how you calculate it but I can just see it.
+537,Teacher,You can just see it. What is the outcome according to you if you are just able to see it?
+541,Single student,"Um, four in total comes off because one of those, uh..."
+546,Teacher,One of these triangles?
+547,Single student,That is one.
+548,Teacher,That is one. Okay.
+549,Single student,And there are four of those.
+550,Teacher,"Correct, but how are you able to calculate that again? Leni?"
+554,New student,You make it into a rectangle?
+556,Teacher,I- I am just going to pull it aside. So these are then the three surface areas of the triangle that we want to calculate.
+564,Teacher,We will make it into a rectangle. And then?
+569,Single student,We calculate the surface area.
+571,Teacher,"We calculate the surface area. That was one by two, so the whole surface area together of the rectangle is then two."
+577,Teacher,"And I just need to take half of that, which brings us to one, very good."
+586,Teacher,So the surface areas of the triangles-
+594,Teacher,So the surface areas of the triangles together here is four. So what is left is five.
+605,Teacher,"So the surface of the square in the center, A B C D, is five."
+612,Teacher,"And now we can finally, after all that calculating, determine one of those sides. Namely, that is?"
+618,New student,The square root of five.
+619,Teacher,The square root of five. Very good.
+624,Teacher,So we've got no problem figuring this out. We may not even need Pythagoras at all.
+628,New student,No.
+629,Teacher,But it is kind of a hassle if you constantly have to draw on like this.
+632,Teacher,"Because, suppose you wanted to know the length of this little line."
+638,Teacher,"If you want to calculate that you first have to, you first have to draw a square again, like this one and another square around it."
+644,Teacher,And then calculating it again. So it's a real hassle. So we're going to do that differently.
+650,Teacher,The example given in the book is that assignment four and five. I will just do that one with the overhead projector.
+674,Teacher,"Okay, we see, we see at assignment four, they have given two plates. Well, I drew those too, I have two plates."
+684,Teacher,They should be equal in size.
+686,Teacher,"Well, if I place them on top of one another, they are indeed- if I place them very neatly on top of each other, equal in size."
+693,New student,Yes. Yes.
+695,Teacher,Well...
+696,New student,Approximately.
+697,Teacher,They are really equal in size but they stick a bit.
+700,New student,Yes.
+701,Teacher,There. Yes? Convinced?
+703,Two or more students,Yes.
+704,Teacher,"Very good. Yes, of course there are some who will never be convinced."
+708,New student,I said yes.
+709,Teacher,"Yes, but I also heard a no."
+716,Teacher,Then we also see- here they made eight right-angled triangles.
+719,Teacher,"Namely, four right-angled triangles in the one board and four right-angled triangles in the other board."
+725,Teacher,I cut those as well. Those are also equal in size. When I stack them on top of each other they're all equal in size.
+730,Teacher,So it's truly a stack of eight and I will take them off from there.
+734,Teacher,We will lay it down just like it is shown in the diagram in the book.
+737,New student,Which question?
+738,Teacher,Question four is what we are working on.
+752,Teacher,"Very well, we are now able to, in the same way as exercise- what? Is one lying incorrectly?"
+757,Two or more students,No.
+758,Teacher,"Oh? Yes, it's crooked- I mean it is loose."
+762,Two or more students,(inaudible)
+765,Teacher,"Now, should we know the size of everything, we could calculate what the area is of the square in the middle here."
+771,Teacher,"Namely, in the same way that we did over there."
+774,Teacher,The surface of the whole board and then the surface area of those three- of those four triangles taken off. We won't do that.
+781,Teacher,"Now I will, with the other four triangles I have, I will make the other one."
+791,Teacher,"It lies in this corner over here, and it lies in that corner over there."
+802,Teacher,"Those triangles- those four triangles that are lying over here, are equal in size as the triangles that are lying over there."
+807,New student,Yes.
+808,Teacher,I knew that the board is equal in size. What am I able to say about the surface of this square and that square?
+814,New student,They are equally big as the other ones.
+816,Teacher,Together they are- if I add these two surface areas together- are equal in size as that one. Yes?
+821,Teacher,Because the boards are equal in size. And the triangles are equal in size. Okay...
+827,Teacher,"What they indicate in the book, then, is that they are going to put those boards on top of each other. Yes?"
+832,Teacher,"Well, you can't see through the board but you can through the overhead sheets."
+835,Teacher,So I will just remove that then because in the book it is shown underneath it. And I will try to place it on top of it.
+843,Teacher,Approximately. I may not move anything. There.
+848,Teacher,We are still aware that the surface area of this square is equal in size as the surface of this square plus that square together.
+855,Teacher,Because they are still the same boards and they are still the same triangle.
+861,Teacher,"What are we going to say now? What are we going to look at? Imagine that this side- that that is 12,"
+863,Teacher,then what is the surface area of the square that is attached to it?
+870,New student,Twelve times 12.
+871,Teacher,Twelve times 12. And that is?
+872,Single student,One hundred forty-four.
+873,Teacher,One hundred forty-four.
+874,New student,Without a calculator.
+875,New student,Oh yes.
+877,Teacher,"The short side, that is five."
+880,New student,Twenty-five.
+881,Teacher,"So it becomes 25 indeed. What do I know about the large square, then?"
+887,New student,One hundred forty-four plus 25.
+888,Teacher,That 144 plus 25 and that is?
+893,New student,(inaudible)
+894,Teacher,One hundred sixty-nine.
+897,Teacher,"If I know that the surface area of the large square is 169, can I say something about how long this sloped side is?"
+904,New student,Which angle?
+905,Teacher,Of this- of this side of the square. It is also the side of the triangle. Namely?
+910,New student,Half of 12.
+911,New student,Twelve.
+912,Two or more students,The square root of 169.
+913,Teacher,The square root of 169. Why should you take half of 12?
+920,Teacher,"On this side, I have this triangle lying over here. The one side is 12, the other side is five. I want to know the hypotenuse."
+927,Teacher,I knew that the surface areas of the squares that are lying here- that have exactly the same sides as the sides of the triangle-
+935,Teacher,if it'd be so kind as to stay on it's spot-
+939,Teacher,is equal in size as the surface area of the large square. Yes?
+942,Teacher,We have seen that the surface area of the large square is 169.
+946,Teacher,"Now I would like to know one side, that is the side of the square, which is at the same time also the side of this, of this triangle,"
+954,Teacher,"which is indeed the square root of 169, which is 13."
+961,Teacher,Yes? And that is actually sort of- of what Pythagoras was talking about.
+966,Teacher,"Pythagoras says that if I place a square on the one right-angled side,"
+971,Teacher,so the surface area of the square I will calculate. I will place another square on the other- the shorter side.
+979,Teacher,"I will take the surface area of that too, of that square. If I add these two surface areas together,"
+984,Teacher,apparently- he discovered all this- they are exactly the same as the surface area...
+992,Teacher,of the square that is placed on the hypotenuse. Yes?
+996,Teacher,I'll show that one to you in a second. As I will write the general rule on the board.
+1046,Teacher,"We have seen- ladies and gentlemen, we are going to continue. Ravi. Rick!"
+1056,Teacher,Okay. This is the same as what was just on the screen. Suppose that this is the triangle of which this side is 12.
+1066,Teacher,Then we would know that the surface area of this square was 144.
+1070,Teacher,"If this surface area is five, then this one is 25."
+1075,Teacher,"This one was 144 plus 25, is then 169."
+1080,New student,So the length is 13.
+1082,Teacher,So this one is 13. That was also what we just had on the screen. But now we are going to construct very generally-
+1086,New student,Now I get it!
+1090,Teacher,"It is also actually in the book, except I am writing it down a bit more detailed."
+1093,Teacher,So perhaps it would be smart if you copied it. Then you can always retrieve it.
+1114,New student,Yak!
+1117,Teacher,Ladies!
+1123,Teacher,The Pythagorean theorem. What have we done? We had a right-angled triangle. It only applies to right-angled triangles.
+1132,Teacher,"One of those right-angled sides, let's take 12 as the first right-angled side. What did we do with this right-angled side?"
+1137,Teacher,We took the square of this right-angled side. In fact we glued a square over it and calculated its surface.
+1144,Teacher,"So you took one right-angled side, squared. So we will write that down: one right-angled side, squared."
+1151,New student,Are you supposed to-
+1153,Teacher,Yup.
+1154,Single student,"You are supposed to copy that thing, right?"
+1156,Teacher,What I am writing down you have to copy.
+1158,Single student,Oh. Ah.
+1166,Teacher,"So we had: one right-angled side squared, that is, in other words, the surface area of the square. What did we do with that?"
+1177,Teacher,We added the surface area of the square that was on the other right-angled side to it.
+1181,Teacher,How did we determine the surface area of the other square again?
+1184,Teacher,So that is plus- taking the other right-angled side squared.
+1208,Teacher,"So we had the one right-angled side squared, which is in fact the surface area of the square that you attached to it."
+1213,Teacher,Plus the other right-angled side squared: the surface area of the other square that you attached to it.
+1219,Teacher,What is it equal to? To the surface area of the large square that is on the hypotenuse.
+1224,Teacher,"So actually, surface area is the same as that side squared."
+1231,Teacher,This is: the hypotenuse.
+1250,Teacher,So that is the hypotenuse squared. Does that thing bother you? Sorry. Since I won't be needing this one anymore.
+1265,Teacher,There.
+1270,New student,The table is slanted.
+1274,Teacher,So this is the general theorem. Let's see if it will work if we apply it.
+1292,Teacher,Gentlemen! Come on.
+1299,Teacher,By now you guys must know that I am crazy about diagrams and tables and things like that.
+1304,New student,"Yes, we knew that because you already told us yesterday."
+1306,Teacher,There we go. There we go. Good thing the book utilizes that too. Otherwise I would have to explain it all by myself once again.
+1312,Teacher,"But the book utilizes it too. So we are going to- to calculate those sides, we will also use the diagram."
+1319,Teacher,"Well, if you copy this, Ravi, it'll speed up your homework for you will have done this assignment already."
+1323,Two or more students,(inaudible) fast hey (inaudible).
+1344,Teacher,Okay. Here I have a right-angled triangle of which I already know two of the right-angled sides. The hypotenuse I don't know yet.
+1352,Teacher,"That's what I want to calculate. We will make a small table. I named it ""side"" on one side."
+1359,Teacher,As in: how long is the side going to be that I am about to fill in- Rick?
+1361,Teacher,You know you can also proceed in the hallway if you're so sure you understand it.
+1368,Teacher,And the squared value actually represents the surface area of the square that you placed on the sides.
+1375,New student,Yes.
+1376,New student,What?
+1377,Teacher,"So here I have- what were we supposed to do? The one right-angled side. ""The right-angled side"" I will abbreviate."
+1383,Teacher,Because otherwise you will keep writing. I need the one right-angled side; I need the other right-angled side.
+1395,New student,Yes?
+1396,Teacher,"Ladies, would you please just be a little more quiet as well?"
+1399,New student,They are filming in this chicken coop.
+1402,Teacher,That doesn't matter. I just want it quiet for myself.
+1406,Teacher,And we have a hypotenuse. Yes?
+1411,Teacher,So what did we see? We were going to take the one side and square it because that was in fact the one with the square attached to it.
+1416,Teacher,"And you were going to determine the surface area of that. That one side is in this case, for example, three."
+1421,Teacher,"What is- is that squared? Or in other words, what is the surface area of the square that you attach to it, Julie?"
+1424,New student,Nine.
+1425,Teacher,That is nine.
+1426,Two or more students,Julie?
+1427,Teacher,Julie? Am I-
+1429,Two or more students,She is sick!
+1430,Teacher,"Oh, she is sick, yes, well then people shouldn't move around like that. Sorry, Myrte."
+1434,Teacher,"The other right-angled side is four, so that is squared."
+1441,Teacher,Now you should listen very carefully because this is a mistake that is often made.
+1445,Teacher,"We had said, the one right-angled side squared plus the other right-angled side squared. Those are the only ones you may add together."
+1450,Teacher,So only the squared sides. So not your regular sides.
+1456,Teacher,So you are allowed to only add this side. And that gives you?
+1462,New student,Twenty-five.
+1464,New student,"Oh, that is four times four and three times three and then subtract-"
+1466,New student,Then the other one is five.
+1468,Teacher,And then I would indeed want to know: how long is the hypotenuse.
+1472,Teacher,You know that the 25 represents the surface area of this square up here.
+1476,Teacher,"Or, in other words, you are going to take the square root, this way. And that leaves me with five."
+1483,New student,Yeah. I already knew that.
+1485,Teacher,Any questions about this?
+1487,New student,"Yes, but it is- no."
+1489,Teacher,"No, no questions? Regardless that you say: ""yes, but""."
+1494,Single student,"Oh, like that, yes, yes I got it."
+1496,Teacher,"Yes, do you? Myrte?"
+1498,New student,"But it says, uh, ""the other right-angled side equals the hypotenuse squared"", but do we have to take the square root of it instead of, uh, squaring it?"
+1507,Teacher,"Yes. The general equation therefore is- uh, Rick, could you please go into the hallway now?"
+1513,Two or more students,Bye!
+1523,Teacher,"What it says here is ""one right-angled side squared plus the other right-angled side squared equals the hypotenuse squared""."
+1531,Teacher,"Therefore, if you want to know what the hypotenuse is, then you have to take the root of the number representing the hypotenuse squared."
+1538,New student,"Is it squared and then you have to- yes, okay."
+1540,Teacher,This whole table over here shows these numbers squared.
+1542,New student,Yes.
+1543,Teacher,Yes? Very well.
+1544,Single student,You figured it out.
+1545,Teacher,"Well, in this way you can also reconstruct..."
+1552,Teacher,"In this way you can also reconstruct how the A squared plus B squared equals C squared is found- gentlemen,"
+1560,Teacher,I wasn't quite finished yet. You can start shortly.
+1566,Teacher,"If I have a right-angled side of which I call the one side A, the other side I call B and the hypotenuse I call C,"
+1573,Teacher,"and you apply the equation, then indeed you will get my first right-angled side squared."
+1579,Teacher,"For example my first right-angled side is A, and you take that one squared. Plus my other right-angled side, take that one squared as well."
+1588,Teacher,Equals your hypotenuse squared. And that is how most of your parents learned this.
+1593,New student,Oh!
+1594,Teacher,"They never had it explained to them with squares. They just learned it kind of like ""this is how it is so you better get to work with it""."
+1602,New student,A squared plus B squared equals-
+1606,New student,"Oh, right."
+1609,Teacher,Okay.
+1610,New student,(inaudible) shows the thing squared there?
+1612,Teacher,Because that notion squared is the surface area that you want to calculate. The surface area of the square.
+1621,New student,Like that would help!
+1628,Teacher,"Okay, ladies and gentlemen. As far as the homework is concerned. Suzanne?"
+1634,Teacher,"Jeffrey, Maarten?"
+1639,Teacher,"So far, by way of what I showed you on the board- and I am hoping that you guys did copy it-"
+1646,Teacher,we have already completed quite a lot of the exercises.
+1648,Teacher,We did exercise one and we did exercise two. We haven't done exercise three yet. That's homework...
+1661,New student,Hey! You are being filmed!
+1673,New student,They will just edit that out.
+1674,New student,That's right. Each time Ravi's head will be cut out. Yes.
+1687,Teacher,You guys still have 20 minutes left.
+1688,New student,Twenty. Yes. Yes.
+1690,Teacher,"That means that you have to- of these exercises, be able to get as far as exercise 11. Presumably even further."
+1697,Teacher,"These we haven't all done yet, those are new. The only advice I'll give you on exercise 11, a lot is written down about triangles there-"
+1705,Teacher,"Sorry, Willem-"
+1706,New student,The only thing (inaudible).
+1707,New student,"Yes, it is fine like that."
+1708,Teacher,Yes? So with exercise 11 you will only get data on what angles are 90 degrees and what the lengths are of certain sides.
+1717,Teacher,Half of you are now missing this instruction.
+1718,New student,"Oh, oh, sorry, you have it right here."
+1720,Teacher,Annelies and Myselle? You girls are missing the instruction.
+1724,New student,Shh.
+1730,Teacher,Exercise 11 only states what angle is 90 degrees and what the sizes are of particular sides.
+1737,Teacher,"If you want to know exactly how things are put together, make a diagram, which explains the comment at the bottom;"
+1742,Teacher,make diagrams of those triangles at exercise 11 so that you know what data you've got.
+1747,Teacher,"Either both of the right-angled sides will be given, or perhaps only the right-angled side and the hypotenuse will be given."
+1755,Teacher,So that you can complete your calculation. Yes?
+1758,New student,"Yes, understood."
+1760,Teacher,"For those of you who want to check, I have answer booklets over here. You can grab those and get started now."
+1778,Teacher,From now on I really want it to be quiet when I am instructing.
+1779,New student,Yes.
+1780,Teacher,Yes?
+1781,Single student,Yes.
+1782,Teacher,"You are one of the few- or one of the few, together with a few more- but there are several who want nothing but to pay attention."
+1786,Single student,Yes.
+1787,Teacher,"If you keep on disrupting, then you are disrupting everyone."
+1788,Single student,Yes.
+1789,Teacher,And certainly me.
+1790,Single student,Yes.
+1791,Teacher,"Just quietly get to work, the homework is on the blackboard."
+1812,Teacher,"Just put it on, uh..."
+1813,New student,"It doesn't make any sense, you don't feel (inaudible)."
+1818,Teacher,"Yes, no, don't close it completely, just put it on- I do want some oxygen to come in."
+1821,New student,Oxygen?
+1822,New student,The heater is still on.
+1823,Teacher,"Well, I can't turn it off, it is central heating. Otherwise I would be the first one to turn it off."
+1827,New student,Here: two plus four plus six.
+1839,Teacher,"Uh, ladies, ladies and gentlemen, when you are working I would like it to be more quiet. Discussions are fine but please do it in a whispering voice."
+1857,New student,"He has the best-looking notebook in the whole class, of course."
+1860,New student,Beautiful notebook.
+1871,New student,How can you determine how much of it is tiled?
+1874,Teacher,"What does it look like, the example, the diagram? How does the whole diagram look, the whole garden?"
+1880,Single student,As a square.
+1881,Teacher,It's an exact square.
+1883,Single student,Yes?
+1885,Teacher,Yes? And what is the shape of that tiled part?
+1888,Single student,A triangle.
+1889,Teacher,A triangle. How could we calculate again the surface area of such a triangle?
+1895,Teacher,We just did that on the board on the other side.
+1897,New student,"Yes, I already have it!"
+1899,Teacher,"Ladies and gentlemen, the fact that I have my back turned towards you doesn't mean you are allowed to turn things upside down."
+1905,New student,I agree.
+1911,Teacher,"How did we do that? What can you make of this, of that one triangle?"
+1914,New student,"A, uh, rectangle."
+1916,Teacher,A rectangle. Yes? You can make a rectangle of this. What is the surface area then of that rectangle?
+1924,Single student,Eight times six is 48.
+1925,Teacher,Forty-eight. And what part of the triangle is it?
+1929,Single student,I don't know.
+1931,Teacher,Considering you know that the whole rectangle- because you said it's six times eight-
+1933,Single student,This one is 24. Twenty-four squares (inaudible).
+1935,Teacher,"Correct, is half of it. Yes?"
+1938,Single student,Yes.
+1939,Teacher,Okay.
+1942,Teacher,"Shh! Whisper, Maarten. Maarten, whisper!"
+1945,New student,I don't know it anymore.
+1947,Teacher,Ladies should be whispering as well.
+1949,Single student,I still don't understand G eight.
+1952,Teacher,"No, right. Okay, oh. Come over here for a second."
+1967,Teacher,G eight.
+1970,Teacher,"What does G eight say? We have a tiler, who uses white as well as blue tiles."
+1975,Single student,Yes.
+1976,Teacher,Yes? The surface area of every tile is one square decimeter. The white ones as well as the blue ones.
+1983,New student,Yes.
+1984,Teacher,"Okay. Five tiles together make the square A B C D. A, B, C, D. What is the surface area of that square?"
+1994,Single student,"Um, (inaudible)."
+1997,Teacher,Sorry?
+1998,Single student,Twenty-five.
+1999,Teacher,Why 25? We are only looking at this one.
+2010,Teacher,"You know that every tile, the white one as well as the blue one, is one square decimeter."
+2013,Single student,Yes.
+2014,Teacher,Yes?
+2015,Single student,Five.
+2016,Teacher,"So it's five, because there are five tiles in there. Yes? The surface area of this is five."
+2021,Teacher,"What is the length then of A B, given the surface area of that square is five?"
+2029,Single student,The square root of five.
+2030,Teacher,"The square root of five. Yes? Maybe later you should add for yourself an ex- a written explanation on how you got that square root of five, okay?"
+2037,Teacher,Because if later on you- you read it again you won't know how you get that square root of five.
+2040,Single student,Yes.
+2041,Teacher,"Yes? Now we have to fill in the length of A E, A E goes from here to there."
+2047,Single student,Is two times AB .
+2048,Teacher,"Yes, is two times A B. Because that section is just as long as this. And that is, then, twice?"
+2054,Single student,(inaudible)
+2055,Teacher,"Yes, very good, two times the square root of five."
+2060,Teacher,"Very good. No, no, no, no sorry, no. We've seen that yesterday. How can we write the two differently?"
+2065,Teacher,"But you don't have to do that here yet, that will come later on."
+2068,Single student,(inaudible) to write the two differently?
+2071,Teacher,How can I write the two into a square root? What is two equal to again?
+2076,Teacher,Yesterday we had that whole list on the board.
+2079,Teacher,You knew that the square root of 16 was equal to four?
+2082,Single student,Yes.
+2083,Teacher,Yes?
+2084,Single student,"Oh, uh, it is equal to, uh, the square root of four."
+2085,Teacher,"Correct, equal to the square root of four, very good. So you have the square root of four times the square root of five here."
+2092,Teacher,"Look, the two was correct, but-"
+2093,Single student,"Oh, yes."
+2094,Teacher,It says the same. What is the outcome of this then?
+2098,Teacher,"Yes! Yes, perfect. Very good. Try to do the rest of them now, too."
+2103,Single student,Yes.
+2104,Teacher,Yes?
+2106,New student,"Look, I have a question, since yesterday I had something from chapter one-"
+2109,Teacher,"Oh, yes."
+2110,Single student,"And, um, look, this is, for example, um, the regular square-"
+2113,Teacher,Yes?
+2114,Single student,And that one is 40 square centimeters.
+2118,Single student,"So the reduction goes to 10 square centimeters. Then the factor isn't four, is it?"
+2122,Teacher,No.
+2123,Single student,"It is two, isn't it?"
+2124,Teacher,"Correct, because the surface area becomes four times smaller-"
+2126,Single student,Yes.
+2127,Teacher,But your magnifying factor will be the square root of that.
+2131,Single student,"So if you have, for example, a really large number, for instance, uh- well, yes, I don't know, uh, for example with five numbers-"
+2135,Teacher,Yes?
+2136,Single student,"And, uh, it becomes a lot smaller, you have to divide it by four?"
+2140,Single student,"So, uh, the magnifying factor with reduction has to be divided by four, whereas if you make it from small to large it is times four? Okay."
+2147,Teacher,"Yes, correct. You were first."
+2150,New student,I just have a question.
+2151,Teacher,Yes?
+2152,Single student,"Uh, could it also be that you only get this number?"
+2155,Teacher,"Yup. Well, not only that, you need two sides at least, otherwise you cannot calculate anything. Yes?"
+2159,Single student,"So this one, and that one, and then all you have to do is calculate this one here?"
+2163,Single student,Okay.
+2163,Teacher,Yes. Very good.
+2164,Teacher,Great.
+2165,New student,Where is this key on my pocket calculator?
+2167,New student,"Oh, it is fine, right?"
+2169,Teacher,Here. Only yours doesn't have an X below. And this is your root.
+2171,Single student,So it's the same thing.
+2172,Teacher,Yes. This is your root.
+2173,Single student,Okay. Yes.
+2197,Teacher,Was it clear for you guys?
+2198,New student,Yes.
+2199,Teacher,Yes? Very good.
+2204,Teacher,"You keep track of this a little too, I hope?"
+2205,New student,"Yes, yes, I just wrote it down."
+2206,Teacher,"No, okay. Oh, okay."
+2207,Single student,That's just the nature of the assignment.
+2218,Teacher,Is this one clear to you guys?
+2219,New student,"Yeah, sure."
+2220,Teacher,Really?
+2221,New student,"Yes with the explanation earlier it made it, in any case, clearer."
+2222,New student,"But in the beginning it seemed a bit weird, but now I understand it."
+2223,Teacher,"Yes, very good. So it is very important that it is written down properly here. Yes?"
+2229,Teacher,I mean you copied it here very nicely but try to retain some of that for yourself too.
+2233,Teacher,"Technically this doesn't get explained until here. So if afterwards you try to calculate the numbers, make sure you use it."
+2239,Teacher,"So don't try to be stubborn or anything like that. So really try to stick to the rules, those steps. Yes?"
+2244,New student,Yes.
+2245,Teacher,Yes?
+2246,New student,"Yes, okay."
+2249,New student,The same problem.
+2252,Teacher,"Three you can still do, in principle, in the old method. Because this one, the one I explained won't be explained until the next paragraph."
+2260,Teacher,"But it is allowed, you'll still work through it."
+2261,New student,"And, uh, the square root of (inaudible)."
+2265,New student,The square root of six.
+2266,New student,Yes.
+2267,Teacher,"Yes, very good."
+2268,Teacher,"Yes? But if you want to calculate that one, what do you need then?"
+2272,Single student,"Then I can- just this one- like that? And, uh-"
+2275,Teacher,"Yes, you can that way, very good. Yes, of course, only it hasn't been explained over here yet."
+2280,Teacher,"But since I have already explained it and as you understand it, then, as far as I am concerned, you can go ahead and use it."
+2283,Single student,Yes.
+2288,Teacher,Yes?
+2289,New student,If you want to measure this side-
+2292,Teacher,Yes?
+2293,Single student,Then you have to- this is 225.
+2295,Teacher,Yes.
+2296,Single student,And this is 64.
+2297,Teacher,Yes.
+2298,Single student,Then aren't you supposed to take two- 225 plus 64-
+2301,Teacher,Yes.
+2302,Single student,Is 289.
+2303,Teacher,"Yes, indeed, that square-"
+2304,Single student,That you have to make into a square root?
+2306,Teacher,"Yes, very good."
+2307,New student,"So that becomes 17, then."
+2308,New student,And that is 17.
+2309,Teacher,"Yes, perfect. Are you writing down what you are doing, though? Not only, uh, writing down the answers?"
+2313,New student,Oh.
+2319,New student,"Ehm, look here."
+2324,New student,Can you see it?
+2325,Teacher,"Yes, I can see it."
+2326,Single student,One hundred ninety-six square meters.
+2328,Teacher,What is this? What exercise are you working on?
+2331,Single student,"Oh, with, um, three."
+2332,Teacher,Yes? And what is this 196?
+2335,Single student,That is the whole garden.
+2336,Teacher,"Okay, the whole garden. Yes?"
+2338,Single student,Then I have to do minus-
+2339,Teacher,Yes.
+2340,Single student,Twenty-four square meters.
+2341,Teacher,Yes.
+2342,Single student,"But doesn't that just become- can you just take this off then, like, like in the same way if there wasn't a square meter on here?"
+2350,Teacher,"Yes, because- the whole garden is in square meters-"
+2353,Single student,I must be confusing it with something else then.
+2354,Teacher,Very small sections of square meters.
+2355,Teacher,So you can easily subtract square meters from square meters.
+2357,New student,Now I don't understand any of this anymore.
+2359,Teacher,"Here I have the table, yes? There are square, well- let's just say meters. If I chop a piece off here, then this piece is also in square meters."
+2369,Teacher,"Then this piece will remain, in square meters. That is the same thing you will do with the garden."
+2374,Single student,"Yes, fine."
+2375,Teacher,Yes?
+2382,Teacher,Everything is clear for you guys?
+2383,New student,(inaudible)
+2385,Teacher,Okay.
+2386,New student,This is how it should be done? Like this?
+2389,Teacher,"Yes, perfect. Perfect, very nice."
+2391,New student,"Of course not, are you crazy or something?"
+2394,New student,But you were too warm weren't you?
+2396,New student,"Yes, right, I will just go and sit here without my T-shirt, in my bare chest."
+2403,Teacher,"Well, if the wind is gone, if the rain is gone then it can be opened again. I mean, uh..."
+2408,New student,Then it'll get even colder.
+2410,Teacher,Are you cold?
+2411,New student,Yes. Very badly!
+2412,New student,(inaudible) only wearing this really thin thing.
+2421,Teacher,"Yes. You aren't going to infect your sister, are you?"
+2424,New student,"No, she is, she is already sick."
+2426,Teacher,"Yes? She is at home, though?"
+2428,Single student,Yes.
+2432,Teacher,"And have you changed her yet, or are you going to leave that to..."
+2437,Single student,Because I did that by myself-
+2439,Teacher,Yes?
+2440,Single student,I am allowed to carry her into the church for the baptism.
+2441,Teacher,"Oh, how neat. Oh, you don't like that?"
+2444,Single student,"Well, I do think it is kind of neat and all-"
+2445,New student,Yes!
+2447,New student,Wow!
+2452,New student,"Well, wonderful..."
+2453,New student,"Really, uh, great. No, I think it is kind of neat."
+2456,Teacher,Yes.
+2457,New student,Do you have the answer booklets?
+2458,Teacher,Yes.
+2466,New student,Shirley isn't here and uh...
+2467,Teacher,Sixty.
+2470,New student,A B.
+2471,Teacher,"No, she was sitting on Shirley's seat and that's confusing me again. I thought I finally knew all the names. Okay, thank you."
+2481,Teacher,And who normally sits next to?
+2484,New student,Sander.
+2485,Teacher,"Oh, yes."
+2486,New student,Four times the square root of 20 is eh-
+2488,Teacher,"De Boer? Thank you. Easy? They were, weren't they?"
+2495,Teacher,"One, two, three, four, five, six, seven... eight, nine, 10- 20. One, two, three, four, 25, 26, 27-"
+2501,Teacher,"No? Yes though, it's 28, 29, it is correct."
+2504,Teacher,Are you going to proceed with the work?
+2509,Teacher,"Can it be a little more quiet, uh, Jeffrey? And Maarten?"
+2513,New student,"We just have to calculate this one, so we have to take half."
+2518,New student,And then?
+2520,New student,"Well, then-"
+2521,Teacher,Will you indicate how you got the numbers?
+2522,New student,"Oh, yes, I will-"
+2523,Teacher,"Yes? Because once again with the test I had a lot of- actually, I haven't seen yours yet, but from the other classes-"
+2528,Teacher,I had to mark a lot incorrect because they only had put answers down.
+2554,Teacher,Very well. My handkerchief will go into the laundry tonight. I'll need it again in a minute.
+2561,New student,Sixty-four. And then this you have to add together-
+2565,Teacher,No.
+2566,New student,Which makes 89.
+2567,Teacher,"No, they have been here on Tuesday and now."
+2571,New student,What class was that then?
+2573,Teacher,On Tuesday it was A 2 C.
+2576,Single student,With Dennis.
+2577,Teacher,Yes.
+2585,New student,Teacher?
+2586,Teacher,Yes?
+2587,Single student,Can you check exercise three for a moment?
+2589,Teacher,Of course.
+2590,Single student,Because if I have that one correct then-
+2591,Teacher,"Then you understand it, you mean."
+2592,Single student,"Yes, because I am not sure if I understand it."
+2593,Teacher,Yes. Except you have already used the new method which is explained to you in the next paragraph.
+2598,Teacher,"But if you understand it, then it doesn't matter at all."
+2599,Single student,"No, I took the old method, I think. Oh, no! That is the new one."
+2602,Teacher,"Yes, that one won't be explained until the next paragraph."
+2604,Single student,"Oh, so according to the book, I am actually working ahead."
+2607,Teacher,"Yes, but that doesn't matter because the answer should be the same. All right?"
+2610,New student,"Here it says: how big is the (inaudible) and here I've got five, but do you just have to (inaudible)?"
+2617,Teacher,"Yes, that is correct. Because the surface area of the square is five."
+2619,Single student,Yes.
+2620,Teacher,"So the side, that is just one side-"
+2622,Single student,Yes.
+2623,Teacher,Is the root of this.
+2624,Single student,"Oh, yes."
+2625,Teacher,Yes? That is what we saw several times yesterday.
+2627,New student,(inaudible)
+2629,Teacher,Sorry?
+2630,Single student,This square over here has four points-
+2632,Teacher,You may draw it-
+2633,Single student,(inaudible) draw it?
+2634,Teacher,"No, you're not obliged to, no, you're not obliged. But if it clarifies things for yourself, then you may, of course."
+2638,Teacher,But you don't have to.
+2642,New student,I got it right.
+2643,Teacher,"Yes, very good."
+2646,Teacher,You can check it this way.
+2648,New student,(inaudible)
+2653,Teacher,"It should, I believe. But what, why?"
+2655,Single student,How does one calculate this?
+2657,Teacher,Surface area is square A E F G. How does A E F G go?
+2662,Teacher,"Okay, well, what is the surface area of that?"
+2666,Teacher,"How much is, what, what is the surface area again of one of these angles?"
+2668,New student,Twenty.
+2670,Teacher,"No, the surface area."
+2671,Single student,Five.
+2672,Teacher,Five. And how many of those little squares do I have in here?
+2675,Single student,Four.
+2676,Teacher,"Yes, so?"
+2677,Single student,Twenty?
+2678,Teacher,Twenty.
+2679,Single student,"Yes, but I thought (inaudible)."
+2681,Teacher,"Yes, that is correct. Because they are determining how you can write things in a different way."
+2685,Single student,Okay.
+2686,Teacher,What I explained yesterday on how you can write out those roots in different ways. Yes?
+2690,Single student,"Yes, okay."
+2692,New student,Heinjan and I are going to BEVO shortly.
+2694,Teacher,"Yes, fine."
+2695,Single student,We have a test to take.
+2696,Teacher,Yup.
+2698,Teacher,Yes?
+2703,New student,"Hey, hey, Ravi you still have to, uh, take the test as well."
+2705,New student,May I come along with you?
+2709,New student,Then you have to come right now.
+2720,New student,"Never mind, I'll go, I also have to go to BEVO."
+2723,Teacher,"Well, then why don't you go instead? That makes a lot more sense, doesn't it?"
+2734,Teacher,Ladies? Ladies?
+2740,Teacher,"Well, go ahead then."
+2747,Single student,Where is (inaudible)?
+2748,Teacher,Just to the restroom.
+2749,New student,In the rectangle one diagonal.
+2761,New student,It is explained over here?
+2763,Teacher,"Well, that is explained with the surfaces-"
+2765,Single student,Yes.
+2766,Teacher,How that works.
+2767,Single student,"Oh, that is right here-"
+2768,Teacher,So you can go right ahead- and now you just have to calculate this again. Yes.
+2770,Single student,"Oh, with the surface area?"
+2771,Teacher,"Yes, because as far as the (inaudible) diagram is concerned that doesn't get explained till over here in exercise seven."
+2775,Teacher,That's why you don't have to do that one.
+2776,Teacher,And then over here it is explained again and then you can continue on working.
+2780,New student,"Plus five is 17- no,"
+2783,New student,It is 14.
+2796,Teacher,"Myrte? It was, uh, chapter one, wasn't it?"
+2798,New student,Yes.
+2799,New student,"Sorry, that one is wrong."
+2803,Single student,This is also wrong.
+2805,New student,No it's not.
+2806,New student,Yes it is.
+2810,New student,Don't make me cry.
+2812,Teacher,Is it that bad?
+2838,New student,Check your answer by measuring this in your diagram.
+2847,New student,The numbers on your triangle have completely faded.
+2863,Teacher,Yes?
+2864,Single student,(inaudible) do wrong?
+2865,Teacher,Excuse me?
+2866,Single student,I don't see why this is wrong here.
+2869,Teacher,What is done wrong here?
+2870,Single student,Look it (inaudible) is wrong but how are you supposed to know?
+2876,Teacher,What does that triangle look like? What kind of triangle is this? Why don't you make a diagram of that triangle.
+2881,Single student,One like that.
+2883,Teacher,"Yes, but with the sides and all, so do it with the correct- oh, you have it already. Oh, no, that is not it."
+2888,Teacher,Although? Yes that's the one though. What does it say? Angle K is 90 degrees. Correct. K L is 15.
+2895,Teacher,That is also correct. And then it says: L M is 25. And where did you put it? Yes?
+2901,Single student,"Oh, here-"
+2902,Teacher,You see? And that is what has gone wrong here too. Do you see that?
+2906,Teacher,Because first you had to take a right-angled side and then another right-angled side.
+2911,Teacher,That is why it is so important that you really make the right diagram with the letters in the correct place. So that you know exactly what belongs with what.
+2919,Teacher,Yes?
+2924,Teacher,"Ladies and gentlemen, it is almost time, so you can start to pack."
+2929,Teacher,Yes?
+2932,New student,"Is it- if you, uh, write it down like this because you have to measure the other right-angled side-"
+2940,Teacher,Yes?
+2941,Single student,"Then is this, uh, correct then, because, uh-"
+2943,Teacher,The calculation is correct but you still have to answer it.
+2946,Teacher,"Because now we have to search, no, you don't have to explain anything."
+2950,Teacher,"Because now I have to search for your answer. Like do I need 41 or do I need 40, or do I need nine?"
+2955,Single student,Yes?
+2956,Teacher,"I need to know what you calculated. Then you can just say the other side is- well, what did you calculate? Forty."
+2961,Single student,Yup.
+2962,Teacher,Yes? So you still have to give an answer because otherwise I will have to search in such a diagram.
+2965,Single student,Yup.
+2966,Teacher,And you know that I will always find the wrong one.

@@ -1,0 +1,414 @@
+﻿time,speaker,talk
+4,Teacher,This one. And something else yet. Which one is it?
+13,New student,That one.
+15,Teacher,This one.
+24,Teacher,"So, good morning."
+25,Entire class,Good morning.
+26,Teacher,"So, kids. I think that we can start to work with enthusiasm. Let's see what we can do."
+32,Teacher,"Before we even start. What are we trying to do? What are we trying to understand or which goal to set, Kristinko?"
+42,New student,Buoyancy.
+43,Teacher,Buoyancy. To figure out what it depends on. We already know; who identified buoyancy?
+51,New student,Archimedes.
+52,Teacher,"Archimedes. So, he'll keep an eye on us from the rear to see if we understand him correctly."
+59,Teacher,"Or, if we still have a gap in our knowledge which we can fill together."
+65,Teacher,Let's try it now. All that I need from you is your attention.
+74,Teacher,"I see already that a mistake has been made. Now I have it here. So, we can start."
+85,Teacher,I have prepared a stone. And how will I find the Earth's force which pulls the stone down? How can I find out? Petre?
+99,New student,We measure it with a spring scale.
+100,Teacher,"We measure it with a spring scale. So, I'll try it. Let's watch carefully."
+106,Teacher,"We don't need a precise value, it's enough to watch the red and white strip. How much?"
+114,Teacher,"And now let's watch what is going to happen. What do we notice? What do we notice, Adelko?"
+126,New student,"So, gravity acted first, and after immersion the weight of the stone was reduced because buoyancy came into effect."
+134,Teacher,"So, this was very difficult for me to understand. Let's try it in parts."
+140,Teacher,"Regardless of the physics involved, what is the first thing that you observe. What is all that we can observe, Marketko?"
+149,New student,That the spring scale indicates less.
+151,Teacher,It indicates less. Has anyone noticed something else? Marketko?
+155,Single student,The surface level of the water has risen.
+156,Teacher,The level of the water has gone up. Excellent. Let's pay attention one more time and try to put everything together.
+169,Teacher,We'll watch the stone and the spring scale. Are you noticing anything overall? Zitko?
+178,New student,"The more it is under water, the lower the gravity."
+181,Teacher,Do you think that the gravity is less? Daso?
+186,New student,The buoyancy is greater.
+187,Teacher,"The buoyancy is greater. So, exactly what is the spring scale indicating? Does it indicate the buoyancy or the difference between gravity and buoyancy?"
+201,New student,It indicates the difference between buoyancy and gravity.
+204,Teacher,Buoyancy and gravity. Do you think that my hand feels the difference or not?
+210,Teacher,"Do you think that it is easier for me to hold the spring scale or is it easier now... or now? Tadeas, Jirko?"
+217,New student,It is easier for you to hold it while it is in the water.
+220,Teacher,I can hold it easier. Why?
+222,Single student,"Because the stone is buoyant, it feels much lighter."
+227,Teacher,"It helps me, right, it helps me. Look, I have two containers with water. Let's pay close attention. I'll put it into the second container."
+243,Teacher,"Kveta will come closer to be able to read it. Kveto, come. What value does the spring scale indicate now?"
+251,New student,The spring scale indicates one and a half.
+254,Teacher,One and a quarter.
+255,Single student,One and a quarter.
+256,Teacher,"One and a quarter. I'll pull it up a bit so that you'll be able to see the whole scale, okay?"
+260,Single student,One and a quarter.
+261,Teacher,One and a quarter. What does it indicate now?
+265,Single student,It indicates one and a half.
+267,Teacher,"One and a half. Kveto, you may sit down. How come? How is it possible? Oto?"
+276,New student,The other water is salty.
+278,Teacher,"And the other one, which one do you mean?"
+279,Single student,The one on the right.
+280,Teacher,"This one? So, how might I find out whether it is really salty? What? How shall I find out, Zito?"
+288,New student,Taste it.
+289,Teacher,Taste it. And do you really think if we are here with the chemists that I can taste it?
+293,Two or more students,No. You can't.
+294,Teacher,"What? So, we have to rely on what we know. Please, Oto, how did you decide that the other water is salty?"
+303,New student,It has higher density and therefore is more buoyant.
+306,Teacher,"It is more buoyant. So, I'll try to write down what we were able to find out."
+312,Teacher,We're able to find out that buoyancy is connected with the volume of an object.
+333,Teacher,You will help me with the symbol. Which? For the volume of an object?
+337,New student,V.
+338,Teacher,Petro?
+339,Single student,V.
+340,Teacher,"The letter V. And with what else will it be connected? What did Ondra say, Tadeasi?"
+347,New student,With the density of water.
+348,Teacher,With the density of water. It'll be water or we may use- any liquid. And help me with the symbol here?
+361,New student,Rho.
+362,Teacher,"The symbol rho, excellent. So, the truth which we've demonstrated is that buoyancy is related to these."
+374,Teacher,An we'll try to inquire into- to point out how big the buoyancy is.
+384,Teacher,"We have an aid for that reason. One cylinder is full, the other is empty and they fit ideally into each other. And when they fit into each other, it means-"
+398,Teacher,"What does it say? What does it say, Martino?"
+402,New student,That they have the same volume.
+404,Teacher,"That they have the same volume. This will be very handy. This aid was made by someone who already knew the Archimedes' principle. And therefore he wanted to help us, to make it easier for us."
+419,Teacher,I'll try it now. And we'll pay attention again.
+427,Teacher,So. Before we do it let's get some water. Like this. We'll prepare it and I need more water.
+450,Teacher,"So, let me use this one, for example. So I'll prepare a bowl. I have a beaker in this bowl and I'll pour the water in a way that the surface will remain smooth, okay?"
+469,Teacher,The surface should be level with the edge of the beaker. Let's watch.
+476,Teacher,"Let's look. The spring scale shows three white and two red stripes. The last white one is not shown completely. Let's look again. Which force is measured, Kristinko?"
+490,New student,Gravity.
+491,Teacher,We measure gravity. How the Earth pulls on it. Let's look. I should turn that around. What else should I notice? What else should I notice? Zito?
+509,New student,That the spring scale indicates a smaller value.
+511,Teacher,"The spring scale indicates less. Why, Tadeasi?"
+513,New student,The water overflowed.
+514,Teacher,The water overflowed. How much of that water overflowed? How much of that water overflowed? Kristinko?
+520,New student,The same amount as is the volume of that roller.
+522,Teacher,"The same as is the volume of that roller. Therefore the spring scale indicates less, because the water is helping me."
+530,Teacher,"And pay attention. If I pull on it to get the primary value, you tell me... How big of a force is in my hand?"
+546,Teacher,"How big of a force is in my hand now, Martino?"
+550,New student,The same as the volume of the displaced water.
+553,Teacher,Or as is? Petre?
+557,New student,The buoyant force.
+558,Teacher,"How big is the buoyancy. So, now I'll use the displaced water instead of pulling with my hand. So, let me try it this way."
+572,Teacher,"And what do we expect? What do we expect if I add the displaced water now? What does the spring scale indicate, Jirko?"
+586,New student,"It indicates the same value as before when gravity was in effect. Gravity is still affecting it, but before we didn't have it in water."
+593,Teacher,"Hmm, excellent. How big is the buoyancy? How big is the buoyancy? Kristinko?"
+602,New student,The buoyancy is the same as the gravitational force of the displaced water.
+607,Teacher,Which was displaced and which we added back. And we were able to see it. Excellent.
+613,Teacher,"So, let's us look, let's us look at the formula, which Mr. Archimedes subsequently drew up."
+626,Teacher,We've already seen how big the buoyancy is. We described that in words and now we need to mark it in the formula.
+638,Teacher,"So, the force will play a role in there. It is the buoyancy. And repeat it one more time that the buoyancy is as big as what?"
+652,New student,As the gravitational force of water displaced by an object.
+654,Teacher,"As the gravitational force of water displaced by an object. So, I'll try it. The mass of an object multiplied by g, which for our country is 10 Newtons per kilogram."
+674,Teacher,Excellent. How will I continue? What now? It is the mass of an object multiplied by a g. Do you I have the object correct or not?
+689,Teacher,"Is there a mistake? Repeat it one more time? Is it a mass, gravitational force of what?"
+697,New student,Water.
+698,Teacher,"Water should be there, you said that correctly, but my thoughts are somewhere else, therefore I wrote that incorrectly."
+708,Teacher,I was one step ahead. What mass is it? A mass of displaced water. Okay.
+721,Teacher,"So, I would have to- you have to watch over me. Displaced water. And how can I write down that displaced water?"
+730,Teacher,How can I write that down? Can I use the mass and the volume? May I write that mass with the help of a density and a volume? Is that possible?
+745,Teacher,"What do you think? I'll help you. Look in here, mass, density, volume. I want to calculate a mass. How can I help myself, Tadeasi?"
+760,New student,Take the volume of an object //and multiply it by its density.
+762,Teacher,//Uh-huh.
+764,Teacher,Excellent. The volume of an object and I'll multiply it by its density. And I won't forget the g.
+773,Teacher,"So, that is the mathematical formulation of what we saw. Okay."
+781,Teacher,Swimming is certainly connected to buoyancy. Have you ever thought of why we have to learn to swim?
+795,Teacher,"Who has a dog at home? Does anyone have a dog? So, did you have to teach your dog to swim or does he know how to? Who knows that his dog can swim?"
+814,Teacher,Vojto? Does he know how to swim?
+816,New student,He knows.
+817,Teacher,He knows. Did anyone teach him how to swim?
+819,Single student,Nobody did.
+820,Teacher,"Nobody did. How is it possible that the dog can swim automatically, but humans can't, Tadeasi?"
+826,New student,He is buoyed by the water.
+828,Teacher,And aren't we?
+831,New student,He could be self-taught.
+833,Teacher,"He could be self-taught. He knows how to do it. Now, tell me, how is this possible? Picture a dog swimming in the water."
+841,Teacher,What sticks out of the water while he swims?
+844,Teacher,What is sticking out of the water when a dog is swimming? Kveto?
+847,New student,A head?
+848,Teacher,A head. All of it?
+850,Two or more students,To here. Only here.
+852,Teacher,"Probably not. For us to be able to breathe, the water must be to here. What about a dog? His snout is also as low?"
+865,Teacher,"He has it relatively high. Therefore the ears, eyes, and snout stick out and he is relatively deep in the water."
+874,Teacher,Is there any reason for the dog- that only a small part of the body sticks out? Daso?
+881,New student,"We've said that if the object is more immersed in the water, the buoyancy is greater."
+886,Teacher,And it is just enough for him. With regard to humans who are afraid and stick the whole head out.
+893,Teacher,Which results in our constant improvement of swimming techniques. Okay. So.
+901,Teacher,And what do you think? Does modeling clay float? How will I find out if it floats? How will I find out if it floats? Oto?
+914,New student,Put it in the water.
+915,Teacher,"I'll throw it in the water. So, I'll throw modeling clay in the water and be able find out if it floats or not, okay?"
+924,Teacher,"So, what do you think? Is it going to float?"
+928,New student,"No, it is not."
+930,Teacher,"Whoever thinks that modeling clay floats, please, raise your hand."
+935,New student,When I'll //teach it.
+936,Teacher,//So. What Petre?
+938,Single student,When I'll teach it.
+939,Teacher,"If I teach it. So, you realized, what I meant by that. So, you've said, throw it in and I'll find out. So. And, now, tell me why?"
+951,Teacher,Why did that happen? Why did that happen? Why did that happen?
+958,New student,Because gravity is greater than the buoyant force.
+961,Teacher,Than the buoyancy. Excellent. So I would like to write that down.
+966,Teacher,"So, we'll indicate that, for this modeling clay, we'll find out that the force of gravity... Martino, how is it?"
+980,New student,Ahh-
+981,Teacher,Is larger or smaller?
+983,New student,It is larger than //the buoyancy.
+984,Teacher,//Than.
+985,Teacher,The buoyancy. We abbreviate a buoyancy force. The force of gravity is larger.
+993,Teacher,"And, now, tell me where the modeling clay will float? What is necessary for the forces? In terms of the forces, what is required for flotation? Adelko?"
+1002,New student,When buoyancy is greater than gravity.
+1004,Teacher,"Greater, or what would be //enough for us?"
+1006,Single student,//When it's equal.
+1008,Teacher,"When it's equal. So. Our goal is, to do it in such a way that gravity and buoyancy are equal in value."
+1023,Teacher,That is our goal. How can we do it? We won't tell. You'll open it and your goal is to teach the modeling clay to float.
+1036,Two or more students,(inaudible)
+1043,New student,It overgrew-
+1044,Two or more students,(inaudible)
+1055,Teacher,"So, I'll try myself- you help yourselves somehow. I warmed up the clay, so I think that it will form well."
+1068,Teacher,Who is done? Who has taught the clay to float? Raise your hand?
+1076,Teacher,"So, you are successful. I'll try it a little longer."
+1084,Two or more students,(inaudible)
+1086,Teacher,"So, in case of those whose clay floats, try to see if it can carry a load."
+1096,Two or more students,"(inaudible), this way down."
+1099,Teacher,"Well, try it."
+1104,New student,I'll put it there. It should be better.
+1109,New student,In what break?
+1110,Teacher,So.
+1114,New student,What do you need that for?
+1117,Teacher,"So, how are we doing?"
+1120,New student,All right then.
+1121,Teacher,Are we done. Excellent.
+1125,New student,"So, do it for him."
+1129,Teacher,"So, okay."
+1130,New student,(Would you go there) after work?
+1134,New student,(inaudible)
+1134,Teacher,So.
+1138,Teacher,"Petriku? What does it mean? So, okay?"
+1147,New student,Hmm.
+1148,Teacher,"So, please, did everyone teach the clay how to float? Who did it? Who did it? Excellent, put your hands down."
+1161,Teacher,"Who did teach the clay to float on the first try? Excellent. So, some of you did it on the second try."
+1172,Teacher,And now pay attention for a minute. It is very important.
+1177,Teacher,"Please, tell me, why the clay didn't float on the first try?"
+1183,Teacher,What did you do to it and yet it didn't float? Adelko?
+1186,New student,"We had it too flat, we didn't shape it as a bowl."
+1189,Teacher,"You didn't shape it into a bowl. But it had a slight bowl shape and still it didn't float. So, not every clay bowl will float."
+1197,Teacher,"According to the laws of physics what was missing? According to physics what was missing, because, although it is shaped as a bowl it doesn't float?"
+1208,Teacher,"Considering the forces involved, what was missing?"
+1211,New student,The force of gravity was greater than the buoyant force.
+1213,Teacher,"Gravity was still greater. Please, what are we able to tell about the density of modeling clay in general?"
+1222,New student,It's greater than water.
+1223,Teacher,"It has a greater density than water. So, please, now I need your undivided attention."
+1231,Teacher,"Let your boats float. I've prepared some symbolic drawings for you, which will help."
+1241,Teacher,The first drawing is a surface of the water level without clay. The second is a surface of water with the clay shaped as a ball. And now I'll put it in...
+1262,Teacher,My boat. I still don't know if it will float.
+1268,Teacher,And Tadeasi come and look. Where should I mark it? Where should I mark it?
+1278,Teacher,"We'll mark it right here, okay? And what would you tell me? Is the level of the water the highest? Look precisely against it?"
+1287,New student,It is the highest.
+1289,Teacher,"It is the highest. So, let's pay attention. It is a very important finding."
+1293,Teacher,When we had clay- let me draw what we marked. I had the water and then I put- threw clay into the water.
+1313,Teacher,"How should I mark it? I have to mark it a little higher. We marked this. Without the clay, with the clay."
+1325,Teacher,"And the third picture, when the clay already floats, shows that the level of the water is even higher and the clay was in the shape of a boat."
+1344,Teacher,"This way we write in Russian, Russian d as a g. I don't know what came over me."
+1350,Two or more students,(inaudible)
+1352,Teacher,"Mo-de-ling clay. Okay, what have we done? Okay. So, it should have been mentioned immediately. So."
+1362,Teacher,"Please, let's look at it now. We had a volume of water. Then we threw in the clay, which didn't know how to float."
+1376,Teacher,And then we put in the clay which knows how to float. At the same time the level is the highest there.
+1383,Teacher,What does this indicate again? What did we increase in the clay?
+1391,New student,Its volume.
+1392,Teacher,"We were increasing its volume, which it actually displaced in the water. The space will be taken up in the water."
+1400,Teacher,Looking at the forces involved we were increasing the buoyancy. How did we do it? How did we do it?
+1411,Teacher,How did we increase the volume of the clay? Adelko?
+1415,New student,We flattened it more.
+1418,Teacher,"And formed the sphere, excellent. That is correct."
+1423,Teacher,"So, we taught the modeling clay to float. We found out that we can do that in a way such that the clay takes up a greater volume of water. Excellent."
+1435,Teacher,"Please, take your notebooks out. And we'll note quickly- copy the pictures involving the floating of the clay. Okay."
+1446,Teacher,"Put everything aside. Petriku, you may sit somewhere else or let me give you a cloth to clean up. Okay."
+1461,Teacher,Heading: Modeling Clay. And copy down only the three pictures.
+1487,Teacher,I placed it in a way that wouldn't allow you to see through it.
+1545,Teacher,"So, write it down. When you're finished, please close your notebooks."
+1555,Teacher,Okay.
+1560,Teacher,"So, Petre, don't play with it. Put it aside. Who is done, raise you hand. Petre, you got it wet."
+1568,New student,It was here.
+1570,Teacher,"When you work with your math tables, be careful, or get another one. Okay, Petre?"
+1577,Teacher,"So, let's finish."
+1599,Teacher,So.
+1609,Teacher,"So, may we continue? May we continue? Let's finish the drawings and continue."
+1620,Teacher,I've prepared something for you that you should already know.
+1627,Teacher,"Can you see better? Sure? I have two different things. What are those, Adelko?"
+1635,New student,Water and oil.
+1636,Teacher,"Water and oil. Please, are you surprised that the oil is on the top?"
+1641,Two or more students,Not really.
+1643,Teacher,"No. It didn't surprise you. Describe a real situation, where, almost every day, you're exposed to oil that is on top of water. Oto?"
+1654,Teacher,In soup.
+1655,Teacher,"In soup. Excellent. Or while we bake meat or cook, the fat stays on the top. Tell me why, please?"
+1664,Teacher,"How does it know that it should stay on the top, and water down? Kristinko?"
+1670,New student,Because the water has a greater density.
+1672,Teacher,Water has greater; water has a greater density. What kind of mixture is it? What do you remember from chemistry? Water and oil?
+1682,New student,Emulsion.
+1683,Two or more students,It is smaller (inaudible)
+1688,Teacher,"What kind? Can you recall, it was long time ago?"
+1692,New student,Heterogeneous.
+1693,Teacher,Heterogeneous mixture. Correct. Do you know how to separate them? Do you know how to separate them? How could we separate them?
+1706,New student,In the separating funnel.
+1707,Teacher,In the separating funnel. How would I do it if I were not a chemist? If I didn't remember the separating funnel? Could I do it at least partially?
+1719,New student,I would for example- try to suck it out with an injection syringe.
+1722,Teacher,"To collect it from the top with a syringe. We do it sometimes when we don't want the fat food. So, this way we can collect oil or fat from the top."
+1734,Teacher,"Excellent. So, this is water and oil. Do you know the Czech proverb about the truth? The truth will float on the top as-"
+1742,New student,(circle)
+1743,Teacher,"As oil, oil on water. Excellent. So, this is water and oil."
+1750,Teacher,"What will happen, what would happen, if I were to have ice and water. What is your experience? Mix ice with water? What will happen? Vojto?"
+1774,New student,Ice floats on top.
+1775,Teacher,"Ice is on top. Please, why? Why is ice on top? Marketko?"
+1783,New student,Because is has a lower density.
+1784,Teacher,It has a lower density. What can I derive from that? Consult the physics table to confirm that ice has a lower density. Look there.
+1796,Teacher,Consult table F11 to verify.
+1801,Two or more students,(inaudible)
+1834,Teacher,"So, do we have it?"
+1836,New student,"Ahh, water is denser, it has 998, but at zero degrees Celsius it has 917."
+1845,Teacher,"Nine hundred and seventeen kilograms per cubic meter. Please, is it good that ice, by nature, has a lower density than water in a liquid state?"
+1857,Teacher,"Or is it not good? Is it better for us that lakes freeze from the top, or would it be better if ice had the greater density and lakes froze from the bottom up?"
+1871,New student,It is good that they freeze from the top.
+1873,Teacher,"Is it good? Why, Tadeasi?"
+1876,New student,"Because if the ice were on the bottom then the water would be on the top, it wouldn't be flooded."
+1885,Teacher,"Hmm, that's one thing, but what would happen to life in the water?"
+1889,New student,(inaudible)
+1890,Teacher,It would die out. Excellent.
+1894,Teacher,"Please, do you have any idea as to what happens to crude oil and water?"
+1903,New student,Crude oil will float on water.
+1905,Teacher,Crude oil will float on water. I'll ask again? Is it good? Is it good that crude oil floats on water? Consult your physics table. Confirm its truth.
+1926,Two or more students,We are here.
+1936,Teacher,So. What did we find in the tables? Jitko?
+1945,New student,Crude oil has 850 kilograms per cubic meter.
+1948,Teacher,That is correct. Is that good from an ecological point of view?
+1957,New student,"From one side it is, because it doesn't affect the bottom of the ocean, but on the other hand when crude oil stays afloat it might destroy the beach and so."
+1965,Teacher,"What is better? Both scenarios are bad when crude oil gets into our waters. But if we were to take care of it,"
+1975,Teacher,Is it easier for us when the crude oil is atop the water or vice versa? Petro?
+1982,New student,I would say when is atop.
+1984,Teacher,When it is on the top of water. On television we often hear about ecological catastrophes.
+1991,Teacher,"When a tanker has an accident in the middle of the ocean, please tell me why after all does the crude oil appear on the shores anyhow?"
+2004,Teacher,It will reach the shores. Which forces are involved or what is the reason for it?
+2013,Teacher,"Regardless of our effort to clean up after an accident and eliminate the presence of crude oil, why will it still reach the shore? What is the reason, Jirko?"
+2023,New student,Sea currents and wind.
+2025,Teacher,Sea currents and wind. What else did we forget? The wind could blow in the other direction. It wouldn't help us.
+2032,Teacher,"But something what is certain to get to the shore, at the same intervals, Daso?"
+2041,New student,High tide and low tide.
+2042,Teacher,Ebb and flow. Does anyone know the reason for it?
+2047,New student,When the Earth tilts then water overflows. [laughter]
+2051,Teacher,"Petriku, did you want to entertain us, please? You are not serious. So?"
+2057,New student,Earth's gravity.
+2058,New student,The moon.
+2060,Teacher,"It is the gravity between the Earth and the moon. Pavel is humorous today. So, excellent."
+2068,Teacher,"So far we have had liquids, solid matter in liquid, and now we could experiment with substances which are not visible."
+2084,Teacher,But they still have different densities and might either stay at the bottom or not. Let's see.
+2094,Teacher,"We have enough air. So let me try. This is- looks like a liquid, but once it leaves the bottle it becomes gas."
+2105,Teacher,"This is lighter gas. So, what characteristic does it possess? What characteristic does it have? Tadeasi?"
+2115,New student,It'll burn.
+2117,Teacher,"It'll burn. So, when it burns, let us try, let us see if it really will burn, okay."
+2126,Teacher,"So, we clean up a little. Now I'll try, to see if the gas will burn, okay. So let me try to ignite it."
+2146,Teacher,"So, //it burns."
+2149,New student,//Once more.
+2151,Teacher,"Let's try something different. Since we are discussing density, let me show you one more thing."
+2162,Teacher,I'll try to put the gaseous fluid in here- cover it and pour it in here.
+2167,Teacher,Under what circumstances will I be able to do it? When will I be able to do it? What must be the case?
+2181,Teacher,"What will allow me to do it? If I'll have this- oh, this is salty water, which we might still need."
+2194,Teacher,This way. I want to do it exactly this way. What must be the case to do it? What is the rule? Petre?
+2208,New student,A gas must be heavier than the air.
+2210,Teacher,Gas must be heavier than air. We would say that it has greater density.
+2215,Teacher,"Well, let's see if this is going to work. I'll put it in here. Now I'll try to transfer it by pouring it."
+2229,Teacher,"What do you think? Now? Or a little longer? So let me try, if I was successful. Can you see that my hand is shaking? Completed successfully. Nothing is left in here."
+2248,Teacher,Please consult your physics tables to see if any inflammable gas really has- it might be a combination of propane and butane.
+2261,Teacher,Try to find out if propane really has greater density than air.
+2269,Two or more students,Propane is there and-
+2271,Teacher,Try it. Look it up.
+2274,New student,These are different ones.
+2276,Teacher,"So, Petro, what did you find?"
+2278,New student,That propane has greater density.
+2281,Teacher,"Has greater density, therefore I knew ahead of time that my experiment would be successful. If a gas were to have lower density, how would I have to do it? I would have to-"
+2292,New student,It would dissipate.
+2293,Teacher,"It would dissipate, I would have to catch it. Excellent. And we still have one more experiment ahead of us. How will we start it? Let's do it this way."
+2310,Teacher,"Excellent. So, I want to show you this."
+2314,Teacher,"I have a glass cup, okay. Honey, water, and oil. What do you know with certainty about the honey? What do we know about the honey? Jitko?"
+2331,New student,It has greater density than water.
+2332,Teacher,And?
+2333,New student,Oil.
+2334,Teacher,Oil. Excellent. what do we know about oil? What do we know about oil? Sono? Not Sona.
+2342,New student,Lenka.
+2344,Teacher,Lenka?
+2345,New student,It has smaller volume than water and oil. I meant density.
+2348,Teacher,"Density. Excellent. So we can continue to investigate. Here, I have a Lego piece and I'll throw it in. Okay. What do we observe?"
+2366,Teacher,Where is the piece? Where did the piece land? Where did it land? It went through... what? Where did it land? Kristinko?
+2377,New student,In the oil.
+2380,Teacher,"Did it land in the oil, or did it remain partially in the water as well? Lenko?"
+2389,New student,It remained partially in the water.
+2390,Teacher,It is also partially in the water. What does it tell us about the Lego's density? What is its density in comparison with the oil? Martino?
+2402,New student,Greater.
+2403,Teacher,It has greater density. In comparison with water?
+2408,New student,Lower.
+2409,Teacher,"Lower. And quite certainly its density is lower than the honey. Excellent. And I brought cork as well. Here it is. What do you think, cork?"
+2422,Teacher,What do you think that cork will do? Vojto? Milane?
+2425,New student,It will float on oil.
+2426,Teacher,It will even float on oil. Excellent.
+2431,Teacher,"Now, let's do the last problem. I am not sure what is the best way of doing it. I'll distribute colored strips of paper to you."
+2445,Teacher,You'll write numbers on them and then we'll determine the identities. So this way. And the paper strips will indicate substances.
+2468,Teacher,So our physics tables stay at hand and let's determine what each strip represents.
+2486,Teacher,Perfect. Get your pencils ready and I would be glad if you take your //excellent.
+2496,New student,//Tables.
+2498,Teacher,Please start with the brown paper strip and write: 1260 cubic kilograms. Write at the edge to leave enough space for the name. Okay?
+2515,Teacher,So write down 1260 on the brown strip.
+2530,Teacher,Take the yellow strip. One point twenty-nine kilograms per cubic meter.
+2553,Teacher,"The blue one, 998 kilograms per cubic meter."
+2567,Teacher,"The red one, two thou- excuse me, two point one kilograms per cubic meter."
+2581,Teacher,"I am missing one. The green one, the last one, 917. Find the name in your tables. What different substances are symbolized by the colored paper strips? Okay?"
+2605,Two or more students,(inaudible)
+2620,Teacher,Find it.
+2621,New student,What do you want to choose?
+2624,New student,This is water.
+2629,New student,"Where should we write it, Miss?"
+2633,Teacher,Excuse me?
+2634,Single student,Where should we write it?
+2635,Teacher,"Write it next to the corresponding number, okay."
+2640,Teacher,"So, find it. You are acting as detectives right now."
+2646,New student,You'll convert it now.
+2649,New student,Aren't you exaggerating?
+2653,New student,Now we have to divide it by-
+2660,Teacher,"Whoever is done with solving the problems, please raise your hand."
+2672,Teacher,It appears that everybody is finishing.
+2684,Teacher,"So, excellent. Tadeasi, what did you determine that the brown strip represents?"
+2692,New student,The brown is glycerol.
+2694,Teacher,"The brown is glycerol. So I will write the name next to it. Please, somewhere... I have a little bottle. Oh, here it is. Glycerol."
+2703,Teacher,You'll find it as glycerine in cosmetic and drug stores. It is a substance widely used in the cosmetics industry.
+2715,Teacher,"It is a moisturizer. So, you'll certainly find it in hand creams. So, glycerine is the same as glycerol."
+2725,Teacher,"Yellow, Kristinko?"
+2726,New student,Air.
+2727,Teacher,Air. Excellent.
+2729,Teacher,Blue. We didn't have to look it up. Tadeasi?
+2733,New student,Water.
+2735,Teacher,"Water. Green, Lenko?"
+2738,New student,Propane.
+2739,New student,"No, ice."
+2740,Teacher,Green. I made a mistake; we're talking about the green strip. //Okay?
+2747,New student,//Ice.
+2748,Teacher,"Ice. And we are left with red- propane. I picked red because when propane burns, we have fire."
+2756,Teacher,"Okay, kids, let's get on the ball! How might we organize them by density?"
+2771,Teacher,Let's do it.
+2790,New student,Are you done?
+2791,New student,No.
+2796,Teacher,"So, check to see if I did it correctly. Do you agree with me? Do agree with the way that I've done it? I will stop at propane."
+2807,Teacher,"Please, who has a gas heater at home? Who? Excellent."
+2817,Teacher,Where is- does anybody know where the gas meter is located? The one that indicates gas usage? Where is it usually? Jirko?
+2827,New student,In the basement.
+2828,Teacher,In the basement. And have you ever thought of why it would be in the basement? Why not on an upper floor? Why in the basement?
+2834,Teacher,We also have a pipe with gas here. The pipes are usually yellow.
+2843,Teacher,"Next to the igniter, next to the meter there are a lot of connections that must be tightly made so that gas will not escape and leak."
+2853,Teacher,"Gas can escape at the connections, not from the pipe itself. So, is there any advantage to a gas leaking in the basement?"
+2863,New student,Yes.
+2864,Teacher,"It is dangerous in any case. But is there at least little advantage of gas escaping in the basement, rather than upstairs? Where will the gas accumulate? Petre?"
+2874,New student,"Gas will sink to the ground, because it is denser than air."
+2876,Teacher,To the ground and when we breathe we would breathe a smaller concentration of gas than we would if the gas were coming from above.
+2887,Teacher,"So. The remaining problem will be your homework. I distributed pictures, which are on your desks. Please, this is a fish, and what is this?"
+2900,Two or more students,A bunny.
+2902,Teacher,"Bunny, or rabbit? Please you will investigate what the differences are between the skeletons of fish and rabbits. Okay?"
+2923,Teacher,"See if you find any differences and using physics, determine why the skeleton of a rabbit is the way that it is."
+2936,Teacher,And why the fish has such small and flexible bones. Why is it this way?
+2944,Teacher,"So, that will be where we pick up next week's lesson. Okay?"
+2954,Teacher,So. That's all. You have a break. I will ask someone to clean up the teaching aids. Okay?
+2970,New student,Do you see it?
+2971,New student,What?
