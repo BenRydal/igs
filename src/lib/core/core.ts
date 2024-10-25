@@ -177,6 +177,7 @@ export class Core {
 		} else if (this.coreUtils.testConversation(results)) {
 			// only process conversation if their is at least one user's movement data loaded
 			if (this.isAnyUserMovementLoaded()) this.updateUsersForConversation(csvData);
+			else alert('Please load conversation file after loading movement data');
 		} else {
 			alert('Error loading CSV file. Please make sure your file is a CSV file formatted with correct column headers');
 		}
