@@ -211,12 +211,11 @@ export class Core {
 			if (!user) {
 				user = this.createNewUser(users, userName);
 				users.push(user);
-			} else user.dataTrail = []; // reset to overwrite user with new data
+			} else user.dataTrail = []; // reset to overwrite user with new data if same user is loaded again
 			user.movementIsLoaded = true;
 			const lastTime = csvData[csvData.length - 1]?.time;
 			if (endTime < lastTime) endTime = lastTime;
 
-			// Use samplingInterval and smallDataThreshold from ConfigStore
 			if (csvData.length <= smallDataThreshold) {
 				csvData.forEach((row) => {
 					user.dataTrail.push(new DataPoint('', row.time, row.x, row.y));
