@@ -11,7 +11,6 @@ import UserStore from '../../stores/userStore';
 import CodeStore from '../../stores/codeStore.js';
 import TimelineStore from '../../stores/timelineStore';
 import ConfigStore from '../../stores/configStore.js';
-import { get } from 'svelte/store';
 
 let timeline, maxStopLength, samplingInterval, smallDataThreshold;
 
@@ -68,6 +67,8 @@ export class Core {
 	sketch: p5;
 	coreUtils: CoreUtils;
 	codeData: { code: string; startTime: number; endTime: number }[] = [];
+	conversationData: any[] | null = null; // Holds a single PapaParse results.data array, initialized as null
+	movementData: { fileName: string; csvData: any[] }[] = []; // Array of PapaParse results.data arrays and fileNames
 
 	constructor(sketch: p5) {
 		this.sketch = sketch;
@@ -169,15 +170,15 @@ export class Core {
 	processResultsData = (results: any, fileName: string) => {
 		const csvData = results.data;
 		if (this.coreUtils.testMovement(results)) {
-			this.updateUsersForMovement(csvData, fileName);
+			this.movementData.push({ fileName, csvData });
+			this.reProcessAllMovementData();
 		} else if (this.coreUtils.testMulticode(results)) {
 			this.updateUsersForMultiCodes(csvData);
 		} else if (this.coreUtils.testSingleCode(results)) {
 			this.updateUsersForSingleCodes(csvData, fileName);
 		} else if (this.coreUtils.testConversation(results)) {
-			// only process conversation if their is at least one user's movement data loaded
-			if (this.isAnyUserMovementLoaded()) this.updateUsersForConversation(csvData);
-			else alert('Please load conversation file after loading movement data');
+			this.conversationData = csvData;
+			if (this.conversationData) this.updateUsersForConversation(csvData);
 		} else {
 			alert('Error loading CSV file. Please make sure your file is a CSV file formatted with correct column headers');
 		}
@@ -193,9 +194,11 @@ export class Core {
 		});
 	};
 
-	isAnyUserMovementLoaded() {
-		const users = get(UserStore);
-		return users.some((user) => user.movementIsLoaded);
+	reProcessAllMovementData() {
+		this.movementData.forEach((file) => {
+			this.updateUsersForMovement(file.csvData, file.fileName);
+		});
+		if (this.conversationData) this.updateUsersForConversation(this.conversationData);
 	}
 
 	updateUsersForMovement = (csvData: any, userName: string) => {
@@ -208,7 +211,7 @@ export class Core {
 			if (!user) {
 				user = this.createNewUser(users, userName);
 				users.push(user);
-			}
+			} else user.dataTrail = []; // reset to overwrite user with new data
 			user.movementIsLoaded = true;
 			const lastTime = csvData[csvData.length - 1]?.time;
 			if (endTime < lastTime) endTime = lastTime;
