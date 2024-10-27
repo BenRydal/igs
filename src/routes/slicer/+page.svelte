@@ -200,6 +200,7 @@
 	function clearAllData() {
 		console.log('Clearing all data');
 		p5Instance.videoController.clear();
+		currentConfig.isPathColorMode = false;
 		UserStore.update(() => {
 			return [];
 		});
@@ -209,6 +210,8 @@
 		});
 
 		core.codeData = [];
+		core.movementData = [];
+		core.conversationData = [];
 
 		ConfigStore.update((currentConfig) => ({
 			...currentConfig,
@@ -219,12 +222,14 @@
 
 	function clearMovementData() {
 		UserStore.update(() => []);
+		core.movementData = [];
 		p5Instance.loop();
 	}
 
 	function clearConversationData() {
 		UserStore.update((users) =>
 			users.map((user) => {
+				user.conversationIsLoaded = false;
 				user.dataTrail = user.dataTrail.map((dataPoint) => {
 					dataPoint.speech = '';
 					return dataPoint;
@@ -232,6 +237,7 @@
 				return user;
 			})
 		);
+		core.conversationData = [];
 		p5Instance.loop();
 	}
 
