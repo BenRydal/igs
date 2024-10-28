@@ -218,11 +218,13 @@ export class Core {
 
 			if (csvData.length <= smallDataThreshold) {
 				csvData.forEach((row) => {
+					if (!this.coreUtils.movementRowForType(row)) return;
 					user.dataTrail.push(new DataPoint('', row.time, row.x, row.y));
 				});
 			} else {
 				let lastSampledTime = csvData[0]?.time;
 				csvData.forEach((row) => {
+					if (!this.coreUtils.movementRowForType(row)) return;
 					if (row.time - lastSampledTime >= samplingInterval) {
 						user.dataTrail.push(new DataPoint('', row.time, row.x, row.y));
 						lastSampledTime = row.time;
@@ -239,8 +241,9 @@ export class Core {
 			const users = [...currentUsers];
 			const allUsersMovementData = this.getAllUsersMovementData(users);
 			csvData.forEach((row: any) => {
-				let curUser = users.find((curUser) => curUser.name === row.speaker.toLowerCase());
+				if (!this.coreUtils.conversationRowForType(row)) return;
 
+				let curUser = users.find((curUser) => curUser.name === row.speaker.toLowerCase());
 				if (!curUser) {
 					curUser = this.createNewUser(users, row.speaker.toLowerCase());
 					users.push(curUser);
