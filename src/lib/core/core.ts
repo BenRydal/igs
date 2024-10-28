@@ -12,7 +12,7 @@ import CodeStore from '../../stores/codeStore.js';
 import TimelineStore from '../../stores/timelineStore';
 import ConfigStore from '../../stores/configStore.js';
 
-let timeline, maxStopLength, samplingInterval, smallDataThreshold;
+let timeline, maxStopLength, stopSliderValue, samplingInterval, smallDataThreshold;
 
 TimelineStore.subscribe((data) => {
 	timeline = data;
@@ -357,7 +357,8 @@ export class Core {
 		}
 		ConfigStore.update((store) => ({
 			...store,
-			maxStopLength: Math.max(store.maxStopLength, curMaxStopLength)
+			maxStopLength: Math.max(store.maxStopLength, curMaxStopLength),
+			stopSliderValue: 1 // Reset the slider value to the minimum
 		}));
 	}
 
