@@ -21,7 +21,7 @@
 							and filtering data, watching video, and rescaling data with the interactive timeline.
 						</p>
 						<div class="flex flex-row justify-center flex-wrap gap-4 my-2">
-							<a href="https://youtu.be/hewU4GKRoSs" target="_blank" class="btn bg-gray-300 text-black">Watch Demo Video</a>
+							<a href="https://youtu.be/FdDVpAYaZwE" target="_blank" class="btn bg-gray-300 text-black">Watch Demo Video</a>
 							<a href="https://www.benrydal.com/software/igs" target="_blank" class="btn bg-gray-300 text-black">Data Collection/Formatting Guide</a>
 							<a href="https://www.benrydal.com/interactiongeography" target="_blank" class="btn bg-gray-300 text-black">Learn About Interaction Geography</a>
 							<a href="https://github.com/BenRydal/igs" target="_blank" class="btn bg-gray-300 text-black">Contribute</a>
