@@ -20,7 +20,7 @@ export interface ConfigStoreType {
 	stopStrokeWeight: number;
 }
 
-const initialConfig: ConfigStoreType = {
+export const initialConfig: ConfigStoreType = {
 	isPathColorMode: false,
 	dataHasCodes: false,
 	circleToggle: false,
