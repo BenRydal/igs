@@ -22,7 +22,7 @@
 						</p>
 						<div class="flex flex-row justify-center flex-wrap gap-4 my-2">
 							<a href="https://www.youtube.com/watch?v=smoxv9AspHA" target="_blank" class="btn bg-gray-300 text-black">Watch Demo Video</a>
-							<a href="https://www.benrydal.com/software/igs" target="_blank" class="btn bg-gray-300 text-black">Data Formatting Guide</a>
+							<a href="/images/data_formatting_guide.pdf" target="_blank" class="btn bg-gray-300 text-black">Data Formatting Guide</a>
 							<a href="https://www.benrydal.com/interactiongeography" target="_blank" class="btn bg-gray-300 text-black">Learn About Interaction Geography</a>
 							<a href="https://github.com/BenRydal/igs" target="_blank" class="btn bg-gray-300 text-black">Contribute</a>
 							<!-- <a href="https://link.springer.com/article/10.1007/s11412-017-9264-8" target="_blank" class="btn bg-gray-300 text-black">Reference</a> -->
