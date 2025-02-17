@@ -24,18 +24,43 @@ ConfigStore.subscribe((data) => {
 	smallDataThreshold = data.smallDataThreshold;
 });
 
-const BASE_PATH = '/slicer';
-
 const examples = {
-	'example-1': { files: ['jordan.csv', 'possession.csv', 'conversation.csv'], videoId: 'iiMjfVOj8po' },
-	'example-2': { files: ['adhir.csv', 'blake.csv', 'jeans.csv', 'lily.csv', 'mae.csv', 'conversation.csv'], videoId: 'pWJ3xNk1Zpg' },
-	'example-3': { files: ['teacher.csv', 'lesson-graph.csv', 'conversation.csv'], videoId: 'Iu0rxb-xkMk' },
-	'example-4': { files: ['cassandra.csv', 'mei.csv', 'nathan.csv', 'sean.csv', 'teacher.csv', 'conversation.csv'], videoId: 'OJSZCK4GPQY' },
-	'example-5': { files: ['teacher.csv', 'lesson-graph.csv', 'conversation.csv'], videoId: 'xrisdnH5GmQ' },
-	'example-6': { files: ['teacher.csv', 'lesson-graph.csv', 'conversation.csv'], videoId: 'nLDXU2c0vLw' },
-	'example-7': { files: ['teacher.csv', 'lesson-graph.csv', 'conversation.csv'], videoId: '5Eg1fJ-ZpQs' },
-	'example-8': { files: ['teacher.csv', 'lesson-graph.csv', 'conversation.csv'], videoId: 'gPb_ST74bpg' },
-	'example-9': { files: ['teacher.csv', 'lesson-graph.csv', 'conversation.csv'], videoId: 'P5Lxj2nfGzc' }
+	'example-1': {
+		files: ['jordan.csv', 'possession.csv', 'conversation.csv'],
+		videoId: 'iiMjfVOj8po'
+	},
+	'example-2': {
+		files: ['adhir.csv', 'blake.csv', 'jeans.csv', 'lily.csv', 'mae.csv', 'conversation.csv'],
+		videoId: 'pWJ3xNk1Zpg'
+	},
+	'example-3': {
+		files: ['teacher.csv', 'lesson-graph.csv', 'conversation.csv'],
+		videoId: 'Iu0rxb-xkMk'
+	},
+	'example-4': {
+		files: ['cassandra.csv', 'mei.csv', 'nathan.csv', 'sean.csv', 'teacher.csv', 'conversation.csv'],
+		videoId: 'OJSZCK4GPQY'
+	},
+	'example-5': {
+		files: ['teacher.csv', 'lesson-graph.csv', 'conversation.csv'],
+		videoId: 'xrisdnH5GmQ'
+	},
+	'example-6': {
+		files: ['teacher.csv', 'lesson-graph.csv', 'conversation.csv'],
+		videoId: 'nLDXU2c0vLw'
+	},
+	'example-7': {
+		files: ['teacher.csv', 'lesson-graph.csv', 'conversation.csv'],
+		videoId: '5Eg1fJ-ZpQs'
+	},
+	'example-8': {
+		files: ['teacher.csv', 'lesson-graph.csv', 'conversation.csv'],
+		videoId: 'gPb_ST74bpg'
+	},
+	'example-9': {
+		files: ['teacher.csv', 'lesson-graph.csv', 'conversation.csv'],
+		videoId: 'P5Lxj2nfGzc'
+	}
 };
 
 export class Core {
@@ -77,9 +102,11 @@ export class Core {
 
 	async loadLocalExampleDataFile(folder: string, fileName: string) {
 		try {
-			const response = await fetch(`${BASE_PATH}${folder}${fileName}`);
+			const response = await fetch(folder + fileName);
 			const buffer = await response.arrayBuffer();
-			const file = new File([buffer], fileName, { type: 'text/csv' });
+			const file = new File([buffer], fileName, {
+				type: 'text/csv'
+			});
 			this.loadCSVData(file);
 		} catch (error) {
 			alert('Error loading CSV file. Please make sure you have a good internet connection');
@@ -91,16 +118,21 @@ export class Core {
 	 * @param  {MP4 File} input
 	 */
 	prepVideoFromFile(fileLocation) {
-		this.sketch.videoController.createVideoPlayer('File', { fileName: fileLocation });
+		this.sketch.videoController.createVideoPlayer('File', {
+			fileName: fileLocation
+		});
 	}
 
 	handleExampleDropdown = async (event: any) => {
-		ConfigStore.update((store) => ({ ...store, maxStopLength: 0 }));
+		ConfigStore.update((store) => ({
+			...store,
+			maxStopLength: 0
+		}));
 		const selectedValue = event.target.value;
 		const selectedExample = examples[selectedValue];
 		if (selectedExample) {
 			const { files, videoId } = selectedExample;
-			await this.loadFloorplanImage(`${BASE_PATH}/data/${selectedValue}/floorplan.png`);
+			await this.loadFloorplanImage(`/data/${selectedValue}/floorplan.png`);
 			for (const file of files) {
 				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, file);
 			}
@@ -401,17 +433,28 @@ export class Core {
 	updateCodeStore = (uniqueCodes: string[]) => {
 		CodeStore.update((currentEntries) => {
 			if (!currentEntries.some((entry) => entry.code === 'no codes')) {
-				currentEntries.unshift({ code: 'no codes', color: '#808080', enabled: true });
+				currentEntries.unshift({
+					code: 'no codes',
+					color: '#808080',
+					enabled: true
+				});
 			}
 
 			const existingCodes = currentEntries.map((entry) => entry.code);
 			const newEntries = uniqueCodes
 				.filter((code) => !existingCodes.includes(code))
-				.map((code, index) => ({ code, color: USER_COLORS[(index + currentEntries.length) % USER_COLORS.length], enabled: true }));
+				.map((code, index) => ({
+					code,
+					color: USER_COLORS[(index + currentEntries.length) % USER_COLORS.length],
+					enabled: true
+				}));
 
 			return [...currentEntries, ...newEntries];
 		});
 
-		ConfigStore.update((currentConfig) => ({ ...currentConfig, dataHasCodes: true }));
+		ConfigStore.update((currentConfig) => ({
+			...currentConfig,
+			dataHasCodes: true
+		}));
 	};
 }
