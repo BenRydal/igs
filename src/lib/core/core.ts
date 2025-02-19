@@ -77,7 +77,8 @@ export class Core {
 
 	async loadLocalExampleDataFile(folder: string, fileName: string) {
 		try {
-			const response = await fetch(`${BASE_PATH}${folder}${fileName}`);
+			// const response = await fetch(`${BASE_PATH}${folder}${fileName}`);
+			const response = await fetch(`${folder}${fileName}`);
 			const buffer = await response.arrayBuffer();
 			const file = new File([buffer], fileName, { type: 'text/csv' });
 			this.loadCSVData(file);
@@ -100,7 +101,8 @@ export class Core {
 		const selectedExample = examples[selectedValue];
 		if (selectedExample) {
 			const { files, videoId } = selectedExample;
-			await this.loadFloorplanImage(`${BASE_PATH}/data/${selectedValue}/floorplan.png`);
+			// await this.loadFloorplanImage(`${BASE_PATH}/data/${selectedValue}/floorplan.png`);
+			await this.loadFloorplanImage(`/data/${selectedValue}/floorplan.png`);
 			for (const file of files) {
 				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, file);
 			}
