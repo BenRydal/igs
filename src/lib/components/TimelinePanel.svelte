@@ -162,9 +162,15 @@
 				slider-width="100%"
 				generate-labels="true"
 				range-dragging="true"
-				pointer-width="25px"
-				pointer-height="25px"
-				pointer-radius="5px"
+				pointer1-width="6px"
+				pointer1-height="30px"
+				pointer1-radius="0"
+				pointer2-width="20px"
+				pointer2-height="20px"
+				pointer2-radius="50%"
+				pointer3-width="6px"
+				pointer3-height="30px"
+				pointer3-radius="0"
 				on:change={handleChange}
 			/>
 		</div>
