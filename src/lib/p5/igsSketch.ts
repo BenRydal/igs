@@ -22,11 +22,13 @@ UserStore.subscribe((data) => {
 	users = data;
 });
 
+const BASE_PATH = ''; // '/slicer/';
+
 export const igsSketch = (p5: any) => {
 	P5Store.set(p5);
 
 	p5.preload = () => {
-		p5.font = p5.loadFont('/slicer/fonts/PlusJakartaSans/VariableFont_wght.ttf');
+		p5.font = p5.loadFont(`/${BASE_PATH}/fonts/PlusJakartaSans/VariableFont_wght.ttf`);
 	};
 
 	p5.setup = () => {

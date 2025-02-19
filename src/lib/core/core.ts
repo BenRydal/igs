@@ -24,7 +24,7 @@ ConfigStore.subscribe((data) => {
 	smallDataThreshold = data.smallDataThreshold;
 });
 
-const BASE_PATH = '/slicer';
+const BASE_PATH = ''; //'/slicer';
 
 const examples = {
 	'example-1': { files: ['jordan.csv', 'possession.csv', 'conversation.csv'], videoId: 'iiMjfVOj8po' },
