@@ -21,19 +21,17 @@
 							and filtering data, watching video, and rescaling data with the interactive timeline.
 						</p>
 						<div class="flex flex-row justify-center flex-wrap gap-4 my-2">
-							<a href="https://www.youtube.com/watch?v=smoxv9AspHA" target="_blank" class="btn bg-gray-300 text-black">Watch Demo Video</a>
+							<a href="https://www.youtube.com/watch?v=smoxv9AspHA" target="_blank" class="btn bg-gray-300 text-black">Demo Video</a>
 							<a href="/images/data_formatting_guide.pdf" target="_blank" class="btn bg-gray-300 text-black">Data Formatting Guide</a>
-							<a href="https://www.benrydal.com/interactiongeography" target="_blank" class="btn bg-gray-300 text-black">Learn About Interaction Geography</a>
-							<a href="https://github.com/BenRydal/igs" target="_blank" class="btn bg-gray-300 text-black">Contribute</a>
-							<!-- <a href="https://link.springer.com/article/10.1007/s11412-017-9264-8" target="_blank" class="btn bg-gray-300 text-black">Reference</a> -->
 							<a href="https://journals.sagepub.com/doi/abs/10.3102/0013189X241238698" target="_blank" class="btn bg-gray-300 text-black">Reference</a>
+							<a href="https://forms.gle/M1gvdgSvdH9yXAABA" target="_blank" class="btn bg-gray-300 text-black">Feedback</a>
 						</div>
 						<p class="pt-3 pb-6 italic text-center">
-							IGS software is an open-source project built with Svelte, JavaScript and p5.js licensed under the GNU General Public License Version 2.0. It is
+							IGS software is an <a href="https://github.com/BenRydal/igs" class="text-blue-500 underline" target="_blank" rel="noopener noreferrer">open-source project</a>
+							built with Svelte, JavaScript and p5.js licensed under the GNU General Public License Version 2.0. It is
 							developed by Ben Rydal Shapiro, Edwin Zhao and contributors with support from the National Science Foundation #1623690 and #2100784.
 						</p>
 						<div class="modal-action flex justify-center">
-							<a href="https://forms.gle/M1gvdgSvdH9yXAABA" target="_blank" class="btn bg-gray-300 text-black">Feedback</a>
 							<button class="btn btn-primary" on:click={() => ($isModalOpen = false)}>
 								Get Started
 							</button>
