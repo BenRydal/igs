@@ -24,8 +24,6 @@ ConfigStore.subscribe((data) => {
 	smallDataThreshold = data.smallDataThreshold;
 });
 
-const BASE_PATH = ''; //'/slicer';
-
 const examples = {
 	'example-1': { files: ['jordan.csv', 'possession.csv', 'conversation.csv'], videoId: 'iiMjfVOj8po' },
 	'example-2': { files: ['adhir.csv', 'blake.csv', 'jeans.csv', 'lily.csv', 'mae.csv', 'conversation.csv'], videoId: 'pWJ3xNk1Zpg' },
@@ -77,7 +75,6 @@ export class Core {
 
 	async loadLocalExampleDataFile(folder: string, fileName: string) {
 		try {
-			// const response = await fetch(`${BASE_PATH}${folder}${fileName}`);
 			const response = await fetch(`${folder}${fileName}`);
 			const buffer = await response.arrayBuffer();
 			const file = new File([buffer], fileName, { type: 'text/csv' });
@@ -101,7 +98,6 @@ export class Core {
 		const selectedExample = examples[selectedValue];
 		if (selectedExample) {
 			const { files, videoId } = selectedExample;
-			// await this.loadFloorplanImage(`${BASE_PATH}/data/${selectedValue}/floorplan.png`);
 			await this.loadFloorplanImage(`/data/${selectedValue}/floorplan.png`);
 			for (const file of files) {
 				await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, file);
