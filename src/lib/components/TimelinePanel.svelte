@@ -1,12 +1,11 @@
 <script lang="ts">
 	import { onMount, onDestroy, tick } from 'svelte';
-	import moment from 'moment';
 	import TimelineStore from '../../stores/timelineStore';
 	import P5Store from '../../stores/p5Store';
 	import ConfigStore, { type ConfigStoreType } from '../../stores/configStore';
 	import MdFastForward from 'svelte-icons/md/MdFastForward.svelte';
 	import MdFastRewind from 'svelte-icons/md/MdFastRewind.svelte';
-
+	import { TimeUtils } from '../core/time-utils';
 	import type p5 from 'p5';
 
 	let p5Instance: p5 | null = null;
@@ -25,13 +24,51 @@
 	$: rightX = $TimelineStore.getRightX();
 	$: isAnimating = $TimelineStore.getIsAnimating();
 
-	// Formatting times for display
-	$: formattedLeft = moment.utc(timelineLeft * 1000).format('HH:mm:ss');
-	$: formattedRight = moment.utc(timelineRight * 1000).format('HH:mm:ss');
-	$: formattedCurr = moment.utc(timelineCurr * 1000).format('HH:mm:ss');
+	// Time format handling
+	type TimeFormat = 'HHMMSS' | 'MMSS' | 'SECONDS' | 'DECIMAL';
+	let currentTimeFormat: TimeFormat = 'HHMMSS';
+
+	// Format time based on selected format
+	function formatTimeDisplay(seconds: number): string {
+		switch (currentTimeFormat) {
+			case 'HHMMSS':
+				return TimeUtils.formatTime(seconds);
+			case 'MMSS':
+				return TimeUtils.formatTimeAuto(seconds);
+			case 'SECONDS':
+				return `${Math.round(seconds)}s`;
+			case 'DECIMAL':
+				return seconds.toFixed(1) + 's';
+			default:
+				return TimeUtils.formatTimeAuto(seconds);
+		}
+	}
+
+	// Cycle through available time formats
+	function cycleTimeFormat() {
+		const formats: TimeFormat[] = ['HHMMSS', 'MMSS', 'SECONDS', 'DECIMAL'];
+		const currentIndex = formats.indexOf(currentTimeFormat);
+		const nextIndex = (currentIndex + 1) % formats.length;
+		currentTimeFormat = formats[nextIndex];
+	}
+
+	// Reactive declarations for formatted times
+	$: formattedLeft = formatTimeDisplay(timelineLeft);
+	$: formattedRight = formatTimeDisplay(timelineRight);
+	$: formattedCurr = formatTimeDisplay(timelineCurr);
+
+	// Update formatted times when time format changes
+	$: {
+		if (currentTimeFormat) {
+			formattedLeft = formatTimeDisplay(timelineLeft);
+			formattedRight = formatTimeDisplay(timelineRight);
+			formattedCurr = formatTimeDisplay(timelineCurr);
+		}
+	}
 
 	let sliderContainer: HTMLDivElement;
 	let loaded = false;
+	let debounceTimeout: ReturnType<typeof setTimeout>;
 
 	// Subscribe to ConfigStore to access animationRate
 	let config: ConfigStoreType;
@@ -46,7 +83,11 @@
 		});
 
 		if (p5Instance) {
-			p5Instance.videoController.timelinePlayPause();
+			// Check if videoController exists on p5Instance before accessing it
+			if ((p5Instance as any).videoController &&
+				typeof (p5Instance as any).videoController.timelinePlayPause === 'function') {
+				(p5Instance as any).videoController.timelinePlayPause();
+			}
 			p5Instance.loop();
 		}
 	};
@@ -80,7 +121,6 @@
 		detail: {
 			value1: number;
 			value2: number;
-
 			value3: number;
 		};
 	}
@@ -93,6 +133,16 @@
 		const { value1, value2, value3 } = event.detail;
 		if (value1 === timelineLeft && value2 === timelineCurr && value3 === timelineRight) {
 			return;
+		}
+
+		if (!isAnimating && p5Instance) {
+			clearTimeout(debounceTimeout);
+			debounceTimeout = setTimeout(() => {
+				// Check if fillSelectedData exists on p5Instance before calling it
+				if (p5Instance && typeof (p5Instance as any).fillSelectedData === 'function') {
+					(p5Instance as any).fillSelectedData();
+				}
+			}, 100);
 		}
 
 		TimelineStore.update((timeline) => {
@@ -207,16 +257,31 @@
 				<MdFastForward class="w-6 h-6" />
 			</button>
 
-			<!-- Display Current Time / End Time and Animation Rate -->
-			<div class="flex flex-col">
-				<p>{formattedCurr}/{formattedRight}</p>
-				<p class="text-sm text-gray-600">Speed: {config.animationRate.toFixed(2)}x</p>
+			<!-- Display Current Time / End Time and Animation Rate with clickable time format -->
+			<div class="flex flex-col items-start">
+				<button
+					class="time-display hover:bg-gray-100 rounded px-2 transition-colors h-6 flex items-center"
+					on:click={cycleTimeFormat}
+					title="Click to change time format"
+				>
+					<span class="font-mono text-sm">{formattedCurr} / {formattedRight}</span>
+				</button>
+				<span class="text-sm text-gray-600 px-2">Speed: {config.animationRate.toFixed(2)}x</span>
 			</div>
 		</div>
 	</div>
 {/if}
 
 <style>
+	.time-display {
+		cursor: pointer;
+		transition: background-color 0.2s;
+	}
+
+	.time-display:hover {
+		background-color: rgba(0, 0, 0, 0.05);
+	}
+
 	:host {
 		width: 100% !important;
 	}
