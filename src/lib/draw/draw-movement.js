@@ -42,8 +42,9 @@ export class DrawMovement {
 				let segmentEnd = this.findSegmentEnd(dataTrail, i); // Look ahead to find the next point with different stopLength or codes
 				this.setLineStyles(point.stopLength, point.codes);
 				this.drawSegment(this.sk.SPACETIME, dataTrail, i, segmentEnd); // drawSpaceTimeCurve
-				if (this.drawUtils.isStopped(point.stopLength)) this.drawStopCircle(augmentedPoint); // draw stop circles on floor plan
-				else this.drawSegment(this.sk.PLAN, dataTrail, i, segmentEnd); // draw floor plan curve
+				if (this.drawUtils.isStopped(point.stopLength)) {
+					this.drawStopCircle(augmentedPoint); // draw stop circles on floor plan
+				} else this.drawSegment(this.sk.PLAN, dataTrail, i, segmentEnd); // draw floor plan curve
 				i = segmentEnd; // Skip ahead to the end of the segment
 			}
 		}
@@ -134,7 +135,7 @@ export class DrawMovement {
 			return this.createDot(xPos, yPos, zPos, timePos, codeColor, null); // No length to compare so set to null
 		}
 		if (this.sk.videoController.isLoadedAndIsPlaying()) {
-			const videoSelectTime = getVideoSelectTime();
+			const videoSelectTime = this.getVideoSelectTime();
 			if (this.compareToCurDot(videoSelectTime, timePos, curDot)) {
 				return this.createDot(xPos, yPos, zPos, timePos, codeColor, Math.abs(videoSelectTime - timePos));
 			}
