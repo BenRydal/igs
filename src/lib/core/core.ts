@@ -25,7 +25,7 @@ ConfigStore.subscribe((data) => {
 });
 
 const examples = {
-	'example-1': { files: ['jordan.csv', 'possession.csv', 'conversation.csv'], videoId: 'iiMjfVOj8po' },
+	'example-1': { files: ['jordan.csv', 'possession.csv'], videoId: 'iiMjfVOj8po' },
 	'example-2': { files: ['adhir.csv', 'blake.csv', 'jeans.csv', 'lily.csv', 'mae.csv', 'conversation.csv'], videoId: 'pWJ3xNk1Zpg' },
 	'example-3': { files: ['teacher.csv', 'lesson-graph.csv', 'conversation.csv'], videoId: 'Iu0rxb-xkMk' },
 	'example-4': { files: ['cassandra.csv', 'mei.csv', 'nathan.csv', 'sean.csv', 'teacher.csv', 'conversation.csv'], videoId: 'OJSZCK4GPQY' },
