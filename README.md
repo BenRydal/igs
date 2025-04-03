@@ -58,7 +58,7 @@ We welcome contributions! If you'd like to contribute, please follow the [contri
 
 ## License
 
-This software is written in JavaScript and p5.js and licensed under the GNU General Public License Version 2.0. See the GNU General Public License included with this software for more details.
+This software is written in JavaScript and p5.js and licensed under the GNU General Public License Version 3.0. See the GNU General Public License included with this software for more details.
 
 ## Feedback
 
