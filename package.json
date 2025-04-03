@@ -38,6 +38,7 @@
 		"vite": "^5.0.3"
 	},
 	"dependencies": {
+		"@floating-ui/dom": "^1.6.13",
 		"@rollup/plugin-typescript": "^11.1.6",
 		"@tsconfig/svelte": "^5.0.0",
 		"@types/luxon": "^3.4.2",
