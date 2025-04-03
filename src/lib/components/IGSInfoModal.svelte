@@ -29,7 +29,7 @@
 
 						<p class="pt-3 pb-2 text-justify">
 							IGS software is an <a href="https://github.com/BenRydal/igs" class="text-blue-500 underline" target="_blank" rel="noopener noreferrer">open-source project</a>
-							licensed under the GNU General Public License Version 2.0. It is
+							licensed under the GNU General Public License Version 3.0. It is
 							developed by Ben Rydal Shapiro, Edwin Zhao and contributors with support from the National Science Foundation #1623690 and #2100784.
 							Example data is from the <a href="https://www.timssvideo.com" class="text-blue-500 underline" target="_blank">TIMSS 1999 Video Study</a> and 
 							<a href="https://deepblue.lib.umich.edu/handle/2027.42/65013" class="text-blue-500 underline" target="_blank">the Case of Sean Numbers</a> from Mathematics Teaching and Learning to Teach (MTLT), University of Michigan (2010) used with special permission.
