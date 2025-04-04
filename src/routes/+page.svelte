@@ -307,25 +307,47 @@ function registerFloating(id: string, button: HTMLElement, content: HTMLElement)
 		p5Instance.loop();
 	}
 
-	function clearAllData() {
-		console.log('Clearing all data');
-		p5Instance.videoController.clear();
-		currentConfig.isPathColorMode = false;
-		UserStore.update(() => {
-			return [];
-		});
+function clearAllData() {
+	console.log('Clearing all data');
+	p5Instance.videoController.clear();
+	currentConfig.isPathColorMode = false;
 
-		CodeStore.update(() => {
-			return [];
-		});
+	// Close all floating elements before clearing data
+	Object.keys(floatingElements).forEach(id => {
+		if (floatingElements[id].isOpen) {
+			toggleFloating(id);
+		}
+	});
 
-		core.codeData = [];
-		core.movementData = [];
-		core.conversationData = [];
+	// Clear all floating elements
+	Object.keys(floatingElements).forEach(id => {
+		const element = floatingElements[id];
+		if (element.cleanup) {
+			element.cleanup();
+		}
+		if (element.content && element.content.parentNode) {
+			element.content.parentNode.removeChild(element.content);
+		}
+		delete floatingElements[id];
+	});
 
-		ConfigStore.update((currentConfig) => ({ ...currentConfig, dataHasCodes: false }));
-		p5Instance.loop();
-	}
+	closeAllDropdowns();
+
+	UserStore.update(() => {
+		return [];
+	});
+
+	CodeStore.update(() => {
+		return [];
+	});
+
+	core.codeData = [];
+	core.movementData = [];
+	core.conversationData = [];
+
+	ConfigStore.update((currentConfig) => ({ ...currentConfig, dataHasCodes: false }));
+	p5Instance.loop();
+}
 
 	function clearMovementData() {
 		UserStore.update(() => []);
@@ -376,37 +398,98 @@ function registerFloating(id: string, button: HTMLElement, content: HTMLElement)
 		}
 	}
 
+	// Track which dropdown is currently open
+	let openDropdownId: string | null = null;
+
+	function closeAllDropdowns() {
+		// If no dropdown is open, do nothing
+		if (!openDropdownId) return;
+
+		// Get the currently open dropdown
+		const dropdown = document.getElementById(openDropdownId);
+		if (dropdown) {
+			dropdown.classList.add('hidden');
+
+			// If it's in the body, move it back to its original position
+			if (dropdown.parentNode === document.body) {
+				const parentId = openDropdownId.replace('dropdown-', 'dropdown-container-');
+				const parent = document.getElementById(parentId);
+				if (parent) {
+					parent.appendChild(dropdown);
+				}
+			}
+		}
+
+		openDropdownId = null;
+	}
+
+	function toggleDropdown(id: string, buttonId: string) {
+		const dropdown = document.getElementById(id);
+		const button = document.getElementById(buttonId);
+
+		if (!dropdown || !button) return;
+
+		const isCurrentlyOpen = openDropdownId === id;
+
+		// Close all dropdowns first
+		closeAllDropdowns();
+
+		// If this dropdown wasn't already open, open it
+		if (!isCurrentlyOpen) {
+			// Show the dropdown
+			dropdown.classList.remove('hidden');
+
+			// Move dropdown to body to avoid clipping by overflow
+			document.body.appendChild(dropdown);
+
+			// Position the dropdown using Floating UI
+			computePosition(button, dropdown, {
+				placement: 'top',
+				middleware: [
+					offset(6),
+					flip(),
+					shift({ padding: 5 })
+				]
+			}).then(({x, y}) => {
+				Object.assign(dropdown.style, {
+					left: `${x}px`,
+					top: `${y}px`,
+					position: 'absolute',
+					zIndex: '9999' // Higher z-index to ensure it's above canvas
+				});
+			});
+
+			openDropdownId = id;
+		}
+	}
+
 	// Add event handlers for dropdowns
 	onMount(() => {
 		// Add global click handler to close dropdowns when clicking outside
 		document.addEventListener('click', (event) => {
 			const target = event.target as HTMLElement;
+			const isButton = document.getElementById('btn-codes')?.contains(target) ||
+				Array.from($UserStore).some(user => {
+					const button = document.getElementById(`btn-${user.name}`);
+					return button && button.contains(target);
+				});
 
-			// Close all dropdowns when clicking outside
-			$UserStore.forEach(user => {
-				const dropdown = document.getElementById(`dropdown-${user.name}`);
-				const button = document.getElementById(`btn-${user.name}`);
+			const isInsideDropdown = document.getElementById('dropdown-codes')?.contains(target) ||
+				Array.from($UserStore).some(user => {
+					const dropdown = document.getElementById(`dropdown-${user.name}`);
+					return dropdown && dropdown.contains(target);
+				});
 
-				if (dropdown && button &&
-					!dropdown.contains(target) &&
-					!button.contains(target) &&
-					!dropdown.classList.contains('hidden')) {
-					dropdown.classList.add('hidden');
-				}
-			});
+			if (!isButton && !isInsideDropdown) {
+				closeAllDropdowns();
+			}
 		});
 
 		// Add scroll handler to close dropdowns when scrolling
 		const userContainer = document.querySelector('.btm-nav .overflow-x-auto');
 		if (userContainer) {
 			userContainer.addEventListener('scroll', () => {
-				// Close all dropdowns when scrolling
-				$UserStore.forEach(user => {
-					const dropdown = document.getElementById(`dropdown-${user.name}`);
-					if (dropdown && !dropdown.classList.contains('hidden')) {
-						dropdown.classList.add('hidden');
-					}
-				});
+				closeAllDropdowns();
 			});
 		}
 	});
@@ -837,9 +920,28 @@ function registerFloating(id: string, button: HTMLElement, content: HTMLElement)
 		}
 	}}>
 		{#if $ConfigStore.dataHasCodes}
-			<details class="dropdown dropdown-top" use:clickOutside>
-				<summary class="btn">CODES</summary>
-				<ul class="menu dropdown-content p-2 bg-base-100 rounded-box w-64 max-h-[75vh] overflow-y-auto flex-nowrap">
+			<div class="relative mr-2">
+				<button
+					class="btn"
+					on:click={(event) => {
+						// Stop event propagation to prevent the global click handler from closing the dropdown
+						event.stopPropagation();
+
+						// Toggle the dropdown
+						toggleDropdown('dropdown-codes', 'btn-codes');
+					}}
+					id="btn-codes"
+				>
+					CODES
+				</button>
+
+				<div id="dropdown-container-codes">
+					<div
+						id="dropdown-codes"
+						class="hidden bg-base-100 rounded-box p-2 shadow absolute"
+						style="z-index: 9999;"
+					>
+					<ul class="menu w-64 max-h-[75vh] overflow-y-auto flex-nowrap">
 					<li>
 						<div class="flex items-center">
 							<input
@@ -890,8 +992,10 @@ function registerFloating(id: string, button: HTMLElement, content: HTMLElement)
 							<div class="divider" />
 						{/if}
 					{/each}
-				</ul>
-			</details>
+					</ul>
+					</div>
+				</div>
+			</div>
 		{/if}
 
 		<!-- Users Dropdowns with Floating UI -->
@@ -899,45 +1003,24 @@ function registerFloating(id: string, button: HTMLElement, content: HTMLElement)
 			<div class="relative mr-2">
 				<button
 					class="btn" style="color: {user.color};"
-					on:click={() => {
-						const dropdown = document.getElementById(`dropdown-${user.name}`);
-						if (dropdown) {
-							dropdown.classList.toggle('hidden');
+					on:click={(event) => {
+						// Stop event propagation to prevent the global click handler from closing the dropdown
+						event.stopPropagation();
 
-							// Position the dropdown using Floating UI
-							const button = document.getElementById(`btn-${user.name}`);
-							if (button && !dropdown.classList.contains('hidden')) {
-								// Move dropdown to body to avoid clipping by overflow
-								document.body.appendChild(dropdown);
-
-								computePosition(button, dropdown, {
-									placement: 'top',
-									middleware: [
-										offset(6),
-										flip(),
-										shift({ padding: 5 })
-									]
-								}).then(({x, y}) => {
-									Object.assign(dropdown.style, {
-										left: `${x}px`,
-										top: `${y}px`,
-										position: 'absolute',
-										zIndex: '9999' // Higher z-index to ensure it's above canvas
-									});
-								});
-							}
-						}
+						// Toggle the dropdown
+						toggleDropdown(`dropdown-${user.name}`, `btn-${user.name}`);
 					}}
 					id={`btn-${user.name}`}
 				>
 					{user.name}
 				</button>
 
-				<div
-					id={`dropdown-${user.name}`}
-					class="hidden bg-base-100 rounded-box p-2 shadow absolute"
-					style="z-index: 9999;"
-				>
+				<div id={`dropdown-container-${user.name}`}>
+					<div
+						id={`dropdown-${user.name}`}
+						class="hidden bg-base-100 rounded-box p-2 shadow absolute"
+						style="z-index: 9999;"
+					>
 					<ul class="w-52">
 						<li class="py-2">
 							<div class="flex items-center">
@@ -975,6 +1058,7 @@ function registerFloating(id: string, button: HTMLElement, content: HTMLElement)
 							</div>
 						</li>
 					</ul>
+					</div>
 				</div>
 			</div>
 		{/each}
