@@ -307,25 +307,56 @@ function registerFloating(id: string, button: HTMLElement, content: HTMLElement)
 		p5Instance.loop();
 	}
 
-	function clearAllData() {
-		console.log('Clearing all data');
-		p5Instance.videoController.clear();
-		currentConfig.isPathColorMode = false;
-		UserStore.update(() => {
-			return [];
-		});
+function clearAllData() {
+	console.log('Clearing all data');
+	p5Instance.videoController.clear();
+	currentConfig.isPathColorMode = false;
 
-		CodeStore.update(() => {
-			return [];
-		});
+	// Close all floating elements before clearing data
+	Object.keys(floatingElements).forEach(id => {
+		if (floatingElements[id].isOpen) {
+			toggleFloating(id);
+		}
+	});
 
-		core.codeData = [];
-		core.movementData = [];
-		core.conversationData = [];
+	// Clear all floating elements
+	Object.keys(floatingElements).forEach(id => {
+		const element = floatingElements[id];
+		if (element.cleanup) {
+			element.cleanup();
+		}
+		if (element.content && element.content.parentNode) {
+			element.content.parentNode.removeChild(element.content);
+		}
+		delete floatingElements[id];
+	});
 
-		ConfigStore.update((currentConfig) => ({ ...currentConfig, dataHasCodes: false }));
-		p5Instance.loop();
-	}
+	// Also close any user dropdowns that might be open
+	document.querySelectorAll('[id^="dropdown-"]').forEach(dropdown => {
+		if (!dropdown.classList.contains('hidden')) {
+			dropdown.classList.add('hidden');
+		}
+		// Remove from body if it was moved there
+		if (dropdown.parentNode === document.body) {
+			document.body.removeChild(dropdown);
+		}
+	});
+
+	UserStore.update(() => {
+		return [];
+	});
+
+	CodeStore.update(() => {
+		return [];
+	});
+
+	core.codeData = [];
+	core.movementData = [];
+	core.conversationData = [];
+
+	ConfigStore.update((currentConfig) => ({ ...currentConfig, dataHasCodes: false }));
+	p5Instance.loop();
+}
 
 	function clearMovementData() {
 		UserStore.update(() => []);
@@ -900,31 +931,56 @@ function registerFloating(id: string, button: HTMLElement, content: HTMLElement)
 				<button
 					class="btn" style="color: {user.color};"
 					on:click={() => {
+						// First, close all other dropdowns
+						$UserStore.forEach(u => {
+							if (u.name !== user.name) {
+								const otherDropdown = document.getElementById(`dropdown-${u.name}`);
+								if (otherDropdown && !otherDropdown.classList.contains('hidden')) {
+									otherDropdown.classList.add('hidden');
+									// Remove from body if it was moved there
+									if (otherDropdown.parentNode === document.body) {
+										document.body.removeChild(otherDropdown);
+									}
+								}
+							}
+						});
+
 						const dropdown = document.getElementById(`dropdown-${user.name}`);
 						if (dropdown) {
-							dropdown.classList.toggle('hidden');
+							// Toggle the current dropdown
+							const isHidden = dropdown.classList.contains('hidden');
 
-							// Position the dropdown using Floating UI
-							const button = document.getElementById(`btn-${user.name}`);
-							if (button && !dropdown.classList.contains('hidden')) {
-								// Move dropdown to body to avoid clipping by overflow
-								document.body.appendChild(dropdown);
+							if (isHidden) {
+								dropdown.classList.remove('hidden');
 
-								computePosition(button, dropdown, {
-									placement: 'top',
-									middleware: [
-										offset(6),
-										flip(),
-										shift({ padding: 5 })
-									]
-								}).then(({x, y}) => {
-									Object.assign(dropdown.style, {
-										left: `${x}px`,
-										top: `${y}px`,
-										position: 'absolute',
-										zIndex: '9999' // Higher z-index to ensure it's above canvas
+								// Position the dropdown using Floating UI
+								const button = document.getElementById(`btn-${user.name}`);
+								if (button) {
+									// Move dropdown to body to avoid clipping by overflow
+									document.body.appendChild(dropdown);
+
+									computePosition(button, dropdown, {
+										placement: 'top',
+										middleware: [
+											offset(6),
+											flip(),
+											shift({ padding: 5 })
+										]
+									}).then(({x, y}) => {
+										Object.assign(dropdown.style, {
+											left: `${x}px`,
+											top: `${y}px`,
+											position: 'absolute',
+											zIndex: '9999' // Higher z-index to ensure it's above canvas
+										});
 									});
-								});
+								}
+							} else {
+								dropdown.classList.add('hidden');
+								// Remove from body if it was moved there
+								if (dropdown.parentNode === document.body) {
+									document.body.removeChild(dropdown);
+								}
 							}
 						}
 					}}
