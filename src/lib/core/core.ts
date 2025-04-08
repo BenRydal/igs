@@ -6,13 +6,14 @@ import { CoreUtils } from './core-utils.js';
 import { DataPoint } from '../../models/dataPoint.js';
 import { User } from '../../models/user.js';
 import { USER_COLORS } from '../constants/index.js';
+import { generateUserColor } from '../colorGenerator';
 
 import UserStore from '../../stores/userStore';
 import CodeStore from '../../stores/codeStore.js';
 import TimelineStore from '../../stores/timelineStore';
 import ConfigStore from '../../stores/configStore.js';
 
-let timeline, maxStopLength, stopSliderValue, samplingInterval, smallDataThreshold;
+let timeline, maxStopLength, samplingInterval, smallDataThreshold;
 
 TimelineStore.subscribe((data) => {
 	timeline = data;
@@ -299,8 +300,12 @@ export class Core {
 	};
 
 	createNewUser(users: User[], userName: string) {
-		const availableColors = USER_COLORS.filter((color) => !users.some((u) => u.color === color));
-		const userColor = availableColors.length > 0 ? availableColors[0] : '#000000'; // Default to black if no more unique colors available
+		// Get all existing user colors
+		const existingColors = users.map((user) => user.color);
+
+		// Generate a color based on the user's name
+		const userColor = generateUserColor(userName, existingColors);
+
 		return new User([], userColor, true, userName);
 	}
 
