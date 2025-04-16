@@ -2,7 +2,7 @@
 
 ![repo](./static/images/igs-background.png)
 
-Welcome to **Interaction Geography Slicer (IGS)!** The IGS is an open-source tool to visualize movement, conversation, and video data over space and time. It provides fluid ways to create interactive visualizations and animations to explore how spatial and multimodal interactions evolve over time.
+Welcome to **Interaction Geography Slicer (IGS)!** The IGS is an open-source tool to visualize movement, conversation, and video data over space and time. It provides fluid ways to create interactive visualizations and animations to explore how spatial and multimodal interactions evolve over time. The IGS runs entirely in your browser. No transcripts or videos are uploaded, stored, or transmitted—your data stays on your device at all times.
 
 ## Get Started
 

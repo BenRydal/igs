@@ -18,7 +18,8 @@
 						<p class="py-3 text-xl text-justify">
 							Welcome to the Interaction Geography Slicer! The IGS is an open-source tool to visualize movement, conversation, and video data over space and time. Data are displayed over a floor plan and
 							a timeline in 2D and 3D views. Use the top menu to explore sample datasets or upload your own data. Interact with data by visualizing movement and conversation in different ways, animating
-							and filtering data, watching video, and rescaling data with the interactive timeline.
+							and filtering data, watching video, and rescaling data with the interactive timeline. The IGS runs entirely in your browser. No transcripts or videos are uploaded, stored, or transmitted—your 
+							data stays on your device at all times.
 						</p>
 						<div class="flex flex-row justify-center flex-wrap gap-4 my-2">
 							<a href="https://www.youtube.com/watch?v=smoxv9AspHA" target="_blank" class="btn bg-gray-300 text-black">Watch Demo Video</a>
