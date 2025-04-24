@@ -163,7 +163,7 @@ export class DrawUtils {
 		if (view === this.sk.PLAN) return 0;
 		else {
 			if (this.sk.handle3D.getIs3DMode()) return selTimelineXPos;
-			else return 0;
+			else return 5; // set to 5 to avoid showing under floor plan in 2D view
 		}
 	}
 
