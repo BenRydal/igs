@@ -89,7 +89,8 @@ export class Core {
 	 * @param  {MP4 File} input
 	 */
 	prepVideoFromFile(fileLocation) {
-		this.sketch.videoController.clear();
+		this.sketch.videoController.clear(); // clear previous video
+		timeline.setIsAnimating(false); // stop animation if it was running
 		this.sketch.videoController.createVideoPlayer('File', { fileName: fileLocation });
 	}
 
