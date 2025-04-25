@@ -89,6 +89,7 @@ export class Core {
 	 * @param  {MP4 File} input
 	 */
 	prepVideoFromFile(fileLocation) {
+		this.sketch.videoController.clear();
 		this.sketch.videoController.createVideoPlayer('File', { fileName: fileLocation });
 	}
 
