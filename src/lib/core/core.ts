@@ -12,7 +12,7 @@ import CodeStore from '../../stores/codeStore.js';
 import TimelineStore from '../../stores/timelineStore';
 import ConfigStore from '../../stores/configStore.js';
 
-let timeline, maxStopLength, stopSliderValue, samplingInterval, smallDataThreshold;
+let timeline, maxStopLength, samplingInterval, smallDataThreshold, optimizationDistance, preserveStops, stopSamplingEnabled, stopSamplingInterval, aggressiveOptimization, codeSamplingEnabled, codeSamplingInterval;
 
 TimelineStore.subscribe((data) => {
 	timeline = data;
@@ -22,6 +22,13 @@ ConfigStore.subscribe((data) => {
 	maxStopLength = data.maxStopLength;
 	samplingInterval = data.samplingInterval;
 	smallDataThreshold = data.smallDataThreshold;
+	optimizationDistance = data.optimizationDistance;
+	preserveStops = data.preserveStops;
+	stopSamplingEnabled = data.stopSamplingEnabled;
+	stopSamplingInterval = data.stopSamplingInterval;
+	aggressiveOptimization = data.aggressiveOptimization;
+	codeSamplingEnabled = data.codeSamplingEnabled;
+	codeSamplingInterval = data.codeSamplingInterval;
 });
 
 const examples = {
@@ -151,12 +158,23 @@ export class Core {
 			alert('Error loading CSV file. Please make sure your file is a CSV file formatted with correct column headers');
 		}
 
-		UserStore.update((currentUsers) => {
-			const users = [...currentUsers];
+		// Generate optimized trails for all users after processing data
+		UserStore.update((users) => {
 			users.forEach((user) => {
 				user.dataTrail.sort((a, b) => (a.time > b.time ? 1 : -1));
 				this.updateStopValues(user.dataTrail);
 				this.updateCodeValues(user.dataTrail);
+
+				// Generate the optimized trail using the configuration settings
+				user.generateOptimizedTrail(
+					optimizationDistance || 5,
+					preserveStops !== undefined ? preserveStops : true,
+					stopSamplingEnabled !== undefined ? stopSamplingEnabled : true,
+					stopSamplingInterval || 5,
+					aggressiveOptimization !== undefined ? aggressiveOptimization : true,
+					codeSamplingEnabled !== undefined ? codeSamplingEnabled : true,
+					codeSamplingInterval || 10
+				);
 			});
 			return users;
 		});
@@ -179,7 +197,10 @@ export class Core {
 			if (!user) {
 				user = this.createNewUser(users, userName);
 				users.push(user);
-			} else user.dataTrail = []; // reset to overwrite user with new data if same user is loaded again
+			} else {
+				user.dataTrail = []; // reset to overwrite user with new data if same user is loaded again
+			}
+
 			user.movementIsLoaded = true;
 			const lastTime = csvData[csvData.length - 1]?.time;
 			if (endTime < lastTime) endTime = lastTime;
