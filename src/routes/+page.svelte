@@ -504,6 +504,31 @@ function clearAllData() {
 		<a class="text-2xl font-bold text-black italic" href="https://interactiongeography.org">IGS</a>
 	</div>
 
+	<div class="flex bg-gray-100 rounded-md px-3 py-1 mx-2 text-sm">
+		{#if $UserStore.length > 0 && $UserStore[0]}
+			<div class="flex items-center">
+				<div class="mr-3">
+					<span class="font-bold">Trail Points:</span>
+					<span class="badge badge-primary ml-1">
+						Basic: {$UserStore[0].dataTrail?.length || 0}
+					</span>
+					<span class="badge badge-secondary ml-1">
+						Optimized: {$UserStore[0].optimizedDataTrail?.length || 0}
+					</span>
+				</div>
+				<div>
+					<label class="cursor-pointer label flex items-center">
+						<span class="mr-2">Use optimized</span>
+						<input type="checkbox" class="toggle toggle-sm toggle-primary"
+							bind:checked={$ConfigStore.useOptimizedTrail}
+							on:change={() => p5Instance?.loop()}
+						/>
+					</label>
+				</div>
+			</div>
+		{/if}
+	</div>
+
 	<div class="flex justify-end flex-1 px-2">
 		<details class="dropdown" use:clickOutside>
 			<summary class="btn btn-sm ml-4 tooltip tooltip-bottom flex items-center justify-center"> Filter </summary>
@@ -804,6 +829,121 @@ function clearAllData() {
 						on:input={(e) => handleConfigChange('stopStrokeWeight', parseInt(e.target.value))}
 						class="range range-primary"
 					/>
+				</div>
+
+				<!-- Optimization Settings -->
+				<div class="flex flex-col mt-4">
+					<h3 class="font-bold">Path Optimization</h3>
+
+					<!-- Use Optimized Trail Toggle -->
+					<div class="form-control mt-2">
+						<label class="label cursor-pointer justify-start gap-4">
+							<span class="label-text">Use Optimized Trail</span>
+							<input
+								type="checkbox"
+								class="toggle toggle-primary"
+								bind:checked={currentConfig.useOptimizedTrail}
+								on:change={() => p5Instance?.loop()}
+							/>
+						</label>
+					</div>
+
+					<!-- Optimization Distance -->
+					<div class="flex flex-col mt-2">
+						<label for="optimizationDistance" class="font-medium">Optimization Threshold: {currentConfig.optimizationDistance}px</label>
+						<input
+							id="optimizationDistance"
+							type="range"
+							min="1"
+							max="20"
+							step="1"
+							bind:value={currentConfig.optimizationDistance}
+							on:input={(e) => handleConfigChange('optimizationDistance', parseInt(e.target.value))}
+							class="range range-primary"
+						/>
+					</div>
+
+					<!-- Preserve Stops Toggle -->
+					<div class="form-control mt-2">
+						<label class="label cursor-pointer justify-start gap-4">
+							<span class="label-text">Preserve Stops</span>
+							<input
+								type="checkbox"
+								class="toggle toggle-primary"
+								bind:checked={currentConfig.preserveStops}
+								on:change={() => p5Instance?.loop()}
+							/>
+						</label>
+					</div>
+
+					<!-- Stop Sampling Enabled -->
+					<div class="form-control mt-2">
+						<label class="label cursor-pointer justify-start gap-4">
+							<span class="label-text">Sample During Stops</span>
+							<input
+								type="checkbox"
+								class="toggle toggle-primary"
+								bind:checked={currentConfig.stopSamplingEnabled}
+								on:change={() => p5Instance?.loop()}
+							/>
+						</label>
+					</div>
+
+					<!-- Stop Sampling Interval -->
+					<div class="flex flex-col mt-2">
+						<label for="stopSamplingInterval" class="font-medium">Stop Sampling Interval: {currentConfig.stopSamplingInterval} points</label>
+						<input
+							id="stopSamplingInterval"
+							type="range"
+							min="2"
+							max="20"
+							step="1"
+							bind:value={currentConfig.stopSamplingInterval}
+							on:input={(e) => handleConfigChange('stopSamplingInterval', parseInt(e.target.value))}
+							class="range range-primary"
+						/>
+					</div>
+
+					<!-- Aggressive Optimization Toggle -->
+					<div class="form-control mt-2">
+						<label class="label cursor-pointer justify-start gap-4">
+							<span class="label-text">Aggressive Optimization</span>
+							<input
+								type="checkbox"
+								class="toggle toggle-primary"
+								bind:checked={currentConfig.aggressiveOptimization}
+								on:change={() => p5Instance?.loop()}
+							/>
+						</label>
+					</div>
+
+					<!-- Code Sampling Enabled -->
+					<div class="form-control mt-2">
+						<label class="label cursor-pointer justify-start gap-4">
+							<span class="label-text">Sample Code Points</span>
+							<input
+								type="checkbox"
+								class="toggle toggle-primary"
+								bind:checked={currentConfig.codeSamplingEnabled}
+								on:change={() => p5Instance?.loop()}
+							/>
+						</label>
+					</div>
+
+					<!-- Code Sampling Interval -->
+					<div class="flex flex-col mt-2">
+						<label for="codeSamplingInterval" class="font-medium">Code Sampling Interval: {currentConfig.codeSamplingInterval} points</label>
+						<input
+							id="codeSamplingInterval"
+							type="range"
+							min="2"
+							max="50"
+							step="1"
+							bind:value={currentConfig.codeSamplingInterval}
+							on:input={(e) => handleConfigChange('codeSamplingInterval', parseInt(e.target.value))}
+							class="range range-primary"
+						/>
+					</div>
 				</div>
 
 				<!-- Text Input for Seconds (Numeric Only) -->

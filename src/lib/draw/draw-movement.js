@@ -7,13 +7,14 @@ TimelineStore.subscribe((data) => {
 	timeline = data;
 });
 
-let maxStopLength, isPathColorMode, movementStrokeWeight, stopStrokeWeight;
+let maxStopLength, isPathColorMode, movementStrokeWeight, stopStrokeWeight, useOptimizedTrail;
 
 ConfigStore.subscribe((data) => {
-	maxStopLength = data.maxStopLength;
-	isPathColorMode = data.isPathColorMode;
-	movementStrokeWeight = data.movementStrokeWeight;
-	stopStrokeWeight = data.stopStrokeWeight;
+    maxStopLength = data.maxStopLength;
+    isPathColorMode = data.isPathColorMode;
+    movementStrokeWeight = data.movementStrokeWeight;
+    stopStrokeWeight = data.stopStrokeWeight;
+    useOptimizedTrail = data.useOptimizedTrail || false;
 });
 
 export class DrawMovement {
@@ -25,13 +26,18 @@ export class DrawMovement {
 		this.shade = null;
 	}
 
-	setData(user) {
-		this.dot = null;
-		this.sk.noFill();
-		this.shade = user.color;
-		this.setDraw(user.dataTrail);
-		if (this.dot !== null) this.drawDot(this.dot);
-	}
+    setData(user) {
+			this.dot = null;
+			this.sk.noFill();
+			this.shade = user.color;
+
+			const dataTrail = useOptimizedTrail && user.optimizedDataTrail && user.optimizedDataTrail.length > 0
+					? user.optimizedDataTrail
+					: user.dataTrail;
+
+			this.setDraw(dataTrail);
+			if (this.dot !== null) this.drawDot(this.dot);
+    }
 
 	setDraw(dataTrail) {
 		for (let i = 0; i < dataTrail.length; i++) {

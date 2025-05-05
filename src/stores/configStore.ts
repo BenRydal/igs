@@ -18,6 +18,14 @@ export interface ConfigStoreType {
 	conversationRectWidth: number;
 	movementStrokeWeight: number;
 	stopStrokeWeight: number;
+	optimizationDistance: number;
+	preserveStops: boolean;
+	useOptimizedTrail: boolean;
+	stopSamplingEnabled: boolean;
+	stopSamplingInterval: number;
+	aggressiveOptimization: boolean;
+	codeSamplingEnabled: boolean;
+	codeSamplingInterval: number;
 }
 
 export const initialConfig: ConfigStoreType = {
@@ -37,7 +45,15 @@ export const initialConfig: ConfigStoreType = {
 	smallDataThreshold: 3000,
 	conversationRectWidth: 5,
 	movementStrokeWeight: 1,
-	stopStrokeWeight: 9
+	stopStrokeWeight: 9,
+	optimizationDistance: 5,
+	preserveStops: true,
+	useOptimizedTrail: true,
+	stopSamplingEnabled: true,
+	stopSamplingInterval: 5,
+	aggressiveOptimization: true,
+	codeSamplingEnabled: true,
+	codeSamplingInterval: 10
 };
 
 const ConfigStore = writable<ConfigStoreType>(initialConfig);
