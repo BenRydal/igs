@@ -152,21 +152,25 @@ export class DrawUtils {
 	}
 
 	getViewXPos(view, floorPlanXPos, selTimelineXPos) {
-		// Check if running on Windows
-		const isWindowsOS = navigator.platform.indexOf('Win') > -1;
+		if (view === this.sk.PLAN) return floorPlanXPos;
+		else {
+			if (this.sk.handle3D.getIs3DMode()) return floorPlanXPos;
+			else return selTimelineXPos;
+			// Check if running on Windows
+			// const isWindowsOS = navigator.platform.indexOf('Win') > -1;
 
-		if (view === this.sk.PLAN) {
-			return floorPlanXPos;
-		} else { // SPACETIME view
-			if (this.sk.handle3D.getIs3DMode()) {
-				return floorPlanXPos;
-			} else {
-				// In 2D mode on Windows, use floorPlanXPos for both views to fix the path rendering issue
-				if (isWindowsOS) {
-					return floorPlanXPos;
-				}
-				return selTimelineXPos;
-			}
+			// if (view === this.sk.PLAN) {
+			// 	return floorPlanXPos;
+			// } else { // SPACETIME view
+			// 	if (this.sk.handle3D.getIs3DMode()) {
+			// 		return floorPlanXPos;
+			// 	} else {
+			// 		// In 2D mode on Windows, use floorPlanXPos for both views to fix the path rendering issue
+			// 		if (isWindowsOS) {
+			// 			return floorPlanXPos;
+			// 		}
+			// 		return selTimelineXPos;
+			// 	}
 		}
 	}
 

@@ -79,7 +79,10 @@ export class FloorPlan {
             this.sk.translate(0, 0, -1);
             this.sk.image(this.img, 0, 0, width, height);
             this.sk.pop();
-        } else this.sk.image(this.img, 0, 0, width, height);
+        } else {
+            this.sk.translate(0, 0, -1);
+            this.sk.image(this.img, 0, 0, width, height);
+        }
     }
 
     rotateAndDraw(angle, width, height, container) {
