@@ -1,5 +1,6 @@
 import ConfigStore from '../../stores/configStore';
 import TimelineStore from '../../stores/timelineStore';
+import { SmoothMovement } from './smooth-movement.js';
 
 let timeline;
 
@@ -24,19 +25,28 @@ export class DrawMovement {
 		this.dot = null;
 		this.largestStopPixelSize = 50;
 		this.shade = null;
+		this.smoothMovement = new SmoothMovement(this);
+		this.currentUser = null;
 	}
 
     setData(user) {
 			this.dot = null;
 			this.sk.noFill();
 			this.shade = user.color;
+			this.currentUser = user;
 
 			const dataTrail = useOptimizedTrail && user.optimizedDataTrail && user.optimizedDataTrail.length > 0
 					? user.optimizedDataTrail
 					: user.dataTrail;
 
-			this.setDraw(dataTrail);
-			if (this.dot !== null) this.drawDot(this.dot);
+			this.setDraw(dataTrail, user);
+			
+			// Try smooth interpolation first, fallback to regular dot recording
+			if (!this.smoothMovement.recordSmoothDot(user) && this.dot !== null) {
+				this.drawDot(this.dot);
+			} else if (this.dot !== null) {
+				this.drawDot(this.dot);
+			}
     }
 
 	setDraw(dataTrail) {

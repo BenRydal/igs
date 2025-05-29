@@ -26,6 +26,10 @@ export interface ConfigStoreType {
 	aggressiveOptimization: boolean;
 	codeSamplingEnabled: boolean;
 	codeSamplingInterval: number;
+	temporalSmoothing: boolean;
+	maxTimeGap: number;
+	interpolationThreshold: number;
+	useInterpolation: boolean;
 }
 
 export const initialConfig: ConfigStoreType = {
@@ -53,7 +57,11 @@ export const initialConfig: ConfigStoreType = {
 	stopSamplingInterval: 5,
 	aggressiveOptimization: true,
 	codeSamplingEnabled: true,
-	codeSamplingInterval: 10
+	codeSamplingInterval: 10,
+	temporalSmoothing: true,
+	maxTimeGap: 2.0,
+	interpolationThreshold: 0.5,
+	useInterpolation: true
 };
 
 const ConfigStore = writable<ConfigStoreType>(initialConfig);

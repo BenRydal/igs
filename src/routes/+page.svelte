@@ -33,6 +33,7 @@
 	import type { ConfigStoreType } from '../stores/configStore';
 	import TimelineStore from '../stores/timelineStore';
 	import { initialConfig } from '../stores/configStore';
+	import SettingsModal from '../lib/components/SettingsModal.svelte';
 import { computePosition, flip, shift, offset, autoUpdate } from '@floating-ui/dom';
 
 // Define ToggleKey type to fix TypeScript errors
@@ -167,6 +168,7 @@ function registerFloating(id: string, button: HTMLElement, content: HTMLElement)
 
 	let showDataPopup = false;
 	let showSettings = false;
+	let activeTab = 'general';
 	let showDataDropDown = false;
 	let currentConfig: ConfigStoreType;
 
@@ -504,31 +506,6 @@ function clearAllData() {
 		<a class="text-2xl font-bold text-black italic" href="https://interactiongeography.org">IGS</a>
 	</div>
 
-	<div class="flex bg-gray-100 rounded-md px-3 py-1 mx-2 text-sm">
-		{#if $UserStore.length > 0 && $UserStore[0]}
-			<div class="flex items-center">
-				<div class="mr-3">
-					<span class="font-bold">Trail Points:</span>
-					<span class="badge badge-primary ml-1">
-						Basic: {$UserStore[0].dataTrail?.length || 0}
-					</span>
-					<span class="badge badge-secondary ml-1">
-						Optimized: {$UserStore[0].optimizedDataTrail?.length || 0}
-					</span>
-				</div>
-				<div>
-					<label class="cursor-pointer label flex items-center">
-						<span class="mr-2">Use optimized</span>
-						<input type="checkbox" class="toggle toggle-sm toggle-primary"
-							bind:checked={$ConfigStore.useOptimizedTrail}
-							on:change={() => p5Instance?.loop()}
-						/>
-					</label>
-				</div>
-			</div>
-		{/if}
-	</div>
-
 	<div class="flex justify-end flex-1 px-2">
 		<details class="dropdown" use:clickOutside>
 			<summary class="btn btn-sm ml-4 tooltip tooltip-bottom flex items-center justify-center"> Filter </summary>
@@ -745,239 +722,19 @@ function clearAllData() {
 			if (e.key === 'Escape') showSettings = false;
 		}}
 	>
-		<div class="modal-box w-11/12 max-w-md">
-			<div class="flex justify-between mb-4">
-				<h3 class="font-bold text-lg">Settings</h3>
-				<button class="btn btn-circle btn-sm" on:click={() => (showSettings = false)}>
-					<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-					</svg>
-				</button>
-			</div>
-
-			<div class="flex flex-col space-y-4">
-				<!-- Animation Rate -->
-				<div class="flex flex-col">
-					<label for="animationRate" class="font-medium">Animation Rate: {currentConfig.animationRate}</label>
-					<input
-						id="animationRate"
-						type="range"
-						min="0.01"
-						max="1"
-						step="0.01"
-						bind:value={currentConfig.animationRate}
-						on:input={(e) => handleConfigChange('animationRate', parseFloat(e.target.value))}
-						class="range range-primary"
-					/>
-				</div>
-
-				<!-- Sampling Interval -->
-				<div class="flex flex-col">
-					<label for="samplingInterval" class="font-medium">Sampling Interval: {currentConfig.samplingInterval} sec</label>
-					<input
-						id="samplingInterval"
-						type="range"
-						min="0.1"
-						max="5"
-						step="0.1"
-						bind:value={currentConfig.samplingInterval}
-						on:input={(e) => handleConfigChange('samplingInterval', parseFloat(e.target.value))}
-						class="range range-primary"
-					/>
-				</div>
-
-				<!-- Small Data Threshold -->
-				<div class="flex flex-col">
-					<label for="smallDataThreshold" class="font-medium">Small Data Threshold: {currentConfig.smallDataThreshold}</label>
-					<input
-						id="smallDataThreshold"
-						type="range"
-						min="500"
-						max="10000"
-						step="100"
-						bind:value={currentConfig.smallDataThreshold}
-						on:input={(e) => handleConfigChange('smallDataThreshold', parseInt(e.target.value))}
-						class="range range-primary"
-					/>
-				</div>
-
-				<!-- Movement StrokeWeight -->
-				<div class="flex flex-col">
-					<label for="movementStrokeWeight" class="font-medium">Movement Line Weight: {currentConfig.movementStrokeWeight}</label>
-					<input
-						id="movementStrokeWeight"
-						type="range"
-						min="1"
-						max="20"
-						step="1"
-						bind:value={currentConfig.movementStrokeWeight}
-						on:input={(e) => handleConfigChange('movementStrokeWeight', parseInt(e.target.value))}
-						class="range range-primary"
-					/>
-				</div>
-
-				<!-- Stop StrokeWeight -->
-				<div class="flex flex-col">
-					<label for="stopStrokeWeight" class="font-medium">Stop Line Weight: {currentConfig.stopStrokeWeight}</label>
-					<input
-						id="stopStrokeWeight"
-						type="range"
-						min="1"
-						max="20"
-						step="1"
-						bind:value={currentConfig.stopStrokeWeight}
-						on:input={(e) => handleConfigChange('stopStrokeWeight', parseInt(e.target.value))}
-						class="range range-primary"
-					/>
-				</div>
-
-				<!-- Optimization Settings -->
-				<div class="flex flex-col mt-4">
-					<h3 class="font-bold">Path Optimization</h3>
-
-					<!-- Use Optimized Trail Toggle -->
-					<div class="form-control mt-2">
-						<label class="label cursor-pointer justify-start gap-4">
-							<span class="label-text">Use Optimized Trail</span>
-							<input
-								type="checkbox"
-								class="toggle toggle-primary"
-								bind:checked={currentConfig.useOptimizedTrail}
-								on:change={() => p5Instance?.loop()}
-							/>
-						</label>
-					</div>
-
-					<!-- Optimization Distance -->
-					<div class="flex flex-col mt-2">
-						<label for="optimizationDistance" class="font-medium">Optimization Threshold: {currentConfig.optimizationDistance}px</label>
-						<input
-							id="optimizationDistance"
-							type="range"
-							min="1"
-							max="20"
-							step="1"
-							bind:value={currentConfig.optimizationDistance}
-							on:input={(e) => handleConfigChange('optimizationDistance', parseInt(e.target.value))}
-							class="range range-primary"
-						/>
-					</div>
-
-					<!-- Preserve Stops Toggle -->
-					<div class="form-control mt-2">
-						<label class="label cursor-pointer justify-start gap-4">
-							<span class="label-text">Preserve Stops</span>
-							<input
-								type="checkbox"
-								class="toggle toggle-primary"
-								bind:checked={currentConfig.preserveStops}
-								on:change={() => p5Instance?.loop()}
-							/>
-						</label>
-					</div>
-
-					<!-- Stop Sampling Enabled -->
-					<div class="form-control mt-2">
-						<label class="label cursor-pointer justify-start gap-4">
-							<span class="label-text">Sample During Stops</span>
-							<input
-								type="checkbox"
-								class="toggle toggle-primary"
-								bind:checked={currentConfig.stopSamplingEnabled}
-								on:change={() => p5Instance?.loop()}
-							/>
-						</label>
-					</div>
-
-					<!-- Stop Sampling Interval -->
-					<div class="flex flex-col mt-2">
-						<label for="stopSamplingInterval" class="font-medium">Stop Sampling Interval: {currentConfig.stopSamplingInterval} points</label>
-						<input
-							id="stopSamplingInterval"
-							type="range"
-							min="2"
-							max="20"
-							step="1"
-							bind:value={currentConfig.stopSamplingInterval}
-							on:input={(e) => handleConfigChange('stopSamplingInterval', parseInt(e.target.value))}
-							class="range range-primary"
-						/>
-					</div>
-
-					<!-- Aggressive Optimization Toggle -->
-					<div class="form-control mt-2">
-						<label class="label cursor-pointer justify-start gap-4">
-							<span class="label-text">Aggressive Optimization</span>
-							<input
-								type="checkbox"
-								class="toggle toggle-primary"
-								bind:checked={currentConfig.aggressiveOptimization}
-								on:change={() => p5Instance?.loop()}
-							/>
-						</label>
-					</div>
-
-					<!-- Code Sampling Enabled -->
-					<div class="form-control mt-2">
-						<label class="label cursor-pointer justify-start gap-4">
-							<span class="label-text">Sample Code Points</span>
-							<input
-								type="checkbox"
-								class="toggle toggle-primary"
-								bind:checked={currentConfig.codeSamplingEnabled}
-								on:change={() => p5Instance?.loop()}
-							/>
-						</label>
-					</div>
-
-					<!-- Code Sampling Interval -->
-					<div class="flex flex-col mt-2">
-						<label for="codeSamplingInterval" class="font-medium">Code Sampling Interval: {currentConfig.codeSamplingInterval} points</label>
-						<input
-							id="codeSamplingInterval"
-							type="range"
-							min="2"
-							max="50"
-							step="1"
-							bind:value={currentConfig.codeSamplingInterval}
-							on:input={(e) => handleConfigChange('codeSamplingInterval', parseInt(e.target.value))}
-							class="range range-primary"
-						/>
-					</div>
-				</div>
-
-				<!-- Text Input for Seconds (Numeric Only) -->
-				<div class="flex flex-col">
-					<label for="inputSeconds" class="font-medium">End Time (seconds)</label>
-					<input
-						id="inputSeconds"
-						type="text"
-						bind:value={timeline.endTime}
-						on:input={(e) => {
-							let value = parseInt(e.target.value.replace(/\D/g, '')) || 0;
-							TimelineStore.update((timeline) => {
-								timeline.setCurrTime(0);
-								timeline.setStartTime(0);
-								timeline.setEndTime(value);
-								timeline.setLeftMarker(0);
-								timeline.setRightMarker(value);
-								return timeline;
-							});
-						}}
-						class="input input-bordered"
-					/>
-				</div>
-			</div>
-
-			<div class="flex flex-col mt-4">
-				<button class="btn btn-sm ml-4" on:click={() => (showDataPopup = true)}>Data Explorer</button>
-			</div>
-
-			<div class="modal-action">
-				<button class="btn btn-warning" on:click={resetSettings}> Reset Settings </button>
-				<button class="btn" on:click={() => (showSettings = false)}>Close</button>
-			</div>
-		</div>
+		<SettingsModal
+			{currentConfig}
+			{timeline}
+			{p5Instance}
+			{activeTab}
+			on:configChange={(e) => handleConfigChange(e.detail.key, e.detail.value)}
+			on:close={() => (showSettings = false)}
+			on:reset={resetSettings}
+			on:openDataExplorer={() => {
+				showSettings = false;
+				showDataPopup = true;
+			}}
+		/>
 	</div>
 {/if}
 
@@ -1035,9 +792,39 @@ function clearAllData() {
 												<div class="badge badge-error ml-2">{user.enabled}</div>
 											{/if}
 										</div>
+										{#if $ConfigStore.useOptimizedTrail && user.optimizationStats}
+											<div class="divider"></div>
+											<h2 class="font-medium mb-2">Optimization Statistics:</h2>
+											<div class="stats stats-vertical lg:stats-horizontal shadow mb-4">
+												<div class="stat">
+													<div class="stat-title">Original Points</div>
+													<div class="stat-value text-primary">{user.optimizationStats.original.toLocaleString()}</div>
+												</div>
+												<div class="stat">
+													<div class="stat-title">Optimized Points</div>
+													<div class="stat-value text-secondary">{user.optimizationStats.optimized.toLocaleString()}</div>
+													<div class="stat-desc">{user.optimizationStats.reduction.toFixed(1)}% reduction</div>
+												</div>
+												<div class="stat">
+													<div class="stat-title">Points Kept</div>
+													<div class="stat-desc text-xs">
+														Speech: {user.optimizationStats.speech}<br/>
+														Codes: {user.optimizationStats.codes}<br/>
+														Stops: {user.optimizationStats.stops}<br/>
+														Movement: {user.optimizationStats.movement}<br/>
+														{#if user.optimizationStats.temporal > 0}
+															Temporal: {user.optimizationStats.temporal}<br/>
+														{/if}
+														{#if user.optimizationStats.interpolated > 0}
+															Interpolated: {user.optimizationStats.interpolated}
+														{/if}
+													</div>
+												</div>
+											</div>
+										{/if}
 									</div>
-									<h2 class="font-medium">Data Points:</h2>
-									<DataPointTable dataPoints={user.dataTrail} />
+									<h2 class="font-medium">Data Points ({$ConfigStore.useOptimizedTrail && user.optimizedDataTrail.length > 0 ? 'Optimized' : 'Original'}):</h2>
+									<DataPointTable dataPoints={$ConfigStore.useOptimizedTrail && user.optimizedDataTrail.length > 0 ? user.optimizedDataTrail : user.dataTrail} />
 								</div>
 							</div>
 						</div>
@@ -1197,6 +984,21 @@ function clearAllData() {
 								<span>Color</span>
 							</div>
 						</li>
+						{#if $ConfigStore.useOptimizedTrail && user.optimizationStats}
+							<li class="py-2">
+								<div class="text-xs opacity-70">
+									Trail points: {user.optimizationStats.optimized.toLocaleString()} / {user.optimizationStats.original.toLocaleString()}
+									<br/>
+									<span class="text-success">({user.optimizationStats.reduction.toFixed(0)}% reduced)</span>
+								</div>
+							</li>
+						{:else if user.dataTrail}
+							<li class="py-2">
+								<div class="text-xs opacity-70">
+									Trail points: {user.dataTrail.length.toLocaleString()}
+								</div>
+							</li>
+						{/if}
 					</ul>
 					</div>
 				</div>

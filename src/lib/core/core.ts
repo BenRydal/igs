@@ -12,7 +12,7 @@ import CodeStore from '../../stores/codeStore.js';
 import TimelineStore from '../../stores/timelineStore';
 import ConfigStore from '../../stores/configStore.js';
 
-let timeline, maxStopLength, samplingInterval, smallDataThreshold, optimizationDistance, preserveStops, stopSamplingEnabled, stopSamplingInterval, aggressiveOptimization, codeSamplingEnabled, codeSamplingInterval;
+let timeline, maxStopLength, samplingInterval, smallDataThreshold, optimizationDistance, preserveStops, stopSamplingEnabled, stopSamplingInterval, aggressiveOptimization, codeSamplingEnabled, codeSamplingInterval, temporalSmoothing, maxTimeGap, interpolationThreshold;
 
 TimelineStore.subscribe((data) => {
 	timeline = data;
@@ -29,6 +29,9 @@ ConfigStore.subscribe((data) => {
 	aggressiveOptimization = data.aggressiveOptimization;
 	codeSamplingEnabled = data.codeSamplingEnabled;
 	codeSamplingInterval = data.codeSamplingInterval;
+	temporalSmoothing = data.temporalSmoothing;
+	maxTimeGap = data.maxTimeGap;
+	interpolationThreshold = data.interpolationThreshold;
 });
 
 const examples = {
@@ -173,7 +176,10 @@ export class Core {
 					stopSamplingInterval || 5,
 					aggressiveOptimization !== undefined ? aggressiveOptimization : true,
 					codeSamplingEnabled !== undefined ? codeSamplingEnabled : true,
-					codeSamplingInterval || 10
+					codeSamplingInterval || 10,
+					temporalSmoothing !== undefined ? temporalSmoothing : true,
+					maxTimeGap || 2.0,
+					interpolationThreshold || 0.5
 				);
 			});
 			return users;
