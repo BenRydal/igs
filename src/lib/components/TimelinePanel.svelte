@@ -84,8 +84,7 @@
 
 		if (p5Instance) {
 			// Check if videoController exists on p5Instance before accessing it
-			if ((p5Instance as any).videoController &&
-				typeof (p5Instance as any).videoController.timelinePlayPause === 'function') {
+			if ((p5Instance as any).videoController && typeof (p5Instance as any).videoController.timelinePlayPause === 'function') {
 				(p5Instance as any).videoController.timelinePlayPause();
 			}
 			p5Instance.loop();
@@ -212,15 +211,15 @@
 				slider-width="100%"
 				generate-labels="true"
 				range-dragging="true"
-				pointer1-width="6px"
-				pointer1-height="30px"
-				pointer1-radius="0"
-				pointer2-width="20px"
-				pointer2-height="20px"
-				pointer2-radius="50%"
-				pointer3-width="6px"
-				pointer3-height="30px"
-				pointer3-radius="0"
+				pointer1-width="8px"
+				pointer1-height="24px"
+				pointer1-radius="4px"
+				pointer2-width="2px"
+				pointer2-height="32px"
+				pointer2-radius="0"
+				pointer3-width="8px"
+				pointer3-height="24px"
+				pointer3-radius="4px"
 				on:change={handleChange}
 			/>
 		</div>
@@ -319,5 +318,81 @@
 
 	.flex-col p {
 		margin: 0;
+	}
+
+	:global(tc-range-slider) {
+		--pointer-bg: #ef4444 !important; /* Red playhead */
+		--pointer-bg-hover: #dc2626 !important;
+		--pointer-bg-focus: #dc2626 !important;
+		--pointer-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2) !important;
+		--slider-bg: #e5e7eb !important;
+		--slider-bg-fill: #3b82f6 !important;
+		--slider-height: 8px !important;
+	}
+
+	:global(tc-range-slider .pointer-2) {
+		background: #ef4444 !important;
+		box-shadow:
+			0 0 0 8px rgba(239, 68, 68, 0.1),
+			0 2px 4px rgba(0, 0, 0, 0.2) !important;
+		cursor: pointer !important;
+		z-index: 10 !important;
+		transition: transform 0.1s ease !important;
+	}
+
+	:global(tc-range-slider .pointer-2::after) {
+		content: '';
+		position: absolute;
+		top: -16px;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 12px;
+		height: 12px;
+		background: #ef4444;
+		border-radius: 50%;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+	}
+
+	:global(tc-range-slider .pointer-2:hover) {
+		transform: scaleX(1.5) !important;
+		box-shadow:
+			0 0 0 12px rgba(239, 68, 68, 0.15),
+			0 2px 6px rgba(0, 0, 0, 0.3) !important;
+	}
+
+	:global(tc-range-slider .pointer-2::before) {
+		content: '';
+		position: absolute;
+		top: -8px;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 2px;
+		height: 48px;
+		background: #ef4444;
+		pointer-events: none;
+	}
+
+	:global(tc-range-slider .pointer-1),
+	:global(tc-range-slider .pointer-3) {
+		background: #6b7280 !important;
+		border: 2px solid #ffffff !important;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+		cursor: ew-resize !important;
+	}
+
+	:global(tc-range-slider .slider-fill) {
+		background: rgba(59, 130, 246, 0.3) !important;
+		height: 100% !important;
+	}
+
+	:global(tc-range-slider .slider) {
+		height: 8px !important;
+		border-radius: 4px !important;
+	}
+
+	:global(tc-range-slider .pointer-2) {
+		width: 16px !important;
+		margin-left: -8px !important;
+		cursor: pointer !important;
 	}
 </style>
