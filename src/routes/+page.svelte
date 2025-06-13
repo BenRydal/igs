@@ -911,8 +911,8 @@ function clearAllData() {
 	</div>
 {/if}
 
-<div class="btm-nav flex justify-between min-h-20">
-	<div class="flex flex-1 flex-row justify-start items-center bg-[#f6f5f3] items-start px-8 overflow-x-auto"
+<div class="btm-nav flex justify-between" style="position: fixed; bottom: 0; left: 0; right: 0; height: auto; min-height: 6rem; z-index: 50; padding: 0;">
+	<div class="flex flex-1 flex-row justify-start items-center bg-[#f6f5f3] px-8 overflow-x-auto" style="min-height: inherit; align-self: stretch;"
 	on:wheel={(e) => {
 		if (e.deltaY !== 0) {
 			e.preventDefault();
@@ -1065,7 +1065,7 @@ function clearAllData() {
 	</div>
 
 	<!-- Right Side: Timeline -->
-	<div class="flex-1 bg-[#f6f5f3]">
+	<div class="flex-1 bg-[#f6f5f3] overflow-visible flex items-center justify-center py-1" style="min-height: inherit; align-self: stretch;">
 		<TimelinePanel />
 	</div>
 </div>
