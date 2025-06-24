@@ -172,7 +172,14 @@ export const igsSketch = (p5: any) => {
 
 	p5.updateAnimation = () => {
 		if (timeline.getCurrTime() < timeline.getEndTime()) p5.continueAnimation();
-		else p5.endAnimation();
+		else {
+			// Ensure we're exactly at the end time when animation completes
+			TimelineStore.update((timeline) => {
+				timeline.setCurrTime(timeline.getEndTime());
+				return timeline;
+			});
+			p5.endAnimation();
+		}
 	};
 
 	p5.continueAnimation = () => {
@@ -181,6 +188,7 @@ export const igsSketch = (p5: any) => {
 		if (p5.videoController.isLoadedAndIsPlaying()) {
 			timeToSet = p5.videoController.getVideoPlayerCurTime();
 		} else {
+			// Original frame-based increment
 			timeToSet = timeline.getCurrTime() + animationRate;
 		}
 		TimelineStore.update((timeline) => {

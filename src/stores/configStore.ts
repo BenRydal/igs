@@ -32,7 +32,7 @@ export const initialConfig: ConfigStoreType = {
 	stopSliderValue: 1,
 	alignToggle: true,
 	wordToSearch: '',
-	animationRate: 0.05,
+	animationRate: 0.02,
 	samplingInterval: 0.5,
 	smallDataThreshold: 3000,
 	conversationRectWidth: 5,
