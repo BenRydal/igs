@@ -7,7 +7,7 @@ import CodeStore from '../../stores/codeStore';
 import ConfigStore from '../../stores/configStore';
 import { get } from 'svelte/store';
 
-let timeline, stopSliderValue, alignToggle;
+let timeline, stopSliderValue, alignToggle, maxTurnLength;
 
 TimelineStore.subscribe((data) => {
 	timeline = data;
@@ -16,6 +16,7 @@ TimelineStore.subscribe((data) => {
 ConfigStore.subscribe((data) => {
 	alignToggle = data.alignToggle;
 	stopSliderValue = data.stopSliderValue;
+	maxTurnLength = data.maxTurnLength;
 });
 
 export class DrawUtils {
@@ -140,7 +141,7 @@ export class DrawUtils {
 
 	getScaledConversationPos(point) {
 		const pos = this.getSharedPosValues(point, point.time);
-		const rectLength = this.sk.constrain(point.speech.length / 2, 3, 175); // 3 and 175 set min and max pixel dimensions
+		const rectLength = this.sk.map(point.speech.length, 0, maxTurnLength, 0, this.sk.height / 4);
 		return {
 			timelineXPos: pos.timelineXPos,
 			selTimelineXPos: pos.selTimelineXPos,

@@ -9,6 +9,7 @@ export interface ConfigStoreType {
 	stopsToggle: boolean;
 	highlightToggle: boolean;
 	maxStopLength: number;
+	maxTurnLength: number;
 	stopSliderValue: number;
 	alignToggle: boolean;
 	wordToSearch: string;
@@ -29,6 +30,7 @@ export const initialConfig: ConfigStoreType = {
 	stopsToggle: false,
 	highlightToggle: false,
 	maxStopLength: 0,
+	maxTurnLength: 10,
 	stopSliderValue: 1,
 	alignToggle: true,
 	wordToSearch: '',

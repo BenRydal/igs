@@ -12,7 +12,7 @@ import CodeStore from '../../stores/codeStore.js';
 import TimelineStore from '../../stores/timelineStore';
 import ConfigStore from '../../stores/configStore.js';
 
-let timeline, maxStopLength, stopSliderValue, samplingInterval, smallDataThreshold;
+let timeline, maxStopLength, maxTurnLength, stopSliderValue, samplingInterval, smallDataThreshold;
 
 TimelineStore.subscribe((data) => {
 	timeline = data;
@@ -20,6 +20,8 @@ TimelineStore.subscribe((data) => {
 
 ConfigStore.subscribe((data) => {
 	maxStopLength = data.maxStopLength;
+	maxTurnLength = data.maxTurnLength;
+	stopSliderValue = data.stopSliderValue;
 	samplingInterval = data.samplingInterval;
 	smallDataThreshold = data.smallDataThreshold;
 });
@@ -209,6 +211,7 @@ export class Core {
 		UserStore.update((currentUsers) => {
 			const users = [...currentUsers];
 			const allUsersMovementData = this.getAllUsersMovementData(users);
+			let curMaxTurnLength = 0;
 			csvData.forEach((row: any) => {
 				if (!this.coreUtils.conversationRowForType(row)) return;
 
@@ -226,7 +229,13 @@ export class Core {
 				} else {
 					this.addDataPointClosestByTimeInSeconds(curUser.dataTrail, new DataPoint(row.talk, row.time), allUsersMovementData);
 				}
+				const len = row.talk ? row.talk.length : 0;
+				if (len > curMaxTurnLength) curMaxTurnLength = len;
 			});
+			ConfigStore.update((store) => ({
+				...store,
+				maxTurnLength: curMaxTurnLength
+			}));
 			return users;
 		});
 	};
