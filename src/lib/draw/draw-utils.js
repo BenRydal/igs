@@ -7,7 +7,7 @@ import CodeStore from '../../stores/codeStore';
 import ConfigStore from '../../stores/configStore';
 import { get } from 'svelte/store';
 
-let timeline, stopSliderValue, alignToggle, maxTurnLength;
+let timeline, stopSliderValue, alignToggle, maxTurnLength, circleToggle, sliceToggle, movementToggle, stopsToggle, highlightToggle;
 
 TimelineStore.subscribe((data) => {
 	timeline = data;
@@ -17,6 +17,11 @@ ConfigStore.subscribe((data) => {
 	alignToggle = data.alignToggle;
 	stopSliderValue = data.stopSliderValue;
 	maxTurnLength = data.maxTurnLength;
+	circleToggle = data.circleToggle;
+	sliceToggle = data.sliceToggle;
+	movementToggle = data.movementToggle;
+	stopsToggle = data.stopsToggle;
+	highlightToggle = data.highlightToggle;
 });
 
 export class DrawUtils {
@@ -69,7 +74,6 @@ export class DrawUtils {
 	}
 
 	selectMode(curPos, pointIsStopped) {
-		const { circleToggle, sliceToggle, movementToggle, stopsToggle, highlightToggle } = get(ConfigStore);
 		const { floorPlanXPos, floorPlanYPos, selTimelineXPos, timelineXPos } = curPos;
 		const is3DMode = this.sk.handle3D.getIs3DModeOrTransitioning();
 
