@@ -33,7 +33,8 @@ const examples = {
 	'example-6': { files: ['teacher.csv', 'lesson-graph.csv', 'conversation.csv'], videoId: 'nLDXU2c0vLw' },
 	'example-7': { files: ['teacher.csv', 'lesson-graph.csv', 'conversation.csv'], videoId: '5Eg1fJ-ZpQs' },
 	'example-8': { files: ['teacher.csv', 'lesson-graph.csv', 'conversation.csv'], videoId: 'gPb_ST74bpg' },
-	'example-9': { files: ['teacher.csv', 'lesson-graph.csv', 'conversation.csv'], videoId: 'P5Lxj2nfGzc' }
+	'example-9': { files: ['teacher.csv', 'lesson-graph.csv', 'conversation.csv'], videoId: 'P5Lxj2nfGzc' },
+	'example-10': { files: ['teacher.csv', 'conversation.csv'] }
 };
 
 export class Core {
