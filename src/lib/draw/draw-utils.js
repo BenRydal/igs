@@ -7,7 +7,7 @@ import CodeStore from '../../stores/codeStore';
 import ConfigStore from '../../stores/configStore';
 import { get } from 'svelte/store';
 
-let timeline, stopSliderValue, alignToggle;
+let timeline, stopSliderValue, alignToggle, maxTurnLength, circleToggle, sliceToggle, movementToggle, stopsToggle, highlightToggle;
 
 TimelineStore.subscribe((data) => {
 	timeline = data;
@@ -16,6 +16,12 @@ TimelineStore.subscribe((data) => {
 ConfigStore.subscribe((data) => {
 	alignToggle = data.alignToggle;
 	stopSliderValue = data.stopSliderValue;
+	maxTurnLength = data.maxTurnLength;
+	circleToggle = data.circleToggle;
+	sliceToggle = data.sliceToggle;
+	movementToggle = data.movementToggle;
+	stopsToggle = data.stopsToggle;
+	highlightToggle = data.highlightToggle;
 });
 
 export class DrawUtils {
@@ -68,7 +74,6 @@ export class DrawUtils {
 	}
 
 	selectMode(curPos, pointIsStopped) {
-		const { circleToggle, sliceToggle, movementToggle, stopsToggle, highlightToggle } = get(ConfigStore);
 		const { floorPlanXPos, floorPlanYPos, selTimelineXPos, timelineXPos } = curPos;
 		const is3DMode = this.sk.handle3D.getIs3DModeOrTransitioning();
 
@@ -140,7 +145,7 @@ export class DrawUtils {
 
 	getScaledConversationPos(point) {
 		const pos = this.getSharedPosValues(point, point.time);
-		const rectLength = this.sk.constrain(point.speech.length / 2, 3, 175); // 3 and 175 set min and max pixel dimensions
+		const rectLength = this.sk.map(point.speech.length, 0, maxTurnLength, 0, this.sk.height / 4);
 		return {
 			timelineXPos: pos.timelineXPos,
 			selTimelineXPos: pos.selTimelineXPos,

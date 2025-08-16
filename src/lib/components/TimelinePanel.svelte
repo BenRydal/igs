@@ -193,7 +193,7 @@
 	// Speed control functions
 	const speedUp = () => {
 		ConfigStore.update((currentConfig) => {
-			const newRate = Math.min(currentConfig.animationRate + 0.01, 0.08); // Cap at 0.08 (4x normal speed)
+			const newRate = Math.min(currentConfig.animationRate + 0.01, 0.5); // Cap at .5 (25x normal speed)
 			return { ...currentConfig, animationRate: newRate };
 		});
 

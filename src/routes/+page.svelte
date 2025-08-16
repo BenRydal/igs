@@ -148,8 +148,8 @@ function registerFloating(id: string, button: HTMLElement, content: HTMLElement)
 		{
 			label: 'Classrooms',
 			items: [
-				{ value: 'example-3', label: 'Classroom Science Lesson' },
-				{ value: 'example-4', label: 'Classroom Discussion' }
+				{ value: 'example-10', label: 'AP Math Lesson' },
+				{ value: 'example-4', label: '3rd Grade Discussion (even/odd numbers)' }
 			]
 		},
 		{
@@ -296,7 +296,6 @@ function registerFloating(id: string, button: HTMLElement, content: HTMLElement)
 	}
 
 	function updateUserLoadedFiles(event) {
-		//clearAllData();
 		core.handleUserLoadedFiles(event);
 		p5Instance.loop();
 	}
