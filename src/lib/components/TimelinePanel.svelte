@@ -97,8 +97,7 @@
 
 		if (p5Instance) {
 			// Check if videoController exists on p5Instance before accessing it
-			if ((p5Instance as any).videoController &&
-				typeof (p5Instance as any).videoController.timelinePlayPause === 'function') {
+			if ((p5Instance as any).videoController && typeof (p5Instance as any).videoController.timelinePlayPause === 'function') {
 				(p5Instance as any).videoController.timelinePlayPause();
 			}
 			p5Instance.loop();
@@ -174,7 +173,7 @@
 			const x = e.clientX - rect.left;
 			const percentage = x / rect.width;
 			const time = startTime + (endTime - startTime) * percentage;
-			
+
 			tooltipX = e.clientX - rect.left;
 			tooltipTime = formatTimeDisplay(Math.max(startTime, Math.min(endTime, time)));
 			showTimeTooltip = true;
@@ -193,7 +192,7 @@
 	// Speed control functions
 	const speedUp = () => {
 		ConfigStore.update((currentConfig) => {
-			const newRate = Math.min(currentConfig.animationRate + 0.01, 0.5); // Cap at .5 (25x normal speed)
+			const newRate = Math.min(Math.max((currentConfig.animationRate || 0.5) + 0.1, 0.01), 1); // Cap at 1 (20x normal speed)
 			return { ...currentConfig, animationRate: newRate };
 		});
 
@@ -202,7 +201,7 @@
 
 	const slowDown = () => {
 		ConfigStore.update((currentConfig) => {
-			const newRate = Math.max(currentConfig.animationRate - 0.01, 0.005); // Floor at 0.005 (0.25x normal speed)
+			const newRate = Math.min(Math.max((currentConfig.animationRate || 0.5) - 0.1, 0.01), 1); // Floor at 0.01 (0.5x normal speed)
 			return { ...currentConfig, animationRate: newRate };
 		});
 
@@ -224,20 +223,34 @@
 					const pointers = slider.querySelectorAll('tc-range-slider-pointer');
 					if (pointers.length >= 3) {
 						// Left marker
-						pointers[0].addEventListener('mouseenter', () => { isHoveringLeft = true; });
-						pointers[0].addEventListener('mouseleave', () => { isHoveringLeft = false; });
-						
+						pointers[0].addEventListener('mouseenter', () => {
+							isHoveringLeft = true;
+						});
+						pointers[0].addEventListener('mouseleave', () => {
+							isHoveringLeft = false;
+						});
+
 						// Playhead
-						pointers[1].addEventListener('mouseenter', () => { isHoveringPlayhead = true; });
-						pointers[1].addEventListener('mouseleave', () => { isHoveringPlayhead = false; });
-						
+						pointers[1].addEventListener('mouseenter', () => {
+							isHoveringPlayhead = true;
+						});
+						pointers[1].addEventListener('mouseleave', () => {
+							isHoveringPlayhead = false;
+						});
+
 						// Right marker
-						pointers[2].addEventListener('mouseenter', () => { isHoveringRight = true; });
-						pointers[2].addEventListener('mouseleave', () => { isHoveringRight = false; });
-						
+						pointers[2].addEventListener('mouseenter', () => {
+							isHoveringRight = true;
+						});
+						pointers[2].addEventListener('mouseleave', () => {
+							isHoveringRight = false;
+						});
+
 						// Drag events
-						slider.addEventListener('mousedown', () => { isDragging = true; });
-						window.addEventListener('mouseup', () => { 
+						slider.addEventListener('mousedown', () => {
+							isDragging = true;
+						});
+						window.addEventListener('mouseup', () => {
 							isDragging = false;
 							showTimeTooltip = false;
 						});
@@ -262,11 +275,7 @@
 {#if loaded}
 	<div class="flex flex-col w-11/12 py-1">
 		<!-- This slider-container div is used to get measurements of the timeline -->
-		<div 
-			class="slider-container" 
-			bind:this={sliderContainer}
-			on:mouseleave={handleMouseLeave}
-		>
+		<div class="slider-container" bind:this={sliderContainer} on:mouseleave={handleMouseLeave}>
 			<tc-range-slider
 				min={startTime}
 				max={endTime}
@@ -293,13 +302,12 @@
 				slider-bg-fill="#64748b"
 				on:change={handleChange}
 				class="timeline-slider"
-				style="--value1-percent: {((timelineLeft - startTime) / (endTime - startTime)) * 100}%; --value3-percent: {((timelineRight - startTime) / (endTime - startTime)) * 100}%;"
+				style="--value1-percent: {((timelineLeft - startTime) / (endTime - startTime)) * 100}%; --value3-percent: {((timelineRight - startTime) /
+					(endTime - startTime)) *
+					100}%;"
 			/>
 			{#if showTimeTooltip}
-				<div 
-					class="time-tooltip"
-					style="left: {tooltipX}px;"
-				>
+				<div class="time-tooltip" style="left: {tooltipX}px;">
 					{tooltipTime}
 				</div>
 			{/if}
@@ -350,7 +358,7 @@
 				>
 					<span class="font-mono text-sm">Range: {formattedLeft} – {formattedRight} | Current: {formattedCurr}</span>
 				</button>
-					<span class="text-sm text-gray-600 px-2">Animation Speed: {(config.animationRate / 0.02).toFixed(2)}x</span>
+				<span class="text-sm text-gray-600 px-2">Animation Speed: {(config.animationRate / 0.02).toFixed(1)}x</span>
 			</div>
 		</div>
 	</div>
@@ -426,7 +434,9 @@
 	:global(.timeline-slider tc-range-slider-pointer:nth-child(3)) {
 		background-color: #3b82f6;
 		box-shadow: var(--pointer-shadow);
-		transition: transform 0.15s ease, background-color 0.15s ease;
+		transition:
+			transform 0.15s ease,
+			background-color 0.15s ease;
 	}
 
 	:global(.timeline-slider tc-range-slider-pointer:nth-child(1):hover),
