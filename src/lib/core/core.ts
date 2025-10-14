@@ -168,10 +168,20 @@ export class Core {
 	};
 
 	reProcessAllMovementData() {
+		const anySmallFile = this.movementData.some((file) => file.csvData.length <= smallDataThreshold);
+
 		this.movementData.forEach((file) => {
 			this.updateUsersForMovement(file.csvData, file.fileName);
 		});
-		if (this.conversationData) this.updateUsersForConversation(this.conversationData);
+
+		ConfigStore.update((store) => ({
+			...store,
+			stopSliderValue: anySmallFile ? 1 : 5
+		}));
+
+		if (this.conversationData) {
+			this.updateUsersForConversation(this.conversationData);
+		}
 	}
 
 	updateUsersForMovement = (csvData: any, userName: string) => {
@@ -340,8 +350,7 @@ export class Core {
 		}
 		ConfigStore.update((store) => ({
 			...store,
-			maxStopLength: Math.max(store.maxStopLength, curMaxStopLength),
-			stopSliderValue: 1 // Reset the slider value to the minimum
+			maxStopLength: Math.max(store.maxStopLength, curMaxStopLength)
 		}));
 	}
 
