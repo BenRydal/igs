@@ -36,7 +36,9 @@ const examples = {
 	'example-7': { files: ['teacher.csv', 'lesson-graph.csv', 'conversation.csv'], videoId: '5Eg1fJ-ZpQs' },
 	'example-8': { files: ['teacher.csv', 'lesson-graph.csv', 'conversation.csv'], videoId: 'gPb_ST74bpg' },
 	'example-9': { files: ['teacher.csv', 'lesson-graph.csv', 'conversation.csv'], videoId: 'P5Lxj2nfGzc' },
-	'example-10': { files: ['teacher.csv', 'conversation.csv'] }
+	'example-10': { files: ['teacher.csv', 'conversation.csv'] },
+	'example-11': { files: ['teacher.csv'] },
+	'example-12': { files: ['teacher.csv'] }
 };
 
 export class Core {
@@ -166,10 +168,20 @@ export class Core {
 	};
 
 	reProcessAllMovementData() {
+		const anySmallFile = this.movementData.some((file) => file.csvData.length <= smallDataThreshold);
+
 		this.movementData.forEach((file) => {
 			this.updateUsersForMovement(file.csvData, file.fileName);
 		});
-		if (this.conversationData) this.updateUsersForConversation(this.conversationData);
+
+		ConfigStore.update((store) => ({
+			...store,
+			stopSliderValue: anySmallFile ? 1 : 5
+		}));
+
+		if (this.conversationData) {
+			this.updateUsersForConversation(this.conversationData);
+		}
 	}
 
 	updateUsersForMovement = (csvData: any, userName: string) => {
@@ -338,8 +350,7 @@ export class Core {
 		}
 		ConfigStore.update((store) => ({
 			...store,
-			maxStopLength: Math.max(store.maxStopLength, curMaxStopLength),
-			stopSliderValue: 1 // Reset the slider value to the minimum
+			maxStopLength: Math.max(store.maxStopLength, curMaxStopLength)
 		}));
 	}
 
