@@ -2,16 +2,16 @@
 	import P5, { type Sketch } from 'p5-svelte';
 
 	import type p5 from 'p5';
-	import MdHelpOutline from 'svelte-icons/md/MdHelpOutline.svelte';
-	import MdCloudUpload from 'svelte-icons/md/MdCloudUpload.svelte';
-	import MdCloudDownload from 'svelte-icons/md/MdCloudDownload.svelte';
-	import MdRotateLeft from 'svelte-icons/md/MdRotateLeft.svelte';
-	import MdRotateRight from 'svelte-icons/md/MdRotateRight.svelte';
-	import Md3DRotation from 'svelte-icons/md/Md3DRotation.svelte';
-	import MdVideocam from 'svelte-icons/md/MdVideocam.svelte';
-	import MdVideocamOff from 'svelte-icons/md/MdVideocamOff.svelte';
-	import MdCheck from 'svelte-icons/md/MdCheck.svelte';
-	import MdSettings from 'svelte-icons/md/MdSettings.svelte';
+	import MdHelpOutline from '~icons/mdi/help-circle-outline';
+	import MdCloudUpload from '~icons/mdi/cloud-upload';
+	import MdCloudDownload from '~icons/mdi/cloud-download';
+	import MdRotateLeft from '~icons/mdi/rotate-left';
+	import MdRotateRight from '~icons/mdi/rotate-right';
+	import Md3DRotation from '~icons/mdi/rotate-3d-variant';
+	import MdVideocam from '~icons/mdi/video';
+	import MdVideocamOff from '~icons/mdi/video-off';
+	import MdCheck from '~icons/mdi/check';
+	import MdSettings from '~icons/mdi/cog';
 
 	import type { User } from '../models/user';
 
@@ -128,7 +128,7 @@
 	const filterToggleOptions = ['movementToggle', 'stopsToggle'] as const;
 	const selectToggleOptions = ['circleToggle', 'sliceToggle', 'highlightToggle'] as const;
 	const conversationToggleOptions = ['alignToggle'] as const;
-	let selectedDropDownOption = '';
+	let selectedDropDownOption = $state('');
 	const dropdownOptions = [
 		{ label: 'Sports', items: [{ value: 'example-1', label: "Michael Jordan's Last Shot" }] },
 		{ label: 'Museums', items: [{ value: 'example-2', label: 'Family Gallery Visit' }] },
@@ -154,39 +154,39 @@
 		}
 	];
 
-	let showDataPopup = false;
-	let showSettings = false;
-	let showDataDropDown = false;
-	let currentConfig: ConfigStoreType;
+	let showDataPopup = $state(false);
+	let showSettings = $state(false);
+	let showDataDropDown = $state(false);
+	let currentConfig = $state<ConfigStoreType>($ConfigStore);
 
-	let files: any = [];
-	let users: User[] = [];
-	let p5Instance: p5 | null = null;
+	let files = $state<any>([]);
+	let users = $state<User[]>([]);
+	let p5Instance = $state<p5 | null>(null);
 	let core: Core;
-	let isVideoShowing = false;
-	let isVideoPlaying = false;
-	let timeline;
+	let isVideoShowing = $state(false);
+	let isVideoPlaying = $state(false);
+	let timeline = $state($TimelineStore);
 
-	ConfigStore.subscribe((value) => {
-		currentConfig = value;
+	$effect(() => {
+		currentConfig = $ConfigStore;
 	});
 
-	TimelineStore.subscribe((value) => {
-		timeline = value;
+	$effect(() => {
+		timeline = $TimelineStore;
 	});
 
-	VideoStore.subscribe((value) => {
-		isVideoShowing = value.isShowing;
-		isVideoPlaying = value.isPlaying;
+	$effect(() => {
+		const videoState = $VideoStore;
+		isVideoShowing = videoState.isShowing;
+		isVideoPlaying = videoState.isPlaying;
 	});
 
-	UserStore.subscribe((data) => {
-		users = data;
+	$effect(() => {
+		users = $UserStore;
 	});
 
-	P5Store.subscribe((value) => {
-		p5Instance = value;
-
+	$effect(() => {
+		p5Instance = $P5Store;
 		if (p5Instance) {
 			core = new Core(p5Instance);
 		}
@@ -198,13 +198,15 @@
 
 	let isModalOpen = writable(true);
 
-	$: sortedCodes = [...$CodeStore].sort((a, b) => {
-		if (a.code.toLowerCase() === 'no codes') return 1;
-		if (b.code.toLowerCase() === 'no codes') return -1;
-		return a.code.localeCompare(b.code);
-	});
+	let sortedCodes = $derived(
+		[...$CodeStore].sort((a, b) => {
+			if (a.code.toLowerCase() === 'no codes') return 1;
+			if (b.code.toLowerCase() === 'no codes') return -1;
+			return a.code.localeCompare(b.code);
+		})
+	);
 
-	$: formattedStopLength = $ConfigStore.stopSliderValue.toFixed(0);
+	let formattedStopLength = $derived($ConfigStore.stopSliderValue.toFixed(0));
 
 	function toggleVideo() {
 		if (p5Instance && p5Instance.videoController) {
@@ -387,7 +389,7 @@
 	}
 
 	// Track which dropdown is currently open
-	let openDropdownId: string | null = null;
+	let openDropdownId = $state<string | null>(null);
 
 	function closeAllDropdowns() {
 		// If no dropdown is open, do nothing
@@ -490,13 +492,13 @@
 		<a class="text-2xl font-bold text-black italic" href="https://interactiongeography.org">IGS</a>
 	</div>
 
-	<div class="flex justify-end flex-1 px-2">
+	<div class="flex items-center justify-end flex-1 px-2">
 		<details class="dropdown" use:clickOutside>
 			<summary class="btn btn-sm ml-4 tooltip tooltip-bottom flex items-center justify-center"> Filter </summary>
 			<ul class="menu dropdown-content rounded-box z-[1] w-52 p-2 shadow bg-base-100">
 				{#each filterToggleOptions as toggle}
 					<li>
-						<button on:click={() => toggleSelection(toggle, filterToggleOptions)} class="w-full text-left flex items-center">
+						<button onclick={() => toggleSelection(toggle, filterToggleOptions)} class="w-full text-left flex items-center">
 							<div class="w-4 h-4 mr-2">
 								{#if $ConfigStore[toggle]}
 									<MdCheck />
@@ -518,7 +520,7 @@
 						max={$ConfigStore.maxStopLength}
 						value={$ConfigStore.stopSliderValue}
 						class="range"
-						on:input={(e) => handleConfigChangeFromInput(e, 'stopSliderValue')}
+						oninput={(e) => handleConfigChangeFromInput(e, 'stopSliderValue')}
 					/>
 				</li>
 			</ul>
@@ -530,7 +532,7 @@
 			<ul class="menu dropdown-content rounded-box z-[1] w-52 p-2 shadow bg-base-100">
 				{#each selectToggleOptions as toggle}
 					<li>
-						<button on:click={() => toggleSelection(toggle, selectToggleOptions)} class="w-full text-left flex items-center">
+						<button onclick={() => toggleSelection(toggle, selectToggleOptions)} class="w-full text-left flex items-center">
 							<div class="w-4 h-4 mr-2">
 								{#if $ConfigStore[toggle]}
 									<MdCheck />
@@ -549,7 +551,7 @@
 			<ul class="menu dropdown-content rounded-box z-[1] w-52 p-2 shadow bg-base-100">
 				{#each conversationToggleOptions as toggle}
 					<li>
-						<button on:click={() => toggleSelection(toggle, conversationToggleOptions)} class="w-full text-left flex items-center">
+						<button onclick={() => toggleSelection(toggle, conversationToggleOptions)} class="w-full text-left flex items-center">
 							<div class="w-4 h-4 mr-2">
 								{#if $ConfigStore[toggle]}
 									<MdCheck />
@@ -571,10 +573,10 @@
 						max="30"
 						value={$ConfigStore.conversationRectWidth}
 						class="range"
-						on:input={(e) => handleConfigChangeFromInput(e, 'conversationRectWidth')}
+						oninput={(e) => handleConfigChangeFromInput(e, 'conversationRectWidth')}
 					/>
 				</li>
-				<input type="text" placeholder="Search conversations..." on:input={(e) => handleWordSearch(e)} class="input input-bordered w-full" />
+				<input type="text" placeholder="Search conversations..." oninput={(e) => handleWordSearch(e)} class="input input-bordered w-full" />
 			</ul>
 		</details>
 
@@ -582,82 +584,59 @@
 		<details class="dropdown" use:clickOutside>
 			<summary class="btn btn-sm ml-4 tooltip tooltip-bottom flex items-center justify-center"> Clear </summary>
 			<ul class="menu dropdown-content rounded-box z-[1] w-52 p-2 shadow bg-base-100">
-				<li><button on:click={clearMovementData}>Movement</button></li>
-				<li><button on:click={clearConversationData}>Conversation</button></li>
-				<li><button on:click={clearCodeData}>Codes</button></li>
-				<li><button on:click={() => p5Instance.videoController.clear()}>Video</button></li>
-				<li><button on:click={clearAllData}>All Data</button></li>
+				<li><button onclick={clearMovementData}>Movement</button></li>
+				<li><button onclick={clearConversationData}>Conversation</button></li>
+				<li><button onclick={clearCodeData}>Codes</button></li>
+				<li><button onclick={() => p5Instance.videoController.clear()}>Video</button></li>
+				<li><button onclick={clearAllData}>All Data</button></li>
 			</ul>
 		</details>
 
-		<div class="flex items-stretch">
+		<div class="flex items-center gap-1">
 			<IconButton
 				id="btn-rotate-left"
 				icon={MdRotateLeft}
 				tooltip={'Rotate Left'}
-				on:click={() => {
+				onclick={() => {
 					p5Instance.floorPlan.setRotateLeft();
 					p5Instance.loop();
 				}}
 			/>
-
 			<IconButton
-				id="btn-rotate-left"
+				id="btn-rotate-right"
 				icon={MdRotateRight}
 				tooltip={'Rotate Right'}
-				on:click={() => {
+				onclick={() => {
 					p5Instance.floorPlan.setRotateRight();
 					p5Instance.loop();
 				}}
 			/>
-
 			<IconButton
 				id="btn-toggle-3d"
 				icon={Md3DRotation}
 				tooltip={'Toggle 2D/3D'}
-				on:click={() => {
+				onclick={() => {
 					p5Instance.handle3D.update();
 				}}
 			/>
-
 			{#if isVideoShowing}
-				<IconButton id="btn-toggle-video" icon={MdVideocam} tooltip={'Show/Hide Video'} on:click={toggleVideo} />
+				<IconButton id="btn-toggle-video" icon={MdVideocam} tooltip={'Show/Hide Video'} onclick={toggleVideo} />
 			{:else}
-				<IconButton id="btn-toggle-video" icon={MdVideocamOff} tooltip={'Show/Hide Video'} on:click={toggleVideo} />
+				<IconButton id="btn-toggle-video" icon={MdVideocamOff} tooltip={'Show/Hide Video'} onclick={toggleVideo} />
 			{/if}
-
-			<IconButton icon={MdCloudDownload} tooltip={'Download Code File'} on:click={() => p5Instance.saveCodeFile()} />
-			<!-- TODO: Need to move this logic into the IconButton component eventually -->
-			<div
-				data-tip="Upload"
-				class="tooltip tooltip-bottom btn capitalize icon max-h-8 max-w-16 bg-[#ffffff] border-[#ffffff] flex items-center justify-center"
-				role="button"
-				tabindex="0"
-				on:click
-				on:keydown
-			>
-				<label for="file-input">
-					<MdCloudUpload />
+			<IconButton icon={MdCloudDownload} tooltip={'Download Code File'} onclick={() => p5Instance.saveCodeFile()} />
+			<div class="tooltip tooltip-bottom" data-tip="Upload">
+				<label for="file-input" class="btn btn-square btn-ghost w-11 h-11 min-h-11 cursor-pointer">
+					<MdCloudUpload class="w-6 h-6" />
 				</label>
 			</div>
-
-			<input
-				class="hidden"
-				id="file-input"
-				multiple
-				accept=".png, .jpg, .jpeg, .csv, .mp4"
-				type="file"
-				bind:files
-				on:change={updateUserLoadedFiles}
-			/>
-
-			<IconButton icon={MdHelpOutline} tooltip={'Help'} on:click={() => ($isModalOpen = !$isModalOpen)} />
-
-			<IconButton icon={MdSettings} tooltip={'Settings'} on:click={() => (showSettings = true)} />
+			<input class="hidden" id="file-input" multiple accept=".png, .jpg, .jpeg, .csv, .mp4" type="file" bind:files onchange={updateUserLoadedFiles} />
+			<IconButton icon={MdHelpOutline} tooltip={'Help'} onclick={() => ($isModalOpen = !$isModalOpen)} />
+			<IconButton icon={MdSettings} tooltip={'Settings'} onclick={() => (showSettings = true)} />
 
 			<div class="relative inline-block text-left">
 				<button
-					on:click={() => (showDataDropDown = !showDataDropDown)}
+					onclick={() => (showDataDropDown = !showDataDropDown)}
 					class="flex justify-between w-full rounded border border-gray-300 p-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring focus:ring-indigo-500"
 				>
 					{selectedDropDownOption || '-- Select an Example --'}
@@ -674,7 +653,7 @@
 								{#each group.items as item}
 									<li>
 										<button
-											on:click={() => {
+											onclick={() => {
 												updateExampleDataDropDown({ target: { value: item.value } });
 												showDataDropDown = false;
 												selectedDropDownOption = item.label;
@@ -701,15 +680,17 @@
 {#if showSettings}
 	<div
 		class="modal modal-open"
-		on:click|self={() => (showSettings = false)}
-		on:keydown={(e) => {
+		onclick={(e) => {
+			if (e.target === e.currentTarget) showSettings = false;
+		}}
+		onkeydown={(e) => {
 			if (e.key === 'Escape') showSettings = false;
 		}}
 	>
 		<div class="modal-box w-11/12 max-w-md">
 			<div class="flex justify-between mb-4">
 				<h3 class="font-bold text-lg">Settings</h3>
-				<button class="btn btn-circle btn-sm" on:click={() => (showSettings = false)}>
+				<button class="btn btn-circle btn-sm" onclick={() => (showSettings = false)}>
 					<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
 					</svg>
@@ -727,7 +708,7 @@
 						max="1"
 						step="0.01"
 						bind:value={currentConfig.animationRate}
-						on:input={(e) => handleConfigChange('animationRate', parseFloat(e.target.value))}
+						oninput={(e) => handleConfigChange('animationRate', parseFloat(e.target.value))}
 						class="range range-primary"
 					/>
 				</div>
@@ -742,7 +723,7 @@
 						max="5"
 						step="0.1"
 						bind:value={currentConfig.samplingInterval}
-						on:input={(e) => handleConfigChange('samplingInterval', parseFloat(e.target.value))}
+						oninput={(e) => handleConfigChange('samplingInterval', parseFloat(e.target.value))}
 						class="range range-primary"
 					/>
 				</div>
@@ -757,7 +738,7 @@
 						max="10000"
 						step="100"
 						bind:value={currentConfig.smallDataThreshold}
-						on:input={(e) => handleConfigChange('smallDataThreshold', parseInt(e.target.value))}
+						oninput={(e) => handleConfigChange('smallDataThreshold', parseInt(e.target.value))}
 						class="range range-primary"
 					/>
 				</div>
@@ -772,7 +753,7 @@
 						max="20"
 						step="1"
 						bind:value={currentConfig.movementStrokeWeight}
-						on:input={(e) => handleConfigChange('movementStrokeWeight', parseInt(e.target.value))}
+						oninput={(e) => handleConfigChange('movementStrokeWeight', parseInt(e.target.value))}
 						class="range range-primary"
 					/>
 				</div>
@@ -787,7 +768,7 @@
 						max="20"
 						step="1"
 						bind:value={currentConfig.stopStrokeWeight}
-						on:input={(e) => handleConfigChange('stopStrokeWeight', parseInt(e.target.value))}
+						oninput={(e) => handleConfigChange('stopStrokeWeight', parseInt(e.target.value))}
 						class="range range-primary"
 					/>
 				</div>
@@ -799,7 +780,7 @@
 						id="inputSeconds"
 						type="text"
 						bind:value={timeline.endTime}
-						on:input={(e) => {
+						oninput={(e) => {
 							let value = parseInt(e.target.value.replace(/\D/g, '')) || 0;
 							TimelineStore.update((timeline) => {
 								timeline.setCurrTime(0);
@@ -816,12 +797,12 @@
 			</div>
 
 			<div class="flex flex-col mt-4">
-				<button class="btn btn-sm ml-4" on:click={() => (showDataPopup = true)}>Data Explorer</button>
+				<button class="btn btn-sm ml-4" onclick={() => (showDataPopup = true)}>Data Explorer</button>
 			</div>
 
 			<div class="modal-action">
-				<button class="btn btn-warning" on:click={resetSettings}> Reset Settings </button>
-				<button class="btn" on:click={() => (showSettings = false)}>Close</button>
+				<button class="btn btn-warning" onclick={resetSettings}> Reset Settings </button>
+				<button class="btn" onclick={() => (showSettings = false)}>Close</button>
 			</div>
 		</div>
 	</div>
@@ -830,8 +811,10 @@
 {#if showDataPopup}
 	<div
 		class="modal modal-open"
-		on:click|self={() => (showDataPopup = false)}
-		on:keydown={(e) => {
+		onclick={(e) => {
+			if (e.target === e.currentTarget) showDataPopup = false;
+		}}
+		onkeydown={(e) => {
 			if (e.key === 'Escape') showDataPopup = false;
 		}}
 	>
@@ -842,7 +825,7 @@
 					<p>Here you will find detailed information on the data that you have uploaded.</p>
 				</div>
 
-				<button class="btn btn-circle btn-sm" on:click={() => (showDataPopup = false)}>
+				<button class="btn btn-circle btn-sm" onclick={() => (showDataPopup = false)}>
 					<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
 					</svg>
@@ -891,7 +874,7 @@
 				</div>
 			</div>
 			<div class="modal-action">
-				<button class="btn" on:click={() => (showDataPopup = false)}>Close</button>
+				<button class="btn" onclick={() => (showDataPopup = false)}>Close</button>
 			</div>
 		</div>
 	</div>
@@ -904,7 +887,7 @@
 	<div
 		class="flex flex-1 flex-row justify-start items-center bg-[#f6f5f3] px-8 overflow-x-auto"
 		style="min-height: inherit; align-self: stretch;"
-		on:wheel={(e) => {
+		onwheel={(e) => {
 			if (e.deltaY !== 0) {
 				e.preventDefault();
 				e.currentTarget.scrollLeft += e.deltaY;
@@ -915,7 +898,7 @@
 			<div class="relative mr-2">
 				<button
 					class="btn"
-					on:click={(event) => {
+					onclick={(event) => {
 						// Stop event propagation to prevent the global click handler from closing the dropdown
 						event.stopPropagation();
 
@@ -937,7 +920,7 @@
 										type="checkbox"
 										class="checkbox"
 										checked={$CodeStore.every((code) => code.enabled)}
-										on:change={() => {
+										onchange={() => {
 											toggleSelectAllCodes();
 											p5Instance?.loop();
 										}}
@@ -950,7 +933,7 @@
 										type="checkbox"
 										class="checkbox"
 										bind:checked={$ConfigStore.isPathColorMode}
-										on:change={() => p5Instance?.loop()}
+										onchange={() => p5Instance?.loop()}
 									/>
 									Color by Codes
 								</div>
@@ -965,14 +948,14 @@
 											type="checkbox"
 											class="checkbox"
 											bind:checked={code.enabled}
-											on:change={() => p5Instance?.loop()}
+											onchange={() => p5Instance?.loop()}
 										/>
 										Enabled
 									</div>
 								</li>
 								<li>
 									<div class="flex items-center">
-										<input type="color" class="color-picker max-w-[24px] max-h-[28px]" bind:value={code.color} on:change={() => p5Instance?.loop()} />
+										<input type="color" class="color-picker max-w-[24px] max-h-[28px]" bind:value={code.color} onchange={() => p5Instance?.loop()} />
 										Color
 									</div>
 								</li>
@@ -992,7 +975,7 @@
 				<button
 					class="btn"
 					style="color: {user.color};"
-					on:click={(event) => {
+					onclick={(event) => {
 						// Stop event propagation to prevent the global click handler from closing the dropdown
 						event.stopPropagation();
 
@@ -1014,7 +997,7 @@
 										type="checkbox"
 										class="checkbox mr-2"
 										bind:checked={user.enabled}
-										on:change={() => p5Instance?.loop()}
+										onchange={() => p5Instance?.loop()}
 									/>
 									<label for="userCheckbox-{user.name}">Movement</label>
 								</div>
@@ -1026,7 +1009,7 @@
 										type="checkbox"
 										class="checkbox mr-2"
 										bind:checked={user.conversation_enabled}
-										on:change={() => p5Instance?.loop()}
+										onchange={() => p5Instance?.loop()}
 									/>
 									<label for="userTalkCheckbox-{user.name}">Talk</label>
 								</div>
@@ -1037,7 +1020,7 @@
 										type="color"
 										class="color-picker max-w-[24px] max-h-[28px] mr-2"
 										bind:value={user.color}
-										on:change={() => p5Instance?.loop()}
+										onchange={() => p5Instance?.loop()}
 									/>
 									<span>Color</span>
 								</div>

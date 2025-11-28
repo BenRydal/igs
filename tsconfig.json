@@ -1,7 +1,7 @@
 {
 	"extends": "./.svelte-kit/tsconfig.json",
 	"include": ["src/**/*", "src/node_modules", "src/lib/papa/papaparse.min.js"],
-  "exclude": ["node_modules/*", "__sapper__/*", "public/*"],
+	"exclude": ["node_modules/*", "__sapper__/*", "public/*"],
 	"compilerOptions": {
 		"allowJs": true,
 		"checkJs": true,

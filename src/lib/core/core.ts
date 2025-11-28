@@ -12,7 +12,12 @@ import CodeStore from '../../stores/codeStore.js';
 import TimelineStore from '../../stores/timelineStore';
 import ConfigStore from '../../stores/configStore.js';
 
-let timeline, maxStopLength, maxTurnLength, stopSliderValue, samplingInterval, smallDataThreshold;
+let timeline: any;
+let maxStopLength: number;
+let maxTurnLength: number;
+let stopSliderValue: number;
+let samplingInterval: number;
+let smallDataThreshold: number;
 
 TimelineStore.subscribe((data) => {
 	timeline = data;

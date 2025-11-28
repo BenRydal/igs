@@ -137,7 +137,8 @@ export class Highlight {
 	 * Returns true if no highlightRects or if data is within bounds of a highlighRect
 	 */
 	overHighlightArray(xPos, yPos, xPosTime) {
-		if (!this.highlightArray.length) return true; // return true if no data
+		if (!this.highlightArray.length)
+			return true; // return true if no data
 		else {
 			for (const highlightRect of this.highlightArray) {
 				if (this.overHighlightRect(highlightRect, xPos, yPos, xPosTime)) return true;

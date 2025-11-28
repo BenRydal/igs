@@ -3,30 +3,30 @@
 	import TimelineStore from '../../stores/timelineStore';
 	import P5Store from '../../stores/p5Store';
 	import ConfigStore, { type ConfigStoreType } from '../../stores/configStore';
-	import MdFastForward from 'svelte-icons/md/MdFastForward.svelte';
-	import MdFastRewind from 'svelte-icons/md/MdFastRewind.svelte';
+	import MdFastForward from '~icons/mdi/fast-forward';
+	import MdFastRewind from '~icons/mdi/rewind';
 	import { TimeUtils } from '../core/time-utils';
 	import type p5 from 'p5';
 
-	let p5Instance: p5 | null = null;
+	let p5Instance = $state<p5 | null>(null);
 
-	P5Store.subscribe((value) => {
-		p5Instance = value;
+	$effect(() => {
+		p5Instance = $P5Store;
 	});
 
-	// Reactive declarations for store values
-	$: timelineLeft = $TimelineStore.getLeftMarker();
-	$: timelineRight = $TimelineStore.getRightMarker();
-	$: timelineCurr = $TimelineStore.getCurrTime();
-	$: startTime = $TimelineStore.getStartTime();
-	$: endTime = $TimelineStore.getEndTime();
-	$: leftX = $TimelineStore.getLeftX();
-	$: rightX = $TimelineStore.getRightX();
-	$: isAnimating = $TimelineStore.getIsAnimating();
+	// Reactive declarations for store values using $derived
+	let timelineLeft = $derived($TimelineStore.getLeftMarker());
+	let timelineRight = $derived($TimelineStore.getRightMarker());
+	let timelineCurr = $derived($TimelineStore.getCurrTime());
+	let startTime = $derived($TimelineStore.getStartTime());
+	let endTime = $derived($TimelineStore.getEndTime());
+	let leftX = $derived($TimelineStore.getLeftX());
+	let rightX = $derived($TimelineStore.getRightX());
+	let isAnimating = $derived($TimelineStore.getIsAnimating());
 
 	// Time format handling
 	type TimeFormat = 'HHMMSS' | 'MMSS' | 'SECONDS' | 'DECIMAL';
-	let currentTimeFormat: TimeFormat = 'HHMMSS';
+	let currentTimeFormat = $state<TimeFormat>('HHMMSS');
 
 	// Format time based on selected format
 	function formatTimeDisplay(seconds: number): string {
@@ -52,37 +52,28 @@
 		currentTimeFormat = formats[nextIndex];
 	}
 
-	// Reactive declarations for formatted times
-	$: formattedLeft = formatTimeDisplay(timelineLeft);
-	$: formattedRight = formatTimeDisplay(timelineRight);
-	$: formattedCurr = formatTimeDisplay(timelineCurr);
+	// Reactive declarations for formatted times using $derived
+	let formattedLeft = $derived(formatTimeDisplay(timelineLeft));
+	let formattedRight = $derived(formatTimeDisplay(timelineRight));
+	let formattedCurr = $derived(formatTimeDisplay(timelineCurr));
 
 	// Hover and drag states
-	let isHoveringPlayhead = false;
-	let isHoveringLeft = false;
-	let isHoveringRight = false;
-	let isDragging = false;
-	let showTimeTooltip = false;
-	let tooltipX = 0;
-	let tooltipTime = '';
+	let isHoveringPlayhead = $state(false);
+	let isHoveringLeft = $state(false);
+	let isHoveringRight = $state(false);
+	let isDragging = $state(false);
+	let showTimeTooltip = $state(false);
+	let tooltipX = $state(0);
+	let tooltipTime = $state('');
 
-	// Update formatted times when time format changes
-	$: {
-		if (currentTimeFormat) {
-			formattedLeft = formatTimeDisplay(timelineLeft);
-			formattedRight = formatTimeDisplay(timelineRight);
-			formattedCurr = formatTimeDisplay(timelineCurr);
-		}
-	}
-
-	let sliderContainer: HTMLDivElement;
-	let loaded = false;
+	let sliderContainer = $state<HTMLDivElement>();
+	let loaded = $state(false);
 	let debounceTimeout: ReturnType<typeof setTimeout>;
 
 	// Subscribe to ConfigStore to access animationRate
-	let config: ConfigStoreType;
-	ConfigStore.subscribe((value) => {
-		config = value;
+	let config = $state<ConfigStoreType>($ConfigStore);
+	$effect(() => {
+		config = $ConfigStore;
 	});
 
 	const toggleAnimation = () => {
@@ -275,7 +266,7 @@
 {#if loaded}
 	<div class="flex flex-col w-11/12 py-1">
 		<!-- This slider-container div is used to get measurements of the timeline -->
-		<div class="slider-container" bind:this={sliderContainer} on:mouseleave={handleMouseLeave}>
+		<div class="slider-container" bind:this={sliderContainer} onmouseleave={handleMouseLeave}>
 			<tc-range-slider
 				min={startTime}
 				max={endTime}
@@ -286,26 +277,26 @@
 				slider-width="100%"
 				generate-labels="false"
 				range-dragging="true"
-				pointer1-width="8px"
-				pointer1-height="20px"
-				pointer1-radius="2px"
-				pointer2-width="8px"
-				pointer2-height="36px"
-				pointer2-radius="1px"
-				pointer3-width="8px"
-				pointer3-height="20px"
-				pointer3-radius="2px"
-				slider-height="6px"
-				slider-radius="3px"
+				pointer1-width="6px"
+				pointer1-height="16px"
+				pointer1-radius="3px"
+				pointer2-width="4px"
+				pointer2-height="24px"
+				pointer2-radius="2px"
+				pointer3-width="6px"
+				pointer3-height="16px"
+				pointer3-radius="3px"
+				slider-height="4px"
+				slider-radius="2px"
 				slider-bg="#e2e8f0"
 				slider-bg-hover="#e2e8f0"
-				slider-bg-fill="#64748b"
-				on:change={handleChange}
+				slider-bg-fill="#94a3b8"
+				onchange={handleChange}
 				class="timeline-slider"
 				style="--value1-percent: {((timelineLeft - startTime) / (endTime - startTime)) * 100}%; --value3-percent: {((timelineRight - startTime) /
 					(endTime - startTime)) *
 					100}%;"
-			/>
+			></tc-range-slider>
 			{#if showTimeTooltip}
 				<div class="time-tooltip" style="left: {tooltipX}px;">
 					{tooltipTime}
@@ -315,14 +306,14 @@
 
 		<div class="flex w-full mt-1 items-center space-x-4 pb-1">
 			<!-- Slow Down Button -->
-			<button on:click={slowDown} class="speed-btn" aria-label="Slow Down" style="background: white;">
+			<button onclick={slowDown} class="speed-btn" aria-label="Slow Down" style="background: white;">
 				<div class="w-6 h-6" style="display: flex; align-items: center; justify-content: center;">
 					<MdFastRewind />
 				</div>
 			</button>
 
 			<!-- Play/Pause Button -->
-			<button on:click={toggleAnimation} class="play-pause-btn" aria-label={isAnimating ? 'Pause' : 'Play'} style="background: white;">
+			<button onclick={toggleAnimation} class="play-pause-btn" aria-label={isAnimating ? 'Pause' : 'Play'} style="background: white;">
 				{#if isAnimating}
 					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
 						<path
@@ -343,7 +334,7 @@
 			</button>
 
 			<!-- Speed Up Button -->
-			<button on:click={speedUp} class="speed-btn" aria-label="Speed Up" style="background: white;">
+			<button onclick={speedUp} class="speed-btn" aria-label="Speed Up" style="background: white;">
 				<div class="w-6 h-6" style="display: flex; align-items: center; justify-content: center;">
 					<MdFastForward />
 				</div>
@@ -353,7 +344,7 @@
 			<div class="flex flex-col items-start">
 				<button
 					class="time-display hover:bg-gray-100 rounded px-2 transition-colors h-6 flex items-center"
-					on:click={cycleTimeFormat}
+					onclick={cycleTimeFormat}
 					title="Click to change time format"
 				>
 					<span class="font-mono text-sm">Range: {formattedLeft} – {formattedRight} | Current: {formattedCurr}</span>
@@ -421,7 +412,7 @@
 	/* Enhanced timeline styles */
 	.slider-container {
 		position: relative;
-		padding: 8px 0 4px 0;
+		padding: 12px 0 8px 0;
 	}
 
 	/* Custom timeline slider overrides */
@@ -458,14 +449,14 @@
 	:global(.timeline-slider tc-range-slider-pointer:nth-child(2))::before {
 		content: '';
 		position: absolute;
-		top: -10px;
+		top: -8px;
 		left: 50%;
 		transform: translateX(-50%);
 		width: 0;
 		height: 0;
-		border-left: 8px solid transparent;
-		border-right: 8px solid transparent;
-		border-bottom: 10px solid #ef4444;
+		border-left: 6px solid transparent;
+		border-right: 6px solid transparent;
+		border-bottom: 8px solid #ef4444;
 	}
 
 	/* Visual line through playhead */
@@ -501,11 +492,11 @@
 		position: absolute;
 		top: 50%;
 		transform: translateY(-50%);
-		height: 6px;
-		background-color: rgba(0, 0, 0, 0.15);
+		height: 4px;
+		background-color: rgba(0, 0, 0, 0.1);
 		pointer-events: none;
 		z-index: 1;
-		border-radius: 3px;
+		border-radius: 2px;
 	}
 
 	:global(.timeline-slider)::before {
