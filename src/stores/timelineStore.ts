@@ -1,5 +1,7 @@
-import { writable } from 'svelte/store';
-import { Timeline } from '../models/timeline';
+import { writable } from 'svelte/store'
+import { Timeline } from '../models/timeline'
 
-const TimelineStore = writable(new Timeline());
-export default TimelineStore;
+export type TimelineStoreState = Timeline
+
+const TimelineStore = writable<TimelineStoreState>(new Timeline())
+export default TimelineStore

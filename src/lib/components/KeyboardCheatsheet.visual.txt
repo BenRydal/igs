@@ -1,0 +1,92 @@
+╔═══════════════════════════════════════════════════════════════════════════════════╗
+║                          Keyboard Shortcuts Cheatsheet                            ║
+║                                                                                   ║
+║   ┌─────────────────────────────────────────────────────────────────────┐  [X]   ║
+║   │  Keyboard Shortcuts                                                 │         ║
+║   ├─────────────────────────────────────────────────────────────────────┤         ║
+║   │                                                                     │         ║
+║   │  PLAYBACK                    VIEW                                  │         ║
+║   │  ─────────                   ────                                  │         ║
+║   │  Play/Pause       [Space]    Toggle 2D/3D      [D]                 │         ║
+║   │  Seek Forward     [→]        Rotate Right      [R]                 │         ║
+║   │  Seek Backward    [←]        Toggle Video      [V]                 │         ║
+║   │  Jump to Start    [Home]                                           │         ║
+║   │  Jump to End      [End]                                            │         ║
+║   │                                                                     │         ║
+║   │  SELECTION                   DATA                                  │         ║
+║   │  ─────────                   ────                                  │         ║
+║   │  Circle Mode      [1]        Toggle Movement   [M]                 │         ║
+║   │  Slice Mode       [2]        Toggle Stops      [S]                 │         ║
+║   │  Highlight Mode   [3]        Toggle Talk       [A]                 │         ║
+║   │  Clear Selection  [Esc]      Color by Code     [C]                 │         ║
+║   │                                                                     │         ║
+║   │  NAVIGATION                  MODAL                                 │         ║
+║   │  ──────────                  ─────                                 │         ║
+║   │  Next Marker      [N]        Settings          [⌘,]                │         ║
+║   │  Prev Marker      [P]        Show Shortcuts    [?]                 │         ║
+║   │                                                                     │         ║
+║   ├─────────────────────────────────────────────────────────────────────┤         ║
+║   │              Press [?] anytime to show this dialog                 │         ║
+║   ├─────────────────────────────────────────────────────────────────────┤         ║
+║   │                                               [Close]               │         ║
+║   └─────────────────────────────────────────────────────────────────────┘         ║
+║                                                                                   ║
+╚═══════════════════════════════════════════════════════════════════════════════════╝
+
+FEATURES:
+─────────
+✓ Opens on '?' key press
+✓ Closes on Escape or backdrop click
+✓ Shows shortcuts grouped by category
+✓ Platform-aware key formatting
+  • Mac: ⌘K, ⌥F, ⇧A, →
+  • Windows: Ctrl+K, Alt+F, Shift+A, →
+✓ Two-column responsive layout
+  • Desktop: 2 columns
+  • Mobile: 1 column
+✓ Full keyboard navigation
+✓ Focus trap
+✓ ARIA accessible
+
+CATEGORIES:
+───────────
+• PLAYBACK   - Play/pause, seeking, timeline control
+• VIEW       - 2D/3D toggle, rotation, zoom
+• SELECTION  - Selection modes, highlight, clear
+• NAVIGATION - Timeline navigation, marker controls
+• DATA       - Data filters, code toggles
+• MODAL      - Open settings, help, modals
+
+KEY COMBINATIONS:
+─────────────────
+Single key:      [D], [R], [V]
+Arrows:          [←], [→], [↑], [↓]
+Special:         [Space], [Esc], [Home], [End]
+With modifiers:  [⌘K], [⌘⇧K], [Ctrl+K], [Ctrl+Shift+K]
+
+USAGE:
+──────
+<script lang="ts">
+  import { activeModal, closeModal } from '$stores/modalStore'
+  import KeyboardCheatsheet from '$lib/components/KeyboardCheatsheet.svelte'
+
+  let currentModal = $state($activeModal)
+
+  $effect(() => {
+    currentModal = $activeModal
+  })
+</script>
+
+<KeyboardCheatsheet
+  isOpen={currentModal?.id === 'shortcuts'}
+  onClose={() => closeModal('shortcuts')}
+/>
+
+INTEGRATION:
+────────────
+1. Register '?' shortcut to open modal
+2. Add component to page/layout
+3. Register app shortcuts in keyboard registry
+4. Press '?' to test
+
+See: KEYBOARD_CHEATSHEET_INTEGRATION.md for complete guide

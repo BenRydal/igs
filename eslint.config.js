@@ -44,6 +44,6 @@ export default [
     },
   },
   {
-    ignores: ['build/', '.svelte-kit/', 'dist/', 'node_modules/', '.yarn/'],
+    ignores: ['build/', '.svelte-kit/', 'dist/', 'node_modules/', '.yarn/', 'static/lib/'],
   },
 ]

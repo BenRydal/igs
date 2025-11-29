@@ -1,6 +1,8 @@
-import { writable } from 'svelte/store';
-import type p5 from 'p5';
+import { writable } from 'svelte/store'
+import type p5 from 'p5'
 
-const P5Store = writable<p5 | null>(null);
+export type P5StoreState = p5 | null
 
-export default P5Store;
+const P5Store = writable<P5StoreState>(null)
+
+export default P5Store

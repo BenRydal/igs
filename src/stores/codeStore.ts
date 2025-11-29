@@ -1,11 +1,13 @@
-import { writable } from 'svelte/store';
+import { writable } from 'svelte/store'
 
-interface CodeEntry {
-	enabled: boolean;
-	code: string;
-	color: string;
+export interface CodeEntry {
+  enabled: boolean
+  code: string
+  color: string
 }
 
-const CodeStore = writable<CodeEntry[]>([]);
+export type CodeStoreState = CodeEntry[]
 
-export default CodeStore;
+const CodeStore = writable<CodeStoreState>([])
+
+export default CodeStore
