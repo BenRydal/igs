@@ -39,6 +39,15 @@
 		"unplugin-icons": "^22.5.0",
 		"vite": "^6.0.0"
 	},
+	"resolutions": {
+		"glob": "^10.5.0",
+		"js-yaml": "^4.1.1",
+		"esbuild": "^0.25.0",
+		"cookie": "^0.7.0",
+		"braces": "^3.0.3",
+		"cross-spawn": "^7.0.5",
+		"micromatch": "^4.0.8"
+	},
 	"dependencies": {
 		"@floating-ui/dom": "^1.7.4",
 		"@types/luxon": "^3.7.1",
