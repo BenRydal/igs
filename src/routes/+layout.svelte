@@ -6,6 +6,7 @@
   import KeyboardCheatsheet from '$lib/components/KeyboardCheatsheet.svelte'
   import { registerAllShortcuts, attachKeyboardHandler } from '$lib/keyboard'
   import { registerUndoRedoShortcuts } from '$lib/history'
+  import { setupModalListeners } from '../stores/modalStore'
 
   // State for modals
   let showCheatsheet = $state(false)
@@ -19,6 +20,9 @@
     // Register undo/redo shortcuts (Cmd+Z, Cmd+Shift+Z)
     registerUndoRedoShortcuts()
 
+    // Set up modal listeners (escape key handling, etc.)
+    const cleanupModalListeners = setupModalListeners()
+
     // Listen for custom events dispatched by shortcuts
     const handleCheatsheet = () => (showCheatsheet = true)
     const handleCommandPalette = () => (showCommandPalette = true)
@@ -29,6 +33,7 @@
     return () => {
       window.removeEventListener('igs:open-cheatsheet', handleCheatsheet)
       window.removeEventListener('igs:open-command-palette', handleCommandPalette)
+      cleanupModalListeners()
     }
   })
 </script>

@@ -2,11 +2,21 @@ import type { KeyboardShortcut } from './types'
 import { registry } from './registry'
 import ConfigStore from '../../stores/configStore'
 import TimelineStore from '../../stores/timelineStore'
+import {
+  toggleMovement,
+  toggleStops,
+  toggleAlign,
+  toggleColorMode,
+  toggleCircle,
+  toggleSlice,
+  toggleHighlight,
+  setAnimationRate,
+} from '$lib/history/config-actions'
 
 // ==================== HELPER FUNCTIONS ====================
 
 /**
- * Create a config toggle shortcut
+ * Create a config toggle shortcut with history support
  */
 function createConfigToggle(
   id: string,
@@ -16,6 +26,14 @@ function createConfigToggle(
   description: string,
   category: KeyboardShortcut['category'] = 'data'
 ): KeyboardShortcut {
+  // Map properties to their history-tracked toggle functions
+  const toggleMap: Record<string, () => void> = {
+    movementToggle: toggleMovement,
+    stopsToggle: toggleStops,
+    alignToggle: toggleAlign,
+    isPathColorMode: toggleColorMode,
+  }
+
   return {
     id,
     key,
@@ -23,16 +41,21 @@ function createConfigToggle(
     description,
     category,
     action: () => {
-      ConfigStore.update((config) => ({
-        ...config,
-        [property]: !config[property],
-      }))
+      const toggleFn = toggleMap[property]
+      if (toggleFn) {
+        toggleFn()
+      } else {
+        // Fallback for unmapped properties (shouldn't happen)
+        // All boolean config properties should be mapped above
+        console.warn(`No history-tracked toggle for property: ${property}`)
+      }
     },
   }
 }
 
 /**
  * Create a selection mode shortcut that enables one toggle and disables others
+ * Uses history-tracked toggles for undo/redo support
  */
 function createSelectionMode(
   id: string,
@@ -48,12 +71,31 @@ function createSelectionMode(
     description,
     category: 'selection',
     action: () => {
-      ConfigStore.update((config) => ({
-        ...config,
-        circleToggle: mode === 'circle',
-        sliceToggle: mode === 'slice',
-        highlightToggle: mode === 'highlight',
-      }))
+      // Get current state
+      const config = ConfigStore
+      let currentConfig: any
+      const unsubscribe = config.subscribe((c) => (currentConfig = c))
+      unsubscribe()
+
+      // Use history-tracked toggles to ensure proper undo/redo
+      if (mode === 'clear') {
+        // Turn off all selection modes
+        if (currentConfig.circleToggle) toggleCircle()
+        if (currentConfig.sliceToggle) toggleSlice()
+        if (currentConfig.highlightToggle) toggleHighlight()
+      } else if (mode === 'circle') {
+        if (!currentConfig.circleToggle) toggleCircle()
+        if (currentConfig.sliceToggle) toggleSlice()
+        if (currentConfig.highlightToggle) toggleHighlight()
+      } else if (mode === 'slice') {
+        if (currentConfig.circleToggle) toggleCircle()
+        if (!currentConfig.sliceToggle) toggleSlice()
+        if (currentConfig.highlightToggle) toggleHighlight()
+      } else if (mode === 'highlight') {
+        if (currentConfig.circleToggle) toggleCircle()
+        if (currentConfig.sliceToggle) toggleSlice()
+        if (!currentConfig.highlightToggle) toggleHighlight()
+      }
     },
   }
 }
@@ -104,12 +146,12 @@ function createCrossPlatformShortcuts(
 /** Speed increment for animation rate */
 const SPEED_INCREMENT = 0.01
 
-/** Shared action for increasing speed */
+/** Shared action for increasing speed (with undo support) */
 const increaseSpeed = () => {
-  ConfigStore.update((config) => ({
-    ...config,
-    animationRate: Math.min(1.0, config.animationRate + SPEED_INCREMENT),
-  }))
+  let currentRate = 0.05
+  const unsubscribe = ConfigStore.subscribe((config) => (currentRate = config.animationRate))
+  unsubscribe()
+  setAnimationRate(Math.min(1.0, currentRate + SPEED_INCREMENT))
 }
 
 // ==================== SHORTCUTS ====================
@@ -222,10 +264,10 @@ export const playbackShortcuts: KeyboardShortcut[] = [
     description: 'Decrease animation playback speed',
     category: 'playback',
     action: () => {
-      ConfigStore.update((config) => ({
-        ...config,
-        animationRate: Math.max(0.01, config.animationRate - SPEED_INCREMENT),
-      }))
+      let currentRate = 0.05
+      const unsubscribe = ConfigStore.subscribe((config) => (currentRate = config.animationRate))
+      unsubscribe()
+      setAnimationRate(Math.max(0.01, currentRate - SPEED_INCREMENT))
     },
   },
   {

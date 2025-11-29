@@ -6,6 +6,7 @@
   import MdFastForward from '~icons/mdi/fast-forward'
   import MdFastRewind from '~icons/mdi/rewind'
   import { TimeUtils } from '../core/time-utils'
+  import { setAnimationRate } from '$lib/history/config-actions'
   import type p5 from 'p5'
 
   let p5Instance = $state<p5 | null>(null)
@@ -186,21 +187,17 @@
     }
   }
 
-  // Speed control functions
+  // Speed control functions (with undo support)
   const speedUp = () => {
-    ConfigStore.update((currentConfig) => {
-      const newRate = Math.min(Math.max((currentConfig.animationRate || 0.5) + 0.1, 0.01), 1) // Cap at 1 (20x normal speed)
-      return { ...currentConfig, animationRate: newRate }
-    })
+    const newRate = Math.min(Math.max((config.animationRate || 0.5) + 0.1, 0.01), 1) // Cap at 1 (20x normal speed)
+    setAnimationRate(newRate)
 
     if (p5Instance) p5Instance.loop() // Trigger redraw if necessary
   }
 
   const slowDown = () => {
-    ConfigStore.update((currentConfig) => {
-      const newRate = Math.min(Math.max((currentConfig.animationRate || 0.5) - 0.1, 0.01), 1) // Floor at 0.01 (0.5x normal speed)
-      return { ...currentConfig, animationRate: newRate }
-    })
+    const newRate = Math.min(Math.max((config.animationRate || 0.5) - 0.1, 0.01), 1) // Floor at 0.01 (0.5x normal speed)
+    setAnimationRate(newRate)
 
     if (p5Instance) p5Instance.loop() // Trigger redraw if necessary
   }

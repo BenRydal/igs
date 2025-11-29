@@ -8,6 +8,9 @@
   import UserStore from '../../stores/userStore'
   import P5Store from '../../stores/p5Store'
   import { Z_INDEX } from '$lib/styles/z-index'
+  import { toggleColorMode } from '$lib/history/config-actions'
+  import { toggleUserEnabled, toggleUserConversationEnabled, setUserColor } from '$lib/history/user-actions'
+  import { toggleAllCodes, setCodeEnabled, setCodeColor } from '$lib/history/data-actions'
   import type p5 from 'p5'
 
   // Reactive p5 instance
@@ -30,75 +33,64 @@
   let allCodesEnabled = $derived($CodeStore.every((code) => code.enabled))
 
   /**
-   * Toggle enable state for all codes
+   * Toggle enable state for all codes (with undo support)
    */
   function toggleSelectAllCodes() {
-    const allEnabled = $CodeStore.every((code) => code.enabled)
-    CodeStore.update((codes) => codes.map((code) => ({ ...code, enabled: !allEnabled })))
+    toggleAllCodes()
     p5Instance?.loop()
   }
 
   /**
-   * Handle code enabled toggle
+   * Handle code enabled toggle (with undo support)
    */
   function handleCodeEnabledChange(
     codeEntry: { code: string; enabled: boolean; color: string },
     checked: boolean
   ) {
-    CodeStore.update((codes) =>
-      codes.map((c) => (c.code === codeEntry.code ? { ...c, enabled: checked } : c))
-    )
+    setCodeEnabled(codeEntry.code, checked)
     p5Instance?.loop()
   }
 
   /**
-   * Handle code color change
+   * Handle code color change (with undo support)
    */
   function handleCodeColorChange(
     codeEntry: { code: string; enabled: boolean; color: string },
     newColor: string
   ) {
-    CodeStore.update((codes) =>
-      codes.map((c) => (c.code === codeEntry.code ? { ...c, color: newColor } : c))
-    )
+    setCodeColor(codeEntry.code, newColor)
     p5Instance?.loop()
   }
 
   /**
-   * Handle "Color by Codes" toggle
+   * Handle "Color by Codes" toggle (with undo support)
    */
-  function handleColorByCodesChange(checked: boolean) {
-    ConfigStore.update((config) => ({ ...config, isPathColorMode: checked }))
+  function handleColorByCodesChange(_checked: boolean) {
+    toggleColorMode()
     p5Instance?.loop()
   }
 
   /**
-   * Handle user movement toggle
+   * Handle user movement toggle (with undo support)
    */
-  function handleUserMovementChange(userName: string, checked: boolean) {
-    UserStore.update((users) =>
-      users.map((u) => (u.name === userName ? { ...u, enabled: checked } : u))
-    )
+  function handleUserMovementChange(userName: string, _checked: boolean) {
+    toggleUserEnabled(userName)
     p5Instance?.loop()
   }
 
   /**
-   * Handle user talk toggle
+   * Handle user talk toggle (with undo support)
    */
-  function handleUserTalkChange(userName: string, checked: boolean) {
-    UserStore.update((users) =>
-      users.map((u) => (u.name === userName ? { ...u, conversation_enabled: checked } : u))
-    )
+  function handleUserTalkChange(userName: string, _checked: boolean) {
+    toggleUserConversationEnabled(userName)
     p5Instance?.loop()
   }
 
   /**
-   * Handle user color change
+   * Handle user color change (with undo support)
    */
   function handleUserColorChange(userName: string, newColor: string) {
-    UserStore.update((users) =>
-      users.map((u) => (u.name === userName ? { ...u, color: newColor } : u))
-    )
+    setUserColor(userName, newColor)
     p5Instance?.loop()
   }
 

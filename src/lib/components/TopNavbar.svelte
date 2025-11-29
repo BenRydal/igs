@@ -14,6 +14,17 @@
   import IconButton from '$lib/components/IconButton.svelte'
   import { clickOutside } from '$lib/actions/clickOutside'
   import ConfigStore from '../../stores/configStore'
+  import {
+    toggleMovement,
+    toggleStops,
+    toggleCircle,
+    toggleSlice,
+    toggleHighlight,
+    toggleAlign,
+    setStopSliderValue,
+    setConversationRectWidth,
+    setWordToSearch,
+  } from '$lib/history/config-actions'
 
   interface Props {
     onOpenSettings: () => void
@@ -107,53 +118,61 @@
     return str.charAt(0).toUpperCase() + str.slice(1)
   }
 
-  // Toggle handlers
-  function handleFilterToggle(toggle: string, checked: boolean) {
-    ConfigStore.update((store) => ({
-      ...store,
-      [toggle]: checked,
-    }))
+  // Toggle handlers (with undo support)
+  function handleFilterToggle(toggle: string, _checked: boolean) {
+    if (toggle === 'movementToggle') {
+      toggleMovement()
+    } else if (toggle === 'stopsToggle') {
+      toggleStops()
+    }
   }
 
-  function handleSelectToggle(toggle: string, checked: boolean) {
-    ConfigStore.update((store) => {
-      const updatedStore = { ...store }
-      // Turn off all other select toggles (mutually exclusive)
-      selectToggleOptions.forEach((key) => {
-        updatedStore[key] = key === toggle ? checked : false
-      })
-      return updatedStore
-    })
+  function handleSelectToggle(toggle: string, _checked: boolean) {
+    // For mutually exclusive toggles, we toggle the clicked one
+    // The history system will record this as an undoable action
+    if (toggle === 'circleToggle') {
+      toggleCircle()
+      // Turn off the others if this one is being enabled
+      if (!currentConfig.circleToggle) {
+        if (currentConfig.sliceToggle) toggleSlice()
+        if (currentConfig.highlightToggle) toggleHighlight()
+      }
+    } else if (toggle === 'sliceToggle') {
+      toggleSlice()
+      if (!currentConfig.sliceToggle) {
+        if (currentConfig.circleToggle) toggleCircle()
+        if (currentConfig.highlightToggle) toggleHighlight()
+      }
+    } else if (toggle === 'highlightToggle') {
+      toggleHighlight()
+      if (!currentConfig.highlightToggle) {
+        if (currentConfig.circleToggle) toggleCircle()
+        if (currentConfig.sliceToggle) toggleSlice()
+      }
+    }
   }
 
-  function handleConversationToggle(toggle: string, checked: boolean) {
-    ConfigStore.update((store) => ({
-      ...store,
-      [toggle]: checked,
-    }))
+  function handleConversationToggle(toggle: string, _checked: boolean) {
+    if (toggle === 'alignToggle') {
+      toggleAlign()
+    }
   }
 
-  // Range slider handlers
+  // Range slider handlers (with undo support)
   function handleStopLengthChange(value: number) {
-    ConfigStore.update((store) => ({
-      ...store,
-      stopSliderValue: value,
-    }))
+    setStopSliderValue(value)
   }
 
   function handleRectWidthChange(value: number) {
-    ConfigStore.update((store) => ({
-      ...store,
-      conversationRectWidth: value,
-    }))
+    setConversationRectWidth(value)
   }
 
-  // Word search handler
+  // Word search handler (with undo support)
   function handleWordSearchInput(event: Event) {
     const target = event.target as HTMLInputElement
     const newWord = target.value.trim()
     wordSearchValue = newWord
-    ConfigStore.update((config) => ({ ...config, wordToSearch: newWord }))
+    setWordToSearch(newWord)
   }
 
   // Example dropdown handlers

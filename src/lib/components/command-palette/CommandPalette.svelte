@@ -71,7 +71,8 @@
     if (searchQuery.trim()) {
       return searchResults.map((r) => r.command)
     }
-    return allCommands
+    // When not searching, include recent commands first, then all commands
+    return [...recentCommands, ...allCommands]
   })
 
   // Reset state when modal opens/closes
@@ -293,25 +294,7 @@
           class="max-h-96 overflow-y-auto"
           role="listbox"
         >
-          {#if !searchQuery.trim() && recentCommands.length > 0}
-            <!-- Recent commands section -->
-            <div class="py-2">
-              <div
-                class="px-4 py-2 text-xs font-semibold text-base-content/60 uppercase tracking-wide"
-              >
-                Recent
-              </div>
-              {#each recentCommands as command, index}
-                <CommandButton
-                  {command}
-                  {index}
-                  {selectedIndex}
-                  onExecute={executeCommand}
-                  onSelect={(i) => (selectedIndex = i)}
-                />
-              {/each}
-            </div>
-          {:else if searchQuery.trim() && groupedCommands.length === 0}
+          {#if searchQuery.trim() && groupedCommands.length === 0}
             <!-- No results -->
             <div class="px-4 py-8 text-center text-base-content/60">
               <svg
@@ -330,8 +313,29 @@
               <p>No commands found for "{searchQuery}"</p>
             </div>
           {:else}
+            <!-- Recent commands section (only when not searching) -->
+            {#if !searchQuery.trim() && recentCommands.length > 0}
+              <div class="py-2">
+                <div
+                  class="px-4 py-2 text-xs font-semibold text-base-content/60 uppercase tracking-wide"
+                >
+                  Recent
+                </div>
+                {#each recentCommands as command, index}
+                  <CommandButton
+                    {command}
+                    {index}
+                    {selectedIndex}
+                    onExecute={executeCommand}
+                    onSelect={(i) => (selectedIndex = i)}
+                  />
+                {/each}
+              </div>
+            {/if}
+
             <!-- Commands grouped by category -->
             {#each groupedCommands as group, groupIndex}
+              {@const recentOffset = !searchQuery.trim() ? recentCommands.length : 0}
               <div class="py-2">
                 <div
                   class="px-4 py-2 text-xs font-semibold text-base-content/60 uppercase tracking-wide"
@@ -340,6 +344,7 @@
                 </div>
                 {#each group.commands as command, cmdIndex}
                   {@const globalIndex =
+                    recentOffset +
                     groupedCommands
                       .slice(0, groupIndex)
                       .reduce((acc, g) => acc + g.commands.length, 0) + cmdIndex}

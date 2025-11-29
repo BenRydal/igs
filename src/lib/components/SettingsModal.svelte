@@ -1,11 +1,16 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte'
   import RangeSlider from './RangeSlider.svelte'
-  import { updateConfig } from '$lib/utils/config'
   import { Z_INDEX } from '$lib/styles/z-index'
-  import ConfigStore, { initialConfig } from '$stores/configStore'
+  import ConfigStore from '$stores/configStore'
   import TimelineStore from '$stores/timelineStore'
   import P5Store from '$stores/p5Store'
+  import {
+    resetConfig,
+    setAnimationRate,
+    setSamplingInterval,
+    setConfigNumber,
+  } from '$lib/history/config-actions'
 
   interface Props {
     isOpen: boolean
@@ -94,9 +99,9 @@
     }
   }
 
-  // Reset all settings to initial config
+  // Reset all settings to initial config (with undo support)
   function resetSettings() {
-    ConfigStore.update(() => ({ ...initialConfig }))
+    resetConfig()
 
     if (p5Instance) {
       p5Instance.loop()
@@ -192,7 +197,7 @@
           min={0.01}
           max={1}
           step={0.01}
-          onChange={(value) => updateConfig('animationRate', value)}
+          onChange={(value) => setAnimationRate(value)}
         />
 
         <!-- Sampling Interval -->
@@ -204,7 +209,7 @@
           max={5}
           step={0.1}
           unit="sec"
-          onChange={(value) => updateConfig('samplingInterval', value)}
+          onChange={(value) => setSamplingInterval(value)}
         />
 
         <!-- Small Data Threshold -->
@@ -215,7 +220,7 @@
           min={500}
           max={10000}
           step={100}
-          onChange={(value) => updateConfig('smallDataThreshold', value)}
+          onChange={(value) => setConfigNumber('smallDataThreshold', value, 'small data threshold')}
         />
 
         <!-- Movement Line Weight -->
@@ -226,7 +231,7 @@
           min={1}
           max={20}
           step={1}
-          onChange={(value) => updateConfig('movementStrokeWeight', value)}
+          onChange={(value) => setConfigNumber('movementStrokeWeight', value, 'movement stroke')}
         />
 
         <!-- Stop Line Weight -->
@@ -237,7 +242,7 @@
           min={1}
           max={20}
           step={1}
-          onChange={(value) => updateConfig('stopStrokeWeight', value)}
+          onChange={(value) => setConfigNumber('stopStrokeWeight', value, 'stop stroke')}
         />
 
         <!-- End Time Input -->

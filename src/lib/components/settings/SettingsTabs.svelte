@@ -1,7 +1,6 @@
 <script lang="ts">
   import { tick } from 'svelte'
   import RangeSlider from '../RangeSlider.svelte'
-  import { updateConfig } from '$lib/utils/config'
   import ConfigStore, { initialConfig } from '$stores/configStore'
   import TimelineStore from '$stores/timelineStore'
   import P5Store from '$stores/p5Store'
@@ -9,6 +8,16 @@
   import MdPalette from '~icons/mdi/palette'
   import MdDatabase from '~icons/mdi/database'
   import MdCog from '~icons/mdi/cog'
+  import {
+    resetConfig,
+    setAnimationRate,
+    setSamplingInterval,
+    setStopSliderValue,
+    setMovementStrokeWeight,
+    setStopStrokeWeight,
+    setConversationRectWidth,
+    setConfigNumber,
+  } from '$lib/history/config-actions'
 
   interface Props {
     activeTab?: 'playback' | 'appearance' | 'data' | 'advanced'
@@ -88,24 +97,11 @@
     tabButton?.focus()
   }
 
-  // Reset current tab to defaults
+  // Reset current tab to defaults (with undo support)
   function resetCurrentTab() {
-    const settings = settingGroups[activeTab]
-
-    ConfigStore.update((config) => {
-      const updated = { ...config }
-      settings.forEach((setting) => {
-        if (setting === 'endTime') {
-          // Handle timeline separately
-          return
-        }
-        if (setting in initialConfig) {
-          updated[setting as keyof typeof config] =
-            initialConfig[setting as keyof typeof initialConfig]
-        }
-      })
-      return updated
-    })
+    // For now, use resetConfig which handles undo/redo
+    // In a future iteration, we could add per-tab reset with proper history tracking
+    resetConfig()
 
     // Reset endTime if in playback tab
     if (activeTab === 'playback') {
@@ -126,9 +122,9 @@
     onResetTab?.(activeTab)
   }
 
-  // Reset all settings
+  // Reset all settings (with undo support)
   function resetAll() {
-    ConfigStore.update(() => ({ ...initialConfig }))
+    resetConfig()
 
     TimelineStore.update((tl) => {
       tl.setCurrTime(0)
@@ -212,7 +208,7 @@
             min={0.01}
             max={1}
             step={0.01}
-            onChange={(value) => updateConfig('animationRate', value)}
+            onChange={(value) => setAnimationRate(value)}
           />
 
           <div class="flex flex-col">
@@ -259,7 +255,7 @@
             min={1}
             max={20}
             step={1}
-            onChange={(value) => updateConfig('movementStrokeWeight', value)}
+            onChange={(value) => setMovementStrokeWeight(value)}
           />
 
           <RangeSlider
@@ -269,7 +265,7 @@
             min={1}
             max={20}
             step={1}
-            onChange={(value) => updateConfig('stopStrokeWeight', value)}
+            onChange={(value) => setStopStrokeWeight(value)}
           />
 
           <RangeSlider
@@ -279,7 +275,7 @@
             min={1}
             max={20}
             step={1}
-            onChange={(value) => updateConfig('conversationRectWidth', value)}
+            onChange={(value) => setConversationRectWidth(value)}
           />
         </div>
       </div>
@@ -306,7 +302,7 @@
             max={5}
             step={0.1}
             unit="sec"
-            onChange={(value) => updateConfig('samplingInterval', value)}
+            onChange={(value) => setSamplingInterval(value)}
           />
 
           <RangeSlider
@@ -317,7 +313,7 @@
             max={10}
             step={0.1}
             unit="sec"
-            onChange={(value) => updateConfig('stopSliderValue', value)}
+            onChange={(value) => setStopSliderValue(value)}
           />
         </div>
       </div>
@@ -348,7 +344,7 @@
             min={500}
             max={10000}
             step={100}
-            onChange={(value) => updateConfig('smallDataThreshold', value)}
+            onChange={(value) => setConfigNumber('smallDataThreshold', value, 'small data threshold')}
           />
         </div>
       </div>
