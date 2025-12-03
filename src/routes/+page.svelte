@@ -626,8 +626,8 @@
 			{/if}
 			<IconButton icon={MdCloudDownload} tooltip={'Download Code File'} onclick={() => p5Instance.saveCodeFile()} />
 			<div class="tooltip tooltip-bottom" data-tip="Upload">
-				<label for="file-input" class="btn btn-square btn-ghost w-11 h-11 min-h-11 cursor-pointer">
-					<MdCloudUpload class="w-6 h-6" />
+				<label for="file-input" class="btn btn-square btn-ghost icon-btn cursor-pointer">
+					<MdCloudUpload />
 				</label>
 			</div>
 			<input class="hidden" id="file-input" multiple accept=".png, .jpg, .jpeg, .csv, .mp4" type="file" bind:files onchange={updateUserLoadedFiles} />
@@ -1049,5 +1049,17 @@
 		border: none;
 		border-radius: 50%;
 		cursor: pointer;
+	}
+
+	.icon-btn {
+		min-width: 44px;
+		min-height: 44px;
+		width: 44px;
+		height: 44px;
+	}
+
+	.icon-btn :global(svg) {
+		width: 24px;
+		height: 24px;
 	}
 </style>

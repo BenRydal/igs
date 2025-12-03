@@ -68,7 +68,9 @@
 
 	let sliderContainer = $state<HTMLDivElement>();
 	let loaded = $state(false);
-	let debounceTimeout: ReturnType<typeof setTimeout>;
+
+	let sliderElement: Element | null = null;
+	let handleMouseUp: (() => void) | null = null;
 
 	// Subscribe to ConfigStore to access animationRate
 	let config = $state<ConfigStoreType>($ConfigStore);
@@ -134,18 +136,9 @@
 	 */
 	const handleChange = (event: SliderChangeEvent): void => {
 		const { value1, value2, value3 } = event.detail;
+
 		if (value1 === timelineLeft && value2 === timelineCurr && value3 === timelineRight) {
 			return;
-		}
-
-		if (!isAnimating && p5Instance) {
-			clearTimeout(debounceTimeout);
-			debounceTimeout = setTimeout(() => {
-				// Check if fillSelectedData exists on p5Instance before calling it
-				if (p5Instance && typeof (p5Instance as any).fillSelectedData === 'function') {
-					(p5Instance as any).fillSelectedData();
-				}
-			}, 100);
 		}
 
 		TimelineStore.update((timeline) => {
@@ -204,7 +197,11 @@
 			// Dynamically import the slider only on the client side
 			import('toolcool-range-slider').then(async () => {
 				loaded = true;
+				await tick();
+
 				const slider = document.querySelector('tc-range-slider');
+				sliderElement = slider;
+
 				if (slider) {
 					slider.addEventListener('change', (event: Event) => {
 						handleChange(event as SliderChangeEvent);
@@ -241,10 +238,11 @@
 						slider.addEventListener('mousedown', () => {
 							isDragging = true;
 						});
-						window.addEventListener('mouseup', () => {
+						handleMouseUp = () => {
 							isDragging = false;
 							showTimeTooltip = false;
-						});
+						};
+						window.addEventListener('mouseup', handleMouseUp);
 					}
 				}
 				await tick();
@@ -260,6 +258,9 @@
 		if (typeof window === 'undefined') return;
 		window.removeEventListener('resize', updateXPositions);
 		window.removeEventListener('mousemove', handleMouseMove);
+		if (handleMouseUp) {
+			window.removeEventListener('mouseup', handleMouseUp);
+		}
 	});
 </script>
 
@@ -291,7 +292,6 @@
 				slider-bg="#e2e8f0"
 				slider-bg-hover="#e2e8f0"
 				slider-bg-fill="#94a3b8"
-				onchange={handleChange}
 				class="timeline-slider"
 				style="--value1-percent: {((timelineLeft - startTime) / (endTime - startTime)) * 100}%; --value3-percent: {((timelineRight - startTime) /
 					(endTime - startTime)) *
