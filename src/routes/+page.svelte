@@ -157,6 +157,11 @@
 	let showDataPopup = $state(false);
 	let showSettings = $state(false);
 	let showDataDropDown = $state(false);
+
+	let filterDropdownRef = $state<HTMLDetailsElement | null>(null);
+	let selectDropdownRef = $state<HTMLDetailsElement | null>(null);
+	let talkDropdownRef = $state<HTMLDetailsElement | null>(null);
+	let clearDropdownRef = $state<HTMLDetailsElement | null>(null);
 	let currentConfig = $state<ConfigStoreType>($ConfigStore);
 
 	let files = $state<any>([]);
@@ -270,22 +275,6 @@
 		p5Instance.loop();
 	}
 
-	function clickOutside(node) {
-		const handleClick = (event) => {
-			if (!node.contains(event.target)) {
-				node.removeAttribute('open');
-			}
-		};
-
-		document.addEventListener('click', handleClick, true);
-
-		return {
-			destroy() {
-				document.removeEventListener('click', handleClick, true);
-			}
-		};
-	}
-
 	function updateUserLoadedFiles(event) {
 		core.handleUserLoadedFiles(event);
 		p5Instance.loop();
@@ -391,11 +380,16 @@
 	// Track which dropdown is currently open
 	let openDropdownId = $state<string | null>(null);
 
-	function closeAllDropdowns() {
-		// If no dropdown is open, do nothing
+	function closeDaisyUIDropdowns() {
+		filterDropdownRef?.removeAttribute('open');
+		selectDropdownRef?.removeAttribute('open');
+		talkDropdownRef?.removeAttribute('open');
+		clearDropdownRef?.removeAttribute('open');
+	}
+
+	function closeFloatingDropdowns() {
 		if (!openDropdownId) return;
 
-		// Get the currently open dropdown
 		const dropdown = document.getElementById(openDropdownId);
 		if (dropdown) {
 			dropdown.classList.add('hidden');
@@ -413,6 +407,13 @@
 		openDropdownId = null;
 	}
 
+	// Close ALL dropdowns (DaisyUI, data dropdown, floating)
+	function closeAllDropdowns() {
+		closeDaisyUIDropdowns();
+		showDataDropDown = false;
+		closeFloatingDropdowns();
+	}
+
 	function toggleDropdown(id: string, buttonId: string) {
 		const dropdown = document.getElementById(id);
 		const button = document.getElementById(buttonId);
@@ -421,8 +422,10 @@
 
 		const isCurrentlyOpen = openDropdownId === id;
 
-		// Close all dropdowns first
-		closeAllDropdowns();
+		// Close all dropdowns first (DaisyUI, data dropdown, and floating)
+		closeDaisyUIDropdowns();
+		showDataDropDown = false;
+		closeFloatingDropdowns();
 
 		// If this dropdown wasn't already open, open it
 		if (!isCurrentlyOpen) {
@@ -451,24 +454,27 @@
 
 	// Add event handlers for dropdowns
 	onMount(() => {
-		// Add global click handler to close dropdowns when clicking outside
 		document.addEventListener('click', (event) => {
 			const target = event.target as HTMLElement;
-			const isButton =
+
+			const isInsideFloatingDropdown =
+				document.getElementById('dropdown-codes')?.contains(target) ||
 				document.getElementById('btn-codes')?.contains(target) ||
 				Array.from($UserStore).some((user) => {
-					const button = document.getElementById(`btn-${user.name}`);
-					return button && button.contains(target);
-				});
-
-			const isInsideDropdown =
-				document.getElementById('dropdown-codes')?.contains(target) ||
-				Array.from($UserStore).some((user) => {
 					const dropdown = document.getElementById(`dropdown-${user.name}`);
-					return dropdown && dropdown.contains(target);
+					const button = document.getElementById(`btn-${user.name}`);
+					return (dropdown && dropdown.contains(target)) || (button && button.contains(target));
 				});
 
-			if (!isButton && !isInsideDropdown) {
+			const isInsideDaisyUIDropdown =
+				filterDropdownRef?.contains(target) ||
+				selectDropdownRef?.contains(target) ||
+				talkDropdownRef?.contains(target) ||
+				clearDropdownRef?.contains(target);
+
+			const isInsideDataDropdown = document.getElementById('data-dropdown-container')?.contains(target) ?? false;
+
+			if (!isInsideFloatingDropdown && !isInsideDaisyUIDropdown && !isInsideDataDropdown) {
 				closeAllDropdowns();
 			}
 		});
@@ -493,7 +499,19 @@
 	</div>
 
 	<div class="flex items-center justify-end flex-1 px-2">
-		<details class="dropdown" use:clickOutside>
+		<details
+			class="dropdown"
+			bind:this={filterDropdownRef}
+			ontoggle={(e) => {
+				if (e.currentTarget.open) {
+					selectDropdownRef?.removeAttribute('open');
+					talkDropdownRef?.removeAttribute('open');
+					clearDropdownRef?.removeAttribute('open');
+					showDataDropDown = false;
+					closeFloatingDropdowns();
+				}
+			}}
+		>
 			<summary class="btn btn-sm ml-4 tooltip tooltip-bottom flex items-center justify-center"> Filter </summary>
 			<ul class="menu dropdown-content rounded-box z-[1] w-52 p-2 shadow bg-base-100">
 				{#each filterToggleOptions as toggle}
@@ -527,7 +545,19 @@
 		</details>
 
 		<!-- Select Dropdown -->
-		<details class="dropdown" use:clickOutside>
+		<details
+			class="dropdown"
+			bind:this={selectDropdownRef}
+			ontoggle={(e) => {
+				if (e.currentTarget.open) {
+					filterDropdownRef?.removeAttribute('open');
+					talkDropdownRef?.removeAttribute('open');
+					clearDropdownRef?.removeAttribute('open');
+					showDataDropDown = false;
+					closeFloatingDropdowns();
+				}
+			}}
+		>
 			<summary class="btn btn-sm ml-4 tooltip tooltip-bottom flex items-center justify-center"> Select </summary>
 			<ul class="menu dropdown-content rounded-box z-[1] w-52 p-2 shadow bg-base-100">
 				{#each selectToggleOptions as toggle}
@@ -546,7 +576,19 @@
 		</details>
 
 		<!-- Talk Dropdown -->
-		<details class="dropdown" use:clickOutside>
+		<details
+			class="dropdown"
+			bind:this={talkDropdownRef}
+			ontoggle={(e) => {
+				if (e.currentTarget.open) {
+					filterDropdownRef?.removeAttribute('open');
+					selectDropdownRef?.removeAttribute('open');
+					clearDropdownRef?.removeAttribute('open');
+					showDataDropDown = false;
+					closeFloatingDropdowns();
+				}
+			}}
+		>
 			<summary class="btn btn-sm ml-4 tooltip tooltip-bottom flex items-center justify-center"> Talk </summary>
 			<ul class="menu dropdown-content rounded-box z-[1] w-52 p-2 shadow bg-base-100">
 				{#each conversationToggleOptions as toggle}
@@ -581,7 +623,19 @@
 		</details>
 
 		<!-- Clear Data Dropdown -->
-		<details class="dropdown" use:clickOutside>
+		<details
+			class="dropdown"
+			bind:this={clearDropdownRef}
+			ontoggle={(e) => {
+				if (e.currentTarget.open) {
+					filterDropdownRef?.removeAttribute('open');
+					selectDropdownRef?.removeAttribute('open');
+					talkDropdownRef?.removeAttribute('open');
+					showDataDropDown = false;
+					closeFloatingDropdowns();
+				}
+			}}
+		>
 			<summary class="btn btn-sm ml-4 tooltip tooltip-bottom flex items-center justify-center"> Clear </summary>
 			<ul class="menu dropdown-content rounded-box z-[1] w-52 p-2 shadow bg-base-100">
 				<li><button onclick={clearMovementData}>Movement</button></li>
@@ -634,9 +688,16 @@
 			<IconButton icon={MdHelpOutline} tooltip={'Help'} onclick={() => ($isModalOpen = !$isModalOpen)} />
 			<IconButton icon={MdSettings} tooltip={'Settings'} onclick={() => (showSettings = true)} />
 
-			<div class="relative inline-block text-left">
+			<div class="relative inline-block text-left" id="data-dropdown-container">
 				<button
-					onclick={() => (showDataDropDown = !showDataDropDown)}
+					onclick={() => {
+						if (!showDataDropDown) {
+							// Close other dropdowns when opening this one
+							closeDaisyUIDropdowns();
+							closeFloatingDropdowns();
+						}
+						showDataDropDown = !showDataDropDown;
+					}}
 					class="flex justify-between w-full rounded border border-gray-300 p-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring focus:ring-indigo-500"
 				>
 					{selectedDropDownOption || '-- Select an Example --'}
