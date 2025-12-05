@@ -108,20 +108,20 @@ export class Timeline {
 		this.isAnimating = isAnimating;
 	}
 
-	mapPixelTimeToTotalTime(value) {
+	mapPixelTimeToTotalTime(value: number): number {
 		return this.map(value, this.getLeftX(), this.getRightX(), 0, this.getEndTime());
 	}
 
-	mapPixelTimeToSelectTime(value) {
+	mapPixelTimeToSelectTime(value: number): number {
 		return this.map(value, this.getLeftX(), this.getRightX(), this.getTimelineLeftMarkerXPos(), this.getTimelineRightMarkerXPos());
 	}
 
-	mapSelectTimeToPixelTime2D(value) {
+	mapSelectTimeToPixelTime2D(value: number): number {
 		return this.map(value, this.getTimelineLeftMarkerXPos(), this.getTimelineRightMarkerXPos(), this.getLeftX(), this.getRightX());
 	}
 
 	// maps value from time in seconds from data to time in pixels on timeline
-	mapTotalTimeToPixelTime(value) {
+	mapTotalTimeToPixelTime(value: number): number {
 		return this.map(value, 0, this.getEndTime(), this.getLeftX(), this.getRightX());
 	}
 
@@ -132,16 +132,16 @@ export class Timeline {
 		return this.mapTotalTimeToPixelTime(this.getRightMarker());
 	}
 
-	overAxis(pixelValue) {
+	overAxis(pixelValue: number): boolean {
 		return pixelValue >= this.getTimelineLeftMarkerXPos() && pixelValue <= this.getTimelineRightMarkerXPos();
 	}
 
-	overTimeline(pixelValue) {
+	overTimeline(pixelValue: number): boolean {
 		return pixelValue >= this.leftX && pixelValue <= this.rightX;
 	}
 
 	// Implementation of Helper function from P5 library to map a value from one range to another
-	map(value, start1, stop1, start2, stop2, withinBounds = false) {
+	map(value: number, start1: number, stop1: number, start2: number, stop2: number, withinBounds = false): number {
 		// Perform the mapping
 		let newval = ((value - start1) / (stop1 - start1)) * (stop2 - start2) + start2;
 		if (withinBounds) {
@@ -151,7 +151,7 @@ export class Timeline {
 	}
 
 	// Helper function to constrain the value within a specific range
-	constrain(n, low, high) {
+	constrain(n: number, low: number, high: number): number {
 		return Math.max(Math.min(n, high), low);
 	}
 }

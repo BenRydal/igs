@@ -17,6 +17,7 @@ This package doesn't seem to be present in your lockfile; run "yarn install" to 
 ### Solution
 
 For MacOS, we need to remove
+
 ```
 rm -rf ~/.yarn/berry/metadata/npm
 ```

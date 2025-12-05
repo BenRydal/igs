@@ -46,7 +46,7 @@ export class SketchGUI {
 		this.sk.stroke(0, 30);
 		this.sk.strokeWeight(3);
 		this.sk.line(this.sk.mouseX + 1, -10, this.sk.mouseX + 1, this.displayBottom + 10);
-		
+
 		// Draw the main line
 		this.setSlicerStroke();
 		this.sk.line(this.sk.mouseX, -10, this.sk.mouseX, this.displayBottom + 10);

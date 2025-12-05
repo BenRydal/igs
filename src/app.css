@@ -1,3 +1,53 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+@plugin "daisyui" {
+	themes: light --default;
+}
+@plugin "daisyui/theme" {
+	name: "light";
+	default: true;
+	color-scheme: light;
+	--color-base-100: #fbfcfd;
+	--color-base-200: #f1f5f9;
+	--color-base-300: #e2e8f0;
+	--color-base-content: #1f2c33;
+	--color-primary: #40d173;
+	--color-primary-content: #ffffff;
+	--color-secondary: #6136c4;
+	--color-secondary-content: #ffffff;
+	--color-accent: #ef9475;
+	--color-accent-content: #ffffff;
+	--color-neutral: #1f2c33;
+	--color-neutral-content: #ffffff;
+	--color-info: #9ad4e4;
+	--color-info-content: #1f2c33;
+	--color-success: #29db7f;
+	--color-success-content: #1f2c33;
+	--color-warning: #f9d42f;
+	--color-warning-content: #1f2c33;
+	--color-error: #eb245f;
+	--color-error-content: #ffffff;
+}
+
+/* Consistent icon sizing in buttons */
+.btn svg {
+	width: 1.25rem;
+	height: 1.25rem;
+}
+
+.btn-sm svg {
+	width: 1.125rem;
+	height: 1.125rem;
+}
+
+/* Navbar button spacing */
+.navbar .btn + .btn,
+.navbar .tooltip + .tooltip,
+.navbar .tooltip + .btn,
+.navbar .btn + .tooltip {
+	margin-left: 0.25rem;
+}
+
+/* Dropdown menu consistent styling */
+.dropdown .menu {
+	min-width: 12rem;
+}

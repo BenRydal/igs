@@ -1,3 +1,4 @@
+import { get } from 'svelte/store';
 import P5Store from '../../stores/p5Store';
 import UserStore from '../../stores/userStore';
 import TimelineStore from '../../stores/timelineStore';
@@ -68,10 +69,12 @@ export const igsSketch = (p5: any) => {
 
 		if (p5.handle3D.getIs3DModeOrTransitioning()) p5.pop();
 		p5.gui.update2D(); // draw all other canvas GUI elements in 2D mode
-		if (timeline.getIsAnimating()) p5.updateAnimation();
+
+		const drawTimeline = get(TimelineStore);
+		if (drawTimeline.getIsAnimating()) p5.updateAnimation();
 		// Determine whether to re-run draw loop depending on user adjustable modes
 		// Might not be running because of not being able to sense if the data is being tracked and such.
-		if (timeline.getIsAnimating() || p5.videoController.isLoadedAndIsPlaying() || p5.handle3D.getIsTransitioning()) {
+		if (drawTimeline.getIsAnimating() || p5.videoController.isLoadedAndIsPlaying() || p5.handle3D.getIsTransitioning()) {
 			p5.loop();
 		} else p5.noLoop();
 	};
@@ -171,7 +174,8 @@ export const igsSketch = (p5: any) => {
 	};
 
 	p5.updateAnimation = () => {
-		if (timeline.getCurrTime() < timeline.getEndTime()) p5.continueAnimation();
+		const currentTimeline = get(TimelineStore);
+		if (currentTimeline.getCurrTime() < currentTimeline.getEndTime()) p5.continueAnimation();
 		else {
 			// Ensure we're exactly at the end time when animation completes
 			TimelineStore.update((timeline) => {
@@ -188,8 +192,8 @@ export const igsSketch = (p5: any) => {
 		if (p5.videoController.isLoadedAndIsPlaying()) {
 			timeToSet = p5.videoController.getVideoPlayerCurTime();
 		} else {
-			// Original frame-based increment
-			timeToSet = timeline.getCurrTime() + animationRate;
+			const currentTimeline = get(TimelineStore);
+			timeToSet = currentTimeline.getCurrTime() + animationRate;
 		}
 		TimelineStore.update((timeline) => {
 			timeline.setCurrTime(timeToSet);

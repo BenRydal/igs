@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { DataPoint } from '../../models/dataPoint';
 
-	export let dataPoints: DataPoint[];
+	let { dataPoints }: { dataPoints: DataPoint[] } = $props();
 </script>
 
 <div class="overflow-x-auto mt-2">

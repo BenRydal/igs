@@ -7,26 +7,38 @@ export class CoreUtils {
 		this.headersMultiCodes = ['code', 'start', 'end']; // MUST MATCH singleCodeHeaders with one extra column 'code' of type string
 	}
 
+	/**
+	 * @param {any} results
+	 */
 	testMovement(results) {
 		return this.testPapaParseResults(results, this.headersMovement, this.movementRowForType);
 	}
 
+	/**
+	 * @param {any} results
+	 */
 	testConversation(results) {
 		return this.testPapaParseResults(results, this.headersConversation, this.conversationRowForType);
 	}
 
+	/**
+	 * @param {any} results
+	 */
 	testSingleCode(results) {
 		return this.testPapaParseResults(results, this.headersSingleCodes, this.codeRowForType);
 	}
 
+	/**
+	 * @param {any} results
+	 */
 	testMulticode(results) {
 		return this.testPapaParseResults(results, this.headersMultiCodes, this.multiCodeRowForType);
 	}
 
 	/**
-	 * @param  {Papaparse Results Array} results
-	 * @param  {Array} headers
-	 * @param  {Function} callbackTypeTest
+	 * @param {any} results
+	 * @param {string[]} headers
+	 * @param {Function} callbackTypeTest
 	 * Note: must bind this to callbackTypeTest to set correct "this" context
 	 */
 	testPapaParseResults(results, headers, callbackTypeTest) {
@@ -38,6 +50,10 @@ export class CoreUtils {
 	}
 
 	// NOTE: fieldNames from parsed file are converted to lowercase on Processing with PapaParse transformHeaders method
+	/**
+	 * @param {string[]} fieldNamesLowerCase
+	 * @param {string[]} headers
+	 */
 	includesAllHeaders(fieldNamesLowerCase, headers) {
 		for (const header of headers) {
 			if (!fieldNamesLowerCase.includes(header)) return false;
@@ -45,6 +61,10 @@ export class CoreUtils {
 		return true;
 	}
 
+	/**
+	 * @param {any[]} resultsDataArray
+	 * @param {Function} callbackTypeTest
+	 */
 	hasOneCleanRow(resultsDataArray, callbackTypeTest) {
 		for (const curRow of resultsDataArray) {
 			if (callbackTypeTest(curRow)) return true;
@@ -52,6 +72,9 @@ export class CoreUtils {
 		return false;
 	}
 
+	/**
+	 * @param {any} curRow
+	 */
 	movementRowForType(curRow) {
 		return (
 			typeof curRow[this.headersMovement[0]] === 'number' &&
@@ -61,6 +84,9 @@ export class CoreUtils {
 	}
 
 	// NOTE: for talk turns/3rd column, allow boolean, number or string values. These are cast as Strings later in program
+	/**
+	 * @param {any} curRow
+	 */
 	conversationRowForType(curRow) {
 		return (
 			typeof curRow[this.headersConversation[0]] === 'number' &&
@@ -69,14 +95,23 @@ export class CoreUtils {
 		);
 	}
 
+	/**
+	 * @param {any} value
+	 */
 	isStringNumberOrBoolean(value) {
 		return typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean';
 	}
 
+	/**
+	 * @param {any} curRow
+	 */
 	codeRowForType(curRow) {
 		return typeof curRow[this.headersSingleCodes[0]] === 'number' && typeof curRow[this.headersSingleCodes[1]] === 'number';
 	}
 
+	/**
+	 * @param {any} curRow
+	 */
 	multiCodeRowForType(curRow) {
 		return (
 			typeof curRow[this.headersMultiCodes[0]] === 'string' &&
@@ -87,7 +122,7 @@ export class CoreUtils {
 
 	/**
 	 * Used to compare and add new data to core data lists from CSV file names and data
-	 * @param  {String} s
+	 * @param {string} string
 	 */
 	cleanFileName(string) {
 		return string
