@@ -93,6 +93,33 @@ export class Core {
     else toastStore.error('Error loading file. Please make sure your file is an accepted format') // this should not be possible due to HTML5 accept for file inputs, but in case
   }
 
+  /**
+   * Async version of testFileTypeForProcessing that waits for CSV files to complete
+   * Used by import wizard to ensure files are processed in correct order
+   *
+   * @param file - File object to validate and process
+   * @returns Promise that resolves when file processing is complete
+   */
+  async testFileTypeForProcessingAsync(file: File): Promise<void> {
+    const fileName = file.name.toLowerCase()
+    if (fileName.endsWith('.csv') || file.type === 'text/csv') {
+      await this.loadCSVData(file)
+    } else if (
+      fileName.endsWith('.png') ||
+      fileName.endsWith('.jpg') ||
+      fileName.endsWith('.jpeg') ||
+      file.type === 'image/png' ||
+      file.type === 'image/jpg' ||
+      file.type === 'image/jpeg'
+    ) {
+      this.loadFloorplanImage(URL.createObjectURL(file))
+    } else if (fileName.endsWith('.mp4') || file.type === 'video/mp4') {
+      this.prepVideoFromFile(URL.createObjectURL(file))
+    } else {
+      toastStore.error('Error loading file. Please make sure your file is an accepted format')
+    }
+  }
+
   async loadLocalExampleDataFile(folder: string, fileName: string) {
     try {
       const response = await fetch(`${folder}${fileName}`)
@@ -160,24 +187,28 @@ export class Core {
    * Converts headers to lowercase and trims whitespace for consistency
    *
    * @param file - CSV File object to parse
+   * @returns Promise that resolves when parsing and processing is complete
    * @example
    * ```typescript
    * const csvFile = new File(['time,x,y\n0,100,200'], 'movement.csv', { type: 'text/csv' });
    * await core.loadCSVData(csvFile);
    * ```
    */
-  loadCSVData = async (file: File): Promise<void> => {
-    Papa.parse(file, {
-      dynamicTyping: true,
-      skipEmptyLines: 'greedy',
-      header: true,
-      transformHeader: (h) => {
-        return h.trim().toLowerCase()
-      },
-      complete: (results: PapaParseResult<CsvRow>, parsedFile: File) => {
-        this.processResultsData(results, this.coreUtils.cleanFileName(parsedFile.name))
-        this.sketch.loop()
-      },
+  loadCSVData = (file: File): Promise<void> => {
+    return new Promise((resolve) => {
+      Papa.parse(file, {
+        dynamicTyping: true,
+        skipEmptyLines: 'greedy',
+        header: true,
+        transformHeader: (h) => {
+          return h.trim().toLowerCase()
+        },
+        complete: (results: PapaParseResult<CsvRow>, parsedFile: File) => {
+          this.processResultsData(results, this.coreUtils.cleanFileName(parsedFile.name))
+          this.sketch.loop()
+          resolve()
+        },
+      })
     })
   }
 
