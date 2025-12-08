@@ -19,6 +19,8 @@ export interface ConfigStoreState {
   conversationRectWidth: number
   movementStrokeWeight: number
   stopStrokeWeight: number
+  selectorSize: number // Circle selector size
+  slicerSize: number // Slice selector width
 }
 
 // Legacy type alias for backwards compatibility
@@ -43,6 +45,8 @@ export const initialConfig: ConfigStoreState = {
   conversationRectWidth: 5,
   movementStrokeWeight: 1,
   stopStrokeWeight: 9,
+  selectorSize: 100,
+  slicerSize: 25,
 }
 
 const ConfigStore = writable<ConfigStoreState>(initialConfig)

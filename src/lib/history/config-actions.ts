@@ -137,3 +137,9 @@ export const setStopStrokeWeight = (value: number) =>
 // String value helpers
 export const setWordToSearch = (value: string) =>
   setConfigString('wordToSearch', value, 'search word')
+
+// Selector size helpers
+export const setSelectorSize = (value: number) =>
+  setConfigNumber('selectorSize', value, 'circle size')
+export const setSlicerSize = (value: number) =>
+  setConfigNumber('slicerSize', value, 'slicer width')

@@ -17,7 +17,7 @@
     circle: {
       icon: MdCircleOutline,
       label: 'Circle Mode',
-      description: 'Click to select points within a circle',
+      description: 'Hover to highlight points within a circle',
       shortcut: '1',
       color: 'text-primary',
       bgColor: 'bg-primary/10',
@@ -26,7 +26,7 @@
     slice: {
       icon: MdChartPie,
       label: 'Slice Mode',
-      description: 'Click to select points within a pie slice',
+      description: 'Hover to highlight points within a pie slice',
       shortcut: '2',
       color: 'text-secondary',
       bgColor: 'bg-secondary/10',
@@ -35,7 +35,7 @@
     highlight: {
       icon: MdFormatColorHighlight,
       label: 'Highlight Mode',
-      description: 'Click to highlight individual points',
+      description: 'Hover to highlight individual points',
       shortcut: '3',
       color: 'text-accent',
       bgColor: 'bg-accent/10',

@@ -25,6 +25,8 @@
     setStopSliderValue,
     setConversationRectWidth,
     setWordToSearch,
+    setSelectorSize,
+    setSlicerSize,
   } from '$lib/history/config-actions'
 
   interface Props {
@@ -163,6 +165,14 @@
     setConversationRectWidth(value)
   }
 
+  function handleSelectorSizeChange(value: number) {
+    setSelectorSize(value)
+  }
+
+  function handleSlicerSizeChange(value: number) {
+    setSlicerSize(value)
+  }
+
   // Word search handler (with undo support)
   function handleWordSearchInput(event: Event) {
     const target = event.target as HTMLInputElement
@@ -230,6 +240,35 @@
             onChange={(checked) => handleSelectToggle(toggle, checked)}
           />
         {/each}
+        <li class="divider my-1"></li>
+        <li class="px-4 py-2">
+          <label class="block text-sm font-medium mb-1">
+            Circle Size: {currentConfig.selectorSize}px
+          </label>
+          <input
+            type="range"
+            min="20"
+            max="300"
+            step="10"
+            bind:value={currentConfig.selectorSize}
+            oninput={(e) => handleSelectorSizeChange(Number((e.target as HTMLInputElement).value))}
+            class="range range-sm w-full"
+          />
+        </li>
+        <li class="px-4 py-2">
+          <label class="block text-sm font-medium mb-1">
+            Slicer Width: {currentConfig.slicerSize}px
+          </label>
+          <input
+            type="range"
+            min="5"
+            max="100"
+            step="5"
+            bind:value={currentConfig.slicerSize}
+            oninput={(e) => handleSlicerSizeChange(Number((e.target as HTMLInputElement).value))}
+            class="range range-sm w-full"
+          />
+        </li>
       </ul>
     </FloatingDropdown>
 
@@ -246,12 +285,12 @@
         <li class="px-4 py-2">
           <RangeSlider
             id="rect-width-slider"
-            label="Rect width"
+            label="Rect Width"
             bind:value={currentConfig.conversationRectWidth}
             min={1}
             max={30}
             step={1}
-            unit="pixels"
+            unit="px"
             showValue={true}
             onChange={handleRectWidthChange}
           />
@@ -262,7 +301,7 @@
             placeholder="Search conversations..."
             value={wordSearchValue}
             oninput={handleWordSearchInput}
-            class="input input-bordered w-full"
+            class="input input-bordered input-sm w-full"
           />
         </li>
       </ul>
@@ -272,28 +311,30 @@
     <FloatingDropdown id="clear-dropdown" buttonText="Clear" buttonClass="btn btn-sm ml-4">
       <ul>
         <li>
-          <button onclick={onClearMovement} class="w-full text-left px-4 py-2 hover:bg-gray-100"
+          <button onclick={onClearMovement} class="w-full text-left px-4 py-2 hover:bg-base-200"
             >Movement</button
           >
         </li>
         <li>
-          <button onclick={onClearConversation} class="w-full text-left px-4 py-2 hover:bg-gray-100"
+          <button onclick={onClearConversation} class="w-full text-left px-4 py-2 hover:bg-base-200"
             >Conversation</button
           >
         </li>
         <li>
-          <button onclick={onClearCodes} class="w-full text-left px-4 py-2 hover:bg-gray-100"
+          <button onclick={onClearCodes} class="w-full text-left px-4 py-2 hover:bg-base-200"
             >Codes</button
           >
         </li>
         <li>
-          <button onclick={onClearVideo} class="w-full text-left px-4 py-2 hover:bg-gray-100"
+          <button onclick={onClearVideo} class="w-full text-left px-4 py-2 hover:bg-base-200"
             >Video</button
           >
         </li>
+        <li class="divider my-1"></li>
         <li>
-          <button onclick={onClearAll} class="w-full text-left px-4 py-2 hover:bg-gray-100"
-            >All Data</button
+          <button
+            onclick={onClearAll}
+            class="w-full text-left px-4 py-2 hover:bg-base-200 text-error">All Data</button
           >
         </li>
       </ul>

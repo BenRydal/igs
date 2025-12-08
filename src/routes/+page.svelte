@@ -40,6 +40,7 @@
   import TimelineStore from '../stores/timelineStore'
   import { initialConfig } from '../stores/configStore'
   import { computePosition, flip, shift, offset, autoUpdate } from '@floating-ui/dom'
+  import { setSelectorSize, setSlicerSize } from '$lib/history/config-actions'
 
   // Define ToggleKey type to fix TypeScript errors
   type ToggleKey = string
@@ -752,6 +753,34 @@
             </button>
           </li>
         {/each}
+        <li class="px-4 py-2">
+          <label class="block text-sm font-medium mb-1">
+            Circle Size: {currentConfig.selectorSize}px
+          </label>
+          <input
+            type="range"
+            min="20"
+            max="300"
+            step="10"
+            bind:value={currentConfig.selectorSize}
+            oninput={(e) => setSelectorSize(parseFloat(e.target.value))}
+            class="range range-sm w-full"
+          />
+        </li>
+        <li class="px-4 py-2">
+          <label class="block text-sm font-medium mb-1">
+            Slicer Width: {currentConfig.slicerSize}px
+          </label>
+          <input
+            type="range"
+            min="5"
+            max="100"
+            step="5"
+            bind:value={currentConfig.slicerSize}
+            oninput={(e) => setSlicerSize(parseFloat(e.target.value))}
+            class="range range-sm w-full"
+          />
+        </li>
       </ul>
     </details>
 
@@ -931,7 +960,7 @@
   </div>
 </div>
 
-<div class="h-10">
+<div class="h-10" class:cursor-crosshair={currentConfig.highlightToggle}>
   <P5 {sketch} />
 </div>
 
