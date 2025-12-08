@@ -36,9 +36,6 @@
 // Export main wizard component
 export { default as DataImportWizard } from './DataImportWizard.svelte'
 
-// Export progress indicator component
-export { default as WizardSteps } from './WizardSteps.svelte'
-
 // Export types
 export type {
   DataType,
