@@ -180,6 +180,7 @@
   let core: Core
   let isVideoShowing = $state(false)
   let isVideoPlaying = $state(false)
+  let is3DMode = $state(true)
   let timeline = $state($TimelineStore)
 
   $effect(() => {
@@ -612,6 +613,7 @@
     const handleToggle3D = () => {
       if (p5Instance?.handle3D) {
         p5Instance.handle3D.update()
+        is3DMode = p5Instance.handle3D.getIs3DMode()
       }
     }
 
@@ -732,57 +734,59 @@
       </ul>
     </details>
 
-    <!-- Select Dropdown -->
-    <details class="dropdown" use:clickOutside>
-      <summary class="btn btn-sm ml-4 tooltip tooltip-bottom flex items-center justify-center">
-        Select
-      </summary>
-      <ul class="menu dropdown-content rounded-box z-[1] w-52 p-2 shadow bg-base-100">
-        {#each selectToggleOptions as toggle}
-          <li>
-            <button
-              onclick={() => toggleSelection(toggle, selectToggleOptions)}
-              class="w-full text-left flex items-center"
-            >
-              <div class="w-4 h-4 mr-2">
-                {#if $ConfigStore[toggle]}
-                  <MdCheck />
-                {/if}
-              </div>
-              {capitalizeFirstLetter(toggle.replace('Toggle', ''))}
-            </button>
+    <!-- Select Dropdown (only shown in 2D mode) -->
+    {#if !is3DMode}
+      <details class="dropdown" use:clickOutside>
+        <summary class="btn btn-sm ml-4 tooltip tooltip-bottom flex items-center justify-center">
+          Select
+        </summary>
+        <ul class="menu dropdown-content rounded-box z-[1] w-52 p-2 shadow bg-base-100">
+          {#each selectToggleOptions as toggle}
+            <li>
+              <button
+                onclick={() => toggleSelection(toggle, selectToggleOptions)}
+                class="w-full text-left flex items-center"
+              >
+                <div class="w-4 h-4 mr-2">
+                  {#if $ConfigStore[toggle]}
+                    <MdCheck />
+                  {/if}
+                </div>
+                {capitalizeFirstLetter(toggle.replace('Toggle', ''))}
+              </button>
+            </li>
+          {/each}
+          <li class="px-4 py-2">
+            <label class="block text-sm font-medium mb-1">
+              Circle Size: {currentConfig.selectorSize}px
+            </label>
+            <input
+              type="range"
+              min="20"
+              max="300"
+              step="10"
+              bind:value={currentConfig.selectorSize}
+              oninput={(e) => setSelectorSize(parseFloat(e.target.value))}
+              class="range range-sm w-full"
+            />
           </li>
-        {/each}
-        <li class="px-4 py-2">
-          <label class="block text-sm font-medium mb-1">
-            Circle Size: {currentConfig.selectorSize}px
-          </label>
-          <input
-            type="range"
-            min="20"
-            max="300"
-            step="10"
-            bind:value={currentConfig.selectorSize}
-            oninput={(e) => setSelectorSize(parseFloat(e.target.value))}
-            class="range range-sm w-full"
-          />
-        </li>
-        <li class="px-4 py-2">
-          <label class="block text-sm font-medium mb-1">
-            Slicer Width: {currentConfig.slicerSize}px
-          </label>
-          <input
-            type="range"
-            min="5"
-            max="100"
-            step="5"
-            bind:value={currentConfig.slicerSize}
-            oninput={(e) => setSlicerSize(parseFloat(e.target.value))}
-            class="range range-sm w-full"
-          />
-        </li>
-      </ul>
-    </details>
+          <li class="px-4 py-2">
+            <label class="block text-sm font-medium mb-1">
+              Slicer Width: {currentConfig.slicerSize}px
+            </label>
+            <input
+              type="range"
+              min="5"
+              max="100"
+              step="5"
+              bind:value={currentConfig.slicerSize}
+              oninput={(e) => setSlicerSize(parseFloat(e.target.value))}
+              class="range range-sm w-full"
+            />
+          </li>
+        </ul>
+      </details>
+    {/if}
 
     <!-- Talk Dropdown -->
     <details class="dropdown" use:clickOutside>
@@ -868,6 +872,7 @@
         tooltip={'Toggle 2D/3D'}
         onclick={() => {
           p5Instance.handle3D.update()
+          is3DMode = p5Instance.handle3D.getIs3DMode()
         }}
       />
       {#if isVideoShowing}
