@@ -23,17 +23,18 @@
  *   registerUndoRedoShortcuts();
  * });
  * ```
- *
- * @example Transactions
- * ```typescript
- * import { historyStore } from '$lib/history';
- *
- * // Group multiple operations into one undo/redo action
- * historyStore.beginTransaction();
- * // ... perform multiple undoable operations ...
- * historyStore.commitTransaction('Reset all settings');
- * ```
  */
+
+/**
+ * Deep clone utility for undo/redo state preservation
+ * Uses structuredClone if available, otherwise JSON parse/stringify
+ */
+export function deepClone<T>(obj: T): T {
+  if (typeof structuredClone === 'function') {
+    return structuredClone(obj)
+  }
+  return JSON.parse(JSON.stringify(obj)) as T
+}
 
 // Store and types
 export { historyStore, canUndo, canRedo } from '../../stores/historyStore'

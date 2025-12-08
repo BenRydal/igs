@@ -46,9 +46,6 @@ const initialState: HistoryState = {
   maxSize: 50,
 }
 
-// Transaction state for grouping multiple operations
-let transactionEntries: HistoryAction[] = []
-let isInTransaction = false
 
 /**
  * Save minimal history state to sessionStorage
@@ -106,12 +103,6 @@ function createHistoryStore() {
      * Clears the future stack and respects maxSize
      */
     push(entry: HistoryAction): void {
-      // If we're in a transaction, collect entries instead of pushing immediately
-      if (isInTransaction) {
-        transactionEntries.push(entry)
-        return
-      }
-
       update((state) => {
         // Don't record history during undo/redo operations
         if (state.isUndoing) {
@@ -256,79 +247,6 @@ function createHistoryStore() {
         ...initialState,
         maxSize: get({ subscribe }).maxSize,
       })
-    },
-
-    /**
-     * Begin a transaction to group multiple operations
-     * Operations will be batched until commitTransaction is called
-     */
-    beginTransaction(): void {
-      isInTransaction = true
-      transactionEntries = []
-    },
-
-    /**
-     * Commit a transaction, creating a single history entry for all operations
-     * @param label Human-readable label for the grouped operations
-     */
-    commitTransaction(label: string): void {
-      if (!isInTransaction) {
-        console.warn('No transaction in progress')
-        return
-      }
-
-      if (transactionEntries.length === 0) {
-        isInTransaction = false
-        return
-      }
-
-      // Create a combined undo/redo that executes all operations
-      const combinedUndo = () => {
-        // Execute undos in reverse order
-        for (let i = transactionEntries.length - 1; i >= 0; i--) {
-          transactionEntries[i].undo()
-        }
-      }
-
-      const combinedRedo = () => {
-        // Execute redos in forward order
-        for (let i = 0; i < transactionEntries.length; i++) {
-          transactionEntries[i].redo()
-        }
-      }
-
-      // Use the action type from the first entry
-      const actionType = transactionEntries[0].actionType
-
-      // Push the combined entry
-      isInTransaction = false
-      this.push({
-        actionType,
-        actionLabel: label,
-        undo: combinedUndo,
-        redo: combinedRedo,
-      })
-
-      transactionEntries = []
-    },
-
-    /**
-     * Rollback a transaction without creating a history entry
-     * Undoes all operations performed during the transaction
-     */
-    rollbackTransaction(): void {
-      if (!isInTransaction) {
-        console.warn('No transaction in progress')
-        return
-      }
-
-      // Execute undos in reverse order
-      for (let i = transactionEntries.length - 1; i >= 0; i--) {
-        transactionEntries[i].undo()
-      }
-
-      isInTransaction = false
-      transactionEntries = []
     },
 
     /**

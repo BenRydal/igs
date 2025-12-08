@@ -1,6 +1,4 @@
 /**
- * Styles barrel export
- *
  * Central export point for styling utilities and constants
  */
 

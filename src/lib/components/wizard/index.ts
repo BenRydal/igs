@@ -40,6 +40,13 @@ export { default as DataImportWizard } from './DataImportWizard.svelte'
 export { default as WizardSteps } from './WizardSteps.svelte'
 
 // Export types
-export type { DataType, WizardFile, WizardState, WizardStep, WizardStepId } from './types'
+export type {
+  DataType,
+  WizardFile,
+  WizardFileStatus,
+  WizardState,
+  WizardStep,
+  WizardStepId,
+} from './types'
 
 export { WIZARD_STEPS, DEFAULT_WIZARD_STATE, SKIP_FORMAT_GUIDE_KEY } from './types'

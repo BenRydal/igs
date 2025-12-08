@@ -1,7 +1,3 @@
-/**
- * Barrel export for utility functions
- */
-
 // String utilities
 export { capitalizeFirstLetter, capitalizeEachWord, formatToggleName } from './string'
 

@@ -1,6 +1,7 @@
 <script lang="ts">
-  import type { WizardFile } from './FileUploadZone.svelte'
+  import type { WizardFile } from './types'
   import type { ValidationResult } from '$lib/validation/types'
+  import { formatFileSize } from '$lib/validation/rules'
 
   interface Props {
     files: WizardFile[]
@@ -39,14 +40,6 @@
 
   function handleClearExistingChange() {
     onClearExistingChange?.(clearExisting)
-  }
-
-  function formatFileSize(bytes: number): string {
-    if (bytes === 0) return '0 Bytes'
-    const k = 1024
-    const sizes = ['Bytes', 'KB', 'MB', 'GB']
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i]
   }
 </script>
 

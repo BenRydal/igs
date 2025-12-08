@@ -2,17 +2,7 @@ import { get } from 'svelte/store'
 import UserStore from '../../stores/userStore'
 import CodeStore from '../../stores/codeStore'
 import { historyStore } from '../../stores/historyStore'
-
-/**
- * Deep clone utility for undo/redo state preservation
- * Uses structuredClone if available, otherwise JSON parse/stringify
- */
-function deepClone<T>(obj: T): T {
-  if (typeof structuredClone === 'function') {
-    return structuredClone(obj)
-  }
-  return JSON.parse(JSON.stringify(obj)) as T
-}
+import { deepClone } from './index'
 
 /**
  * Clear all user data with undo

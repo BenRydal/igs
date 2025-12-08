@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { onMount, onDestroy, type Snippet } from 'svelte'
-  import { floatingManager } from '$lib/floating'
+  import { onDestroy, type Snippet } from 'svelte'
+  import { computePosition, flip, shift, offset as floatingOffset, autoUpdate } from '@floating-ui/dom'
   import { clickOutside } from '$lib/actions/clickOutside'
   import { Z_INDEX } from '$lib/styles/z-index'
-  import type { FloatingOptions } from '$lib/floating/types'
+  import type { Placement } from '@floating-ui/dom'
 
   /**
    * Props interface for FloatingDropdown component
@@ -29,7 +29,7 @@
      * Placement of the dropdown relative to the button
      * @default 'bottom'
      */
-    placement?: 'top' | 'bottom' | 'left' | 'right'
+    placement?: Placement
     /**
      * Offset distance from the button in pixels
      * @default 8
@@ -72,41 +72,70 @@
   let buttonElement = $state<HTMLButtonElement | null>(null)
   let contentElement = $state<HTMLDivElement | null>(null)
   let isOpen = $state(false)
+  let cleanup: (() => void) | null = null
 
-  // Derived state - check if dropdown is open via manager
-  $effect(() => {
-    isOpen = floatingManager.isOpen(id)
-  })
+  /**
+   * Position the dropdown using @floating-ui/dom
+   */
+  async function updatePosition() {
+    if (!buttonElement || !contentElement) return
+
+    const { x, y } = await computePosition(buttonElement, contentElement, {
+      placement,
+      middleware: [
+        floatingOffset(offset),
+        flip(),
+        shift({ padding: 5 })
+      ],
+    })
+
+    Object.assign(contentElement.style, {
+      left: `${x}px`,
+      top: `${y}px`,
+    })
+  }
 
   /**
    * Toggle the dropdown open/closed
    */
   function toggle() {
-    const options: FloatingOptions = {
-      placement,
-      offset,
-      zIndex: Z_INDEX.DROPDOWN,
+    if (isOpen) {
+      close()
+    } else {
+      open()
     }
-    floatingManager.toggle(id, options)
   }
 
   /**
    * Open the dropdown programmatically
    */
   export function open() {
-    const options: FloatingOptions = {
-      placement,
-      offset,
-      zIndex: Z_INDEX.DROPDOWN,
-    }
-    floatingManager.open(id, options)
+    if (!buttonElement || !contentElement) return
+
+    isOpen = true
+    contentElement.style.display = 'block'
+
+    // Move to document body to avoid clipping
+    document.body.appendChild(contentElement)
+
+    // Set up auto-update for position
+    cleanup = autoUpdate(buttonElement, contentElement, updatePosition)
   }
 
   /**
    * Close the dropdown programmatically
    */
   export function close() {
-    floatingManager.close(id)
+    if (!contentElement) return
+
+    isOpen = false
+    contentElement.style.display = 'none'
+
+    // Clean up auto-update
+    if (cleanup) {
+      cleanup()
+      cleanup = null
+    }
   }
 
   /**
@@ -143,16 +172,9 @@
     }
   }
 
-  // Register with floating manager on mount
-  onMount(() => {
-    if (buttonElement && contentElement) {
-      floatingManager.register(id, buttonElement, contentElement)
-    }
-  })
-
   // Cleanup on destroy
   onDestroy(() => {
-    floatingManager.unregister(id)
+    close()
   })
 </script>
 

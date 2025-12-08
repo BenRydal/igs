@@ -2,6 +2,8 @@ import type { ActionReturn } from 'svelte/action'
 
 /**
  * Configuration options for the clickOutside action
+ * This was created cause of some weird interactions with dropdowns not
+ * closing properly when clicking outside.
  */
 export interface ClickOutsideOptions {
   /**

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte'
   import { Z_INDEX } from '$lib/styles/z-index'
-  import { FILE_SIZE_LIMITS, formatFileSize } from '$lib/validation/rules'
+  import { formatFileSize, getFileSizeLimit } from '$lib/validation/rules'
   import { toastStore } from '../../../stores/toastStore'
 
   interface Props {
@@ -42,25 +42,6 @@
   function getFileTypeDisplay(file: File) {
     const ext = getFileExtension(file.name)
     return fileTypeInfo[ext] || { label: 'Unknown', icon: '📄', color: 'badge-ghost' }
-  }
-
-  /**
-   * Get file size limit based on file extension
-   */
-  function getFileSizeLimit(filename: string): number {
-    const ext = getFileExtension(filename)
-    switch (ext) {
-      case 'csv':
-        return FILE_SIZE_LIMITS.CSV
-      case 'png':
-      case 'jpg':
-      case 'jpeg':
-        return FILE_SIZE_LIMITS.IMAGE
-      case 'mp4':
-        return FILE_SIZE_LIMITS.VIDEO
-      default:
-        return FILE_SIZE_LIMITS.DEFAULT
-    }
   }
 
   /**

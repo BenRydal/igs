@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { WizardFile } from './FileUploadZone.svelte'
+  import type { WizardFile } from './types'
   import type { ValidationResult, ValidationError, ValidationWarning } from '$lib/validation/types'
 
   interface Props {

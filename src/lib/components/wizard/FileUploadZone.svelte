@@ -1,14 +1,8 @@
 <script lang="ts">
   import type { DataFileType } from '$lib/validation/types'
-  import { FILE_SIZE_LIMITS, formatFileSize } from '$lib/validation/rules'
+  import type { WizardFile } from './types'
+  import { formatFileSize, getFileSizeLimit } from '$lib/validation/rules'
   import { toastStore } from '../../../stores/toastStore'
-
-  export interface WizardFile {
-    file: File
-    id: string
-    status: 'pending' | 'validating' | 'valid' | 'error'
-    validationResult?: any
-  }
 
   interface Props {
     files?: WizardFile[]
@@ -34,25 +28,6 @@
         return '.csv'
     }
   })
-
-  /**
-   * Get file size limit based on file extension
-   */
-  function getFileSizeLimit(filename: string): number {
-    const ext = filename.split('.').pop()?.toLowerCase() || ''
-    switch (ext) {
-      case 'csv':
-        return FILE_SIZE_LIMITS.CSV
-      case 'png':
-      case 'jpg':
-      case 'jpeg':
-        return FILE_SIZE_LIMITS.IMAGE
-      case 'mp4':
-        return FILE_SIZE_LIMITS.VIDEO
-      default:
-        return FILE_SIZE_LIMITS.DEFAULT
-    }
-  }
 
   /**
    * Validate file size

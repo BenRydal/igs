@@ -10,6 +10,11 @@ import type { ValidationResult } from '$lib/validation'
 export type DataType = 'movement' | 'conversation' | 'floorplan' | 'video' | 'codes'
 
 /**
+ * File upload and validation status
+ */
+export type WizardFileStatus = 'pending' | 'validating' | 'valid' | 'error'
+
+/**
  * File with validation state and preview data
  */
 export interface WizardFile {
@@ -17,14 +22,14 @@ export interface WizardFile {
   file: File
   /** Unique identifier for this file */
   id: string
+  /** Current validation status of the file */
+  status: WizardFileStatus
   /** Selected data type for this file */
   dataType?: DataType
   /** Validation result after checking the file */
   validationResult?: ValidationResult
   /** Preview data (first 10 rows for CSV files) */
   preview?: any[]
-  /** Whether this file passed validation */
-  isValid: boolean
   /** Error message if validation failed */
   errorMessage?: string
 }

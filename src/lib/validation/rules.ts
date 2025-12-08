@@ -189,6 +189,25 @@ export const VALIDATION_LIMITS = {
 export const DANGEROUS_CSV_STARTS = ['=', '+', '-', '@', '\t', '\r'] as const
 
 /**
+ * Get file size limit based on file extension
+ */
+export function getFileSizeLimit(filename: string): number {
+  const ext = filename.split('.').pop()?.toLowerCase() || ''
+  switch (ext) {
+    case 'csv':
+      return FILE_SIZE_LIMITS.CSV
+    case 'png':
+    case 'jpg':
+    case 'jpeg':
+      return FILE_SIZE_LIMITS.IMAGE
+    case 'mp4':
+      return FILE_SIZE_LIMITS.VIDEO
+    default:
+      return FILE_SIZE_LIMITS.DEFAULT
+  }
+}
+
+/**
  * Format file size in human-readable format
  */
 export function formatFileSize(bytes: number): string {

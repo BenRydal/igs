@@ -1,17 +1,7 @@
 import { get } from 'svelte/store'
 import ConfigStore, { type ConfigStoreType, initialConfig } from '../../stores/configStore'
 import { historyStore } from '../../stores/historyStore'
-
-/**
- * Deep clone utility for undo/redo state preservation
- * Uses structuredClone if available, otherwise JSON parse/stringify
- */
-function deepClone<T>(obj: T): T {
-  if (typeof structuredClone === 'function') {
-    return structuredClone(obj)
-  }
-  return JSON.parse(JSON.stringify(obj)) as T
-}
+import { deepClone } from './index'
 
 /**
  * Toggle a boolean config value with undo support

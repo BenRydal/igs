@@ -13,6 +13,7 @@
   import RangeSlider from '$lib/components/RangeSlider.svelte'
   import IconButton from '$lib/components/IconButton.svelte'
   import { clickOutside } from '$lib/actions/clickOutside'
+  import { capitalizeFirstLetter } from '$lib/utils/string'
   import ConfigStore from '../../stores/configStore'
   import {
     toggleMovement,
@@ -112,11 +113,6 @@
 
   // Computed values
   let formattedStopLength = $derived(currentConfig.stopSliderValue.toFixed(0))
-
-  // Helper function to capitalize first letter
-  function capitalizeFirstLetter(str: string): string {
-    return str.charAt(0).toUpperCase() + str.slice(1)
-  }
 
   // Toggle handlers (with undo support)
   function handleFilterToggle(toggle: string, _checked: boolean) {

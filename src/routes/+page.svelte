@@ -32,6 +32,7 @@
   import ModeIndicator from '$lib/components/ModeIndicator.svelte'
   import { OnboardingTour } from '$lib/tour'
   import DataImportWizard from '$lib/components/wizard/DataImportWizard.svelte'
+  import { capitalizeFirstLetter, capitalizeEachWord } from '$lib/utils/string'
 
   import CodeStore from '../stores/codeStore'
   import ConfigStore from '../stores/configStore'
@@ -239,18 +240,6 @@
     if (p5Instance) {
       p5Instance.loop()
     }
-  }
-
-  function capitalizeEachWord(sentence: string) {
-    return sentence
-      .split(' ')
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-      .join(' ')
-  }
-
-  // TODO: Sync this with the capitalizeEachWord function
-  function capitalizeFirstLetter(string: string) {
-    return string.charAt(0).toUpperCase() + string.slice(1)
   }
 
   function handleConfigChangeFromInput(e: Event, key: keyof ConfigStoreType) {
@@ -773,11 +762,6 @@
         tooltip={'Import Wizard'}
         onclick={() => (showImportWizard = true)}
       />
-      <div class="tooltip tooltip-bottom" data-tip="Upload">
-        <label for="file-input" class="btn btn-square btn-ghost w-11 h-11 min-h-11 cursor-pointer">
-          <MdCloudUpload class="w-6 h-6" />
-        </label>
-      </div>
       <input
         class="hidden"
         id="file-input"
