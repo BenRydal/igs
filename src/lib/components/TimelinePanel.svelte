@@ -6,7 +6,6 @@
   import MdFastForward from '~icons/mdi/fast-forward'
   import MdFastRewind from '~icons/mdi/rewind'
   import { TimeUtils } from '../core/time-utils'
-  import { setAnimationRate } from '$lib/history/config-actions'
   import type p5 from 'p5'
 
   let p5Instance = $state<p5 | null>(null)
@@ -69,7 +68,9 @@
 
   let sliderContainer = $state<HTMLDivElement>()
   let loaded = $state(false)
-  let debounceTimeout: ReturnType<typeof setTimeout>
+
+  let sliderElement: Element | null = null
+  let handleMouseUp: (() => void) | null = null
 
   // Subscribe to ConfigStore to access animationRate
   let config = $state<ConfigStoreType>($ConfigStore)
@@ -138,18 +139,9 @@
    */
   const handleChange = (event: SliderChangeEvent): void => {
     const { value1, value2, value3 } = event.detail
+
     if (value1 === timelineLeft && value2 === timelineCurr && value3 === timelineRight) {
       return
-    }
-
-    if (!isAnimating && p5Instance) {
-      clearTimeout(debounceTimeout)
-      debounceTimeout = setTimeout(() => {
-        // Check if fillSelectedData exists on p5Instance before calling it
-        if (p5Instance && typeof (p5Instance as any).fillSelectedData === 'function') {
-          ;(p5Instance as any).fillSelectedData()
-        }
-      }, 100)
     }
 
     TimelineStore.update((timeline) => {
@@ -187,89 +179,76 @@
     }
   }
 
-  // Speed control functions (with undo support)
+  // Speed control functions
   const speedUp = () => {
-    const newRate = Math.min(Math.max((config.animationRate || 0.5) + 0.1, 0.01), 1) // Cap at 1 (20x normal speed)
-    setAnimationRate(newRate)
+    ConfigStore.update((currentConfig) => {
+      const newRate = Math.min(Math.max((currentConfig.animationRate || 0.5) + 0.1, 0.01), 1) // Cap at 1 (20x normal speed)
+      return { ...currentConfig, animationRate: newRate }
+    })
 
     if (p5Instance) p5Instance.loop() // Trigger redraw if necessary
   }
 
   const slowDown = () => {
-    const newRate = Math.min(Math.max((config.animationRate || 0.5) - 0.1, 0.01), 1) // Floor at 0.01 (0.5x normal speed)
-    setAnimationRate(newRate)
+    ConfigStore.update((currentConfig) => {
+      const newRate = Math.min(Math.max((currentConfig.animationRate || 0.5) - 0.1, 0.01), 1) // Floor at 0.01 (0.5x normal speed)
+      return { ...currentConfig, animationRate: newRate }
+    })
 
     if (p5Instance) p5Instance.loop() // Trigger redraw if necessary
   }
-
-  // Store references for cleanup
-  let sliderElement: Element | null = null
-  let pointerElements: NodeListOf<Element> | null = null
-  let handleChangeListener: ((event: Event) => void) | null = null
-  let handleMouseDownListener: (() => void) | null = null
-  let handleMouseUpListener: (() => void) | null = null
-  let handleLeftEnterListener: (() => void) | null = null
-  let handleLeftLeaveListener: (() => void) | null = null
-  let handlePlayheadEnterListener: (() => void) | null = null
-  let handlePlayheadLeaveListener: (() => void) | null = null
-  let handleRightEnterListener: (() => void) | null = null
-  let handleRightLeaveListener: (() => void) | null = null
 
   onMount(async () => {
     if (typeof window !== 'undefined') {
       // Dynamically import the slider only on the client side
       import('toolcool-range-slider').then(async () => {
         loaded = true
-        sliderElement = document.querySelector('tc-range-slider')
-        if (sliderElement) {
-          handleChangeListener = (event: Event) => {
+        await tick()
+
+        const slider = document.querySelector('tc-range-slider')
+        sliderElement = slider
+
+        if (slider) {
+          slider.addEventListener('change', (event: Event) => {
             handleChange(event as SliderChangeEvent)
-          }
-          sliderElement.addEventListener('change', handleChangeListener)
+          })
 
           // Add pointer event listeners
-          pointerElements = sliderElement.querySelectorAll('tc-range-slider-pointer')
-          if (pointerElements.length >= 3) {
+          const pointers = slider.querySelectorAll('tc-range-slider-pointer')
+          if (pointers.length >= 3) {
             // Left marker
-            handleLeftEnterListener = () => {
+            pointers[0].addEventListener('mouseenter', () => {
               isHoveringLeft = true
-            }
-            handleLeftLeaveListener = () => {
+            })
+            pointers[0].addEventListener('mouseleave', () => {
               isHoveringLeft = false
-            }
-            pointerElements[0].addEventListener('mouseenter', handleLeftEnterListener)
-            pointerElements[0].addEventListener('mouseleave', handleLeftLeaveListener)
+            })
 
             // Playhead
-            handlePlayheadEnterListener = () => {
+            pointers[1].addEventListener('mouseenter', () => {
               isHoveringPlayhead = true
-            }
-            handlePlayheadLeaveListener = () => {
+            })
+            pointers[1].addEventListener('mouseleave', () => {
               isHoveringPlayhead = false
-            }
-            pointerElements[1].addEventListener('mouseenter', handlePlayheadEnterListener)
-            pointerElements[1].addEventListener('mouseleave', handlePlayheadLeaveListener)
+            })
 
             // Right marker
-            handleRightEnterListener = () => {
+            pointers[2].addEventListener('mouseenter', () => {
               isHoveringRight = true
-            }
-            handleRightLeaveListener = () => {
+            })
+            pointers[2].addEventListener('mouseleave', () => {
               isHoveringRight = false
-            }
-            pointerElements[2].addEventListener('mouseenter', handleRightEnterListener)
-            pointerElements[2].addEventListener('mouseleave', handleRightLeaveListener)
+            })
 
             // Drag events
-            handleMouseDownListener = () => {
+            slider.addEventListener('mousedown', () => {
               isDragging = true
-            }
-            handleMouseUpListener = () => {
+            })
+            handleMouseUp = () => {
               isDragging = false
               showTimeTooltip = false
             }
-            sliderElement.addEventListener('mousedown', handleMouseDownListener)
-            window.addEventListener('mouseup', handleMouseUpListener)
+            window.addEventListener('mouseup', handleMouseUp)
           }
         }
         await tick()
@@ -283,38 +262,10 @@
 
   onDestroy(() => {
     if (typeof window === 'undefined') return
-
-    // Remove window event listeners
     window.removeEventListener('resize', updateXPositions)
     window.removeEventListener('mousemove', handleMouseMove)
-    if (handleMouseUpListener) {
-      window.removeEventListener('mouseup', handleMouseUpListener)
-    }
-
-    // Remove slider event listeners
-    if (sliderElement) {
-      if (handleChangeListener) {
-        sliderElement.removeEventListener('change', handleChangeListener)
-      }
-      if (handleMouseDownListener) {
-        sliderElement.removeEventListener('mousedown', handleMouseDownListener)
-      }
-    }
-
-    // Remove pointer event listeners
-    if (pointerElements && pointerElements.length >= 3) {
-      if (handleLeftEnterListener && handleLeftLeaveListener) {
-        pointerElements[0].removeEventListener('mouseenter', handleLeftEnterListener)
-        pointerElements[0].removeEventListener('mouseleave', handleLeftLeaveListener)
-      }
-      if (handlePlayheadEnterListener && handlePlayheadLeaveListener) {
-        pointerElements[1].removeEventListener('mouseenter', handlePlayheadEnterListener)
-        pointerElements[1].removeEventListener('mouseleave', handlePlayheadLeaveListener)
-      }
-      if (handleRightEnterListener && handleRightLeaveListener) {
-        pointerElements[2].removeEventListener('mouseenter', handleRightEnterListener)
-        pointerElements[2].removeEventListener('mouseleave', handleRightLeaveListener)
-      }
+    if (handleMouseUp) {
+      window.removeEventListener('mouseup', handleMouseUp)
     }
   })
 </script>
@@ -347,7 +298,6 @@
         slider-bg="#e2e8f0"
         slider-bg-hover="#e2e8f0"
         slider-bg-fill="#94a3b8"
-        onchange={handleChange}
         class="timeline-slider"
         style="--value1-percent: {((timelineLeft - startTime) / (endTime - startTime)) *
           100}%; --value3-percent: {((timelineRight - startTime) / (endTime - startTime)) * 100}%;"
