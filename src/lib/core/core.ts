@@ -95,7 +95,7 @@ export class Core {
 
   /**
    * Async version of testFileTypeForProcessing that waits for CSV files to complete
-   * Used by import wizard to ensure files are processed in correct order
+   * Used by import dialog to ensure files are processed in correct order
    *
    * @param file - File object to validate and process
    * @returns Promise that resolves when file processing is complete

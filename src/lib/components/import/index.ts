@@ -1,49 +1,49 @@
 /**
- * Data Import Wizard Components
+ * Data Import Components
  *
- * A multi-step modal wizard for guided data import into IGS.
+ * A modal dialog for guided data import into IGS.
  * Supports movement, conversation, floorplan, video, and code data.
  *
  * @example
  * ```typescript
- * import { DataImportWizard } from '$lib/components/wizard';
+ * import { DataImporter } from '$lib/components/import';
  * import { openModal } from '$stores/modalStore';
  *
- * // Open the wizard
- * openModal('importWizard');
+ * // Open the import dialog
+ * openModal('fileImport');
  * ```
  *
  * @example
  * ```svelte
  * <script>
- *   import { DataImportWizard } from '$lib/components/wizard';
+ *   import { DataImporter } from '$lib/components/import';
  *
- *   let isWizardOpen = $state(false);
+ *   let isImportOpen = $state(false);
  *
  *   function handleImport(state) {
  *     console.log('Importing:', state);
  *   }
  * </script>
  *
- * <DataImportWizard
- *   isOpen={isWizardOpen}
- *   onClose={() => isWizardOpen = false}
+ * <DataImporter
+ *   isOpen={isImportOpen}
+ *   onClose={() => isImportOpen = false}
  *   onImport={handleImport}
  * />
  * ```
  */
 
-// Export main wizard component
-export { default as DataImportWizard } from './DataImportWizard.svelte'
+// Export main importer component
+export { default as DataImporter } from './DataImporter.svelte'
 
 // Export types
 export type {
   DataType,
-  WizardFile,
-  WizardFileStatus,
-  WizardState,
-  WizardStep,
-  WizardStepId,
+  ImportFile,
+  ImportFileStatus,
+  ImportState,
+  ImportStep,
+  ImportStepId,
 } from './types'
 
-export { WIZARD_STEPS, DEFAULT_WIZARD_STATE, SKIP_FORMAT_GUIDE_KEY } from './types'
+export { IMPORT_STEPS, DEFAULT_IMPORT_STATE, SKIP_FORMAT_GUIDE_KEY } from './types'

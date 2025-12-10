@@ -31,7 +31,7 @@
   import DataPointTable from '$lib/components/DataPointTable.svelte'
   import ModeIndicator from '$lib/components/ModeIndicator.svelte'
   import { OnboardingTour } from '$lib/tour'
-  import DataImportWizard from '$lib/components/wizard/DataImportWizard.svelte'
+  import DataImporter from '$lib/components/import/DataImporter.svelte'
   import { capitalizeFirstLetter, capitalizeEachWord } from '$lib/utils/string'
 
   import CodeStore from '../stores/codeStore'
@@ -171,7 +171,7 @@
   let showDataPopup = $state(false)
   let showSettings = $state(false)
   let showDataDropDown = $state(false)
-  let showImportWizard = $state(false)
+  let showImportDialog = $state(false)
   let currentConfig = $state<ConfigStoreType>($ConfigStore)
 
   let files = $state<any>([])
@@ -394,7 +394,7 @@
     return fileTypes.map((ft) => ft.file)
   }
 
-  async function handleWizardImport(files: File[], clearExisting: boolean) {
+  async function handleImportFiles(files: File[], clearExisting: boolean) {
     // Clear existing data if requested
     if (clearExisting) {
       clearAllData()
@@ -897,8 +897,8 @@
       />
       <IconButton
         icon={MdFileUploadOutline}
-        tooltip={'Import Wizard'}
-        onclick={() => (showImportWizard = true)}
+        tooltip={'Import Files'}
+        onclick={() => (showImportDialog = true)}
       />
       <input
         class="hidden"
@@ -1392,10 +1392,10 @@
 
 <ModeIndicator />
 
-<DataImportWizard
-  isOpen={showImportWizard}
-  onClose={() => (showImportWizard = false)}
-  onImport={handleWizardImport}
+<DataImporter
+  isOpen={showImportDialog}
+  onClose={() => (showImportDialog = false)}
+  onImport={handleImportFiles}
 />
 
 <style>

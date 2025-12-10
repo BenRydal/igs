@@ -5,7 +5,7 @@ export type ModalId =
   | 'dataExplorer'
   | 'help'
   | 'commandPalette'
-  | 'importWizard'
+  | 'fileImport'
   | 'shortcuts'
 
 export interface ModalState {

@@ -1,5 +1,5 @@
 /**
- * Wizard types for guided data import
+ * Import types for guided data import
  */
 
 import type { ValidationResult } from '$lib/validation'
@@ -12,18 +12,18 @@ export type DataType = 'movement' | 'conversation' | 'floorplan' | 'video' | 'co
 /**
  * File upload and validation status
  */
-export type WizardFileStatus = 'pending' | 'validating' | 'valid' | 'error'
+export type ImportFileStatus = 'pending' | 'validating' | 'valid' | 'error'
 
 /**
  * File with validation state and preview data
  */
-export interface WizardFile {
+export interface ImportFile {
   /** The actual File object */
   file: File
   /** Unique identifier for this file */
   id: string
   /** Current validation status of the file */
-  status: WizardFileStatus
+  status: ImportFileStatus
   /** Selected data type for this file */
   dataType?: DataType
   /** Validation result after checking the file */
@@ -35,15 +35,15 @@ export interface WizardFile {
 }
 
 /**
- * Current state of the wizard
+ * Current state of the importer
  */
-export interface WizardState {
+export interface ImportState {
   /** Current step index (0-4) */
   currentStep: number
   /** Selected data type (null if not yet selected) */
   selectedDataType: DataType | null
   /** Files uploaded for import */
-  files: WizardFile[]
+  files: ImportFile[]
   /** User preference to skip format guide step */
   skipFormatGuide: boolean
   /** Whether to clear existing data before import */
@@ -51,9 +51,9 @@ export interface WizardState {
 }
 
 /**
- * Wizard step configuration
+ * Import step configuration
  */
-export interface WizardStep {
+export interface ImportStep {
   /** Step identifier */
   id: string
   /** Display label for the step */
@@ -63,9 +63,9 @@ export interface WizardStep {
 }
 
 /**
- * Wizard step definitions
+ * Import step definitions
  */
-export const WIZARD_STEPS: readonly WizardStep[] = [
+export const IMPORT_STEPS: readonly ImportStep[] = [
   { id: 'type', label: 'Data Type', icon: '📊' },
   { id: 'format', label: 'Format Guide', icon: '📋' },
   { id: 'upload', label: 'Upload', icon: '📁' },
@@ -74,19 +74,19 @@ export const WIZARD_STEPS: readonly WizardStep[] = [
 ] as const
 
 /**
- * Type for wizard step IDs
+ * Type for import step IDs
  */
-export type WizardStepId = (typeof WIZARD_STEPS)[number]['id']
+export type ImportStepId = (typeof IMPORT_STEPS)[number]['id']
 
 /**
  * Local storage key for skip format guide preference
  */
-export const SKIP_FORMAT_GUIDE_KEY = 'igs:wizard:skipFormatGuide'
+export const SKIP_FORMAT_GUIDE_KEY = 'igs:import:skipFormatGuide'
 
 /**
- * Default wizard state
+ * Default import state
  */
-export const DEFAULT_WIZARD_STATE: WizardState = {
+export const DEFAULT_IMPORT_STATE: ImportState = {
   currentStep: 0,
   selectedDataType: null,
   files: [],

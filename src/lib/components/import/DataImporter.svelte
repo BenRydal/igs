@@ -306,15 +306,15 @@
         ondrop={handleDrop}
         ondragover={handleDragOver}
         ondragleave={handleDragLeave}
-        onclick={() => document.getElementById('file-input-wizard')?.click()}
+        onclick={() => document.getElementById('file-input-import')?.click()}
         onkeydown={(e) =>
-          e.key === 'Enter' && document.getElementById('file-input-wizard')?.click()}
+          e.key === 'Enter' && document.getElementById('file-input-import')?.click()}
         role="button"
         tabindex="0"
         aria-label="Drop files here or click to browse"
       >
         <input
-          id="file-input-wizard"
+          id="file-input-import"
           type="file"
           multiple
           accept=".csv,.png,.jpg,.jpeg,.mp4"
