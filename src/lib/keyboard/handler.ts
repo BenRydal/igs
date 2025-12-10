@@ -1,5 +1,6 @@
 import type { KeyboardShortcut, KeyboardEventMatch } from './types'
 import { registry } from './registry'
+import { redrawCanvas } from '../utils/p5'
 
 /**
  * Elements that should ignore keyboard shortcuts when focused
@@ -98,6 +99,10 @@ function handleKeyboardEvent(event: KeyboardEvent): boolean {
 
       try {
         shortcut.action()
+
+        // Trigger P5 redraw after shortcut execution to ensure UI updates immediately
+        // This fixes the issue where keyboard shortcuts don't update the screen until mouse movement
+        redrawCanvas()
       } catch (error) {
         console.error(`Error executing shortcut "${shortcut.id}":`, error)
       }
