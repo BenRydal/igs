@@ -1,10 +1,31 @@
 <script lang="ts">
   import { writable } from 'svelte/store'
+  import { onMount, onDestroy } from 'svelte'
+
   let { isModalOpen = writable(false) } = $props()
 
   function openGoogleForm() {
     window.open('https://forms.gle/M1gvdgSvdH9yXAABA', '_blank')
   }
+
+  // Close modal on Escape key
+  function handleKeyDown(e: KeyboardEvent) {
+    if (e.key === 'Escape' && $isModalOpen) {
+      e.preventDefault()
+      e.stopPropagation()
+      $isModalOpen = false
+    }
+  }
+
+  onMount(() => {
+    document.addEventListener('keydown', handleKeyDown)
+  })
+
+  onDestroy(() => {
+    if (typeof document !== 'undefined') {
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  })
 </script>
 
 {#if $isModalOpen}

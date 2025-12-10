@@ -40,7 +40,20 @@
   import TimelineStore from '../stores/timelineStore'
   import { initialConfig } from '../stores/configStore'
   import { computePosition, flip, shift, offset, autoUpdate } from '@floating-ui/dom'
-  import { setSelectorSize, setSlicerSize } from '$lib/history/config-actions'
+  import { setSelectorSize, setSlicerSize, toggleColorMode } from '$lib/history/config-actions'
+  import {
+    toggleUserEnabled,
+    toggleUserConversationEnabled,
+    setUserColor,
+  } from '$lib/history/user-actions'
+  import {
+    clearUsers,
+    clearCodes,
+    clearAllData as clearAllDataWithHistory,
+    setCodeEnabled,
+    toggleAllCodes,
+    setCodeColor,
+  } from '$lib/history/data-actions'
 
   // Define ToggleKey type to fix TypeScript errors
   type ToggleKey = string
@@ -270,8 +283,7 @@
   }
 
   function toggleSelectAllCodes() {
-    const allEnabled = $CodeStore.every((code) => code.enabled)
-    CodeStore.update((codes) => codes.map((code) => ({ ...code, enabled: !allEnabled })))
+    toggleAllCodes()
     p5Instance.loop()
   }
 
@@ -397,7 +409,7 @@
   async function handleImportFiles(files: File[], clearExisting: boolean) {
     // Clear existing data if requested
     if (clearExisting) {
-      clearAllData()
+      clearAllDataLocal()
     }
 
     // Sort files to ensure correct processing order:
@@ -416,12 +428,13 @@
   }
 
   function updateExampleDataDropDown(event) {
-    clearAllData()
+    clearAllDataLocal()
     core.handleExampleDropdown(event)
     p5Instance.loop()
   }
 
-  function clearAllData() {
+  // Local version that handles UI cleanup and non-store data
+  function clearAllDataLocal() {
     console.log('Clearing all data')
     p5Instance.videoController.clear()
     currentConfig.isPathColorMode = false
@@ -447,13 +460,8 @@
 
     closeAllDropdowns()
 
-    UserStore.update(() => {
-      return []
-    })
-
-    CodeStore.update(() => {
-      return []
-    })
+    // Use history-tracked function for store clearing
+    clearAllDataWithHistory()
 
     core.codeData = []
     core.movementData = []
@@ -464,7 +472,7 @@
   }
 
   function clearMovementData() {
-    UserStore.update(() => [])
+    clearUsers()
     core.movementData = []
     p5Instance.loop()
   }
@@ -485,9 +493,7 @@
   }
 
   function clearCodeData() {
-    CodeStore.update(() => {
-      return []
-    })
+    clearCodes()
     core.codeData = []
     UserStore.update((users) =>
       users.map((user) => {
@@ -843,7 +849,7 @@
         <li><button onclick={clearConversationData}>Conversation</button></li>
         <li><button onclick={clearCodeData}>Codes</button></li>
         <li><button onclick={() => p5Instance.videoController.clear()}>Video</button></li>
-        <li><button onclick={clearAllData}>All Data</button></li>
+        <li><button onclick={clearAllDataLocal}>All Data</button></li>
       </ul>
     </details>
 
@@ -1254,10 +1260,7 @@
                     type="checkbox"
                     class="checkbox"
                     checked={$CodeStore.every((code) => code.enabled)}
-                    onchange={() => {
-                      toggleSelectAllCodes()
-                      p5Instance?.loop()
-                    }}
+                    onchange={toggleSelectAllCodes}
                   />
                   Enable All
                 </div>
@@ -1266,8 +1269,11 @@
                     id="colorByCodes"
                     type="checkbox"
                     class="checkbox"
-                    bind:checked={$ConfigStore.isPathColorMode}
-                    onchange={() => p5Instance?.loop()}
+                    checked={$ConfigStore.isPathColorMode}
+                    onchange={() => {
+                      toggleColorMode()
+                      p5Instance?.loop()
+                    }}
                   />
                   Color by Codes
                 </div>
@@ -1281,8 +1287,11 @@
                       id="codeCheckbox-{code.code}"
                       type="checkbox"
                       class="checkbox"
-                      bind:checked={code.enabled}
-                      onchange={() => p5Instance?.loop()}
+                      checked={code.enabled}
+                      onchange={(e) => {
+                        setCodeEnabled(code.code, e.target.checked)
+                        p5Instance?.loop()
+                      }}
                     />
                     Enabled
                   </div>
@@ -1292,8 +1301,11 @@
                     <input
                       type="color"
                       class="color-picker max-w-[24px] max-h-[28px]"
-                      bind:value={code.color}
-                      onchange={() => p5Instance?.loop()}
+                      value={code.color}
+                      onchange={(e) => {
+                        setCodeColor(code.code, e.target.value)
+                        p5Instance?.loop()
+                      }}
                     />
                     Color
                   </div>
@@ -1339,8 +1351,11 @@
                     id="userCheckbox-{user.name}"
                     type="checkbox"
                     class="checkbox mr-2"
-                    bind:checked={user.enabled}
-                    onchange={() => p5Instance?.loop()}
+                    checked={user.enabled}
+                    onchange={() => {
+                      toggleUserEnabled(user.name)
+                      p5Instance?.loop()
+                    }}
                   />
                   <label for="userCheckbox-{user.name}">Movement</label>
                 </div>
@@ -1351,8 +1366,11 @@
                     id="userTalkCheckbox-{user.name}"
                     type="checkbox"
                     class="checkbox mr-2"
-                    bind:checked={user.conversation_enabled}
-                    onchange={() => p5Instance?.loop()}
+                    checked={user.conversation_enabled}
+                    onchange={() => {
+                      toggleUserConversationEnabled(user.name)
+                      p5Instance?.loop()
+                    }}
                   />
                   <label for="userTalkCheckbox-{user.name}">Talk</label>
                 </div>
@@ -1362,8 +1380,11 @@
                   <input
                     type="color"
                     class="color-picker max-w-[24px] max-h-[28px] mr-2"
-                    bind:value={user.color}
-                    onchange={() => p5Instance?.loop()}
+                    value={user.color}
+                    onchange={(e) => {
+                      setUserColor(user.name, e.target.value)
+                      p5Instance?.loop()
+                    }}
                   />
                   <span>Color</span>
                 </div>

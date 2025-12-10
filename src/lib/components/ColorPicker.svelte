@@ -86,6 +86,24 @@
     }
   }
 
+  // Close swatch panel on Escape
+  function handleGlobalKeyDown(e: KeyboardEvent) {
+    if (e.key === 'Escape' && showSwatchPanel) {
+      e.preventDefault()
+      e.stopPropagation()
+      showSwatchPanel = false
+    }
+  }
+
+  $effect(() => {
+    if (showSwatchPanel) {
+      document.addEventListener('keydown', handleGlobalKeyDown)
+      return () => {
+        document.removeEventListener('keydown', handleGlobalKeyDown)
+      }
+    }
+  })
+
   function handleSwatchKeyDown(e: KeyboardEvent, swatchColor: string) {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault()
