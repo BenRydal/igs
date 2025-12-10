@@ -78,14 +78,9 @@ export const EXAMPLE_DATASETS: Record<string, ExampleDataset> = {
     description: 'Teacher movement and conversation data',
   },
   'example-11': {
-    files: ['teacher.csv'],
-    name: 'Teacher Movement Only 1',
-    description: 'Teacher movement data only',
-  },
-  'example-12': {
-    files: ['teacher.csv'],
-    name: 'Teacher Movement Only 2',
-    description: 'Teacher movement data only',
+    files: ['adhir.csv', 'blake.csv', 'jeans.csv', 'lily.csv', 'mae.csv'],
+    name: 'Group Interaction',
+    description: 'Multi-person movement and conversation data',
   },
 } as const
 

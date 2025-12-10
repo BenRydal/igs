@@ -324,29 +324,16 @@ export function getAllCommands(): Command[] {
         )
       },
     },
-    {
-      id: 'example:sandy-1',
-      label: 'Load: Sandy Lesson 1',
-      description: 'Classroom example dataset',
-      keywords: ['example', 'classroom', 'sandy', 'lesson'],
+        {
+      id: 'example:museum-complete-visit',
+      label: 'Load: Family Museum Visit',
+      description: 'Museum example dataset',
+      keywords: ['example', 'museum', 'gallery', 'family'],
       icon: '👩‍🏫',
       category: 'examples',
       action: () => {
         window.dispatchEvent(
           new CustomEvent('igs:load-example', { detail: { value: 'example-11' } })
-        )
-      },
-    },
-    {
-      id: 'example:sandy-2',
-      label: 'Load: Sandy Lesson 2',
-      description: 'Classroom example dataset',
-      keywords: ['example', 'classroom', 'sandy', 'lesson'],
-      icon: '👩‍🏫',
-      category: 'examples',
-      action: () => {
-        window.dispatchEvent(
-          new CustomEvent('igs:load-example', { detail: { value: 'example-12' } })
         )
       },
     },

@@ -158,14 +158,18 @@
   let selectedDropDownOption = $state('')
   const dropdownOptions = [
     { label: 'Sports', items: [{ value: 'example-1', label: "Michael Jordan's Last Shot" }] },
-    { label: 'Museums', items: [{ value: 'example-2', label: 'Family Gallery Visit' }] },
+    {
+      label: 'Museums',
+      items: [
+        { value: 'example-2', label: 'Family Gallery Visit' },
+        { value: 'example-11', label: 'Family Museum Visit' },
+      ],
+    },
     {
       label: 'Classrooms',
       items: [
-        { value: 'example-11', label: 'Sandy Lesson 1' },
-        { value: 'example-12', label: 'Sandy Lesson 2' },
-        { value: 'example-10', label: 'AP Math Lesson' },
-        { value: 'example-4', label: '3rd Grade Sean Numbers Discussion' },
+        { value: 'example-10', label: '8th Grade AP Math Lesson' },
+        { value: 'example-4', label: '3rd Grade Discussion' },
       ],
     },
     {
