@@ -6,9 +6,11 @@ import ConfigStore from '../../stores/configStore'
 import { toastStore } from '../../stores/toastStore'
 import type { User } from '../../models/user'
 import { FloorPlan, SketchGUI, Handle3D, VideoController, SetPathData } from '..'
+import type { Timeline } from '../../models/timeline';
 
 let users: User[] = []
-let timeline, highlightToggle
+let timeline: Timeline;
+let highlightToggle: boolean;
 let animationRate = 0.05
 
 TimelineStore.subscribe((data) => {
@@ -77,7 +79,8 @@ export const igsSketch = (p5: any) => {
     if (
       drawTimeline.getIsAnimating() ||
       p5.videoController.isLoadedAndIsPlaying() ||
-      p5.handle3D.getIsTransitioning()
+      p5.handle3D.getIsTransitioning() ||
+      highlightToggle
     ) {
       p5.loop()
     } else p5.noLoop()
