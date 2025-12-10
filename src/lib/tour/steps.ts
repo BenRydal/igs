@@ -4,9 +4,9 @@ export const tourSteps: TourStep[] = [
   {
     element: '.navbar',
     popover: {
-      title: 'Welcome to IGS',
+      title: 'Welcome to the IGS!',
       description:
-        "The Interaction Geography Slicer helps you visualize movement, conversation, and video data over space and time. Let's take a quick tour!",
+        "The Interaction Geography Slicer is an open-source tool to visualize movement, conversation, and video data over space and time. Let's take a quick tour!",
       side: 'bottom',
       align: 'start',
     },
@@ -16,7 +16,7 @@ export const tourSteps: TourStep[] = [
     popover: {
       title: 'Try Example Data',
       description:
-        'Start exploring immediately! Select from sample datasets including sports, museums, and classroom scenarios.',
+        'Start exploring immediately! Select from sample datasets including sports, museums, and classrooms.',
       side: 'bottom',
       align: 'end',
     },
@@ -26,7 +26,7 @@ export const tourSteps: TourStep[] = [
     popover: {
       title: 'Upload Your Data',
       description:
-        'Import your own data: CSV files, images for floor plans, or MP4 videos. All processing happens locally in your browser.',
+        'Import your own data: CSV files of movement and conversation, images for floor plans, and MP4 videos. All processing happens locally in your browser.',
       side: 'bottom',
       align: 'end',
     },
@@ -36,7 +36,7 @@ export const tourSteps: TourStep[] = [
     popover: {
       title: 'Visualization Canvas',
       description:
-        "This is where your data comes to life. You'll see movement trails, conversation markers, and floor plans visualized here.",
+        "This is where your data comes to life. You'll see movement trails, conversation transcripts, and floor plans visualized here.",
       side: 'top',
       align: 'center',
     },
@@ -44,25 +44,15 @@ export const tourSteps: TourStep[] = [
   {
     element: '.navbar details:nth-of-type(1)',
     popover: {
-      title: 'Filter Options',
+      title: 'Filter and Select Options',
       description:
-        "Control what's displayed: movement trails, stop points, and adjust stop length thresholds.",
+        "Control what's displayed by filtering and selecting movement and conversation data in different ways.",
       side: 'bottom',
       align: 'start',
     },
   },
   {
     element: '.navbar details:nth-of-type(2)',
-    popover: {
-      title: 'Selection Tools',
-      description:
-        'Use Circle, Slice, or Highlight modes to select and explore specific data regions.',
-      side: 'bottom',
-      align: 'start',
-    },
-  },
-  {
-    element: '.navbar details:nth-of-type(3)',
     popover: {
       title: 'Conversation Controls',
       description:
@@ -74,8 +64,8 @@ export const tourSteps: TourStep[] = [
   {
     element: '#btn-toggle-3d',
     popover: {
-      title: 'Change Your Perspective',
-      description: 'Toggle between 2D (floor plan) and 3D (space-time cube) views.',
+      title: 'Toggle 2D/3D Views',
+      description: 'Shift between 2D (floor plan) and 3D (space-time cube) views.',
       side: 'bottom',
       align: 'center',
     },
@@ -85,7 +75,7 @@ export const tourSteps: TourStep[] = [
     popover: {
       title: 'Manage Users & Codes',
       description:
-        'When data is loaded, user buttons appear here. Click to show/hide individual users and manage codes.',
+        'When data is loaded, individual users appear here. Click to show/hide user data and manage codes.',
       side: 'top',
       align: 'start',
     },
