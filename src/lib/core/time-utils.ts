@@ -1,4 +1,4 @@
-import { DateTime, Duration } from 'luxon'
+import { Duration } from 'luxon'
 
 export class TimeUtils {
   /**
@@ -60,46 +60,5 @@ export class TimeUtils {
   static formatTimeAuto(seconds: number): string {
     const duration = Duration.fromObject({ seconds: Math.round(seconds) })
     return seconds < 3600 ? duration.toFormat('mm:ss') : duration.toFormat('hh:mm:ss')
-  }
-
-  /**
-   * Formats word count with appropriate units
-   */
-  static formatWordCount(count: number): string {
-    return `${count} words`
-  }
-
-  /**
-   * Format progress as percentage of words
-   */
-  static formatWordProgress(current: number, total: number): string {
-    const percentage = Math.round((current / total) * 100)
-    return `${current}/${total} (${percentage}%)`
-  }
-
-  /**
-   * Validates if a string is in a valid time format
-   */
-  static isValidTimeFormat(time: string): boolean {
-    // Check HH:MM:SS format
-    const hhmmssRegex = /^(?:(?:([01]?\d|2[0-3]):)?([0-5]?\d):)?([0-5]?\d)$/
-    return hhmmssRegex.test(time)
-  }
-
-  /**
-   * Parses a timestamp string and returns milliseconds
-   */
-  static parseTimestamp(timestamp: string): number {
-    const formats = ['HH:mm:ss', 'mm:ss', 'H:mm:ss', 'm:ss']
-
-    for (const format of formats) {
-      const parsed = DateTime.fromFormat(timestamp, format)
-      if (parsed.isValid) {
-        const midnight = DateTime.fromObject({ hour: 0, minute: 0, second: 0 })
-        return parsed.diff(midnight).as('seconds')
-      }
-    }
-
-    throw new Error(`Invalid timestamp format: ${timestamp}`)
   }
 }

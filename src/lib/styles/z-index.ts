@@ -26,16 +26,13 @@
  *
  * @example
  * ```typescript
- * import { Z_INDEX, getZIndex, getZIndexClass } from '$lib/styles/z-index';
- *
- * // In TypeScript
- * const modalZ = getZIndex('MODAL'); // 110
+ * import { Z_INDEX } from '$lib/styles/z-index';
  *
  * // In Svelte component
  * <div style="z-index: {Z_INDEX.DROPDOWN}">Dropdown</div>
  *
  * // With Tailwind (using arbitrary values)
- * <div class="{getZIndexClass('MODAL')}">Modal</div>
+ * <div class="z-[{Z_INDEX.MODAL}]">Modal</div>
  * ```
  */
 
@@ -194,48 +191,3 @@ export type ZIndexLayer = keyof typeof Z_INDEX
  * Type representing all possible z-index values
  */
 export type ZIndexValue = (typeof Z_INDEX)[ZIndexLayer]
-
-/**
- * Get the numeric z-index value for a layer
- *
- * @param layer - The layer name
- * @returns The z-index value
- *
- * @example
- * ```typescript
- * const modalZ = getZIndex('MODAL'); // 110
- * element.style.zIndex = String(getZIndex('DROPDOWN'));
- * ```
- */
-export function getZIndex(layer: ZIndexLayer): number {
-  return Z_INDEX[layer]
-}
-
-/**
- * Generate a Tailwind CSS class for z-index using arbitrary values
- *
- * Note: Tailwind's default z-index scale only goes up to z-50.
- * This function uses arbitrary values (e.g., z-[110]) for higher values.
- *
- * @param layer - The layer name
- * @returns Tailwind class string (e.g., 'z-10' or 'z-[110]')
- *
- * @example
- * ```svelte
- * <div class={getZIndexClass('MODAL')}>Modal content</div>
- * <!-- Outputs: <div class="z-[110]">Modal content</div> -->
- * ```
- */
-export function getZIndexClass(layer: ZIndexLayer): string {
-  const value = Z_INDEX[layer]
-
-  // Tailwind has built-in classes for common values
-  const tailwindDefaults = [0, 10, 20, 30, 40, 50]
-
-  if (tailwindDefaults.includes(value)) {
-    return `z-${value}`
-  }
-
-  // Use arbitrary value syntax for custom z-index values
-  return `z-[${value}]`
-}
