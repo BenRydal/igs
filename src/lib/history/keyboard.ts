@@ -24,67 +24,50 @@ const redoAction = () => {
 }
 
 /** Shortcut IDs for cleanup */
-const SHORTCUT_IDS = ['undo', 'undo-ctrl', 'redo', 'redo-ctrl', 'redo-y', 'redo-y-ctrl'] as const
+const SHORTCUT_IDS = ['undo', 'redo', 'redo-y'] as const
+
+/**
+ * Check if the current platform is Mac
+ */
+function isMac(): boolean {
+  if (typeof navigator === 'undefined') return false
+  return navigator.platform.includes('Mac') || navigator.userAgent.includes('Mac')
+}
 
 /**
  * Register undo/redo keyboard shortcuts using the global keyboard registry
- * Supports both Mac (Cmd) and Windows/Linux (Ctrl) modifiers
+ * Registers platform-appropriate shortcuts (Cmd for Mac, Ctrl for Windows/Linux)
  */
 export function registerUndoRedoShortcuts(): void {
+  const useMeta = isMac()
+
   const shortcuts: KeyboardShortcut[] = [
-    // Undo: Cmd+Z (Mac) and Ctrl+Z (Windows/Linux)
+    // Undo: Cmd+Z (Mac) or Ctrl+Z (Windows/Linux)
     {
       id: 'undo',
       key: 'z',
-      modifiers: { meta: true },
+      modifiers: useMeta ? { meta: true } : { ctrl: true },
       label: 'Undo',
       description: 'Undo last action',
       category: 'navigation',
       action: undoAction,
     },
-    {
-      id: 'undo-ctrl',
-      key: 'z',
-      modifiers: { ctrl: true },
-      label: 'Undo',
-      description: 'Undo last action',
-      category: 'navigation',
-      action: undoAction,
-    },
-    // Redo: Cmd+Shift+Z (Mac) and Ctrl+Shift+Z (Windows/Linux)
+    // Redo: Cmd+Shift+Z (Mac) or Ctrl+Shift+Z (Windows/Linux)
     {
       id: 'redo',
       key: 'z',
-      modifiers: { meta: true, shift: true },
+      modifiers: useMeta ? { meta: true, shift: true } : { ctrl: true, shift: true },
       label: 'Redo',
       description: 'Redo last undone action',
       category: 'navigation',
       action: redoAction,
     },
-    {
-      id: 'redo-ctrl',
-      key: 'z',
-      modifiers: { ctrl: true, shift: true },
-      label: 'Redo',
-      description: 'Redo last undone action',
-      category: 'navigation',
-      action: redoAction,
-    },
-    // Alternative redo: Cmd+Y (Mac) and Ctrl+Y (Windows/Linux)
+    // Alternative redo: Cmd+Y (Mac) or Ctrl+Y (Windows/Linux)
     {
       id: 'redo-y',
       key: 'y',
-      modifiers: { meta: true },
-      label: 'Redo',
-      description: 'Redo last undone action',
-      category: 'navigation',
-      action: redoAction,
-    },
-    {
-      id: 'redo-y-ctrl',
-      key: 'y',
-      modifiers: { ctrl: true },
-      label: 'Redo',
+      modifiers: useMeta ? { meta: true } : { ctrl: true },
+      label: 'Redo (Alt)',
       description: 'Redo last undone action',
       category: 'navigation',
       action: redoAction,
