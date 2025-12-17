@@ -1,8 +1,13 @@
-import { writable } from 'svelte/store';
+import { writable } from 'svelte/store'
 
-const VideoStore = writable({
-	isShowing: false,
-	isPlaying: false
-});
+export interface VideoStoreState {
+  isShowing: boolean
+  isPlaying: boolean
+}
 
-export default VideoStore;
+const VideoStore = writable<VideoStoreState>({
+  isShowing: false,
+  isPlaying: false,
+})
+
+export default VideoStore

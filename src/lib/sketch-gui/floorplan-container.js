@@ -1,44 +1,59 @@
+import ConfigStore from '../../stores/configStore'
+import { get } from 'svelte/store'
+
 export class FloorPlanContainer {
-	constructor(sketch, start, height) {
-		this.sk = sketch;
-		this.width = start;
-		this.height = height;
-		this.slicerSize = 25;
-		this.selectorSize = 100;
-	}
+  constructor(sketch, start, height) {
+    this.sk = sketch
+    this.width = start
+    this.height = height
+  }
 
-	drawRegionSelector() {
-		this.setSelectorStroke();
-		this.sk.circle(this.sk.mouseX, this.sk.mouseY, this.selectorSize);
-	}
+  getSelectorSize() {
+    return get(ConfigStore).selectorSize
+  }
 
-	drawSlicerSelector() {
-		this.setSelectorStroke();
-		this.sk.line(this.sk.mouseX - this.slicerSize, 0, this.sk.mouseX - this.slicerSize, this.height);
-		this.sk.line(this.sk.mouseX + this.slicerSize, 0, this.sk.mouseX + this.slicerSize, this.height);
-	}
+  getSlicerSize() {
+    return get(ConfigStore).slicerSize
+  }
 
-	setSelectorStroke() {
-		this.sk.noFill();
-		this.sk.strokeWeight(4);
-		this.sk.stroke(0);
-	}
+  drawRegionSelector() {
+    this.setSelectorStroke()
+    this.sk.circle(this.sk.mouseX, this.sk.mouseY, this.getSelectorSize())
+  }
 
-	overCursor(xPos, yPos, xPosTime) {
-		return this.sk.overCircle(xPos, yPos, this.selectorSize) || this.sk.overCircle(xPosTime, yPos, this.selectorSize);
-	}
+  drawSlicerSelector() {
+    const slicerSize = this.getSlicerSize()
+    this.setSelectorStroke()
+    this.sk.line(this.sk.mouseX - slicerSize, 0, this.sk.mouseX - slicerSize, this.height)
+    this.sk.line(this.sk.mouseX + slicerSize, 0, this.sk.mouseX + slicerSize, this.height)
+  }
 
-	overSlicer(xPos, xPosTime) {
-		return (
-			this.sk.overRect(xPos - this.slicerSize, 0, 2 * this.slicerSize, this.height) ||
-			this.sk.overRect(xPosTime - this.slicerSize, 0, 2 * this.slicerSize, this.height)
-		);
-	}
+  setSelectorStroke() {
+    this.sk.noFill()
+    this.sk.strokeWeight(4)
+    this.sk.stroke(0)
+  }
 
-	getContainer() {
-		return {
-			width: this.width,
-			height: this.height
-		};
-	}
+  overCursor(xPos, yPos, xPosTime) {
+    const selectorSize = this.getSelectorSize()
+    return (
+      this.sk.overCircle(xPos, yPos, selectorSize) ||
+      this.sk.overCircle(xPosTime, yPos, selectorSize)
+    )
+  }
+
+  overSlicer(xPos, xPosTime) {
+    const slicerSize = this.getSlicerSize()
+    return (
+      this.sk.overRect(xPos - slicerSize, 0, 2 * slicerSize, this.height) ||
+      this.sk.overRect(xPosTime - slicerSize, 0, 2 * slicerSize, this.height)
+    )
+  }
+
+  getContainer() {
+    return {
+      width: this.width,
+      height: this.height,
+    }
+  }
 }

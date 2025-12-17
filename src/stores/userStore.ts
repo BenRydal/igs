@@ -1,6 +1,8 @@
-import { writable } from 'svelte/store';
-import type { User } from '../models/user';
+import { writable } from 'svelte/store'
+import type { User } from '../models/user'
 
-const UserStore = writable(new Array<User>());
+export type UserStoreState = User[]
 
-export default UserStore;
+const UserStore = writable<UserStoreState>(new Array<User>())
+
+export default UserStore

@@ -1,1 +1,1 @@
-export * from './floorplan';
+export * from './floorplan'
