@@ -103,7 +103,8 @@ export const igsSketch = (p5: any) => {
 
   p5.visualizeData = () => {
     if (p5.dataIsLoaded(p5.floorPlan.getImg())) {
-      p5.floorPlan.setFloorPlan(p5.gui.fpContainer.getContainer())
+      const container = p5.gui.fpContainer.getContainer()
+      p5.floorPlan.setFloorPlan(container)
       if (p5.arrayIsLoaded(users)) {
         const setPathData = new SetPathData(p5)
         setPathData.setMovementAndConversation(users)

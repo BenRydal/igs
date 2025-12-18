@@ -19,6 +19,7 @@ export interface VideoState {
 
   // UI state
   isVisible: boolean
+  isSplitScreen: boolean
 
   // Seek request (for external components to request seek)
   seekRequest: { time: number; id: number } | null
@@ -32,6 +33,7 @@ const initialState: VideoState = {
   duration: 0,
   isMuted: false,
   isVisible: false,
+  isSplitScreen: false,
   seekRequest: null,
 }
 
@@ -70,6 +72,7 @@ export function hideVideo(): void {
     ...state,
     isVisible: false,
     isPlaying: false,
+    isSplitScreen: false, // Exit split-screen when hiding video
   }))
 }
 
@@ -123,6 +126,18 @@ export function setMuted(muted: boolean): void {
 export function toggleMute(): void {
   const state = get(VideoStore)
   setMuted(!state.isMuted)
+}
+
+export function toggleSplitScreen(): void {
+  VideoStore.update((state) => {
+    const newSplitScreen = !state.isSplitScreen
+    return {
+      ...state,
+      isSplitScreen: newSplitScreen,
+      // When entering split-screen, ensure video is visible
+      isVisible: newSplitScreen ? true : state.isVisible,
+    }
+  })
 }
 
 export function reset(): void {

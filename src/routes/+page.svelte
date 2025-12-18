@@ -29,6 +29,7 @@
   import P5Store from '../stores/p5Store'
   import VideoStore, { toggleVisibility, reset as resetVideo, hasVideoSource } from '../stores/videoStore'
   import VideoContainer from '$lib/components/VideoContainer.svelte'
+  import SplitScreenVideo from '$lib/components/SplitScreenVideo.svelte'
 
   import { Core } from '$lib'
   import { igsSketch } from '$lib/p5/igsSketch'
@@ -218,11 +219,67 @@
     timeline = $TimelineStore
   })
 
+  let isSplitScreen = $state(false)
+  let splitWidth = $state(40) // percentage
+  let isDraggingSplit = $state(false)
+  let prevSplitScreen = false
+
   $effect(() => {
     const videoState = $VideoStore
     isVideoShowing = videoState.isVisible
     isVideoPlaying = videoState.isPlaying
+    isSplitScreen = videoState.isSplitScreen
+
+    // Trigger canvas resize when entering/exiting split-screen
+    if (isSplitScreen !== prevSplitScreen) {
+      prevSplitScreen = isSplitScreen
+      // Wait for DOM to update, then trigger a window resize event
+      // This lets the native p5 windowResized handler work, which
+      // combined with CSS clipping handles split-screen correctly
+      setTimeout(() => {
+        window.dispatchEvent(new Event('resize'))
+      }, 150)
+    }
   })
+
+  function handleSplitDividerMouseDown(e: MouseEvent) {
+    e.preventDefault()
+    e.stopPropagation()
+    isDraggingSplit = true
+    // Prevent text selection during drag
+    document.body.style.userSelect = 'none'
+    document.body.style.cursor = 'col-resize'
+  }
+
+  function handleGlobalMouseMove(e: MouseEvent) {
+    if (!isDraggingSplit) return
+    e.preventDefault()
+
+    const container = document.getElementById('main-content')
+    if (!container) return
+
+    const rect = container.getBoundingClientRect()
+    const x = e.clientX - rect.left
+    let newPercent = (x / rect.width) * 100
+
+    // Constrain between 20% and 80%
+    newPercent = Math.max(20, Math.min(80, newPercent))
+    splitWidth = newPercent
+
+    // Trigger redraw - canvas stays full width, CSS handles clipping
+    p5Instance?.loop()
+  }
+
+  function handleGlobalMouseUp() {
+    if (isDraggingSplit) {
+      isDraggingSplit = false
+      // Restore normal selection and cursor
+      document.body.style.userSelect = ''
+      document.body.style.cursor = ''
+      // Final redraw
+      p5Instance?.loop()
+    }
+  }
 
   $effect(() => {
     users = $UserStore
@@ -697,6 +754,7 @@
     window.addEventListener('igs:load-example', handleLoadExample)
     window.addEventListener('tour-complete', handleTourComplete)
 
+
     // Cleanup function
     return () => {
       // Remove global click handler
@@ -715,6 +773,7 @@
       window.removeEventListener('igs:toggle-help', handleToggleHelp)
       window.removeEventListener('igs:load-example', handleLoadExample)
       window.removeEventListener('tour-complete', handleTourComplete)
+
     }
   })
 </script>
@@ -736,6 +795,8 @@
 <svelte:head>
   <title>IGS</title>
 </svelte:head>
+
+<svelte:window onmousemove={handleGlobalMouseMove} onmouseup={handleGlobalMouseUp} />
 
 <div class="navbar min-h-16 bg-[#ffffff]">
   <div class="flex-1 px-2 lg:flex-none">
@@ -1022,9 +1083,26 @@
   </div>
 </div>
 
-<div id="p5-canvas-container" class="relative" class:cursor-crosshair={currentConfig.highlightToggle}>
-  <P5 {sketch} />
-  <VideoContainer />
+<div id="main-content" class:split-screen-mode={isSplitScreen} class:is-dragging-split={isDraggingSplit}>
+  {#if isSplitScreen}
+    <div class="split-video-pane" style="width: {splitWidth}%;">
+      <SplitScreenVideo />
+    </div>
+    <div
+      class="split-divider"
+      onmousedown={handleSplitDividerMouseDown}
+      role="separator"
+      tabindex="0"
+    >
+      <div class="divider-handle"></div>
+    </div>
+  {/if}
+  <div id="p5-canvas-container" class="canvas-pane" class:cursor-crosshair={currentConfig.highlightToggle}>
+    <P5 {sketch} />
+    {#if !isSplitScreen}
+      <VideoContainer />
+    {/if}
+  </div>
 </div>
 
 {#if showSettings}
@@ -1510,6 +1588,89 @@
 />
 
 <style>
+  #main-content {
+    position: relative;
+    width: 100%;
+  }
+
+  #main-content.split-screen-mode {
+    display: flex;
+    height: calc(100vh - 4rem - 6rem); /* viewport - navbar - bottom nav */
+    overflow: hidden;
+  }
+
+  .split-video-pane {
+    min-width: 200px;
+    max-width: 80%;
+    height: 100%;
+    flex-shrink: 0;
+    background: #000;
+  }
+
+  .split-divider {
+    width: 12px;
+    background: #d1d5db;
+    cursor: col-resize;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s;
+  }
+
+  .split-divider:hover {
+    background: #3b82f6;
+  }
+
+  .split-divider:hover .divider-handle {
+    background: white;
+  }
+
+  .divider-handle {
+    width: 4px;
+    height: 48px;
+    background: #9ca3af;
+    border-radius: 2px;
+    transition: background 0.15s;
+  }
+
+  .canvas-pane {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+  }
+
+  #main-content.split-screen-mode .canvas-pane {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  /* Constrain the P5 canvas and its wrapper to fit within the container */
+  #main-content.split-screen-mode #p5-canvas-container {
+    width: 100%;
+    overflow: hidden;
+  }
+
+  #main-content.split-screen-mode #p5-canvas-container :global(div) {
+    width: 100% !important;
+    overflow: hidden;
+  }
+
+  #main-content.split-screen-mode #p5-canvas-container :global(canvas) {
+    max-width: 100% !important;
+    display: block;
+  }
+
+  /* Disable pointer events on children during drag to prevent P5 from capturing mouse */
+  #main-content.is-dragging-split .canvas-pane,
+  #main-content.is-dragging-split .split-video-pane {
+    pointer-events: none;
+  }
+
+  #main-content.is-dragging-split .split-divider {
+    background: #3b82f6;
+  }
+
   .color-picker {
     width: 30px;
     height: 30px;

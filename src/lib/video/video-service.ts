@@ -84,6 +84,7 @@ export function createYouTubePlayer(
         playsinline: 1,
         modestbranding: 1,
         rel: 0,
+        autoplay: 0,
       },
       events: {
         onReady: (event: any) => {

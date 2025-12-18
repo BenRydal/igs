@@ -1,24 +1,31 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte'
   import { browser } from '$app/environment'
-  import VideoStore, { clearSeekRequest } from '../../stores/videoStore'
-  import { playVideo, pauseVideo, seekTo, muteVideo, unmuteVideo, type VideoPlayer } from '../video/video-service'
+  import VideoStore from '../../stores/videoStore'
+  import { type VideoPlayer } from '../video/video-service'
+  import {
+    createVideoSyncState,
+    handleSeekRequest,
+    syncPlaybackState,
+    syncMuteState,
+    handlePlayerReady,
+  } from '../video/useVideoSync'
   import VideoPlayerComponent from './VideoPlayer.svelte'
   import VideoControls from './VideoControls.svelte'
 
   const DRAG_HANDLE_HEIGHT = 24
   const MIN_WIDTH = 160
   const DEFAULT_WIDTH = 320
+  const ASPECT_RATIO = 16 / 9
 
-  let player = $state<VideoPlayer | null>(null)
+  const syncState = createVideoSyncState()
 
   // Local state for position/size
   let posX = $state(50)
   let posY = $state(50)
   let width = $state(DEFAULT_WIDTH)
-  let aspectRatio = $state(16 / 9)
 
-  let height = $derived(width / aspectRatio + DRAG_HANDLE_HEIGHT)
+  let height = $derived(width / ASPECT_RATIO + DRAG_HANDLE_HEIGHT)
 
   // Drag state
   let isDragging = $state(false)
@@ -35,10 +42,6 @@
   let resizeStartPosX = 0
   let resizeStartPosY = 0
 
-  // Track previous state to avoid unnecessary player calls
-  let prevIsPlaying: boolean | null = null
-  let prevIsMuted: boolean | null = null
-
   let isPlaying = $derived($VideoStore.isPlaying)
   let isMuted = $derived($VideoStore.isMuted)
   let isVisible = $derived($VideoStore.isVisible)
@@ -46,51 +49,25 @@
   let seekRequest = $derived($VideoStore.seekRequest)
 
   // Handle seek requests
-  let lastSeekRequestId = 0
   $effect(() => {
-    if (player && seekRequest && seekRequest.id !== lastSeekRequestId) {
-      lastSeekRequestId = seekRequest.id
-      seekTo(player, seekRequest.time)
-      clearSeekRequest()
-    }
+    handleSeekRequest(syncState, seekRequest)
   })
 
   // Sync playback state with player
   $effect(() => {
-    if (!player || !browser || !isLoaded) return
-
-    if (isPlaying !== prevIsPlaying) {
-      if (isPlaying) {
-        playVideo(player)
-      } else if (prevIsPlaying === true) {
-        pauseVideo(player)
-      }
-      prevIsPlaying = isPlaying
-    }
+    syncPlaybackState(syncState, isPlaying, isLoaded)
   })
 
   // Sync mute state with player
   $effect(() => {
-    if (!player || !browser || !isLoaded) return
-
-    if (isMuted !== prevIsMuted) {
-      if (isMuted) {
-        muteVideo(player)
-      } else if (prevIsMuted === true) {
-        unmuteVideo(player)
-      }
-      prevIsMuted = isMuted
-    }
+    syncMuteState(syncState, isMuted, isLoaded)
   })
 
-  function handlePlayerReady(playerInstance: VideoPlayer, duration: number) {
-    player = playerInstance
-    // Reset tracking to prevent immediate pause/unmute
-    prevIsPlaying = isPlaying
-    prevIsMuted = isMuted
+  function onPlayerReady(playerInstance: VideoPlayer, duration: number) {
+    handlePlayerReady(syncState, playerInstance, isPlaying, isMuted)
   }
 
-  function handlePlayerError(message: string) {
+  function onPlayerError(message: string) {
     console.error('Video player error:', message)
   }
 
@@ -141,7 +118,7 @@
       let newX = resizeStartPosX
       let newY = resizeStartPosY
 
-      const videoHeight = (w: number) => w / aspectRatio
+      const videoHeight = (w: number) => w / ASPECT_RATIO
       const totalHeight = (w: number) => videoHeight(w) + DRAG_HANDLE_HEIGHT
 
       if (resizeCorner === 'se') {
@@ -208,7 +185,7 @@
 
   <!-- Video player area -->
   <div class="video-area" style="height: {height - DRAG_HANDLE_HEIGHT}px;">
-    <VideoPlayerComponent onready={handlePlayerReady} onerror={handlePlayerError} />
+    <VideoPlayerComponent onready={onPlayerReady} onerror={onPlayerError} />
 
     <!-- Click shield for YouTube -->
     <div class="click-shield"></div>
@@ -216,7 +193,7 @@
 
   <!-- Controls bar at bottom -->
   <div class="controls-bar">
-    <VideoControls {player} />
+    <VideoControls player={syncState.player} />
   </div>
 
   <!-- Resize handles -->
