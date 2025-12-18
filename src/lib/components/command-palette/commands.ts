@@ -2,7 +2,7 @@ import type { Command } from './types'
 import { get } from 'svelte/store'
 import ConfigStore, { type ConfigStoreType } from '../../../stores/configStore'
 import TimelineStore from '../../../stores/timelineStore'
-import VideoStore from '../../../stores/videoStore'
+import VideoStore, { toggleVisibility } from '../../../stores/videoStore'
 import P5Store from '../../../stores/p5Store'
 import { openModal } from '../../../stores/modalStore'
 import type { Timeline } from '../../../models/timeline'
@@ -230,12 +230,9 @@ export function getAllCommands(): Command[] {
       category: 'view',
       shortcut: 'V',
       action: () => {
-        VideoStore.update((store: { isShowing: boolean; isPlaying: boolean }) => ({
-          ...store,
-          isShowing: !store.isShowing,
-        }))
+        toggleVisibility()
       },
-      isActive: () => (get(VideoStore) as { isShowing: boolean; isPlaying: boolean }).isShowing,
+      isActive: () => get(VideoStore).isVisible,
     },
 
     // ==================== CLEAR COMMANDS ====================

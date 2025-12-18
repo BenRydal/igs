@@ -14,7 +14,9 @@ export class SketchGUI {
   constructor(sketch) {
     this.sk = sketch
     this.displayBottom = this.sk.height
-    this.fpContainer = new FloorPlanContainer(this.sk, timeline.getLeftX(), this.displayBottom)
+    // Cap container width to canvas width for split-screen mode
+    const containerWidth = Math.min(timeline.getLeftX(), this.sk.width)
+    this.fpContainer = new FloorPlanContainer(this.sk, containerWidth, this.displayBottom)
     this.highlight = new Highlight(this.sk, this.displayBottom)
   }
 

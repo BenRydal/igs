@@ -26,6 +26,7 @@ import UserStore from '../../stores/userStore'
 import CodeStore from '../../stores/codeStore.js'
 import TimelineStore from '../../stores/timelineStore'
 import ConfigStore from '../../stores/configStore.js'
+import VideoStore, { loadVideo, reset as resetVideo } from '../../stores/videoStore'
 import { toastStore } from '../../stores/toastStore'
 
 export class Core {
@@ -147,9 +148,9 @@ export class Core {
    */
   prepVideoFromFile(fileLocation: string): void {
     const timeline = get(TimelineStore)
-    this.sketch.videoController.clear() // clear previous video
+    resetVideo() // clear previous video
     timeline.setIsAnimating(false) // stop animation if it was running
-    this.sketch.videoController.createVideoPlayer('File', { fileName: fileLocation })
+    loadVideo({ type: 'file', fileUrl: fileLocation })
   }
 
   /**
@@ -167,6 +168,7 @@ export class Core {
    */
   handleExampleDropdown = async (event: ExampleSelectEvent): Promise<void> => {
     ConfigStore.update((store) => ({ ...store, maxStopLength: 0 }))
+    resetVideo() // Always clear previous video state when switching datasets
     const selectedValue = event.target.value as ExampleId
     const selectedExample = getExampleDataset(selectedValue)
     if (selectedExample) {
@@ -176,7 +178,7 @@ export class Core {
         await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, file)
       }
       if (videoId) {
-        this.sketch.videoController.createVideoPlayer('Youtube', { videoId })
+        loadVideo({ type: 'youtube', videoId })
       }
     }
   }

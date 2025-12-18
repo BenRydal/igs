@@ -14,12 +14,22 @@
   import MdCheck from '~icons/mdi/check'
   import MdSettings from '~icons/mdi/cog'
   import MdFileUploadOutline from '~icons/mdi/file-upload-outline'
+  import MdVisibility from '~icons/mdi/eye'
+  import MdVisibilityOff from '~icons/mdi/eye-off'
+  import MdFilterList from '~icons/mdi/filter-variant'
+  import MdSelectAll from '~icons/mdi/selection'
+  import MdChat from '~icons/mdi/chat'
+  import MdDelete from '~icons/mdi/delete'
+  import MdFolder from '~icons/mdi/folder-open'
+  import MdMoreVert from '~icons/mdi/dots-vertical'
 
   import type { User } from '../models/user'
 
   import UserStore from '../stores/userStore'
   import P5Store from '../stores/p5Store'
-  import VideoStore from '../stores/videoStore'
+  import VideoStore, { toggleVisibility, reset as resetVideo, hasVideoSource } from '../stores/videoStore'
+  import VideoContainer from '$lib/components/VideoContainer.svelte'
+  import SplitScreenVideo from '$lib/components/SplitScreenVideo.svelte'
 
   import { Core } from '$lib'
   import { igsSketch } from '$lib/p5/igsSketch'
@@ -45,6 +55,8 @@
     toggleUserEnabled,
     toggleUserConversationEnabled,
     setUserColor,
+    setUserEnabled,
+    setUserConversationEnabled,
   } from '$lib/history/user-actions'
   import {
     clearUsers,
@@ -187,7 +199,6 @@
 
   let showDataPopup = $state(false)
   let showSettings = $state(false)
-  let showDataDropDown = $state(false)
   let showImportDialog = $state(false)
   let currentConfig = $state<ConfigStoreType>($ConfigStore)
 
@@ -208,11 +219,67 @@
     timeline = $TimelineStore
   })
 
+  let isSplitScreen = $state(false)
+  let splitWidth = $state(40) // percentage
+  let isDraggingSplit = $state(false)
+  let prevSplitScreen = false
+
   $effect(() => {
     const videoState = $VideoStore
-    isVideoShowing = videoState.isShowing
+    isVideoShowing = videoState.isVisible
     isVideoPlaying = videoState.isPlaying
+    isSplitScreen = videoState.isSplitScreen
+
+    // Trigger canvas resize when entering/exiting split-screen
+    if (isSplitScreen !== prevSplitScreen) {
+      prevSplitScreen = isSplitScreen
+      // Wait for DOM to update, then trigger a window resize event
+      // This lets the native p5 windowResized handler work, which
+      // combined with CSS clipping handles split-screen correctly
+      setTimeout(() => {
+        window.dispatchEvent(new Event('resize'))
+      }, 150)
+    }
   })
+
+  function handleSplitDividerMouseDown(e: MouseEvent) {
+    e.preventDefault()
+    e.stopPropagation()
+    isDraggingSplit = true
+    // Prevent text selection during drag
+    document.body.style.userSelect = 'none'
+    document.body.style.cursor = 'col-resize'
+  }
+
+  function handleGlobalMouseMove(e: MouseEvent) {
+    if (!isDraggingSplit) return
+    e.preventDefault()
+
+    const container = document.getElementById('main-content')
+    if (!container) return
+
+    const rect = container.getBoundingClientRect()
+    const x = e.clientX - rect.left
+    let newPercent = (x / rect.width) * 100
+
+    // Constrain between 20% and 80%
+    newPercent = Math.max(20, Math.min(80, newPercent))
+    splitWidth = newPercent
+
+    // Trigger redraw - canvas stays full width, CSS handles clipping
+    p5Instance?.loop()
+  }
+
+  function handleGlobalMouseUp() {
+    if (isDraggingSplit) {
+      isDraggingSplit = false
+      // Restore normal selection and cursor
+      document.body.style.userSelect = ''
+      document.body.style.cursor = ''
+      // Final redraw
+      p5Instance?.loop()
+    }
+  }
 
   $effect(() => {
     users = $UserStore
@@ -243,13 +310,8 @@
   let formattedStopLength = $derived($ConfigStore.stopSliderValue.toFixed(0))
 
   function toggleVideo() {
-    if (p5Instance && p5Instance.videoController) {
-      p5Instance.videoController.toggleShowVideo()
-      VideoStore.update((value) => {
-        value.isShowing = p5Instance.videoController.isShowing
-        value.isPlaying = p5Instance.videoController.isPlaying
-        return value
-      })
+    if (hasVideoSource()) {
+      toggleVisibility()
     }
   }
 
@@ -440,7 +502,7 @@
   // Local version that handles UI cleanup and non-store data
   function clearAllDataLocal() {
     console.log('Clearing all data')
-    p5Instance.videoController.clear()
+    resetVideo()
     currentConfig.isPathColorMode = false
 
     // Close all floating elements before clearing data
@@ -583,6 +645,24 @@
     }
   }
 
+  /**
+   * Check if a user is visible (either movement or talk enabled)
+   */
+  function isUserVisible(user: User): boolean {
+    return user.enabled || user.conversation_enabled
+  }
+
+  /**
+   * Toggle both movement and talk visibility for a user
+   */
+  function toggleUserVisibility(user: User) {
+    const currentlyVisible = isUserVisible(user)
+    // If either is on, turn both off. If both are off, turn both on.
+    setUserEnabled(user.name, !currentlyVisible)
+    setUserConversationEnabled(user.name, !currentlyVisible)
+    p5Instance?.loop()
+  }
+
   // Add event handlers for dropdowns
   onMount(() => {
     // Global click handler to close dropdowns when clicking outside
@@ -674,6 +754,7 @@
     window.addEventListener('igs:load-example', handleLoadExample)
     window.addEventListener('tour-complete', handleTourComplete)
 
+
     // Cleanup function
     return () => {
       // Remove global click handler
@@ -692,13 +773,30 @@
       window.removeEventListener('igs:toggle-help', handleToggleHelp)
       window.removeEventListener('igs:load-example', handleLoadExample)
       window.removeEventListener('tour-complete', handleTourComplete)
+
     }
   })
 </script>
 
+{#snippet chevronDown()}
+  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+  </svg>
+{/snippet}
+
+{#snippet icon(Icon: any)}
+  <div class="w-4 h-4"><Icon /></div>
+{/snippet}
+
+{#snippet navDivider()}
+  <div class="divider divider-horizontal mx-2 h-6 self-center"></div>
+{/snippet}
+
 <svelte:head>
   <title>IGS</title>
 </svelte:head>
+
+<svelte:window onmousemove={handleGlobalMouseMove} onmouseup={handleGlobalMouseUp} />
 
 <div class="navbar min-h-16 bg-[#ffffff]">
   <div class="flex-1 px-2 lg:flex-none">
@@ -707,8 +805,10 @@
 
   <div class="flex items-center justify-end flex-1 px-2">
     <details class="dropdown" use:clickOutside>
-      <summary class="btn btn-sm ml-4 tooltip tooltip-bottom flex items-center justify-center">
+      <summary class="btn btn-sm ml-4 gap-1 flex items-center">
+        {@render icon(MdFilterList)}
         Filter
+        {@render chevronDown()}
       </summary>
       <ul class="menu dropdown-content rounded-box z-[1] w-52 p-2 shadow bg-base-100">
         {#each filterToggleOptions as toggle}
@@ -747,8 +847,10 @@
     <!-- Select Dropdown (only shown in 2D mode) -->
     {#if !is3DMode}
       <details class="dropdown" use:clickOutside>
-        <summary class="btn btn-sm ml-4 tooltip tooltip-bottom flex items-center justify-center">
+        <summary class="btn btn-sm ml-4 gap-1 flex items-center">
+          {@render icon(MdSelectAll)}
           Select
+          {@render chevronDown()}
         </summary>
         <ul class="menu dropdown-content rounded-box z-[1] w-52 p-2 shadow bg-base-100">
           {#each selectToggleOptions as toggle}
@@ -800,8 +902,10 @@
 
     <!-- Talk Dropdown -->
     <details class="dropdown" use:clickOutside>
-      <summary class="btn btn-sm ml-4 tooltip tooltip-bottom flex items-center justify-center">
+      <summary class="btn btn-sm ml-4 gap-1 flex items-center">
+        {@render icon(MdChat)}
         Talk
+        {@render chevronDown()}
       </summary>
       <ul class="menu dropdown-content rounded-box z-[1] w-52 p-2 shadow bg-base-100">
         {#each conversationToggleOptions as toggle}
@@ -845,17 +949,21 @@
 
     <!-- Clear Data Dropdown -->
     <details class="dropdown" use:clickOutside>
-      <summary class="btn btn-sm ml-4 tooltip tooltip-bottom flex items-center justify-center">
+      <summary class="btn btn-sm ml-4 gap-1 flex items-center">
+        {@render icon(MdDelete)}
         Clear
+        {@render chevronDown()}
       </summary>
       <ul class="menu dropdown-content rounded-box z-[1] w-52 p-2 shadow bg-base-100">
         <li><button onclick={clearMovementData}>Movement</button></li>
         <li><button onclick={clearConversationData}>Conversation</button></li>
         <li><button onclick={clearCodeData}>Codes</button></li>
-        <li><button onclick={() => p5Instance.videoController.clear()}>Video</button></li>
+        <li><button onclick={resetVideo}>Video</button></li>
         <li><button onclick={clearAllDataLocal}>All Data</button></li>
       </ul>
     </details>
+
+    {@render navDivider()}
 
     <div class="flex items-center gap-1">
       <IconButton
@@ -885,25 +993,11 @@
           is3DMode = p5Instance.handle3D.getIs3DMode()
         }}
       />
-      {#if isVideoShowing}
-        <IconButton
-          id="btn-toggle-video"
-          icon={MdVideocam}
-          tooltip={'Show/Hide Video'}
-          onclick={toggleVideo}
-        />
-      {:else}
-        <IconButton
-          id="btn-toggle-video"
-          icon={MdVideocamOff}
-          tooltip={'Show/Hide Video'}
-          onclick={toggleVideo}
-        />
-      {/if}
       <IconButton
-        icon={MdCloudDownload}
-        tooltip={'Download Code File'}
-        onclick={() => p5Instance.saveCodeFile()}
+        id="btn-toggle-video"
+        icon={isVideoShowing ? MdVideocam : MdVideocamOff}
+        tooltip={'Show/Hide Video'}
+        onclick={toggleVideo}
       />
       <IconButton
         icon={MdFileUploadOutline}
@@ -919,64 +1013,96 @@
         bind:files
         onchange={updateUserLoadedFiles}
       />
-      <IconButton
-        icon={MdKeyboard}
-        tooltip={'Keyboard Shortcuts (?)'}
-        onclick={() => window.dispatchEvent(new CustomEvent('igs:open-cheatsheet'))}
-      />
+
       <IconButton
         icon={MdHelpOutline}
         tooltip={'Help'}
         onclick={() => ($isModalOpen = !$isModalOpen)}
       />
-      <IconButton icon={MdSettings} tooltip={'Settings'} onclick={() => (showSettings = true)} />
 
-      <div class="relative inline-block text-left">
-        <button
-          onclick={() => (showDataDropDown = !showDataDropDown)}
-          class="flex justify-between w-full rounded border border-gray-300 p-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring focus:ring-indigo-500"
-        >
-          {selectedDropDownOption || '-- Select an Example --'}
-          <div
-            class={`ml-2 transition-transform duration-300 ${showDataDropDown ? 'rotate-0' : 'rotate-180'}`}
-          >
-            <span class="block w-3 h-3 border-l border-t border-gray-700 transform rotate-45"
-            ></span>
-          </div>
-        </button>
+      <!-- More menu (Download, Keyboard, Settings) -->
+      <details class="dropdown dropdown-end" use:clickOutside>
+        <summary class="btn btn-sm btn-ghost btn-square">
+          <div class="w-5 h-5"><MdMoreVert /></div>
+        </summary>
+        <ul class="menu dropdown-content rounded-box z-[1] w-48 p-2 shadow bg-base-100">
+          <li>
+            <button onclick={() => p5Instance.saveCodeFile()} class="flex items-center gap-2">
+              {@render icon(MdCloudDownload)}
+              Download Codes
+            </button>
+          </li>
+          <li>
+            <button onclick={() => window.dispatchEvent(new CustomEvent('igs:open-cheatsheet'))} class="flex items-center gap-2">
+              {@render icon(MdKeyboard)}
+              Keyboard Shortcuts
+            </button>
+          </li>
+          <li>
+            <button onclick={() => (showSettings = true)} class="flex items-center gap-2">
+              {@render icon(MdSettings)}
+              Settings
+            </button>
+          </li>
+        </ul>
+      </details>
 
-        {#if showDataDropDown}
-          <div
-            class="absolute z-10 mt-2 w-full rounded-md bg-white shadow-lg max-h-[75vh] overflow-y-auto"
-          >
-            <ul class="py-1" role="menu" aria-orientation="vertical">
-              {#each dropdownOptions as group}
-                <li class="px-4 py-2 font-semibold text-gray-600">{group.label}</li>
-                {#each group.items as item}
-                  <li>
-                    <button
-                      onclick={() => {
-                        updateExampleDataDropDown({ target: { value: item.value } })
-                        showDataDropDown = false
-                        selectedDropDownOption = item.label
-                      }}
-                      class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                    >
-                      {item.label}
-                    </button>
-                  </li>
-                {/each}
-              {/each}
-            </ul>
-          </div>
-        {/if}
-      </div>
+      {@render navDivider()}
+
+      <!-- Examples Dropdown -->
+      <details class="dropdown dropdown-end" use:clickOutside>
+        <summary class="btn btn-sm gap-1 flex items-center">
+          {@render icon(MdFolder)}
+          <span class="max-w-32 truncate">{selectedDropDownOption || 'Examples'}</span>
+          {@render chevronDown()}
+        </summary>
+        <ul class="menu dropdown-content rounded-box z-[1] w-56 p-2 shadow bg-base-100 max-h-[60vh] overflow-y-auto">
+          {#each dropdownOptions as group}
+            <li class="menu-title">{group.label}</li>
+            {#each group.items as item}
+              {@const isSelected = selectedDropDownOption === item.label}
+              <li>
+                <button
+                  onclick={() => {
+                    updateExampleDataDropDown({ target: { value: item.value } })
+                    selectedDropDownOption = item.label
+                  }}
+                  class="text-left {isSelected ? 'bg-primary/20 font-medium' : ''}"
+                >
+                  {#if isSelected}
+                    <MdCheck class="w-4 h-4" />
+                  {/if}
+                  {item.label}
+                </button>
+              </li>
+            {/each}
+          {/each}
+        </ul>
+      </details>
     </div>
   </div>
 </div>
 
-<div class="h-10" class:cursor-crosshair={currentConfig.highlightToggle}>
-  <P5 {sketch} />
+<div id="main-content" class:split-screen-mode={isSplitScreen} class:is-dragging-split={isDraggingSplit}>
+  {#if isSplitScreen}
+    <div class="split-video-pane" style="width: {splitWidth}%;">
+      <SplitScreenVideo />
+    </div>
+    <div
+      class="split-divider"
+      onmousedown={handleSplitDividerMouseDown}
+      role="separator"
+      tabindex="0"
+    >
+      <div class="divider-handle"></div>
+    </div>
+  {/if}
+  <div id="p5-canvas-container" class="canvas-pane" class:cursor-crosshair={currentConfig.highlightToggle}>
+    <P5 {sketch} />
+    {#if !isSplitScreen}
+      <VideoContainer />
+    {/if}
+  </div>
 </div>
 
 {#if showSettings}
@@ -1324,77 +1450,117 @@
       </div>
     {/if}
 
-    <!-- Users Dropdowns with Floating UI -->
-    {#each $UserStore as user, index}
-      <div class="relative mr-2">
-        <button
-          class="btn"
-          style="color: {user.color};"
-          onclick={(event) => {
-            // Stop event propagation to prevent the global click handler from closing the dropdown
-            event.stopPropagation()
-
-            // Toggle the dropdown
-            toggleDropdown(`dropdown-${user.name}`, `btn-${user.name}`)
-          }}
-          id={`btn-${user.name}`}
-        >
-          {user.name}
-        </button>
-
-        <div id={`dropdown-container-${user.name}`}>
-          <div
-            id={`dropdown-${user.name}`}
-            class="hidden bg-base-100 rounded-box p-2 shadow absolute"
-            style="z-index: 9999;"
+    <!-- User Buttons with Eye Icon -->
+    {#each $UserStore as user}
+      {@const visible = isUserVisible(user)}
+      {@const buttonStyle = `color: ${visible ? user.color : '#999'}; opacity: ${visible ? 1 : 0.5};`}
+      <div class="relative flex-shrink-0 mr-2">
+        <div class="join">
+          <!-- Visibility toggle (eye icon) -->
+          <button
+            class="btn join-item px-2"
+            style={buttonStyle}
+            onclick={(event) => {
+              event.stopPropagation()
+              toggleUserVisibility(user)
+            }}
+            title={visible ? 'Hide user' : 'Show user'}
           >
-            <ul class="w-52">
-              <li class="py-2">
-                <div class="flex items-center">
-                  <input
-                    id="userCheckbox-{user.name}"
-                    type="checkbox"
-                    class="checkbox mr-2"
-                    checked={user.enabled}
-                    onchange={() => {
-                      toggleUserEnabled(user.name)
-                      p5Instance?.loop()
-                    }}
-                  />
-                  <label for="userCheckbox-{user.name}">Movement</label>
-                </div>
-              </li>
-              <li class="py-2">
-                <div class="flex items-center">
-                  <input
-                    id="userTalkCheckbox-{user.name}"
-                    type="checkbox"
-                    class="checkbox mr-2"
-                    checked={user.conversation_enabled}
-                    onchange={() => {
-                      toggleUserConversationEnabled(user.name)
-                      p5Instance?.loop()
-                    }}
-                  />
-                  <label for="userTalkCheckbox-{user.name}">Talk</label>
-                </div>
-              </li>
-              <li class="py-2">
-                <div class="flex items-center">
-                  <input
-                    type="color"
-                    class="color-picker max-w-[24px] max-h-[28px] mr-2"
-                    value={user.color}
-                    onchange={(e) => {
-                      setUserColor(user.name, e.target.value)
-                      p5Instance?.loop()
-                    }}
-                  />
-                  <span>Color</span>
-                </div>
-              </li>
-            </ul>
-          </div>
+            {#if visible}
+              <MdVisibility class="w-5 h-5" />
+            {:else}
+              <MdVisibilityOff class="w-5 h-5" />
+            {/if}
+          </button>
+
+          <!-- Name button opens dropdown -->
+          <button
+            class="btn join-item px-3 max-w-40 truncate"
+            style={buttonStyle}
+            onclick={(event) => {
+              event.stopPropagation()
+              toggleDropdown(`dropdown-${user.name}`, `btn-${user.name}`)
+            }}
+            id={`btn-${user.name}`}
+            title={user.name}
+          >
+            {user.name}
+          </button>
+        </div>
+
+        <!-- User dropdown -->
+        <div
+          id={`dropdown-${user.name}`}
+          class="hidden bg-base-100 rounded-box p-2 shadow absolute"
+          style="z-index: 9999;"
+        >
+          <ul class="w-52">
+            <!-- Name Input -->
+            <li class="py-2">
+              <input
+                type="text"
+                class="input input-bordered input-sm w-full"
+                value={user.name}
+                onchange={(e) => {
+                  const oldName = user.name
+                  const newName = e.currentTarget.value.trim()
+                  if (newName && newName !== oldName) {
+                    UserStore.update((users) =>
+                      users.map((u) => (u.name === oldName ? { ...u, name: newName } : u))
+                    )
+                    closeAllDropdowns()
+                    p5Instance?.loop()
+                  }
+                }}
+                placeholder="User name"
+              />
+            </li>
+            <!-- Movement -->
+            <li class="py-2">
+              <label class="flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  class="checkbox mr-2"
+                  checked={user.enabled}
+                  onchange={() => {
+                    toggleUserEnabled(user.name)
+                    p5Instance?.loop()
+                  }}
+                />
+                Movement
+              </label>
+            </li>
+            <!-- Talk -->
+            <li class="py-2">
+              <label class="flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  class="checkbox mr-2"
+                  checked={user.conversation_enabled}
+                  onchange={() => {
+                    toggleUserConversationEnabled(user.name)
+                    p5Instance?.loop()
+                  }}
+                />
+                Talk
+              </label>
+            </li>
+            <!-- Color -->
+            <li class="py-2">
+              <div class="flex items-center">
+                <input
+                  type="color"
+                  class="color-picker max-w-[24px] max-h-[28px] mr-2"
+                  value={user.color}
+                  onchange={(e) => {
+                    setUserColor(user.name, e.currentTarget.value)
+                    p5Instance?.loop()
+                  }}
+                />
+                <span>Color</span>
+              </div>
+            </li>
+          </ul>
         </div>
       </div>
     {/each}
@@ -1409,8 +1575,6 @@
   </div>
 </div>
 
-<slot />
-
 <IgsInfoModal {isModalOpen} />
 
 <OnboardingTour />
@@ -1424,6 +1588,89 @@
 />
 
 <style>
+  #main-content {
+    position: relative;
+    width: 100%;
+  }
+
+  #main-content.split-screen-mode {
+    display: flex;
+    height: calc(100vh - 4rem - 6rem); /* viewport - navbar - bottom nav */
+    overflow: hidden;
+  }
+
+  .split-video-pane {
+    min-width: 200px;
+    max-width: 80%;
+    height: 100%;
+    flex-shrink: 0;
+    background: #000;
+  }
+
+  .split-divider {
+    width: 12px;
+    background: #d1d5db;
+    cursor: col-resize;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s;
+  }
+
+  .split-divider:hover {
+    background: #3b82f6;
+  }
+
+  .split-divider:hover .divider-handle {
+    background: white;
+  }
+
+  .divider-handle {
+    width: 4px;
+    height: 48px;
+    background: #9ca3af;
+    border-radius: 2px;
+    transition: background 0.15s;
+  }
+
+  .canvas-pane {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+  }
+
+  #main-content.split-screen-mode .canvas-pane {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  /* Constrain the P5 canvas and its wrapper to fit within the container */
+  #main-content.split-screen-mode #p5-canvas-container {
+    width: 100%;
+    overflow: hidden;
+  }
+
+  #main-content.split-screen-mode #p5-canvas-container :global(div) {
+    width: 100% !important;
+    overflow: hidden;
+  }
+
+  #main-content.split-screen-mode #p5-canvas-container :global(canvas) {
+    max-width: 100% !important;
+    display: block;
+  }
+
+  /* Disable pointer events on children during drag to prevent P5 from capturing mouse */
+  #main-content.is-dragging-split .canvas-pane,
+  #main-content.is-dragging-split .split-video-pane {
+    pointer-events: none;
+  }
+
+  #main-content.is-dragging-split .split-divider {
+    background: #3b82f6;
+  }
+
   .color-picker {
     width: 30px;
     height: 30px;

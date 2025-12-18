@@ -33,6 +33,35 @@ export function toggleUserEnabled(userId: string): void {
 }
 
 /**
+ * Set user visibility to a specific value with undo
+ */
+export function setUserEnabled(userId: string, enabled: boolean): void {
+  const users = get(UserStore)
+  const user = users.find((u) => u.name === userId)
+  if (!user) return
+
+  const wasEnabled = user.enabled
+  if (wasEnabled === enabled) return
+
+  UserStore.update((list) =>
+    list.map((u) => (u.name === userId ? { ...u, enabled } : u))
+  )
+
+  historyStore.push({
+    actionType: 'user.toggle',
+    actionLabel: `${enabled ? 'Showed' : 'Hid'} ${userId}`,
+    undo: () =>
+      UserStore.update((list) =>
+        list.map((u) => (u.name === userId ? { ...u, enabled: wasEnabled } : u))
+      ),
+    redo: () =>
+      UserStore.update((list) =>
+        list.map((u) => (u.name === userId ? { ...u, enabled } : u))
+      ),
+  })
+}
+
+/**
  * Toggle user conversation visibility with undo
  */
 export function toggleUserConversationEnabled(userId: string): void {
@@ -58,6 +87,35 @@ export function toggleUserConversationEnabled(userId: string): void {
     redo: () =>
       UserStore.update((list) =>
         list.map((u) => (u.name === userId ? { ...u, conversation_enabled: !wasEnabled } : u))
+      ),
+  })
+}
+
+/**
+ * Set user conversation visibility to a specific value with undo
+ */
+export function setUserConversationEnabled(userId: string, enabled: boolean): void {
+  const users = get(UserStore)
+  const user = users.find((u) => u.name === userId)
+  if (!user) return
+
+  const wasEnabled = user.conversation_enabled
+  if (wasEnabled === enabled) return
+
+  UserStore.update((list) =>
+    list.map((u) => (u.name === userId ? { ...u, conversation_enabled: enabled } : u))
+  )
+
+  historyStore.push({
+    actionType: 'user.toggle',
+    actionLabel: `${enabled ? 'Showed' : 'Hid'} ${userId} conversation`,
+    undo: () =>
+      UserStore.update((list) =>
+        list.map((u) => (u.name === userId ? { ...u, conversation_enabled: wasEnabled } : u))
+      ),
+    redo: () =>
+      UserStore.update((list) =>
+        list.map((u) => (u.name === userId ? { ...u, conversation_enabled: enabled } : u))
       ),
   })
 }

@@ -1,5 +1,6 @@
 import ConfigStore from '../../stores/configStore'
 import TimelineStore from '../../stores/timelineStore'
+import VideoStore from '../../stores/videoStore'
 
 let timeline
 
@@ -14,6 +15,16 @@ ConfigStore.subscribe((data) => {
   isPathColorMode = data.isPathColorMode
   movementStrokeWeight = data.movementStrokeWeight
   stopStrokeWeight = data.stopStrokeWeight
+})
+
+let videoIsPlaying = false
+let videoIsLoaded = false
+let videoCurrentTime = 0
+
+VideoStore.subscribe((data) => {
+  videoIsPlaying = data.isPlaying
+  videoIsLoaded = data.isLoaded
+  videoCurrentTime = data.currentTime
 })
 
 export class DrawMovement {
@@ -160,7 +171,7 @@ export class DrawMovement {
     if (timeline.getIsAnimating()) {
       return this.createDot(xPos, yPos, zPos, timePos, codeColor, null) // No length to compare so set to null
     }
-    if (this.sk.videoController.isLoadedAndIsPlaying()) {
+    if (videoIsLoaded && videoIsPlaying) {
       const videoSelectTime = this.getVideoSelectTime()
       if (this.compareToCurDot(videoSelectTime, timePos, curDot)) {
         return this.createDot(
@@ -194,9 +205,7 @@ export class DrawMovement {
   }
 
   getVideoSelectTime() {
-    const videoPixelTime = timeline.mapTotalTimeToPixelTime(
-      this.sk.videoController.getVideoPlayerCurTime()
-    )
+    const videoPixelTime = timeline.mapTotalTimeToPixelTime(videoCurrentTime)
     return this.sk.mapSelectTimeToPixelTime(videoPixelTime)
   }
 

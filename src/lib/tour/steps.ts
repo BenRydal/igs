@@ -22,7 +22,7 @@ export const tourSteps: TourStep[] = [
     },
   },
   {
-    element: '[data-tip="Upload"]',
+    element: '[data-tip="Import Files"]',
     popover: {
       title: 'Upload Your Data',
       description:
