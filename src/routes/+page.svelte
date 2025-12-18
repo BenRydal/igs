@@ -20,6 +20,8 @@
   import MdSelectAll from '~icons/mdi/selection'
   import MdChat from '~icons/mdi/chat'
   import MdDelete from '~icons/mdi/delete'
+  import MdFolder from '~icons/mdi/folder-open'
+  import MdMoreVert from '~icons/mdi/dots-vertical'
 
   import type { User } from '../models/user'
 
@@ -195,7 +197,6 @@
 
   let showDataPopup = $state(false)
   let showSettings = $state(false)
-  let showDataDropDown = $state(false)
   let showImportDialog = $state(false)
   let currentConfig = $state<ConfigStoreType>($ConfigStore)
 
@@ -728,6 +729,14 @@
   </svg>
 {/snippet}
 
+{#snippet icon(Icon: any)}
+  <div class="w-4 h-4"><Icon /></div>
+{/snippet}
+
+{#snippet navDivider()}
+  <div class="divider divider-horizontal mx-2 h-6 self-center"></div>
+{/snippet}
+
 <svelte:head>
   <title>IGS</title>
 </svelte:head>
@@ -740,7 +749,7 @@
   <div class="flex items-center justify-end flex-1 px-2">
     <details class="dropdown" use:clickOutside>
       <summary class="btn btn-sm ml-4 gap-1 flex items-center">
-        <div class="w-4 h-4"><MdFilterList /></div>
+        {@render icon(MdFilterList)}
         Filter
         {@render chevronDown()}
       </summary>
@@ -782,7 +791,7 @@
     {#if !is3DMode}
       <details class="dropdown" use:clickOutside>
         <summary class="btn btn-sm ml-4 gap-1 flex items-center">
-          <div class="w-4 h-4"><MdSelectAll /></div>
+          {@render icon(MdSelectAll)}
           Select
           {@render chevronDown()}
         </summary>
@@ -837,7 +846,7 @@
     <!-- Talk Dropdown -->
     <details class="dropdown" use:clickOutside>
       <summary class="btn btn-sm ml-4 gap-1 flex items-center">
-        <div class="w-4 h-4"><MdChat /></div>
+        {@render icon(MdChat)}
         Talk
         {@render chevronDown()}
       </summary>
@@ -884,7 +893,7 @@
     <!-- Clear Data Dropdown -->
     <details class="dropdown" use:clickOutside>
       <summary class="btn btn-sm ml-4 gap-1 flex items-center">
-        <div class="w-4 h-4"><MdDelete /></div>
+        {@render icon(MdDelete)}
         Clear
         {@render chevronDown()}
       </summary>
@@ -896,6 +905,8 @@
         <li><button onclick={clearAllDataLocal}>All Data</button></li>
       </ul>
     </details>
+
+    {@render navDivider()}
 
     <div class="flex items-center gap-1">
       <IconButton
@@ -925,25 +936,11 @@
           is3DMode = p5Instance.handle3D.getIs3DMode()
         }}
       />
-      {#if isVideoShowing}
-        <IconButton
-          id="btn-toggle-video"
-          icon={MdVideocam}
-          tooltip={'Show/Hide Video'}
-          onclick={toggleVideo}
-        />
-      {:else}
-        <IconButton
-          id="btn-toggle-video"
-          icon={MdVideocamOff}
-          tooltip={'Show/Hide Video'}
-          onclick={toggleVideo}
-        />
-      {/if}
       <IconButton
-        icon={MdCloudDownload}
-        tooltip={'Download Code File'}
-        onclick={() => p5Instance.saveCodeFile()}
+        id="btn-toggle-video"
+        icon={isVideoShowing ? MdVideocam : MdVideocamOff}
+        tooltip={'Show/Hide Video'}
+        onclick={toggleVideo}
       />
       <IconButton
         icon={MdFileUploadOutline}
@@ -959,58 +956,68 @@
         bind:files
         onchange={updateUserLoadedFiles}
       />
-      <IconButton
-        icon={MdKeyboard}
-        tooltip={'Keyboard Shortcuts (?)'}
-        onclick={() => window.dispatchEvent(new CustomEvent('igs:open-cheatsheet'))}
-      />
+
       <IconButton
         icon={MdHelpOutline}
         tooltip={'Help'}
         onclick={() => ($isModalOpen = !$isModalOpen)}
       />
-      <IconButton icon={MdSettings} tooltip={'Settings'} onclick={() => (showSettings = true)} />
 
-      <div class="relative inline-block text-left">
-        <button
-          onclick={() => (showDataDropDown = !showDataDropDown)}
-          class="flex justify-between w-full rounded border border-gray-300 p-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring focus:ring-indigo-500"
-        >
-          {selectedDropDownOption || '-- Select an Example --'}
-          <div
-            class={`ml-2 transition-transform duration-300 ${showDataDropDown ? 'rotate-0' : 'rotate-180'}`}
-          >
-            <span class="block w-3 h-3 border-l border-t border-gray-700 transform rotate-45"
-            ></span>
-          </div>
-        </button>
+      <!-- More menu (Download, Keyboard, Settings) -->
+      <details class="dropdown dropdown-end" use:clickOutside>
+        <summary class="btn btn-sm btn-ghost btn-square">
+          <div class="w-5 h-5"><MdMoreVert /></div>
+        </summary>
+        <ul class="menu dropdown-content rounded-box z-[1] w-48 p-2 shadow bg-base-100">
+          <li>
+            <button onclick={() => p5Instance.saveCodeFile()} class="flex items-center gap-2">
+              {@render icon(MdCloudDownload)}
+              Download Codes
+            </button>
+          </li>
+          <li>
+            <button onclick={() => window.dispatchEvent(new CustomEvent('igs:open-cheatsheet'))} class="flex items-center gap-2">
+              {@render icon(MdKeyboard)}
+              Keyboard Shortcuts
+            </button>
+          </li>
+          <li>
+            <button onclick={() => (showSettings = true)} class="flex items-center gap-2">
+              {@render icon(MdSettings)}
+              Settings
+            </button>
+          </li>
+        </ul>
+      </details>
 
-        {#if showDataDropDown}
-          <div
-            class="absolute z-10 mt-2 w-full rounded-md bg-white shadow-lg max-h-[75vh] overflow-y-auto"
-          >
-            <ul class="py-1" role="menu" aria-orientation="vertical">
-              {#each dropdownOptions as group}
-                <li class="px-4 py-2 font-semibold text-gray-600">{group.label}</li>
-                {#each group.items as item}
-                  <li>
-                    <button
-                      onclick={() => {
-                        updateExampleDataDropDown({ target: { value: item.value } })
-                        showDataDropDown = false
-                        selectedDropDownOption = item.label
-                      }}
-                      class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                    >
-                      {item.label}
-                    </button>
-                  </li>
-                {/each}
-              {/each}
-            </ul>
-          </div>
-        {/if}
-      </div>
+      {@render navDivider()}
+
+      <!-- Examples Dropdown -->
+      <details class="dropdown dropdown-end" use:clickOutside>
+        <summary class="btn btn-sm gap-1 flex items-center">
+          {@render icon(MdFolder)}
+          <span class="max-w-32 truncate">{selectedDropDownOption || 'Examples'}</span>
+          {@render chevronDown()}
+        </summary>
+        <ul class="menu dropdown-content rounded-box z-[1] w-56 p-2 shadow bg-base-100 max-h-[60vh] overflow-y-auto">
+          {#each dropdownOptions as group}
+            <li class="menu-title">{group.label}</li>
+            {#each group.items as item}
+              <li>
+                <button
+                  onclick={() => {
+                    updateExampleDataDropDown({ target: { value: item.value } })
+                    selectedDropDownOption = item.label
+                  }}
+                  class="text-left"
+                >
+                  {item.label}
+                </button>
+              </li>
+            {/each}
+          {/each}
+        </ul>
+      </details>
     </div>
   </div>
 </div>
