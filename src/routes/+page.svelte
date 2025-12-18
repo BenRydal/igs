@@ -1003,14 +1003,18 @@
           {#each dropdownOptions as group}
             <li class="menu-title">{group.label}</li>
             {#each group.items as item}
+              {@const isSelected = selectedDropDownOption === item.label}
               <li>
                 <button
                   onclick={() => {
                     updateExampleDataDropDown({ target: { value: item.value } })
                     selectedDropDownOption = item.label
                   }}
-                  class="text-left"
+                  class="text-left {isSelected ? 'bg-primary/20 font-medium' : ''}"
                 >
+                  {#if isSelected}
+                    <MdCheck class="w-4 h-4" />
+                  {/if}
                   {item.label}
                 </button>
               </li>
