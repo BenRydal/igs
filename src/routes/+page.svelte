@@ -14,6 +14,8 @@
   import MdCheck from '~icons/mdi/check'
   import MdSettings from '~icons/mdi/cog'
   import MdFileUploadOutline from '~icons/mdi/file-upload-outline'
+  import MdVisibility from '~icons/mdi/eye'
+  import MdVisibilityOff from '~icons/mdi/eye-off'
 
   import type { User } from '../models/user'
 
@@ -45,6 +47,8 @@
     toggleUserEnabled,
     toggleUserConversationEnabled,
     setUserColor,
+    setUserEnabled,
+    setUserConversationEnabled,
   } from '$lib/history/user-actions'
   import {
     clearUsers,
@@ -581,6 +585,24 @@
 
       openDropdownId = id
     }
+  }
+
+  /**
+   * Check if a user is visible (either movement or talk enabled)
+   */
+  function isUserVisible(user: User): boolean {
+    return user.enabled || user.conversation_enabled
+  }
+
+  /**
+   * Toggle both movement and talk visibility for a user
+   */
+  function toggleUserVisibility(user: User) {
+    const currentlyVisible = isUserVisible(user)
+    // If either is on, turn both off. If both are off, turn both on.
+    setUserEnabled(user.name, !currentlyVisible)
+    setUserConversationEnabled(user.name, !currentlyVisible)
+    p5Instance?.loop()
   }
 
   // Add event handlers for dropdowns
@@ -1324,77 +1346,117 @@
       </div>
     {/if}
 
-    <!-- Users Dropdowns with Floating UI -->
-    {#each $UserStore as user, index}
-      <div class="relative mr-2">
-        <button
-          class="btn"
-          style="color: {user.color};"
-          onclick={(event) => {
-            // Stop event propagation to prevent the global click handler from closing the dropdown
-            event.stopPropagation()
-
-            // Toggle the dropdown
-            toggleDropdown(`dropdown-${user.name}`, `btn-${user.name}`)
-          }}
-          id={`btn-${user.name}`}
-        >
-          {user.name}
-        </button>
-
-        <div id={`dropdown-container-${user.name}`}>
-          <div
-            id={`dropdown-${user.name}`}
-            class="hidden bg-base-100 rounded-box p-2 shadow absolute"
-            style="z-index: 9999;"
+    <!-- User Buttons with Eye Icon -->
+    {#each $UserStore as user}
+      {@const visible = isUserVisible(user)}
+      {@const buttonStyle = `color: ${visible ? user.color : '#999'}; opacity: ${visible ? 1 : 0.5};`}
+      <div class="relative flex-shrink-0 mr-2">
+        <div class="join">
+          <!-- Visibility toggle (eye icon) -->
+          <button
+            class="btn join-item px-2"
+            style={buttonStyle}
+            onclick={(event) => {
+              event.stopPropagation()
+              toggleUserVisibility(user)
+            }}
+            title={visible ? 'Hide user' : 'Show user'}
           >
-            <ul class="w-52">
-              <li class="py-2">
-                <div class="flex items-center">
-                  <input
-                    id="userCheckbox-{user.name}"
-                    type="checkbox"
-                    class="checkbox mr-2"
-                    checked={user.enabled}
-                    onchange={() => {
-                      toggleUserEnabled(user.name)
-                      p5Instance?.loop()
-                    }}
-                  />
-                  <label for="userCheckbox-{user.name}">Movement</label>
-                </div>
-              </li>
-              <li class="py-2">
-                <div class="flex items-center">
-                  <input
-                    id="userTalkCheckbox-{user.name}"
-                    type="checkbox"
-                    class="checkbox mr-2"
-                    checked={user.conversation_enabled}
-                    onchange={() => {
-                      toggleUserConversationEnabled(user.name)
-                      p5Instance?.loop()
-                    }}
-                  />
-                  <label for="userTalkCheckbox-{user.name}">Talk</label>
-                </div>
-              </li>
-              <li class="py-2">
-                <div class="flex items-center">
-                  <input
-                    type="color"
-                    class="color-picker max-w-[24px] max-h-[28px] mr-2"
-                    value={user.color}
-                    onchange={(e) => {
-                      setUserColor(user.name, e.target.value)
-                      p5Instance?.loop()
-                    }}
-                  />
-                  <span>Color</span>
-                </div>
-              </li>
-            </ul>
-          </div>
+            {#if visible}
+              <MdVisibility class="w-5 h-5" />
+            {:else}
+              <MdVisibilityOff class="w-5 h-5" />
+            {/if}
+          </button>
+
+          <!-- Name button opens dropdown -->
+          <button
+            class="btn join-item px-3 max-w-40 truncate"
+            style={buttonStyle}
+            onclick={(event) => {
+              event.stopPropagation()
+              toggleDropdown(`dropdown-${user.name}`, `btn-${user.name}`)
+            }}
+            id={`btn-${user.name}`}
+            title={user.name}
+          >
+            {user.name}
+          </button>
+        </div>
+
+        <!-- User dropdown -->
+        <div
+          id={`dropdown-${user.name}`}
+          class="hidden bg-base-100 rounded-box p-2 shadow absolute"
+          style="z-index: 9999;"
+        >
+          <ul class="w-52">
+            <!-- Name Input -->
+            <li class="py-2">
+              <input
+                type="text"
+                class="input input-bordered input-sm w-full"
+                value={user.name}
+                onchange={(e) => {
+                  const oldName = user.name
+                  const newName = e.currentTarget.value.trim()
+                  if (newName && newName !== oldName) {
+                    UserStore.update((users) =>
+                      users.map((u) => (u.name === oldName ? { ...u, name: newName } : u))
+                    )
+                    closeAllDropdowns()
+                    p5Instance?.loop()
+                  }
+                }}
+                placeholder="User name"
+              />
+            </li>
+            <!-- Movement -->
+            <li class="py-2">
+              <label class="flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  class="checkbox mr-2"
+                  checked={user.enabled}
+                  onchange={() => {
+                    toggleUserEnabled(user.name)
+                    p5Instance?.loop()
+                  }}
+                />
+                Movement
+              </label>
+            </li>
+            <!-- Talk -->
+            <li class="py-2">
+              <label class="flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  class="checkbox mr-2"
+                  checked={user.conversation_enabled}
+                  onchange={() => {
+                    toggleUserConversationEnabled(user.name)
+                    p5Instance?.loop()
+                  }}
+                />
+                Talk
+              </label>
+            </li>
+            <!-- Color -->
+            <li class="py-2">
+              <div class="flex items-center">
+                <input
+                  type="color"
+                  class="color-picker max-w-[24px] max-h-[28px] mr-2"
+                  value={user.color}
+                  onchange={(e) => {
+                    setUserColor(user.name, e.currentTarget.value)
+                    p5Instance?.loop()
+                  }}
+                />
+                <span>Color</span>
+              </div>
+            </li>
+          </ul>
         </div>
       </div>
     {/each}
