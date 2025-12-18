@@ -168,6 +168,7 @@ export class Core {
    */
   handleExampleDropdown = async (event: ExampleSelectEvent): Promise<void> => {
     ConfigStore.update((store) => ({ ...store, maxStopLength: 0 }))
+    resetVideo() // Always clear previous video state when switching datasets
     const selectedValue = event.target.value as ExampleId
     const selectedExample = getExampleDataset(selectedValue)
     if (selectedExample) {

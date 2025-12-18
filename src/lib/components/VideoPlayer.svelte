@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount, onDestroy } from 'svelte'
+  import { onDestroy } from 'svelte'
   import { browser } from '$app/environment'
   import VideoStore, { setLoaded } from '../../stores/videoStore'
   import {
@@ -22,10 +22,8 @@
 
   const youtubeContainerId = 'youtube-player-container'
 
-  // Track source changes
-  let prevSourceType: string | null = null
-  let prevVideoId: string | undefined = undefined
-  let prevFileUrl: string | undefined = undefined
+  // Track source changes as a single string
+  let prevSourceKey: string | null = null
 
   let source = $derived($VideoStore.source)
 
@@ -33,37 +31,25 @@
   $effect(() => {
     if (!browser || !containerEl) return
 
-    const sourceChanged =
-      source.type !== prevSourceType ||
-      source.videoId !== prevVideoId ||
-      source.fileUrl !== prevFileUrl
+    const sourceKey = source.type ? `${source.type}:${source.videoId || source.fileUrl}` : null
+    if (sourceKey === prevSourceKey) return
+    prevSourceKey = sourceKey
 
-    if (sourceChanged && source.type) {
-      prevSourceType = source.type
-      prevVideoId = source.videoId
-      prevFileUrl = source.fileUrl
-      initializePlayer()
-    }
-  })
-
-  function initializePlayer() {
-    // Destroy existing player first
+    // Cleanup existing player
     if (player) {
       destroyPlayer(player)
       player = null
     }
-
-    // Clear the YouTube container if switching away from YouTube
     if (youtubeContainerEl) {
       youtubeContainerEl.innerHTML = ''
     }
 
+    // Initialize new player if we have a YouTube source
+    // (HTML5 video is initialized via element binding)
     if (source.type === 'youtube' && source.videoId) {
-      // Small delay to ensure DOM is ready
       setTimeout(() => initYouTubePlayer(source.videoId!), 50)
     }
-    // HTML5 video will be initialized via the element binding
-  }
+  })
 
   function initYouTubePlayer(videoId: string) {
     if (!youtubeContainerEl) return
