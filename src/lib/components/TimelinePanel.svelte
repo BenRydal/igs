@@ -211,6 +211,7 @@
         slider-width="100%"
         generate-labels="false"
         range-dragging="true"
+        animate-onclick="false"
         pointer1-width="6px"
         pointer1-height="30px"
         pointer1-radius="0"
@@ -368,7 +369,6 @@
     border-radius: 3px;
     pointer-events: none;
     z-index: 1;
-    transition: width 0.05s linear;
   }
 
   .play-pause-btn {
@@ -440,6 +440,11 @@
   /* Slider pointer styles */
   :global(tc-range-slider) {
     --pointer-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Disable transitions on all pointers during animation */
+  :global(tc-range-slider tc-range-slider-pointer) {
+    transition: none !important;
   }
 
   /* Left and right boundary markers - blue */
