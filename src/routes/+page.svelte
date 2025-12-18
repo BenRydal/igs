@@ -27,7 +27,8 @@
 
   import UserStore from '../stores/userStore'
   import P5Store from '../stores/p5Store'
-  import VideoStore from '../stores/videoStore'
+  import VideoStore, { toggleVisibility, reset as resetVideo, hasVideoSource } from '../stores/videoStore'
+  import VideoContainer from '$lib/components/VideoContainer.svelte'
 
   import { Core } from '$lib'
   import { igsSketch } from '$lib/p5/igsSketch'
@@ -219,7 +220,7 @@
 
   $effect(() => {
     const videoState = $VideoStore
-    isVideoShowing = videoState.isShowing
+    isVideoShowing = videoState.isVisible
     isVideoPlaying = videoState.isPlaying
   })
 
@@ -252,13 +253,8 @@
   let formattedStopLength = $derived($ConfigStore.stopSliderValue.toFixed(0))
 
   function toggleVideo() {
-    if (p5Instance && p5Instance.videoController) {
-      p5Instance.videoController.toggleShowVideo()
-      VideoStore.update((value) => {
-        value.isShowing = p5Instance.videoController.isShowing
-        value.isPlaying = p5Instance.videoController.isPlaying
-        return value
-      })
+    if (hasVideoSource()) {
+      toggleVisibility()
     }
   }
 
@@ -449,7 +445,7 @@
   // Local version that handles UI cleanup and non-store data
   function clearAllDataLocal() {
     console.log('Clearing all data')
-    p5Instance.videoController.clear()
+    resetVideo()
     currentConfig.isPathColorMode = false
 
     // Close all floating elements before clearing data
@@ -901,7 +897,7 @@
         <li><button onclick={clearMovementData}>Movement</button></li>
         <li><button onclick={clearConversationData}>Conversation</button></li>
         <li><button onclick={clearCodeData}>Codes</button></li>
-        <li><button onclick={() => p5Instance.videoController.clear()}>Video</button></li>
+        <li><button onclick={resetVideo}>Video</button></li>
         <li><button onclick={clearAllDataLocal}>All Data</button></li>
       </ul>
     </details>
@@ -1026,8 +1022,9 @@
   </div>
 </div>
 
-<div class="h-10" class:cursor-crosshair={currentConfig.highlightToggle}>
+<div id="p5-canvas-container" class="relative" class:cursor-crosshair={currentConfig.highlightToggle}>
   <P5 {sketch} />
+  <VideoContainer />
 </div>
 
 {#if showSettings}

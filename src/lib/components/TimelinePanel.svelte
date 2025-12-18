@@ -3,6 +3,7 @@
   import TimelineStore from '../../stores/timelineStore'
   import P5Store from '../../stores/p5Store'
   import ConfigStore from '../../stores/configStore'
+  import VideoStore, { togglePlayPause as toggleVideoPlayPause, isVideoActive, requestSeek } from '../../stores/videoStore'
   import MdRefresh from '~icons/mdi/refresh'
   import MdPlayArrow from '~icons/mdi/play-arrow'
   import MdPause from '~icons/mdi/pause'
@@ -81,22 +82,28 @@
       return timeline
     })
 
+    // Sync video playback with timeline animation (only if video is visible)
+    if (isVideoActive()) {
+      toggleVideoPlayPause()
+    }
+
     if (p5Instance) {
-      if (
-        (p5Instance as any).videoController &&
-        typeof (p5Instance as any).videoController.timelinePlayPause === 'function'
-      ) {
-        ;(p5Instance as any).videoController.timelinePlayPause()
-      }
       p5Instance.loop()
     }
   }
 
   const resetToStart = () => {
+    let leftMarkerTime = 0
     TimelineStore.update((timeline) => {
-      timeline.setCurrTime(timeline.getLeftMarker())
+      leftMarkerTime = timeline.getLeftMarker()
+      timeline.setCurrTime(leftMarkerTime)
       return timeline
     })
+
+    // Seek video to the reset position (only if video is visible)
+    if (isVideoActive()) {
+      requestSeek(leftMarkerTime)
+    }
 
     if (p5Instance) {
       p5Instance.loop()
@@ -144,6 +151,17 @@
       updateXPositions()
       return timeline
     })
+
+    // Seek video when the current time slider is moved (but not while animating/playing)
+    // When animating, the video is already playing at the right position
+    if (isVideoActive() && !isAnimating) {
+      requestSeek(value2)
+    }
+
+    // Trigger p5 redraw to update visualization
+    if (p5Instance) {
+      p5Instance.loop()
+    }
   }
 
   const adjustSpeed = (delta: 1 | -1) => {

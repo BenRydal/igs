@@ -3,15 +3,18 @@ import P5Store from '../../stores/p5Store'
 import UserStore from '../../stores/userStore'
 import TimelineStore from '../../stores/timelineStore'
 import ConfigStore from '../../stores/configStore'
+import VideoStore from '../../stores/videoStore'
 import { toastStore } from '../../stores/toastStore'
 import type { User } from '../../models/user'
-import { FloorPlan, SketchGUI, Handle3D, VideoController, SetPathData } from '..'
+import { FloorPlan, SketchGUI, Handle3D, SetPathData } from '..'
 import type { Timeline } from '../../models/timeline';
 
 let users: User[] = []
 let timeline: Timeline;
 let highlightToggle: boolean;
 let animationRate = 0.05
+let videoIsPlaying = false
+let videoIsLoaded = false
 
 TimelineStore.subscribe((data) => {
   timeline = data
@@ -24,6 +27,11 @@ ConfigStore.subscribe((data) => {
 
 UserStore.subscribe((data) => {
   users = data
+})
+
+VideoStore.subscribe((data) => {
+  videoIsPlaying = data.isPlaying
+  videoIsLoaded = data.isLoaded
 })
 
 export const igsSketch = (p5: any) => {
@@ -42,7 +50,6 @@ export const igsSketch = (p5: any) => {
     p5.createCanvas(window.innerWidth, availableHeight, p5.WEBGL)
     p5.gui = new SketchGUI(p5)
     p5.handle3D = new Handle3D(p5, true)
-    p5.videoController = new VideoController(p5)
     p5.floorPlan = new FloorPlan(p5)
 
     // Constants
@@ -78,7 +85,7 @@ export const igsSketch = (p5: any) => {
     // Might not be running because of not being able to sense if the data is being tracked and such.
     if (
       drawTimeline.getIsAnimating() ||
-      p5.videoController.isLoadedAndIsPlaying() ||
+      (videoIsLoaded && videoIsPlaying) ||
       p5.handle3D.getIsTransitioning() ||
       highlightToggle
     ) {
@@ -102,8 +109,6 @@ export const igsSketch = (p5: any) => {
         setPathData.setMovementAndConversation(users)
       }
     }
-
-    p5.videoController.updateDisplay()
   }
 
   // TODO: This needs to be moved eventually
@@ -199,10 +204,11 @@ export const igsSketch = (p5: any) => {
 
   p5.continueAnimation = () => {
     const currentTimeline = get(TimelineStore);
+    const videoState = get(VideoStore)
     let timeToSet = 0
-    // Use animationRate from ConfigStore
-    if (p5.videoController.isLoadedAndIsPlaying()) {
-      timeToSet = p5.videoController.getVideoPlayerCurTime()
+    // Use video time if video is playing, otherwise use animation rate
+    if (videoIsLoaded && videoIsPlaying) {
+      timeToSet = videoState.currentTime
     } else {
       // Original frame-based increment
       timeToSet = currentTimeline.getCurrTime() + animationRate
