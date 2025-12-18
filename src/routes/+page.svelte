@@ -16,6 +16,10 @@
   import MdFileUploadOutline from '~icons/mdi/file-upload-outline'
   import MdVisibility from '~icons/mdi/eye'
   import MdVisibilityOff from '~icons/mdi/eye-off'
+  import MdFilterList from '~icons/mdi/filter-variant'
+  import MdSelectAll from '~icons/mdi/selection'
+  import MdChat from '~icons/mdi/chat'
+  import MdDelete from '~icons/mdi/delete'
 
   import type { User } from '../models/user'
 
@@ -718,6 +722,12 @@
   })
 </script>
 
+{#snippet chevronDown()}
+  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+  </svg>
+{/snippet}
+
 <svelte:head>
   <title>IGS</title>
 </svelte:head>
@@ -729,8 +739,10 @@
 
   <div class="flex items-center justify-end flex-1 px-2">
     <details class="dropdown" use:clickOutside>
-      <summary class="btn btn-sm ml-4 tooltip tooltip-bottom flex items-center justify-center">
+      <summary class="btn btn-sm ml-4 gap-1 flex items-center">
+        <div class="w-4 h-4"><MdFilterList /></div>
         Filter
+        {@render chevronDown()}
       </summary>
       <ul class="menu dropdown-content rounded-box z-[1] w-52 p-2 shadow bg-base-100">
         {#each filterToggleOptions as toggle}
@@ -769,8 +781,10 @@
     <!-- Select Dropdown (only shown in 2D mode) -->
     {#if !is3DMode}
       <details class="dropdown" use:clickOutside>
-        <summary class="btn btn-sm ml-4 tooltip tooltip-bottom flex items-center justify-center">
+        <summary class="btn btn-sm ml-4 gap-1 flex items-center">
+          <div class="w-4 h-4"><MdSelectAll /></div>
           Select
+          {@render chevronDown()}
         </summary>
         <ul class="menu dropdown-content rounded-box z-[1] w-52 p-2 shadow bg-base-100">
           {#each selectToggleOptions as toggle}
@@ -822,8 +836,10 @@
 
     <!-- Talk Dropdown -->
     <details class="dropdown" use:clickOutside>
-      <summary class="btn btn-sm ml-4 tooltip tooltip-bottom flex items-center justify-center">
+      <summary class="btn btn-sm ml-4 gap-1 flex items-center">
+        <div class="w-4 h-4"><MdChat /></div>
         Talk
+        {@render chevronDown()}
       </summary>
       <ul class="menu dropdown-content rounded-box z-[1] w-52 p-2 shadow bg-base-100">
         {#each conversationToggleOptions as toggle}
@@ -867,8 +883,10 @@
 
     <!-- Clear Data Dropdown -->
     <details class="dropdown" use:clickOutside>
-      <summary class="btn btn-sm ml-4 tooltip tooltip-bottom flex items-center justify-center">
+      <summary class="btn btn-sm ml-4 gap-1 flex items-center">
+        <div class="w-4 h-4"><MdDelete /></div>
         Clear
+        {@render chevronDown()}
       </summary>
       <ul class="menu dropdown-content rounded-box z-[1] w-52 p-2 shadow bg-base-100">
         <li><button onclick={clearMovementData}>Movement</button></li>
@@ -1470,8 +1488,6 @@
     <TimelinePanel />
   </div>
 </div>
-
-<slot />
 
 <IgsInfoModal {isModalOpen} />
 
