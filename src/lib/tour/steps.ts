@@ -12,7 +12,7 @@ export const tourSteps: TourStep[] = [
     },
   },
   {
-    element: '.relative.inline-block.text-left',
+    element: '#examples-dropdown',
     popover: {
       title: 'Try Example Data',
       description:
@@ -52,7 +52,7 @@ export const tourSteps: TourStep[] = [
     },
   },
   {
-    element: '.navbar details:nth-of-type(2)',
+    element: '#talk-dropdown',
     popover: {
       title: 'Conversation Controls',
       description:

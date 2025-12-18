@@ -901,7 +901,7 @@
     {/if}
 
     <!-- Talk Dropdown -->
-    <details class="dropdown" use:clickOutside>
+    <details id="talk-dropdown" class="dropdown" use:clickOutside>
       <summary class="btn btn-sm ml-4 gap-1 flex items-center">
         {@render icon(MdChat)}
         Talk
@@ -1050,7 +1050,7 @@
       {@render navDivider()}
 
       <!-- Examples Dropdown -->
-      <details class="dropdown dropdown-end" use:clickOutside>
+      <details id="examples-dropdown" class="dropdown dropdown-end" use:clickOutside>
         <summary class="btn btn-sm gap-1 flex items-center">
           {@render icon(MdFolder)}
           <span class="max-w-32 truncate">{selectedDropDownOption || 'Examples'}</span>
