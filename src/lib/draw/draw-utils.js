@@ -11,6 +11,7 @@ let timeline,
   stopSliderValue,
   alignToggle,
   maxTurnLength,
+  conversationRectWidth,
   circleToggle,
   sliceToggle,
   movementToggle,
@@ -25,6 +26,7 @@ ConfigStore.subscribe((data) => {
   alignToggle = data.alignToggle
   stopSliderValue = data.stopSliderValue
   maxTurnLength = data.maxTurnLength
+  conversationRectWidth = data.conversationRectWidth
   circleToggle = data.circleToggle
   sliceToggle = data.sliceToggle
   movementToggle = data.movementToggle
@@ -162,14 +164,16 @@ export class DrawUtils {
 
   getScaledConversationPos(point) {
     const pos = this.getSharedPosValues(point, point.time)
-    const rectLength = this.sk.map(point.speech.length, 0, maxTurnLength, 0, this.sk.height / 4)
+    // Height: content length (how much text) - 15-80px to match aggregate range
+    const rectHeight = this.sk.map(point.speech.length, 0, maxTurnLength, 15, 80)
     return {
       timelineXPos: pos.timelineXPos,
       selTimelineXPos: pos.selTimelineXPos,
       floorPlanXPos: pos.floorPlanXPos,
       floorPlanYPos: pos.floorPlanYPos,
-      rectLength,
-      adjustYPos: this.getConversationAdjustYPos(pos.floorPlanYPos, rectLength),
+      rectHeight,
+      rectWidth: conversationRectWidth,
+      adjustYPos: this.getConversationAdjustYPos(pos.floorPlanYPos, rectHeight),
     }
   }
 

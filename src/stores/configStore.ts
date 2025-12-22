@@ -21,6 +21,8 @@ export interface ConfigStoreState {
   stopStrokeWeight: number
   selectorSize: number // Circle selector size
   slicerSize: number // Slice selector width
+  clusterTimeThreshold: number // seconds - time gap to start new cluster
+  clusterSpaceThreshold: number // pixels - distance to start new cluster
 }
 
 // Legacy type alias for backwards compatibility
@@ -47,6 +49,8 @@ export const initialConfig: ConfigStoreState = {
   stopStrokeWeight: 9,
   selectorSize: 100,
   slicerSize: 25,
+  clusterTimeThreshold: 10,
+  clusterSpaceThreshold: 50,
 }
 
 const ConfigStore = writable<ConfigStoreState>(initialConfig)

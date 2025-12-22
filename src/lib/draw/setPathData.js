@@ -19,6 +19,9 @@ export class SetPathData {
     const drawConversation = new DrawConversation(this.sk, this.drawUtils)
     const drawMovement = new DrawMovement(this.sk, this.drawUtils)
 
+    // Clear hover state once at start of draw cycle
+    DrawConversation.clearHoverState()
+
     for (const user of userList) {
       if (user.conversation_enabled && user.conversationIsLoaded) {
         drawConversation.setData(user)
@@ -27,7 +30,7 @@ export class SetPathData {
         drawMovement.setData(user) // draw after conversation so dot displays on top
       }
     }
-    drawConversation.setConversationBubble() // draw conversation text last so it displays on top
+    // Tooltip now handled by HTML ConversationTooltip component
   }
 
   getCodeFileArrays(dataTrail) {

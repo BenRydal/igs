@@ -30,6 +30,8 @@
   import VideoStore, { toggleVisibility, reset as resetVideo, hasVideoSource } from '../stores/videoStore'
   import VideoContainer from '$lib/components/VideoContainer.svelte'
   import SplitScreenVideo from '$lib/components/SplitScreenVideo.svelte'
+  import TranscriptPanel from '$lib/components/TranscriptPanel.svelte'
+  import ConversationTooltip from '$lib/components/ConversationTooltip.svelte'
 
   import { Core } from '$lib'
   import { igsSketch } from '$lib/p5/igsSketch'
@@ -210,6 +212,7 @@
   let isVideoPlaying = $state(false)
   let is3DMode = $state(true)
   let timeline = $state($TimelineStore)
+  let isTranscriptVisible = $state(true)
 
   $effect(() => {
     currentConfig = $ConfigStore
@@ -575,14 +578,6 @@
     p5Instance.loop()
   }
 
-  function handleWordSearch(event) {
-    const newWord = event.target.value.trim()
-    ConfigStore.update((config) => ({ ...config, wordToSearch: newWord }))
-    // Trigger a redraw of the P5 sketch
-    if (p5Instance) {
-      p5Instance.loop()
-    }
-  }
 
   // Track which dropdown is currently open
   let openDropdownId = $state<string | null>(null)
@@ -907,43 +902,79 @@
         Talk
         {@render chevronDown()}
       </summary>
-      <ul class="menu dropdown-content rounded-box z-[1] w-52 p-2 shadow bg-base-100">
-        {#each conversationToggleOptions as toggle}
-          <li>
-            <button
-              onclick={() => toggleSelection(toggle, conversationToggleOptions)}
-              class="w-full text-left flex items-center"
-            >
-              <div class="w-4 h-4 mr-2">
-                {#if $ConfigStore[toggle]}
-                  <MdCheck />
-                {/if}
-              </div>
-              {capitalizeFirstLetter(toggle.replace('Toggle', ''))}
-            </button>
-          </li>
-        {/each}
-        <li class="cursor-none">
-          <p>Rect width: {$ConfigStore.conversationRectWidth} pixels</p>
+      <ul class="menu dropdown-content rounded-box z-[1] w-64 p-2 shadow bg-base-100">
+        <!-- Transcript Panel Toggle -->
+        <li>
+          <button
+            onclick={() => (isTranscriptVisible = !isTranscriptVisible)}
+            class="w-full text-left flex items-center"
+          >
+            <div class="w-4 h-4 mr-2">
+              {#if isTranscriptVisible}
+                <MdCheck />
+              {/if}
+            </div>
+            Transcript Panel
+          </button>
         </li>
         <li>
-          <label for="rectWidthRange" class="sr-only">Adjust rect width</label>
-          <input
-            id="rectWidthRange"
-            type="range"
-            min="1"
-            max="30"
-            value={$ConfigStore.conversationRectWidth}
-            class="range"
-            oninput={(e) => handleConfigChangeFromInput(e, 'conversationRectWidth')}
-          />
+          <button
+            onclick={() => toggleSelection('alignToggle', conversationToggleOptions)}
+            class="w-full text-left flex items-center"
+          >
+            <div class="w-4 h-4 mr-2">
+              {#if $ConfigStore.alignToggle}
+                <MdCheck />
+              {/if}
+            </div>
+            Align
+          </button>
         </li>
-        <input
-          type="text"
-          placeholder="Search conversations..."
-          oninput={(e) => handleWordSearch(e)}
-          class="input input-bordered w-full"
-        />
+
+        <div class="divider my-1"></div>
+
+        <li class="px-2 py-1">
+          <div class="w-full">
+            <p class="text-xs mb-1">Split turn groups after {$ConfigStore.clusterTimeThreshold}s pause</p>
+            <input
+              id="clusterTimeRange"
+              type="range"
+              min="1"
+              max="60"
+              value={$ConfigStore.clusterTimeThreshold}
+              class="range range-xs"
+              oninput={(e) => handleConfigChangeFromInput(e, 'clusterTimeThreshold')}
+            />
+          </div>
+        </li>
+        <li class="px-2 py-1">
+          <div class="w-full">
+            <p class="text-xs mb-1">Split turn groups after {$ConfigStore.clusterSpaceThreshold}px movement</p>
+            <input
+              id="clusterSpaceRange"
+              type="range"
+              min="0"
+              max="200"
+              value={$ConfigStore.clusterSpaceThreshold}
+              class="range range-xs"
+              oninput={(e) => handleConfigChangeFromInput(e, 'clusterSpaceThreshold')}
+            />
+          </div>
+        </li>
+        <li class="px-2 py-1">
+          <div class="w-full">
+            <p class="text-xs mb-1">Individual turn width: {$ConfigStore.conversationRectWidth}px</p>
+            <input
+              id="rectWidthRange"
+              type="range"
+              min="1"
+              max="30"
+              value={$ConfigStore.conversationRectWidth}
+              class="range range-xs"
+              oninput={(e) => handleConfigChangeFromInput(e, 'conversationRectWidth')}
+            />
+          </div>
+        </li>
       </ul>
     </details>
 
@@ -1102,6 +1133,8 @@
     {#if !isSplitScreen}
       <VideoContainer />
     {/if}
+    <TranscriptPanel bind:isVisible={isTranscriptVisible} />
+    <ConversationTooltip hideTooltip={isTranscriptVisible} />
   </div>
 </div>
 
