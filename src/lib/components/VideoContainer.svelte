@@ -155,6 +155,13 @@
     if (browser) {
       document.addEventListener('mousemove', handleMouseMove)
       document.addEventListener('mouseup', handleMouseUp)
+
+      // Position video on the right side of the container
+      const canvasContainer = document.getElementById('p5-canvas-container')
+      if (canvasContainer) {
+        const rect = canvasContainer.getBoundingClientRect()
+        posX = rect.width - width - 20 // 20px margin from right
+      }
     }
   })
 
