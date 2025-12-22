@@ -26,6 +26,7 @@ let searchRegex = null
 const TAIL_HEIGHT = 8
 const TAIL_WIDTH = 10
 const RECT_GAP = 12 // gap between aggregate rect and movement path
+const RECT_ALPHA = 180 // transparency for conversation rects
 
 ConfigStore.subscribe((data) => {
   alignToggle = data.alignToggle
@@ -57,6 +58,10 @@ export class DrawConversation {
     clearHoveredConversation()
   }
 
+  setFillWithAlpha(color, alpha) {
+    this.sk.fill(this.sk.red(color), this.sk.green(color), this.sk.blue(color), alpha)
+  }
+
   setData(user) {
     this.speaker = user.name
     this.color = user.color
@@ -79,6 +84,7 @@ export class DrawConversation {
       if (!this.drawUtils.isVisible(point, pos, point.stopLength)) continue
 
       // Deterministic jitter based on point time (consistent across redraws)
+      // Uses primes (7, 13) to create pseudo-random but reproducible offsets
       const jitterX = ((point.time * 7) % JITTER_AMOUNT) - JITTER_AMOUNT / 2
       const jitterY = ((point.time * 13) % JITTER_AMOUNT) - JITTER_AMOUNT / 2
       const fpX = pos.floorPlanXPos + jitterX
@@ -86,7 +92,7 @@ export class DrawConversation {
 
       this.sk.noStroke()
       const color = isPathColorMode ? this.drawUtils.setCodeColor(point.codes) : this.color
-      this.sk.fill(this.sk.red(color), this.sk.green(color), this.sk.blue(color), 180)
+      this.setFillWithAlpha(color, RECT_ALPHA)
 
       if (this.is3D) {
         this.sk.rect(fpX, fpY, -conversationRectWidth, -pos.rectHeight)
@@ -129,7 +135,7 @@ export class DrawConversation {
       const color = isPathColorMode ? this.drawUtils.setCodeColor(first.codes) : this.color
 
       this.sk.noStroke()
-      this.sk.fill(this.sk.red(color), this.sk.green(color), this.sk.blue(color), 180)
+      this.setFillWithAlpha(color, RECT_ALPHA)
 
       if (this.is3D) {
         const yPos = alignToggle ? this.sk.gui.fpContainer.getContainer().height : pos.floorPlanYPos - RECT_GAP
