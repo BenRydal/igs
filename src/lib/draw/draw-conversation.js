@@ -22,10 +22,10 @@ let clusterTimeThreshold, clusterSpaceThreshold
 let timelineLeftMarker, timelineRightMarker, timelineEndTime
 let searchRegex = null
 
-// Speech bubble dimensions
+// Aggregate rect dimensions
 const TAIL_HEIGHT = 8
 const TAIL_WIDTH = 10
-const BUBBLE_GAP = 12 // gap between bubble and movement path
+const RECT_GAP = 12 // gap between aggregate rect and movement path
 
 ConfigStore.subscribe((data) => {
   alignToggle = data.alignToggle
@@ -125,24 +125,24 @@ export class DrawConversation {
       const width = Math.max(10, Math.abs(endPos.selTimelineXPos - pos.selTimelineXPos))
 
       const fpX = pos.floorPlanXPos - size / 2
-      const fpY = alignToggle ? 0 : pos.floorPlanYPos - size - BUBBLE_GAP
+      const fpY = alignToggle ? 0 : pos.floorPlanYPos - size - RECT_GAP
       const color = isPathColorMode ? this.drawUtils.setCodeColor(first.codes) : this.color
 
       this.sk.noStroke()
       this.sk.fill(this.sk.red(color), this.sk.green(color), this.sk.blue(color), 180)
 
       if (this.is3D) {
-        const yPos = alignToggle ? this.sk.gui.fpContainer.getContainer().height : pos.floorPlanYPos - BUBBLE_GAP
+        const yPos = alignToggle ? this.sk.gui.fpContainer.getContainer().height : pos.floorPlanYPos - RECT_GAP
         // 3D draws with negative dimensions (leftward/upward), so adjust x to center
         const fpX3D = pos.floorPlanXPos + size / 2
-        // Floor plan bubble + tail pointing down toward movement path
-        this.sk.rect(fpX3D, yPos, -size, -size, 5)
+        // Floor plan rect + tail pointing down toward movement path
+        this.sk.rect(fpX3D, yPos, -size, -size)
         this.sk.triangle(
           pos.floorPlanXPos - TAIL_WIDTH / 2, yPos,
           pos.floorPlanXPos + TAIL_WIDTH / 2, yPos,
           pos.floorPlanXPos, yPos + TAIL_HEIGHT
         )
-        // Space-time bubble + tail (offset so tail points at movement path)
+        // Space-time quad + tail
         const stFpX = pos.floorPlanXPos + TAIL_WIDTH / 2
         this.drawQuad3D(pos.selTimelineXPos, width, size, stFpX, pos.floorPlanYPos)
         this.drawTail3D(pos.selTimelineXPos, stFpX, pos.floorPlanYPos)
@@ -155,18 +155,18 @@ export class DrawConversation {
             this.sk.mouseX, this.sk.mouseY
           )
         }
-        // Floor plan bubble + tail
-        this.sk.rect(fpX, fpY, size, size, 5)
+        // Floor plan rect + tail
+        this.sk.rect(fpX, fpY, size, size)
         this.sk.triangle(
           fpX + size / 2 - TAIL_WIDTH / 2, fpY + size,
           fpX + size / 2 + TAIL_WIDTH / 2, fpY + size,
           fpX + size / 2, fpY + size + TAIL_HEIGHT
         )
-        // Space-time bubble + tail (base overlaps rect by 2px to hide gap from rounded corners)
-        this.sk.rect(pos.selTimelineXPos, fpY, width, size, 5)
+        // Space-time rect + tail
+        this.sk.rect(pos.selTimelineXPos, fpY, width, size)
         this.sk.triangle(
-          pos.selTimelineXPos, fpY + size - 2,
-          pos.selTimelineXPos + TAIL_WIDTH, fpY + size - 2,
+          pos.selTimelineXPos, fpY + size,
+          pos.selTimelineXPos + TAIL_WIDTH, fpY + size,
           pos.selTimelineXPos, fpY + size + TAIL_HEIGHT
         )
       }
@@ -177,6 +177,7 @@ export class DrawConversation {
     const clusters = []
     let current = []
     let lastPoint = null
+    const spaceThresholdSq = clusterSpaceThreshold * clusterSpaceThreshold
 
     for (const point of dataTrail) {
       if (!point.speech || (searchRegex && !searchRegex.test(point.speech))) continue
@@ -185,12 +186,11 @@ export class DrawConversation {
         current.push(point)
       } else {
         const timeDiff = point.time - lastPoint.time
-        const distance = Math.sqrt(
-          Math.pow(point.x - lastPoint.x, 2) +
-          Math.pow(point.y - lastPoint.y, 2)
-        )
+        const dx = point.x - lastPoint.x
+        const dy = point.y - lastPoint.y
+        const distanceSq = dx * dx + dy * dy
 
-        if (timeDiff > clusterTimeThreshold || distance > clusterSpaceThreshold) {
+        if (timeDiff > clusterTimeThreshold || distanceSq > spaceThresholdSq) {
           clusters.push(current)
           current = [point]
         } else {
