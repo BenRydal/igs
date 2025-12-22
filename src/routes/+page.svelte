@@ -1133,10 +1133,11 @@
     {#if !isSplitScreen}
       <VideoContainer />
     {/if}
-    <TranscriptPanel bind:isVisible={isTranscriptVisible} />
     <ConversationTooltip hideTooltip={isTranscriptVisible} />
   </div>
 </div>
+
+<TranscriptPanel bind:isVisible={isTranscriptVisible} />
 
 {#if showSettings}
   <div
