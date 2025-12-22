@@ -15,7 +15,7 @@
 
   const DRAG_HANDLE_HEIGHT = 24
   const MIN_WIDTH = 160
-  const DEFAULT_WIDTH = 320
+  const DEFAULT_WIDTH = 480
   const ASPECT_RATIO = 16 / 9
 
   const syncState = createVideoSyncState()

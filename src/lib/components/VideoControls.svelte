@@ -98,12 +98,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 28px;
-    height: 28px;
-    padding: 4px;
+    width: 36px;
+    height: 36px;
+    padding: 6px;
     background: rgba(0, 0, 0, 0.5);
     border: none;
-    border-radius: 4px;
+    border-radius: 6px;
     color: white;
     cursor: pointer;
     transition: background 0.15s;
@@ -114,7 +114,7 @@
   }
 
   .control-btn :global(svg) {
-    width: 16px;
-    height: 16px;
+    width: 22px;
+    height: 22px;
   }
 </style>
