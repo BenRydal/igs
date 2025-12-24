@@ -46,6 +46,7 @@
   import TimelinePanel from '$lib/components/TimelinePanel.svelte'
   import DataPointTable from '$lib/components/DataPointTable.svelte'
   import ModeIndicator from '$lib/components/ModeIndicator.svelte'
+  import FloatingDropdown from '$lib/components/FloatingDropdown.svelte'
   import { OnboardingTour } from '$lib/tour'
   import DataImporter from '$lib/components/import/DataImporter.svelte'
   import { capitalizeFirstLetter, capitalizeEachWord } from '$lib/utils/string'
@@ -1104,15 +1105,17 @@
       {@render navDivider()}
 
       <!-- Examples Dropdown -->
-      <details id="examples-dropdown" class="dropdown dropdown-end" use:clickOutside>
-        <summary class="btn btn-sm gap-1 flex items-center">
+      <FloatingDropdown
+        id="examples-dropdown"
+        buttonClass="btn btn-sm gap-1 flex items-center"
+        contentClass="menu rounded-box w-56 p-2 shadow bg-base-100 max-h-[60vh] overflow-y-auto"
+      >
+        {#snippet buttonChildren()}
           {@render icon(MdFolder)}
           <span class="max-w-32 truncate">{selectedDropDownOption || 'Examples'}</span>
           {@render chevronDown()}
-        </summary>
-        <ul
-          class="menu dropdown-content rounded-box z-[1] w-56 p-2 shadow bg-base-100 max-h-[60vh] overflow-y-auto"
-        >
+        {/snippet}
+        <ul>
           {#each dropdownOptions as group}
             <li class="menu-title">{group.label}</li>
             {#each group.items as item}
@@ -1134,7 +1137,7 @@
             {/each}
           {/each}
         </ul>
-      </details>
+      </FloatingDropdown>
     </div>
   </div>
 </div>
