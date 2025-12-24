@@ -1,32 +1,29 @@
 import ConfigStore from '../../stores/configStore'
 import TimelineStore from '../../stores/timelineStore'
 import { setHoveredConversation, clearHoveredConversation } from '../../stores/interactionStore'
+import { MIN_RECT_SIZE, MAX_RECT_SIZE } from './draw-utils'
 
 /**
  * Draws conversation rectangles with level-of-detail:
  * - Aggregated clusters when zoomed out (>30% timeline visible)
  * - Individual rectangles when zoomed in
  *
- * Individual rect sizing:
- *   Floor plan:  width = conversationRectWidth (config), height = text length
- *                Jittered position to separate overlapping turns
- *   Space-time:  width = conversationRectWidth (config), height = text length
- *
- * Aggregate cluster sizing:
- *   Floor plan:  size scales with total text volume (15-80px)
- *   Space-time:  width = time span, height = total text volume (15-80px)
+ * Supports two modes for aggregated clusters:
+ * - Striped: Multiple speakers shown as proportional vertical stripes
+ * - Single color: Each speaker's clusters drawn separately
  */
 
 let alignToggle, isPathColorMode, conversationRectWidth
-let clusterTimeThreshold, clusterSpaceThreshold
+let clusterTimeThreshold, clusterSpaceThreshold, showSpeakerStripes
 let timelineLeftMarker, timelineRightMarker, timelineEndTime
 let searchRegex = null
 
-// Aggregate rect dimensions
 const TAIL_HEIGHT = 8
 const TAIL_WIDTH = 10
-const RECT_GAP = 12 // gap between aggregate rect and movement path
-const RECT_ALPHA = 180 // transparency for conversation rects
+const RECT_GAP = 12
+const RECT_ALPHA = 180
+const JITTER_AMOUNT = 8
+const MIN_TEXT_FOR_SCALING = 100 // Prevents tiny clusters from appearing huge
 
 ConfigStore.subscribe((data) => {
   alignToggle = data.alignToggle
@@ -34,12 +31,10 @@ ConfigStore.subscribe((data) => {
   conversationRectWidth = data.conversationRectWidth
   clusterTimeThreshold = data.clusterTimeThreshold
   clusterSpaceThreshold = data.clusterSpaceThreshold
-  if (data.wordToSearch) {
-    const escaped = data.wordToSearch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-    searchRegex = new RegExp(escaped, 'i')
-  } else {
-    searchRegex = null
-  }
+  showSpeakerStripes = data.showSpeakerStripes
+  searchRegex = data.wordToSearch
+    ? new RegExp(data.wordToSearch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i')
+    : null
 })
 
 TimelineStore.subscribe((data) => {
@@ -58,169 +53,291 @@ export class DrawConversation {
     clearHoveredConversation()
   }
 
-  setFillWithAlpha(color, alpha) {
-    this.sk.fill(this.sk.red(color), this.sk.green(color), this.sk.blue(color), alpha)
-  }
+  // --- Core drawing entry point ---
 
-  setData(user) {
-    this.speaker = user.name
-    this.color = user.color
+  drawAllConversations(mergedPoints) {
     this.is3D = this.sk.handle3D.getIs3DMode()
     if (this.is3D) {
       this.translateZoom = Math.abs(this.sk.handle3D.getCurTranslatePos().zoom)
     }
 
-    const zoomLevel = timelineEndTime ? (timelineRightMarker - timelineLeftMarker) / timelineEndTime : 1
-    zoomLevel > 0.3 ? this.drawAggregated(user.dataTrail) : this.drawDetailed(user.dataTrail)
+    const zoomLevel = timelineEndTime
+      ? (timelineRightMarker - timelineLeftMarker) / timelineEndTime
+      : 1
+    zoomLevel > 0.3 ? this.drawAggregated(mergedPoints) : this.drawDetailed(mergedPoints)
   }
 
-  drawDetailed(dataTrail) {
-    const JITTER_AMOUNT = 8 // max pixels to offset in each direction
+  // --- Detailed view (zoomed in) ---
 
-    for (const point of dataTrail) {
-      if (!point.speech || (searchRegex && !searchRegex.test(point.speech))) continue
+  drawDetailed(mergedPoints) {
+    for (const { point, speaker, color } of mergedPoints) {
+      if (!this.isValidPoint(point)) continue
 
       const pos = this.drawUtils.getScaledConversationPos(point)
       if (!this.drawUtils.isVisible(point, pos, point.stopLength)) continue
 
-      // Deterministic jitter based on point time (consistent across redraws)
-      // Uses primes (7, 13) to create pseudo-random but reproducible offsets
       const jitterX = ((point.time * 7) % JITTER_AMOUNT) - JITTER_AMOUNT / 2
       const jitterY = ((point.time * 13) % JITTER_AMOUNT) - JITTER_AMOUNT / 2
       const fpX = pos.floorPlanXPos + jitterX
       const fpY = pos.adjustYPos + jitterY
+      const fillColor = isPathColorMode ? this.drawUtils.setCodeColor(point.codes) : color
 
-      this.sk.noStroke()
-      const color = isPathColorMode ? this.drawUtils.setCodeColor(point.codes) : this.color
-      this.setFillWithAlpha(color, RECT_ALPHA)
+      this.setFill(fillColor)
 
       if (this.is3D) {
         this.sk.rect(fpX, fpY, -conversationRectWidth, -pos.rectHeight)
         this.drawQuad3D(pos.selTimelineXPos, pos.rectWidth, pos.rectHeight, fpX, fpY)
       } else {
-        // Hover detection for both views
-        if (this.sk.overRect(fpX, fpY, conversationRectWidth, pos.rectHeight) ||
-            this.sk.overRect(pos.selTimelineXPos, pos.adjustYPos, pos.rectWidth, pos.rectHeight)) {
-          this.sk.stroke(0)
-          this.sk.strokeWeight(4)
+        const isHovered =
+          this.sk.overRect(fpX, fpY, conversationRectWidth, pos.rectHeight) ||
+          this.sk.overRect(pos.selTimelineXPos, pos.adjustYPos, pos.rectWidth, pos.rectHeight)
+        if (isHovered) {
+          this.setHoverStroke()
           setHoveredConversation(
-            [{ time: point.time, speaker: this.speaker, text: point.speech, color: this.color }],
-            this.sk.mouseX, this.sk.mouseY
+            [{ time: point.time, speaker, text: point.speech, color }],
+            this.sk.mouseX,
+            this.sk.mouseY
           )
         }
-        // Floor plan: jittered position
         this.sk.rect(fpX, fpY, conversationRectWidth, pos.rectHeight)
-        // Space-time: no jitter (time separates them)
         this.sk.rect(pos.selTimelineXPos, pos.adjustYPos, pos.rectWidth, pos.rectHeight)
       }
     }
   }
 
-  drawAggregated(dataTrail) {
-    for (const points of this.clusterPoints(dataTrail)) {
-      const first = points[0], last = points[points.length - 1]
-      const pos = this.drawUtils.getScaledConversationPos(first)
-      if (!this.drawUtils.isVisible(first, pos, first.stopLength)) continue
+  // --- Aggregated view (zoomed out) ---
 
-      const endPos = this.drawUtils.getScaledConversationPos(last)
-      const totalTextLength = points.reduce((sum, p) => sum + p.speech.length, 0)
+  drawAggregated(mergedPoints) {
+    // Compute combined clusters with text lengths (used for max calculation and possibly drawing)
+    const combinedStats = this.clusterPoints(mergedPoints, true).map((cluster) => ({
+      cluster,
+      textLength: cluster.reduce((sum, p) => sum + p.point.speech.length, 0),
+    }))
+    const maxTextLength = Math.max(...combinedStats.map((c) => c.textLength), MIN_TEXT_FOR_SCALING)
 
-      // Both views use same size scaling based on total text volume
-      const size = Math.min(80, this.sk.map(totalTextLength, 0, 1000, 15, 80))
-      // Space-time width = time span
+    // Use combined clusters if stripes enabled, otherwise re-cluster with speaker breaks
+    const clusterStats = showSpeakerStripes
+      ? combinedStats
+      : this.clusterPoints(mergedPoints, false).map((cluster) => ({
+          cluster,
+          textLength: cluster.reduce((sum, p) => sum + p.point.speech.length, 0),
+        }))
+
+    for (const { cluster, textLength } of clusterStats) {
+      const first = cluster[0],
+        last = cluster[cluster.length - 1]
+      const pos = this.drawUtils.getScaledConversationPos(first.point)
+      if (!this.drawUtils.isVisible(first.point, pos, first.point.stopLength)) continue
+
+      const endPos = this.drawUtils.getScaledConversationPos(last.point)
+      const size = this.sk.map(textLength, 0, maxTextLength, MIN_RECT_SIZE, MAX_RECT_SIZE)
       const width = Math.max(10, Math.abs(endPos.selTimelineXPos - pos.selTimelineXPos))
 
       const fpX = pos.floorPlanXPos - size / 2
       const fpY = alignToggle ? 0 : pos.floorPlanYPos - size - RECT_GAP
-      const color = isPathColorMode ? this.drawUtils.setCodeColor(first.codes) : this.color
+      const speakerProportions =
+        showSpeakerStripes && !isPathColorMode ? this.getSpeakerProportions(cluster) : null
+      const primaryColor = this.getPrimaryColor(first, speakerProportions)
 
       this.sk.noStroke()
-      this.setFillWithAlpha(color, RECT_ALPHA)
 
       if (this.is3D) {
-        const yPos = alignToggle ? this.sk.gui.fpContainer.getContainer().height : pos.floorPlanYPos - RECT_GAP
-        // 3D draws with negative dimensions (leftward/upward), so adjust x to center
-        const fpX3D = pos.floorPlanXPos + size / 2
-        // Floor plan rect + tail pointing down toward movement path
-        this.sk.rect(fpX3D, yPos, -size, -size)
-        this.sk.triangle(
-          pos.floorPlanXPos - TAIL_WIDTH / 2, yPos,
-          pos.floorPlanXPos + TAIL_WIDTH / 2, yPos,
-          pos.floorPlanXPos, yPos + TAIL_HEIGHT
-        )
-        // Space-time quad + tail
-        const stFpX = pos.floorPlanXPos + TAIL_WIDTH / 2
-        this.drawQuad3D(pos.selTimelineXPos, width, size, stFpX, pos.floorPlanYPos)
-        this.drawTail3D(pos.selTimelineXPos, stFpX, pos.floorPlanYPos)
+        this.drawAggregated3D(pos, size, width, speakerProportions, primaryColor)
       } else {
-        if (this.sk.overRect(fpX, fpY, size, size) || this.sk.overRect(pos.selTimelineXPos, fpY, width, size)) {
-          this.sk.stroke(0)
-          this.sk.strokeWeight(3)
-          setHoveredConversation(
-            points.map(p => ({ time: p.time, speaker: this.speaker, text: p.speech, color: this.color })),
-            this.sk.mouseX, this.sk.mouseY
-          )
-        }
-        // Floor plan rect + tail
-        this.sk.rect(fpX, fpY, size, size)
-        this.sk.triangle(
-          fpX + size / 2 - TAIL_WIDTH / 2, fpY + size,
-          fpX + size / 2 + TAIL_WIDTH / 2, fpY + size,
-          fpX + size / 2, fpY + size + TAIL_HEIGHT
-        )
-        // Space-time rect + tail
-        this.sk.rect(pos.selTimelineXPos, fpY, width, size)
-        this.sk.triangle(
-          pos.selTimelineXPos, fpY + size,
-          pos.selTimelineXPos + TAIL_WIDTH, fpY + size,
-          pos.selTimelineXPos, fpY + size + TAIL_HEIGHT
-        )
+        this.drawAggregated2D(cluster, pos, fpX, fpY, size, width, speakerProportions, primaryColor)
       }
     }
   }
 
-  clusterPoints(dataTrail) {
-    const clusters = []
-    let current = []
-    let lastPoint = null
-    const spaceThresholdSq = clusterSpaceThreshold * clusterSpaceThreshold
+  drawAggregated3D(pos, size, width, speakerProportions, primaryColor) {
+    const yPos = alignToggle
+      ? this.sk.gui.fpContainer.getContainer().height
+      : pos.floorPlanYPos - RECT_GAP
+    const fpX3D = pos.floorPlanXPos + size / 2
+    const stFpX = pos.floorPlanXPos + TAIL_WIDTH / 2
 
-    for (const point of dataTrail) {
-      if (!point.speech || (searchRegex && !searchRegex.test(point.speech))) continue
-
-      if (!current.length) {
-        current.push(point)
-      } else {
-        const timeDiff = point.time - lastPoint.time
-        const dx = point.x - lastPoint.x
-        const dy = point.y - lastPoint.y
-        const distanceSq = dx * dx + dy * dy
-
-        if (timeDiff > clusterTimeThreshold || distanceSq > spaceThresholdSq) {
-          clusters.push(current)
-          current = [point]
-        } else {
-          current.push(point)
-        }
-      }
-      lastPoint = point
+    if (speakerProportions) {
+      this.drawStripedRect3D(fpX3D, yPos, size, size, speakerProportions)
+      this.drawStripedQuad3D(
+        pos.selTimelineXPos,
+        width,
+        size,
+        stFpX,
+        pos.floorPlanYPos,
+        speakerProportions
+      )
+    } else {
+      this.setFill(primaryColor)
+      this.sk.rect(fpX3D, yPos, -size, -size)
+      this.drawQuad3D(pos.selTimelineXPos, width, size, stFpX, pos.floorPlanYPos)
     }
-    if (current.length) clusters.push(current)
-    return clusters
+
+    // Tails
+    this.setFill(primaryColor)
+    this.sk.triangle(
+      pos.floorPlanXPos - TAIL_WIDTH / 2,
+      yPos,
+      pos.floorPlanXPos + TAIL_WIDTH / 2,
+      yPos,
+      pos.floorPlanXPos,
+      yPos + TAIL_HEIGHT
+    )
+    this.drawTail3D(pos.selTimelineXPos, stFpX, pos.floorPlanYPos)
   }
+
+  drawAggregated2D(cluster, pos, fpX, fpY, size, width, speakerProportions, primaryColor) {
+    const isHovered =
+      this.sk.overRect(fpX, fpY, size, size) ||
+      this.sk.overRect(pos.selTimelineXPos, fpY, width, size)
+
+    if (isHovered) {
+      setHoveredConversation(
+        cluster.map((p) => ({
+          time: p.point.time,
+          speaker: p.speaker,
+          text: p.point.speech,
+          color: p.color,
+        })),
+        this.sk.mouseX,
+        this.sk.mouseY
+      )
+    }
+
+    if (speakerProportions) {
+      this.drawStripedRect(fpX, fpY, size, size, speakerProportions, isHovered)
+      this.drawStripedRect(pos.selTimelineXPos, fpY, width, size, speakerProportions, isHovered)
+    } else {
+      this.setFill(primaryColor)
+      if (isHovered) this.setHoverStroke()
+      this.sk.rect(fpX, fpY, size, size)
+      this.sk.rect(pos.selTimelineXPos, fpY, width, size)
+    }
+
+    // Tails
+    if (isHovered) {
+      this.setHoverStroke()
+    } else {
+      this.sk.noStroke()
+    }
+    this.setFill(primaryColor, false)
+    const tailY = fpY + size
+    const tailCenterX = fpX + size / 2
+    this.sk.triangle(
+      tailCenterX - TAIL_WIDTH / 2,
+      tailY,
+      tailCenterX + TAIL_WIDTH / 2,
+      tailY,
+      tailCenterX,
+      tailY + TAIL_HEIGHT
+    )
+    this.sk.triangle(
+      pos.selTimelineXPos,
+      tailY,
+      pos.selTimelineXPos + TAIL_WIDTH,
+      tailY,
+      pos.selTimelineXPos,
+      tailY + TAIL_HEIGHT
+    )
+  }
+
+  // --- Striped drawing methods ---
+
+  drawStripedRect(x, y, width, height, speakerProportions, isHovered) {
+    // Draw stripes without stroke
+    let currentX = x
+    for (const sp of speakerProportions) {
+      const stripeWidth = width * sp.proportion
+      this.setFill(sp.color)
+      this.sk.rect(currentX, y, stripeWidth, height)
+      currentX += stripeWidth
+    }
+    // Draw single outline around entire rect if hovered
+    if (isHovered) {
+      this.sk.noFill()
+      this.setHoverStroke()
+      this.sk.rect(x, y, width, height)
+    }
+  }
+
+  drawStripedRect3D(x, y, width, height, speakerProportions) {
+    let currentX = x
+    for (const sp of speakerProportions) {
+      const stripeWidth = width * sp.proportion
+      this.setFill(sp.color)
+      this.sk.rect(currentX, y, -stripeWidth, -height)
+      currentX -= stripeWidth
+    }
+  }
+
+  drawStripedQuad3D(xPos, width, height, fpX, fpY, speakerProportions) {
+    const z = this.translateZoom
+    let currentXPos = xPos
+
+    for (const sp of speakerProportions) {
+      const stripeWidth = width * sp.proportion
+      this.setFill(sp.color)
+
+      if (alignToggle) {
+        this.sk.quad(
+          0,
+          z,
+          currentXPos,
+          height,
+          z,
+          currentXPos,
+          height,
+          z,
+          currentXPos + stripeWidth,
+          0,
+          z,
+          currentXPos + stripeWidth
+        )
+      } else {
+        this.sk.quad(
+          fpX,
+          fpY,
+          currentXPos,
+          fpX + height,
+          fpY,
+          currentXPos,
+          fpX + height,
+          fpY,
+          currentXPos + stripeWidth,
+          fpX,
+          fpY,
+          currentXPos + stripeWidth
+        )
+      }
+      currentXPos += stripeWidth
+    }
+  }
+
+  // --- 3D primitives ---
 
   drawQuad3D(xPos, width, height, fpX, fpY) {
     const z = this.translateZoom
     if (alignToggle) {
       this.sk.quad(0, z, xPos, height, z, xPos, height, z, xPos + width, 0, z, xPos + width)
     } else {
-      this.sk.quad(fpX, fpY, xPos, fpX + height, fpY, xPos, fpX + height, fpY, xPos + width, fpX, fpY, xPos + width)
+      this.sk.quad(
+        fpX,
+        fpY,
+        xPos,
+        fpX + height,
+        fpY,
+        xPos,
+        fpX + height,
+        fpY,
+        xPos + width,
+        fpX,
+        fpY,
+        xPos + width
+      )
     }
   }
 
   drawTail3D(xPos, fpX, fpY) {
     const z = this.translateZoom
-    // Tail extends down (negative x) from bottom-left of quad
     this.sk.beginShape()
     if (alignToggle) {
       this.sk.vertex(0, z, xPos)
@@ -232,5 +349,82 @@ export class DrawConversation {
       this.sk.vertex(fpX - TAIL_HEIGHT, fpY, xPos)
     }
     this.sk.endShape(this.sk.CLOSE)
+  }
+
+  // --- Clustering ---
+
+  clusterPoints(mergedPoints, forceCombineMode = showSpeakerStripes) {
+    const clusters = []
+    let current = []
+    let lastPoint = null
+    let lastSpeaker = null
+    const spaceThresholdSq = clusterSpaceThreshold * clusterSpaceThreshold
+
+    for (const item of mergedPoints) {
+      if (!this.isValidPoint(item.point)) continue
+
+      if (!current.length) {
+        current.push(item)
+      } else {
+        const dx = item.point.x - lastPoint.x
+        const dy = item.point.y - lastPoint.y
+        const shouldBreak =
+          (!forceCombineMode && item.speaker !== lastSpeaker) ||
+          item.point.time - lastPoint.time > clusterTimeThreshold ||
+          dx * dx + dy * dy > spaceThresholdSq
+
+        if (shouldBreak) {
+          clusters.push(current)
+          current = [item]
+        } else {
+          current.push(item)
+        }
+      }
+      lastPoint = item.point
+      lastSpeaker = item.speaker
+    }
+    if (current.length) clusters.push(current)
+    return clusters
+  }
+
+  getSpeakerProportions(cluster) {
+    const stats = new Map()
+    let total = 0
+
+    for (const { point, speaker, color } of cluster) {
+      const len = point.speech.length
+      total += len
+      const existing = stats.get(speaker)
+      if (existing) {
+        existing.textLength += len
+      } else {
+        stats.set(speaker, { speaker, color, textLength: len })
+      }
+    }
+
+    return Array.from(stats.values())
+      .map((s) => ({ ...s, proportion: s.textLength / total }))
+      .sort((a, b) => b.textLength - a.textLength)
+  }
+
+  // --- Helpers ---
+
+  isValidPoint(point) {
+    return point.speech && (!searchRegex || searchRegex.test(point.speech))
+  }
+
+  getPrimaryColor(first, speakerProportions) {
+    if (isPathColorMode) return this.drawUtils.setCodeColor(first.point.codes)
+    return speakerProportions ? speakerProportions[0].color : first.color
+  }
+
+  setFill(color, clearStroke = true) {
+    if (clearStroke) this.sk.noStroke()
+    this.sk.fill(this.sk.red(color), this.sk.green(color), this.sk.blue(color), RECT_ALPHA)
+  }
+
+  setHoverStroke() {
+    this.sk.stroke(0)
+    this.sk.strokeWeight(3)
   }
 }

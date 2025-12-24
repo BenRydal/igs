@@ -7,6 +7,10 @@ import CodeStore from '../../stores/codeStore'
 import ConfigStore from '../../stores/configStore'
 import { get } from 'svelte/store'
 
+// Shared constants for conversation rect sizing
+export const MIN_RECT_SIZE = 15
+export const MAX_RECT_SIZE = 80
+
 let timeline,
   stopSliderValue,
   alignToggle,
@@ -164,8 +168,14 @@ export class DrawUtils {
 
   getScaledConversationPos(point) {
     const pos = this.getSharedPosValues(point, point.time)
-    // Height: content length (how much text) - 15-80px to match aggregate range
-    const rectHeight = this.sk.map(point.speech.length, 0, maxTurnLength, 15, 80)
+    // Height: content length (how much text)
+    const rectHeight = this.sk.map(
+      point.speech.length,
+      0,
+      maxTurnLength,
+      MIN_RECT_SIZE,
+      MAX_RECT_SIZE
+    )
     return {
       timelineXPos: pos.timelineXPos,
       selTimelineXPos: pos.selTimelineXPos,

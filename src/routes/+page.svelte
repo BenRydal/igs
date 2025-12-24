@@ -27,7 +27,11 @@
 
   import UserStore from '../stores/userStore'
   import P5Store from '../stores/p5Store'
-  import VideoStore, { toggleVisibility, reset as resetVideo, hasVideoSource } from '../stores/videoStore'
+  import VideoStore, {
+    toggleVisibility,
+    reset as resetVideo,
+    hasVideoSource,
+  } from '../stores/videoStore'
   import VideoContainer from '$lib/components/VideoContainer.svelte'
   import SplitScreenVideo from '$lib/components/SplitScreenVideo.svelte'
   import TranscriptPanel from '$lib/components/TranscriptPanel.svelte'
@@ -578,7 +582,6 @@
     p5Instance.loop()
   }
 
-
   // Track which dropdown is currently open
   let openDropdownId = $state<string | null>(null)
 
@@ -749,7 +752,6 @@
     window.addEventListener('igs:load-example', handleLoadExample)
     window.addEventListener('tour-complete', handleTourComplete)
 
-
     // Cleanup function
     return () => {
       // Remove global click handler
@@ -768,7 +770,6 @@
       window.removeEventListener('igs:toggle-help', handleToggleHelp)
       window.removeEventListener('igs:load-example', handleLoadExample)
       window.removeEventListener('tour-complete', handleTourComplete)
-
     }
   })
 </script>
@@ -903,7 +904,6 @@
         {@render chevronDown()}
       </summary>
       <ul class="menu dropdown-content rounded-box z-[1] w-64 p-2 shadow bg-base-100">
-        <!-- Transcript Panel Toggle -->
         <li>
           <button
             onclick={() => (isTranscriptVisible = !isTranscriptVisible)}
@@ -927,15 +927,31 @@
                 <MdCheck />
               {/if}
             </div>
-            Align
+            Align to side
           </button>
         </li>
 
         <div class="divider my-1"></div>
+        <li class="menu-title px-2 py-0 text-xs opacity-60">Grouped turns</li>
 
+        <li>
+          <button
+            onclick={() => {
+              handleConfigChange('showSpeakerStripes', !$ConfigStore.showSpeakerStripes)
+            }}
+            class="w-full text-left flex items-center"
+          >
+            <div class="w-4 h-4 mr-2">
+              {#if $ConfigStore.showSpeakerStripes}
+                <MdCheck />
+              {/if}
+            </div>
+            Combine speakers
+          </button>
+        </li>
         <li class="px-2 py-1">
           <div class="w-full">
-            <p class="text-xs mb-1">Split turn groups after {$ConfigStore.clusterTimeThreshold}s pause</p>
+            <p class="text-xs mb-1">Group within {$ConfigStore.clusterTimeThreshold} seconds</p>
             <input
               id="clusterTimeRange"
               type="range"
@@ -949,7 +965,7 @@
         </li>
         <li class="px-2 py-1">
           <div class="w-full">
-            <p class="text-xs mb-1">Split turn groups after {$ConfigStore.clusterSpaceThreshold}px movement</p>
+            <p class="text-xs mb-1">Group within {$ConfigStore.clusterSpaceThreshold}px distance</p>
             <input
               id="clusterSpaceRange"
               type="range"
@@ -961,9 +977,13 @@
             />
           </div>
         </li>
+
+        <div class="divider my-1"></div>
+        <li class="menu-title px-2 py-0 text-xs opacity-60">Individual turns</li>
+
         <li class="px-2 py-1">
           <div class="w-full">
-            <p class="text-xs mb-1">Individual turn width: {$ConfigStore.conversationRectWidth}px</p>
+            <p class="text-xs mb-1">Turn width: {$ConfigStore.conversationRectWidth}px</p>
             <input
               id="rectWidthRange"
               type="range"
@@ -1064,7 +1084,10 @@
             </button>
           </li>
           <li>
-            <button onclick={() => window.dispatchEvent(new CustomEvent('igs:open-cheatsheet'))} class="flex items-center gap-2">
+            <button
+              onclick={() => window.dispatchEvent(new CustomEvent('igs:open-cheatsheet'))}
+              class="flex items-center gap-2"
+            >
               {@render icon(MdKeyboard)}
               Keyboard Shortcuts
             </button>
@@ -1087,7 +1110,9 @@
           <span class="max-w-32 truncate">{selectedDropDownOption || 'Examples'}</span>
           {@render chevronDown()}
         </summary>
-        <ul class="menu dropdown-content rounded-box z-[1] w-56 p-2 shadow bg-base-100 max-h-[60vh] overflow-y-auto">
+        <ul
+          class="menu dropdown-content rounded-box z-[1] w-56 p-2 shadow bg-base-100 max-h-[60vh] overflow-y-auto"
+        >
           {#each dropdownOptions as group}
             <li class="menu-title">{group.label}</li>
             {#each group.items as item}
@@ -1114,7 +1139,11 @@
   </div>
 </div>
 
-<div id="main-content" class:split-screen-mode={isSplitScreen} class:is-dragging-split={isDraggingSplit}>
+<div
+  id="main-content"
+  class:split-screen-mode={isSplitScreen}
+  class:is-dragging-split={isDraggingSplit}
+>
   {#if isSplitScreen}
     <div class="split-video-pane" style="width: {splitWidth}%;">
       <SplitScreenVideo />
@@ -1128,7 +1157,11 @@
       <div class="divider-handle"></div>
     </div>
   {/if}
-  <div id="p5-canvas-container" class="canvas-pane" class:cursor-crosshair={currentConfig.highlightToggle}>
+  <div
+    id="p5-canvas-container"
+    class="canvas-pane"
+    class:cursor-crosshair={currentConfig.highlightToggle}
+  >
     <P5 {sketch} />
     {#if !isSplitScreen}
       <VideoContainer />
