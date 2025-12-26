@@ -2,6 +2,7 @@ import type { KeyboardShortcut } from './types'
 import { registry } from './registry'
 import ConfigStore from '../../stores/configStore'
 import TimelineStore from '../../stores/timelineStore'
+import { togglePlayback } from '../../stores/playbackStore'
 import {
   toggleMovement,
   toggleStops,
@@ -166,12 +167,7 @@ export const playbackShortcuts: KeyboardShortcut[] = [
     label: 'Play/Pause',
     description: 'Toggle animation playback',
     category: 'playback',
-    action: () => {
-      TimelineStore.update((timeline) => {
-        timeline.setIsAnimating(!timeline.getIsAnimating())
-        return timeline
-      })
-    },
+    action: togglePlayback,
   },
   {
     id: 'playback.seek-backward',

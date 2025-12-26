@@ -50,7 +50,7 @@
 
   // Handle seek requests
   $effect(() => {
-    handleSeekRequest(syncState, seekRequest)
+    handleSeekRequest(syncState, seekRequest, isPlaying)
   })
 
   // Sync playback state with player

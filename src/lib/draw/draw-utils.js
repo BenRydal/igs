@@ -5,6 +5,7 @@
 import TimelineStore from '../../stores/timelineStore'
 import CodeStore from '../../stores/codeStore'
 import ConfigStore from '../../stores/configStore'
+import PlaybackStore from '../../stores/playbackStore'
 import { get } from 'svelte/store'
 
 // Shared constants for conversation rect sizing
@@ -20,7 +21,8 @@ let timeline,
   sliceToggle,
   movementToggle,
   stopsToggle,
-  highlightToggle
+  highlightToggle,
+  playbackMode = 'stopped'
 
 TimelineStore.subscribe((data) => {
   timeline = data
@@ -36,6 +38,10 @@ ConfigStore.subscribe((data) => {
   movementToggle = data.movementToggle
   stopsToggle = data.stopsToggle
   highlightToggle = data.highlightToggle
+})
+
+PlaybackStore.subscribe((data) => {
+  playbackMode = data.mode
 })
 
 export class DrawUtils {
@@ -87,7 +93,7 @@ export class DrawUtils {
   }
 
   isShowingInAnimation(value) {
-    if (timeline.getIsAnimating())
+    if (playbackMode !== 'stopped')
       return timeline.mapPixelTimeToTotalTime(value) < timeline.getCurrTime()
     else return true
   }

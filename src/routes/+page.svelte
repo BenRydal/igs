@@ -32,6 +32,7 @@
     reset as resetVideo,
     hasVideoSource,
   } from '../stores/videoStore'
+  import { onVideoVisibilityChange } from '../stores/playbackStore'
   import VideoContainer from '$lib/components/VideoContainer.svelte'
   import SplitScreenVideo from '$lib/components/SplitScreenVideo.svelte'
   import TranscriptPanel from '$lib/components/TranscriptPanel.svelte'
@@ -318,9 +319,11 @@
   let formattedStopLength = $derived($ConfigStore.stopSliderValue.toFixed(0))
 
   function toggleVideo() {
-    if (hasVideoSource()) {
-      toggleVisibility()
-    }
+    if (!hasVideoSource()) return
+
+    const willBeVisible = !$VideoStore.isVisible
+    toggleVisibility()
+    onVideoVisibilityChange(willBeVisible)
   }
 
   function resetSettings() {

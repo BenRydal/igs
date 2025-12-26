@@ -86,13 +86,6 @@ export function toggleVisibility(): void {
   }
 }
 
-export function togglePlayPause(): void {
-  VideoStore.update((state) => ({
-    ...state,
-    isPlaying: !state.isPlaying,
-  }))
-}
-
 export function setCurrentTime(time: number): void {
   VideoStore.update((state) => ({
     ...state,
@@ -147,12 +140,6 @@ export function reset(): void {
 export function hasVideoSource(): boolean {
   const state = get(VideoStore)
   return state.source.type !== null
-}
-
-/** Check if video has a source and is visible (ready for playback control) */
-export function isVideoActive(): boolean {
-  const state = get(VideoStore)
-  return state.source.type !== null && state.isVisible
 }
 
 export default VideoStore

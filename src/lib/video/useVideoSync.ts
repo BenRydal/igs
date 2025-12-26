@@ -27,11 +27,17 @@ export function createVideoSyncState(): VideoSyncState {
  */
 export function handleSeekRequest(
   state: VideoSyncState,
-  seekRequest: { time: number; id: number } | null
+  seekRequest: { time: number; id: number } | null,
+  isPlaying: boolean
 ): void {
   if (state.player && seekRequest && seekRequest.id !== state.lastSeekRequestId) {
     state.lastSeekRequestId = seekRequest.id
     seekTo(state.player, seekRequest.time)
+    // Ensure video stays paused after seeking when not playing
+    // (YouTube's seekTo can sometimes trigger auto-play)
+    if (!isPlaying) {
+      pauseVideo(state.player)
+    }
     clearSeekRequest()
   }
 }
