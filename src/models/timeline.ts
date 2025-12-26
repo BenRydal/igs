@@ -139,10 +139,6 @@ export class Timeline {
     )
   }
 
-  overTimeline(pixelValue: number): boolean {
-    return pixelValue >= this.leftX && pixelValue <= this.rightX
-  }
-
   // Implementation of Helper function from P5 library to map a value from one range to another
   map(
     value: number,
