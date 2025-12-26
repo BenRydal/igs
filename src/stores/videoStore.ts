@@ -10,9 +10,8 @@ export interface VideoState {
   // Source
   source: VideoSource
 
-  // Playback state
+  // Video state
   isLoaded: boolean
-  isPlaying: boolean
   currentTime: number
   duration: number
   isMuted: boolean
@@ -28,7 +27,6 @@ export interface VideoState {
 const initialState: VideoState = {
   source: { type: null },
   isLoaded: false,
-  isPlaying: false,
   currentTime: 0,
   duration: 0,
   isMuted: false,
@@ -45,7 +43,6 @@ export function loadVideo(source: VideoSource): void {
     ...state,
     source,
     isLoaded: false,
-    isPlaying: false,
     currentTime: 0,
     duration: 0,
     isVisible: false,
@@ -71,7 +68,6 @@ export function hideVideo(): void {
   VideoStore.update((state) => ({
     ...state,
     isVisible: false,
-    isPlaying: false,
     isSplitScreen: false, // Exit split-screen when hiding video
   }))
 }

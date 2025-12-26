@@ -18,6 +18,9 @@ const PlaybackStore = writable<PlaybackState>(initialState)
 // Derived store: is playback active (either mode)?
 export const isPlaying = derived(PlaybackStore, ($store) => $store.mode !== 'stopped')
 
+// Derived store: is video-driven playback?
+export const isPlayingVideo = derived(PlaybackStore, ($store) => $store.mode === 'playing-video')
+
 /**
  * Get current playback mode
  */
@@ -26,15 +29,10 @@ export function getMode(): PlaybackMode {
 }
 
 /**
- * Set playback mode and sync VideoStore.isPlaying
+ * Set playback mode
  */
 export function setMode(mode: PlaybackMode): void {
   PlaybackStore.update((state) => ({ ...state, mode }))
-
-  // Sync VideoStore.isPlaying so video components know whether to play
-  const shouldVideoPlay = mode === 'playing-video'
-  VideoStore.update((state) => ({ ...state, isPlaying: shouldVideoPlay }))
-
   triggerRedraw()
 }
 

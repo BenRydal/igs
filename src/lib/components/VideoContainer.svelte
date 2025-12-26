@@ -2,6 +2,7 @@
   import { onMount, onDestroy } from 'svelte'
   import { browser } from '$app/environment'
   import VideoStore from '../../stores/videoStore'
+  import { isPlayingVideo } from '../../stores/playbackStore'
   import { type VideoPlayer } from '../video/video-service'
   import {
     createVideoSyncState,
@@ -42,7 +43,7 @@
   let resizeStartPosX = 0
   let resizeStartPosY = 0
 
-  let isPlaying = $derived($VideoStore.isPlaying)
+  let isPlaying = $derived($isPlayingVideo)
   let isMuted = $derived($VideoStore.isMuted)
   let isVisible = $derived($VideoStore.isVisible)
   let isLoaded = $derived($VideoStore.isLoaded)

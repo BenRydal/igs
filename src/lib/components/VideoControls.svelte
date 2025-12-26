@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onDestroy } from 'svelte'
   import VideoStore, { toggleMute, toggleSplitScreen, setCurrentTime } from '../../stores/videoStore'
+  import { isPlayingVideo } from '../../stores/playbackStore'
   import { getCurrentTime, type VideoPlayer } from '../video/video-service'
   import MdVolumeUp from '~icons/mdi/volume-high'
   import MdVolumeOff from '~icons/mdi/volume-off'
@@ -15,7 +16,7 @@
 
   let animationFrameId: number | null = null
 
-  let isPlaying = $derived($VideoStore.isPlaying)
+  let isPlaying = $derived($isPlayingVideo)
   let isMuted = $derived($VideoStore.isMuted)
   let isSplitScreen = $derived($VideoStore.isSplitScreen)
 
