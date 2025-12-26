@@ -56,7 +56,7 @@ export const tourSteps: TourStep[] = [
     popover: {
       title: 'Conversation Controls',
       description:
-        'Adjust how conversation data is displayed and aligned. Search through conversations too!',
+        'Adjust how conversation data is displayed, grouped, and aligned. Search through conversations too!',
       side: 'bottom',
       align: 'start',
     },

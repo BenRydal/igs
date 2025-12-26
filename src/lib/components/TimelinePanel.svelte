@@ -3,7 +3,8 @@
   import TimelineStore from '../../stores/timelineStore'
   import P5Store from '../../stores/p5Store'
   import ConfigStore from '../../stores/configStore'
-  import VideoStore, { togglePlayPause as toggleVideoPlayPause, isVideoActive, requestSeek } from '../../stores/videoStore'
+  import VideoStore, { requestSeek } from '../../stores/videoStore'
+  import { isPlaying, togglePlayback, pause as pausePlayback } from '../../stores/playbackStore'
   import MdRefresh from '~icons/mdi/refresh'
   import MdPlayArrow from '~icons/mdi/play-arrow'
   import MdPause from '~icons/mdi/pause'
@@ -17,7 +18,6 @@
   let timelineCurr = $derived($TimelineStore.getCurrTime())
   let startTime = $derived($TimelineStore.getStartTime())
   let endTime = $derived($TimelineStore.getEndTime())
-  let isAnimating = $derived($TimelineStore.getIsAnimating())
 
   // Progress fill calculations
   let leftMarkerPercent = $derived(
@@ -72,36 +72,20 @@
     config.animationRate < 1 ? `${config.animationRate}x` : `${Math.round(config.animationRate)}x`
   )
 
-  const toggleAnimation = () => {
-    TimelineStore.update((timeline) => {
-      // If we're at the end and not animating, reset to beginning
-      if (!timeline.getIsAnimating() && timeline.getCurrTime() >= timeline.getRightMarker()) {
-        timeline.setCurrTime(timeline.getLeftMarker())
-      }
-      timeline.setIsAnimating(!timeline.getIsAnimating())
-      return timeline
-    })
-
-    // Sync video playback with timeline animation (only if video is visible)
-    if (isVideoActive()) {
-      toggleVideoPlayPause()
-    }
-
-    if (p5Instance) {
-      p5Instance.loop()
-    }
-  }
-
   const resetToStart = () => {
-    let leftMarkerTime = 0
+    // Pause if playing
+    if ($isPlaying) {
+      pausePlayback()
+    }
+
+    const leftMarkerTime = $TimelineStore.getLeftMarker()
     TimelineStore.update((timeline) => {
-      leftMarkerTime = timeline.getLeftMarker()
       timeline.setCurrTime(leftMarkerTime)
       return timeline
     })
 
-    // Seek video to the reset position (only if video is visible)
-    if (isVideoActive()) {
+    // Seek video if visible
+    if ($VideoStore.isVisible) {
       requestSeek(leftMarkerTime)
     }
 
@@ -152,9 +136,9 @@
       return timeline
     })
 
-    // Seek video when the current time slider is moved (but not while animating/playing)
-    // When animating, the video is already playing at the right position
-    if (isVideoActive() && !isAnimating) {
+    // Seek video when the current time slider is moved (but not while playing)
+    // When playing, the video is already at the right position
+    if ($VideoStore.isVisible && !$isPlaying) {
       requestSeek(value2)
     }
 
@@ -233,11 +217,11 @@
       <div class="flex items-center gap-3">
         <div class="flex items-center gap-1">
           <button
-            onclick={toggleAnimation}
+            onclick={togglePlayback}
             class="play-pause-btn"
-            aria-label={isAnimating ? 'Pause' : 'Play'}
+            aria-label={$isPlaying ? 'Pause' : 'Play'}
           >
-            {#if isAnimating}
+            {#if $isPlaying}
               <MdPause />
             {:else}
               <MdPlayArrow />

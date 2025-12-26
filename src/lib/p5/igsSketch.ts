@@ -1,20 +1,20 @@
-import { get } from 'svelte/store';
+import { get } from 'svelte/store'
 import P5Store from '../../stores/p5Store'
 import UserStore from '../../stores/userStore'
 import TimelineStore from '../../stores/timelineStore'
 import ConfigStore from '../../stores/configStore'
 import VideoStore from '../../stores/videoStore'
+import PlaybackStore, { onAnimationEnd, type PlaybackMode } from '../../stores/playbackStore'
 import { toastStore } from '../../stores/toastStore'
 import type { User } from '../../models/user'
 import { FloorPlan, SketchGUI, Handle3D, SetPathData } from '..'
-import type { Timeline } from '../../models/timeline';
+import type { Timeline } from '../../models/timeline'
 
 let users: User[] = []
-let timeline: Timeline;
-let highlightToggle: boolean;
+let timeline: Timeline
+let highlightToggle: boolean
 let animationRate = 0.05
-let videoIsPlaying = false
-let videoIsLoaded = false
+let playbackMode: PlaybackMode = 'stopped'
 
 TimelineStore.subscribe((data) => {
   timeline = data
@@ -22,16 +22,15 @@ TimelineStore.subscribe((data) => {
 
 ConfigStore.subscribe((data) => {
   highlightToggle = data.highlightToggle
-  animationRate = data.animationRate // Subscribe to animationRate
+  animationRate = data.animationRate
 })
 
 UserStore.subscribe((data) => {
   users = data
 })
 
-VideoStore.subscribe((data) => {
-  videoIsPlaying = data.isPlaying
-  videoIsLoaded = data.isLoaded
+PlaybackStore.subscribe((data) => {
+  playbackMode = data.mode
 })
 
 export const igsSketch = (p5: any) => {
@@ -79,16 +78,14 @@ export const igsSketch = (p5: any) => {
 
     if (p5.handle3D.getIs3DModeOrTransitioning()) p5.pop()
     p5.gui.update2D() // draw all other canvas GUI elements in 2D mode
-    const drawTimeline = get(TimelineStore);
-		if (drawTimeline.getIsAnimating()) p5.updateAnimation();
-    // Determine whether to re-run draw loop depending on user adjustable modes
-    // Might not be running because of not being able to sense if the data is being tracked and such.
-    if (
-      drawTimeline.getIsAnimating() ||
-      (videoIsLoaded && videoIsPlaying) ||
-      p5.handle3D.getIsTransitioning() ||
-      highlightToggle
-    ) {
+
+    // Update animation if playing
+    if (playbackMode !== 'stopped') {
+      p5.updateAnimation()
+    }
+
+    // Determine whether to re-run draw loop
+    if (playbackMode !== 'stopped' || p5.handle3D.getIsTransitioning() || highlightToggle) {
       p5.loop()
     } else p5.noLoop()
   }
@@ -191,38 +188,28 @@ export const igsSketch = (p5: any) => {
   }
 
   p5.updateAnimation = () => {
-    const currentTimeline = get(TimelineStore);
-    if (currentTimeline.getCurrTime() < currentTimeline.getEndTime()) p5.continueAnimation()
-    else {
-      // Ensure we're exactly at the end time when animation completes
-      TimelineStore.update((timeline) => {
-        timeline.setCurrTime(timeline.getEndTime())
-        return timeline
-      })
-      p5.endAnimation()
+    const currentTimeline = get(TimelineStore)
+    if (currentTimeline.getCurrTime() < currentTimeline.getRightMarker()) {
+      p5.continueAnimation()
+    } else {
+      onAnimationEnd()
     }
   }
 
   p5.continueAnimation = () => {
-    const currentTimeline = get(TimelineStore);
-    const videoState = get(VideoStore)
-    let timeToSet = 0
-    // Use video time if video is playing, otherwise use animation rate
-    if (videoIsLoaded && videoIsPlaying) {
-      timeToSet = videoState.currentTime
+    const currentTimeline = get(TimelineStore)
+    let timeToSet: number
+
+    if (playbackMode === 'playing-video') {
+      // Video is driving - use video's current time
+      timeToSet = get(VideoStore).currentTime
     } else {
-      // Original frame-based increment
+      // Animation is driving - use frame-based increment
       timeToSet = currentTimeline.getCurrTime() + animationRate
     }
+
     TimelineStore.update((timeline) => {
       timeline.setCurrTime(timeToSet)
-      return timeline
-    })
-  }
-
-  p5.endAnimation = () => {
-    TimelineStore.update((timeline) => {
-      timeline.setIsAnimating(false)
       return timeline
     })
   }
@@ -232,7 +219,7 @@ export const igsSketch = (p5: any) => {
   }
 
   p5.mapSelectTimeToPixelTime = (value) => {
-    const currentTimeline = get(TimelineStore);
+    const currentTimeline = get(TimelineStore)
     const spaceTimeCubeBottom = p5.height / 10
     const spaceTimeCubeTop = p5.height / 1.6
     if (p5.handle3D.getIs3DMode())

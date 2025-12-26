@@ -2,6 +2,7 @@
   import { onMount, onDestroy } from 'svelte'
   import { browser } from '$app/environment'
   import VideoStore from '../../stores/videoStore'
+  import { isPlayingVideo } from '../../stores/playbackStore'
   import { type VideoPlayer } from '../video/video-service'
   import {
     createVideoSyncState,
@@ -15,7 +16,7 @@
 
   const DRAG_HANDLE_HEIGHT = 24
   const MIN_WIDTH = 160
-  const DEFAULT_WIDTH = 320
+  const DEFAULT_WIDTH = 480
   const ASPECT_RATIO = 16 / 9
 
   const syncState = createVideoSyncState()
@@ -42,7 +43,7 @@
   let resizeStartPosX = 0
   let resizeStartPosY = 0
 
-  let isPlaying = $derived($VideoStore.isPlaying)
+  let isPlaying = $derived($isPlayingVideo)
   let isMuted = $derived($VideoStore.isMuted)
   let isVisible = $derived($VideoStore.isVisible)
   let isLoaded = $derived($VideoStore.isLoaded)
@@ -50,7 +51,7 @@
 
   // Handle seek requests
   $effect(() => {
-    handleSeekRequest(syncState, seekRequest)
+    handleSeekRequest(syncState, seekRequest, isPlaying)
   })
 
   // Sync playback state with player
@@ -155,6 +156,13 @@
     if (browser) {
       document.addEventListener('mousemove', handleMouseMove)
       document.addEventListener('mouseup', handleMouseUp)
+
+      // Position video on the right side of the container
+      const canvasContainer = document.getElementById('p5-canvas-container')
+      if (canvasContainer) {
+        const rect = canvasContainer.getBoundingClientRect()
+        posX = rect.width - width - 20 // 20px margin from right
+      }
     }
   })
 

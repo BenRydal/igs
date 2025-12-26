@@ -1,6 +1,7 @@
 import ConfigStore from '../../stores/configStore'
 import TimelineStore from '../../stores/timelineStore'
 import VideoStore from '../../stores/videoStore'
+import PlaybackStore from '../../stores/playbackStore'
 
 let timeline
 
@@ -17,14 +18,15 @@ ConfigStore.subscribe((data) => {
   stopStrokeWeight = data.stopStrokeWeight
 })
 
-let videoIsPlaying = false
-let videoIsLoaded = false
 let videoCurrentTime = 0
+let playbackMode = 'stopped'
 
 VideoStore.subscribe((data) => {
-  videoIsPlaying = data.isPlaying
-  videoIsLoaded = data.isLoaded
   videoCurrentTime = data.currentTime
+})
+
+PlaybackStore.subscribe((data) => {
+  playbackMode = data.mode
 })
 
 export class DrawMovement {
@@ -115,9 +117,7 @@ export class DrawMovement {
   }
 
   getAugmentedPoint(view, point) {
-    if (view === this.sk.PLAN)
-      return this.drawUtils.createAugmentPoint(this.sk.PLAN, point, point.time)
-    else return this.drawUtils.createAugmentPoint(this.sk.SPACETIME, point, point.time)
+    return this.drawUtils.createAugmentPoint(view, point, point.time)
   }
 
   drawAdditionalVertex(view, point) {
@@ -165,13 +165,11 @@ export class DrawMovement {
   getNewDot(augmentedPoint, curDot) {
     const [xPos, yPos, zPos, timePos, map3DMouse, codeColor] = this.getDotValues(augmentedPoint)
 
-    if (this.isMouseOverTimelineAndValid(map3DMouse, timePos, curDot)) {
-      return this.createDot(xPos, yPos, zPos, map3DMouse, codeColor, Math.abs(map3DMouse - timePos))
+    // When playing, always show dot at current playback position (not mouse position)
+    if (playbackMode === 'playing-animation') {
+      return this.createDot(xPos, yPos, zPos, timePos, codeColor, null)
     }
-    if (timeline.getIsAnimating()) {
-      return this.createDot(xPos, yPos, zPos, timePos, codeColor, null) // No length to compare so set to null
-    }
-    if (videoIsLoaded && videoIsPlaying) {
+    if (playbackMode === 'playing-video') {
       const videoSelectTime = this.getVideoSelectTime()
       if (this.compareToCurDot(videoSelectTime, timePos, curDot)) {
         return this.createDot(
@@ -183,6 +181,11 @@ export class DrawMovement {
           Math.abs(videoSelectTime - timePos)
         )
       }
+      return null
+    }
+    // When stopped, show dot at mouse position if hovering over timeline
+    if (this.isMouseOverTimelineAndValid(map3DMouse, timePos, curDot)) {
+      return this.createDot(xPos, yPos, zPos, map3DMouse, codeColor, Math.abs(map3DMouse - timePos))
     }
     return null
   }

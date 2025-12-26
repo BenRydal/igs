@@ -27,9 +27,16 @@
 
   import UserStore from '../stores/userStore'
   import P5Store from '../stores/p5Store'
-  import VideoStore, { toggleVisibility, reset as resetVideo, hasVideoSource } from '../stores/videoStore'
+  import VideoStore, {
+    toggleVisibility,
+    reset as resetVideo,
+    hasVideoSource,
+  } from '../stores/videoStore'
+  import { onVideoVisibilityChange } from '../stores/playbackStore'
   import VideoContainer from '$lib/components/VideoContainer.svelte'
   import SplitScreenVideo from '$lib/components/SplitScreenVideo.svelte'
+  import TranscriptPanel from '$lib/components/TranscriptPanel.svelte'
+  import ConversationTooltip from '$lib/components/ConversationTooltip.svelte'
 
   import { Core } from '$lib'
   import { igsSketch } from '$lib/p5/igsSketch'
@@ -40,6 +47,7 @@
   import TimelinePanel from '$lib/components/TimelinePanel.svelte'
   import DataPointTable from '$lib/components/DataPointTable.svelte'
   import ModeIndicator from '$lib/components/ModeIndicator.svelte'
+  import FloatingDropdown from '$lib/components/FloatingDropdown.svelte'
   import { OnboardingTour } from '$lib/tour'
   import DataImporter from '$lib/components/import/DataImporter.svelte'
   import { capitalizeFirstLetter, capitalizeEachWord } from '$lib/utils/string'
@@ -210,6 +218,7 @@
   let isVideoPlaying = $state(false)
   let is3DMode = $state(true)
   let timeline = $state($TimelineStore)
+  let isTranscriptVisible = $state(true)
 
   $effect(() => {
     currentConfig = $ConfigStore
@@ -310,9 +319,11 @@
   let formattedStopLength = $derived($ConfigStore.stopSliderValue.toFixed(0))
 
   function toggleVideo() {
-    if (hasVideoSource()) {
-      toggleVisibility()
-    }
+    if (!hasVideoSource()) return
+
+    const willBeVisible = !$VideoStore.isVisible
+    toggleVisibility()
+    onVideoVisibilityChange(willBeVisible)
   }
 
   function resetSettings() {
@@ -575,15 +586,6 @@
     p5Instance.loop()
   }
 
-  function handleWordSearch(event) {
-    const newWord = event.target.value.trim()
-    ConfigStore.update((config) => ({ ...config, wordToSearch: newWord }))
-    // Trigger a redraw of the P5 sketch
-    if (p5Instance) {
-      p5Instance.loop()
-    }
-  }
-
   // Track which dropdown is currently open
   let openDropdownId = $state<string | null>(null)
 
@@ -754,7 +756,6 @@
     window.addEventListener('igs:load-example', handleLoadExample)
     window.addEventListener('tour-complete', handleTourComplete)
 
-
     // Cleanup function
     return () => {
       // Remove global click handler
@@ -773,7 +774,6 @@
       window.removeEventListener('igs:toggle-help', handleToggleHelp)
       window.removeEventListener('igs:load-example', handleLoadExample)
       window.removeEventListener('tour-complete', handleTourComplete)
-
     }
   })
 </script>
@@ -907,43 +907,98 @@
         Talk
         {@render chevronDown()}
       </summary>
-      <ul class="menu dropdown-content rounded-box z-[1] w-52 p-2 shadow bg-base-100">
-        {#each conversationToggleOptions as toggle}
-          <li>
-            <button
-              onclick={() => toggleSelection(toggle, conversationToggleOptions)}
-              class="w-full text-left flex items-center"
-            >
-              <div class="w-4 h-4 mr-2">
-                {#if $ConfigStore[toggle]}
-                  <MdCheck />
-                {/if}
-              </div>
-              {capitalizeFirstLetter(toggle.replace('Toggle', ''))}
-            </button>
-          </li>
-        {/each}
-        <li class="cursor-none">
-          <p>Rect width: {$ConfigStore.conversationRectWidth} pixels</p>
+      <ul class="menu dropdown-content rounded-box z-[1] w-64 p-2 shadow bg-base-100">
+        <li>
+          <button
+            onclick={() => (isTranscriptVisible = !isTranscriptVisible)}
+            class="w-full text-left flex items-center"
+          >
+            <div class="w-4 h-4 mr-2">
+              {#if isTranscriptVisible}
+                <MdCheck />
+              {/if}
+            </div>
+            Transcript Panel
+          </button>
         </li>
         <li>
-          <label for="rectWidthRange" class="sr-only">Adjust rect width</label>
-          <input
-            id="rectWidthRange"
-            type="range"
-            min="1"
-            max="30"
-            value={$ConfigStore.conversationRectWidth}
-            class="range"
-            oninput={(e) => handleConfigChangeFromInput(e, 'conversationRectWidth')}
-          />
+          <button
+            onclick={() => toggleSelection('alignToggle', conversationToggleOptions)}
+            class="w-full text-left flex items-center"
+          >
+            <div class="w-4 h-4 mr-2">
+              {#if $ConfigStore.alignToggle}
+                <MdCheck />
+              {/if}
+            </div>
+            Align to side
+          </button>
         </li>
-        <input
-          type="text"
-          placeholder="Search conversations..."
-          oninput={(e) => handleWordSearch(e)}
-          class="input input-bordered w-full"
-        />
+
+        <div class="divider my-1"></div>
+        <li class="menu-title px-2 py-0 text-xs opacity-60">Grouped turns</li>
+
+        <li>
+          <button
+            onclick={() => {
+              handleConfigChange('showSpeakerStripes', !$ConfigStore.showSpeakerStripes)
+            }}
+            class="w-full text-left flex items-center"
+          >
+            <div class="w-4 h-4 mr-2">
+              {#if $ConfigStore.showSpeakerStripes}
+                <MdCheck />
+              {/if}
+            </div>
+            Combine speakers
+          </button>
+        </li>
+        <li class="px-2 py-1">
+          <div class="w-full">
+            <p class="text-xs mb-1">Group within {$ConfigStore.clusterTimeThreshold} seconds</p>
+            <input
+              id="clusterTimeRange"
+              type="range"
+              min="1"
+              max="60"
+              value={$ConfigStore.clusterTimeThreshold}
+              class="range range-xs"
+              oninput={(e) => handleConfigChangeFromInput(e, 'clusterTimeThreshold')}
+            />
+          </div>
+        </li>
+        <li class="px-2 py-1">
+          <div class="w-full">
+            <p class="text-xs mb-1">Group within {$ConfigStore.clusterSpaceThreshold}px distance</p>
+            <input
+              id="clusterSpaceRange"
+              type="range"
+              min="0"
+              max="200"
+              value={$ConfigStore.clusterSpaceThreshold}
+              class="range range-xs"
+              oninput={(e) => handleConfigChangeFromInput(e, 'clusterSpaceThreshold')}
+            />
+          </div>
+        </li>
+
+        <div class="divider my-1"></div>
+        <li class="menu-title px-2 py-0 text-xs opacity-60">Individual turns</li>
+
+        <li class="px-2 py-1">
+          <div class="w-full">
+            <p class="text-xs mb-1">Turn width: {$ConfigStore.conversationRectWidth}px</p>
+            <input
+              id="rectWidthRange"
+              type="range"
+              min="1"
+              max="30"
+              value={$ConfigStore.conversationRectWidth}
+              class="range range-xs"
+              oninput={(e) => handleConfigChangeFromInput(e, 'conversationRectWidth')}
+            />
+          </div>
+        </li>
       </ul>
     </details>
 
@@ -1033,7 +1088,10 @@
             </button>
           </li>
           <li>
-            <button onclick={() => window.dispatchEvent(new CustomEvent('igs:open-cheatsheet'))} class="flex items-center gap-2">
+            <button
+              onclick={() => window.dispatchEvent(new CustomEvent('igs:open-cheatsheet'))}
+              class="flex items-center gap-2"
+            >
               {@render icon(MdKeyboard)}
               Keyboard Shortcuts
             </button>
@@ -1050,13 +1108,17 @@
       {@render navDivider()}
 
       <!-- Examples Dropdown -->
-      <details id="examples-dropdown" class="dropdown dropdown-end" use:clickOutside>
-        <summary class="btn btn-sm gap-1 flex items-center">
+      <FloatingDropdown
+        id="examples-dropdown"
+        buttonClass="btn btn-sm gap-1 flex items-center"
+        contentClass="menu rounded-box w-56 p-2 shadow bg-base-100 max-h-[60vh] overflow-y-auto"
+      >
+        {#snippet buttonChildren()}
           {@render icon(MdFolder)}
           <span class="max-w-32 truncate">{selectedDropDownOption || 'Examples'}</span>
           {@render chevronDown()}
-        </summary>
-        <ul class="menu dropdown-content rounded-box z-[1] w-56 p-2 shadow bg-base-100 max-h-[60vh] overflow-y-auto">
+        {/snippet}
+        <ul>
           {#each dropdownOptions as group}
             <li class="menu-title">{group.label}</li>
             {#each group.items as item}
@@ -1078,12 +1140,16 @@
             {/each}
           {/each}
         </ul>
-      </details>
+      </FloatingDropdown>
     </div>
   </div>
 </div>
 
-<div id="main-content" class:split-screen-mode={isSplitScreen} class:is-dragging-split={isDraggingSplit}>
+<div
+  id="main-content"
+  class:split-screen-mode={isSplitScreen}
+  class:is-dragging-split={isDraggingSplit}
+>
   {#if isSplitScreen}
     <div class="split-video-pane" style="width: {splitWidth}%;">
       <SplitScreenVideo />
@@ -1097,13 +1163,20 @@
       <div class="divider-handle"></div>
     </div>
   {/if}
-  <div id="p5-canvas-container" class="canvas-pane" class:cursor-crosshair={currentConfig.highlightToggle}>
+  <div
+    id="p5-canvas-container"
+    class="canvas-pane"
+    class:cursor-crosshair={currentConfig.highlightToggle}
+  >
     <P5 {sketch} />
     {#if !isSplitScreen}
       <VideoContainer />
     {/if}
+    <ConversationTooltip hideTooltip={isTranscriptVisible} />
   </div>
 </div>
+
+<TranscriptPanel bind:isVisible={isTranscriptVisible} />
 
 {#if showSettings}
   <div

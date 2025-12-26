@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onDestroy } from 'svelte'
   import VideoStore, { toggleMute, toggleSplitScreen, setCurrentTime } from '../../stores/videoStore'
+  import { isPlayingVideo } from '../../stores/playbackStore'
   import { getCurrentTime, type VideoPlayer } from '../video/video-service'
   import MdVolumeUp from '~icons/mdi/volume-high'
   import MdVolumeOff from '~icons/mdi/volume-off'
@@ -15,7 +16,7 @@
 
   let animationFrameId: number | null = null
 
-  let isPlaying = $derived($VideoStore.isPlaying)
+  let isPlaying = $derived($isPlayingVideo)
   let isMuted = $derived($VideoStore.isMuted)
   let isSplitScreen = $derived($VideoStore.isSplitScreen)
 
@@ -98,12 +99,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 28px;
-    height: 28px;
-    padding: 4px;
+    width: 36px;
+    height: 36px;
+    padding: 6px;
     background: rgba(0, 0, 0, 0.5);
     border: none;
-    border-radius: 4px;
+    border-radius: 6px;
     color: white;
     cursor: pointer;
     transition: background 0.15s;
@@ -114,7 +115,7 @@
   }
 
   .control-btn :global(svg) {
-    width: 16px;
-    height: 16px;
+    width: 22px;
+    height: 22px;
   }
 </style>

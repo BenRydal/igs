@@ -1,5 +1,6 @@
 <script lang="ts">
   import VideoStore from '../../stores/videoStore'
+  import { isPlayingVideo } from '../../stores/playbackStore'
   import { type VideoPlayer } from '../video/video-service'
   import {
     createVideoSyncState,
@@ -13,14 +14,14 @@
 
   const syncState = createVideoSyncState()
 
-  let isPlaying = $derived($VideoStore.isPlaying)
+  let isPlaying = $derived($isPlayingVideo)
   let isMuted = $derived($VideoStore.isMuted)
   let isLoaded = $derived($VideoStore.isLoaded)
   let seekRequest = $derived($VideoStore.seekRequest)
 
   // Handle seek requests
   $effect(() => {
-    handleSeekRequest(syncState, seekRequest)
+    handleSeekRequest(syncState, seekRequest, isPlaying)
   })
 
   // Sync playback state with player

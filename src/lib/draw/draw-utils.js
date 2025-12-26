@@ -5,17 +5,24 @@
 import TimelineStore from '../../stores/timelineStore'
 import CodeStore from '../../stores/codeStore'
 import ConfigStore from '../../stores/configStore'
+import PlaybackStore from '../../stores/playbackStore'
 import { get } from 'svelte/store'
+
+// Shared constants for conversation rect sizing
+export const MIN_RECT_SIZE = 15
+export const MAX_RECT_SIZE = 80
 
 let timeline,
   stopSliderValue,
   alignToggle,
   maxTurnLength,
+  conversationRectWidth,
   circleToggle,
   sliceToggle,
   movementToggle,
   stopsToggle,
-  highlightToggle
+  highlightToggle,
+  playbackMode = 'stopped'
 
 TimelineStore.subscribe((data) => {
   timeline = data
@@ -25,11 +32,16 @@ ConfigStore.subscribe((data) => {
   alignToggle = data.alignToggle
   stopSliderValue = data.stopSliderValue
   maxTurnLength = data.maxTurnLength
+  conversationRectWidth = data.conversationRectWidth
   circleToggle = data.circleToggle
   sliceToggle = data.sliceToggle
   movementToggle = data.movementToggle
   stopsToggle = data.stopsToggle
   highlightToggle = data.highlightToggle
+})
+
+PlaybackStore.subscribe((data) => {
+  playbackMode = data.mode
 })
 
 export class DrawUtils {
@@ -81,7 +93,7 @@ export class DrawUtils {
   }
 
   isShowingInAnimation(value) {
-    if (timeline.getIsAnimating())
+    if (playbackMode !== 'stopped')
       return timeline.mapPixelTimeToTotalTime(value) < timeline.getCurrTime()
     else return true
   }
@@ -162,14 +174,22 @@ export class DrawUtils {
 
   getScaledConversationPos(point) {
     const pos = this.getSharedPosValues(point, point.time)
-    const rectLength = this.sk.map(point.speech.length, 0, maxTurnLength, 0, this.sk.height / 4)
+    // Height: content length (how much text)
+    const rectHeight = this.sk.map(
+      point.speech.length,
+      0,
+      maxTurnLength,
+      MIN_RECT_SIZE,
+      MAX_RECT_SIZE
+    )
     return {
       timelineXPos: pos.timelineXPos,
       selTimelineXPos: pos.selTimelineXPos,
       floorPlanXPos: pos.floorPlanXPos,
       floorPlanYPos: pos.floorPlanYPos,
-      rectLength,
-      adjustYPos: this.getConversationAdjustYPos(pos.floorPlanYPos, rectLength),
+      rectHeight,
+      rectWidth: conversationRectWidth,
+      adjustYPos: this.getConversationAdjustYPos(pos.floorPlanYPos, rectHeight),
     }
   }
 

@@ -3,9 +3,9 @@ import { get } from 'svelte/store'
 import ConfigStore, { type ConfigStoreType } from '../../../stores/configStore'
 import TimelineStore from '../../../stores/timelineStore'
 import VideoStore, { toggleVisibility } from '../../../stores/videoStore'
+import { togglePlayback, isPlaying } from '../../../stores/playbackStore'
 import P5Store from '../../../stores/p5Store'
 import { openModal } from '../../../stores/modalStore'
-import type { Timeline } from '../../../models/timeline'
 
 // Type guards and helpers for p5 instance
 interface IGSp5Instance {
@@ -229,9 +229,7 @@ export function getAllCommands(): Command[] {
       icon: '🎥',
       category: 'view',
       shortcut: 'V',
-      action: () => {
-        toggleVisibility()
-      },
+      action: toggleVisibility,
       isActive: () => get(VideoStore).isVisible,
     },
 
@@ -321,7 +319,7 @@ export function getAllCommands(): Command[] {
         )
       },
     },
-        {
+    {
       id: 'example:museum-complete-visit',
       label: 'Load: Family Museum Visit',
       description: 'Museum example dataset',
@@ -448,21 +446,8 @@ export function getAllCommands(): Command[] {
       icon: '⏯️',
       category: 'playback',
       shortcut: 'Space',
-      action: () => {
-        const timeline = get(TimelineStore) as Timeline
-        const p5 = get(P5Store) as IGSp5Instance
-
-        if (timeline.getIsAnimating()) {
-          timeline.setIsAnimating(false)
-          if (p5?.noLoop) p5.noLoop()
-        } else {
-          timeline.setIsAnimating(true)
-          if (p5?.loop) p5.loop()
-        }
-
-        TimelineStore.set(timeline)
-      },
-      isActive: () => (get(TimelineStore) as Timeline).getIsAnimating(),
+      action: togglePlayback,
+      isActive: () => get(isPlaying),
     },
     {
       id: 'playback:speed-up',

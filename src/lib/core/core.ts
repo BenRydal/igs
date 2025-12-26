@@ -27,6 +27,7 @@ import CodeStore from '../../stores/codeStore.js'
 import TimelineStore from '../../stores/timelineStore'
 import ConfigStore from '../../stores/configStore.js'
 import VideoStore, { loadVideo, reset as resetVideo } from '../../stores/videoStore'
+import { pause as pausePlayback } from '../../stores/playbackStore'
 import { toastStore } from '../../stores/toastStore'
 
 export class Core {
@@ -147,9 +148,8 @@ export class Core {
    * ```
    */
   prepVideoFromFile(fileLocation: string): void {
-    const timeline = get(TimelineStore)
     resetVideo() // clear previous video
-    timeline.setIsAnimating(false) // stop animation if it was running
+    pausePlayback() // stop playback if it was running
     loadVideo({ type: 'file', fileUrl: fileLocation })
   }
 
