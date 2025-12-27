@@ -1019,7 +1019,7 @@
         <li><button onclick={clearConversationData}>Conversation</button></li>
         <li><button onclick={clearCodeData}>Codes</button></li>
         <li><button onclick={resetVideo}>Video</button></li>
-        <li><button onclick={clearAllDataLocal}>All Data</button></li>
+        <li><button onclick={clearAllDataLocal} class="text-error">All Data</button></li>
       </ul>
     </details>
 
