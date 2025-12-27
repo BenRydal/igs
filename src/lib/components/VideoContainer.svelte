@@ -43,6 +43,9 @@
   let resizeStartPosX = 0
   let resizeStartPosY = 0
 
+  // Track if user has manually positioned the video
+  let hasUserPositioned = false
+
   let isPlaying = $derived($isPlayingVideo)
   let isMuted = $derived($VideoStore.isMuted)
   let isVisible = $derived($VideoStore.isVisible)
@@ -75,6 +78,7 @@
   function handleDragStart(e: MouseEvent) {
     if (isResizing) return
     isDragging = true
+    hasUserPositioned = true
     dragStartX = e.clientX
     dragStartY = e.clientY
     dragStartPosX = posX
@@ -84,6 +88,7 @@
 
   function handleResizeStart(e: MouseEvent, corner: string) {
     isResizing = true
+    hasUserPositioned = true
     resizeCorner = corner
     resizeStartX = e.clientX
     resizeStartWidth = width
@@ -152,17 +157,34 @@
     resizeCorner = ''
   }
 
+  function positionVideoForContainer() {
+    const canvasContainer = document.getElementById('p5-canvas-container')
+    if (!canvasContainer) return
+
+    const rect = canvasContainer.getBoundingClientRect()
+    const maxWidth = rect.width - 40
+
+    width = Math.max(MIN_WIDTH, Math.min(width, maxWidth))
+    posX = Math.max(10, rect.width - width - 20)
+    posY = Math.max(10, posY)
+  }
+
+  // Only auto-reposition when video first becomes visible
+  let wasVisible = false
+  $effect(() => {
+    const justBecameVisible = isVisible && !wasVisible
+    wasVisible = isVisible
+
+    if (justBecameVisible && browser && !hasUserPositioned) {
+      positionVideoForContainer()
+    }
+  })
+
   onMount(() => {
     if (browser) {
       document.addEventListener('mousemove', handleMouseMove)
       document.addEventListener('mouseup', handleMouseUp)
-
-      // Position video on the right side of the container
-      const canvasContainer = document.getElementById('p5-canvas-container')
-      if (canvasContainer) {
-        const rect = canvasContainer.getBoundingClientRect()
-        posX = rect.width - width - 20 // 20px margin from right
-      }
+      positionVideoForContainer()
     }
   })
 
