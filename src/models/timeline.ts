@@ -96,51 +96,64 @@ export class Timeline {
     this.currTime = currTime
   }
 
-  mapPixelTimeToTotalTime(value: number): number {
-    return this.map(value, this.getLeftX(), this.getRightX(), 0, this.getEndTime())
+  // ========== Pixel ↔ Time (full data range: 0 to endTime) ==========
+
+  /** Convert pixel position to time in seconds (full range) */
+  pixelToTime(pixel: number): number {
+    return this.map(pixel, this.getLeftX(), this.getRightX(), 0, this.getEndTime())
   }
 
-  mapPixelTimeToSelectTime(value: number): number {
+  /** Convert time in seconds to pixel position (full range) */
+  timeToPixel(time: number): number {
+    return this.map(time, 0, this.getEndTime(), this.getLeftX(), this.getRightX())
+  }
+
+  // ========== Pixel ↔ Selected Time (marker range: leftMarker to rightMarker) ==========
+
+  /** Convert pixel position to time in seconds (within selected marker range) */
+  pixelToSelectedTime(pixel: number): number {
+    return this.map(pixel, this.getLeftX(), this.getRightX(), this.getLeftMarker(), this.getRightMarker())
+  }
+
+  // ========== Pixel ↔ Pixel (coordinate transforms for marker space) ==========
+
+  /** Convert timeline pixel to marker-space pixel */
+  pixelToMarkerPixel(pixel: number): number {
     return this.map(
-      value,
+      pixel,
       this.getLeftX(),
       this.getRightX(),
-      this.getTimelineLeftMarkerXPos(),
-      this.getTimelineRightMarkerXPos()
+      this.getLeftMarkerPixel(),
+      this.getRightMarkerPixel()
     )
   }
 
-  mapSelectTimeToPixelTime2D(value: number): number {
+  /** Convert marker-space pixel back to timeline pixel */
+  markerPixelToPixel(pixel: number): number {
     return this.map(
-      value,
-      this.getTimelineLeftMarkerXPos(),
-      this.getTimelineRightMarkerXPos(),
+      pixel,
+      this.getLeftMarkerPixel(),
+      this.getRightMarkerPixel(),
       this.getLeftX(),
       this.getRightX()
     )
   }
 
-  // maps value from time in seconds from data to time in pixels on timeline
-  mapTotalTimeToPixelTime(value: number): number {
-    return this.map(value, 0, this.getEndTime(), this.getLeftX(), this.getRightX())
+  // ========== Marker pixel positions ==========
+
+  getLeftMarkerPixel(): number {
+    return this.timeToPixel(this.getLeftMarker())
   }
 
-  getTimelineLeftMarkerXPos() {
-    return this.mapTotalTimeToPixelTime(this.getLeftMarker())
-  }
-  getTimelineRightMarkerXPos() {
-    return this.mapTotalTimeToPixelTime(this.getRightMarker())
+  getRightMarkerPixel(): number {
+    return this.timeToPixel(this.getRightMarker())
   }
 
   overAxis(pixelValue: number): boolean {
     return (
-      pixelValue >= this.getTimelineLeftMarkerXPos() &&
-      pixelValue <= this.getTimelineRightMarkerXPos()
+      pixelValue >= this.getLeftMarkerPixel() &&
+      pixelValue <= this.getRightMarkerPixel()
     )
-  }
-
-  overTimeline(pixelValue: number): boolean {
-    return pixelValue >= this.leftX && pixelValue <= this.rightX
   }
 
   // Implementation of Helper function from P5 library to map a value from one range to another

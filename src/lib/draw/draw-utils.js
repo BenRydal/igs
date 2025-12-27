@@ -94,7 +94,7 @@ export class DrawUtils {
 
   isShowingInAnimation(value) {
     if (playbackMode !== 'stopped')
-      return timeline.mapPixelTimeToTotalTime(value) < timeline.getCurrTime()
+      return timeline.pixelToTime(value) < timeline.getCurrTime()
     else return true
   }
 
@@ -141,7 +141,7 @@ export class DrawUtils {
    * @param  {Integer} time
    */
   getSharedPosValues(point, time) {
-    const timelineXPos = timeline.mapTotalTimeToPixelTime(time)
+    const timelineXPos = timeline.timeToPixel(time)
     const selTimelineXPos = this.sk.mapSelectTimeToPixelTime(timelineXPos)
     const [floorPlanXPos, floorPlanYPos] = this.sk.floorPlan.getScaledXYPos(
       point.x,

@@ -4,7 +4,6 @@
   import type p5 from 'p5'
   import MdHelpOutline from '~icons/mdi/help-circle-outline'
   import MdKeyboard from '~icons/mdi/keyboard'
-  import MdCloudUpload from '~icons/mdi/cloud-upload'
   import MdCloudDownload from '~icons/mdi/cloud-download'
   import MdRotateLeft from '~icons/mdi/rotate-left'
   import MdRotateRight from '~icons/mdi/rotate-right'
@@ -22,6 +21,8 @@
   import MdDelete from '~icons/mdi/delete'
   import MdFolder from '~icons/mdi/folder-open'
   import MdMoreVert from '~icons/mdi/dots-vertical'
+  import MdMenu from '~icons/mdi/menu'
+  import MdClose from '~icons/mdi/close'
 
   import type { User } from '../models/user'
 
@@ -57,7 +58,7 @@
   import type { ConfigStoreType } from '../stores/configStore'
   import TimelineStore from '../stores/timelineStore'
   import { initialConfig } from '../stores/configStore'
-  import { computePosition, flip, shift, offset, autoUpdate } from '@floating-ui/dom'
+  import { computePosition, flip, shift, offset } from '@floating-ui/dom'
   import { setSelectorSize, setSlicerSize, toggleColorMode } from '$lib/history/config-actions'
   import {
     toggleUserEnabled,
@@ -77,100 +78,6 @@
 
   // Define ToggleKey type to fix TypeScript errors
   type ToggleKey = string
-
-  // Floating UI references
-  type FloatingElement = {
-    button: HTMLElement | null
-    content: HTMLElement | null
-    cleanup: (() => void) | null
-    isOpen: boolean
-  }
-
-  // Store references to floating elements
-  const floatingElements: Record<string, FloatingElement> = {}
-
-  // Function to position a floating element
-  function positionFloatingElement(reference: HTMLElement, floating: HTMLElement) {
-    return computePosition(reference, floating, {
-      placement: 'top',
-      middleware: [offset(6), flip(), shift({ padding: 5 })],
-    }).then(({ x, y }) => {
-      Object.assign(floating.style, {
-        left: `${x}px`,
-        top: `${y}px`,
-        position: 'absolute',
-        width: 'max-content',
-        zIndex: '100',
-      })
-    })
-  }
-
-  // Function to toggle a floating element
-  function toggleFloating(id: string) {
-    const element = floatingElements[id]
-    if (!element || !element.button || !element.content) return
-
-    element.isOpen = !element.isOpen
-
-    if (element.isOpen) {
-      // Show the floating element
-      element.content.style.display = 'block'
-      document.body.appendChild(element.content)
-
-      // Position it initially
-      positionFloatingElement(element.button, element.content)
-
-      // Set up auto-update to reposition on scroll/resize
-      element.cleanup = autoUpdate(element.button, element.content, () =>
-        positionFloatingElement(element.button, element.content)
-      )
-
-      // Add click outside listener
-      const handleClickOutside = (event: MouseEvent) => {
-        if (
-          element.content &&
-          element.button &&
-          !element.content.contains(event.target as Node) &&
-          !element.button.contains(event.target as Node)
-        ) {
-          toggleFloating(id)
-        }
-      }
-
-      document.addEventListener('click', handleClickOutside)
-
-      // Update cleanup to include removing the event listener
-      const prevCleanup = element.cleanup
-      element.cleanup = () => {
-        prevCleanup?.()
-        document.removeEventListener('click', handleClickOutside)
-      }
-    } else {
-      // Hide the floating element
-      if (element.content) {
-        element.content.style.display = 'none'
-      }
-
-      // Clean up auto-update
-      if (element.cleanup) {
-        element.cleanup()
-        element.cleanup = null
-      }
-    }
-  }
-
-  // Function to register a floating element
-  function registerFloating(id: string, button: HTMLElement, content: HTMLElement) {
-    floatingElements[id] = {
-      button,
-      content,
-      cleanup: null,
-      isOpen: false,
-    }
-
-    // Initially hide the content
-    content.style.display = 'none'
-  }
 
   const filterToggleOptions = ['movementToggle', 'stopsToggle'] as const
   const selectToggleOptions = ['circleToggle', 'sliceToggle', 'highlightToggle'] as const
@@ -219,6 +126,7 @@
   let is3DMode = $state(true)
   let timeline = $state($TimelineStore)
   let isTranscriptVisible = $state(true)
+  let mobileMenuOpen = $state(false)
 
   $effect(() => {
     currentConfig = $ConfigStore
@@ -353,7 +261,6 @@
           updatedStore[key] = key === selection ? !updatedStore[key] : false
         }
       })
-      p5Instance?.loop()
       return updatedStore
     })
     p5Instance?.loop()
@@ -512,28 +419,8 @@
 
   // Local version that handles UI cleanup and non-store data
   function clearAllDataLocal() {
-    console.log('Clearing all data')
     resetVideo()
     currentConfig.isPathColorMode = false
-
-    // Close all floating elements before clearing data
-    Object.keys(floatingElements).forEach((id) => {
-      if (floatingElements[id].isOpen) {
-        toggleFloating(id)
-      }
-    })
-
-    // Clear all floating elements
-    Object.keys(floatingElements).forEach((id) => {
-      const element = floatingElements[id]
-      if (element.cleanup) {
-        element.cleanup()
-      }
-      if (element.content && element.content.parentNode) {
-        element.content.parentNode.removeChild(element.content)
-      }
-      delete floatingElements[id]
-    })
 
     closeAllDropdowns()
 
@@ -788,6 +675,10 @@
   <div class="w-4 h-4"><Icon /></div>
 {/snippet}
 
+{#snippet check(condition: boolean)}
+  <div class="w-4 h-4 mr-2">{#if condition}<MdCheck />{/if}</div>
+{/snippet}
+
 {#snippet navDivider()}
   <div class="divider divider-horizontal mx-2 h-6 self-center"></div>
 {/snippet}
@@ -798,12 +689,30 @@
 
 <svelte:window onmousemove={handleGlobalMouseMove} onmouseup={handleGlobalMouseUp} />
 
-<div class="navbar min-h-16 bg-[#ffffff]">
+<div class="navbar min-h-16 bg-[#ffffff] relative">
   <div class="flex-1 px-2 lg:flex-none">
     <a class="text-2xl font-bold text-black italic" href="https://interactiongeography.org">IGS</a>
   </div>
 
-  <div class="flex items-center justify-end flex-1 px-2">
+  <!-- Hamburger button - visible on mobile only, positioned to the right -->
+  <div class="flex-none lg:hidden">
+    <button
+      class="btn btn-ghost btn-square"
+      onclick={() => (mobileMenuOpen = !mobileMenuOpen)}
+      aria-label="Toggle menu"
+    >
+      <div class="w-6 h-6">
+        {#if mobileMenuOpen}
+          <MdClose />
+        {:else}
+          <MdMenu />
+        {/if}
+      </div>
+    </button>
+  </div>
+
+  <!-- Desktop menu - hidden on mobile -->
+  <div class="hidden lg:flex items-center justify-end flex-1 px-2">
     <details class="dropdown" use:clickOutside>
       <summary class="btn btn-sm ml-4 gap-1 flex items-center">
         {@render icon(MdFilterList)}
@@ -817,11 +726,7 @@
               onclick={() => toggleSelection(toggle, filterToggleOptions)}
               class="w-full text-left flex items-center"
             >
-              <div class="w-4 h-4 mr-2">
-                {#if $ConfigStore[toggle]}
-                  <MdCheck />
-                {/if}
-              </div>
+              {@render check($ConfigStore[toggle])}
               {capitalizeFirstLetter(toggle.replace('Toggle', ''))}
             </button>
           </li>
@@ -859,11 +764,7 @@
                 onclick={() => toggleSelection(toggle, selectToggleOptions)}
                 class="w-full text-left flex items-center"
               >
-                <div class="w-4 h-4 mr-2">
-                  {#if $ConfigStore[toggle]}
-                    <MdCheck />
-                  {/if}
-                </div>
+                {@render check($ConfigStore[toggle])}
                 {capitalizeFirstLetter(toggle.replace('Toggle', ''))}
               </button>
             </li>
@@ -913,11 +814,7 @@
             onclick={() => (isTranscriptVisible = !isTranscriptVisible)}
             class="w-full text-left flex items-center"
           >
-            <div class="w-4 h-4 mr-2">
-              {#if isTranscriptVisible}
-                <MdCheck />
-              {/if}
-            </div>
+            {@render check(isTranscriptVisible)}
             Transcript Panel
           </button>
         </li>
@@ -926,11 +823,7 @@
             onclick={() => toggleSelection('alignToggle', conversationToggleOptions)}
             class="w-full text-left flex items-center"
           >
-            <div class="w-4 h-4 mr-2">
-              {#if $ConfigStore.alignToggle}
-                <MdCheck />
-              {/if}
-            </div>
+            {@render check($ConfigStore.alignToggle)}
             Align to side
           </button>
         </li>
@@ -945,11 +838,7 @@
             }}
             class="w-full text-left flex items-center"
           >
-            <div class="w-4 h-4 mr-2">
-              {#if $ConfigStore.showSpeakerStripes}
-                <MdCheck />
-              {/if}
-            </div>
+            {@render check($ConfigStore.showSpeakerStripes)}
             Combine speakers
           </button>
         </li>
@@ -1014,7 +903,7 @@
         <li><button onclick={clearConversationData}>Conversation</button></li>
         <li><button onclick={clearCodeData}>Codes</button></li>
         <li><button onclick={resetVideo}>Video</button></li>
-        <li><button onclick={clearAllDataLocal}>All Data</button></li>
+        <li><button onclick={clearAllDataLocal} class="text-error">All Data</button></li>
       </ul>
     </details>
 
@@ -1129,11 +1018,9 @@
                     updateExampleDataDropDown({ target: { value: item.value } })
                     selectedDropDownOption = item.label
                   }}
-                  class="text-left {isSelected ? 'bg-primary/20 font-medium' : ''}"
+                  class="text-left flex items-center {isSelected ? 'bg-primary/20 font-medium' : ''}"
                 >
-                  {#if isSelected}
-                    <MdCheck class="w-4 h-4" />
-                  {/if}
+                  {@render check(isSelected)}
                   {item.label}
                 </button>
               </li>
@@ -1143,6 +1030,141 @@
       </FloatingDropdown>
     </div>
   </div>
+
+  <!-- Mobile menu -->
+  {#if mobileMenuOpen}
+    <!-- Backdrop -->
+    <div
+      class="lg:hidden fixed inset-0 bg-black/20 z-40"
+      onclick={() => (mobileMenuOpen = false)}
+      role="button"
+      tabindex="-1"
+    ></div>
+
+    <!-- Menu panel -->
+    <div class="lg:hidden absolute top-full left-0 right-0 bg-base-100 shadow-lg border-t z-50 max-h-[85vh] overflow-y-auto px-6 py-8">
+      <!-- Dropdown buttons -->
+      <div class="flex flex-wrap gap-2 justify-center mb-6">
+        <details class="dropdown dropdown-bottom" use:clickOutside>
+          <summary class="btn btn-sm gap-1">{@render icon(MdFilterList)}Filter</summary>
+          <ul class="dropdown-content menu bg-base-200 rounded-box z-[60] w-48 p-2 shadow mt-1">
+            {#each filterToggleOptions as toggle}
+              <li><button onclick={() => toggleSelection(toggle, filterToggleOptions)}>{@render check($ConfigStore[toggle])}{capitalizeFirstLetter(toggle.replace('Toggle', ''))}</button></li>
+            {/each}
+            <li class="px-2 py-1">
+              <div class="flex flex-col w-full">
+                <span class="text-xs">Stop: {formattedStopLength}s</span>
+                <input type="range" min="1" max={$ConfigStore.maxStopLength} value={$ConfigStore.stopSliderValue} class="range range-xs" oninput={(e) => handleConfigChangeFromInput(e, 'stopSliderValue')} />
+              </div>
+            </li>
+          </ul>
+        </details>
+
+        {#if !is3DMode}
+          <details class="dropdown dropdown-bottom" use:clickOutside>
+            <summary class="btn btn-sm gap-1">{@render icon(MdSelectAll)}Select</summary>
+            <ul class="dropdown-content menu bg-base-200 rounded-box z-[60] w-56 p-2 shadow mt-1">
+              {#each selectToggleOptions as toggle}
+                <li><button onclick={() => toggleSelection(toggle, selectToggleOptions)}>{@render check($ConfigStore[toggle])}{capitalizeFirstLetter(toggle.replace('Toggle', ''))}</button></li>
+              {/each}
+              <li class="px-2 py-1">
+                <div class="w-full">
+                  <p class="text-xs mb-1">Circle Size: {currentConfig.selectorSize}px</p>
+                  <input type="range" min="20" max="300" step="10" bind:value={currentConfig.selectorSize} oninput={(e) => setSelectorSize(parseFloat(e.target.value))} class="range range-xs" />
+                </div>
+              </li>
+              <li class="px-2 py-1">
+                <div class="w-full">
+                  <p class="text-xs mb-1">Slicer Width: {currentConfig.slicerSize}px</p>
+                  <input type="range" min="5" max="100" step="5" bind:value={currentConfig.slicerSize} oninput={(e) => setSlicerSize(parseFloat(e.target.value))} class="range range-xs" />
+                </div>
+              </li>
+            </ul>
+          </details>
+        {/if}
+
+        <details class="dropdown dropdown-bottom" use:clickOutside>
+          <summary class="btn btn-sm gap-1">{@render icon(MdChat)}Talk</summary>
+          <ul class="dropdown-content menu bg-base-200 rounded-box z-[60] w-64 p-2 shadow mt-1">
+            <li><button onclick={() => (isTranscriptVisible = !isTranscriptVisible)}>{@render check(isTranscriptVisible)}Transcript</button></li>
+            <li><button onclick={() => toggleSelection('alignToggle', conversationToggleOptions)}>{@render check($ConfigStore.alignToggle)}Align to side</button></li>
+            <div class="divider my-1"></div>
+            <li class="menu-title px-2 py-0 text-xs opacity-60">Grouped turns</li>
+            <li><button onclick={() => handleConfigChange('showSpeakerStripes', !$ConfigStore.showSpeakerStripes)}>{@render check($ConfigStore.showSpeakerStripes)}Combine speakers</button></li>
+            <li class="px-2 py-1">
+              <div class="w-full">
+                <p class="text-xs mb-1">Group within {$ConfigStore.clusterTimeThreshold} seconds</p>
+                <input type="range" min="1" max="60" value={$ConfigStore.clusterTimeThreshold} class="range range-xs" oninput={(e) => handleConfigChangeFromInput(e, 'clusterTimeThreshold')} />
+              </div>
+            </li>
+            <li class="px-2 py-1">
+              <div class="w-full">
+                <p class="text-xs mb-1">Group within {$ConfigStore.clusterSpaceThreshold}px distance</p>
+                <input type="range" min="0" max="200" value={$ConfigStore.clusterSpaceThreshold} class="range range-xs" oninput={(e) => handleConfigChangeFromInput(e, 'clusterSpaceThreshold')} />
+              </div>
+            </li>
+            <div class="divider my-1"></div>
+            <li class="menu-title px-2 py-0 text-xs opacity-60">Individual turns</li>
+            <li class="px-2 py-1">
+              <div class="w-full">
+                <p class="text-xs mb-1">Turn width: {$ConfigStore.conversationRectWidth}px</p>
+                <input type="range" min="1" max="30" value={$ConfigStore.conversationRectWidth} class="range range-xs" oninput={(e) => handleConfigChangeFromInput(e, 'conversationRectWidth')} />
+              </div>
+            </li>
+          </ul>
+        </details>
+
+        <details class="dropdown dropdown-bottom dropdown-end" use:clickOutside>
+          <summary class="btn btn-sm gap-1">{@render icon(MdDelete)}Clear</summary>
+          <ul class="dropdown-content menu bg-base-200 rounded-box z-[60] w-40 p-2 shadow mt-1">
+            <li><button onclick={() => { clearMovementData(); mobileMenuOpen = false }}>Movement</button></li>
+            <li><button onclick={() => { clearConversationData(); mobileMenuOpen = false }}>Conversation</button></li>
+            <li><button onclick={() => { clearCodeData(); mobileMenuOpen = false }}>Codes</button></li>
+            <li><button onclick={() => { resetVideo(); mobileMenuOpen = false }}>Video</button></li>
+            <li><button onclick={() => { clearAllDataLocal(); mobileMenuOpen = false }} class="text-error">All Data</button></li>
+          </ul>
+        </details>
+
+        <details class="dropdown dropdown-bottom" use:clickOutside>
+          <summary class="btn btn-sm gap-1">{@render icon(MdFolder)}{selectedDropDownOption || 'Examples'}</summary>
+          <ul class="dropdown-content menu bg-base-200 rounded-box z-[60] w-56 p-2 shadow mt-1 max-h-60 overflow-y-auto">
+            {#each dropdownOptions as group}
+              <li class="menu-title text-xs">{group.label}</li>
+              {#each group.items as item}
+                <li>
+                  <button
+                    onclick={() => {
+                      updateExampleDataDropDown({ target: { value: item.value } })
+                      selectedDropDownOption = item.label
+                      mobileMenuOpen = false
+                    }}
+                    class={selectedDropDownOption === item.label ? 'bg-primary/20' : ''}
+                  >
+                    {item.label}
+                  </button>
+                </li>
+              {/each}
+            {/each}
+          </ul>
+        </details>
+      </div>
+
+      <div class="divider my-2"></div>
+
+      <!-- Icon buttons -->
+      <div class="flex flex-wrap gap-3 justify-center">
+        <IconButton icon={MdRotateLeft} tooltip="Rotate Left" onclick={() => { p5Instance.floorPlan.setRotateLeft(); p5Instance.loop(); mobileMenuOpen = false }} />
+        <IconButton icon={MdRotateRight} tooltip="Rotate Right" onclick={() => { p5Instance.floorPlan.setRotateRight(); p5Instance.loop(); mobileMenuOpen = false }} />
+        <IconButton icon={Md3DRotation} tooltip="Toggle 2D/3D" onclick={() => { p5Instance.handle3D.update(); is3DMode = p5Instance.handle3D.getIs3DMode(); mobileMenuOpen = false }} />
+        <IconButton icon={isVideoShowing ? MdVideocam : MdVideocamOff} tooltip="Show/Hide Video" onclick={() => { toggleVideo(); mobileMenuOpen = false }} />
+        <IconButton icon={MdFileUploadOutline} tooltip="Import Files" onclick={() => { showImportDialog = true; mobileMenuOpen = false }} />
+        <IconButton icon={MdHelpOutline} tooltip="Help" onclick={() => { $isModalOpen = !$isModalOpen; mobileMenuOpen = false }} />
+        <IconButton icon={MdCloudDownload} tooltip="Download Codes" onclick={() => { p5Instance.saveCodeFile(); mobileMenuOpen = false }} />
+        <IconButton icon={MdKeyboard} tooltip="Keyboard Shortcuts" onclick={() => { window.dispatchEvent(new CustomEvent('igs:open-cheatsheet')); mobileMenuOpen = false }} />
+        <IconButton icon={MdSettings} tooltip="Settings" onclick={() => { showSettings = true; mobileMenuOpen = false }} />
+      </div>
+    </div>
+  {/if}
 </div>
 
 <div
@@ -1192,20 +1214,7 @@
       <div class="flex justify-between mb-4">
         <h3 class="font-bold text-lg">Settings</h3>
         <button class="btn btn-circle btn-sm" onclick={() => (showSettings = false)}>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-6 w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
+          <MdClose class="h-5 w-5" />
         </button>
       </div>
 
@@ -1349,20 +1358,7 @@
         </div>
 
         <button class="btn btn-circle btn-sm" onclick={() => (showDataPopup = false)}>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-6 w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
+          <MdClose class="h-5 w-5" />
         </button>
       </div>
 

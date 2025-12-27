@@ -135,6 +135,21 @@ export const igsSketch = (p5: any) => {
     return p5.sqrt(p5.sq(x - p5.mouseX) + p5.sq(y - p5.mouseY)) < diameter / 2
   }
 
+  /**
+   * Check if mouse is over the timeline interaction area.
+   * In 2D mode: checks X bounds (timeline visible on canvas)
+   * In 3D mode: checks X bounds AND mouseY is below canvas (over bottom nav)
+   */
+  p5.isMouseOverTimeline = () => {
+    const currentTimeline = get(TimelineStore)
+    const inXBounds =
+      p5.mouseX >= currentTimeline.getLeftX() && p5.mouseX <= currentTimeline.getRightX()
+    if (p5.handle3D.getIs3DMode()) {
+      return inXBounds && p5.mouseY > p5.height
+    }
+    return inXBounds
+  }
+
   p5.mousePressed = () => {
     if (highlightToggle && !p5.handle3D.getIs3DModeOrTransitioning())
       p5.gui.highlight.handleMousePressed()
@@ -215,7 +230,7 @@ export const igsSketch = (p5: any) => {
   }
 
   p5.mapToSelectTimeThenPixelTime = (value) => {
-    return p5.mapSelectTimeToPixelTime(timeline.mapPixelTimeToSelectTime(value))
+    return p5.mapSelectTimeToPixelTime(timeline.pixelToMarkerPixel(value))
   }
 
   p5.mapSelectTimeToPixelTime = (value) => {
@@ -225,11 +240,11 @@ export const igsSketch = (p5: any) => {
     if (p5.handle3D.getIs3DMode())
       return p5.map(
         value,
-        currentTimeline.getTimelineLeftMarkerXPos(),
-        currentTimeline.getTimelineRightMarkerXPos(),
+        currentTimeline.getLeftMarkerPixel(),
+        currentTimeline.getRightMarkerPixel(),
         spaceTimeCubeBottom,
         spaceTimeCubeTop
       )
-    else return currentTimeline.mapSelectTimeToPixelTime2D(value)
+    else return currentTimeline.markerPixelToPixel(value)
   }
 }

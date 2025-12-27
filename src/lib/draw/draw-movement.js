@@ -202,13 +202,11 @@ export class DrawMovement {
   }
 
   isMouseOverTimelineAndValid(map3DMouse, timePos, curDot) {
-    return (
-      timeline.overTimeline(this.sk.mouseX) && this.compareToCurDot(map3DMouse, timePos, curDot)
-    )
+    return this.sk.isMouseOverTimeline() && this.compareToCurDot(map3DMouse, timePos, curDot)
   }
 
   getVideoSelectTime() {
-    const videoPixelTime = timeline.mapTotalTimeToPixelTime(videoCurrentTime)
+    const videoPixelTime = timeline.timeToPixel(videoCurrentTime)
     return this.sk.mapSelectTimeToPixelTime(videoPixelTime)
   }
 
