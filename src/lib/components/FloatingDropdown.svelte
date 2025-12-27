@@ -178,7 +178,7 @@
   })
 </script>
 
-<div class="floating-dropdown-wrapper">
+<div class="floating-dropdown-wrapper" {id}>
   <!-- Button trigger -->
   <button
     bind:this={buttonElement}
