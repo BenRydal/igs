@@ -62,7 +62,7 @@ export class SketchGUI {
   }
 
   drawHoverTimeLabel() {
-    const hoverTime = timeline.mapPixelTimeToTotalTime(this.sk.mouseX)
+    const hoverTime = timeline.pixelToSelectedTime(this.sk.mouseX)
     const timeText = formatTime(hoverTime)
 
     this.sk.textSize(14)

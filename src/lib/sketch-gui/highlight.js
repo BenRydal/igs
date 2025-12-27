@@ -175,7 +175,7 @@ export class Highlight {
    * NOTE: If in 3D mode, you need to first test if highlightRect was selected on floor plan or timeline
    */
   overHighlightRect(highlightRect, xPos, yPos, xPosTimeToMap) {
-    const xPosTime = timeline.mapSelectTimeToPixelTime2D(xPosTimeToMap) // Map method maintains highlight rect scaling if user adjusts timeline, make sure to test 2D only
+    const xPosTime = timeline.markerPixelToPixel(xPosTimeToMap) // Map method maintains highlight rect scaling if user adjusts timeline, make sure to test 2D only
     if (this.sk.handle3D.getIs3DMode()) {
       if (timeline.overAxis(highlightRect.xPos))
         return this.betweenX(xPosTime, highlightRect) && this.betweenY(yPos, highlightRect)

@@ -230,7 +230,7 @@ export const igsSketch = (p5: any) => {
   }
 
   p5.mapToSelectTimeThenPixelTime = (value) => {
-    return p5.mapSelectTimeToPixelTime(timeline.mapPixelTimeToSelectTime(value))
+    return p5.mapSelectTimeToPixelTime(timeline.pixelToMarkerPixel(value))
   }
 
   p5.mapSelectTimeToPixelTime = (value) => {
@@ -240,11 +240,11 @@ export const igsSketch = (p5: any) => {
     if (p5.handle3D.getIs3DMode())
       return p5.map(
         value,
-        currentTimeline.getTimelineLeftMarkerXPos(),
-        currentTimeline.getTimelineRightMarkerXPos(),
+        currentTimeline.getLeftMarkerPixel(),
+        currentTimeline.getRightMarkerPixel(),
         spaceTimeCubeBottom,
         spaceTimeCubeTop
       )
-    else return currentTimeline.mapSelectTimeToPixelTime2D(value)
+    else return currentTimeline.markerPixelToPixel(value)
   }
 }

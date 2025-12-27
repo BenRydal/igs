@@ -206,7 +206,7 @@ export class DrawMovement {
   }
 
   getVideoSelectTime() {
-    const videoPixelTime = timeline.mapTotalTimeToPixelTime(videoCurrentTime)
+    const videoPixelTime = timeline.timeToPixel(videoCurrentTime)
     return this.sk.mapSelectTimeToPixelTime(videoPixelTime)
   }
 
