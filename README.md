@@ -1,74 +1,207 @@
+<div align="center">
+
 # Interaction Geography Slicer (IGS)
 
-![repo](./static/images/igs-background.png)
+**Visualize movement, conversation, and video data across space and time**
 
-Welcome to **Interaction Geography Slicer (IGS)!** The IGS is an open-source tool to visualize movement, conversation, and video data over space and time. It provides fluid ways to create interactive visualizations and animations to explore how spatial and multimodal interactions evolve over time. The IGS runs entirely in your browser. No transcripts or videos are uploaded, stored, or transmitted—your data stays on your device at all times.
+[![Live Site](https://img.shields.io/badge/Live%20Site-interactiongeography.org-blue?style=for-the-badge)](https://www.interactiongeography.org)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-green.svg?style=for-the-badge)](https://www.gnu.org/licenses/gpl-3.0)
+[![Built with Svelte](https://img.shields.io/badge/Built%20with-Svelte%205-FF3E00?style=for-the-badge&logo=svelte)](https://svelte.dev)
 
-## Get Started
+![IGS Visualization](./static/images/igs-background.png)
 
-- **Visit**: https://www.interactiongeography.org
+[Try it now](https://www.interactiongeography.org) · [Report Bug](https://github.com/BenRydal/igs/issues) · [Request Feature](https://github.com/BenRydal/igs/issues)
 
-## IGS Features
+</div>
 
-- **Browser-based**: Everything in your browser.
-- **Visualizations**: Create dynamic 2D/3D space-time visualizations at different scales.
-- **Mix multi-modal data sources**: Explore movement, conversation, and video data independently or simultaneously in the same visualization.
-- **Interactions and animations**: Create dynamic animations to communicate your data
-- **Use in qualitative and quantitative projects**: Supports projects spanning micro-ethnographic analysis of gesture; mid-scale analyses of movement and conversation in settings like classrooms and museums; and larger scale analysis of urban mobility.
-- **Future features**: We are rapidly developing and expanding IGS features, and collaborators in this effort are welcome.
+---
 
-## Frameworks and Libraries
+## About
 
-- **Svelte**: A lightweight and powerful framework for building fast, interactive web applications.
-- **Papa Parse**: Used for fast CSV data parsing in JavaScript.
-- **p5.js**: For generating the custom visualizations of movement and conversation.
-- **Tailwind CSS**: For visually appealing user interface.
+The **Interaction Geography Slicer (IGS)** is an open-source, browser-based tool for creating interactive 2D/3D visualizations that reveal how spatial and multimodal interactions evolve over space and time.
 
-## Installation & Setup
+**Your data stays private.** IGS runs entirely in your browser—no transcripts or videos are uploaded, stored, or transmitted.
 
-1. Clone the repository:
+### Use Cases
 
-   ```bash
-   git clone https://github.com/yourusername/interaction-geography-slicer.git
-   ```
+- **Micro-ethnographic analysis** of gesture and embodied interaction
+- **Mid-scale analysis** of movement and conversation in settings like classrooms, museums, and workplaces
+- **Large-scale analysis** of urban mobility and spatial behavior
 
-2. Navigate to the project directory:
+---
 
-   ```bash
-   cd interaction-geography-slicer
-   ```
+## Features
 
-3. Install dependencies:
+| Feature | Description |
+|---------|-------------|
+| **Browser-based** | No installation required—runs entirely in your browser |
+| **2D/3D Visualizations** | Create dynamic space-time visualizations at different scales |
+| **Multi-modal Data** | Explore movement, conversation, and video data simultaneously |
+| **Interactive Animations** | Build dynamic animations to communicate your findings |
+| **Privacy-first** | All data processing happens locally on your device |
+| **Qualitative Code Support** | Annotate and analyze data with custom coding schemes |
 
-   ```bash
-   yarn install
-   ```
+---
 
-4. Start the development server:
+## Quick Start
 
-   ```bash
-   yarn dev
-   ```
+### Option 1: Use Online (Recommended)
 
-5. Visit `http://localhost:5000` in your browser to see the tool in action.
+Visit **[interactiongeography.org](https://www.interactiongeography.org)** to start using IGS immediately.
 
-## Contribute
+### Option 2: Run Locally
 
-We welcome contributions! If you'd like to contribute, please follow the [contribution guidelines](CONTRIBUTING.md) and open a pull request. For major changes, please open an issue first to discuss what you would like to change.
+```bash
+# Clone the repository
+git clone https://github.com/BenRydal/igs.git
 
-## License
+# Navigate to project directory
+cd igs
 
-This software is written in JavaScript and p5.js and licensed under the GNU General Public License Version 3.0. See the GNU General Public License included with this software for more details.
+# Install dependencies
+yarn install
+
+# Start development server
+yarn dev
+```
+
+Open [http://localhost:5173](http://localhost:5173) in your browser.
+
+---
+
+## Data Formats
+
+IGS accepts CSV files with the following formats:
+
+| Data Type | Required Headers | Example |
+|-----------|-----------------|---------|
+| **Movement** | `time, x, y` | `0, 100, 200` |
+| **Conversation** | `time, speaker, talk` | `5, Alice, Hello everyone` |
+| **Codes (multi)** | `code, start, end` | `teaching, 0, 30` |
+| **Codes (single)** | `start, end` | `0, 30` (filename = code) |
+
+You can also load:
+- **Floorplan images** (PNG, JPG) as background
+- **Video** (MP4, YouTube URL) synced to timeline
+
+📄 [Download Data Formatting Guide (PDF)](./static/images/data_formatting_guide.pdf)
+
+---
+
+## Tech Stack
+
+<table>
+<tr>
+<td align="center"><strong>Framework</strong></td>
+<td>SvelteKit + Svelte 5</td>
+</tr>
+<tr>
+<td align="center"><strong>Visualization</strong></td>
+<td>p5.js</td>
+</tr>
+<tr>
+<td align="center"><strong>Styling</strong></td>
+<td>Tailwind CSS v4 + DaisyUI v5</td>
+</tr>
+<tr>
+<td align="center"><strong>CSV Parsing</strong></td>
+<td>PapaParse</td>
+</tr>
+<tr>
+<td align="center"><strong>Package Manager</strong></td>
+<td>Yarn 4</td>
+</tr>
+</table>
+
+---
+
+## Development
+
+```bash
+# Development server
+yarn dev
+
+# Type checking
+yarn check
+
+# Lint and format
+yarn lint
+yarn format
+
+# Production build
+yarn build
+yarn preview
+```
+
+---
+
+## Contributing
+
+We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
+
+For major changes, please [open an issue](https://github.com/BenRydal/igs/issues) first to discuss your ideas.
+
+---
 
 ## Feedback
 
-If you encounter any issues or have suggestions, feel free to open an issue or use our [feedback form](https://forms.gle/WaeHRt5Hug3fYzKW9).
+Found a bug or have a suggestion?
+
+- [Open an issue](https://github.com/BenRydal/igs/issues) on GitHub
+- [Submit feedback](https://forms.gle/WaeHRt5Hug3fYzKW9) via our form
+
+---
 
 ## Credits
 
-- **Developed by**: Ben Rydal Shapiro, Edwin Zhao, and contributors.
-- **Supported by**: This project was generously supported by the National Science Foundation.
-- **Collaborators**: Special thanks to Rogers Hall, David Owens, Christine Hsieh, Lani Horn, Brette Garner, Lizi Metts, and the TAU and SLaM research groups for feedback and discussions supporting this work.
-- **Data Sources**:
-  - Classroom discussion example data from _Mathematics Teaching and Learning to Teach (MTLT)_, University of Michigan (2010).
-  - Classroom science lesson data from _The Third International Mathematics and Science Study (TIMSS) 1999 Video Study_.
+**Developed by** Ben Rydal Shapiro, Edwin Zhao, and [contributors](https://github.com/BenRydal/igs/graphs/contributors)
+
+**Supported by** the National Science Foundation
+
+**Collaborators** Rogers Hall, David Owens, Christine Hsieh, Lani Horn, Brette Garner, Lizi Metts, and the TAU and SLaM research groups
+
+### Data Sources
+
+- Classroom discussion data from *Mathematics Teaching and Learning to Teach (MTLT)*, University of Michigan (2010)
+- Classroom science lesson data from *The Third International Mathematics and Science Study (TIMSS) 1999 Video Study*
+
+---
+
+## Citation
+
+If you use IGS in your research, please cite:
+
+> Shapiro, B. R., Silvis, D., & Hall, R. (2025). Visualization as theory and experience: Interactive qualitative data visualization for the learning sciences. *Journal of the Learning Sciences, 34*(5), 840–871. https://doi.org/10.1080/10508406.2025.2537945
+
+<details>
+<summary>BibTeX</summary>
+
+```bibtex
+@article{shapiro2025visualization,
+  title={Visualization as theory and experience: Interactive qualitative data visualization for the learning sciences},
+  author={Shapiro, Ben Rydal and Silvis, Deborah and Hall, Rogers},
+  journal={Journal of the Learning Sciences},
+  volume={34},
+  number={5},
+  pages={840--871},
+  year={2025},
+  publisher={Taylor \& Francis},
+  doi={10.1080/10508406.2025.2537945}
+}
+```
+
+</details>
+
+---
+
+## License
+
+This project is licensed under the [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0).
+
+---
+
+<div align="center">
+
+**[⬆ Back to Top](#interaction-geography-slicer-igs)**
+
+</div>
