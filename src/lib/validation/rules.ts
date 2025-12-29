@@ -7,8 +7,8 @@
  */
 export const FILE_SIZE_LIMITS = {
   CSV: 10 * 1024 * 1024, // 10MB
-  IMAGE: 5 * 1024 * 1024, // 5MB
-  VIDEO: 1024 * 1024 * 1024, // 1GB
+  IMAGE: 25 * 1024 * 1024, // 25MB
+  VIDEO: 10 * 1024 * 1024 * 1024, // 10GB
   DEFAULT: 50 * 1024 * 1024, // 50MB
 } as const
 
