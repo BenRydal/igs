@@ -33,6 +33,7 @@
     reset as resetVideo,
     hasVideoSource,
   } from '../stores/videoStore'
+  import { resetGPS } from '../stores/gpsStore'
   import { onVideoVisibilityChange } from '../stores/playbackStore'
   import VideoContainer from '$lib/components/VideoContainer.svelte'
   import SplitScreenVideo from '$lib/components/SplitScreenVideo.svelte'
@@ -51,6 +52,7 @@
   import FloatingDropdown from '$lib/components/FloatingDropdown.svelte'
   import { OnboardingTour } from '$lib/tour'
   import DataImporter from '$lib/components/import/DataImporter.svelte'
+  import MapStyleSelector from '$lib/components/MapStyleSelector.svelte'
   import { capitalizeFirstLetter, capitalizeEachWord } from '$lib/utils/string'
 
   import CodeStore from '../stores/codeStore'
@@ -420,6 +422,7 @@
   // Local version that handles UI cleanup and non-store data
   function clearAllDataLocal() {
     resetVideo()
+    resetGPS()
     currentConfig.isPathColorMode = false
 
     closeAllDropdowns()
@@ -890,6 +893,9 @@
         </li>
       </ul>
     </details>
+
+    <!-- Map Style Selector (GPS mode only) -->
+    <MapStyleSelector />
 
     <!-- Clear Data Dropdown -->
     <details class="dropdown" use:clickOutside>

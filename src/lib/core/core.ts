@@ -6,6 +6,7 @@ import { CoreUtils } from './core-utils'
 import { getExampleDataset } from './example-datasets'
 import type {
   MovementRow,
+  GPSMovementRow,
   ConversationRow,
   SingleCodeRow,
   MultiCodeRow,
@@ -29,6 +30,9 @@ import ConfigStore from '../../stores/configStore.js'
 import VideoStore, { loadVideo, reset as resetVideo } from '../../stores/videoStore'
 import { pause as pausePlayback } from '../../stores/playbackStore'
 import { toastStore } from '../../stores/toastStore'
+import { setGPSMode, setBounds, resetGPS, getGPSState } from '../../stores/gpsStore'
+import { GPSTransformer, GPS_NORMALIZED_SIZE } from '../gps/gps-transformer'
+import { loadMapAsFloorPlan, isMapboxConfigured } from '../gps/mapbox-service'
 
 export class Core {
   sketch: p5
@@ -234,9 +238,25 @@ export class Core {
    * @remarks Multicode files must be processed before single code files due to header structure
    */
   // NOTE: multicode should be processed before single code file as headers of multicode have one additional column
+  // NOTE: GPS movement should be processed before regular movement as it has different headers
   processResultsData = (results: PapaParseResult<CsvRow>, fileName: string): void => {
     const csvData = results.data
+    // Check for GPS movement data first (lat/lng headers)
+    // GPS processing is async (loads map image), so handle separately and return early
+    if (this.coreUtils.testGPSMovement(results)) {
+      this.processGPSMovementData(csvData as unknown as GPSMovementRow[], fileName).catch(
+        (error) => {
+          console.error('Error processing GPS data:', error)
+        }
+      )
+      return
+    }
+
     if (this.coreUtils.testMovement(results)) {
+      // Regular movement data (x/y headers) - reset GPS mode if active
+      if (getGPSState().isGPSMode) {
+        resetGPS()
+      }
       this.movementData.push({ fileName, csvData: csvData as unknown as MovementRow[] })
       this.reProcessAllMovementData()
     } else if (this.coreUtils.testMulticode(results)) {
@@ -253,15 +273,7 @@ export class Core {
       )
     }
 
-    UserStore.update((currentUsers) => {
-      const users = [...currentUsers]
-      users.forEach((user) => {
-        user.dataTrail.sort((a, b) => ((a.time ?? 0) > (b.time ?? 0) ? 1 : -1))
-        this.updateStopValues(user.dataTrail)
-        this.updateCodeValues(user.dataTrail)
-      })
-      return users
-    })
+    this.finalizeUserData()
   }
 
   /**
@@ -340,6 +352,88 @@ export class Core {
       return users
     })
     this.updateTimelineValues(endTime)
+  }
+
+  /**
+   * Processes GPS movement CSV data (lat/lng coordinates)
+   * Converts GPS coordinates to pixel coordinates and loads a Mapbox static map as floor plan
+   *
+   * @param csvData - Array of GPS movement rows containing time, lat, lng coordinates
+   * @param userName - Name identifier for the user (typically from filename)
+   */
+  processGPSMovementData = async (csvData: GPSMovementRow[], fileName: string): Promise<void> => {
+    // Check if Mapbox is configured
+    if (!isMapboxConfigured()) {
+      toastStore.error(
+        'GPS data detected but Mapbox is not configured. Please set VITE_MAPBOX_TOKEN in your .env file.'
+      )
+      return
+    }
+
+    // Normalize GPS data to consistent field names and filter invalid points
+    const normalizedData = csvData
+      .map((row) => GPSTransformer.normalizeGPSRow(row))
+      .filter((row) => GPSTransformer.isValidGPSPoint(row))
+
+    if (normalizedData.length === 0) {
+      toastStore.error('No valid GPS coordinates found in the file.')
+      return
+    }
+
+    // Calculate bounds from GPS data
+    const bounds = GPSTransformer.calculateBounds(normalizedData)
+
+    // Enable GPS mode and set bounds in store
+    setGPSMode(true)
+    setBounds(bounds)
+
+    // Load Mapbox static map as floor plan
+    try {
+      await loadMapAsFloorPlan(this.sketch, bounds, getGPSState().mapStyle)
+      // Reset rotation to 0 - Mapbox maps are oriented with north up
+      this.sketch.floorPlan.curFloorPlanRotation = 0
+    } catch (error) {
+      console.error('Failed to load map:', error)
+      resetGPS()
+      return
+    }
+
+    // Convert GPS coordinates to normalized pixel coordinates
+    const pixelData: MovementRow[] = normalizedData.map((row) => {
+      const [x, y] = GPSTransformer.toPixels(
+        row.lat,
+        row.lng,
+        bounds,
+        GPS_NORMALIZED_SIZE,
+        GPS_NORMALIZED_SIZE
+      )
+      return {
+        time: row.time,
+        x,
+        y,
+      }
+    })
+
+    // Process as regular movement data
+    this.movementData.push({ fileName, csvData: pixelData })
+    this.reProcessAllMovementData()
+    this.finalizeUserData()
+  }
+
+  /**
+   * Sorts user data trails by time and updates stop/code values
+   * Called after processing any data type to ensure consistent state
+   */
+  private finalizeUserData(): void {
+    UserStore.update((currentUsers) => {
+      const users = [...currentUsers]
+      users.forEach((user) => {
+        user.dataTrail.sort((a, b) => ((a.time ?? 0) > (b.time ?? 0) ? 1 : -1))
+        this.updateStopValues(user.dataTrail)
+        this.updateCodeValues(user.dataTrail)
+      })
+      return users
+    })
   }
 
   /**
