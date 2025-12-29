@@ -5,6 +5,7 @@
   import P5Store from '../../stores/p5Store'
   import { loadMapAsFloorPlan } from '$lib/gps/mapbox-service'
   import { MAP_STYLES, type MapboxStyle } from '$lib/gps/gps-types'
+  import { clickOutsideClose } from '$lib/actions/clickOutside'
 
   let p5Instance = $state<any>(null)
 
@@ -27,26 +28,10 @@
       console.error('Failed to load map style:', error)
     }
   }
-
-  function clickOutside(node: HTMLElement) {
-    const handleClick = (event: MouseEvent) => {
-      if (!node.contains(event.target as Node)) {
-        node.removeAttribute('open')
-      }
-    }
-
-    document.addEventListener('click', handleClick, true)
-
-    return {
-      destroy() {
-        document.removeEventListener('click', handleClick, true)
-      },
-    }
-  }
 </script>
 
 {#if $GPSStore.isGPSMode}
-  <details class="dropdown" use:clickOutside>
+  <details class="dropdown" use:clickOutsideClose>
     <summary class="btn btn-sm ml-4 gap-1 flex items-center" class:loading={$GPSStore.isLoading}>
       <div class="w-4 h-4"><MdMap /></div>
       Map
