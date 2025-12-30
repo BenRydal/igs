@@ -43,3 +43,20 @@ export const MAP_STYLES: MapStyleOption[] = [
   { value: 'light-v11', label: 'Light' },
   { value: 'dark-v11', label: 'Dark' },
 ]
+
+/**
+ * Normalized GPS point with consistent field names
+ */
+export interface NormalizedGPSPoint {
+  time: number
+  lat: number
+  lng: number
+}
+
+/**
+ * Result of GPS data validation
+ */
+export interface GPSValidationResult {
+  filteredData: NormalizedGPSPoint[]
+  warnings: string[]
+}

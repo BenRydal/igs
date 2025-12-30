@@ -33,6 +33,7 @@ import { toastStore } from '../../stores/toastStore'
 import { setGPSMode, setBounds, resetGPS, getGPSState } from '../../stores/gpsStore'
 import { GPSTransformer, GPS_NORMALIZED_SIZE } from '../gps/gps-transformer'
 import { loadMapAsFloorPlan, isMapboxConfigured } from '../gps/mapbox-service'
+import { validateGPSData } from '../gps/gps-validation'
 
 export class Core {
   sketch: p5
@@ -399,15 +400,44 @@ export class Core {
     // Normalize GPS data to consistent field names and filter invalid points
     const normalizedData = csvData
       .map((row) => GPSTransformer.normalizeGPSRow(row))
-      .filter((row) => GPSTransformer.isValidGPSPoint(row))
+      .filter(
+        (row) =>
+          GPSTransformer.isValidGPSPoint(row) &&
+          typeof row.time === 'number' &&
+          Number.isFinite(row.time)
+      )
+
+    // Warn about skipped rows due to missing/invalid data
+    const skippedRows = csvData.length - normalizedData.length
+    if (skippedRows > 0) {
+      toastStore.warning(
+        `${skippedRows} row${skippedRows > 1 ? 's were' : ' was'} skipped due to missing or invalid values`
+      )
+    }
 
     if (normalizedData.length === 0) {
       toastStore.error('No valid GPS coordinates found in the file.')
       return
     }
 
-    // Calculate bounds from GPS data
-    const bounds = GPSTransformer.calculateBounds(normalizedData)
+    // Validate GPS data: detect spikes, time issues, and filter bad points
+    const validationResult = validateGPSData(normalizedData)
+
+    // Show warnings for any issues detected
+    for (const warning of validationResult.warnings) {
+      toastStore.warning(warning)
+    }
+
+    // Use filtered data (spikes removed, timestamps sorted)
+    const validatedData = validationResult.filteredData
+
+    if (validatedData.length === 0) {
+      toastStore.error('No valid GPS points remaining after filtering. All points had impossible speeds.')
+      return
+    }
+
+    // Calculate bounds from validated GPS data
+    const bounds = GPSTransformer.calculateBounds(validatedData)
 
     // Enable GPS mode and set bounds in store
     setGPSMode(true)
@@ -425,7 +455,7 @@ export class Core {
     }
 
     // Convert GPS coordinates to normalized pixel coordinates
-    const pixelData: MovementRow[] = normalizedData.map((row) => {
+    const pixelData: MovementRow[] = validatedData.map((row) => {
       const [x, y] = GPSTransformer.toPixels(
         row.lat,
         row.lng,
