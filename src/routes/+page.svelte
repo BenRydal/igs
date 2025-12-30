@@ -958,7 +958,7 @@
         class="hidden"
         id="file-input"
         multiple
-        accept=".png, .jpg, .jpeg, .csv, .mp4"
+        accept=".png, .jpg, .jpeg, .csv, .mp4, .gpx"
         type="file"
         bind:files
         onchange={updateUserLoadedFiles}

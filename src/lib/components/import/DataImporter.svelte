@@ -113,7 +113,7 @@
   async function addFiles(newFiles: File[]): Promise<void> {
     try {
       // Filter to only supported file types
-      const supportedExtensions = ['csv', 'png', 'jpg', 'jpeg', 'mp4']
+      const supportedExtensions = ['csv', 'png', 'jpg', 'jpeg', 'mp4', 'gpx']
       const validFiles = newFiles.filter((file) => {
         const ext = getFileExtension(file.name)
         return supportedExtensions.includes(ext)
@@ -317,7 +317,7 @@
           id="file-input-import"
           type="file"
           multiple
-          accept=".csv,.png,.jpg,.jpeg,.mp4"
+          accept=".csv,.png,.jpg,.jpeg,.mp4,.gpx"
           onchange={handleFileInput}
           class="hidden"
         />

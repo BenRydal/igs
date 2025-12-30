@@ -34,6 +34,7 @@ import { setGPSMode, setBounds, resetGPS, getGPSState } from '../../stores/gpsSt
 import { GPSTransformer, GPS_NORMALIZED_SIZE } from '../gps/gps-transformer'
 import { loadMapAsFloorPlan, isMapboxConfigured } from '../gps/mapbox-service'
 import { validateGPSData } from '../gps/gps-validation'
+import { GPXParser } from '../gps/gpx-parser'
 
 export class Core {
   sketch: p5
@@ -49,7 +50,7 @@ export class Core {
 
   /**
    * Handles file upload events and processes multiple files
-   * Supports CSV (movement/conversation/codes), PNG/JPG (floorplan), and MP4 (video)
+   * Supports CSV (movement/conversation/codes), GPX (GPS tracks), PNG/JPG (floorplan), and MP4 (video)
    *
    * @param event - File input change event from an <input type="file"> element
    * @throws Shows toast notification if file format is not supported
@@ -86,6 +87,8 @@ export class Core {
   testFileTypeForProcessing(file: File): void {
     const fileName = file.name.toLowerCase()
     if (fileName.endsWith('.csv') || file.type === 'text/csv') this.loadCSVData(file)
+    else if (fileName.endsWith('.gpx') || file.type === 'application/gpx+xml')
+      this.loadGPXData(file)
     else if (
       fileName.endsWith('.png') ||
       fileName.endsWith('.jpg') ||
@@ -111,6 +114,8 @@ export class Core {
     const fileName = file.name.toLowerCase()
     if (fileName.endsWith('.csv') || file.type === 'text/csv') {
       await this.loadCSVData(file)
+    } else if (fileName.endsWith('.gpx') || file.type === 'application/gpx+xml') {
+      await this.loadGPXData(file)
     } else if (
       fileName.endsWith('.png') ||
       fileName.endsWith('.jpg') ||
@@ -243,6 +248,38 @@ export class Core {
     // All known time column names - TimeParser will filter to those that exist
     const timeColumns = ['time', 'start', 'end']
     return TimeParser.preprocess(results, { timeColumns })
+  }
+
+  /**
+   * Loads and processes GPX file data
+   * Parses XML, extracts tracks, and routes to GPS processing pipeline
+   *
+   * @param file - GPX File object to parse
+   * @returns Promise that resolves when processing is complete
+   */
+  loadGPXData = async (file: File): Promise<void> => {
+    try {
+      const gpxContent = await file.text()
+      const fileName = this.coreUtils.cleanFileName(file.name)
+      const parseResult = GPXParser.parse(gpxContent, fileName)
+
+      if (!parseResult.success) {
+        toastStore.error(parseResult.error || 'Failed to parse GPX file')
+        return
+      }
+
+      parseResult.warnings.forEach((warning) => toastStore.warning(warning))
+
+      // Process each track as a separate "user" (like multiple CSV files)
+      for (const track of parseResult.tracks) {
+        await this.processGPSMovementData(GPXParser.toGPSMovementRows(track), track.name)
+      }
+
+      this.sketch.loop()
+    } catch (error) {
+      console.error('Error loading GPX file:', error)
+      toastStore.error('Error reading GPX file. Please check the file format.')
+    }
   }
 
   loadFloorplanImage = (path: string) => {
