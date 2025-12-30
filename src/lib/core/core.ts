@@ -4,6 +4,7 @@ import { get } from 'svelte/store'
 
 import { CoreUtils } from './core-utils'
 import { getExampleDataset } from './example-datasets'
+import { TimeParser, type TimeParseOutput } from './time-parser'
 import type {
   MovementRow,
   GPSMovementRow,
@@ -15,7 +16,6 @@ import type {
   MovementDataFile,
   CodeEntry,
   ExampleId,
-  ExampleConfig,
   ExampleSelectEvent,
 } from './types.js'
 
@@ -210,12 +210,38 @@ export class Core {
           return h.trim().toLowerCase()
         },
         complete: (results: PapaParseResult<CsvRow>, parsedFile: File) => {
+          // Preprocess time columns (detect format, convert to relative seconds)
+          const preprocessed = this.preprocessTimeData(results)
+          if (!preprocessed.success) {
+            toastStore.error(preprocessed.error || 'Failed to parse time values')
+            resolve()
+            return
+          }
+
+          // Log any warnings from preprocessing
+          if (preprocessed.warnings.length > 0) {
+            console.warn('Time parsing warnings:', preprocessed.warnings)
+          }
+
+          // Update results with preprocessed data
+          results.data = preprocessed.data
+
           this.processResultsData(results, this.coreUtils.cleanFileName(parsedFile.name))
           this.sketch.loop()
           resolve()
         },
       })
     })
+  }
+
+  /**
+   * Preprocesses time columns in parsed CSV data
+   * Converts time values to relative seconds from the first timestamp
+   */
+  private preprocessTimeData(results: PapaParseResult<CsvRow>): TimeParseOutput {
+    // All known time column names - TimeParser will filter to those that exist
+    const timeColumns = ['time', 'start', 'end']
+    return TimeParser.preprocess(results, { timeColumns })
   }
 
   loadFloorplanImage = (path: string) => {
