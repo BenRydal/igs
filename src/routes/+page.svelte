@@ -104,8 +104,9 @@
     {
       label: 'Walking Tours',
       items: [
-        { value: 'example-12', label: 'Making Historical Tour' },
-        { value: 'example-13', label: 'Taking Historical Tour' },
+        { value: 'example-14', label: 'Jefferson Street Tour' },
+        { value: 'example-12', label: 'Civil Rights Tour: Creating the Route' },
+        { value: 'example-13', label: 'Civil Rights Tour: Walking the Route' },
       ],
     },
     {

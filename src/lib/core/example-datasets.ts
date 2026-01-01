@@ -84,13 +84,18 @@ export const EXAMPLE_DATASETS: Record<string, ExampleDataset> = {
   },
   'example-12': {
     files: ['Making Tour.csv', 'conversation.csv'],
-    name: 'Making Historical Tour',
+    name: 'Civil Rights Tour: Creating the Route',
     description: 'GPS movement and conversation data from creating a Nashville civil rights walking tour',
   },
   'example-13': {
     files: ['Taking Tour.csv', 'conversation.csv'],
-    name: 'Taking Historical Tour',
+    name: 'Civil Rights Tour: Walking the Route',
     description: 'GPS movement and conversation data from following a Nashville civil rights walking tour',
+  },
+  'example-14': {
+    files: ['tour.csv'],
+    name: 'Jefferson Street Tour',
+    description: 'GPS movement data from a historical walking tour',
   },
 } as const
 
