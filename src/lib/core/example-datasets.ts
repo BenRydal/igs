@@ -7,6 +7,7 @@ export interface ExampleDataset {
   files: string[]
   videoId?: string
   duration: string
+  isGPS?: boolean
 }
 
 export const EXAMPLE_DATASETS: Record<string, ExampleDataset> = {
@@ -66,14 +67,17 @@ export const EXAMPLE_DATASETS: Record<string, ExampleDataset> = {
   'example-12': {
     files: ['Making Tour.csv', 'conversation.csv'],
     duration: '43 min',
+    isGPS: true,
   },
   'example-13': {
     files: ['Taking Tour.csv', 'conversation.csv'],
     duration: '50 min',
+    isGPS: true,
   },
   'example-14': {
     files: ['tour.csv'],
     duration: '3h 6m',
+    isGPS: true,
   },
 } as const
 

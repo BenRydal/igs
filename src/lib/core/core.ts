@@ -127,8 +127,10 @@ export class Core {
     const selectedValue = event.target.value as ExampleId
     const selectedExample = getExampleDataset(selectedValue)
     if (selectedExample) {
-      const { files, videoId } = selectedExample
-      await this.loadFloorplanImage(`/data/${selectedValue}/floorplan.png`)
+      const { files, videoId, isGPS } = selectedExample
+      if (!isGPS) {
+        await this.loadFloorplanImage(`/data/${selectedValue}/floorplan.png`)
+      }
       for (const file of files) {
         await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, file)
       }
