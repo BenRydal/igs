@@ -82,6 +82,16 @@ export const EXAMPLE_DATASETS: Record<string, ExampleDataset> = {
     name: 'Group Interaction',
     description: 'Multi-person movement and conversation data',
   },
+  'example-12': {
+    files: ['Making Tour.csv', 'conversation.csv'],
+    name: 'Making Historical Tour',
+    description: 'GPS movement and conversation data from creating a Nashville civil rights walking tour',
+  },
+  'example-13': {
+    files: ['Taking Tour.csv', 'conversation.csv'],
+    name: 'Taking Historical Tour',
+    description: 'GPS movement and conversation data from following a Nashville civil rights walking tour',
+  },
 } as const
 
 export type ExampleId = keyof typeof EXAMPLE_DATASETS | ''

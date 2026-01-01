@@ -102,6 +102,13 @@
       ],
     },
     {
+      label: 'Walking Tours',
+      items: [
+        { value: 'example-12', label: 'Making Historical Tour' },
+        { value: 'example-13', label: 'Taking Historical Tour' },
+      ],
+    },
+    {
       label: 'TIMSS 1999 Video Study',
       items: [
         { value: 'example-3', label: 'U.S. Science Lesson (weather)' },
