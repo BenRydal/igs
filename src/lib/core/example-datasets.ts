@@ -6,96 +6,74 @@
 export interface ExampleDataset {
   files: string[]
   videoId?: string
-  name: string
-  description?: string
+  duration: string
 }
 
 export const EXAMPLE_DATASETS: Record<string, ExampleDataset> = {
   'example-1': {
     files: ['jordan.csv', 'possession.csv'],
     videoId: 'iiMjfVOj8po',
-    name: 'Basketball Game Analysis',
-    description: 'Movement and possession data from a basketball game',
+    duration: '37 sec',
   },
   'example-2': {
     files: ['adhir.csv', 'blake.csv', 'jeans.csv', 'lily.csv', 'mae.csv', 'conversation.csv'],
     videoId: 'pWJ3xNk1Zpg',
-    name: 'Group Interaction',
-    description: 'Multi-person movement and conversation data',
+    duration: '8 min',
   },
   'example-3': {
     files: ['teacher.csv', 'lesson-graph.csv', 'conversation.csv'],
     videoId: 'Iu0rxb-xkMk',
-    name: 'Classroom Lesson 1',
-    description: 'Teacher movement with lesson graph and conversation',
+    duration: '56 min',
   },
   'example-4': {
-    files: [
-      'cassandra.csv',
-      'mei.csv',
-      'nathan.csv',
-      'sean.csv',
-      'teacher.csv',
-      'conversation.csv',
-    ],
+    files: ['cassandra.csv', 'mei.csv', 'nathan.csv', 'sean.csv', 'teacher.csv', 'conversation.csv'],
     videoId: 'OJSZCK4GPQY',
-    name: 'Classroom Group Work',
-    description: 'Multiple students and teacher movement with conversation',
+    duration: '7 min',
   },
   'example-5': {
     files: ['teacher.csv', 'lesson-graph.csv', 'conversation.csv'],
     videoId: 'xrisdnH5GmQ',
-    name: 'Classroom Lesson 2',
-    description: 'Teacher movement with lesson graph and conversation',
+    duration: '49 min',
   },
   'example-6': {
     files: ['teacher.csv', 'lesson-graph.csv', 'conversation.csv'],
     videoId: 'nLDXU2c0vLw',
-    name: 'Classroom Lesson 3',
-    description: 'Teacher movement with lesson graph and conversation',
+    duration: '52 min',
   },
   'example-7': {
     files: ['teacher.csv', 'lesson-graph.csv', 'conversation.csv'],
     videoId: '5Eg1fJ-ZpQs',
-    name: 'Classroom Lesson 4',
-    description: 'Teacher movement with lesson graph and conversation',
+    duration: '44 min',
   },
   'example-8': {
     files: ['teacher.csv', 'lesson-graph.csv', 'conversation.csv'],
     videoId: 'gPb_ST74bpg',
-    name: 'Classroom Lesson 5',
-    description: 'Teacher movement with lesson graph and conversation',
+    duration: '41 min',
   },
   'example-9': {
     files: ['teacher.csv', 'lesson-graph.csv', 'conversation.csv'],
     videoId: 'P5Lxj2nfGzc',
-    name: 'Classroom Lesson 6',
-    description: 'Teacher movement with lesson graph and conversation',
+    duration: '50 min',
   },
   'example-10': {
     files: ['teacher.csv', 'conversation.csv'],
-    name: 'Teacher with Conversation',
-    description: 'Teacher movement and conversation data',
+    duration: '1h 35m',
   },
   'example-11': {
     files: ['adhir.csv', 'blake.csv', 'jeans.csv', 'lily.csv', 'mae.csv'],
-    name: 'Group Interaction',
-    description: 'Multi-person movement and conversation data',
+    duration: '47 min',
   },
   'example-12': {
     files: ['Making Tour.csv', 'conversation.csv'],
-    name: 'Civil Rights Tour: Creating the Route',
-    description: 'GPS movement and conversation data from creating a Nashville civil rights walking tour',
+    duration: '43 min',
   },
   'example-13': {
     files: ['Taking Tour.csv', 'conversation.csv'],
-    name: 'Civil Rights Tour: Walking the Route',
-    description: 'GPS movement and conversation data from following a Nashville civil rights walking tour',
+    duration: '50 min',
   },
   'example-14': {
     files: ['tour.csv'],
-    name: 'Jefferson Street Tour',
-    description: 'GPS movement data from a historical walking tour',
+    duration: '3h 6m',
   },
 } as const
 
@@ -108,12 +86,4 @@ export type ExampleId = keyof typeof EXAMPLE_DATASETS | ''
  */
 export function getExampleDataset(id: string): ExampleDataset | undefined {
   return EXAMPLE_DATASETS[id]
-}
-
-/**
- * Get all available example IDs
- * @returns Array of example IDs
- */
-export function getExampleIds(): string[] {
-  return Object.keys(EXAMPLE_DATASETS)
 }

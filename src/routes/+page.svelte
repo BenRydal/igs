@@ -20,6 +20,13 @@
   import MdChat from '~icons/mdi/chat'
   import MdDelete from '~icons/mdi/delete'
   import MdFolder from '~icons/mdi/folder-open'
+  import MdSports from '~icons/mdi/basketball'
+  import MdMuseum from '~icons/mdi/bank'
+  import MdSchool from '~icons/mdi/school'
+  import MdWalk from '~icons/mdi/walk'
+  import MdVideo from '~icons/mdi/video-vintage'
+  import MdChevronDown from '~icons/mdi/chevron-down'
+  import MdChevronRight from '~icons/mdi/chevron-right'
   import MdMoreVert from '~icons/mdi/dots-vertical'
   import MdMenu from '~icons/mdi/menu'
   import MdClose from '~icons/mdi/close'
@@ -41,6 +48,7 @@
   import ConversationTooltip from '$lib/components/ConversationTooltip.svelte'
 
   import { Core } from '$lib'
+  import { EXAMPLE_DATASETS } from '$lib/core/example-datasets'
   import { igsSketch } from '$lib/p5/igsSketch'
   import { writable } from 'svelte/store'
   import { onMount } from 'svelte'
@@ -86,23 +94,30 @@
   const conversationToggleOptions = ['alignToggle'] as const
   let selectedDropDownOption = $state('')
   const dropdownOptions = [
-    { label: 'Sports', items: [{ value: 'example-1', label: "Michael Jordan's Last Shot" }] },
+    {
+      label: 'Sports',
+      icon: MdSports,
+      items: [{ value: 'example-1', label: "Michael Jordan's Last Shot" }],
+    },
     {
       label: 'Museums',
+      icon: MdMuseum,
       items: [
-        { value: 'example-2', label: 'Family Gallery Visit' },
-        { value: 'example-11', label: 'Family Museum Visit' },
+        { value: 'example-2', label: 'Single Gallery' },
+        { value: 'example-11', label: 'Complete Visit' },
       ],
     },
     {
       label: 'Classrooms',
+      icon: MdSchool,
       items: [
         { value: 'example-10', label: '8th Grade AP Math Lesson' },
-        { value: 'example-4', label: '3rd Grade Discussion' },
+        { value: 'example-4', label: '3rd Grade Discussion Odd/Even Numbers' },
       ],
     },
     {
       label: 'Walking Tours',
+      icon: MdWalk,
       items: [
         { value: 'example-14', label: 'Jefferson Street Tour' },
         { value: 'example-12', label: 'Civil Rights Tour: Creating the Route' },
@@ -110,17 +125,36 @@
       ],
     },
     {
-      label: 'TIMSS 1999 Video Study',
+      label: 'TIMSS Classroom Video Study',
+      icon: MdVideo,
       items: [
-        { value: 'example-3', label: 'U.S. Science Lesson (weather)' },
-        { value: 'example-5', label: 'Czech Republic Science Lesson (density)' },
-        { value: 'example-6', label: 'Japan Math Lesson (angles)' },
-        { value: 'example-7', label: 'U.S. Math Lesson (linear equations)' },
-        { value: 'example-8', label: 'U.S. Science Lesson (rocks)' },
-        { value: 'example-9', label: 'Netherlands Math Lesson (pythagorean theorem)' },
+        { value: 'example-3', label: 'US: Weather' },
+        { value: 'example-5', label: 'Czech: Density' },
+        { value: 'example-6', label: 'Japan: Angles' },
+        { value: 'example-7', label: 'US: Linear Equations' },
+        { value: 'example-8', label: 'US: Rocks' },
+        { value: 'example-9', label: 'Netherlands: Pythagorean Theorem' },
       ],
     },
   ]
+
+  // Helper to get dataset duration
+  function getDatasetDuration(value: string) {
+    return EXAMPLE_DATASETS[value]?.duration ?? ''
+  }
+
+  // Track which categories are expanded (all expanded by default)
+  let expandedCategories = $state<Set<string>>(new Set(dropdownOptions.map((g) => g.label)))
+
+  function toggleCategory(label: string) {
+    const newSet = new Set(expandedCategories)
+    if (newSet.has(label)) {
+      newSet.delete(label)
+    } else {
+      newSet.add(label)
+    }
+    expandedCategories = newSet
+  }
 
   let showDataPopup = $state(false)
   let showSettings = $state(false)
@@ -691,7 +725,9 @@
 {/snippet}
 
 {#snippet check(condition: boolean)}
-  <div class="w-4 h-4 mr-2">{#if condition}<MdCheck />{/if}</div>
+  <div class="w-4 h-4 mr-2">
+    {#if condition}<MdCheck />{/if}
+  </div>
 {/snippet}
 
 {#snippet navDivider()}
@@ -1009,7 +1045,7 @@
       <FloatingDropdown
         id="examples-dropdown"
         buttonClass="btn btn-sm gap-1 flex items-center"
-        contentClass="menu rounded-box w-56 p-2 shadow bg-base-100 max-h-[60vh] overflow-y-auto"
+        contentClass="menu rounded-box w-72 p-2 shadow bg-base-100 max-h-[60vh] overflow-y-auto"
       >
         {#snippet buttonChildren()}
           {@render icon(MdFolder)}
@@ -1017,23 +1053,44 @@
           {@render chevronDown()}
         {/snippet}
         <ul>
-          {#each dropdownOptions as group}
-            <li class="menu-title">{group.label}</li>
-            {#each group.items as item}
-              {@const isSelected = selectedDropDownOption === item.label}
-              <li>
-                <button
-                  onclick={() => {
-                    updateExampleDataDropDown({ target: { value: item.value } })
-                    selectedDropDownOption = item.label
-                  }}
-                  class="text-left flex items-center {isSelected ? 'bg-primary/20 font-medium' : ''}"
-                >
-                  {@render check(isSelected)}
-                  {item.label}
-                </button>
-              </li>
-            {/each}
+          {#each dropdownOptions as group, groupIndex}
+            {#if groupIndex > 0}
+              <li class="my-1"><hr class="border-base-300" /></li>
+            {/if}
+            <li>
+              <button
+                class="menu-title flex items-center gap-2 w-full hover:bg-base-200 rounded-lg px-2 py-1 cursor-pointer"
+                onclick={() => toggleCategory(group.label)}
+              >
+                <svelte:component
+                  this={expandedCategories.has(group.label) ? MdChevronDown : MdChevronRight}
+                  class="w-4 h-4 opacity-50"
+                />
+                <svelte:component this={group.icon} class="w-4 h-4" />
+                <span>{group.label}</span>
+              </button>
+            </li>
+            {#if expandedCategories.has(group.label)}
+              {#each group.items as item}
+                {@const isSelected = selectedDropDownOption === item.label}
+                <li class="pl-2 w-full">
+                  <button
+                    onclick={() => {
+                      updateExampleDataDropDown({ target: { value: item.value } })
+                      selectedDropDownOption = item.label
+                    }}
+                    class="flex items-center gap-2 w-full {isSelected
+                      ? 'bg-primary/20 font-medium'
+                      : ''}"
+                  >
+                    <span class="truncate flex-1">{item.label}</span>
+                    <span class="badge badge-ghost badge-sm opacity-60 shrink-0"
+                      >{getDatasetDuration(item.value)}</span
+                    >
+                  </button>
+                </li>
+              {/each}
+            {/if}
           {/each}
         </ul>
       </FloatingDropdown>
@@ -1051,19 +1108,34 @@
     ></div>
 
     <!-- Menu panel -->
-    <div class="lg:hidden absolute top-full left-0 right-0 bg-base-100 shadow-lg border-t z-50 max-h-[85vh] overflow-y-auto px-6 py-8">
+    <div
+      class="lg:hidden absolute top-full left-0 right-0 bg-base-100 shadow-lg border-t z-50 max-h-[85vh] overflow-y-auto px-6 py-8"
+    >
       <!-- Dropdown buttons -->
       <div class="flex flex-wrap gap-2 justify-center mb-6">
         <details class="dropdown dropdown-bottom" use:clickOutside>
           <summary class="btn btn-sm gap-1">{@render icon(MdFilterList)}Filter</summary>
           <ul class="dropdown-content menu bg-base-200 rounded-box z-[60] w-48 p-2 shadow mt-1">
             {#each filterToggleOptions as toggle}
-              <li><button onclick={() => toggleSelection(toggle, filterToggleOptions)}>{@render check($ConfigStore[toggle])}{capitalizeFirstLetter(toggle.replace('Toggle', ''))}</button></li>
+              <li>
+                <button onclick={() => toggleSelection(toggle, filterToggleOptions)}
+                  >{@render check($ConfigStore[toggle])}{capitalizeFirstLetter(
+                    toggle.replace('Toggle', '')
+                  )}</button
+                >
+              </li>
             {/each}
             <li class="px-2 py-1">
               <div class="flex flex-col w-full">
                 <span class="text-xs">Stop: {formattedStopLength}s</span>
-                <input type="range" min="1" max={$ConfigStore.maxStopLength} value={$ConfigStore.stopSliderValue} class="range range-xs" oninput={(e) => handleConfigChangeFromInput(e, 'stopSliderValue')} />
+                <input
+                  type="range"
+                  min="1"
+                  max={$ConfigStore.maxStopLength}
+                  value={$ConfigStore.stopSliderValue}
+                  class="range range-xs"
+                  oninput={(e) => handleConfigChangeFromInput(e, 'stopSliderValue')}
+                />
               </div>
             </li>
           </ul>
@@ -1074,18 +1146,40 @@
             <summary class="btn btn-sm gap-1">{@render icon(MdSelectAll)}Select</summary>
             <ul class="dropdown-content menu bg-base-200 rounded-box z-[60] w-56 p-2 shadow mt-1">
               {#each selectToggleOptions as toggle}
-                <li><button onclick={() => toggleSelection(toggle, selectToggleOptions)}>{@render check($ConfigStore[toggle])}{capitalizeFirstLetter(toggle.replace('Toggle', ''))}</button></li>
+                <li>
+                  <button onclick={() => toggleSelection(toggle, selectToggleOptions)}
+                    >{@render check($ConfigStore[toggle])}{capitalizeFirstLetter(
+                      toggle.replace('Toggle', '')
+                    )}</button
+                  >
+                </li>
               {/each}
               <li class="px-2 py-1">
                 <div class="w-full">
                   <p class="text-xs mb-1">Circle Size: {currentConfig.selectorSize}px</p>
-                  <input type="range" min="20" max="300" step="10" bind:value={currentConfig.selectorSize} oninput={(e) => setSelectorSize(parseFloat(e.target.value))} class="range range-xs" />
+                  <input
+                    type="range"
+                    min="20"
+                    max="300"
+                    step="10"
+                    bind:value={currentConfig.selectorSize}
+                    oninput={(e) => setSelectorSize(parseFloat(e.target.value))}
+                    class="range range-xs"
+                  />
                 </div>
               </li>
               <li class="px-2 py-1">
                 <div class="w-full">
                   <p class="text-xs mb-1">Slicer Width: {currentConfig.slicerSize}px</p>
-                  <input type="range" min="5" max="100" step="5" bind:value={currentConfig.slicerSize} oninput={(e) => setSlicerSize(parseFloat(e.target.value))} class="range range-xs" />
+                  <input
+                    type="range"
+                    min="5"
+                    max="100"
+                    step="5"
+                    bind:value={currentConfig.slicerSize}
+                    oninput={(e) => setSlicerSize(parseFloat(e.target.value))}
+                    class="range range-xs"
+                  />
                 </div>
               </li>
             </ul>
@@ -1095,21 +1189,51 @@
         <details class="dropdown dropdown-bottom" use:clickOutside>
           <summary class="btn btn-sm gap-1">{@render icon(MdChat)}Talk</summary>
           <ul class="dropdown-content menu bg-base-200 rounded-box z-[60] w-64 p-2 shadow mt-1">
-            <li><button onclick={() => (isTranscriptVisible = !isTranscriptVisible)}>{@render check(isTranscriptVisible)}Transcript</button></li>
-            <li><button onclick={() => toggleSelection('alignToggle', conversationToggleOptions)}>{@render check($ConfigStore.alignToggle)}Align to side</button></li>
+            <li>
+              <button onclick={() => (isTranscriptVisible = !isTranscriptVisible)}
+                >{@render check(isTranscriptVisible)}Transcript</button
+              >
+            </li>
+            <li>
+              <button onclick={() => toggleSelection('alignToggle', conversationToggleOptions)}
+                >{@render check($ConfigStore.alignToggle)}Align to side</button
+              >
+            </li>
             <div class="divider my-1"></div>
             <li class="menu-title px-2 py-0 text-xs opacity-60">Grouped turns</li>
-            <li><button onclick={() => handleConfigChange('showSpeakerStripes', !$ConfigStore.showSpeakerStripes)}>{@render check($ConfigStore.showSpeakerStripes)}Combine speakers</button></li>
+            <li>
+              <button
+                onclick={() =>
+                  handleConfigChange('showSpeakerStripes', !$ConfigStore.showSpeakerStripes)}
+                >{@render check($ConfigStore.showSpeakerStripes)}Combine speakers</button
+              >
+            </li>
             <li class="px-2 py-1">
               <div class="w-full">
                 <p class="text-xs mb-1">Group within {$ConfigStore.clusterTimeThreshold} seconds</p>
-                <input type="range" min="1" max="60" value={$ConfigStore.clusterTimeThreshold} class="range range-xs" oninput={(e) => handleConfigChangeFromInput(e, 'clusterTimeThreshold')} />
+                <input
+                  type="range"
+                  min="1"
+                  max="60"
+                  value={$ConfigStore.clusterTimeThreshold}
+                  class="range range-xs"
+                  oninput={(e) => handleConfigChangeFromInput(e, 'clusterTimeThreshold')}
+                />
               </div>
             </li>
             <li class="px-2 py-1">
               <div class="w-full">
-                <p class="text-xs mb-1">Group within {$ConfigStore.clusterSpaceThreshold}px distance</p>
-                <input type="range" min="0" max="200" value={$ConfigStore.clusterSpaceThreshold} class="range range-xs" oninput={(e) => handleConfigChangeFromInput(e, 'clusterSpaceThreshold')} />
+                <p class="text-xs mb-1">
+                  Group within {$ConfigStore.clusterSpaceThreshold}px distance
+                </p>
+                <input
+                  type="range"
+                  min="0"
+                  max="200"
+                  value={$ConfigStore.clusterSpaceThreshold}
+                  class="range range-xs"
+                  oninput={(e) => handleConfigChangeFromInput(e, 'clusterSpaceThreshold')}
+                />
               </div>
             </li>
             <div class="divider my-1"></div>
@@ -1117,7 +1241,14 @@
             <li class="px-2 py-1">
               <div class="w-full">
                 <p class="text-xs mb-1">Turn width: {$ConfigStore.conversationRectWidth}px</p>
-                <input type="range" min="1" max="30" value={$ConfigStore.conversationRectWidth} class="range range-xs" oninput={(e) => handleConfigChangeFromInput(e, 'conversationRectWidth')} />
+                <input
+                  type="range"
+                  min="1"
+                  max="30"
+                  value={$ConfigStore.conversationRectWidth}
+                  class="range range-xs"
+                  oninput={(e) => handleConfigChangeFromInput(e, 'conversationRectWidth')}
+                />
               </div>
             </li>
           </ul>
@@ -1126,33 +1257,96 @@
         <details class="dropdown dropdown-bottom dropdown-end" use:clickOutside>
           <summary class="btn btn-sm gap-1">{@render icon(MdDelete)}Clear</summary>
           <ul class="dropdown-content menu bg-base-200 rounded-box z-[60] w-40 p-2 shadow mt-1">
-            <li><button onclick={() => { clearMovementData(); mobileMenuOpen = false }}>Movement</button></li>
-            <li><button onclick={() => { clearConversationData(); mobileMenuOpen = false }}>Conversation</button></li>
-            <li><button onclick={() => { clearCodeData(); mobileMenuOpen = false }}>Codes</button></li>
-            <li><button onclick={() => { resetVideo(); mobileMenuOpen = false }}>Video</button></li>
-            <li><button onclick={() => { clearAllDataLocal(); mobileMenuOpen = false }} class="text-error">All Data</button></li>
+            <li>
+              <button
+                onclick={() => {
+                  clearMovementData()
+                  mobileMenuOpen = false
+                }}>Movement</button
+              >
+            </li>
+            <li>
+              <button
+                onclick={() => {
+                  clearConversationData()
+                  mobileMenuOpen = false
+                }}>Conversation</button
+              >
+            </li>
+            <li>
+              <button
+                onclick={() => {
+                  clearCodeData()
+                  mobileMenuOpen = false
+                }}>Codes</button
+              >
+            </li>
+            <li>
+              <button
+                onclick={() => {
+                  resetVideo()
+                  mobileMenuOpen = false
+                }}>Video</button
+              >
+            </li>
+            <li>
+              <button
+                onclick={() => {
+                  clearAllDataLocal()
+                  mobileMenuOpen = false
+                }}
+                class="text-error">All Data</button
+              >
+            </li>
           </ul>
         </details>
 
         <details class="dropdown dropdown-bottom" use:clickOutside>
-          <summary class="btn btn-sm gap-1">{@render icon(MdFolder)}{selectedDropDownOption || 'Examples'}</summary>
-          <ul class="dropdown-content menu bg-base-200 rounded-box z-[60] w-56 p-2 shadow mt-1 max-h-60 overflow-y-auto">
-            {#each dropdownOptions as group}
-              <li class="menu-title text-xs">{group.label}</li>
-              {#each group.items as item}
-                <li>
-                  <button
-                    onclick={() => {
-                      updateExampleDataDropDown({ target: { value: item.value } })
-                      selectedDropDownOption = item.label
-                      mobileMenuOpen = false
-                    }}
-                    class={selectedDropDownOption === item.label ? 'bg-primary/20' : ''}
-                  >
-                    {item.label}
-                  </button>
-                </li>
-              {/each}
+          <summary class="btn btn-sm gap-1"
+            >{@render icon(MdFolder)}{selectedDropDownOption || 'Examples'}</summary
+          >
+          <ul
+            class="dropdown-content menu bg-base-200 rounded-box z-[60] w-72 p-2 shadow mt-1 max-h-60 overflow-y-auto"
+          >
+            {#each dropdownOptions as group, groupIndex}
+              {#if groupIndex > 0}
+                <li class="my-1"><hr class="border-base-300" /></li>
+              {/if}
+              <li>
+                <button
+                  class="menu-title flex items-center gap-2 w-full hover:bg-base-300 rounded-lg px-2 py-1 cursor-pointer text-xs"
+                  onclick={() => toggleCategory(group.label)}
+                >
+                  <svelte:component
+                    this={expandedCategories.has(group.label) ? MdChevronDown : MdChevronRight}
+                    class="w-4 h-4 opacity-50"
+                  />
+                  <svelte:component this={group.icon} class="w-4 h-4" />
+                  <span>{group.label}</span>
+                </button>
+              </li>
+              {#if expandedCategories.has(group.label)}
+                {#each group.items as item}
+                  {@const isSelected = selectedDropDownOption === item.label}
+                  <li class="pl-2 w-full">
+                    <button
+                      onclick={() => {
+                        updateExampleDataDropDown({ target: { value: item.value } })
+                        selectedDropDownOption = item.label
+                        mobileMenuOpen = false
+                      }}
+                      class="flex items-center gap-2 w-full {isSelected
+                        ? 'bg-primary/20 font-medium'
+                        : ''}"
+                    >
+                      <span class="truncate flex-1">{item.label}</span>
+                      <span class="badge badge-ghost badge-sm opacity-60 shrink-0"
+                        >{getDatasetDuration(item.value)}</span
+                      >
+                    </button>
+                  </li>
+                {/each}
+              {/if}
             {/each}
           </ul>
         </details>
@@ -1162,15 +1356,81 @@
 
       <!-- Icon buttons -->
       <div class="flex flex-wrap gap-3 justify-center">
-        <IconButton icon={MdRotateLeft} tooltip="Rotate Left" onclick={() => { p5Instance.floorPlan.setRotateLeft(); p5Instance.loop(); mobileMenuOpen = false }} />
-        <IconButton icon={MdRotateRight} tooltip="Rotate Right" onclick={() => { p5Instance.floorPlan.setRotateRight(); p5Instance.loop(); mobileMenuOpen = false }} />
-        <IconButton icon={Md3DRotation} tooltip="Toggle 2D/3D" onclick={() => { p5Instance.handle3D.update(); is3DMode = p5Instance.handle3D.getIs3DMode(); mobileMenuOpen = false }} />
-        <IconButton icon={isVideoShowing ? MdVideocam : MdVideocamOff} tooltip="Show/Hide Video" onclick={() => { toggleVideo(); mobileMenuOpen = false }} />
-        <IconButton icon={MdFileUploadOutline} tooltip="Import Files" onclick={() => { showImportDialog = true; mobileMenuOpen = false }} />
-        <IconButton icon={MdHelpOutline} tooltip="Help" onclick={() => { $isModalOpen = !$isModalOpen; mobileMenuOpen = false }} />
-        <IconButton icon={MdCloudDownload} tooltip="Download Codes" onclick={() => { p5Instance.saveCodeFile(); mobileMenuOpen = false }} />
-        <IconButton icon={MdKeyboard} tooltip="Keyboard Shortcuts" onclick={() => { window.dispatchEvent(new CustomEvent('igs:open-cheatsheet')); mobileMenuOpen = false }} />
-        <IconButton icon={MdSettings} tooltip="Settings" onclick={() => { showSettings = true; mobileMenuOpen = false }} />
+        <IconButton
+          icon={MdRotateLeft}
+          tooltip="Rotate Left"
+          onclick={() => {
+            p5Instance.floorPlan.setRotateLeft()
+            p5Instance.loop()
+            mobileMenuOpen = false
+          }}
+        />
+        <IconButton
+          icon={MdRotateRight}
+          tooltip="Rotate Right"
+          onclick={() => {
+            p5Instance.floorPlan.setRotateRight()
+            p5Instance.loop()
+            mobileMenuOpen = false
+          }}
+        />
+        <IconButton
+          icon={Md3DRotation}
+          tooltip="Toggle 2D/3D"
+          onclick={() => {
+            p5Instance.handle3D.update()
+            is3DMode = p5Instance.handle3D.getIs3DMode()
+            mobileMenuOpen = false
+          }}
+        />
+        <IconButton
+          icon={isVideoShowing ? MdVideocam : MdVideocamOff}
+          tooltip="Show/Hide Video"
+          onclick={() => {
+            toggleVideo()
+            mobileMenuOpen = false
+          }}
+        />
+        <IconButton
+          icon={MdFileUploadOutline}
+          tooltip="Import Files"
+          onclick={() => {
+            showImportDialog = true
+            mobileMenuOpen = false
+          }}
+        />
+        <IconButton
+          icon={MdHelpOutline}
+          tooltip="Help"
+          onclick={() => {
+            $isModalOpen = !$isModalOpen
+            mobileMenuOpen = false
+          }}
+        />
+        <IconButton
+          icon={MdCloudDownload}
+          tooltip="Download Codes"
+          onclick={() => {
+            p5Instance.saveCodeFile()
+            mobileMenuOpen = false
+          }}
+        />
+        <IconButton
+          icon={MdKeyboard}
+          tooltip="Keyboard Shortcuts"
+          onclick={() => {
+            window.dispatchEvent(new CustomEvent('igs:open-cheatsheet'))
+            mobileMenuOpen = false
+          }}
+        />
+        <IconButton
+          icon={MdSettings}
+          tooltip="Settings"
+          onclick={() => {
+            showSettings = true
+            mobileMenuOpen = false
+          }}
+        />
       </div>
     </div>
   {/if}
