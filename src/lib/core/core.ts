@@ -63,10 +63,11 @@ export class Core {
     const input = event.target as HTMLInputElement
     if (!input.files) return
 
+    // Process files sequentially to ensure GPS data loads before conversation data
     for (let i = 0; i < input.files.length; i++) {
       const file = input.files[i]
       if (file) {
-        this.testFileTypeForProcessing(file)
+        await this.testFileTypeForProcessingAsync(file)
       }
     }
     input.value = '' // reset input value so you can load same file(s) again in browser
@@ -215,7 +216,7 @@ export class Core {
         transformHeader: (h) => {
           return h.trim().toLowerCase()
         },
-        complete: (results: PapaParseResult<CsvRow>, parsedFile: File) => {
+        complete: async (results: PapaParseResult<CsvRow>, parsedFile: File) => {
           // Preprocess time columns (detect format, convert to relative seconds)
           const preprocessed = this.preprocessTimeData(results)
           if (!preprocessed.success) {
@@ -232,7 +233,8 @@ export class Core {
           // Update results with preprocessed data
           results.data = preprocessed.data
 
-          this.processResultsData(results, this.coreUtils.cleanFileName(parsedFile.name))
+          // Await processing to ensure GPS data loads before conversation data
+          await this.processResultsData(results, this.coreUtils.cleanFileName(parsedFile.name))
           this.sketch.loop()
           resolve()
         },
@@ -303,16 +305,16 @@ export class Core {
    */
   // NOTE: multicode should be processed before single code file as headers of multicode have one additional column
   // NOTE: GPS movement should be processed before regular movement as it has different headers
-  processResultsData = (results: PapaParseResult<CsvRow>, fileName: string): void => {
+  processResultsData = async (results: PapaParseResult<CsvRow>, fileName: string): Promise<void> => {
     const csvData = results.data
     // Check for GPS movement data first (lat/lng headers)
-    // GPS processing is async (loads map image), so handle separately and return early
+    // GPS processing is async (loads map image), await to ensure it completes before other files process
     if (this.coreUtils.testGPSMovement(results)) {
-      this.processGPSMovementData(csvData as unknown as GPSMovementRow[], fileName).catch(
-        (error) => {
-          console.error('Error processing GPS data:', error)
-        }
-      )
+      try {
+        await this.processGPSMovementData(csvData as unknown as GPSMovementRow[], fileName)
+      } catch (error) {
+        console.error('Error processing GPS data:', error)
+      }
       return
     }
 
