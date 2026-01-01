@@ -1079,7 +1079,7 @@
                       updateExampleDataDropDown({ target: { value: item.value } })
                       selectedDropDownOption = item.label
                     }}
-                    class="flex items-center gap-2 w-full {isSelected
+                    class="flex items-center gap-2 w-full cursor-pointer {isSelected
                       ? 'bg-primary/20 font-medium'
                       : ''}"
                   >
@@ -1335,7 +1335,7 @@
                         selectedDropDownOption = item.label
                         mobileMenuOpen = false
                       }}
-                      class="flex items-center gap-2 w-full {isSelected
+                      class="flex items-center gap-2 w-full cursor-pointer {isSelected
                         ? 'bg-primary/20 font-medium'
                         : ''}"
                     >
