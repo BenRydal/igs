@@ -119,7 +119,6 @@
   let showImportDialog = $state(false)
   let currentConfig = $state<ConfigStoreType>($ConfigStore)
 
-  let files = $state<any>([])
   let users = $state<User[]>([])
   let p5Instance = $state<p5 | null>(null)
   let core: Core
@@ -289,11 +288,6 @@
     }
   }
 
-  function updateUserLoadedFiles(event) {
-    core.handleUserLoadedFiles(event)
-    p5Instance.loop()
-  }
-
   /**
    * Detect CSV file type by reading headers
    * Returns: 'movement' | 'conversation' | 'multicode' | 'singlecode' | 'unknown'
@@ -314,6 +308,16 @@
           .toLowerCase()
           .split(',')
           .map((h) => h.trim().replace(/"/g, ''))
+
+        // Check for GPS movement: time, lat, lng (or latitude, longitude)
+        if (
+          headers.includes('time') &&
+          (headers.includes('lat') || headers.includes('latitude')) &&
+          (headers.includes('lng') || headers.includes('longitude'))
+        ) {
+          resolve('movement')
+          return
+        }
 
         // Check for movement: time, x, y
         if (headers.includes('time') && headers.includes('x') && headers.includes('y')) {
@@ -413,9 +417,9 @@
     p5Instance?.loop()
   }
 
-  function updateExampleDataDropDown(event) {
+  async function updateExampleDataDropDown(event) {
     clearAllDataLocal()
-    core.handleExampleDropdown(event)
+    await core.handleExampleDropdown(event)
     p5Instance.loop()
   }
 
@@ -953,15 +957,6 @@
         icon={MdFileUploadOutline}
         tooltip={'Import Files'}
         onclick={() => (showImportDialog = true)}
-      />
-      <input
-        class="hidden"
-        id="file-input"
-        multiple
-        accept=".png, .jpg, .jpeg, .csv, .mp4, .gpx"
-        type="file"
-        bind:files
-        onchange={updateUserLoadedFiles}
       />
 
       <IconButton

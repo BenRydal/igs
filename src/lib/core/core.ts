@@ -49,64 +49,8 @@ export class Core {
   }
 
   /**
-   * Handles file upload events and processes multiple files
-   * Supports CSV (movement/conversation/codes), GPX (GPS tracks), PNG/JPG (floorplan), and MP4 (video)
-   *
-   * @param event - File input change event from an <input type="file"> element
-   * @throws Shows toast notification if file format is not supported
-   * @example
-   * ```typescript
-   * <input type="file" on:change={core.handleUserLoadedFiles} multiple />
-   * ```
-   */
-  handleUserLoadedFiles = async (event: Event): Promise<void> => {
-    const input = event.target as HTMLInputElement
-    if (!input.files) return
-
-    // Process files sequentially to ensure GPS data loads before conversation data
-    for (let i = 0; i < input.files.length; i++) {
-      const file = input.files[i]
-      if (file) {
-        await this.testFileTypeForProcessingAsync(file)
-      }
-    }
-    input.value = '' // reset input value so you can load same file(s) again in browser
-  }
-
-  /**
-   * Determines file type and routes to appropriate processing method
-   * Validates file extensions and MIME types for CSV, image, and video files
-   *
-   * @param file - File object to validate and process
-   * @throws Shows toast error if file format is not recognized
-   * @example
-   * ```typescript
-   * const file = new File(['data'], 'movement.csv', { type: 'text/csv' });
-   * core.testFileTypeForProcessing(file);
-   * ```
-   */
-  testFileTypeForProcessing(file: File): void {
-    const fileName = file.name.toLowerCase()
-    if (fileName.endsWith('.csv') || file.type === 'text/csv') this.loadCSVData(file)
-    else if (fileName.endsWith('.gpx') || file.type === 'application/gpx+xml')
-      this.loadGPXData(file)
-    else if (
-      fileName.endsWith('.png') ||
-      fileName.endsWith('.jpg') ||
-      fileName.endsWith('.jpeg') ||
-      file.type === 'image/png' ||
-      file.type === 'image/jpg' ||
-      file.type === 'image/jpeg'
-    )
-      this.loadFloorplanImage(URL.createObjectURL(file))
-    else if (fileName.endsWith('.mp4') || file.type === 'video/mp4')
-      this.prepVideoFromFile(URL.createObjectURL(file))
-    else toastStore.error('Error loading file. Please make sure your file is an accepted format') // this should not be possible due to HTML5 accept for file inputs, but in case
-  }
-
-  /**
-   * Async version of testFileTypeForProcessing that waits for CSV files to complete
-   * Used by import dialog to ensure files are processed in correct order
+   * Determines file type and routes to appropriate async processing method
+   * Waits for CSV/GPX files to complete processing before returning
    *
    * @param file - File object to validate and process
    * @returns Promise that resolves when file processing is complete
@@ -138,7 +82,7 @@ export class Core {
       const response = await fetch(`${folder}${fileName}`)
       const buffer = await response.arrayBuffer()
       const file = new File([buffer], fileName, { type: 'text/csv' })
-      this.loadCSVData(file)
+      await this.loadCSVData(file)
     } catch (error) {
       toastStore.error(
         'Error loading CSV file. Please make sure you have a good internet connection'
