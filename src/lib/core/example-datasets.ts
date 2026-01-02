@@ -75,8 +75,9 @@ export const EXAMPLE_DATASETS: Record<string, ExampleDataset> = {
     isGPS: true,
   },
   'example-14': {
-    files: ['tour.csv'],
-    duration: '3h 6m',
+    files: ['tour.csv', 'code.csv'],
+    videoId: 'la2fkEnpUZs',
+    duration: '3h 22m',
     isGPS: true,
   },
 } as const
