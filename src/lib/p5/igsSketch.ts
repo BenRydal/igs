@@ -5,6 +5,7 @@ import TimelineStore from '../../stores/timelineStore'
 import ConfigStore from '../../stores/configStore'
 import VideoStore from '../../stores/videoStore'
 import PlaybackStore, { onAnimationEnd, type PlaybackMode } from '../../stores/playbackStore'
+import { isAnyModalOpen } from '../../stores/modalStore'
 import { toastStore } from '../../stores/toastStore'
 import type { User } from '../../models/user'
 import { FloorPlan, SketchGUI, Handle3D, SetPathData } from '..'
@@ -15,6 +16,7 @@ let timeline: Timeline
 let highlightToggle: boolean
 let animationRate = 0.05
 let playbackMode: PlaybackMode = 'stopped'
+let isModalOpen = false
 
 TimelineStore.subscribe((data) => {
   timeline = data
@@ -31,6 +33,10 @@ UserStore.subscribe((data) => {
 
 PlaybackStore.subscribe((data) => {
   playbackMode = data.mode
+})
+
+isAnyModalOpen.subscribe((data) => {
+  isModalOpen = data
 })
 
 export const igsSketch = (p5: any) => {
@@ -91,7 +97,11 @@ export const igsSketch = (p5: any) => {
   }
 
   p5.mouseMoved = () => {
-    p5.loop()
+    // Don't trigger expensive redraws when a modal is open
+    // This prevents UI freezing during drag-and-drop operations
+    if (!isModalOpen) {
+      p5.loop()
+    }
   }
 
   p5.dataIsLoaded = (data: any) => {
