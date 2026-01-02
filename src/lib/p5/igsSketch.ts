@@ -42,17 +42,28 @@ isAnyModalOpen.subscribe((data) => {
 export const igsSketch = (p5: any) => {
   P5Store.set(p5)
 
+  // Helper to calculate available canvas height
+  const getAvailableHeight = () => {
+    const navbarHeight = (document.querySelector('.navbar') as HTMLElement).offsetHeight
+    const bottomNavHeight = (document.querySelector('.btm-nav') as HTMLElement).offsetHeight
+    return window.innerHeight - navbarHeight - bottomNavHeight
+  }
+
+  // Helper to apply text styles
+  const applyStyles = () => {
+    p5.textSize(p5.width / 70)
+    p5.textFont(p5.font)
+    p5.textAlign(p5.LEFT, p5.TOP)
+    p5.smooth()
+    p5.strokeCap(p5.SQUARE)
+  }
+
   p5.preload = () => {
     p5.font = p5.loadFont(`/fonts/PlusJakartaSans/VariableFont_wght.ttf`)
   }
 
   p5.setup = () => {
-    const navbarHeight = (document.querySelector('.navbar') as HTMLElement).offsetHeight
-    const bottomNavHeight = (document.querySelector('.btm-nav') as HTMLElement).offsetHeight
-
-    const availableHeight = window.innerHeight - navbarHeight - bottomNavHeight
-
-    p5.createCanvas(window.innerWidth, availableHeight, p5.WEBGL)
+    p5.createCanvas(window.innerWidth, getAvailableHeight(), p5.WEBGL)
     p5.gui = new SketchGUI(p5)
     p5.handle3D = new Handle3D(p5, true)
     p5.floorPlan = new FloorPlan(p5)
@@ -60,14 +71,8 @@ export const igsSketch = (p5: any) => {
     // Constants
     p5.PLAN = 0
     p5.SPACETIME = 1
-    p5.GUI_TEXT_SIZE = p5.width / 70
 
-    // STYLES
-    p5.textSize(p5.GUI_TEXT_SIZE)
-    p5.textFont(p5.font)
-    p5.textAlign(p5.LEFT, p5.TOP)
-    p5.smooth()
-    p5.strokeCap(p5.SQUARE)
+    applyStyles()
   }
 
   p5.draw = () => {
@@ -128,16 +133,23 @@ export const igsSketch = (p5: any) => {
   }
 
   p5.windowResized = () => {
-    const navbarHeight = (document.querySelector('.navbar') as HTMLElement).offsetHeight
-    const bottomNavHeight = (document.querySelector('.btm-nav') as HTMLElement).offsetHeight
+    p5.resizeCanvas(window.innerWidth, getAvailableHeight())
+    p5.gui = new SketchGUI(p5)
+    p5.handle3D = new Handle3D(p5, p5.handle3D.getIs3DMode())
+    applyStyles()
+    p5.loop()
+  }
 
-    const availableHeight = window.innerHeight - navbarHeight - bottomNavHeight
-
-    p5.resizeCanvas(window.innerWidth, availableHeight)
-    p5.gui = new SketchGUI(p5) // update GUI vars
-    p5.GUITEXTSIZE = p5.width / 70
-    p5.textSize(p5.GUITEXTSIZE)
-    p5.handle3D = new Handle3D(p5, p5.handle3D.getIs3DMode()) // update 3D display vars, pass current 3D mode
+  /**
+   * Recreate the canvas to reset WebGL state
+   * This helps with Safari performance issues after loading large datasets
+   */
+  p5.recreateCanvas = () => {
+    p5.createCanvas(window.innerWidth, getAvailableHeight(), p5.WEBGL)
+    p5.gui = new SketchGUI(p5)
+    p5.handle3D = new Handle3D(p5, true)
+    p5.floorPlan = new FloorPlan(p5)
+    applyStyles()
     p5.loop()
   }
 

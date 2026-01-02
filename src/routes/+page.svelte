@@ -481,7 +481,11 @@
     core.conversationData = []
 
     ConfigStore.update((currentConfig) => ({ ...currentConfig, dataHasCodes: false }))
-    p5Instance.loop()
+
+    // Recreate canvas to get fresh WebGL context (helps Safari performance)
+    if (p5Instance?.recreateCanvas) {
+      p5Instance.recreateCanvas()
+    }
   }
 
   function clearMovementData() {
