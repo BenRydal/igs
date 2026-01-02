@@ -12,20 +12,17 @@
   let tooltipStyle = $derived.by(() => {
     if (!hoverData || !browser) return null
 
-    // Convert canvas-relative coords to viewport coords
-    const canvas = document.querySelector('canvas')
-    const canvasRect = canvas?.getBoundingClientRect()
-    const mouseX = hoverData.mouseX + (canvasRect?.left ?? 0)
-    const mouseY = hoverData.mouseY + (canvasRect?.top ?? 0)
+    const mouseX = hoverData.mouseX
+    const mouseY = hoverData.mouseY
 
-    // Center tooltip horizontally on cursor
+    // Estimate width based on text length
     const estimatedWidth = timeText.length * 9 + 16
+
+    // Center tooltip horizontally on cursor, clamped to viewport
     const x = Math.max(GAP, Math.min(mouseX - estimatedWidth / 2, window.innerWidth - estimatedWidth - GAP))
 
-    // Position above mouse, clamped to canvas bounds
-    const canvasTop = canvasRect?.top ?? 0
-    const canvasBottom = canvasRect?.bottom ?? window.innerHeight
-    const y = Math.max(canvasTop + GAP, Math.min(mouseY - TOOLTIP_HEIGHT - 10, canvasBottom - TOOLTIP_HEIGHT - GAP))
+    // Position above mouse, clamped to viewport bounds
+    const y = Math.max(GAP, Math.min(mouseY - TOOLTIP_HEIGHT - 10, window.innerHeight - TOOLTIP_HEIGHT - GAP))
 
     return `left: ${x}px; top: ${y}px;`
   })

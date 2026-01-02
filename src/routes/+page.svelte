@@ -1995,7 +1995,7 @@
     overflow: hidden;
   }
 
-  #main-content.split-screen-mode #p5-canvas-container :global(div) {
+  #main-content.split-screen-mode #p5-canvas-container :global(div:not(.timeline-tooltip):not(.tooltip-wrapper):not(.tooltip-content):not(.triangle)) {
     width: 100% !important;
     overflow: hidden;
   }

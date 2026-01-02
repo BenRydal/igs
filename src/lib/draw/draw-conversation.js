@@ -95,8 +95,8 @@ export class DrawConversation {
           this.setHoverStroke()
           setHoveredConversation(
             [{ time: point.time, speaker, text: point.speech, color }],
-            this.sk.mouseX,
-            this.sk.mouseY
+            this.sk.winMouseX,
+            this.sk.winMouseY
           )
         }
         this.sk.rect(fpX, fpY, conversationRectWidth, pos.rectHeight)
@@ -198,8 +198,8 @@ export class DrawConversation {
           text: p.point.speech,
           color: p.color,
         })),
-        this.sk.mouseX,
-        this.sk.mouseY
+        this.sk.winMouseX,
+        this.sk.winMouseY
       )
     }
 

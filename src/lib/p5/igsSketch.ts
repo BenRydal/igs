@@ -150,15 +150,14 @@ export const igsSketch = (p5: any) => {
 
   /**
    * Check if mouse is over the timeline interaction area.
-   * In 2D mode: checks X bounds (timeline visible on canvas)
-   * In 3D mode: checks X bounds AND mouseY is below canvas (over bottom nav)
+   * Uses winMouseX/Y (viewport coordinates) to match timeline bounds.
    */
   p5.isMouseOverTimeline = () => {
     const currentTimeline = get(TimelineStore)
     const inXBounds =
-      p5.mouseX >= currentTimeline.getLeftX() && p5.mouseX <= currentTimeline.getRightX()
+      p5.winMouseX >= currentTimeline.getLeftX() && p5.winMouseX <= currentTimeline.getRightX()
     if (p5.handle3D.getIs3DMode()) {
-      return inXBounds && p5.mouseY > p5.height
+      return inXBounds && p5.winMouseY > p5.height
     }
     return inXBounds
   }

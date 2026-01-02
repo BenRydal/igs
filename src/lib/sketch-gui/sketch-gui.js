@@ -29,9 +29,8 @@ export class SketchGUI {
       if (!this.sk.handle3D.getIs3DMode()) {
         this.drawSlicerLine()
       }
-      // Set timeline hover for tooltip
-      const hoverTime = timeline.pixelToSelectedTime(this.sk.mouseX)
-      setTimelineHover(hoverTime, this.sk.mouseX, this.sk.mouseY)
+      const hoverTime = timeline.pixelToSelectedTime(this.sk.winMouseX)
+      setTimelineHover(hoverTime, this.sk.winMouseX, this.sk.winMouseY)
     } else {
       clearTimelineHover()
     }
@@ -47,7 +46,7 @@ export class SketchGUI {
     if (this.sk.isMouseOverTimeline() && this.sk.handle3D.getIs3DMode()) {
       this.draw3DSlicerRect(
         this.fpContainer.getContainer(),
-        this.sk.mapToSelectTimeThenPixelTime(this.sk.mouseX)
+        this.sk.mapToSelectTimeThenPixelTime(this.sk.winMouseX)
       )
     }
   }

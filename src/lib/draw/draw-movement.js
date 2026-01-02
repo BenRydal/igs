@@ -196,7 +196,7 @@ export class DrawMovement {
       augmentedPoint.pos.floorPlanYPos,
       augmentedPoint.pos.zPos,
       augmentedPoint.pos.selTimelineXPos,
-      this.sk.mapToSelectTimeThenPixelTime(this.sk.mouseX),
+      this.sk.mapToSelectTimeThenPixelTime(this.sk.winMouseX),
       this.drawUtils.setCodeColor(augmentedPoint.point.codes),
     ]
   }
