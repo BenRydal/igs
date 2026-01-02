@@ -46,6 +46,7 @@
   import SplitScreenVideo from '$lib/components/SplitScreenVideo.svelte'
   import TranscriptPanel from '$lib/components/TranscriptPanel.svelte'
   import ConversationTooltip from '$lib/components/ConversationTooltip.svelte'
+  import TimelineTooltip from '$lib/components/TimelineTooltip.svelte'
 
   import { Core } from '$lib'
   import { EXAMPLE_DATASETS } from '$lib/core/example-datasets'
@@ -1468,6 +1469,7 @@
       <VideoContainer />
     {/if}
     <ConversationTooltip hideTooltip={isTranscriptVisible} />
+    <TimelineTooltip />
   </div>
 </div>
 

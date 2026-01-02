@@ -49,17 +49,9 @@ export const igsSketch = (p5: any) => {
     return window.innerHeight - navbarHeight - bottomNavHeight
   }
 
-  // Helper to apply text styles
   const applyStyles = () => {
-    p5.textSize(p5.width / 70)
-    p5.textFont(p5.font)
-    p5.textAlign(p5.LEFT, p5.TOP)
     p5.smooth()
     p5.strokeCap(p5.SQUARE)
-  }
-
-  p5.preload = () => {
-    p5.font = p5.loadFont(`/fonts/PlusJakartaSans/VariableFont_wght.ttf`)
   }
 
   p5.setup = () => {
@@ -71,7 +63,6 @@ export const igsSketch = (p5: any) => {
     // Constants
     p5.PLAN = 0
     p5.SPACETIME = 1
-
     applyStyles()
   }
 
