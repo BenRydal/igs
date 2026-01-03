@@ -14,9 +14,9 @@
 	import MdFitToScreen from '~icons/mdi/fit-to-screen-outline';
 
 	/** Speed presets - these map to animationRate values */
-	const SPEED_PRESETS = [0.01, 0.025, 0.05, 0.1, 0.2];
-	const SPEED_LABELS = ['0.25x', '0.5x', '1x', '2x', '4x'];
-	const DEFAULT_SPEED_INDEX = 2; // 1x
+	const SPEED_PRESETS = [0.025, 0.05, 0.1, 0.25, 0.5, 1.0];
+	const SPEED_LABELS = ['0.5x', '1x', '2x', '5x', '10x', '20x'];
+	const DEFAULT_SPEED_INDEX = 1; // 1x
 
 	let currentTime = $derived($timelineV2Store.currentTime);
 	let duration = $derived($timelineV2Store.viewEnd - $timelineV2Store.viewStart);
