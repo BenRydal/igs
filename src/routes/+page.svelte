@@ -7,6 +7,8 @@
   import MdCloudDownload from '~icons/mdi/cloud-download'
   import MdRotateLeft from '~icons/mdi/rotate-left'
   import MdRotateRight from '~icons/mdi/rotate-right'
+  import MdAspectRatio from '~icons/mdi/aspect-ratio'
+  import MdFitToPageOutline from '~icons/mdi/fit-to-page-outline'
   import Md3DRotation from '~icons/mdi/rotate-3d-variant'
   import MdVideocam from '~icons/mdi/video'
   import MdVideocamOff from '~icons/mdi/video-off'
@@ -987,6 +989,15 @@
         onclick={() => {
           p5Instance.floorPlan.setRotateRight()
           p5Instance.loop()
+        }}
+      />
+      <IconButton
+        id="btn-aspect-ratio"
+        icon={currentConfig.preserveFloorplanAspectRatio ? MdAspectRatio : MdFitToPageOutline}
+        tooltip={currentConfig.preserveFloorplanAspectRatio ? 'Stretch to Fill' : 'Preserve Aspect Ratio'}
+        onclick={() => {
+          handleConfigChange('preserveFloorplanAspectRatio', !currentConfig.preserveFloorplanAspectRatio)
+          p5Instance?.loop()
         }}
       />
       <IconButton
