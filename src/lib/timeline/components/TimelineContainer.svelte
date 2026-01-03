@@ -32,10 +32,6 @@
 	export function setCurrentTime(time: number) {
 		timelineV2Store.setCurrentTime(time);
 	}
-
-	export function setSelection(start: number, end: number) {
-		timelineV2Store.setSelection(start, end);
-	}
 </script>
 
 <div
