@@ -1,22 +1,16 @@
 import { FloorPlanContainer } from './floorplan-container.js'
 import { Highlight } from './highlight.js'
-import TimelineStore from '../../stores/timelineStore'
+import { timelineV2Store } from '../timeline/store'
 import ConfigStore from '../../stores/configStore'
-import { setTimelineHover, clearTimelineHover } from '../../stores/interactionStore'
 import { get } from 'svelte/store'
-
-let timeline
-
-TimelineStore.subscribe((data) => {
-  timeline = data
-})
 
 export class SketchGUI {
   constructor(sketch) {
     this.sk = sketch
     this.displayBottom = this.sk.height
     // Cap container width to canvas width for split-screen mode
-    const containerWidth = Math.min(timeline.getLeftX(), this.sk.width)
+    const state = timelineV2Store.getState()
+    const containerWidth = Math.min(state.leftX, this.sk.width)
     this.fpContainer = new FloorPlanContainer(this.sk, containerWidth, this.displayBottom)
     this.highlight = new Highlight(this.sk, this.displayBottom)
   }
@@ -24,15 +18,9 @@ export class SketchGUI {
   update2D() {
     const config = get(ConfigStore)
 
-    if (this.sk.isMouseOverTimeline()) {
-      // Draw slicer line in 2D mode only
-      if (!this.sk.handle3D.getIs3DMode()) {
-        this.drawSlicerLine()
-      }
-      const hoverTime = timeline.pixelToSelectedTime(this.sk.winMouseX)
-      setTimelineHover(hoverTime, this.sk.winMouseX, this.sk.winMouseY)
-    } else {
-      clearTimelineHover()
+    // Draw slicer line in 2D mode when hovering over timeline
+    if (this.sk.isMouseOverTimeline() && !this.sk.handle3D.getIs3DMode()) {
+      this.drawSlicerLine()
     }
 
     if (!this.sk.handle3D.getIs3DModeOrTransitioning()) {

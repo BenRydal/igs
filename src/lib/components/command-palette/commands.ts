@@ -1,7 +1,7 @@
 import type { Command } from './types'
 import { get } from 'svelte/store'
 import ConfigStore, { type ConfigStoreType } from '../../../stores/configStore'
-import TimelineStore from '../../../stores/timelineStore'
+import { timelineV2Store } from '../../timeline/store'
 import VideoStore, { toggleVisibility } from '../../../stores/videoStore'
 import { togglePlayback, isPlaying } from '../../../stores/playbackStore'
 import P5Store from '../../../stores/p5Store'
@@ -488,9 +488,8 @@ export function getAllCommands(): Command[] {
       category: 'playback',
       shortcut: 'Home',
       action: () => {
-        const timeline = get(TimelineStore) as Timeline
-        timeline.setCurrTime(0)
-        TimelineStore.set(timeline)
+        const state = timelineV2Store.getState()
+        timelineV2Store.setCurrentTime(state.selectionStart)
       },
     },
 

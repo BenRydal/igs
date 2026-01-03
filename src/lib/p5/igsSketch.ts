@@ -1,7 +1,7 @@
 import { get } from 'svelte/store'
 import P5Store from '../../stores/p5Store'
 import UserStore from '../../stores/userStore'
-import TimelineStore from '../../stores/timelineStore'
+import { timelineV2Store } from '../timeline/store'
 import ConfigStore from '../../stores/configStore'
 import VideoStore from '../../stores/videoStore'
 import PlaybackStore, { onAnimationEnd, type PlaybackMode } from '../../stores/playbackStore'
@@ -9,18 +9,12 @@ import { isAnyModalOpen } from '../../stores/modalStore'
 import { toastStore } from '../../stores/toastStore'
 import type { User } from '../../models/user'
 import { FloorPlan, SketchGUI, Handle3D, SetPathData } from '..'
-import type { Timeline } from '../../models/timeline'
 
 let users: User[] = []
-let timeline: Timeline
 let highlightToggle: boolean
 let animationRate = 0.05
 let playbackMode: PlaybackMode = 'stopped'
 let isModalOpen = false
-
-TimelineStore.subscribe((data) => {
-  timeline = data
-})
 
 ConfigStore.subscribe((data) => {
   highlightToggle = data.highlightToggle
@@ -153,9 +147,8 @@ export const igsSketch = (p5: any) => {
    * Uses winMouseX/Y (viewport coordinates) to match timeline bounds.
    */
   p5.isMouseOverTimeline = () => {
-    const currentTimeline = get(TimelineStore)
-    const inXBounds =
-      p5.winMouseX >= currentTimeline.getLeftX() && p5.winMouseX <= currentTimeline.getRightX()
+    const state = timelineV2Store.getState()
+    const inXBounds = p5.winMouseX >= state.leftX && p5.winMouseX <= state.rightX
     if (p5.handle3D.getIs3DMode()) {
       return inXBounds && p5.winMouseY > p5.height
     }
@@ -215,8 +208,8 @@ export const igsSketch = (p5: any) => {
   }
 
   p5.updateAnimation = () => {
-    const currentTimeline = get(TimelineStore)
-    if (currentTimeline.getCurrTime() < currentTimeline.getRightMarker()) {
+    const state = timelineV2Store.getState()
+    if (state.currentTime < state.selectionEnd) {
       p5.continueAnimation()
     } else {
       onAnimationEnd()
@@ -224,7 +217,7 @@ export const igsSketch = (p5: any) => {
   }
 
   p5.continueAnimation = () => {
-    const currentTimeline = get(TimelineStore)
+    const state = timelineV2Store.getState()
     let timeToSet: number
 
     if (playbackMode === 'playing-video') {
@@ -232,31 +225,27 @@ export const igsSketch = (p5: any) => {
       timeToSet = get(VideoStore).currentTime
     } else {
       // Animation is driving - use frame-based increment
-      timeToSet = currentTimeline.getCurrTime() + animationRate
+      timeToSet = state.currentTime + animationRate
     }
 
-    TimelineStore.update((timeline) => {
-      timeline.setCurrTime(timeToSet)
-      return timeline
-    })
+    timelineV2Store.setCurrentTime(timeToSet)
   }
 
   p5.mapToSelectTimeThenPixelTime = (value) => {
-    return p5.mapSelectTimeToPixelTime(timeline.pixelToMarkerPixel(value))
+    return p5.mapSelectTimeToPixelTime(timelineV2Store.pixelToMarkerPixel(value))
   }
 
   p5.mapSelectTimeToPixelTime = (value) => {
-    const currentTimeline = get(TimelineStore)
     const spaceTimeCubeBottom = p5.height / 10
     const spaceTimeCubeTop = p5.height / 1.6
     if (p5.handle3D.getIs3DMode())
       return p5.map(
         value,
-        currentTimeline.getLeftMarkerPixel(),
-        currentTimeline.getRightMarkerPixel(),
+        timelineV2Store.getLeftMarkerPixel(),
+        timelineV2Store.getRightMarkerPixel(),
         spaceTimeCubeBottom,
         spaceTimeCubeTop
       )
-    else return currentTimeline.markerPixelToPixel(value)
+    else return timelineV2Store.markerPixelToPixel(value)
   }
 }

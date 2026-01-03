@@ -1,6 +1,6 @@
 import { writable, derived, get } from 'svelte/store'
 import VideoStore, { requestSeek } from './videoStore'
-import TimelineStore from './timelineStore'
+import { timelineV2Store } from '../lib/timeline/store'
 import P5Store from './p5Store'
 
 export type PlaybackMode = 'stopped' | 'playing-video' | 'playing-animation'
@@ -46,8 +46,8 @@ export function play(): void {
 
   // If starting video playback, seek to current timeline position
   if (mode === 'playing-video') {
-    const currentTime = get(TimelineStore).getCurrTime()
-    requestSeek(currentTime)
+    const state = timelineV2Store.getState()
+    requestSeek(state.currentTime)
   }
 
   setMode(mode)
@@ -67,12 +67,9 @@ export function togglePlayback(): void {
   const currentMode = getMode()
   if (currentMode === 'stopped') {
     // If at the end, reset to beginning before playing
-    const timeline = get(TimelineStore)
-    if (timeline.getCurrTime() >= timeline.getRightMarker()) {
-      TimelineStore.update((t) => {
-        t.setCurrTime(t.getLeftMarker())
-        return t
-      })
+    const state = timelineV2Store.getState()
+    if (state.currentTime >= state.selectionEnd) {
+      timelineV2Store.setCurrentTime(state.selectionStart)
     }
     play()
   } else {
@@ -94,8 +91,8 @@ export function onVideoVisibilityChange(isVisible: boolean): void {
 
   if (isVisible && videoState.isLoaded) {
     // Showing video while playing - switch to video mode
-    const currentTime = get(TimelineStore).getCurrTime()
-    requestSeek(currentTime)
+    const state = timelineV2Store.getState()
+    requestSeek(state.currentTime)
     setMode('playing-video')
   } else if (!isVisible && currentMode === 'playing-video') {
     // Hiding video while in video mode - switch to animation mode
@@ -107,13 +104,10 @@ export function onVideoVisibilityChange(isVisible: boolean): void {
  * Handle animation reaching the end
  */
 export function onAnimationEnd(): void {
-  const leftMarker = get(TimelineStore).getLeftMarker()
+  const state = timelineV2Store.getState()
 
   // Reset timeline to start
-  TimelineStore.update((timeline) => {
-    timeline.setCurrTime(leftMarker)
-    return timeline
-  })
+  timelineV2Store.setCurrentTime(state.selectionStart)
 
   // Stop playback
   pause()
@@ -121,7 +115,7 @@ export function onAnimationEnd(): void {
   // Seek video to start if visible
   const videoState = get(VideoStore)
   if (videoState.isVisible) {
-    requestSeek(leftMarker)
+    requestSeek(state.selectionStart)
   }
 }
 

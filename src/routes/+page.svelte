@@ -46,7 +46,6 @@
   import SplitScreenVideo from '$lib/components/SplitScreenVideo.svelte'
   import TranscriptPanel from '$lib/components/TranscriptPanel.svelte'
   import ConversationTooltip from '$lib/components/ConversationTooltip.svelte'
-  import TimelineTooltip from '$lib/components/TimelineTooltip.svelte'
 
   import { Core } from '$lib'
   import { EXAMPLE_DATASETS } from '$lib/core/example-datasets'
@@ -55,7 +54,7 @@
   import { onMount } from 'svelte'
   import IconButton from '$lib/components/IconButton.svelte'
   import IgsInfoModal from '$lib/components/IGSInfoModal.svelte'
-  import TimelinePanel from '$lib/components/TimelinePanel.svelte'
+  import { TimelineContainer } from '$lib/timeline'
   import DataPointTable from '$lib/components/DataPointTable.svelte'
   import ModeIndicator from '$lib/components/ModeIndicator.svelte'
   import FloatingDropdown from '$lib/components/FloatingDropdown.svelte'
@@ -67,7 +66,7 @@
   import CodeStore from '../stores/codeStore'
   import ConfigStore from '../stores/configStore'
   import type { ConfigStoreType } from '../stores/configStore'
-  import TimelineStore from '../stores/timelineStore'
+  import { timelineV2Store } from '$lib/timeline/store'
   import { initialConfig } from '../stores/configStore'
   import { computePosition, flip, shift, offset } from '@floating-ui/dom'
   import { setSelectorSize, setSlicerSize, toggleColorMode } from '$lib/history/config-actions'
@@ -168,7 +167,7 @@
   let isVideoShowing = $state(false)
   let isVideoPlaying = $state(false)
   let is3DMode = $state(true)
-  let timeline = $state($TimelineStore)
+  let timelineEndTime = $state(0)
   let isTranscriptVisible = $state(true)
   let mobileMenuOpen = $state(false)
 
@@ -177,7 +176,10 @@
   })
 
   $effect(() => {
-    timeline = $TimelineStore
+    const unsubscribe = timelineV2Store.subscribe((state) => {
+      timelineEndTime = state.dataEnd
+    })
+    return unsubscribe
   })
 
   let isSplitScreen = $state(false)
@@ -1469,7 +1471,6 @@
       <VideoContainer />
     {/if}
     <ConversationTooltip hideTooltip={isTranscriptVisible} />
-    <TimelineTooltip />
   </div>
 </div>
 
@@ -1585,17 +1586,10 @@
           <input
             id="inputSeconds"
             type="text"
-            bind:value={timeline.endTime}
+            bind:value={timelineEndTime}
             oninput={(e) => {
               let value = parseInt(e.target.value.replace(/\D/g, '')) || 0
-              TimelineStore.update((timeline) => {
-                timeline.setCurrTime(0)
-                timeline.setStartTime(0)
-                timeline.setEndTime(value)
-                timeline.setLeftMarker(0)
-                timeline.setRightMarker(value)
-                return timeline
-              })
+              timelineV2Store.initialize(value, 0)
             }}
             class="input input-bordered"
           />
@@ -1691,12 +1685,10 @@
 {/if}
 
 <div
-  class="btm-nav flex justify-between"
-  style="position: fixed; bottom: 0; left: 0; right: 0; height: auto; min-height: 6rem; z-index: 50; padding: 0;"
+  class="btm-nav fixed bottom-0 left-0 right-0 flex justify-between min-h-24 z-50 p-0"
 >
   <div
-    class="flex flex-1 flex-row justify-start items-center bg-[#f6f5f3] px-8 overflow-x-auto"
-    style="min-height: inherit; align-self: stretch;"
+    class="flex flex-1 min-w-0 flex-row justify-start items-center bg-[#f6f5f3] px-4 lg:px-8 overflow-x-auto"
     onwheel={(e) => {
       if (e.deltaY !== 0) {
         e.preventDefault()
@@ -1912,10 +1904,10 @@
 
   <!-- Right Side: Timeline -->
   <div
-    class="flex-1 bg-[#f6f5f3] overflow-visible flex items-center justify-center py-1"
-    style="min-height: inherit; align-self: stretch;"
+    class="flex flex-1 items-center bg-[#f6f5f3] overflow-visible py-1 px-2 lg:px-4"
+    style="min-width: 280px;"
   >
-    <TimelinePanel />
+    <TimelineContainer height={50} showControls={true} embedded={true} />
   </div>
 </div>
 

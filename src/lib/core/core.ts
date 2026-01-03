@@ -25,7 +25,7 @@ import { USER_COLORS } from '../constants/index.js'
 
 import UserStore from '../../stores/userStore'
 import CodeStore from '../../stores/codeStore.js'
-import TimelineStore from '../../stores/timelineStore'
+import { timelineV2Store } from '../timeline/store'
 import ConfigStore from '../../stores/configStore.js'
 import VideoStore, { loadVideo, reset as resetVideo } from '../../stores/videoStore'
 import { pause as pausePlayback } from '../../stores/playbackStore'
@@ -678,14 +678,7 @@ export class Core {
   }
 
   updateTimelineValues = (endTime: number) => {
-    TimelineStore.update((timeline) => {
-      timeline.setCurrTime(0)
-      timeline.setStartTime(0)
-      timeline.setEndTime(endTime)
-      timeline.setLeftMarker(0)
-      timeline.setRightMarker(endTime)
-      return timeline
-    })
+    timelineV2Store.initialize(endTime, 0)
   }
 
   updateCodeValues = (dataPoints: DataPoint[]) => {
