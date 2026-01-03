@@ -38,6 +38,11 @@ export const activeModal = derived(modalStackStore, ($store) => {
   return $store.stack[$store.stack.length - 1]
 })
 
+// Derived store to check if any modal is open (for p5 loop prevention)
+export const isAnyModalOpen = derived(modalStackStore, ($store) => {
+  return $store.stack.length > 0
+})
+
 export function openModal(id: ModalId, options: OpenModalOptions = {}): void {
   const { props, onClose, exclusive = false } = options
 

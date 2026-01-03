@@ -8,7 +8,7 @@
   // Constants
   const MAX_TURNS = 5
   const GAP = 15
-  const TOOLTIP_WIDTH = 300
+  const TOOLTIP_WIDTH = 320 // Match max-width in CSS
   const TRIANGLE_BORDER = 10
   const TRIANGLE_MIN_Y = 20
   const TURN_HEIGHT = 70
@@ -31,11 +31,8 @@
   let tooltipPosition = $derived.by(() => {
     if (!hoveredData || !browser) return { style: '', triangleClass: 'point-left' }
 
-    // Convert canvas-relative coords to viewport coords
-    const canvas = document.querySelector('canvas')
-    const canvasRect = canvas?.getBoundingClientRect()
-    const mouseX = hoveredData.mouseX + (canvasRect?.left ?? 0)
-    const mouseY = hoveredData.mouseY + (canvasRect?.top ?? 0)
+    const mouseX = hoveredData.mouseX
+    const mouseY = hoveredData.mouseY
 
     const viewportWidth = window.innerWidth
     const viewportHeight = window.innerHeight
@@ -44,17 +41,16 @@
     let x: number
     let y: number
     let triangleClass: string
-    let useRightPosition = false
 
     // Horizontal: prefer right side, flip to left if doesn't fit
     if (mouseX + GAP + TOOLTIP_WIDTH < viewportWidth) {
       x = mouseX + GAP
       triangleClass = 'point-left'
     } else {
-      x = viewportWidth - mouseX + GAP
+      x = mouseX - GAP - TOOLTIP_WIDTH
       triangleClass = 'point-right'
-      useRightPosition = true
     }
+    x = Math.max(GAP, Math.min(x, viewportWidth - TOOLTIP_WIDTH - GAP))
 
     // Vertical: position so triangle points at mouse
     const idealTriangleY = 30
@@ -65,9 +61,8 @@
     const triangleMaxY = Math.max(TRIANGLE_MIN_Y, tooltipHeight - TRIANGLE_MIN_Y - TRIANGLE_BORDER * 2)
     const triangleY = Math.max(TRIANGLE_MIN_Y, Math.min(mouseY - y - TRIANGLE_BORDER, triangleMaxY))
 
-    const position = useRightPosition ? 'right' : 'left'
     return {
-      style: `${position}: ${x}px; top: ${y}px; --triangle-y: ${triangleY}px;`,
+      style: `left: ${x}px; top: ${y}px; --triangle-y: ${triangleY}px;`,
       triangleClass
     }
   })
@@ -79,8 +74,8 @@
 
 {#if !hideTooltip && hoveredData && hoveredData.turns.length > 0}
   <div class="tooltip-wrapper {tooltipPosition.triangleClass}" style={tooltipPosition.style}>
-    <div class="triangle"></div>
     <div class="tooltip-content">
+      <div class="triangle"></div>
       <div class="turns-container">
         {#each displayedTurns as turn}
           <div class="turn" style="--speaker-color: {turn.color || DEFAULT_COLOR}">
@@ -123,6 +118,7 @@
   }
 
   .tooltip-content {
+    position: relative;
     max-width: 320px;
     min-width: 200px;
     background: #fefefe;

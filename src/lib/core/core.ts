@@ -4,8 +4,10 @@ import { get } from 'svelte/store'
 
 import { CoreUtils } from './core-utils'
 import { getExampleDataset } from './example-datasets'
+import { TimeParser, type TimeParseOutput } from './time-parser'
 import type {
   MovementRow,
+  GPSMovementRow,
   ConversationRow,
   SingleCodeRow,
   MultiCodeRow,
@@ -14,7 +16,6 @@ import type {
   MovementDataFile,
   CodeEntry,
   ExampleId,
-  ExampleConfig,
   ExampleSelectEvent,
 } from './types.js'
 
@@ -24,11 +25,16 @@ import { USER_COLORS } from '../constants/index.js'
 
 import UserStore from '../../stores/userStore'
 import CodeStore from '../../stores/codeStore.js'
-import TimelineStore from '../../stores/timelineStore'
+import { timelineV2Store } from '../timeline/store'
 import ConfigStore from '../../stores/configStore.js'
 import VideoStore, { loadVideo, reset as resetVideo } from '../../stores/videoStore'
 import { pause as pausePlayback } from '../../stores/playbackStore'
 import { toastStore } from '../../stores/toastStore'
+import { setGPSMode, setBounds, resetGPS, getGPSState } from '../../stores/gpsStore'
+import { GPSTransformer, GPS_NORMALIZED_SIZE } from '../gps/gps-transformer'
+import { loadMapAsFloorPlan, isMapboxConfigured } from '../gps/mapbox-service'
+import { validateGPSData } from '../gps/gps-validation'
+import { GPXParser } from '../gps/gpx-parser'
 
 export class Core {
   sketch: p5
@@ -43,61 +49,8 @@ export class Core {
   }
 
   /**
-   * Handles file upload events and processes multiple files
-   * Supports CSV (movement/conversation/codes), PNG/JPG (floorplan), and MP4 (video)
-   *
-   * @param event - File input change event from an <input type="file"> element
-   * @throws Shows toast notification if file format is not supported
-   * @example
-   * ```typescript
-   * <input type="file" on:change={core.handleUserLoadedFiles} multiple />
-   * ```
-   */
-  handleUserLoadedFiles = async (event: Event): Promise<void> => {
-    const input = event.target as HTMLInputElement
-    if (!input.files) return
-
-    for (let i = 0; i < input.files.length; i++) {
-      const file = input.files[i]
-      if (file) {
-        this.testFileTypeForProcessing(file)
-      }
-    }
-    input.value = '' // reset input value so you can load same file(s) again in browser
-  }
-
-  /**
-   * Determines file type and routes to appropriate processing method
-   * Validates file extensions and MIME types for CSV, image, and video files
-   *
-   * @param file - File object to validate and process
-   * @throws Shows toast error if file format is not recognized
-   * @example
-   * ```typescript
-   * const file = new File(['data'], 'movement.csv', { type: 'text/csv' });
-   * core.testFileTypeForProcessing(file);
-   * ```
-   */
-  testFileTypeForProcessing(file: File): void {
-    const fileName = file.name.toLowerCase()
-    if (fileName.endsWith('.csv') || file.type === 'text/csv') this.loadCSVData(file)
-    else if (
-      fileName.endsWith('.png') ||
-      fileName.endsWith('.jpg') ||
-      fileName.endsWith('.jpeg') ||
-      file.type === 'image/png' ||
-      file.type === 'image/jpg' ||
-      file.type === 'image/jpeg'
-    )
-      this.loadFloorplanImage(URL.createObjectURL(file))
-    else if (fileName.endsWith('.mp4') || file.type === 'video/mp4')
-      this.prepVideoFromFile(URL.createObjectURL(file))
-    else toastStore.error('Error loading file. Please make sure your file is an accepted format') // this should not be possible due to HTML5 accept for file inputs, but in case
-  }
-
-  /**
-   * Async version of testFileTypeForProcessing that waits for CSV files to complete
-   * Used by import dialog to ensure files are processed in correct order
+   * Determines file type and routes to appropriate async processing method
+   * Waits for CSV/GPX files to complete processing before returning
    *
    * @param file - File object to validate and process
    * @returns Promise that resolves when file processing is complete
@@ -106,6 +59,8 @@ export class Core {
     const fileName = file.name.toLowerCase()
     if (fileName.endsWith('.csv') || file.type === 'text/csv') {
       await this.loadCSVData(file)
+    } else if (fileName.endsWith('.gpx') || file.type === 'application/gpx+xml') {
+      await this.loadGPXData(file)
     } else if (
       fileName.endsWith('.png') ||
       fileName.endsWith('.jpg') ||
@@ -127,7 +82,7 @@ export class Core {
       const response = await fetch(`${folder}${fileName}`)
       const buffer = await response.arrayBuffer()
       const file = new File([buffer], fileName, { type: 'text/csv' })
-      this.loadCSVData(file)
+      await this.loadCSVData(file)
     } catch (error) {
       toastStore.error(
         'Error loading CSV file. Please make sure you have a good internet connection'
@@ -172,8 +127,10 @@ export class Core {
     const selectedValue = event.target.value as ExampleId
     const selectedExample = getExampleDataset(selectedValue)
     if (selectedExample) {
-      const { files, videoId } = selectedExample
-      await this.loadFloorplanImage(`/data/${selectedValue}/floorplan.png`)
+      const { files, videoId, isGPS } = selectedExample
+      if (!isGPS) {
+        await this.loadFloorplanImage(`/data/${selectedValue}/floorplan.png`)
+      }
       for (const file of files) {
         await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, file)
       }
@@ -205,13 +162,72 @@ export class Core {
         transformHeader: (h) => {
           return h.trim().toLowerCase()
         },
-        complete: (results: PapaParseResult<CsvRow>, parsedFile: File) => {
-          this.processResultsData(results, this.coreUtils.cleanFileName(parsedFile.name))
+        complete: async (results: PapaParseResult<CsvRow>, parsedFile: File) => {
+          // Preprocess time columns (detect format, convert to relative seconds)
+          const preprocessed = this.preprocessTimeData(results)
+          if (!preprocessed.success) {
+            toastStore.error(preprocessed.error || 'Failed to parse time values')
+            resolve()
+            return
+          }
+
+          // Log any warnings from preprocessing
+          if (preprocessed.warnings.length > 0) {
+            console.warn('Time parsing warnings:', preprocessed.warnings)
+          }
+
+          // Update results with preprocessed data
+          results.data = preprocessed.data
+
+          // Await processing to ensure GPS data loads before conversation data
+          await this.processResultsData(results, this.coreUtils.cleanFileName(parsedFile.name))
           this.sketch.loop()
           resolve()
         },
       })
     })
+  }
+
+  /**
+   * Preprocesses time columns in parsed CSV data
+   * Converts time values to relative seconds from the first timestamp
+   */
+  private preprocessTimeData(results: PapaParseResult<CsvRow>): TimeParseOutput {
+    // All known time column names - TimeParser will filter to those that exist
+    const timeColumns = ['time', 'start', 'end']
+    return TimeParser.preprocess(results, { timeColumns })
+  }
+
+  /**
+   * Loads and processes GPX file data
+   * Parses XML, extracts tracks, and routes to GPS processing pipeline
+   *
+   * @param file - GPX File object to parse
+   * @returns Promise that resolves when processing is complete
+   */
+  loadGPXData = async (file: File): Promise<void> => {
+    try {
+      const gpxContent = await file.text()
+      const fileName = this.coreUtils.cleanFileName(file.name)
+      const parseResult = GPXParser.parse(gpxContent, fileName)
+
+      if (!parseResult.success) {
+        toastStore.error(parseResult.error || 'Failed to parse GPX file')
+        return
+      }
+
+      parseResult.warnings.forEach((warning) => toastStore.warning(warning))
+
+      // Process each track as a separate "user" (like multiple CSV files)
+      for (const track of parseResult.tracks) {
+        await this.processGPSMovementData(GPXParser.toGPSMovementRows(track), track.name)
+      }
+
+      this.sketch.loop()
+    } catch (error) {
+      console.error('Error loading GPX file:', error)
+      toastStore.error('Error reading GPX file. Please check the file format.')
+    }
   }
 
   loadFloorplanImage = (path: string) => {
@@ -234,9 +250,25 @@ export class Core {
    * @remarks Multicode files must be processed before single code files due to header structure
    */
   // NOTE: multicode should be processed before single code file as headers of multicode have one additional column
-  processResultsData = (results: PapaParseResult<CsvRow>, fileName: string): void => {
+  // NOTE: GPS movement should be processed before regular movement as it has different headers
+  processResultsData = async (results: PapaParseResult<CsvRow>, fileName: string): Promise<void> => {
     const csvData = results.data
+    // Check for GPS movement data first (lat/lng headers)
+    // GPS processing is async (loads map image), await to ensure it completes before other files process
+    if (this.coreUtils.testGPSMovement(results)) {
+      try {
+        await this.processGPSMovementData(csvData as unknown as GPSMovementRow[], fileName)
+      } catch (error) {
+        console.error('Error processing GPS data:', error)
+      }
+      return
+    }
+
     if (this.coreUtils.testMovement(results)) {
+      // Regular movement data (x/y headers) - reset GPS mode if active
+      if (getGPSState().isGPSMode) {
+        resetGPS()
+      }
       this.movementData.push({ fileName, csvData: csvData as unknown as MovementRow[] })
       this.reProcessAllMovementData()
     } else if (this.coreUtils.testMulticode(results)) {
@@ -253,15 +285,7 @@ export class Core {
       )
     }
 
-    UserStore.update((currentUsers) => {
-      const users = [...currentUsers]
-      users.forEach((user) => {
-        user.dataTrail.sort((a, b) => ((a.time ?? 0) > (b.time ?? 0) ? 1 : -1))
-        this.updateStopValues(user.dataTrail)
-        this.updateCodeValues(user.dataTrail)
-      })
-      return users
-    })
+    this.finalizeUserData()
   }
 
   /**
@@ -340,6 +364,117 @@ export class Core {
       return users
     })
     this.updateTimelineValues(endTime)
+  }
+
+  /**
+   * Processes GPS movement CSV data (lat/lng coordinates)
+   * Converts GPS coordinates to pixel coordinates and loads a Mapbox static map as floor plan
+   *
+   * @param csvData - Array of GPS movement rows containing time, lat, lng coordinates
+   * @param userName - Name identifier for the user (typically from filename)
+   */
+  processGPSMovementData = async (csvData: GPSMovementRow[], fileName: string): Promise<void> => {
+    // Check if Mapbox is configured
+    if (!isMapboxConfigured()) {
+      toastStore.error(
+        'GPS data detected but Mapbox is not configured. Please set VITE_MAPBOX_TOKEN in your .env file.'
+      )
+      return
+    }
+
+    // Normalize GPS data to consistent field names and filter invalid points
+    const normalizedData = csvData
+      .map((row) => GPSTransformer.normalizeGPSRow(row))
+      .filter(
+        (row) =>
+          GPSTransformer.isValidGPSPoint(row) &&
+          typeof row.time === 'number' &&
+          Number.isFinite(row.time)
+      )
+
+    // Warn about skipped rows due to missing/invalid data
+    const skippedRows = csvData.length - normalizedData.length
+    if (skippedRows > 0) {
+      toastStore.warning(
+        `${skippedRows} row${skippedRows > 1 ? 's were' : ' was'} skipped due to missing or invalid values`
+      )
+    }
+
+    if (normalizedData.length === 0) {
+      toastStore.error('No valid GPS coordinates found in the file.')
+      return
+    }
+
+    // Validate GPS data: detect spikes, time issues, and filter bad points
+    const validationResult = validateGPSData(normalizedData)
+
+    // Show warnings for any issues detected
+    for (const warning of validationResult.warnings) {
+      toastStore.warning(warning)
+    }
+
+    // Use filtered data (spikes removed, timestamps sorted)
+    const validatedData = validationResult.filteredData
+
+    if (validatedData.length === 0) {
+      toastStore.error('No valid GPS points remaining after filtering. All points had impossible speeds.')
+      return
+    }
+
+    // Calculate bounds from validated GPS data
+    const bounds = GPSTransformer.calculateBounds(validatedData)
+
+    // Enable GPS mode and set bounds in store
+    setGPSMode(true)
+    setBounds(bounds)
+
+    // Load Mapbox static map as floor plan
+    try {
+      await loadMapAsFloorPlan(this.sketch, bounds, getGPSState().mapStyle)
+      // Reset rotation to 0 - Mapbox maps are oriented with north up
+      this.sketch.floorPlan.curFloorPlanRotation = 0
+    } catch (error) {
+      console.error('Failed to load map:', error)
+      resetGPS()
+      return
+    }
+
+    // Convert GPS coordinates to normalized pixel coordinates
+    const pixelData: MovementRow[] = validatedData.map((row) => {
+      const [x, y] = GPSTransformer.toPixels(
+        row.lat,
+        row.lng,
+        bounds,
+        GPS_NORMALIZED_SIZE,
+        GPS_NORMALIZED_SIZE
+      )
+      return {
+        time: row.time,
+        x,
+        y,
+      }
+    })
+
+    // Process as regular movement data
+    this.movementData.push({ fileName, csvData: pixelData })
+    this.reProcessAllMovementData()
+    this.finalizeUserData()
+  }
+
+  /**
+   * Sorts user data trails by time and updates stop/code values
+   * Called after processing any data type to ensure consistent state
+   */
+  private finalizeUserData(): void {
+    UserStore.update((currentUsers) => {
+      const users = [...currentUsers]
+      users.forEach((user) => {
+        user.dataTrail.sort((a, b) => ((a.time ?? 0) > (b.time ?? 0) ? 1 : -1))
+        this.updateStopValues(user.dataTrail)
+        this.updateCodeValues(user.dataTrail)
+      })
+      return users
+    })
   }
 
   /**
@@ -543,14 +678,7 @@ export class Core {
   }
 
   updateTimelineValues = (endTime: number) => {
-    TimelineStore.update((timeline) => {
-      timeline.setCurrTime(0)
-      timeline.setStartTime(0)
-      timeline.setEndTime(endTime)
-      timeline.setLeftMarker(0)
-      timeline.setRightMarker(endTime)
-      return timeline
-    })
+    timelineV2Store.initialize(endTime, 0)
   }
 
   updateCodeValues = (dataPoints: DataPoint[]) => {

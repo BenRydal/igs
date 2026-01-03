@@ -3,6 +3,7 @@
   import { Z_INDEX } from '$lib/styles/z-index'
   import { formatFileSize, getFileSizeLimit } from '$lib/validation/rules'
   import { toastStore } from '../../../stores/toastStore'
+  import { openModal, closeModal } from '../../../stores/modalStore'
 
   interface Props {
     /** Whether the dialog is open */
@@ -14,6 +15,15 @@
   }
 
   let { isOpen = false, onClose, onImport }: Props = $props()
+
+  // Track modal open state in the modal stack for p5 loop prevention
+  $effect(() => {
+    if (isOpen) {
+      openModal('fileImport')
+    } else {
+      closeModal('fileImport')
+    }
+  })
 
   // State
   let files = $state<File[]>([])
@@ -113,7 +123,7 @@
   async function addFiles(newFiles: File[]): Promise<void> {
     try {
       // Filter to only supported file types
-      const supportedExtensions = ['csv', 'png', 'jpg', 'jpeg', 'mp4']
+      const supportedExtensions = ['csv', 'png', 'jpg', 'jpeg', 'mp4', 'gpx']
       const validFiles = newFiles.filter((file) => {
         const ext = getFileExtension(file.name)
         return supportedExtensions.includes(ext)
@@ -261,6 +271,8 @@
     if (typeof window !== 'undefined') {
       window.removeEventListener('keydown', handleKeyDown)
     }
+    // Ensure modal is unregistered if component is destroyed while open
+    closeModal('fileImport')
   })
 </script>
 
@@ -317,7 +329,7 @@
           id="file-input-import"
           type="file"
           multiple
-          accept=".csv,.png,.jpg,.jpeg,.mp4"
+          accept=".csv,.png,.jpg,.jpeg,.mp4,.gpx"
           onchange={handleFileInput}
           class="hidden"
         />

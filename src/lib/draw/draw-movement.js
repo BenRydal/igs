@@ -1,13 +1,7 @@
 import ConfigStore from '../../stores/configStore'
-import TimelineStore from '../../stores/timelineStore'
+import { timelineV2Store } from '../timeline/store'
 import VideoStore from '../../stores/videoStore'
 import PlaybackStore from '../../stores/playbackStore'
-
-let timeline
-
-TimelineStore.subscribe((data) => {
-  timeline = data
-})
 
 let maxStopLength, isPathColorMode, movementStrokeWeight, stopStrokeWeight
 
@@ -196,7 +190,7 @@ export class DrawMovement {
       augmentedPoint.pos.floorPlanYPos,
       augmentedPoint.pos.zPos,
       augmentedPoint.pos.selTimelineXPos,
-      this.sk.mapToSelectTimeThenPixelTime(this.sk.mouseX),
+      this.sk.mapToSelectTimeThenPixelTime(this.sk.winMouseX),
       this.drawUtils.setCodeColor(augmentedPoint.point.codes),
     ]
   }
@@ -206,7 +200,7 @@ export class DrawMovement {
   }
 
   getVideoSelectTime() {
-    const videoPixelTime = timeline.timeToPixel(videoCurrentTime)
+    const videoPixelTime = timelineV2Store.timeToPixel(videoCurrentTime)
     return this.sk.mapSelectTimeToPixelTime(videoPixelTime)
   }
 

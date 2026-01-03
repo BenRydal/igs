@@ -6,6 +6,7 @@ import type {
   MultiCodeRow,
   CsvRow,
 } from './types'
+import { GPSTransformer } from '../gps/gps-transformer'
 
 export type RowValidator<T> = (row: T) => boolean
 
@@ -15,6 +16,8 @@ export class CoreUtils {
   readonly headersConversation: readonly string[] = ['time', 'speaker', 'talk'] // Of type number, string, and not null or undefined
   readonly headersSingleCodes: readonly string[] = ['start', 'end'] // Of type number
   readonly headersMultiCodes: readonly string[] = ['code', 'start', 'end'] // MUST MATCH singleCodeHeaders with one extra column 'code' of type string
+  readonly headersGPSMovement1: readonly string[] = ['time', 'lat', 'lng'] // GPS movement with short header names
+  readonly headersGPSMovement2: readonly string[] = ['time', 'latitude', 'longitude'] // GPS movement with full header names
 
   testMovement(results: PapaParseResult): boolean {
     return this.testPapaParseResults(results, this.headersMovement, this.movementRowForType)
@@ -30,6 +33,13 @@ export class CoreUtils {
 
   testMulticode(results: PapaParseResult): boolean {
     return this.testPapaParseResults(results, this.headersMultiCodes, this.multiCodeRowForType)
+  }
+
+  testGPSMovement(results: PapaParseResult): boolean {
+    return (
+      this.testPapaParseResults(results, this.headersGPSMovement1, this.gpsRowForType) ||
+      this.testPapaParseResults(results, this.headersGPSMovement2, this.gpsRowForType)
+    )
   }
 
   /**
@@ -74,6 +84,18 @@ export class CoreUtils {
       this.isValidNumber(curRow[this.headersMovement[0]]) &&
       this.isValidNumber(curRow[this.headersMovement[1]]) &&
       this.isValidNumber(curRow[this.headersMovement[2]])
+    )
+  }
+
+  gpsRowForType(curRow: CsvRow): boolean {
+    const time = curRow['time']
+    const lat = curRow['lat'] ?? curRow['latitude']
+    const lng = curRow['lng'] ?? curRow['longitude']
+    return (
+      this.isValidNumber(time) &&
+      this.isValidNumber(lat) &&
+      this.isValidNumber(lng) &&
+      GPSTransformer.isValidGPSPoint({ lat: lat as number, lng: lng as number })
     )
   }
 

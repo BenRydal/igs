@@ -1,4 +1,7 @@
 import { toastStore } from '../../stores/toastStore'
+import GPSStore from '../../stores/gpsStore'
+import { get } from 'svelte/store'
+import { GPS_NORMALIZED_SIZE } from '../gps/gps-transformer'
 
 export class FloorPlan {
   constructor(sk) {
@@ -35,9 +38,6 @@ export class FloorPlan {
    */
   setFloorPlan(container) {
     switch (this.curFloorPlanRotation) {
-      case 0:
-        this.draw(container.width, container.height)
-        break
       case 1:
         this.rotateAndDraw(this.sk.HALF_PI, container.height, container.width, container)
         break
@@ -47,33 +47,40 @@ export class FloorPlan {
       case 3:
         this.rotateAndDraw(-this.sk.HALF_PI, container.height, container.width, container)
         break
+      case 0:
+      default:
+        this.draw(container.width, container.height)
+        break
     }
   }
 
   /**
    * Converts x/y pixel positions from data point to floor plan depending on floor plan rotation mode
+   * In GPS mode, coordinates are in normalized 0-1000 space; in regular mode, based on image dimensions
    * @param  {Float} xPos
    * @param  {Float} yPos
    */
   getScaledXYPos(xPos, yPos, container) {
-    let scaledXPos, scaledYPos
+    const gpsState = get(GPSStore)
+
+    // Normalize coordinates to 0-1 range based on mode
+    const normX =
+      gpsState.isGPSMode && this.img ? xPos / GPS_NORMALIZED_SIZE : xPos / this.img.width
+    const normY =
+      gpsState.isGPSMode && this.img ? yPos / GPS_NORMALIZED_SIZE : yPos / this.img.height
+
+    // Apply rotation and scale to container dimensions
     switch (this.curFloorPlanRotation) {
       case 0:
-        scaledXPos = (xPos * container.width) / this.img.width
-        scaledYPos = (yPos * container.height) / this.img.height
-        return [scaledXPos, scaledYPos]
+        return [normX * container.width, normY * container.height]
       case 1:
-        scaledXPos = container.width - (yPos * container.width) / this.img.height
-        scaledYPos = (xPos * container.height) / this.img.width
-        return [scaledXPos, scaledYPos]
+        return [container.width - normY * container.width, normX * container.height]
       case 2:
-        scaledXPos = container.width - (xPos * container.width) / this.img.width
-        scaledYPos = container.height - (yPos * container.height) / this.img.height
-        return [scaledXPos, scaledYPos]
+        return [container.width - normX * container.width, container.height - normY * container.height]
       case 3:
-        scaledXPos = (yPos * container.width) / this.img.height
-        scaledYPos = container.height - (xPos * container.height) / this.img.width
-        return [scaledXPos, scaledYPos]
+        return [normY * container.width, container.height - normX * container.height]
+      default:
+        return [normX * container.width, normY * container.height]
     }
   }
 
