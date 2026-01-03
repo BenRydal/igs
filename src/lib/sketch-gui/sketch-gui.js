@@ -4,13 +4,16 @@ import { timelineV2Store } from '../timeline/store'
 import ConfigStore from '../../stores/configStore'
 import { get } from 'svelte/store'
 
+/** Padding between floorplan edge and timeline data start */
+const FLOORPLAN_TIMELINE_GAP = 20
+
 export class SketchGUI {
   constructor(sketch) {
     this.sk = sketch
     this.displayBottom = this.sk.height
-    // Cap container width to canvas width for split-screen mode
+    // Cap container width to canvas width for split-screen mode, with gap for timeline
     const state = timelineV2Store.getState()
-    const containerWidth = Math.min(state.leftX, this.sk.width)
+    const containerWidth = Math.min(state.leftX, this.sk.width) - FLOORPLAN_TIMELINE_GAP
     this.fpContainer = new FloorPlanContainer(this.sk, containerWidth, this.displayBottom)
     this.highlight = new Highlight(this.sk, this.displayBottom)
   }
