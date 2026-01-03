@@ -482,14 +482,14 @@ export function getAllCommands(): Command[] {
     {
       id: 'playback:reset-time',
       label: 'Reset Timeline to Start',
-      description: 'Jump to the beginning of the timeline',
+      description: 'Jump to the beginning of the view',
       keywords: ['reset', 'start', 'beginning', 'timeline'],
       icon: '⏮️',
       category: 'playback',
       shortcut: 'Home',
       action: () => {
         const state = timelineV2Store.getState()
-        timelineV2Store.setCurrentTime(state.selectionStart)
+        timelineV2Store.setCurrentTime(state.viewStart)
       },
     },
 

@@ -7,8 +7,6 @@
 import type { TimelineState, RenderLayer, RenderContext } from '../types';
 import { mapRange, getDevicePixelRatio } from '../utils';
 import { BackgroundLayer } from './layers/background';
-import { TracksLayer } from './layers/tracks';
-import { SelectionLayer } from './layers/selection';
 import { PlayheadLayer } from './layers/playhead';
 import { HoverLayer } from './layers/hover';
 
@@ -29,13 +27,7 @@ export class TimelineRenderer {
 		this.dpr = getDevicePixelRatio();
 
 		// Layer stack (render order: bottom to top)
-		this.layers = [
-			new BackgroundLayer(),
-			new TracksLayer(),
-			new SelectionLayer(),
-			new PlayheadLayer(),
-			new HoverLayer()
-		];
+		this.layers = [new BackgroundLayer(), new PlayheadLayer(), new HoverLayer()];
 	}
 
 	/**

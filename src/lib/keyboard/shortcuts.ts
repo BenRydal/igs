@@ -177,7 +177,7 @@ export const playbackShortcuts: KeyboardShortcut[] = [
     category: 'playback',
     action: () => {
       const state = timelineV2Store.getState()
-      const newTime = Math.max(state.selectionStart, state.currentTime - 5)
+      const newTime = Math.max(state.viewStart, state.currentTime - 5)
       timelineV2Store.setCurrentTime(newTime)
     },
   },
@@ -189,7 +189,7 @@ export const playbackShortcuts: KeyboardShortcut[] = [
     category: 'playback',
     action: () => {
       const state = timelineV2Store.getState()
-      const newTime = Math.min(state.selectionEnd, state.currentTime + 5)
+      const newTime = Math.min(state.viewEnd, state.currentTime + 5)
       timelineV2Store.setCurrentTime(newTime)
     },
   },
@@ -197,44 +197,22 @@ export const playbackShortcuts: KeyboardShortcut[] = [
     id: 'playback.jump-to-start',
     key: 'Home',
     label: 'Jump to Start',
-    description: 'Jump to the beginning of the timeline',
+    description: 'Jump to the beginning of the view',
     category: 'playback',
     action: () => {
       const state = timelineV2Store.getState()
-      timelineV2Store.setCurrentTime(state.selectionStart)
+      timelineV2Store.setCurrentTime(state.viewStart)
     },
   },
   {
     id: 'playback.jump-to-end',
     key: 'End',
     label: 'Jump to End',
-    description: 'Jump to the end of the timeline',
+    description: 'Jump to the end of the view',
     category: 'playback',
     action: () => {
       const state = timelineV2Store.getState()
-      timelineV2Store.setCurrentTime(state.selectionEnd)
-    },
-  },
-  {
-    id: 'playback.set-left-marker',
-    key: '[',
-    label: 'Set Left Marker',
-    description: 'Set the left boundary marker at current time',
-    category: 'playback',
-    action: () => {
-      const state = timelineV2Store.getState()
-      timelineV2Store.setSelectionStart(state.currentTime)
-    },
-  },
-  {
-    id: 'playback.set-right-marker',
-    key: ']',
-    label: 'Set Right Marker',
-    description: 'Set the right boundary marker at current time',
-    category: 'playback',
-    action: () => {
-      const state = timelineV2Store.getState()
-      timelineV2Store.setSelectionEnd(state.currentTime)
+      timelineV2Store.setCurrentTime(state.viewEnd)
     },
   },
   {

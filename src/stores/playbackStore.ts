@@ -68,8 +68,8 @@ export function togglePlayback(): void {
   if (currentMode === 'stopped') {
     // If at the end, reset to beginning before playing
     const state = timelineV2Store.getState()
-    if (state.currentTime >= state.selectionEnd) {
-      timelineV2Store.setCurrentTime(state.selectionStart)
+    if (state.currentTime >= state.viewEnd) {
+      timelineV2Store.setCurrentTime(state.viewStart)
     }
     play()
   } else {
@@ -107,7 +107,7 @@ export function onAnimationEnd(): void {
   const state = timelineV2Store.getState()
 
   // Reset timeline to start
-  timelineV2Store.setCurrentTime(state.selectionStart)
+  timelineV2Store.setCurrentTime(state.viewStart)
 
   // Stop playback
   pause()
@@ -115,7 +115,7 @@ export function onAnimationEnd(): void {
   // Seek video to start if visible
   const videoState = get(VideoStore)
   if (videoState.isVisible) {
-    requestSeek(state.selectionStart)
+    requestSeek(state.viewStart)
   }
 }
 

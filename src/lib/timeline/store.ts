@@ -1,11 +1,11 @@
 /**
  * Timeline Store
  *
- * Svelte store for managing timeline state with zoom, pan, and selection.
+ * Svelte store for managing timeline state with zoom and pan.
  */
 
 import { writable, derived, get } from 'svelte/store';
-import type { TimelineState, TimelineTrack, TimelineMarker, DragTarget } from './types';
+import type { TimelineState, DragTarget } from './types';
 import { clamp, mapRange, zoomAtPoint, panView } from './utils';
 
 /** Initial empty state */
@@ -14,20 +14,12 @@ const initialState: TimelineState = {
 	dataStart: 0,
 	dataEnd: 0,
 
-	// View window
+	// View window (controls playback bounds)
 	viewStart: 0,
 	viewEnd: 0,
 
-	// Selection
-	selectionStart: 0,
-	selectionEnd: 0,
-
 	// Playhead
 	currentTime: 0,
-
-	// Data
-	tracks: [],
-	markers: [],
 
 	// Pixel bounds
 	leftX: 0,
@@ -35,7 +27,6 @@ const initialState: TimelineState = {
 
 	// UI
 	hoveredTime: null,
-	hoveredTrack: null,
 	isDragging: null
 };
 
@@ -58,8 +49,6 @@ function createTimelineStore() {
 				dataEnd: endTime,
 				viewStart: startTime,
 				viewEnd: endTime,
-				selectionStart: startTime,
-				selectionEnd: endTime,
 				currentTime: startTime
 			}));
 		},
@@ -80,52 +69,6 @@ function createTimelineStore() {
 			update((s) => ({
 				...s,
 				currentTime: clamp(time, s.dataStart, s.dataEnd)
-			}));
-		},
-
-		/**
-		 * Advance playhead by delta (for animation)
-		 */
-		advanceTime(delta: number) {
-			update((s) => {
-				const newTime = s.currentTime + delta;
-				return {
-					...s,
-					currentTime: clamp(newTime, s.dataStart, s.dataEnd)
-				};
-			});
-		},
-
-		// ==================== Selection ====================
-
-		/**
-		 * Set selection range (left/right markers)
-		 */
-		setSelection(start: number, end: number) {
-			update((s) => ({
-				...s,
-				selectionStart: clamp(Math.min(start, end), s.dataStart, s.dataEnd),
-				selectionEnd: clamp(Math.max(start, end), s.dataStart, s.dataEnd)
-			}));
-		},
-
-		/**
-		 * Set selection start (left marker)
-		 */
-		setSelectionStart(time: number) {
-			update((s) => ({
-				...s,
-				selectionStart: clamp(time, s.dataStart, s.selectionEnd)
-			}));
-		},
-
-		/**
-		 * Set selection end (right marker)
-		 */
-		setSelectionEnd(time: number) {
-			update((s) => ({
-				...s,
-				selectionEnd: clamp(time, s.selectionStart, s.dataEnd)
 			}));
 		},
 
@@ -162,17 +105,6 @@ function createTimelineStore() {
 		},
 
 		/**
-		 * Zoom to fit selection in view
-		 */
-		zoomToSelection() {
-			update((s) => ({
-				...s,
-				viewStart: s.selectionStart,
-				viewEnd: s.selectionEnd
-			}));
-		},
-
-		/**
 		 * Reset view to show all data
 		 */
 		zoomToFit() {
@@ -199,79 +131,15 @@ function createTimelineStore() {
 			});
 		},
 
-		// ==================== Tracks ====================
-
-		/**
-		 * Set all tracks
-		 */
-		setTracks(tracks: TimelineTrack[]) {
-			update((s) => ({ ...s, tracks }));
-		},
-
-		/**
-		 * Add or update a single track
-		 */
-		upsertTrack(track: TimelineTrack) {
-			update((s) => ({
-				...s,
-				tracks: s.tracks.some((t) => t.id === track.id)
-					? s.tracks.map((t) => (t.id === track.id ? track : t))
-					: [...s.tracks, track]
-			}));
-		},
-
-		/**
-		 * Remove a track
-		 */
-		removeTrack(trackId: string) {
-			update((s) => ({
-				...s,
-				tracks: s.tracks.filter((t) => t.id !== trackId)
-			}));
-		},
-
-		/**
-		 * Toggle track visibility
-		 */
-		toggleTrackVisibility(trackId: string) {
-			update((s) => ({
-				...s,
-				tracks: s.tracks.map((t) => (t.id === trackId ? { ...t, visible: !t.visible } : t))
-			}));
-		},
-
-		// ==================== Markers ====================
-
-		/**
-		 * Add a marker
-		 */
-		addMarker(marker: TimelineMarker) {
-			update((s) => ({
-				...s,
-				markers: [...s.markers, marker]
-			}));
-		},
-
-		/**
-		 * Remove a marker
-		 */
-		removeMarker(markerId: string) {
-			update((s) => ({
-				...s,
-				markers: s.markers.filter((m) => m.id !== markerId)
-			}));
-		},
-
 		// ==================== UI State ====================
 
 		/**
 		 * Set hover state
 		 */
-		setHover(time: number | null, trackId: string | null = null) {
+		setHover(time: number | null) {
 			update((s) => ({
 				...s,
-				hoveredTime: time,
-				hoveredTrack: trackId
+				hoveredTime: time
 			}));
 		},
 
@@ -310,57 +178,48 @@ function createTimelineStore() {
 		},
 
 		/**
-		 * Convert pixel position to time within selection range
+		 * Get view start pixel position
 		 */
-		pixelToSelectedTime(pixel: number): number {
+		getViewStartPixel(): number {
 			const s = get({ subscribe });
-			return mapRange(pixel, s.leftX, s.rightX, s.selectionStart, s.selectionEnd);
+			return mapRange(s.viewStart, s.dataStart, s.dataEnd, s.leftX, s.rightX);
 		},
 
 		/**
-		 * Get left marker pixel position
+		 * Get view end pixel position
 		 */
-		getLeftMarkerPixel(): number {
+		getViewEndPixel(): number {
 			const s = get({ subscribe });
-			return mapRange(s.selectionStart, s.dataStart, s.dataEnd, s.leftX, s.rightX);
+			return mapRange(s.viewEnd, s.dataStart, s.dataEnd, s.leftX, s.rightX);
 		},
 
 		/**
-		 * Get right marker pixel position
+		 * Convert timeline pixel to view-space pixel
 		 */
-		getRightMarkerPixel(): number {
+		pixelToViewPixel(pixel: number): number {
 			const s = get({ subscribe });
-			return mapRange(s.selectionEnd, s.dataStart, s.dataEnd, s.leftX, s.rightX);
+			const viewStartPx = this.getViewStartPixel();
+			const viewEndPx = this.getViewEndPixel();
+			return mapRange(pixel, s.leftX, s.rightX, viewStartPx, viewEndPx);
 		},
 
 		/**
-		 * Convert timeline pixel to marker-space pixel
+		 * Convert view-space pixel to timeline pixel
 		 */
-		pixelToMarkerPixel(pixel: number): number {
+		viewPixelToPixel(pixel: number): number {
 			const s = get({ subscribe });
-			const leftMarkerPx = mapRange(s.selectionStart, s.dataStart, s.dataEnd, s.leftX, s.rightX);
-			const rightMarkerPx = mapRange(s.selectionEnd, s.dataStart, s.dataEnd, s.leftX, s.rightX);
-			return mapRange(pixel, s.leftX, s.rightX, leftMarkerPx, rightMarkerPx);
+			const viewStartPx = this.getViewStartPixel();
+			const viewEndPx = this.getViewEndPixel();
+			return mapRange(pixel, viewStartPx, viewEndPx, s.leftX, s.rightX);
 		},
 
 		/**
-		 * Convert marker-space pixel to timeline pixel
-		 */
-		markerPixelToPixel(pixel: number): number {
-			const s = get({ subscribe });
-			const leftMarkerPx = mapRange(s.selectionStart, s.dataStart, s.dataEnd, s.leftX, s.rightX);
-			const rightMarkerPx = mapRange(s.selectionEnd, s.dataStart, s.dataEnd, s.leftX, s.rightX);
-			return mapRange(pixel, leftMarkerPx, rightMarkerPx, s.leftX, s.rightX);
-		},
-
-		/**
-		 * Check if pixel value is within marker range
+		 * Check if pixel value is within view range
 		 */
 		overAxis(pixel: number): boolean {
-			const s = get({ subscribe });
-			const leftMarkerPx = mapRange(s.selectionStart, s.dataStart, s.dataEnd, s.leftX, s.rightX);
-			const rightMarkerPx = mapRange(s.selectionEnd, s.dataStart, s.dataEnd, s.leftX, s.rightX);
-			return pixel >= leftMarkerPx && pixel <= rightMarkerPx;
+			const viewStartPx = this.getViewStartPixel();
+			const viewEndPx = this.getViewEndPixel();
+			return pixel >= viewStartPx && pixel <= viewEndPx;
 		},
 
 		// ==================== Helpers ====================

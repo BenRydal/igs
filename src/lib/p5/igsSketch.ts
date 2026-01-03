@@ -209,7 +209,7 @@ export const igsSketch = (p5: any) => {
 
   p5.updateAnimation = () => {
     const state = timelineV2Store.getState()
-    if (state.currentTime < state.selectionEnd) {
+    if (state.currentTime < state.viewEnd) {
       p5.continueAnimation()
     } else {
       onAnimationEnd()
@@ -232,7 +232,7 @@ export const igsSketch = (p5: any) => {
   }
 
   p5.mapToSelectTimeThenPixelTime = (value) => {
-    return p5.mapSelectTimeToPixelTime(timelineV2Store.pixelToMarkerPixel(value))
+    return p5.mapSelectTimeToPixelTime(timelineV2Store.pixelToViewPixel(value))
   }
 
   p5.mapSelectTimeToPixelTime = (value) => {
@@ -241,11 +241,11 @@ export const igsSketch = (p5: any) => {
     if (p5.handle3D.getIs3DMode())
       return p5.map(
         value,
-        timelineV2Store.getLeftMarkerPixel(),
-        timelineV2Store.getRightMarkerPixel(),
+        timelineV2Store.getViewStartPixel(),
+        timelineV2Store.getViewEndPixel(),
         spaceTimeCubeBottom,
         spaceTimeCubeTop
       )
-    else return timelineV2Store.markerPixelToPixel(value)
+    else return timelineV2Store.viewPixelToPixel(value)
   }
 }

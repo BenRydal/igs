@@ -1,12 +1,9 @@
 <script lang="ts">
 	import { timelineV2Store, isZoomed, zoomLevel } from '../store';
 	import { formatTime } from '../utils';
-	import {
-		isPlaying,
-		togglePlayback as togglePlaybackStore,
-		pause as pausePlayback
-	} from '../../../stores/playbackStore';
+	import { isPlaying, togglePlayback, pause as pausePlayback } from '../../../stores/playbackStore';
 	import ConfigStore from '../../../stores/configStore';
+	import P5Store from '../../../stores/p5Store';
 
 	// MDI Icons
 	import MdPlayArrow from '~icons/mdi/play-arrow';
@@ -23,17 +20,14 @@
 	const SPEED_LABELS = ['0.25x', '0.5x', '1x', '2x', '4x'];
 
 	let currentTime = $derived($timelineV2Store.currentTime);
-	let selectionStart = $derived($timelineV2Store.selectionStart);
-	let selectionEnd = $derived($timelineV2Store.selectionEnd);
+	let viewStart = $derived($timelineV2Store.viewStart);
+	let viewEnd = $derived($timelineV2Store.viewEnd);
 	let speedIndex = $derived(SPEED_PRESETS.indexOf($ConfigStore.animationRate) ?? 2);
-
-	function togglePlayback() {
-		togglePlaybackStore();
-	}
+	let p5Instance = $derived($P5Store);
 
 	function reset() {
 		pausePlayback();
-		timelineV2Store.setCurrentTime($timelineV2Store.selectionStart);
+		timelineV2Store.setCurrentTime($timelineV2Store.viewStart);
 	}
 
 	function decreaseSpeed() {
@@ -58,14 +52,17 @@
 
 	function zoomIn() {
 		timelineV2Store.zoom(0.7);
+		p5Instance?.loop();
 	}
 
 	function zoomOut() {
 		timelineV2Store.zoom(1.4);
+		p5Instance?.loop();
 	}
 
 	function zoomToFit() {
 		timelineV2Store.zoomToFit();
+		p5Instance?.loop();
 	}
 </script>
 
@@ -155,6 +152,6 @@
 	<div class="flex items-center gap-1.5 ml-auto bg-gray-100 px-3 py-1 rounded-md">
 		<span class="font-mono text-base font-semibold text-red-500">{formatTime(currentTime)}</span>
 		<span class="text-gray-400">/</span>
-		<span class="font-mono text-base text-gray-500">{formatTime(selectionEnd - selectionStart)}</span>
+		<span class="font-mono text-base text-gray-500">{formatTime(viewEnd - viewStart)}</span>
 	</div>
 </div>

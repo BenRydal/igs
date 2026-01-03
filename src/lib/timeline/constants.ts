@@ -14,19 +14,11 @@ export const HANDLE_HEIGHT = 20;
 /** Height of the playhead triangle head */
 export const PLAYHEAD_HEAD_HEIGHT = 14;
 
-/** Width of selection marker handles */
-export const MARKER_WIDTH = 8;
-
 /** Vertical position for time labels */
 export const LABEL_TOP_OFFSET = 10;
 
 /** Vertical position for hover tooltip (below labels) */
 export const TOOLTIP_TOP_OFFSET = 22;
 
-/** Hit testing tolerances */
+/** Hit testing tolerance for playhead */
 export const PLAYHEAD_HIT_TOLERANCE = 10;
-export const MARKER_HIT_TOLERANCE = 10;
-
-/** Track layout */
-export const TRACK_PADDING = 4;
-export const MIN_SEGMENT_WIDTH = 2;

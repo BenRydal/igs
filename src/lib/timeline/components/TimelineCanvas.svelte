@@ -7,7 +7,7 @@
 	import P5Store from '../../../stores/p5Store';
 	import VideoStore, { requestSeek } from '../../../stores/videoStore';
 	import { isPlaying } from '../../../stores/playbackStore';
-	import { HANDLE_HEIGHT, PLAYHEAD_HIT_TOLERANCE, MARKER_HIT_TOLERANCE } from '../constants';
+	import { HANDLE_HEIGHT, PLAYHEAD_HIT_TOLERANCE } from '../constants';
 
 	/** Canvas element reference */
 	let canvas: HTMLCanvasElement;
@@ -72,30 +72,6 @@
 		}
 	}
 
-	/**
-	 * Sync left marker (selection start)
-	 */
-	function syncLeftMarker(time: number): void {
-		timelineV2Store.setSelectionStart(time);
-
-		// Trigger p5 redraw
-		if (p5Instance) {
-			p5Instance.loop();
-		}
-	}
-
-	/**
-	 * Sync right marker (selection end)
-	 */
-	function syncRightMarker(time: number): void {
-		timelineV2Store.setSelectionEnd(time);
-
-		// Trigger p5 redraw
-		if (p5Instance) {
-			p5Instance.loop();
-		}
-	}
-
 	onMount(() => {
 		// Initialize renderer
 		renderer = new TimelineRenderer(canvas, currentState);
@@ -106,7 +82,7 @@
 			if (entry) {
 				const { width, height } = entry.contentRect;
 				renderer?.resize(width, height);
-				// Update X positions for legacy store
+				// Update X positions for coordinate conversion
 				updateXPositions();
 			}
 		});
@@ -136,39 +112,14 @@
 	/**
 	 * Hit test to determine what element is at position
 	 */
-	function hitTest(x: number, y: number): HitTarget {
+	function hitTest(x: number): HitTarget {
 		if (!renderer || !currentState) return 'empty';
 
 		const playheadX = renderer.timeToPixel(currentState.currentTime);
-		const selStartX = renderer.timeToPixel(currentState.selectionStart);
-		const selEndX = renderer.timeToPixel(currentState.selectionEnd);
 
-		// Check handles at top of timeline (within HANDLE_HEIGHT)
-		if (y < HANDLE_HEIGHT) {
-			// Selection markers (check first - they're at the edges)
-			if (Math.abs(x - selStartX) < MARKER_HIT_TOLERANCE) {
-				return 'selection-start';
-			}
-			if (Math.abs(x - selEndX) < MARKER_HIT_TOLERANCE) {
-				return 'selection-end';
-			}
-			// Playhead head
-			if (Math.abs(x - playheadX) < PLAYHEAD_HIT_TOLERANCE) {
-				return 'playhead';
-			}
-		}
-
-		// Playhead line (full height)
+		// Playhead (full height, including handle area)
 		if (Math.abs(x - playheadX) < PLAYHEAD_HIT_TOLERANCE) {
 			return 'playhead';
-		}
-
-		// Selection marker lines (full height)
-		if (Math.abs(x - selStartX) < MARKER_HIT_TOLERANCE) {
-			return 'selection-start';
-		}
-		if (Math.abs(x - selEndX) < MARKER_HIT_TOLERANCE) {
-			return 'selection-end';
 		}
 
 		// Track area (clicking anywhere else seeks)
@@ -182,9 +133,6 @@
 		switch (target) {
 			case 'playhead':
 				return 'grab';
-			case 'selection-start':
-			case 'selection-end':
-				return 'ew-resize';
 			case 'track':
 				return 'pointer';
 			default:
@@ -203,20 +151,12 @@
 		const y = e.clientY - rect.top;
 		const time = renderer.pixelToTime(x);
 
-		const target = hitTest(x, y);
+		const target = hitTest(x);
 
 		switch (target) {
 			case 'playhead':
 				timelineV2Store.setDragging('playhead');
 				canvas.style.cursor = 'grabbing';
-				break;
-
-			case 'selection-start':
-				timelineV2Store.setDragging('selection-start');
-				break;
-
-			case 'selection-end':
-				timelineV2Store.setDragging('selection-end');
 				break;
 
 			case 'track':
@@ -260,14 +200,6 @@
 					syncCurrentTime(time);
 					break;
 
-				case 'selection-start':
-					syncLeftMarker(time);
-					break;
-
-				case 'selection-end':
-					syncRightMarker(time);
-					break;
-
 				case 'pan': {
 					const deltaX = x - panStartX;
 					const viewDuration = panStartViewEnd - panStartViewStart;
@@ -281,13 +213,13 @@
 		} else {
 			// Update hover state
 			if (y >= 0 && y <= renderer.height) {
-				timelineV2Store.setHover(time, null);
+				timelineV2Store.setHover(time);
 			} else {
-				timelineV2Store.setHover(null, null);
+				timelineV2Store.setHover(null);
 			}
 
 			// Update cursor based on what's under mouse
-			const target = hitTest(x, y);
+			const target = hitTest(x);
 			canvas.style.cursor = getCursor(target);
 		}
 	}
@@ -303,8 +235,7 @@
 			// Reset cursor
 			const rect = canvas.getBoundingClientRect();
 			const x = e.clientX - rect.left;
-			const y = e.clientY - rect.top;
-			const target = hitTest(x, y);
+			const target = hitTest(x);
 			canvas.style.cursor = getCursor(target);
 		}
 	}
@@ -314,7 +245,7 @@
 	 */
 	function onPointerLeave() {
 		if (!currentState.isDragging) {
-			timelineV2Store.setHover(null, null);
+			timelineV2Store.setHover(null);
 		}
 	}
 
@@ -343,6 +274,11 @@
 			const viewDuration = currentState.viewEnd - currentState.viewStart;
 			const panAmount = (e.deltaY / renderer.width) * viewDuration * 0.3;
 			timelineV2Store.pan(panAmount);
+		}
+
+		// Trigger p5 redraw to update visualization
+		if (p5Instance) {
+			p5Instance.loop();
 		}
 	}
 </script>

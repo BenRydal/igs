@@ -1,7 +1,7 @@
 /**
  * Timeline Module
  *
- * Custom canvas-based timeline component with zoom, pan, and selection.
+ * Custom canvas-based timeline component with zoom and pan.
  */
 
 // Components
@@ -13,16 +13,7 @@ export { default as TimelineControls } from './components/TimelineControls.svelt
 export { timelineV2Store, zoomLevel, isZoomed } from './store';
 
 // Types
-export type {
-	TimelineState,
-	TimelineTrack,
-	TrackSegment,
-	TimelineMarker,
-	RenderContext,
-	RenderLayer,
-	DragTarget,
-	HitTarget
-} from './types';
+export type { TimelineState, RenderContext, RenderLayer, DragTarget, HitTarget } from './types';
 
 // Utilities
 export { formatTime, clamp, mapRange, generateGridLines, calculateGridInterval } from './utils';
