@@ -8,9 +8,7 @@
 	// MDI Icons
 	import MdPlayArrow from '~icons/mdi/play-arrow';
 	import MdPause from '~icons/mdi/pause';
-	import MdSkipPrevious from '~icons/mdi/skip-previous';
-	import MdPlus from '~icons/mdi/plus';
-	import MdMinus from '~icons/mdi/minus';
+	import MdReplay from '~icons/mdi/replay';
 	import MdMagnifyPlus from '~icons/mdi/magnify-plus-outline';
 	import MdMagnifyMinus from '~icons/mdi/magnify-minus-outline';
 	import MdFitToScreen from '~icons/mdi/fit-to-screen-outline';
@@ -18,11 +16,14 @@
 	/** Speed presets - these map to animationRate values */
 	const SPEED_PRESETS = [0.01, 0.025, 0.05, 0.1, 0.2];
 	const SPEED_LABELS = ['0.25x', '0.5x', '1x', '2x', '4x'];
+	const DEFAULT_SPEED_INDEX = 2; // 1x
 
 	let currentTime = $derived($timelineV2Store.currentTime);
-	let viewStart = $derived($timelineV2Store.viewStart);
-	let viewEnd = $derived($timelineV2Store.viewEnd);
-	let speedIndex = $derived(SPEED_PRESETS.indexOf($ConfigStore.animationRate) ?? 2);
+	let duration = $derived($timelineV2Store.viewEnd - $timelineV2Store.viewStart);
+	let speedIndex = $derived.by(() => {
+		const idx = SPEED_PRESETS.indexOf($ConfigStore.animationRate);
+		return idx >= 0 ? idx : DEFAULT_SPEED_INDEX;
+	});
 	let p5Instance = $derived($P5Store);
 
 	function reset() {
@@ -30,24 +31,15 @@
 		timelineV2Store.setCurrentTime($timelineV2Store.viewStart);
 	}
 
-	function decreaseSpeed() {
-		const currentIdx = SPEED_PRESETS.indexOf($ConfigStore.animationRate);
-		if (currentIdx > 0) {
-			ConfigStore.update((c) => {
-				c.animationRate = SPEED_PRESETS[currentIdx - 1];
-				return c;
-			});
-		}
-	}
+	function cycleSpeed(e: MouseEvent) {
+		const newIdx = e.shiftKey
+			? (speedIndex <= 0 ? SPEED_PRESETS.length - 1 : speedIndex - 1)
+			: (speedIndex >= SPEED_PRESETS.length - 1 ? 0 : speedIndex + 1);
 
-	function increaseSpeed() {
-		const currentIdx = SPEED_PRESETS.indexOf($ConfigStore.animationRate);
-		if (currentIdx < SPEED_PRESETS.length - 1) {
-			ConfigStore.update((c) => {
-				c.animationRate = SPEED_PRESETS[currentIdx + 1];
-				return c;
-			});
-		}
+		ConfigStore.update((c) => {
+			c.animationRate = SPEED_PRESETS[newIdx];
+			return c;
+		});
 	}
 
 	function zoomIn() {
@@ -66,82 +58,66 @@
 	}
 </script>
 
-<div class="flex items-center gap-4 px-4 py-2 bg-[#f6f5f3] border-t border-gray-200">
+<div class="flex items-center gap-3 px-3 py-1.5 bg-[#f6f5f3] border-t border-gray-200">
 	<!-- Playback controls -->
-	<div class="flex items-center gap-1">
+	<div class="flex items-center gap-1 bg-white border border-gray-200 rounded-full pl-0.5 pr-1 py-0.5">
 		<button
-			class="btn btn-circle btn-primary btn-sm"
+			class="btn btn-circle btn-primary btn-xs"
 			onclick={togglePlayback}
 			title={$isPlaying ? 'Pause (Space)' : 'Play (Space)'}
 			aria-label={$isPlaying ? 'Pause' : 'Play'}
 		>
 			{#if $isPlaying}
-				<MdPause class="w-4 h-4" />
+				<MdPause class="w-3.5 h-3.5" />
 			{:else}
-				<MdPlayArrow class="w-4 h-4" />
+				<MdPlayArrow class="w-3.5 h-3.5" />
 			{/if}
 		</button>
 		<button
-			class="btn btn-ghost btn-square btn-sm"
+			class="btn btn-ghost btn-square btn-xs"
 			onclick={reset}
 			title="Reset to start"
 			aria-label="Reset"
 		>
-			<MdSkipPrevious class="w-5 h-5" />
+			<MdReplay class="w-3.5 h-3.5" />
 		</button>
-	</div>
-
-	<!-- Speed controls -->
-	<div class="join border border-gray-200 rounded">
+		<span class="w-px h-3.5 bg-gray-200"></span>
 		<button
-			class="join-item btn btn-ghost btn-xs px-1.5"
-			onclick={decreaseSpeed}
-			disabled={speedIndex === 0}
-			title="Slower"
-			aria-label="Decrease speed"
+			class="btn btn-ghost btn-xs px-1.5 font-mono font-semibold"
+			onclick={cycleSpeed}
+			title="Click to change speed (Shift+click for slower)"
+			aria-label="Playback speed"
 		>
-			<MdMinus class="w-3.5 h-3.5" />
-		</button>
-		<span class="join-item flex items-center px-2 text-xs font-semibold font-mono bg-white border-x border-gray-200">
-			{SPEED_LABELS[speedIndex >= 0 ? speedIndex : 2]}
-		</span>
-		<button
-			class="join-item btn btn-ghost btn-xs px-1.5"
-			onclick={increaseSpeed}
-			disabled={speedIndex === SPEED_PRESETS.length - 1}
-			title="Faster"
-			aria-label="Increase speed"
-		>
-			<MdPlus class="w-3.5 h-3.5" />
+			{SPEED_LABELS[speedIndex]}
 		</button>
 	</div>
 
 	<!-- Zoom controls -->
-	<div class="join border border-gray-200 rounded">
+	<div class="flex items-center gap-0.5 bg-white border border-gray-200 rounded-full px-0.5 py-0.5">
 		<button
-			class="join-item btn btn-ghost btn-xs px-1.5"
+			class="btn btn-ghost btn-square btn-xs"
 			onclick={zoomOut}
 			title="Zoom out (−)"
 			aria-label="Zoom out"
 		>
-			<MdMagnifyMinus class="w-4 h-4" />
+			<MdMagnifyMinus class="w-3.5 h-3.5" />
 		</button>
 		<button
-			class="join-item btn btn-ghost btn-xs px-1.5"
+			class="btn btn-ghost btn-square btn-xs"
 			onclick={zoomToFit}
 			title="Fit to view (0)"
 			aria-label="Fit to view"
 			disabled={!$isZoomed}
 		>
-			<MdFitToScreen class="w-4 h-4" />
+			<MdFitToScreen class="w-3.5 h-3.5" />
 		</button>
 		<button
-			class="join-item btn btn-ghost btn-xs px-1.5"
+			class="btn btn-ghost btn-square btn-xs"
 			onclick={zoomIn}
 			title="Zoom in (+)"
 			aria-label="Zoom in"
 		>
-			<MdMagnifyPlus class="w-4 h-4" />
+			<MdMagnifyPlus class="w-3.5 h-3.5" />
 		</button>
 	</div>
 	{#if $isZoomed}
@@ -151,9 +127,9 @@
 	{/if}
 
 	<!-- Time display -->
-	<div class="flex items-center gap-1.5 ml-auto bg-gray-100 px-3 py-1 rounded-md">
-		<span class="font-mono text-base font-semibold text-red-500">{formatTime(currentTime)}</span>
-		<span class="text-gray-400">/</span>
-		<span class="font-mono text-base text-gray-500">{formatTime(viewEnd - viewStart)}</span>
+	<div class="flex items-center gap-1 ml-auto bg-gray-100 px-2 py-0.5 rounded">
+		<span class="font-mono text-sm font-semibold text-red-500">{formatTime(currentTime)}</span>
+		<span class="text-gray-400 text-sm">/</span>
+		<span class="font-mono text-sm text-gray-500">{formatTime(duration)}</span>
 	</div>
 </div>
