@@ -9,6 +9,7 @@ import { mapRange, getDevicePixelRatio } from '../utils';
 import { BackgroundLayer } from './layers/background';
 import { PlayheadLayer } from './layers/playhead';
 import { HoverLayer } from './layers/hover';
+import { ZoomSelectionLayer } from './layers/zoom-selection';
 
 export class TimelineRenderer {
 	private canvas: HTMLCanvasElement;
@@ -27,7 +28,12 @@ export class TimelineRenderer {
 		this.dpr = getDevicePixelRatio();
 
 		// Layer stack (render order: bottom to top)
-		this.layers = [new BackgroundLayer(), new PlayheadLayer(), new HoverLayer()];
+		this.layers = [
+			new BackgroundLayer(),
+			new PlayheadLayer(),
+			new ZoomSelectionLayer(),
+			new HoverLayer()
+		];
 	}
 
 	/**

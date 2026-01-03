@@ -7,7 +7,7 @@
 	import P5Store from '../../../stores/p5Store';
 	import VideoStore, { requestSeek } from '../../../stores/videoStore';
 	import { isPlaying } from '../../../stores/playbackStore';
-	import { HANDLE_HEIGHT, PLAYHEAD_HIT_TOLERANCE } from '../constants';
+	import { PLAYHEAD_HIT_TOLERANCE } from '../constants';
 
 	/** Canvas element reference */
 	let canvas: HTMLCanvasElement;
@@ -25,6 +25,10 @@
 	let panStartX = 0;
 	let panStartViewStart = 0;
 	let panStartViewEnd = 0;
+
+	/** Zoom region state */
+	let zoomStartX = 0;
+	const DRAG_THRESHOLD = 5; // pixels - distinguishes click from drag
 
 	/** p5 instance for triggering redraws */
 	let p5Instance = $derived($P5Store);
@@ -148,12 +152,9 @@
 
 		const rect = canvas.getBoundingClientRect();
 		const x = e.clientX - rect.left;
-		const y = e.clientY - rect.top;
 		const time = renderer.pixelToTime(x);
 
-		const target = hitTest(x);
-
-		switch (target) {
+		switch (hitTest(x)) {
 			case 'playhead':
 				timelineV2Store.setDragging('playhead');
 				canvas.style.cursor = 'grabbing';
@@ -168,11 +169,11 @@
 					panStartViewEnd = currentState.viewEnd;
 					canvas.style.cursor = 'grabbing';
 				} else {
-					// Click to seek
-					syncCurrentTime(time);
-					// Also start dragging playhead
-					timelineV2Store.setDragging('playhead');
-					canvas.style.cursor = 'grabbing';
+					// Start potential zoom region (will become seek if no drag)
+					timelineV2Store.setDragging('zoom-region');
+					timelineV2Store.setZoomSelection(time, time);
+					zoomStartX = x;
+					canvas.style.cursor = 'crosshair';
 				}
 				break;
 
@@ -209,6 +210,10 @@
 					timelineV2Store.setView(newStart, newEnd);
 					break;
 				}
+
+				case 'zoom-region':
+					timelineV2Store.setZoomSelection(currentState.zoomSelectionStart, time);
+					break;
 			}
 		} else {
 			// Update hover state
@@ -228,13 +233,36 @@
 	 * Pointer up handler
 	 */
 	function onPointerUp(e: PointerEvent) {
+		if (!renderer) return;
+
 		if (currentState.isDragging) {
-			timelineV2Store.setDragging(null);
+			const rect = canvas.getBoundingClientRect();
+			const x = e.clientX - rect.left;
+
+			// Handle zoom-region completion
+			if (currentState.isDragging === 'zoom-region') {
+				const dragDistance = Math.abs(x - zoomStartX);
+
+				if (dragDistance < DRAG_THRESHOLD) {
+					// It was a click, not a drag - seek to this position
+					const time = renderer.pixelToTime(x);
+					syncCurrentTime(time);
+					timelineV2Store.setZoomSelection(null, null);
+					timelineV2Store.setDragging(null);
+				} else {
+					// It was a drag - apply zoom
+					timelineV2Store.applyZoomSelection();
+					// Trigger p5 redraw
+					if (p5Instance) {
+						p5Instance.loop();
+					}
+				}
+			} else {
+				timelineV2Store.setDragging(null);
+			}
 			canvas.releasePointerCapture(e.pointerId);
 
 			// Reset cursor
-			const rect = canvas.getBoundingClientRect();
-			const x = e.clientX - rect.left;
 			const target = hitTest(x);
 			canvas.style.cursor = getCursor(target);
 		}
@@ -281,6 +309,7 @@
 			p5Instance.loop();
 		}
 	}
+
 </script>
 
 <div bind:this={container} class="w-full h-full min-h-10 relative">

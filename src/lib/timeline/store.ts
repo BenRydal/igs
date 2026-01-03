@@ -27,7 +27,11 @@ const initialState: TimelineState = {
 
 	// UI
 	hoveredTime: null,
-	isDragging: null
+	isDragging: null,
+
+	// Zoom selection
+	zoomSelectionStart: null,
+	zoomSelectionEnd: null
 };
 
 function createTimelineStore() {
@@ -148,6 +152,37 @@ function createTimelineStore() {
 		 */
 		setDragging(target: DragTarget) {
 			update((s) => ({ ...s, isDragging: target }));
+		},
+
+		/**
+		 * Set zoom selection range (for drag-to-zoom)
+		 */
+		setZoomSelection(start: number | null, end: number | null) {
+			update((s) => ({ ...s, zoomSelectionStart: start, zoomSelectionEnd: end }));
+		},
+
+		/**
+		 * Apply zoom selection and clear it
+		 */
+		applyZoomSelection() {
+			update((s) => {
+				if (s.zoomSelectionStart !== null && s.zoomSelectionEnd !== null) {
+					const start = Math.min(s.zoomSelectionStart, s.zoomSelectionEnd);
+					const end = Math.max(s.zoomSelectionStart, s.zoomSelectionEnd);
+					// Only zoom if selection is meaningful (> 0.5 seconds)
+					if (end - start > 0.5) {
+						return {
+							...s,
+							viewStart: clamp(start, s.dataStart, s.dataEnd),
+							viewEnd: clamp(end, s.dataStart, s.dataEnd),
+							zoomSelectionStart: null,
+							zoomSelectionEnd: null,
+							isDragging: null
+						};
+					}
+				}
+				return { ...s, zoomSelectionStart: null, zoomSelectionEnd: null, isDragging: null };
+			});
 		},
 
 		// ==================== Pixel Bounds ====================

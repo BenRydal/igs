@@ -146,6 +146,8 @@
 	</div>
 	{#if $isZoomed}
 		<span class="text-xs text-gray-500 font-medium">{$zoomLevel.toFixed(1)}x</span>
+	{:else}
+		<span class="text-xs text-gray-400">Drag to zoom · Ctrl+scroll to zoom</span>
 	{/if}
 
 	<!-- Time display -->

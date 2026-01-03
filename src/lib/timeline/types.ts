@@ -5,7 +5,7 @@
  */
 
 /** What the user is currently dragging */
-export type DragTarget = 'playhead' | 'pan' | null;
+export type DragTarget = 'playhead' | 'pan' | 'zoom-region' | null;
 
 /** Hit test result */
 export type HitTarget = 'playhead' | 'track' | 'empty';
@@ -30,6 +30,10 @@ export interface TimelineState {
 	// UI state
 	hoveredTime: number | null;
 	isDragging: DragTarget;
+
+	// Zoom selection (for drag-to-zoom)
+	zoomSelectionStart: number | null;
+	zoomSelectionEnd: number | null;
 }
 
 /** Context passed to render layers */

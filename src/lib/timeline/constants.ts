@@ -8,9 +8,6 @@
 /** Monospace font stack for time labels and tooltips */
 export const MONO_FONT = 'ui-monospace, SFMono-Regular, monospace';
 
-/** Height of draggable handles at the top (selection markers, playhead) */
-export const HANDLE_HEIGHT = 20;
-
 /** Height of the playhead triangle head */
 export const PLAYHEAD_HEAD_HEIGHT = 14;
 
