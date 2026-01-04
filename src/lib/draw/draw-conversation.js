@@ -55,9 +55,9 @@ export class DrawConversation {
     }
 
     const state = timelineV2Store.getState()
-    const zoomLevel = state.dataEnd
-      ? (state.selectionEnd - state.selectionStart) / state.dataEnd
-      : 1
+    const dataRange = state.dataEnd - state.dataStart
+    const viewRange = state.viewEnd - state.viewStart
+    const zoomLevel = dataRange > 0 ? viewRange / dataRange : 1
     zoomLevel > 0.3 ? this.drawAggregated(mergedPoints) : this.drawDetailed(mergedPoints)
   }
 
