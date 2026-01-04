@@ -4,6 +4,9 @@
   import { formatFileSize, getFileSizeLimit } from '$lib/validation/rules'
   import { toastStore } from '../../../stores/toastStore'
   import { openModal, closeModal } from '../../../stores/modalStore'
+  import { loadVideo, reset as resetVideo } from '../../../stores/videoStore'
+  import { pause as pausePlayback } from '../../../stores/playbackStore'
+  import { parseYouTubeUrl } from '$lib/video/video-service'
 
   interface Props {
     /** Whether the dialog is open */
@@ -29,6 +32,8 @@
   let files = $state<File[]>([])
   let isDragOver = $state(false)
   let clearExistingData = $state(false)
+  let youtubeUrl = $state('')
+  let youtubeError = $state('')
 
   // File type info for display
   const fileTypeInfo: Record<string, { label: string; icon: string; color: string }> = {
@@ -215,6 +220,27 @@
   }
 
   /**
+   * Load YouTube video from URL
+   */
+  function handleLoadYoutube() {
+    const trimmed = youtubeUrl.trim()
+    if (!trimmed) return
+
+    const videoId = parseYouTubeUrl(trimmed)
+    if (!videoId) {
+      youtubeError = 'Invalid YouTube URL'
+      return
+    }
+
+    resetVideo()
+    pausePlayback()
+    loadVideo({ type: 'youtube', videoId })
+    toastStore.success('YouTube video loaded')
+    youtubeUrl = ''
+    youtubeError = ''
+  }
+
+  /**
    * Handle import action
    */
   async function handleImport() {
@@ -238,6 +264,8 @@
     files = []
     clearExistingData = false
     isDragOver = false
+    youtubeUrl = ''
+    youtubeError = ''
     onClose()
   }
 
@@ -308,7 +336,7 @@
         <span class="badge badge-outline gap-1">📊 CSV</span>
         <span class="badge badge-outline gap-1">📍 GPX</span>
         <span class="badge badge-outline gap-1">🗺️ PNG/JPG</span>
-        <span class="badge badge-outline gap-1">🎬 MP4</span>
+        <span class="badge badge-outline gap-1">🎬 MP4/YouTube</span>
       </div>
 
       <!-- Drop Zone -->
@@ -341,6 +369,29 @@
           {isDragOver ? 'Drop files here' : 'Drag & drop files here'}
         </p>
         <p class="text-sm text-base-content/60">or click to browse</p>
+      </div>
+
+      <!-- YouTube URL Input -->
+      <div class="mt-4">
+        <div class="divider text-sm text-base-content/60">OR</div>
+        <div class="flex gap-2">
+          <div class="flex-1">
+            <input
+              type="text"
+              placeholder="Paste YouTube URL (e.g., https://youtube.com/watch?v=...)"
+              bind:value={youtubeUrl}
+              oninput={() => (youtubeError = '')}
+              onkeydown={(e) => e.key === 'Enter' && handleLoadYoutube()}
+              class="input input-bordered w-full {youtubeError ? 'input-error' : ''}"
+            />
+            {#if youtubeError}
+              <p class="text-error text-sm mt-1">{youtubeError}</p>
+            {/if}
+          </div>
+          <button class="btn btn-primary" onclick={handleLoadYoutube} disabled={!youtubeUrl.trim()}>
+            Load Video
+          </button>
+        </div>
       </div>
 
       <!-- File List -->
