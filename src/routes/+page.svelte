@@ -1393,6 +1393,15 @@
           }}
         />
         <IconButton
+          icon={currentConfig.preserveFloorplanAspectRatio ? MdAspectRatio : MdFitToPageOutline}
+          tooltip={currentConfig.preserveFloorplanAspectRatio ? 'Stretch to Fill' : 'Preserve Aspect Ratio'}
+          onclick={() => {
+            handleConfigChange('preserveFloorplanAspectRatio', !currentConfig.preserveFloorplanAspectRatio)
+            p5Instance?.loop()
+            mobileMenuOpen = false
+          }}
+        />
+        <IconButton
           icon={Md3DRotation}
           tooltip="Toggle 2D/3D"
           onclick={() => {
