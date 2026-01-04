@@ -15,10 +15,10 @@
   let showCitation = $state(false)
 
   const examples = [
-    { id: 'example-1', title: "Jordan's Last Shot", duration: '37 sec', image: '/images/1-example-jordan.png' },
-    { id: 'example-2', title: 'Museum Gallery Visit', duration: '8 min', image: '/images/2-example-museum.png' },
-    { id: 'example-3', title: 'Classroom Lesson', duration: '56 min', image: '/images/3-example-timss.png' },
-    { id: 'example-12', title: 'Walking Tour', duration: '43 min', image: '/images/4-example-tour.png' },
+    { id: 'example-1', title: "Jordan's Last Shot", duration: '37 sec', image: '/images/1-example-jordan.webp' },
+    { id: 'example-2', title: 'Museum Gallery Visit', duration: '8 min', image: '/images/2-example-museum.webp' },
+    { id: 'example-3', title: 'Classroom Lesson', duration: '56 min', image: '/images/3-example-timss.webp' },
+    { id: 'example-12', title: 'Walking Tour', duration: '43 min', image: '/images/4-example-tour.webp' },
   ]
 
   function loadExample(exampleId: string) {
