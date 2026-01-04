@@ -1932,6 +1932,7 @@
 
   <!-- Right Side: Timeline -->
   <div
+    id="timeline-panel"
     class="flex flex-1 items-center bg-[#f6f5f3] overflow-visible py-1 px-2 lg:px-4"
     style="min-width: 280px;"
   >
