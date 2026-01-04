@@ -33,6 +33,7 @@
   // File type info for display
   const fileTypeInfo: Record<string, { label: string; icon: string; color: string }> = {
     csv: { label: 'CSV Data', icon: '📊', color: 'badge-info' },
+    gpx: { label: 'GPS Track', icon: '📍', color: 'badge-info' },
     png: { label: 'Floor Plan', icon: '🗺️', color: 'badge-success' },
     jpg: { label: 'Floor Plan', icon: '🗺️', color: 'badge-success' },
     jpeg: { label: 'Floor Plan', icon: '🗺️', color: 'badge-success' },
@@ -305,6 +306,7 @@
       <!-- Supported file types info -->
       <div class="mb-4 flex flex-wrap gap-2 justify-center">
         <span class="badge badge-outline gap-1">📊 CSV</span>
+        <span class="badge badge-outline gap-1">📍 GPX</span>
         <span class="badge badge-outline gap-1">🗺️ PNG/JPG</span>
         <span class="badge badge-outline gap-1">🎬 MP4</span>
       </div>
