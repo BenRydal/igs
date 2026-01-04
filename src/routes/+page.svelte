@@ -684,6 +684,14 @@
       const customEvent = event as CustomEvent<{ value: string }>
       if (customEvent.detail?.value) {
         updateExampleDataDropDown({ target: { value: customEvent.detail.value } })
+        // Find and set the label for the dropdown
+        for (const group of dropdownOptions) {
+          const item = group.items.find((i) => i.value === customEvent.detail.value)
+          if (item) {
+            selectedDropDownOption = item.label
+            break
+          }
+        }
       }
     }
 
