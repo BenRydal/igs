@@ -27,6 +27,7 @@
   import MdSchool from '~icons/mdi/school'
   import MdWalk from '~icons/mdi/walk'
   import MdVideo from '~icons/mdi/video-vintage'
+  import MdMusic from '~icons/mdi/music'
   import MdChevronDown from '~icons/mdi/chevron-down'
   import MdChevronRight from '~icons/mdi/chevron-right'
   import MdMoreVert from '~icons/mdi/dots-vertical'
@@ -124,6 +125,14 @@
         { value: 'example-14', label: 'Jefferson Street Tour' },
         { value: 'example-12', label: 'Civil Rights Tour: Creating the Route' },
         { value: 'example-13', label: 'Civil Rights Tour: Walking the Route' },
+      ],
+    },
+    {
+      label: 'Music Performance',
+      icon: MdMusic,
+      items: [
+        { value: 'example-15', label: 'Trio' },
+        { value: 'example-16', label: 'Full Band' },
       ],
     },
     {

@@ -113,6 +113,10 @@ export type ExampleId =
   | 'example-10'
   | 'example-11'
   | 'example-12'
+  | 'example-13'
+  | 'example-14'
+  | 'example-15'
+  | 'example-16'
 
 /**
  * Example data configuration
