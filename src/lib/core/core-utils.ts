@@ -99,11 +99,11 @@ export class CoreUtils {
     )
   }
 
-  // NOTE: for talk turns/3rd column, allow boolean, number or string values. These are cast as Strings later in program
+  // NOTE: for speaker and talk columns, allow boolean, number or string values. These are cast as Strings later in program
   conversationRowForType(curRow: CsvRow): boolean {
     return (
       this.isValidNumber(curRow[this.headersConversation[0]]) &&
-      typeof curRow[this.headersConversation[1]] === 'string' &&
+      this.isStringNumberOrBoolean(curRow[this.headersConversation[1]]) &&
       this.isStringNumberOrBoolean(curRow[this.headersConversation[2]])
     )
   }

@@ -538,9 +538,12 @@ export class Core {
       csvData.forEach((row) => {
         if (!this.coreUtils.conversationRowForType(row)) return
 
-        let curUser = users.find((curUser) => curUser.name === row.speaker.toLowerCase())
+        const speakerName = String(row.speaker).trim().toLowerCase()
+        if (!speakerName) return // Skip empty speaker names
+
+        let curUser = users.find((curUser) => curUser.name === speakerName)
         if (!curUser) {
-          curUser = this.createNewUser(users, row.speaker.toLowerCase())
+          curUser = this.createNewUser(users, speakerName)
           users.push(curUser)
         }
         curUser.conversationIsLoaded = true
