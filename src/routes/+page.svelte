@@ -483,7 +483,6 @@
   function clearAllDataLocal() {
     resetVideo()
     resetGPS()
-    currentConfig.isPathColorMode = false
 
     closeAllDropdowns()
 
@@ -494,7 +493,7 @@
     core.movementData = []
     core.conversationData = []
 
-    ConfigStore.update((currentConfig) => ({ ...currentConfig, dataHasCodes: false }))
+    ConfigStore.update((config) => ({ ...config, dataHasCodes: false, isPathColorMode: false }))
 
     // Recreate canvas to get fresh WebGL context (helps Safari performance)
     if (p5Instance?.recreateCanvas) {
