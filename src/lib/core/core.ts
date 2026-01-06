@@ -267,6 +267,9 @@ export class Core {
     if (this.coreUtils.testMovement(results)) {
       // Regular movement data (x/y headers) - reset GPS mode if active
       if (getGPSState().isGPSMode) {
+        toastStore.warning(
+          'Loading indoor movement alongside GPS data. Coordinates may not align.'
+        )
         resetGPS()
       }
       this.movementData.push({ fileName, csvData: csvData as unknown as MovementRow[] })
@@ -377,6 +380,13 @@ export class Core {
         'GPS data detected but Mapbox is not configured. Please set VITE_MAPBOX_TOKEN in your .env file.'
       )
       return
+    }
+
+    // Warn if loading GPS data alongside existing indoor movement data
+    if (this.movementData.length > 0 && !getGPSState().isGPSMode) {
+      toastStore.warning(
+        'Loading GPS data alongside indoor movement. Coordinates may not align.'
+      )
     }
 
     // Normalize GPS data to consistent field names and filter invalid points
