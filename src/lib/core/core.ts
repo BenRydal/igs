@@ -332,7 +332,6 @@ export class Core {
    */
   updateUsersForMovement = (csvData: MovementRow[], userName: string): void => {
     const { smallDataThreshold, samplingInterval } = get(ConfigStore)
-    let endTime = 0
 
     UserStore.update((currentUsers) => {
       let users = [...currentUsers]
@@ -343,8 +342,6 @@ export class Core {
         users.push(user)
       } else user.dataTrail = [] // reset to overwrite user with new data if same user is loaded again
       user.movementIsLoaded = true
-      const lastTime = csvData[csvData.length - 1]?.time
-      if (endTime < lastTime) endTime = lastTime
 
       if (csvData.length <= smallDataThreshold) {
         csvData.forEach((row) => {
@@ -363,7 +360,7 @@ export class Core {
       }
       return users
     })
-    this.updateTimelineValues(endTime)
+    this.updateTimelineValues()
   }
 
   /**
@@ -677,8 +674,20 @@ export class Core {
     this.updateCodeStore(uniqueCodes)
   }
 
-  updateTimelineValues = (endTime: number) => {
-    timelineV2Store.initialize(endTime, 0)
+  updateTimelineValues = () => {
+    const users = get(UserStore)
+    let maxEndTime = 0
+
+    for (const user of users) {
+      if (user.dataTrail.length > 0) {
+        const lastTime = user.dataTrail[user.dataTrail.length - 1].time ?? 0
+        if (lastTime > maxEndTime) maxEndTime = lastTime
+      }
+    }
+
+    if (maxEndTime > 0) {
+      timelineV2Store.initialize(maxEndTime, 0)
+    }
   }
 
   updateCodeValues = (dataPoints: DataPoint[]) => {
