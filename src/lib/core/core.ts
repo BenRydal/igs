@@ -491,9 +491,39 @@ export class Core {
    * ```
    */
   updateUsersForConversation = (csvData: ConversationRow[]): void => {
+    // Check for movement data before update (for warning toast)
+    const existingUsers = get(UserStore)
+    const hasMovementData = existingUsers.some((user) =>
+      user.dataTrail.some((point) => point.x != null && point.y != null)
+    )
+
+    if (!hasMovementData) {
+      toastStore.warning(
+        'Conversation loaded without movement data. Positions will update when movement is loaded.'
+      )
+    }
+
     UserStore.update((currentUsers) => {
-      const users = [...currentUsers]
+      // Clean up previous conversation data:
+      // 1. Remove conversation-only users entirely
+      // 2. Clear conversation data from users who also have movement
+      let users = currentUsers.filter((user) => {
+        if (user.conversationIsLoaded && !user.movementIsLoaded) {
+          return false // Remove conversation-only users
+        }
+        return true
+      })
+
+      // For users with both movement and conversation, remove speech data points
+      users.forEach((user) => {
+        if (user.conversationIsLoaded && user.movementIsLoaded) {
+          user.dataTrail = user.dataTrail.filter((point) => !point.speech)
+          user.conversationIsLoaded = false
+        }
+      })
+
       const allUsersMovementData = this.getAllUsersMovementData(users)
+
       let curMaxTurnLength = 0
       csvData.forEach((row) => {
         if (!this.coreUtils.conversationRowForType(row)) return
