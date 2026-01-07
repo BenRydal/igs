@@ -59,9 +59,14 @@ function createTimelineStore() {
 
 		/**
 		 * Reset to initial empty state
+		 * Preserves leftX/rightX pixel bounds as they depend on DOM layout, not data
 		 */
 		reset() {
-			set(initialState);
+			update((s) => ({
+				...initialState,
+				leftX: s.leftX,
+				rightX: s.rightX
+			}));
 		},
 
 		// ==================== Playhead ====================
