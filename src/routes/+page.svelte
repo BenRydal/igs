@@ -61,7 +61,7 @@
   import DataPointTable from '$lib/components/DataPointTable.svelte'
   import ModeIndicator from '$lib/components/ModeIndicator.svelte'
   import FloatingDropdown from '$lib/components/FloatingDropdown.svelte'
-  import { OnboardingTour } from '$lib/tour'
+  import { OnboardingTour, shouldShowTour } from '$lib/tour'
   import DataImporter from '$lib/components/import/DataImporter.svelte'
   import MapStyleSelector from '$lib/components/MapStyleSelector.svelte'
   import { capitalizeFirstLetter, capitalizeEachWord } from '$lib/utils/string'
@@ -270,7 +270,7 @@
     igsSketch(p5)
   }
 
-  // Start with modal closed - it will open after tour completes
+  // Modal state - opens immediately for first-time visitors
   let isModalOpen = writable(false)
 
   let sortedCodes = $derived(
@@ -708,8 +708,8 @@
       }
     }
 
-    // Handler to show modal after tour completes
-    const handleTourComplete = () => {
+    // Show welcome modal immediately for first-time visitors
+    if (shouldShowTour()) {
       isModalOpen.set(true)
     }
 
@@ -720,7 +720,6 @@
     window.addEventListener('igs:download-codes', handleDownloadCodes)
     window.addEventListener('igs:toggle-help', handleToggleHelp)
     window.addEventListener('igs:load-example', handleLoadExample)
-    window.addEventListener('tour-complete', handleTourComplete)
 
     // Cleanup function
     return () => {
@@ -739,7 +738,6 @@
       window.removeEventListener('igs:download-codes', handleDownloadCodes)
       window.removeEventListener('igs:toggle-help', handleToggleHelp)
       window.removeEventListener('igs:load-example', handleLoadExample)
-      window.removeEventListener('tour-complete', handleTourComplete)
     }
   })
 </script>
