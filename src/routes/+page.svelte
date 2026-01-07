@@ -493,7 +493,12 @@
     core.movementData = []
     core.conversationData = []
 
-    ConfigStore.update((config) => ({ ...config, dataHasCodes: false, isPathColorMode: false }))
+    ConfigStore.update((config) => ({
+      ...config,
+      dataHasCodes: false,
+      isPathColorMode: false,
+      maxStopLength: 0,
+    }))
 
     // Recreate canvas to get fresh WebGL context (helps Safari performance)
     if (p5Instance?.recreateCanvas) {
