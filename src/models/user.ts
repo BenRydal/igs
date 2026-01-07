@@ -13,15 +13,14 @@ export class User {
     dataTrail: DataPoint[],
     color: string,
     enabled = true,
-    name = '',
-    movementIsLoaded = false
+    name = ''
   ) {
     this.enabled = enabled
     this.conversation_enabled = enabled
     this.name = name
     this.color = color
     this.dataTrail = dataTrail
-    this.movementIsLoaded = movementIsLoaded
-    this.conversationIsLoaded = movementIsLoaded
+    this.movementIsLoaded = false
+    this.conversationIsLoaded = false
   }
 }
