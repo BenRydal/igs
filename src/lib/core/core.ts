@@ -662,29 +662,34 @@ export class Core {
   }
 
   updateStopValues(data: DataPoint[]): void {
-    let curMaxStopLength = 0 // holds length of stop for each calculated stop segment
+    let curMaxStopLength = 0
 
     for (let i = 0; i < data.length; i++) {
-      let cumulativeTime = 0
+      // Find end of this stop (consecutive points at same location)
       let j = i
       while (
         j < data.length &&
         (data[j].x ?? 0) === (data[i].x ?? 0) &&
         (data[j].y ?? 0) === (data[i].y ?? 0)
       ) {
-        cumulativeTime = (data[j].time ?? 0) - (data[i].time ?? 0)
         j++
       }
 
-      if (cumulativeTime > curMaxStopLength) {
-        curMaxStopLength = cumulativeTime
+      // Calculate stop duration (first point to last point in stop)
+      const stopDuration = (data[j - 1].time ?? 0) - (data[i].time ?? 0)
+
+      if (stopDuration > curMaxStopLength) {
+        curMaxStopLength = stopDuration
       }
 
+      // Mark all points in this stop (except first) with the duration
       for (let k = i + 1; k < j; k++) {
-        data[k].stopLength = cumulativeTime
+        data[k].stopLength = stopDuration
       }
+
       i = j - 1
     }
+
     ConfigStore.update((store) => ({
       ...store,
       maxStopLength: Math.max(store.maxStopLength, curMaxStopLength),
