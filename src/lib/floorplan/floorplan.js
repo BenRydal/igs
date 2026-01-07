@@ -1,4 +1,8 @@
 import { toastStore } from '../../stores/toastStore'
+import GPSStore from '../../stores/gpsStore'
+import ConfigStore from '../../stores/configStore'
+import { get } from 'svelte/store'
+import { GPS_NORMALIZED_SIZE } from '../gps/gps-transformer'
 
 export class FloorPlan {
   constructor(sk) {
@@ -7,6 +11,45 @@ export class FloorPlan {
     this.width = null
     this.height = null
     this.curFloorPlanRotation = 1 // [0-3] 4 rotation modes none, 90, 180, 270
+  }
+
+  /**
+   * Calculate effective dimensions for the floorplan within the container.
+   * When preserveFloorplanAspectRatio is true, maintains image proportions.
+   * Returns { width, height, offsetX, offsetY } for positioning.
+   */
+  getEffectiveDimensions(container) {
+    const config = get(ConfigStore)
+
+    if (!config.preserveFloorplanAspectRatio || !this.img) {
+      return { width: container.width, height: container.height, offsetX: 0, offsetY: 0 }
+    }
+
+    // Get image aspect ratio, accounting for rotation
+    // Rotations 1 and 3 (90° and 270°) swap width/height
+    const isRotated90or270 = this.curFloorPlanRotation === 1 || this.curFloorPlanRotation === 3
+    const imgWidth = isRotated90or270 ? this.img.height : this.img.width
+    const imgHeight = isRotated90or270 ? this.img.width : this.img.height
+    const imgAspect = imgWidth / imgHeight
+    const containerAspect = container.width / container.height
+
+    let width, height, offsetX, offsetY
+
+    if (imgAspect > containerAspect) {
+      // Image is wider than container - fit to width
+      width = container.width
+      height = width / imgAspect
+      offsetX = 0
+      offsetY = (container.height - height) / 2
+    } else {
+      // Image is taller than container - fit to height
+      height = container.height
+      width = height * imgAspect
+      offsetX = (container.width - width) / 2
+      offsetY = 0
+    }
+
+    return { width, height, offsetX, offsetY }
   }
 
   /**
@@ -31,49 +74,60 @@ export class FloorPlan {
   }
 
   /**
-   * Organizes floor plan drawing methods with correct rotation angle and corresponding width/height that vary bsed on rotation angle
+   * Organizes floor plan drawing methods with correct rotation angle and corresponding width/height that vary based on rotation angle
    */
   setFloorPlan(container) {
+    const eff = this.getEffectiveDimensions(container)
+
+    // Apply offset for centered positioning when preserving aspect ratio
+    this.sk.push()
+    this.sk.translate(eff.offsetX, eff.offsetY)
+
     switch (this.curFloorPlanRotation) {
-      case 0:
-        this.draw(container.width, container.height)
-        break
       case 1:
-        this.rotateAndDraw(this.sk.HALF_PI, container.height, container.width, container)
+        this.rotateAndDraw(this.sk.HALF_PI, eff.height, eff.width, eff)
         break
       case 2:
-        this.rotateAndDraw(this.sk.PI, container.width, container.height, container)
+        this.rotateAndDraw(this.sk.PI, eff.width, eff.height, eff)
         break
       case 3:
-        this.rotateAndDraw(-this.sk.HALF_PI, container.height, container.width, container)
+        this.rotateAndDraw(-this.sk.HALF_PI, eff.height, eff.width, eff)
+        break
+      case 0:
+      default:
+        this.draw(eff.width, eff.height)
         break
     }
+
+    this.sk.pop()
   }
 
   /**
    * Converts x/y pixel positions from data point to floor plan depending on floor plan rotation mode
+   * In GPS mode, coordinates are in normalized 0-1000 space; in regular mode, based on image dimensions
    * @param  {Float} xPos
    * @param  {Float} yPos
    */
   getScaledXYPos(xPos, yPos, container) {
-    let scaledXPos, scaledYPos
+    const gpsState = get(GPSStore)
+    const eff = this.getEffectiveDimensions(container)
+
+    // Normalize coordinates to 0-1 range based on mode
+    const normX =
+      gpsState.isGPSMode && this.img ? xPos / GPS_NORMALIZED_SIZE : xPos / this.img.width
+    const normY =
+      gpsState.isGPSMode && this.img ? yPos / GPS_NORMALIZED_SIZE : yPos / this.img.height
+
+    // Apply rotation and scale to effective dimensions, then add offset
     switch (this.curFloorPlanRotation) {
-      case 0:
-        scaledXPos = (xPos * container.width) / this.img.width
-        scaledYPos = (yPos * container.height) / this.img.height
-        return [scaledXPos, scaledYPos]
       case 1:
-        scaledXPos = container.width - (yPos * container.width) / this.img.height
-        scaledYPos = (xPos * container.height) / this.img.width
-        return [scaledXPos, scaledYPos]
+        return [eff.offsetX + eff.width - normY * eff.width, eff.offsetY + normX * eff.height]
       case 2:
-        scaledXPos = container.width - (xPos * container.width) / this.img.width
-        scaledYPos = container.height - (yPos * container.height) / this.img.height
-        return [scaledXPos, scaledYPos]
+        return [eff.offsetX + eff.width - normX * eff.width, eff.offsetY + eff.height - normY * eff.height]
       case 3:
-        scaledXPos = (yPos * container.width) / this.img.height
-        scaledYPos = container.height - (xPos * container.height) / this.img.width
-        return [scaledXPos, scaledYPos]
+        return [eff.offsetX + normY * eff.width, eff.offsetY + eff.height - normX * eff.height]
+      default:
+        return [eff.offsetX + normX * eff.width, eff.offsetY + normY * eff.height]
     }
   }
 

@@ -4,7 +4,7 @@
   import HoveredConversationStore from '../../stores/interactionStore'
   import ConfigStore from '../../stores/configStore'
   import { requestSeek, hasVideoSource } from '../../stores/videoStore'
-  import TimelineStore from '../../stores/timelineStore'
+  import { timelineV2Store } from '../timeline/store'
   import P5Store from '../../stores/p5Store'
   import { formatTime, parseTime } from '../utils/format'
   import MdClose from '~icons/mdi/close'
@@ -62,7 +62,7 @@
 
   // Store subscriptions
   let hoveredConversation = $derived($HoveredConversationStore)
-  let timelineCurrTime = $derived($TimelineStore.getCurrTime())
+  let timelineCurrTime = $derived($timelineV2Store.currentTime)
 
   // Current time: hover takes priority, otherwise timeline
   let currentTime = $derived(hoveredConversation?.turns[0]?.time ?? timelineCurrTime)
@@ -135,10 +135,7 @@
   function handleEntryClick(entry: TranscriptEntry) {
     if (editingIndex !== null) return
 
-    TimelineStore.update(timeline => {
-      timeline.setCurrTime(entry.time)
-      return timeline
-    })
+    timelineV2Store.setCurrentTime(entry.time)
 
     if (hasVideoSource()) {
       requestSeek(entry.time)

@@ -1,7 +1,7 @@
 import type { KeyboardShortcut } from './types'
 import { registry } from './registry'
 import ConfigStore from '../../stores/configStore'
-import TimelineStore from '../../stores/timelineStore'
+import { timelineV2Store } from '../timeline/store'
 import { togglePlayback } from '../../stores/playbackStore'
 import {
   toggleMovement,
@@ -176,12 +176,9 @@ export const playbackShortcuts: KeyboardShortcut[] = [
     description: 'Jump backward 5 seconds',
     category: 'playback',
     action: () => {
-      TimelineStore.update((timeline) => {
-        const currentTime = timeline.getCurrTime()
-        const newTime = Math.max(timeline.getLeftMarker(), currentTime - 5)
-        timeline.setCurrTime(newTime)
-        return timeline
-      })
+      const state = timelineV2Store.getState()
+      const newTime = Math.max(state.viewStart, state.currentTime - 5)
+      timelineV2Store.setCurrentTime(newTime)
     },
   },
   {
@@ -191,66 +188,31 @@ export const playbackShortcuts: KeyboardShortcut[] = [
     description: 'Jump forward 5 seconds',
     category: 'playback',
     action: () => {
-      TimelineStore.update((timeline) => {
-        const currentTime = timeline.getCurrTime()
-        const newTime = Math.min(timeline.getRightMarker(), currentTime + 5)
-        timeline.setCurrTime(newTime)
-        return timeline
-      })
+      const state = timelineV2Store.getState()
+      const newTime = Math.min(state.viewEnd, state.currentTime + 5)
+      timelineV2Store.setCurrentTime(newTime)
     },
   },
   {
     id: 'playback.jump-to-start',
     key: 'Home',
     label: 'Jump to Start',
-    description: 'Jump to the beginning of the timeline',
+    description: 'Jump to the beginning of the view',
     category: 'playback',
     action: () => {
-      TimelineStore.update((timeline) => {
-        timeline.setCurrTime(timeline.getLeftMarker())
-        return timeline
-      })
+      const state = timelineV2Store.getState()
+      timelineV2Store.setCurrentTime(state.viewStart)
     },
   },
   {
     id: 'playback.jump-to-end',
     key: 'End',
     label: 'Jump to End',
-    description: 'Jump to the end of the timeline',
+    description: 'Jump to the end of the view',
     category: 'playback',
     action: () => {
-      TimelineStore.update((timeline) => {
-        timeline.setCurrTime(timeline.getRightMarker())
-        return timeline
-      })
-    },
-  },
-  {
-    id: 'playback.set-left-marker',
-    key: '[',
-    label: 'Set Left Marker',
-    description: 'Set the left boundary marker at current time',
-    category: 'playback',
-    action: () => {
-      TimelineStore.update((timeline) => {
-        const currentTime = timeline.getCurrTime()
-        timeline.setLeftMarker(currentTime)
-        return timeline
-      })
-    },
-  },
-  {
-    id: 'playback.set-right-marker',
-    key: ']',
-    label: 'Set Right Marker',
-    description: 'Set the right boundary marker at current time',
-    category: 'playback',
-    action: () => {
-      TimelineStore.update((timeline) => {
-        const currentTime = timeline.getCurrTime()
-        timeline.setRightMarker(currentTime)
-        return timeline
-      })
+      const state = timelineV2Store.getState()
+      timelineV2Store.setCurrentTime(state.viewEnd)
     },
   },
   {

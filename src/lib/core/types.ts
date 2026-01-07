@@ -13,6 +13,19 @@ export interface MovementRow {
 }
 
 /**
+ * GPS Movement data CSV row structure (lat/lng based)
+ * Supports both 'lat/lng' and 'latitude/longitude' headers
+ * All headers are lowercase (transformed by PapaParse)
+ */
+export interface GPSMovementRow {
+  time: number
+  lat?: number
+  lng?: number
+  latitude?: number
+  longitude?: number
+}
+
+/**
  * Conversation data CSV row structure
  * All headers are lowercase (transformed by PapaParse)
  */
@@ -100,6 +113,10 @@ export type ExampleId =
   | 'example-10'
   | 'example-11'
   | 'example-12'
+  | 'example-13'
+  | 'example-14'
+  | 'example-15'
+  | 'example-16'
 
 /**
  * Example data configuration

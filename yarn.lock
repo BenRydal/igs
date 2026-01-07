@@ -2193,7 +2193,6 @@ __metadata:
     svelte: "npm:^5.0.0"
     svelte-check: "npm:^4.0.0"
     tailwindcss: "npm:^4.0.0"
-    toolcool-range-slider: "npm:^4.0.28"
     typescript: "npm:^5.9.3"
     typescript-eslint: "npm:^8.0.0"
     unplugin-icons: "npm:^22.5.0"
@@ -3499,13 +3498,6 @@ __metadata:
     fdir: "npm:^6.5.0"
     picomatch: "npm:^4.0.3"
   checksum: 869c31490d0d88eedb8305d178d4c75e7463e820df5a9b9d388291daf93e8b1eb5de1dad1c1e139767e4269fe75f3b10d5009b2cc14db96ff98986920a186844
-  languageName: node
-  linkType: hard
-
-"toolcool-range-slider@npm:^4.0.28":
-  version: 4.0.28
-  resolution: "toolcool-range-slider@npm:4.0.28"
-  checksum: 7e6ce1c67aa0998c87c0c872e5ff5ad86f8015a87155ba709531a56ca734dcaf65cc31b71619351741411c0f64fab9e06707e7bad050978b6919b2450445660b
   languageName: node
   linkType: hard
 

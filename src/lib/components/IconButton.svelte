@@ -7,17 +7,19 @@
     id = '',
     onclick,
     children,
+    active = false,
   }: {
     icon?: ConstructorOfATypedSvelteComponent
     tooltip?: string
     id?: string
     onclick?: (event: MouseEvent) => void
     children?: Snippet
+    active?: boolean
   } = $props()
 </script>
 
 <div class="tooltip tooltip-bottom" data-tip={tooltip}>
-  <button class="btn btn-square btn-ghost icon-btn" type="button" {id} {onclick}>
+  <button class="btn btn-square btn-ghost icon-btn" class:btn-active={active} type="button" {id} {onclick}>
     {#if icon}
       <svelte:component this={icon} />
     {:else if children}

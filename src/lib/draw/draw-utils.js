@@ -2,7 +2,7 @@
  * This class holds different utility and helper methods used in draw movement and conversation classes
  */
 
-import TimelineStore from '../../stores/timelineStore'
+import { timelineV2Store } from '../timeline/store'
 import CodeStore from '../../stores/codeStore'
 import ConfigStore from '../../stores/configStore'
 import PlaybackStore from '../../stores/playbackStore'
@@ -12,8 +12,7 @@ import { get } from 'svelte/store'
 export const MIN_RECT_SIZE = 15
 export const MAX_RECT_SIZE = 80
 
-let timeline,
-  stopSliderValue,
+let stopSliderValue,
   alignToggle,
   maxTurnLength,
   conversationRectWidth,
@@ -23,10 +22,6 @@ let timeline,
   stopsToggle,
   highlightToggle,
   playbackMode = 'stopped'
-
-TimelineStore.subscribe((data) => {
-  timeline = data
-})
 
 ConfigStore.subscribe((data) => {
   alignToggle = data.alignToggle
@@ -89,13 +84,15 @@ export class DrawUtils {
   }
 
   isShowingInGUI(pixelTime) {
-    return timeline.overAxis(pixelTime) && this.isShowingInAnimation(pixelTime)
+    return timelineV2Store.overAxis(pixelTime) && this.isShowingInAnimation(pixelTime)
   }
 
   isShowingInAnimation(value) {
-    if (playbackMode !== 'stopped')
-      return timeline.pixelToTime(value) < timeline.getCurrTime()
-    else return true
+    if (playbackMode !== 'stopped') {
+      const state = timelineV2Store.getState()
+      return timelineV2Store.pixelToTime(value) < state.currentTime
+    }
+    return true
   }
 
   selectMode(curPos, pointIsStopped) {
@@ -141,7 +138,7 @@ export class DrawUtils {
    * @param  {Integer} time
    */
   getSharedPosValues(point, time) {
-    const timelineXPos = timeline.timeToPixel(time)
+    const timelineXPos = timelineV2Store.timeToPixel(time)
     const selTimelineXPos = this.sk.mapSelectTimeToPixelTime(timelineXPos)
     const [floorPlanXPos, floorPlanYPos] = this.sk.floorPlan.getScaledXYPos(
       point.x,

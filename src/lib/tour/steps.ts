@@ -81,7 +81,7 @@ export const tourSteps: TourStep[] = [
     },
   },
   {
-    element: '.slider-container',
+    element: '#timeline-panel',
     popover: {
       title: 'Control Time',
       description:

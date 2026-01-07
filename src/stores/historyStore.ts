@@ -71,24 +71,6 @@ function persistHistory(past: HistoryEntry[]): void {
   }
 }
 
-/**
- * Load persisted history entries from sessionStorage
- * These are for display only - undo/redo functions cannot be restored
- */
-function loadPersistedHistory(): PersistedHistoryEntry[] {
-  // Guard against SSR - sessionStorage is only available in browser
-  if (typeof window === 'undefined' || typeof sessionStorage === 'undefined') {
-    return []
-  }
-
-  try {
-    const saved = sessionStorage.getItem(HISTORY_STORAGE_KEY)
-    return saved ? JSON.parse(saved) : []
-  } catch {
-    return []
-  }
-}
-
 // Debounce timeout for persisting history
 let persistTimeout: ReturnType<typeof setTimeout> | null = null
 
@@ -247,14 +229,6 @@ function createHistoryStore() {
         ...initialState,
         maxSize: get({ subscribe }).maxSize,
       })
-    },
-
-    /**
-     * Get persisted history entries from sessionStorage
-     * These are for display only - actual undo/redo functions cannot be restored
-     */
-    getPersistedHistory(): PersistedHistoryEntry[] {
-      return loadPersistedHistory()
     },
   }
 }

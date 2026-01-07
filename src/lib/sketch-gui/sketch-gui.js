@@ -1,22 +1,19 @@
 import { FloorPlanContainer } from './floorplan-container.js'
 import { Highlight } from './highlight.js'
-import TimelineStore from '../../stores/timelineStore'
+import { timelineV2Store } from '../timeline/store'
 import ConfigStore from '../../stores/configStore'
 import { get } from 'svelte/store'
-import { formatTime } from '../utils/format'
 
-let timeline
-
-TimelineStore.subscribe((data) => {
-  timeline = data
-})
+/** Padding between floorplan edge and timeline data start */
+const FLOORPLAN_TIMELINE_GAP = 20
 
 export class SketchGUI {
   constructor(sketch) {
     this.sk = sketch
     this.displayBottom = this.sk.height
-    // Cap container width to canvas width for split-screen mode
-    const containerWidth = Math.min(timeline.getLeftX(), this.sk.width)
+    // Cap container width to canvas width for split-screen mode, with gap for timeline
+    const state = timelineV2Store.getState()
+    const containerWidth = Math.min(state.leftX, this.sk.width) - FLOORPLAN_TIMELINE_GAP
     this.fpContainer = new FloorPlanContainer(this.sk, containerWidth, this.displayBottom)
     this.highlight = new Highlight(this.sk, this.displayBottom)
   }
@@ -24,13 +21,9 @@ export class SketchGUI {
   update2D() {
     const config = get(ConfigStore)
 
-    if (this.sk.isMouseOverTimeline()) {
-      // Draw slicer line in 2D mode only
-      if (!this.sk.handle3D.getIs3DMode()) {
-        this.drawSlicerLine()
-      }
-      // Always draw time label when hovering over timeline
-      this.drawHoverTimeLabel()
+    // Draw slicer line in 2D mode when hovering over timeline
+    if (this.sk.isMouseOverTimeline() && !this.sk.handle3D.getIs3DMode()) {
+      this.drawSlicerLine()
     }
 
     if (!this.sk.handle3D.getIs3DModeOrTransitioning()) {
@@ -44,7 +37,7 @@ export class SketchGUI {
     if (this.sk.isMouseOverTimeline() && this.sk.handle3D.getIs3DMode()) {
       this.draw3DSlicerRect(
         this.fpContainer.getContainer(),
-        this.sk.mapToSelectTimeThenPixelTime(this.sk.mouseX)
+        this.sk.mapToSelectTimeThenPixelTime(this.sk.winMouseX)
       )
     }
   }
@@ -59,47 +52,6 @@ export class SketchGUI {
     this.sk.stroke(0)
     this.sk.strokeWeight(1)
     this.sk.line(this.sk.mouseX, 0, this.sk.mouseX, this.sk.height)
-  }
-
-  drawHoverTimeLabel() {
-    const hoverTime = timeline.pixelToSelectedTime(this.sk.mouseX)
-    const timeText = formatTime(hoverTime)
-
-    this.sk.textSize(14)
-    const textW = this.sk.textWidth(timeText)
-    const padding = 8
-    const pillHeight = 24
-    const pillWidth = textW + padding * 2
-
-    // Y follows mouse, clamped to stay on canvas
-    const minY = 20
-    const maxY = this.sk.height - pillHeight
-    const labelY = Math.max(minY, Math.min(this.sk.mouseY - pillHeight / 2, maxY))
-
-    // X position: centered in 3D mode, offset to side in 2D mode
-    let labelX
-    if (this.sk.handle3D.getIs3DMode()) {
-      // Center above mouse
-      labelX = this.sk.mouseX - pillWidth / 2
-    } else {
-      // Offset to right, flip to left if near edge
-      labelX = this.sk.mouseX + 15
-      if (labelX + pillWidth > this.sk.width - 10) {
-        labelX = this.sk.mouseX - pillWidth - 15
-      }
-    }
-    // Keep within canvas bounds
-    labelX = Math.max(10, Math.min(labelX, this.sk.width - pillWidth - 10))
-
-    // Background pill
-    this.sk.noStroke()
-    this.sk.fill(0, 180)
-    this.sk.rect(labelX, labelY, pillWidth, pillHeight, 4)
-
-    // Text
-    this.sk.fill(255)
-    this.sk.textAlign(this.sk.CENTER, this.sk.CENTER)
-    this.sk.text(timeText, labelX + pillWidth / 2, labelY + pillHeight / 2)
   }
 
   draw3DSlicerRect(container, zPos) {

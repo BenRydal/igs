@@ -1,5 +1,5 @@
 import ConfigStore from '../../stores/configStore'
-import TimelineStore from '../../stores/timelineStore'
+import { timelineV2Store } from '../timeline/store'
 import { setHoveredConversation, clearHoveredConversation } from '../../stores/interactionStore'
 import { MIN_RECT_SIZE, MAX_RECT_SIZE } from './draw-utils'
 
@@ -15,7 +15,6 @@ import { MIN_RECT_SIZE, MAX_RECT_SIZE } from './draw-utils'
 
 let alignToggle, isPathColorMode, conversationRectWidth
 let clusterTimeThreshold, clusterSpaceThreshold, showSpeakerStripes
-let timelineLeftMarker, timelineRightMarker, timelineEndTime
 let searchRegex = null
 
 const TAIL_HEIGHT = 8
@@ -37,12 +36,6 @@ ConfigStore.subscribe((data) => {
     : null
 })
 
-TimelineStore.subscribe((data) => {
-  timelineLeftMarker = data.getLeftMarker()
-  timelineRightMarker = data.getRightMarker()
-  timelineEndTime = data.getEndTime()
-})
-
 export class DrawConversation {
   constructor(sketch, drawUtils) {
     this.sk = sketch
@@ -61,9 +54,10 @@ export class DrawConversation {
       this.translateZoom = Math.abs(this.sk.handle3D.getCurTranslatePos().zoom)
     }
 
-    const zoomLevel = timelineEndTime
-      ? (timelineRightMarker - timelineLeftMarker) / timelineEndTime
-      : 1
+    const state = timelineV2Store.getState()
+    const dataRange = state.dataEnd - state.dataStart
+    const viewRange = state.viewEnd - state.viewStart
+    const zoomLevel = dataRange > 0 ? viewRange / dataRange : 1
     zoomLevel > 0.3 ? this.drawAggregated(mergedPoints) : this.drawDetailed(mergedPoints)
   }
 
@@ -95,8 +89,8 @@ export class DrawConversation {
           this.setHoverStroke()
           setHoveredConversation(
             [{ time: point.time, speaker, text: point.speech, color }],
-            this.sk.mouseX,
-            this.sk.mouseY
+            this.sk.winMouseX,
+            this.sk.winMouseY
           )
         }
         this.sk.rect(fpX, fpY, conversationRectWidth, pos.rectHeight)
@@ -198,8 +192,8 @@ export class DrawConversation {
           text: p.point.speech,
           color: p.color,
         })),
-        this.sk.mouseX,
-        this.sk.mouseY
+        this.sk.winMouseX,
+        this.sk.winMouseY
       )
     }
 

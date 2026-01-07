@@ -7,6 +7,8 @@
   import MdCloudDownload from '~icons/mdi/cloud-download'
   import MdRotateLeft from '~icons/mdi/rotate-left'
   import MdRotateRight from '~icons/mdi/rotate-right'
+  import MdAspectRatio from '~icons/mdi/aspect-ratio'
+  import MdFitToPageOutline from '~icons/mdi/fit-to-page-outline'
   import Md3DRotation from '~icons/mdi/rotate-3d-variant'
   import MdVideocam from '~icons/mdi/video'
   import MdVideocamOff from '~icons/mdi/video-off'
@@ -20,6 +22,14 @@
   import MdChat from '~icons/mdi/chat'
   import MdDelete from '~icons/mdi/delete'
   import MdFolder from '~icons/mdi/folder-open'
+  import MdSports from '~icons/mdi/basketball'
+  import MdMuseum from '~icons/mdi/bank'
+  import MdSchool from '~icons/mdi/school'
+  import MdWalk from '~icons/mdi/walk'
+  import MdVideo from '~icons/mdi/video-vintage'
+  import MdMusic from '~icons/mdi/music'
+  import MdChevronDown from '~icons/mdi/chevron-down'
+  import MdChevronRight from '~icons/mdi/chevron-right'
   import MdMoreVert from '~icons/mdi/dots-vertical'
   import MdMenu from '~icons/mdi/menu'
   import MdClose from '~icons/mdi/close'
@@ -33,6 +43,7 @@
     reset as resetVideo,
     hasVideoSource,
   } from '../stores/videoStore'
+  import { resetGPS } from '../stores/gpsStore'
   import { onVideoVisibilityChange } from '../stores/playbackStore'
   import VideoContainer from '$lib/components/VideoContainer.svelte'
   import SplitScreenVideo from '$lib/components/SplitScreenVideo.svelte'
@@ -40,23 +51,25 @@
   import ConversationTooltip from '$lib/components/ConversationTooltip.svelte'
 
   import { Core } from '$lib'
+  import { EXAMPLE_DATASETS } from '$lib/core/example-datasets'
   import { igsSketch } from '$lib/p5/igsSketch'
   import { writable } from 'svelte/store'
   import { onMount } from 'svelte'
   import IconButton from '$lib/components/IconButton.svelte'
   import IgsInfoModal from '$lib/components/IGSInfoModal.svelte'
-  import TimelinePanel from '$lib/components/TimelinePanel.svelte'
+  import { TimelineContainer } from '$lib/timeline'
   import DataPointTable from '$lib/components/DataPointTable.svelte'
   import ModeIndicator from '$lib/components/ModeIndicator.svelte'
   import FloatingDropdown from '$lib/components/FloatingDropdown.svelte'
   import { OnboardingTour } from '$lib/tour'
   import DataImporter from '$lib/components/import/DataImporter.svelte'
+  import MapStyleSelector from '$lib/components/MapStyleSelector.svelte'
   import { capitalizeFirstLetter, capitalizeEachWord } from '$lib/utils/string'
 
   import CodeStore from '../stores/codeStore'
   import ConfigStore from '../stores/configStore'
   import type { ConfigStoreType } from '../stores/configStore'
-  import TimelineStore from '../stores/timelineStore'
+  import { timelineV2Store } from '$lib/timeline/store'
   import { initialConfig } from '../stores/configStore'
   import { computePosition, flip, shift, offset } from '@floating-ui/dom'
   import { setSelectorSize, setSlicerSize, toggleColorMode } from '$lib/history/config-actions'
@@ -84,47 +97,88 @@
   const conversationToggleOptions = ['alignToggle'] as const
   let selectedDropDownOption = $state('')
   const dropdownOptions = [
-    { label: 'Sports', items: [{ value: 'example-1', label: "Michael Jordan's Last Shot" }] },
+    {
+      label: 'Sports',
+      icon: MdSports,
+      items: [{ value: 'example-1', label: "Michael Jordan's Last Shot" }],
+    },
     {
       label: 'Museums',
+      icon: MdMuseum,
       items: [
-        { value: 'example-2', label: 'Family Gallery Visit' },
-        { value: 'example-11', label: 'Family Museum Visit' },
+        { value: 'example-2', label: 'Single Gallery' },
+        { value: 'example-11', label: 'Complete Visit' },
       ],
     },
     {
       label: 'Classrooms',
+      icon: MdSchool,
       items: [
         { value: 'example-10', label: '8th Grade AP Math Lesson' },
-        { value: 'example-4', label: '3rd Grade Discussion' },
+        { value: 'example-4', label: '3rd Grade Discussion Odd/Even Numbers' },
       ],
     },
     {
-      label: 'TIMSS 1999 Video Study',
+      label: 'Walking Tours',
+      icon: MdWalk,
       items: [
-        { value: 'example-3', label: 'U.S. Science Lesson (weather)' },
-        { value: 'example-5', label: 'Czech Republic Science Lesson (density)' },
-        { value: 'example-6', label: 'Japan Math Lesson (angles)' },
-        { value: 'example-7', label: 'U.S. Math Lesson (linear equations)' },
-        { value: 'example-8', label: 'U.S. Science Lesson (rocks)' },
-        { value: 'example-9', label: 'Netherlands Math Lesson (pythagorean theorem)' },
+        { value: 'example-14', label: 'Jefferson Street Tour' },
+        { value: 'example-12', label: 'Civil Rights Tour: Creating the Route' },
+        { value: 'example-13', label: 'Civil Rights Tour: Walking the Route' },
+      ],
+    },
+    {
+      label: 'Music Performance',
+      icon: MdMusic,
+      items: [
+        { value: 'example-15', label: 'Trio' },
+        { value: 'example-16', label: 'Full Band' },
+      ],
+    },
+    {
+      label: 'TIMSS Classroom Video Study',
+      icon: MdVideo,
+      items: [
+        { value: 'example-3', label: 'US: Weather' },
+        { value: 'example-5', label: 'Czech: Density' },
+        { value: 'example-6', label: 'Japan: Angles' },
+        { value: 'example-7', label: 'US: Linear Equations' },
+        { value: 'example-8', label: 'US: Rocks' },
+        { value: 'example-9', label: 'Netherlands: Pythagorean Theorem' },
       ],
     },
   ]
+
+  // Helper to get dataset duration
+  function getDatasetDuration(value: string) {
+    return EXAMPLE_DATASETS[value]?.duration ?? ''
+  }
+
+  // Track which categories are expanded (all expanded by default)
+  let expandedCategories = $state<Set<string>>(new Set(dropdownOptions.map((g) => g.label)))
+
+  function toggleCategory(label: string) {
+    const newSet = new Set(expandedCategories)
+    if (newSet.has(label)) {
+      newSet.delete(label)
+    } else {
+      newSet.add(label)
+    }
+    expandedCategories = newSet
+  }
 
   let showDataPopup = $state(false)
   let showSettings = $state(false)
   let showImportDialog = $state(false)
   let currentConfig = $state<ConfigStoreType>($ConfigStore)
 
-  let files = $state<any>([])
   let users = $state<User[]>([])
   let p5Instance = $state<p5 | null>(null)
   let core: Core
   let isVideoShowing = $state(false)
   let isVideoPlaying = $state(false)
   let is3DMode = $state(true)
-  let timeline = $state($TimelineStore)
+  let timelineEndTime = $state(0)
   let isTranscriptVisible = $state(true)
   let mobileMenuOpen = $state(false)
 
@@ -133,7 +187,10 @@
   })
 
   $effect(() => {
-    timeline = $TimelineStore
+    const unsubscribe = timelineV2Store.subscribe((state) => {
+      timelineEndTime = state.dataEnd
+    })
+    return unsubscribe
   })
 
   let isSplitScreen = $state(false)
@@ -287,11 +344,6 @@
     }
   }
 
-  function updateUserLoadedFiles(event) {
-    core.handleUserLoadedFiles(event)
-    p5Instance.loop()
-  }
-
   /**
    * Detect CSV file type by reading headers
    * Returns: 'movement' | 'conversation' | 'multicode' | 'singlecode' | 'unknown'
@@ -312,6 +364,16 @@
           .toLowerCase()
           .split(',')
           .map((h) => h.trim().replace(/"/g, ''))
+
+        // Check for GPS movement: time, lat, lng (or latitude, longitude)
+        if (
+          headers.includes('time') &&
+          (headers.includes('lat') || headers.includes('latitude')) &&
+          (headers.includes('lng') || headers.includes('longitude'))
+        ) {
+          resolve('movement')
+          return
+        }
 
         // Check for movement: time, x, y
         if (headers.includes('time') && headers.includes('x') && headers.includes('y')) {
@@ -411,16 +473,16 @@
     p5Instance?.loop()
   }
 
-  function updateExampleDataDropDown(event) {
+  async function updateExampleDataDropDown(event) {
     clearAllDataLocal()
-    core.handleExampleDropdown(event)
+    await core.handleExampleDropdown(event)
     p5Instance.loop()
   }
 
   // Local version that handles UI cleanup and non-store data
   function clearAllDataLocal() {
     resetVideo()
-    currentConfig.isPathColorMode = false
+    resetGPS()
 
     closeAllDropdowns()
 
@@ -431,8 +493,17 @@
     core.movementData = []
     core.conversationData = []
 
-    ConfigStore.update((currentConfig) => ({ ...currentConfig, dataHasCodes: false }))
-    p5Instance.loop()
+    ConfigStore.update((config) => ({
+      ...config,
+      dataHasCodes: false,
+      isPathColorMode: false,
+      maxStopLength: 0,
+    }))
+
+    // Recreate canvas to get fresh WebGL context (helps Safari performance)
+    if (p5Instance?.recreateCanvas) {
+      p5Instance.recreateCanvas()
+    }
   }
 
   function clearMovementData() {
@@ -626,6 +697,14 @@
       const customEvent = event as CustomEvent<{ value: string }>
       if (customEvent.detail?.value) {
         updateExampleDataDropDown({ target: { value: customEvent.detail.value } })
+        // Find and set the label for the dropdown
+        for (const group of dropdownOptions) {
+          const item = group.items.find((i) => i.value === customEvent.detail.value)
+          if (item) {
+            selectedDropDownOption = item.label
+            break
+          }
+        }
       }
     }
 
@@ -676,7 +755,9 @@
 {/snippet}
 
 {#snippet check(condition: boolean)}
-  <div class="w-4 h-4 mr-2">{#if condition}<MdCheck />{/if}</div>
+  <div class="w-4 h-4 mr-2">
+    {#if condition}<MdCheck />{/if}
+  </div>
 {/snippet}
 
 {#snippet navDivider()}
@@ -891,6 +972,9 @@
       </ul>
     </details>
 
+    <!-- Map Style Selector (GPS mode only) -->
+    <MapStyleSelector />
+
     <!-- Clear Data Dropdown -->
     <details class="dropdown" use:clickOutside>
       <summary class="btn btn-sm ml-4 gap-1 flex items-center">
@@ -929,6 +1013,15 @@
         }}
       />
       <IconButton
+        id="btn-aspect-ratio"
+        icon={currentConfig.preserveFloorplanAspectRatio ? MdAspectRatio : MdFitToPageOutline}
+        tooltip={currentConfig.preserveFloorplanAspectRatio ? 'Stretch to Fill' : 'Preserve Aspect Ratio'}
+        onclick={() => {
+          handleConfigChange('preserveFloorplanAspectRatio', !currentConfig.preserveFloorplanAspectRatio)
+          p5Instance?.loop()
+        }}
+      />
+      <IconButton
         id="btn-toggle-3d"
         icon={Md3DRotation}
         tooltip={'Toggle 2D/3D'}
@@ -947,15 +1040,6 @@
         icon={MdFileUploadOutline}
         tooltip={'Import Files'}
         onclick={() => (showImportDialog = true)}
-      />
-      <input
-        class="hidden"
-        id="file-input"
-        multiple
-        accept=".png, .jpg, .jpeg, .csv, .mp4"
-        type="file"
-        bind:files
-        onchange={updateUserLoadedFiles}
       />
 
       <IconButton
@@ -1000,7 +1084,7 @@
       <FloatingDropdown
         id="examples-dropdown"
         buttonClass="btn btn-sm gap-1 flex items-center"
-        contentClass="menu rounded-box w-56 p-2 shadow bg-base-100 max-h-[60vh] overflow-y-auto"
+        contentClass="menu rounded-box w-72 p-2 shadow bg-base-100 max-h-[60vh] overflow-y-auto"
       >
         {#snippet buttonChildren()}
           {@render icon(MdFolder)}
@@ -1008,23 +1092,44 @@
           {@render chevronDown()}
         {/snippet}
         <ul>
-          {#each dropdownOptions as group}
-            <li class="menu-title">{group.label}</li>
-            {#each group.items as item}
-              {@const isSelected = selectedDropDownOption === item.label}
-              <li>
-                <button
-                  onclick={() => {
-                    updateExampleDataDropDown({ target: { value: item.value } })
-                    selectedDropDownOption = item.label
-                  }}
-                  class="text-left flex items-center {isSelected ? 'bg-primary/20 font-medium' : ''}"
-                >
-                  {@render check(isSelected)}
-                  {item.label}
-                </button>
-              </li>
-            {/each}
+          {#each dropdownOptions as group, groupIndex}
+            {#if groupIndex > 0}
+              <li class="my-1"><hr class="border-base-300" /></li>
+            {/if}
+            <li>
+              <button
+                class="menu-title flex items-center gap-2 w-full hover:bg-base-200 rounded-lg px-2 py-1 cursor-pointer"
+                onclick={() => toggleCategory(group.label)}
+              >
+                <svelte:component
+                  this={expandedCategories.has(group.label) ? MdChevronDown : MdChevronRight}
+                  class="w-4 h-4 opacity-50"
+                />
+                <svelte:component this={group.icon} class="w-4 h-4" />
+                <span>{group.label}</span>
+              </button>
+            </li>
+            {#if expandedCategories.has(group.label)}
+              {#each group.items as item}
+                {@const isSelected = selectedDropDownOption === item.label}
+                <li class="pl-2 w-full">
+                  <button
+                    onclick={() => {
+                      updateExampleDataDropDown({ target: { value: item.value } })
+                      selectedDropDownOption = item.label
+                    }}
+                    class="flex items-center gap-2 w-full cursor-pointer {isSelected
+                      ? 'bg-primary/20 font-medium'
+                      : ''}"
+                  >
+                    <span class="truncate flex-1">{item.label}</span>
+                    <span class="badge badge-ghost badge-sm opacity-60 shrink-0"
+                      >{getDatasetDuration(item.value)}</span
+                    >
+                  </button>
+                </li>
+              {/each}
+            {/if}
           {/each}
         </ul>
       </FloatingDropdown>
@@ -1042,19 +1147,34 @@
     ></div>
 
     <!-- Menu panel -->
-    <div class="lg:hidden absolute top-full left-0 right-0 bg-base-100 shadow-lg border-t z-50 max-h-[85vh] overflow-y-auto px-6 py-8">
+    <div
+      class="lg:hidden absolute top-full left-0 right-0 bg-base-100 shadow-lg border-t z-50 max-h-[85vh] overflow-y-auto px-6 py-8"
+    >
       <!-- Dropdown buttons -->
       <div class="flex flex-wrap gap-2 justify-center mb-6">
         <details class="dropdown dropdown-bottom" use:clickOutside>
           <summary class="btn btn-sm gap-1">{@render icon(MdFilterList)}Filter</summary>
           <ul class="dropdown-content menu bg-base-200 rounded-box z-[60] w-48 p-2 shadow mt-1">
             {#each filterToggleOptions as toggle}
-              <li><button onclick={() => toggleSelection(toggle, filterToggleOptions)}>{@render check($ConfigStore[toggle])}{capitalizeFirstLetter(toggle.replace('Toggle', ''))}</button></li>
+              <li>
+                <button onclick={() => toggleSelection(toggle, filterToggleOptions)}
+                  >{@render check($ConfigStore[toggle])}{capitalizeFirstLetter(
+                    toggle.replace('Toggle', '')
+                  )}</button
+                >
+              </li>
             {/each}
             <li class="px-2 py-1">
               <div class="flex flex-col w-full">
                 <span class="text-xs">Stop: {formattedStopLength}s</span>
-                <input type="range" min="1" max={$ConfigStore.maxStopLength} value={$ConfigStore.stopSliderValue} class="range range-xs" oninput={(e) => handleConfigChangeFromInput(e, 'stopSliderValue')} />
+                <input
+                  type="range"
+                  min="1"
+                  max={$ConfigStore.maxStopLength}
+                  value={$ConfigStore.stopSliderValue}
+                  class="range range-xs"
+                  oninput={(e) => handleConfigChangeFromInput(e, 'stopSliderValue')}
+                />
               </div>
             </li>
           </ul>
@@ -1065,18 +1185,40 @@
             <summary class="btn btn-sm gap-1">{@render icon(MdSelectAll)}Select</summary>
             <ul class="dropdown-content menu bg-base-200 rounded-box z-[60] w-56 p-2 shadow mt-1">
               {#each selectToggleOptions as toggle}
-                <li><button onclick={() => toggleSelection(toggle, selectToggleOptions)}>{@render check($ConfigStore[toggle])}{capitalizeFirstLetter(toggle.replace('Toggle', ''))}</button></li>
+                <li>
+                  <button onclick={() => toggleSelection(toggle, selectToggleOptions)}
+                    >{@render check($ConfigStore[toggle])}{capitalizeFirstLetter(
+                      toggle.replace('Toggle', '')
+                    )}</button
+                  >
+                </li>
               {/each}
               <li class="px-2 py-1">
                 <div class="w-full">
                   <p class="text-xs mb-1">Circle Size: {currentConfig.selectorSize}px</p>
-                  <input type="range" min="20" max="300" step="10" bind:value={currentConfig.selectorSize} oninput={(e) => setSelectorSize(parseFloat(e.target.value))} class="range range-xs" />
+                  <input
+                    type="range"
+                    min="20"
+                    max="300"
+                    step="10"
+                    bind:value={currentConfig.selectorSize}
+                    oninput={(e) => setSelectorSize(parseFloat(e.target.value))}
+                    class="range range-xs"
+                  />
                 </div>
               </li>
               <li class="px-2 py-1">
                 <div class="w-full">
                   <p class="text-xs mb-1">Slicer Width: {currentConfig.slicerSize}px</p>
-                  <input type="range" min="5" max="100" step="5" bind:value={currentConfig.slicerSize} oninput={(e) => setSlicerSize(parseFloat(e.target.value))} class="range range-xs" />
+                  <input
+                    type="range"
+                    min="5"
+                    max="100"
+                    step="5"
+                    bind:value={currentConfig.slicerSize}
+                    oninput={(e) => setSlicerSize(parseFloat(e.target.value))}
+                    class="range range-xs"
+                  />
                 </div>
               </li>
             </ul>
@@ -1086,21 +1228,51 @@
         <details class="dropdown dropdown-bottom" use:clickOutside>
           <summary class="btn btn-sm gap-1">{@render icon(MdChat)}Talk</summary>
           <ul class="dropdown-content menu bg-base-200 rounded-box z-[60] w-64 p-2 shadow mt-1">
-            <li><button onclick={() => (isTranscriptVisible = !isTranscriptVisible)}>{@render check(isTranscriptVisible)}Transcript</button></li>
-            <li><button onclick={() => toggleSelection('alignToggle', conversationToggleOptions)}>{@render check($ConfigStore.alignToggle)}Align to side</button></li>
+            <li>
+              <button onclick={() => (isTranscriptVisible = !isTranscriptVisible)}
+                >{@render check(isTranscriptVisible)}Transcript</button
+              >
+            </li>
+            <li>
+              <button onclick={() => toggleSelection('alignToggle', conversationToggleOptions)}
+                >{@render check($ConfigStore.alignToggle)}Align to side</button
+              >
+            </li>
             <div class="divider my-1"></div>
             <li class="menu-title px-2 py-0 text-xs opacity-60">Grouped turns</li>
-            <li><button onclick={() => handleConfigChange('showSpeakerStripes', !$ConfigStore.showSpeakerStripes)}>{@render check($ConfigStore.showSpeakerStripes)}Combine speakers</button></li>
+            <li>
+              <button
+                onclick={() =>
+                  handleConfigChange('showSpeakerStripes', !$ConfigStore.showSpeakerStripes)}
+                >{@render check($ConfigStore.showSpeakerStripes)}Combine speakers</button
+              >
+            </li>
             <li class="px-2 py-1">
               <div class="w-full">
                 <p class="text-xs mb-1">Group within {$ConfigStore.clusterTimeThreshold} seconds</p>
-                <input type="range" min="1" max="60" value={$ConfigStore.clusterTimeThreshold} class="range range-xs" oninput={(e) => handleConfigChangeFromInput(e, 'clusterTimeThreshold')} />
+                <input
+                  type="range"
+                  min="1"
+                  max="60"
+                  value={$ConfigStore.clusterTimeThreshold}
+                  class="range range-xs"
+                  oninput={(e) => handleConfigChangeFromInput(e, 'clusterTimeThreshold')}
+                />
               </div>
             </li>
             <li class="px-2 py-1">
               <div class="w-full">
-                <p class="text-xs mb-1">Group within {$ConfigStore.clusterSpaceThreshold}px distance</p>
-                <input type="range" min="0" max="200" value={$ConfigStore.clusterSpaceThreshold} class="range range-xs" oninput={(e) => handleConfigChangeFromInput(e, 'clusterSpaceThreshold')} />
+                <p class="text-xs mb-1">
+                  Group within {$ConfigStore.clusterSpaceThreshold}px distance
+                </p>
+                <input
+                  type="range"
+                  min="0"
+                  max="200"
+                  value={$ConfigStore.clusterSpaceThreshold}
+                  class="range range-xs"
+                  oninput={(e) => handleConfigChangeFromInput(e, 'clusterSpaceThreshold')}
+                />
               </div>
             </li>
             <div class="divider my-1"></div>
@@ -1108,7 +1280,14 @@
             <li class="px-2 py-1">
               <div class="w-full">
                 <p class="text-xs mb-1">Turn width: {$ConfigStore.conversationRectWidth}px</p>
-                <input type="range" min="1" max="30" value={$ConfigStore.conversationRectWidth} class="range range-xs" oninput={(e) => handleConfigChangeFromInput(e, 'conversationRectWidth')} />
+                <input
+                  type="range"
+                  min="1"
+                  max="30"
+                  value={$ConfigStore.conversationRectWidth}
+                  class="range range-xs"
+                  oninput={(e) => handleConfigChangeFromInput(e, 'conversationRectWidth')}
+                />
               </div>
             </li>
           </ul>
@@ -1117,33 +1296,96 @@
         <details class="dropdown dropdown-bottom dropdown-end" use:clickOutside>
           <summary class="btn btn-sm gap-1">{@render icon(MdDelete)}Clear</summary>
           <ul class="dropdown-content menu bg-base-200 rounded-box z-[60] w-40 p-2 shadow mt-1">
-            <li><button onclick={() => { clearMovementData(); mobileMenuOpen = false }}>Movement</button></li>
-            <li><button onclick={() => { clearConversationData(); mobileMenuOpen = false }}>Conversation</button></li>
-            <li><button onclick={() => { clearCodeData(); mobileMenuOpen = false }}>Codes</button></li>
-            <li><button onclick={() => { resetVideo(); mobileMenuOpen = false }}>Video</button></li>
-            <li><button onclick={() => { clearAllDataLocal(); mobileMenuOpen = false }} class="text-error">All Data</button></li>
+            <li>
+              <button
+                onclick={() => {
+                  clearMovementData()
+                  mobileMenuOpen = false
+                }}>Movement</button
+              >
+            </li>
+            <li>
+              <button
+                onclick={() => {
+                  clearConversationData()
+                  mobileMenuOpen = false
+                }}>Conversation</button
+              >
+            </li>
+            <li>
+              <button
+                onclick={() => {
+                  clearCodeData()
+                  mobileMenuOpen = false
+                }}>Codes</button
+              >
+            </li>
+            <li>
+              <button
+                onclick={() => {
+                  resetVideo()
+                  mobileMenuOpen = false
+                }}>Video</button
+              >
+            </li>
+            <li>
+              <button
+                onclick={() => {
+                  clearAllDataLocal()
+                  mobileMenuOpen = false
+                }}
+                class="text-error">All Data</button
+              >
+            </li>
           </ul>
         </details>
 
         <details class="dropdown dropdown-bottom" use:clickOutside>
-          <summary class="btn btn-sm gap-1">{@render icon(MdFolder)}{selectedDropDownOption || 'Examples'}</summary>
-          <ul class="dropdown-content menu bg-base-200 rounded-box z-[60] w-56 p-2 shadow mt-1 max-h-60 overflow-y-auto">
-            {#each dropdownOptions as group}
-              <li class="menu-title text-xs">{group.label}</li>
-              {#each group.items as item}
-                <li>
-                  <button
-                    onclick={() => {
-                      updateExampleDataDropDown({ target: { value: item.value } })
-                      selectedDropDownOption = item.label
-                      mobileMenuOpen = false
-                    }}
-                    class={selectedDropDownOption === item.label ? 'bg-primary/20' : ''}
-                  >
-                    {item.label}
-                  </button>
-                </li>
-              {/each}
+          <summary class="btn btn-sm gap-1"
+            >{@render icon(MdFolder)}{selectedDropDownOption || 'Examples'}</summary
+          >
+          <ul
+            class="dropdown-content menu bg-base-200 rounded-box z-[60] w-72 p-2 shadow mt-1 max-h-60 overflow-y-auto"
+          >
+            {#each dropdownOptions as group, groupIndex}
+              {#if groupIndex > 0}
+                <li class="my-1"><hr class="border-base-300" /></li>
+              {/if}
+              <li>
+                <button
+                  class="menu-title flex items-center gap-2 w-full hover:bg-base-300 rounded-lg px-2 py-1 cursor-pointer text-xs"
+                  onclick={() => toggleCategory(group.label)}
+                >
+                  <svelte:component
+                    this={expandedCategories.has(group.label) ? MdChevronDown : MdChevronRight}
+                    class="w-4 h-4 opacity-50"
+                  />
+                  <svelte:component this={group.icon} class="w-4 h-4" />
+                  <span>{group.label}</span>
+                </button>
+              </li>
+              {#if expandedCategories.has(group.label)}
+                {#each group.items as item}
+                  {@const isSelected = selectedDropDownOption === item.label}
+                  <li class="pl-2 w-full">
+                    <button
+                      onclick={() => {
+                        updateExampleDataDropDown({ target: { value: item.value } })
+                        selectedDropDownOption = item.label
+                        mobileMenuOpen = false
+                      }}
+                      class="flex items-center gap-2 w-full cursor-pointer {isSelected
+                        ? 'bg-primary/20 font-medium'
+                        : ''}"
+                    >
+                      <span class="truncate flex-1">{item.label}</span>
+                      <span class="badge badge-ghost badge-sm opacity-60 shrink-0"
+                        >{getDatasetDuration(item.value)}</span
+                      >
+                    </button>
+                  </li>
+                {/each}
+              {/if}
             {/each}
           </ul>
         </details>
@@ -1153,15 +1395,90 @@
 
       <!-- Icon buttons -->
       <div class="flex flex-wrap gap-3 justify-center">
-        <IconButton icon={MdRotateLeft} tooltip="Rotate Left" onclick={() => { p5Instance.floorPlan.setRotateLeft(); p5Instance.loop(); mobileMenuOpen = false }} />
-        <IconButton icon={MdRotateRight} tooltip="Rotate Right" onclick={() => { p5Instance.floorPlan.setRotateRight(); p5Instance.loop(); mobileMenuOpen = false }} />
-        <IconButton icon={Md3DRotation} tooltip="Toggle 2D/3D" onclick={() => { p5Instance.handle3D.update(); is3DMode = p5Instance.handle3D.getIs3DMode(); mobileMenuOpen = false }} />
-        <IconButton icon={isVideoShowing ? MdVideocam : MdVideocamOff} tooltip="Show/Hide Video" onclick={() => { toggleVideo(); mobileMenuOpen = false }} />
-        <IconButton icon={MdFileUploadOutline} tooltip="Import Files" onclick={() => { showImportDialog = true; mobileMenuOpen = false }} />
-        <IconButton icon={MdHelpOutline} tooltip="Help" onclick={() => { $isModalOpen = !$isModalOpen; mobileMenuOpen = false }} />
-        <IconButton icon={MdCloudDownload} tooltip="Download Codes" onclick={() => { p5Instance.saveCodeFile(); mobileMenuOpen = false }} />
-        <IconButton icon={MdKeyboard} tooltip="Keyboard Shortcuts" onclick={() => { window.dispatchEvent(new CustomEvent('igs:open-cheatsheet')); mobileMenuOpen = false }} />
-        <IconButton icon={MdSettings} tooltip="Settings" onclick={() => { showSettings = true; mobileMenuOpen = false }} />
+        <IconButton
+          icon={MdRotateLeft}
+          tooltip="Rotate Left"
+          onclick={() => {
+            p5Instance.floorPlan.setRotateLeft()
+            p5Instance.loop()
+            mobileMenuOpen = false
+          }}
+        />
+        <IconButton
+          icon={MdRotateRight}
+          tooltip="Rotate Right"
+          onclick={() => {
+            p5Instance.floorPlan.setRotateRight()
+            p5Instance.loop()
+            mobileMenuOpen = false
+          }}
+        />
+        <IconButton
+          icon={currentConfig.preserveFloorplanAspectRatio ? MdAspectRatio : MdFitToPageOutline}
+          tooltip={currentConfig.preserveFloorplanAspectRatio ? 'Stretch to Fill' : 'Preserve Aspect Ratio'}
+          onclick={() => {
+            handleConfigChange('preserveFloorplanAspectRatio', !currentConfig.preserveFloorplanAspectRatio)
+            p5Instance?.loop()
+            mobileMenuOpen = false
+          }}
+        />
+        <IconButton
+          icon={Md3DRotation}
+          tooltip="Toggle 2D/3D"
+          onclick={() => {
+            p5Instance.handle3D.update()
+            is3DMode = p5Instance.handle3D.getIs3DMode()
+            mobileMenuOpen = false
+          }}
+        />
+        <IconButton
+          icon={isVideoShowing ? MdVideocam : MdVideocamOff}
+          tooltip="Show/Hide Video"
+          onclick={() => {
+            toggleVideo()
+            mobileMenuOpen = false
+          }}
+        />
+        <IconButton
+          icon={MdFileUploadOutline}
+          tooltip="Import Files"
+          onclick={() => {
+            showImportDialog = true
+            mobileMenuOpen = false
+          }}
+        />
+        <IconButton
+          icon={MdHelpOutline}
+          tooltip="Help"
+          onclick={() => {
+            $isModalOpen = !$isModalOpen
+            mobileMenuOpen = false
+          }}
+        />
+        <IconButton
+          icon={MdCloudDownload}
+          tooltip="Download Codes"
+          onclick={() => {
+            p5Instance.saveCodeFile()
+            mobileMenuOpen = false
+          }}
+        />
+        <IconButton
+          icon={MdKeyboard}
+          tooltip="Keyboard Shortcuts"
+          onclick={() => {
+            window.dispatchEvent(new CustomEvent('igs:open-cheatsheet'))
+            mobileMenuOpen = false
+          }}
+        />
+        <IconButton
+          icon={MdSettings}
+          tooltip="Settings"
+          onclick={() => {
+            showSettings = true
+            mobileMenuOpen = false
+          }}
+        />
       </div>
     </div>
   {/if}
@@ -1310,17 +1627,10 @@
           <input
             id="inputSeconds"
             type="text"
-            bind:value={timeline.endTime}
+            bind:value={timelineEndTime}
             oninput={(e) => {
               let value = parseInt(e.target.value.replace(/\D/g, '')) || 0
-              TimelineStore.update((timeline) => {
-                timeline.setCurrTime(0)
-                timeline.setStartTime(0)
-                timeline.setEndTime(value)
-                timeline.setLeftMarker(0)
-                timeline.setRightMarker(value)
-                return timeline
-              })
+              timelineV2Store.initialize(value, 0)
             }}
             class="input input-bordered"
           />
@@ -1416,12 +1726,10 @@
 {/if}
 
 <div
-  class="btm-nav flex justify-between"
-  style="position: fixed; bottom: 0; left: 0; right: 0; height: auto; min-height: 6rem; z-index: 50; padding: 0;"
+  class="btm-nav fixed bottom-0 left-0 right-0 flex justify-between min-h-24 z-50 p-0"
 >
   <div
-    class="flex flex-1 flex-row justify-start items-center bg-[#f6f5f3] px-8 overflow-x-auto"
-    style="min-height: inherit; align-self: stretch;"
+    class="flex flex-1 min-w-0 flex-row justify-start items-center bg-[#f6f5f3] px-4 lg:px-8 overflow-x-auto"
     onwheel={(e) => {
       if (e.deltaY !== 0) {
         e.preventDefault()
@@ -1637,10 +1945,11 @@
 
   <!-- Right Side: Timeline -->
   <div
-    class="flex-1 bg-[#f6f5f3] overflow-visible flex items-center justify-center py-1"
-    style="min-height: inherit; align-self: stretch;"
+    id="timeline-panel"
+    class="flex flex-1 items-center bg-[#f6f5f3] overflow-visible py-1 px-2 lg:px-4"
+    style="min-width: 280px;"
   >
-    <TimelinePanel />
+    <TimelineContainer height={50} showControls={true} embedded={true} />
   </div>
 </div>
 
@@ -1720,7 +2029,7 @@
     overflow: hidden;
   }
 
-  #main-content.split-screen-mode #p5-canvas-container :global(div) {
+  #main-content.split-screen-mode #p5-canvas-container :global(div:not(.timeline-tooltip):not(.tooltip-wrapper):not(.tooltip-content):not(.triangle)) {
     width: 100% !important;
     overflow: hidden;
   }

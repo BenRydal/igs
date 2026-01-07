@@ -1,24 +1,20 @@
 import { get } from 'svelte/store'
 import P5Store from '../../stores/p5Store'
 import UserStore from '../../stores/userStore'
-import TimelineStore from '../../stores/timelineStore'
+import { timelineV2Store } from '../timeline/store'
 import ConfigStore from '../../stores/configStore'
 import VideoStore from '../../stores/videoStore'
 import PlaybackStore, { onAnimationEnd, type PlaybackMode } from '../../stores/playbackStore'
+import { isAnyModalOpen } from '../../stores/modalStore'
 import { toastStore } from '../../stores/toastStore'
 import type { User } from '../../models/user'
 import { FloorPlan, SketchGUI, Handle3D, SetPathData } from '..'
-import type { Timeline } from '../../models/timeline'
 
 let users: User[] = []
-let timeline: Timeline
 let highlightToggle: boolean
 let animationRate = 0.05
 let playbackMode: PlaybackMode = 'stopped'
-
-TimelineStore.subscribe((data) => {
-  timeline = data
-})
+let isModalOpen = false
 
 ConfigStore.subscribe((data) => {
   highlightToggle = data.highlightToggle
@@ -33,20 +29,27 @@ PlaybackStore.subscribe((data) => {
   playbackMode = data.mode
 })
 
+isAnyModalOpen.subscribe((data) => {
+  isModalOpen = data
+})
+
 export const igsSketch = (p5: any) => {
   P5Store.set(p5)
 
-  p5.preload = () => {
-    p5.font = p5.loadFont(`/fonts/PlusJakartaSans/VariableFont_wght.ttf`)
+  // Helper to calculate available canvas height
+  const getAvailableHeight = () => {
+    const navbarHeight = (document.querySelector('.navbar') as HTMLElement).offsetHeight
+    const bottomNavHeight = (document.querySelector('.btm-nav') as HTMLElement).offsetHeight
+    return window.innerHeight - navbarHeight - bottomNavHeight
+  }
+
+  const applyStyles = () => {
+    p5.smooth()
+    p5.strokeCap(p5.SQUARE)
   }
 
   p5.setup = () => {
-    const navbarHeight = (document.querySelector('.navbar') as HTMLElement).offsetHeight
-    const bottomNavHeight = (document.querySelector('.btm-nav') as HTMLElement).offsetHeight
-
-    const availableHeight = window.innerHeight - navbarHeight - bottomNavHeight
-
-    p5.createCanvas(window.innerWidth, availableHeight, p5.WEBGL)
+    p5.createCanvas(window.innerWidth, getAvailableHeight(), p5.WEBGL)
     p5.gui = new SketchGUI(p5)
     p5.handle3D = new Handle3D(p5, true)
     p5.floorPlan = new FloorPlan(p5)
@@ -54,14 +57,7 @@ export const igsSketch = (p5: any) => {
     // Constants
     p5.PLAN = 0
     p5.SPACETIME = 1
-    p5.GUI_TEXT_SIZE = p5.width / 70
-
-    // STYLES
-    p5.textSize(p5.GUI_TEXT_SIZE)
-    p5.textFont(p5.font)
-    p5.textAlign(p5.LEFT, p5.TOP)
-    p5.smooth()
-    p5.strokeCap(p5.SQUARE)
+    applyStyles()
   }
 
   p5.draw = () => {
@@ -91,7 +87,11 @@ export const igsSketch = (p5: any) => {
   }
 
   p5.mouseMoved = () => {
-    p5.loop()
+    // Don't trigger expensive redraws when a modal is open
+    // This prevents UI freezing during drag-and-drop operations
+    if (!isModalOpen) {
+      p5.loop()
+    }
   }
 
   p5.dataIsLoaded = (data: any) => {
@@ -118,16 +118,23 @@ export const igsSketch = (p5: any) => {
   }
 
   p5.windowResized = () => {
-    const navbarHeight = (document.querySelector('.navbar') as HTMLElement).offsetHeight
-    const bottomNavHeight = (document.querySelector('.btm-nav') as HTMLElement).offsetHeight
+    p5.resizeCanvas(window.innerWidth, getAvailableHeight())
+    p5.gui = new SketchGUI(p5)
+    p5.handle3D = new Handle3D(p5, p5.handle3D.getIs3DMode())
+    applyStyles()
+    p5.loop()
+  }
 
-    const availableHeight = window.innerHeight - navbarHeight - bottomNavHeight
-
-    p5.resizeCanvas(window.innerWidth, availableHeight)
-    p5.gui = new SketchGUI(p5) // update GUI vars
-    p5.GUITEXTSIZE = p5.width / 70
-    p5.textSize(p5.GUITEXTSIZE)
-    p5.handle3D = new Handle3D(p5, p5.handle3D.getIs3DMode()) // update 3D display vars, pass current 3D mode
+  /**
+   * Recreate the canvas to reset WebGL state
+   * This helps with Safari performance issues after loading large datasets
+   */
+  p5.recreateCanvas = () => {
+    p5.createCanvas(window.innerWidth, getAvailableHeight(), p5.WEBGL)
+    p5.gui = new SketchGUI(p5)
+    p5.handle3D = new Handle3D(p5, true)
+    p5.floorPlan = new FloorPlan(p5)
+    applyStyles()
     p5.loop()
   }
 
@@ -137,15 +144,13 @@ export const igsSketch = (p5: any) => {
 
   /**
    * Check if mouse is over the timeline interaction area.
-   * In 2D mode: checks X bounds (timeline visible on canvas)
-   * In 3D mode: checks X bounds AND mouseY is below canvas (over bottom nav)
+   * Uses winMouseX/Y (viewport coordinates) to match timeline bounds.
    */
   p5.isMouseOverTimeline = () => {
-    const currentTimeline = get(TimelineStore)
-    const inXBounds =
-      p5.mouseX >= currentTimeline.getLeftX() && p5.mouseX <= currentTimeline.getRightX()
+    const state = timelineV2Store.getState()
+    const inXBounds = p5.winMouseX >= state.leftX && p5.winMouseX <= state.rightX
     if (p5.handle3D.getIs3DMode()) {
-      return inXBounds && p5.mouseY > p5.height
+      return inXBounds && p5.winMouseY > p5.height
     }
     return inXBounds
   }
@@ -203,8 +208,8 @@ export const igsSketch = (p5: any) => {
   }
 
   p5.updateAnimation = () => {
-    const currentTimeline = get(TimelineStore)
-    if (currentTimeline.getCurrTime() < currentTimeline.getRightMarker()) {
+    const state = timelineV2Store.getState()
+    if (state.currentTime < state.viewEnd) {
       p5.continueAnimation()
     } else {
       onAnimationEnd()
@@ -212,7 +217,7 @@ export const igsSketch = (p5: any) => {
   }
 
   p5.continueAnimation = () => {
-    const currentTimeline = get(TimelineStore)
+    const state = timelineV2Store.getState()
     let timeToSet: number
 
     if (playbackMode === 'playing-video') {
@@ -220,31 +225,27 @@ export const igsSketch = (p5: any) => {
       timeToSet = get(VideoStore).currentTime
     } else {
       // Animation is driving - use frame-based increment
-      timeToSet = currentTimeline.getCurrTime() + animationRate
+      timeToSet = state.currentTime + animationRate
     }
 
-    TimelineStore.update((timeline) => {
-      timeline.setCurrTime(timeToSet)
-      return timeline
-    })
+    timelineV2Store.setCurrentTime(timeToSet)
   }
 
   p5.mapToSelectTimeThenPixelTime = (value) => {
-    return p5.mapSelectTimeToPixelTime(timeline.pixelToMarkerPixel(value))
+    return p5.mapSelectTimeToPixelTime(timelineV2Store.pixelToViewPixel(value))
   }
 
   p5.mapSelectTimeToPixelTime = (value) => {
-    const currentTimeline = get(TimelineStore)
     const spaceTimeCubeBottom = p5.height / 10
     const spaceTimeCubeTop = p5.height / 1.6
     if (p5.handle3D.getIs3DMode())
       return p5.map(
         value,
-        currentTimeline.getLeftMarkerPixel(),
-        currentTimeline.getRightMarkerPixel(),
+        timelineV2Store.getViewStartPixel(),
+        timelineV2Store.getViewEndPixel(),
         spaceTimeCubeBottom,
         spaceTimeCubeTop
       )
-    else return currentTimeline.markerPixelToPixel(value)
+    else return timelineV2Store.viewPixelToPixel(value)
   }
 }
