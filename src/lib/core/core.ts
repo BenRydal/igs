@@ -696,9 +696,8 @@ export class Core {
     const uniqueCodes = [codeName]
 
     csvData.forEach((row) => {
-      const startTime = parseFloat(row.start.toString())
-      const endTime = parseFloat(row.end.toString())
-      this.codeData.push({ code: codeName, startTime, endTime })
+      if (!this.coreUtils.codeRowForType(row)) return
+      this.codeData.push({ code: codeName, startTime: row.start, endTime: row.end })
     })
 
     this.updateCodeStore(uniqueCodes)
@@ -708,11 +707,10 @@ export class Core {
     const uniqueCodes: string[] = []
 
     csvData.forEach((row) => {
+      if (!this.coreUtils.multiCodeRowForType(row)) return
       const code = row.code.toLowerCase()
       if (!uniqueCodes.includes(code)) uniqueCodes.push(code)
-      const startTime = parseFloat(row.start.toString())
-      const endTime = parseFloat(row.end.toString())
-      this.codeData.push({ code, startTime, endTime })
+      this.codeData.push({ code, startTime: row.start, endTime: row.end })
     })
     this.updateCodeStore(uniqueCodes)
   }
