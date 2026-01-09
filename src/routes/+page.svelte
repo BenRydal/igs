@@ -127,14 +127,15 @@
         { value: 'example-13', label: 'Civil Rights Tour: Walking the Route' },
       ],
     },
-    {
-      label: 'Music Performance',
-      icon: MdMusic,
-      items: [
-        { value: 'example-15', label: 'Trio' },
-        { value: 'example-16', label: 'Full Band' },
-      ],
-    },
+    // Hidden temporarily - uncomment when ready to show
+    // {
+    //   label: 'Music Performance',
+    //   icon: MdMusic,
+    //   items: [
+    //     { value: 'example-15', label: 'Trio' },
+    //     { value: 'example-16', label: 'Full Band' },
+    //   ],
+    // },
     {
       label: 'TIMSS Classroom Video Study',
       icon: MdVideo,
