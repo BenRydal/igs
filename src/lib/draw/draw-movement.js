@@ -4,12 +4,18 @@ import VideoStore from '../../stores/videoStore'
 import PlaybackStore from '../../stores/playbackStore'
 
 let maxStopLength, isPathColorMode, movementStrokeWeight, stopStrokeWeight
+let circleToggle, sliceToggle, movementToggle, stopsToggle, highlightToggle
 
 ConfigStore.subscribe((data) => {
   maxStopLength = data.maxStopLength
   isPathColorMode = data.isPathColorMode
   movementStrokeWeight = data.movementStrokeWeight
   stopStrokeWeight = data.stopStrokeWeight
+  circleToggle = data.circleToggle
+  sliceToggle = data.sliceToggle
+  movementToggle = data.movementToggle
+  stopsToggle = data.stopsToggle
+  highlightToggle = data.highlightToggle
 })
 
 let videoCurrentTime = 0
@@ -24,12 +30,56 @@ PlaybackStore.subscribe((data) => {
 })
 
 export class DrawMovement {
+  // Static constants
+  static LARGEST_STOP_PIXEL_SIZE = 50
+  // Minimum pixel distance between rendered vertices (skip closer points)
+  // Higher values = fewer vertices = better performance, but less detail when zoomed in
+  // 8 pixels provides good balance - visually indistinguishable from full detail at typical zoom
+  static MIN_PIXEL_DISTANCE = 8
+
   constructor(sketch, drawUtils) {
     this.sk = sketch
     this.drawUtils = drawUtils
     this.dot = null
-    this.largestStopPixelSize = 50
     this.shade = null
+  }
+
+  // Pre-compute segment boundaries for a dataTrail
+  computeSegments(dataTrail) {
+    if (dataTrail.length === 0) return []
+
+    const segments = []
+    let segStart = 0
+
+    for (let i = 1; i < dataTrail.length; i++) {
+      const prevPoint = dataTrail[i - 1]
+      const currPoint = dataTrail[i]
+
+      const prevStopped = this.drawUtils.isStopped(prevPoint.stopLength)
+      const currStopped = this.drawUtils.isStopped(currPoint.stopLength)
+
+      // Check if we need to start a new segment
+      if (prevStopped !== currStopped || !this.codesEqual(prevPoint.codes, currPoint.codes)) {
+        segments.push({
+          start: segStart,
+          end: i - 1,
+          isStopped: prevStopped,
+          codes: prevPoint.codes
+        })
+        segStart = i
+      }
+    }
+
+    // Add final segment
+    const lastPoint = dataTrail[dataTrail.length - 1]
+    segments.push({
+      start: segStart,
+      end: dataTrail.length - 1,
+      isStopped: this.drawUtils.isStopped(lastPoint.stopLength),
+      codes: lastPoint.codes
+    })
+
+    return segments
   }
 
   setData(user) {
@@ -40,87 +90,192 @@ export class DrawMovement {
     if (this.dot !== null) this.drawDot(this.dot)
   }
 
-  setDraw(dataTrail) {
-    for (let i = 0; i < dataTrail.length; i++) {
-      let point = dataTrail[i]
-      let augmentedPoint = this.getAugmentedPoint(this.sk.PLAN, point)
+  // Check if we can use fast path (skip per-point visibility checks)
+  canUseFastPath(state) {
+    // Fast path when: full timeline visible, not animating, no special modes
+    const isFullTimeline = state.viewStart <= state.dataStart && state.viewEnd >= state.dataEnd
+    const notAnimating = playbackMode === 'stopped'
+    const noSpecialModes = !circleToggle && !sliceToggle && !highlightToggle && !movementToggle && !stopsToggle
 
-      if (
-        this.drawUtils.isVisible(
-          augmentedPoint.point,
-          augmentedPoint.pos,
-          augmentedPoint.point.stopLength
-        )
-      ) {
-        let segmentEnd = this.findSegmentEnd(dataTrail, i) // Look ahead to find the next point with different stopLength or codes
-        this.setLineStyles(point.stopLength, point.codes)
-        this.drawSegment(this.sk.SPACETIME, dataTrail, i, segmentEnd) // drawSpaceTimeCurve
-        if (this.drawUtils.isStopped(point.stopLength)) {
-          this.drawStopCircle(augmentedPoint) // draw stop circles on floor plan
-        } else this.drawSegment(this.sk.PLAN, dataTrail, i, segmentEnd) // draw floor plan curve
-        i = segmentEnd // Skip ahead to the end of the segment
+    return isFullTimeline && notAnimating && noSpecialModes
+  }
+
+  setDraw(dataTrail) {
+    if (dataTrail.length === 0) return
+
+    this.sk.strokeCap(this.sk.SQUARE)
+
+    // Get visible time range from timeline store
+    const state = timelineV2Store.getState()
+    const useFastPath = this.canUseFastPath(state)
+
+    if (useFastPath) {
+      // FAST PATH: Use pre-computed segments, skip all visibility checks
+      const segments = this.computeSegments(dataTrail)
+
+      // Pre-partition segments to avoid multiple iterations
+      const movingSegments = []
+      const stoppedSegments = []
+      for (const seg of segments) {
+        if (seg.isStopped) {
+          stoppedSegments.push(seg)
+        } else {
+          movingSegments.push(seg)
+        }
+      }
+
+      if (!isPathColorMode) {
+        // Batch all movement into minimal draw calls (single color)
+        this.sk.stroke(this.shade)
+
+        // Draw moving segments to SPACETIME
+        this.sk.strokeWeight(movementStrokeWeight)
+        this.sk.beginShape(this.sk.LINES)
+        for (const seg of movingSegments) {
+          this.drawSegmentVerticesAsLines(this.sk.SPACETIME, dataTrail, seg.start, seg.end)
+        }
+        this.sk.endShape()
+
+        // Draw stopped segments to SPACETIME
+        this.sk.strokeWeight(stopStrokeWeight)
+        this.sk.beginShape(this.sk.LINES)
+        for (const seg of stoppedSegments) {
+          this.drawSegmentVerticesAsLines(this.sk.SPACETIME, dataTrail, seg.start, seg.end)
+        }
+        this.sk.endShape()
+
+        // Draw moving segments to PLAN
+        this.sk.strokeWeight(movementStrokeWeight)
+        this.sk.beginShape(this.sk.LINES)
+        for (const seg of movingSegments) {
+          this.drawSegmentVerticesAsLines(this.sk.PLAN, dataTrail, seg.start, seg.end)
+        }
+        this.sk.endShape()
+
+        // Draw stop circles on floor plan
+        this.sk.strokeWeight(stopStrokeWeight)
+        for (const seg of stoppedSegments) {
+          const aug = this.getAugmentedPoint(this.sk.PLAN, dataTrail[seg.start])
+          this.drawStopCircle(aug)
+        }
+      } else {
+        // Path color mode: need separate shapes per segment for different colors
+        for (const seg of segments) {
+          this.setLineStyles(dataTrail[seg.start].stopLength, seg.codes)
+          this.drawSegment(this.sk.SPACETIME, dataTrail, seg.start, seg.end)
+
+          if (seg.isStopped) {
+            const aug = this.getAugmentedPoint(this.sk.PLAN, dataTrail[seg.start])
+            this.drawStopCircle(aug)
+          } else {
+            this.drawSegment(this.sk.PLAN, dataTrail, seg.start, seg.end)
+          }
+        }
+      }
+    } else {
+      // NORMAL PATH: Loop through all points, check visibility per point
+      for (let i = 0; i < dataTrail.length; i++) {
+        const point = dataTrail[i]
+        const aug = this.getAugmentedPoint(this.sk.PLAN, point)
+
+        if (this.drawUtils.isVisible(aug.point, aug.pos, aug.point.stopLength)) {
+          const segmentEnd = this.findSegmentEnd(dataTrail, i)
+          this.setLineStyles(point.stopLength, point.codes)
+          this.drawSegment(this.sk.SPACETIME, dataTrail, i, segmentEnd)
+          if (this.drawUtils.isStopped(point.stopLength)) {
+            this.drawStopCircle(aug)
+          } else {
+            this.drawSegment(this.sk.PLAN, dataTrail, i, segmentEnd)
+          }
+          i = segmentEnd
+        }
       }
     }
   }
 
-  // Find the end of the segment where stopLength or codes change
+  // Fast array comparison - avoids JSON.stringify overhead
+  codesEqual(codes1, codes2) {
+    if (!codes1 || !codes2) return codes1 === codes2
+    if (codes1.length !== codes2.length) return false
+    for (let i = 0; i < codes1.length; i++) {
+      if (codes1[i] !== codes2[i]) return false
+    }
+    return true
+  }
+
+  // Find the end of the segment where stopLength, codes, or visibility changes
   findSegmentEnd(dataTrail, start) {
     const startPoint = dataTrail[start]
-    for (let i = start + 1; i < dataTrail.length; i++) {
-      let currentPoint = dataTrail[i]
-      let augmentedPoint = this.getAugmentedPoint(this.sk.PLAN, currentPoint)
-      if (this.testToDetermineSegmentEnd(currentPoint, startPoint, augmentedPoint)) {
-        return i - 1
-      }
-    }
-    return dataTrail.length - 1 // If no change, return the last point
-  }
+    const startStopped = this.drawUtils.isStopped(startPoint.stopLength)
 
-  testToDetermineSegmentEnd(currentPoint, startPoint, augmentedPoint) {
-    return (
-      this.drawUtils.isStopped(currentPoint.stopLength) !==
-        this.drawUtils.isStopped(startPoint.stopLength) ||
-      JSON.stringify(currentPoint.codes) !== JSON.stringify(startPoint.codes) ||
-      !this.drawUtils.isVisible(
+    for (let i = start + 1; i < dataTrail.length; i++) {
+      const currentPoint = dataTrail[i]
+      const augmentedPoint = this.getAugmentedPoint(this.sk.PLAN, currentPoint)
+
+      const stoppedChanged = this.drawUtils.isStopped(currentPoint.stopLength) !== startStopped
+      const codesChanged = !this.codesEqual(currentPoint.codes, startPoint.codes)
+      const notVisible = !this.drawUtils.isVisible(
         augmentedPoint.point,
         augmentedPoint.pos,
         augmentedPoint.point.stopLength
       )
-    )
+
+      if (stoppedChanged || codesChanged || notVisible) {
+        return i - 1
+      }
+    }
+    return dataTrail.length - 1
+  }
+
+  // Draw segment vertices as LINES pairs (for batched drawing)
+  // LINES mode draws separate line segments between each pair of vertices
+  drawSegmentVerticesAsLines(view, dataTrail, start, end) {
+    const minDistSq = DrawMovement.MIN_PIXEL_DISTANCE * DrawMovement.MIN_PIXEL_DISTANCE
+    let lastX = -Infinity, lastY = -Infinity, lastZ = -Infinity
+    let prevX, prevY, prevZ
+    let hasPrev = false
+
+    for (let i = start; i <= end; i++) {
+      const point = dataTrail[i]
+      const aug = this.getAugmentedPoint(view, point)
+      const x = aug.pos.viewXPos
+      const y = aug.pos.floorPlanYPos
+      const z = aug.pos.zPos
+
+      if (view === this.sk.SPACETIME) this.recordDot(aug)
+
+      // Apply decimation
+      const dx = x - lastX
+      const dy = y - lastY
+      const dz = z - lastZ
+      const distSq = dx * dx + dy * dy + dz * dz
+
+      const isFirstOrLast = i === start || i === end
+      if (isFirstOrLast || distSq >= minDistSq) {
+        if (hasPrev) {
+          // Output line segment from prev to current
+          this.sk.vertex(prevX, prevY, prevZ)
+          this.sk.vertex(x, y, z)
+        }
+        prevX = x
+        prevY = y
+        prevZ = z
+        hasPrev = true
+        lastX = x
+        lastY = y
+        lastZ = z
+      }
+    }
   }
 
   drawSegment(view, dataTrail, start, end) {
-    this.sk.beginShape()
-    for (let i = start; i <= end; i++) {
-      let point = dataTrail[i]
-      const augmentedPoint = this.getAugmentedPoint(view, point)
-      if (view === this.sk.SPACETIME) this.recordDot(augmentedPoint)
-      if (i === start && i !== 0 && !this.drawUtils.isStopped(point.stopLength)) {
-        this.drawAdditionalVertex(view, dataTrail[i - 1])
-      }
-      this.sk.vertex(
-        augmentedPoint.pos.viewXPos,
-        augmentedPoint.pos.floorPlanYPos,
-        augmentedPoint.pos.zPos
-      )
-      if (i === end && i !== dataTrail.length - 1 && !this.drawUtils.isStopped(point.stopLength)) {
-        this.drawAdditionalVertex(view, dataTrail[i + 1])
-      }
-    }
+    this.sk.beginShape(this.sk.LINES)
+    this.drawSegmentVerticesAsLines(view, dataTrail, start, end)
     this.sk.endShape()
   }
 
   getAugmentedPoint(view, point) {
     return this.drawUtils.createAugmentPoint(view, point, point.time)
-  }
-
-  drawAdditionalVertex(view, point) {
-    const augmentedPoint = this.getAugmentedPoint(view, point)
-    this.sk.vertex(
-      augmentedPoint.pos.viewXPos,
-      augmentedPoint.pos.floorPlanYPos,
-      augmentedPoint.pos.zPos
-    )
   }
 
   drawStopCircle(augmentedPoint) {
@@ -131,7 +286,7 @@ export class DrawMovement {
       0,
       maxStopLength,
       5,
-      this.largestStopPixelSize
+      DrawMovement.LARGEST_STOP_PIXEL_SIZE
     )
     this.sk.circle(augmentedPoint.pos.viewXPos, augmentedPoint.pos.floorPlanYPos, stopSize)
     this.sk.noFill()
