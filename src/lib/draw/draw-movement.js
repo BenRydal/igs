@@ -44,44 +44,6 @@ export class DrawMovement {
     this.shade = null
   }
 
-  // Pre-compute segment boundaries for a dataTrail
-  computeSegments(dataTrail) {
-    if (dataTrail.length === 0) return []
-
-    const segments = []
-    let segStart = 0
-
-    for (let i = 1; i < dataTrail.length; i++) {
-      const prevPoint = dataTrail[i - 1]
-      const currPoint = dataTrail[i]
-
-      const prevStopped = this.drawUtils.isStopped(prevPoint.stopLength)
-      const currStopped = this.drawUtils.isStopped(currPoint.stopLength)
-
-      // Check if we need to start a new segment
-      if (prevStopped !== currStopped || !this.codesEqual(prevPoint.codes, currPoint.codes)) {
-        segments.push({
-          start: segStart,
-          end: i - 1,
-          isStopped: prevStopped,
-          codes: prevPoint.codes
-        })
-        segStart = i
-      }
-    }
-
-    // Add final segment
-    const lastPoint = dataTrail[dataTrail.length - 1]
-    segments.push({
-      start: segStart,
-      end: dataTrail.length - 1,
-      isStopped: this.drawUtils.isStopped(lastPoint.stopLength),
-      codes: lastPoint.codes
-    })
-
-    return segments
-  }
-
   setData(user) {
     this.dot = null
     this.sk.noFill()
@@ -90,14 +52,63 @@ export class DrawMovement {
     if (this.dot !== null) this.drawDot(this.dot)
   }
 
-  // Check if we can use fast path (skip per-point visibility checks)
+  // Check if we can use fast path (skip ALL visibility checks)
   canUseFastPath(state) {
-    // Fast path when: full timeline visible, not animating, no special modes
     const isFullTimeline = state.viewStart <= state.dataStart && state.viewEnd >= state.dataEnd
     const notAnimating = playbackMode === 'stopped'
     const noSpecialModes = !circleToggle && !sliceToggle && !highlightToggle && !movementToggle && !stopsToggle
-
     return isFullTimeline && notAnimating && noSpecialModes
+  }
+
+  // Check if we can use medium path (time-based filtering only, still batched)
+  canUseMediumPath() {
+    // Medium path works when only time-based filtering is needed (no spatial checks)
+    const noSpatialModes = !circleToggle && !sliceToggle && !highlightToggle
+    const noTypeFilters = !movementToggle && !stopsToggle
+    return noSpatialModes && noTypeFilters
+  }
+
+  // Binary search to find first index where time >= targetTime
+  findTimeIndex(dataTrail, targetTime, findFirst = true) {
+    let low = 0
+    let high = dataTrail.length - 1
+    let result = findFirst ? dataTrail.length : -1
+
+    while (low <= high) {
+      const mid = (low + high) >>> 1
+      const midTime = dataTrail[mid].time
+
+      if (findFirst) {
+        if (midTime >= targetTime) {
+          result = mid
+          high = mid - 1
+        } else {
+          low = mid + 1
+        }
+      } else {
+        // Find last index where time <= targetTime
+        if (midTime <= targetTime) {
+          result = mid
+          low = mid + 1
+        } else {
+          high = mid - 1
+        }
+      }
+    }
+    return result
+  }
+
+  // Get visible time range based on current state
+  getVisibleTimeRange(state) {
+    let startTime = state.viewStart
+    let endTime = state.viewEnd
+
+    // If animating, cap at current playback time
+    if (playbackMode !== 'stopped') {
+      endTime = Math.min(endTime, state.currentTime)
+    }
+
+    return { startTime, endTime }
   }
 
   setDraw(dataTrail) {
@@ -107,73 +118,21 @@ export class DrawMovement {
 
     // Get visible time range from timeline store
     const state = timelineV2Store.getState()
-    const useFastPath = this.canUseFastPath(state)
 
-    if (useFastPath) {
-      // FAST PATH: Use pre-computed segments, skip all visibility checks
-      const segments = this.computeSegments(dataTrail)
+    if (this.canUseFastPath(state)) {
+      // FAST PATH: Draw everything, no visibility checks
+      this.drawBatched(dataTrail, 0, dataTrail.length - 1)
+    } else if (this.canUseMediumPath()) {
+      // MEDIUM PATH: Use binary search to find visible range, then batch
+      const { startTime, endTime } = this.getVisibleTimeRange(state)
+      const startIdx = this.findTimeIndex(dataTrail, startTime, true)
+      const endIdx = this.findTimeIndex(dataTrail, endTime, false)
 
-      // Pre-partition segments to avoid multiple iterations
-      const movingSegments = []
-      const stoppedSegments = []
-      for (const seg of segments) {
-        if (seg.isStopped) {
-          stoppedSegments.push(seg)
-        } else {
-          movingSegments.push(seg)
-        }
-      }
-
-      if (!isPathColorMode) {
-        // Batch all movement into minimal draw calls (single color)
-        this.sk.stroke(this.shade)
-
-        // Draw moving segments to SPACETIME
-        this.sk.strokeWeight(movementStrokeWeight)
-        this.sk.beginShape(this.sk.LINES)
-        for (const seg of movingSegments) {
-          this.drawSegmentVerticesAsLines(this.sk.SPACETIME, dataTrail, seg.start, seg.end)
-        }
-        this.sk.endShape()
-
-        // Draw stopped segments to SPACETIME
-        this.sk.strokeWeight(stopStrokeWeight)
-        this.sk.beginShape(this.sk.LINES)
-        for (const seg of stoppedSegments) {
-          this.drawSegmentVerticesAsLines(this.sk.SPACETIME, dataTrail, seg.start, seg.end)
-        }
-        this.sk.endShape()
-
-        // Draw moving segments to PLAN
-        this.sk.strokeWeight(movementStrokeWeight)
-        this.sk.beginShape(this.sk.LINES)
-        for (const seg of movingSegments) {
-          this.drawSegmentVerticesAsLines(this.sk.PLAN, dataTrail, seg.start, seg.end)
-        }
-        this.sk.endShape()
-
-        // Draw stop circles on floor plan
-        this.sk.strokeWeight(stopStrokeWeight)
-        for (const seg of stoppedSegments) {
-          const aug = this.getAugmentedPoint(this.sk.PLAN, dataTrail[seg.start])
-          this.drawStopCircle(aug)
-        }
-      } else {
-        // Path color mode: need separate shapes per segment for different colors
-        for (const seg of segments) {
-          this.setLineStyles(dataTrail[seg.start].stopLength, seg.codes)
-          this.drawSegment(this.sk.SPACETIME, dataTrail, seg.start, seg.end)
-
-          if (seg.isStopped) {
-            const aug = this.getAugmentedPoint(this.sk.PLAN, dataTrail[seg.start])
-            this.drawStopCircle(aug)
-          } else {
-            this.drawSegment(this.sk.PLAN, dataTrail, seg.start, seg.end)
-          }
-        }
+      if (startIdx <= endIdx && startIdx < dataTrail.length && endIdx >= 0) {
+        this.drawBatched(dataTrail, startIdx, endIdx)
       }
     } else {
-      // NORMAL PATH: Loop through all points, check visibility per point
+      // SLOW PATH: Per-point visibility checks (spatial modes active)
       for (let i = 0; i < dataTrail.length; i++) {
         const point = dataTrail[i]
         const aug = this.getAugmentedPoint(this.sk.PLAN, point)
@@ -191,6 +150,105 @@ export class DrawMovement {
         }
       }
     }
+  }
+
+  // Batched drawing for fast and medium paths
+  drawBatched(dataTrail, startIdx, endIdx) {
+    const segments = this.computeSegmentsInRange(dataTrail, startIdx, endIdx)
+
+    if (!isPathColorMode) {
+      // Single color mode: batch all segments by type
+      this.sk.stroke(this.shade)
+
+      // Draw moving segments to SPACETIME
+      this.sk.strokeWeight(movementStrokeWeight)
+      this.sk.beginShape(this.sk.LINES)
+      for (const seg of segments) {
+        if (!seg.isStopped) {
+          this.drawSegmentVerticesAsLines(this.sk.SPACETIME, dataTrail, seg.start, seg.end)
+        }
+      }
+      this.sk.endShape()
+
+      // Draw stopped segments to SPACETIME
+      this.sk.strokeWeight(stopStrokeWeight)
+      this.sk.beginShape(this.sk.LINES)
+      for (const seg of segments) {
+        if (seg.isStopped) {
+          this.drawSegmentVerticesAsLines(this.sk.SPACETIME, dataTrail, seg.start, seg.end)
+        }
+      }
+      this.sk.endShape()
+
+      // Draw moving segments to PLAN
+      this.sk.strokeWeight(movementStrokeWeight)
+      this.sk.beginShape(this.sk.LINES)
+      for (const seg of segments) {
+        if (!seg.isStopped) {
+          this.drawSegmentVerticesAsLines(this.sk.PLAN, dataTrail, seg.start, seg.end)
+        }
+      }
+      this.sk.endShape()
+
+      // Draw stop circles on floor plan
+      this.sk.strokeWeight(stopStrokeWeight)
+      for (const seg of segments) {
+        if (seg.isStopped) {
+          const aug = this.getAugmentedPoint(this.sk.PLAN, dataTrail[seg.start])
+          this.drawStopCircle(aug)
+        }
+      }
+    } else {
+      // Path color mode: separate shapes per segment for different colors
+      for (const seg of segments) {
+        this.setLineStyles(dataTrail[seg.start].stopLength, seg.codes)
+        this.drawSegment(this.sk.SPACETIME, dataTrail, seg.start, seg.end)
+
+        if (seg.isStopped) {
+          const aug = this.getAugmentedPoint(this.sk.PLAN, dataTrail[seg.start])
+          this.drawStopCircle(aug)
+        } else {
+          this.drawSegment(this.sk.PLAN, dataTrail, seg.start, seg.end)
+        }
+      }
+    }
+  }
+
+  // Compute segments within a specific index range
+  computeSegmentsInRange(dataTrail, startIdx, endIdx) {
+    if (startIdx > endIdx) return []
+
+    const segments = []
+    let segStart = startIdx
+
+    for (let i = startIdx + 1; i <= endIdx; i++) {
+      const prevPoint = dataTrail[i - 1]
+      const currPoint = dataTrail[i]
+
+      const prevStopped = this.drawUtils.isStopped(prevPoint.stopLength)
+      const currStopped = this.drawUtils.isStopped(currPoint.stopLength)
+
+      if (prevStopped !== currStopped || !this.codesEqual(prevPoint.codes, currPoint.codes)) {
+        segments.push({
+          start: segStart,
+          end: i - 1,
+          isStopped: prevStopped,
+          codes: prevPoint.codes
+        })
+        segStart = i
+      }
+    }
+
+    // Add final segment
+    const lastPoint = dataTrail[endIdx]
+    segments.push({
+      start: segStart,
+      end: endIdx,
+      isStopped: this.drawUtils.isStopped(lastPoint.stopLength),
+      codes: lastPoint.codes
+    })
+
+    return segments
   }
 
   // Fast array comparison - avoids JSON.stringify overhead
