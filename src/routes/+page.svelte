@@ -1864,6 +1864,7 @@
           id="btn-codes"
         >
           CODES
+          <MdChevronDown class="w-4 h-4 -ml-1" />
         </button>
 
         <div id="dropdown-container-codes">
