@@ -43,6 +43,7 @@ export class Core {
   codeData: CodeEntry[] = []
   conversationData: ConversationRow[] | null = null
   movementData: MovementDataFile[] = []
+  gpsMovementData: { fileName: string; gpsData: { time: number; lat: number; lng: number }[] }[] = []
 
   constructor(sketch: p5) {
     this.sketch = sketch
@@ -125,8 +126,17 @@ export class Core {
    * ```
    */
   handleExampleDropdown = async (event: ExampleSelectEvent): Promise<void> => {
-    ConfigStore.update((store) => ({ ...store, maxStopLength: 0 }))
-    resetVideo() // Always clear previous video state when switching datasets
+    // Clear all previous data when switching datasets
+    pausePlayback()
+    this.movementData = []
+    this.gpsMovementData = []
+    this.conversationData = null
+    this.codeData = []
+    UserStore.set([])
+    CodeStore.set([])
+    resetGPS()
+    resetVideo()
+    ConfigStore.update((store) => ({ ...store, maxStopLength: 0, dataHasCodes: false }))
     const selectedValue = event.target.value as ExampleId
     const selectedExample = getExampleDataset(selectedValue)
     if (selectedExample) {
@@ -306,6 +316,7 @@ export class Core {
           'Loading indoor movement alongside GPS data. Coordinates may not align.'
         )
         resetGPS()
+        this.gpsMovementData = []
       }
       this.movementData.push({ fileName, csvData: csvData as unknown as MovementRow[] })
       this.reProcessAllMovementData()
@@ -402,11 +413,11 @@ export class Core {
   }
 
   /**
-   * Processes GPS movement CSV data (lat/lng coordinates)
-   * Converts GPS coordinates to pixel coordinates and loads a Mapbox static map as floor plan
+   * Processes GPS movement data - validates, stores, and triggers reprocessing
+   * Stores raw GPS data so bounds can be recalculated when multiple files are loaded
    *
    * @param csvData - Array of GPS movement rows containing time, lat, lng coordinates
-   * @param userName - Name identifier for the user (typically from filename)
+   * @param fileName - Name identifier for the user (typically from filename)
    */
   processGPSMovementData = async (csvData: GPSMovementRow[], fileName: string): Promise<void> => {
     // Check if Mapbox is configured
@@ -463,8 +474,23 @@ export class Core {
       return
     }
 
-    // Calculate bounds from validated GPS data
-    const bounds = GPSTransformer.calculateBounds(validatedData)
+    // Store validated GPS data for reprocessing when more files are added
+    this.gpsMovementData.push({ fileName, gpsData: validatedData })
+
+    // Reprocess all GPS data with combined bounds
+    await this.reProcessAllGPSMovementData()
+  }
+
+  /**
+   * Reprocesses all GPS movement data with unified bounds
+   * Called when new GPS files are added to ensure all tracks fit on the map
+   */
+  reProcessAllGPSMovementData = async (): Promise<void> => {
+    if (this.gpsMovementData.length === 0) return
+
+    // Combine all GPS points to calculate unified bounds
+    const allGPSPoints = this.gpsMovementData.flatMap((file) => file.gpsData)
+    const bounds = GPSTransformer.calculateBounds(allGPSPoints)
 
     // Enable GPS mode and set bounds in store
     setGPSMode(true)
@@ -473,32 +499,28 @@ export class Core {
     // Load Mapbox static map as floor plan
     try {
       await loadMapAsFloorPlan(this.sketch, bounds, getGPSState().mapStyle)
-      // Reset rotation to 0 - Mapbox maps are oriented with north up
       this.sketch.floorPlan.curFloorPlanRotation = 0
     } catch (error) {
       console.error('Failed to load map:', error)
       resetGPS()
+      this.gpsMovementData = []
       return
     }
 
-    // Convert GPS coordinates to normalized pixel coordinates
-    const pixelData: MovementRow[] = validatedData.map((row) => {
-      const [x, y] = GPSTransformer.toPixels(
-        row.lat,
-        row.lng,
-        bounds,
-        GPS_NORMALIZED_SIZE,
-        GPS_NORMALIZED_SIZE
-      )
-      return {
-        time: row.time,
-        x,
-        y,
-      }
-    })
+    // Remove old GPS entries from movementData
+    const gpsFileNames = new Set(this.gpsMovementData.map((f) => f.fileName))
+    this.movementData = this.movementData.filter((m) => !gpsFileNames.has(m.fileName))
 
-    // Process as regular movement data
-    this.movementData.push({ fileName, csvData: pixelData })
+    // Convert all GPS data to pixels using unified bounds and add to movementData
+    for (const { fileName, gpsData } of this.gpsMovementData) {
+      const pixelData: MovementRow[] = gpsData.map((row) => {
+        const [x, y] = GPSTransformer.toPixels(row.lat, row.lng, bounds, GPS_NORMALIZED_SIZE, GPS_NORMALIZED_SIZE)
+        return { time: row.time, x, y }
+      })
+      this.movementData.push({ fileName, csvData: pixelData })
+    }
+
+    // Process all movement data and finalize
     this.reProcessAllMovementData()
     this.finalizeUserData()
   }
