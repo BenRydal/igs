@@ -35,6 +35,7 @@ import { GPSTransformer, GPS_NORMALIZED_SIZE } from '../gps/gps-transformer'
 import { loadMapAsFloorPlan, isMapboxConfigured } from '../gps/mapbox-service'
 import { validateGPSData } from '../gps/gps-validation'
 import { GPXParser } from '../gps/gpx-parser'
+import { KMLParser } from '../gps/kml-parser'
 
 export class Core {
   sketch: p5
@@ -61,6 +62,8 @@ export class Core {
       await this.loadCSVData(file)
     } else if (fileName.endsWith('.gpx') || file.type === 'application/gpx+xml') {
       await this.loadGPXData(file)
+    } else if (fileName.endsWith('.kml') || file.type === 'application/vnd.google-earth.kml+xml') {
+      await this.loadKMLData(file)
     } else if (
       fileName.endsWith('.png') ||
       fileName.endsWith('.jpg') ||
@@ -227,6 +230,38 @@ export class Core {
     } catch (error) {
       console.error('Error loading GPX file:', error)
       toastStore.error('Error reading GPX file. Please check the file format.')
+    }
+  }
+
+  /**
+   * Loads and processes KML file data
+   * Parses XML, extracts tracks (LineString or gx:Track), and routes to GPS processing pipeline
+   *
+   * @param file - KML File object to parse
+   * @returns Promise that resolves when processing is complete
+   */
+  loadKMLData = async (file: File): Promise<void> => {
+    try {
+      const kmlContent = await file.text()
+      const fileName = this.coreUtils.cleanFileName(file.name)
+      const parseResult = KMLParser.parse(kmlContent, fileName)
+
+      if (!parseResult.success) {
+        toastStore.error(parseResult.error || 'Failed to parse KML file')
+        return
+      }
+
+      parseResult.warnings.forEach((warning) => toastStore.warning(warning))
+
+      // Process each track as a separate "user" (like multiple CSV files)
+      for (const track of parseResult.tracks) {
+        await this.processGPSMovementData(KMLParser.toGPSMovementRows(track), track.name)
+      }
+
+      this.sketch.loop()
+    } catch (error) {
+      console.error('Error loading KML file:', error)
+      toastStore.error('Error reading KML file. Please check the file format.')
     }
   }
 
