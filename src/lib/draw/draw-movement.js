@@ -146,6 +146,10 @@ export class DrawMovement {
           } else {
             this.drawSegment(this.sk.PLAN, dataTrail, i, segmentEnd)
           }
+
+          // Draw connecting line to next segment if next point is visible
+          this.drawConnectionIfVisible(dataTrail, segmentEnd, point.codes)
+
           i = segmentEnd
         }
       }
@@ -180,6 +184,12 @@ export class DrawMovement {
       }
       this.sk.endShape()
 
+      // Draw connecting lines between segments (fixes gaps at transitions)
+      // Use movement weight for transitions as they represent movement into/out of stops
+      this.sk.strokeWeight(movementStrokeWeight)
+      this.drawSegmentConnections(this.sk.SPACETIME, dataTrail, segments)
+      this.drawSegmentConnections(this.sk.PLAN, dataTrail, segments)
+
       // Draw moving segments to PLAN
       this.sk.strokeWeight(movementStrokeWeight)
       this.sk.beginShape(this.sk.LINES)
@@ -211,6 +221,59 @@ export class DrawMovement {
           this.drawSegment(this.sk.PLAN, dataTrail, seg.start, seg.end)
         }
       }
+      // Draw connecting lines between segments (fixes gaps at transitions)
+      // For path color mode, use movement weight for all connections
+      this.sk.strokeWeight(movementStrokeWeight)
+      this.drawSegmentConnectionsWithColor(this.sk.SPACETIME, dataTrail, segments)
+      this.drawSegmentConnectionsWithColor(this.sk.PLAN, dataTrail, segments)
+    }
+  }
+
+  // Draw connecting lines between consecutive segments (single color mode - batched)
+  drawSegmentConnections(view, dataTrail, segments) {
+    if (segments.length < 2) return
+    this.sk.beginShape(this.sk.LINES)
+    for (let i = 0; i < segments.length - 1; i++) {
+      this.emitConnectionVertices(view, dataTrail, segments[i].end, segments[i + 1].start)
+    }
+    this.sk.endShape()
+  }
+
+  // Draw connecting lines between segments with per-connection color (path color mode)
+  drawSegmentConnectionsWithColor(view, dataTrail, segments) {
+    if (segments.length < 2) return
+    for (let i = 0; i < segments.length - 1; i++) {
+      this.setStroke(this.drawUtils.setCodeColor(segments[i].codes))
+      this.sk.beginShape(this.sk.LINES)
+      this.emitConnectionVertices(view, dataTrail, segments[i].end, segments[i + 1].start)
+      this.sk.endShape()
+    }
+  }
+
+  // Emit vertex pair for a connection line (used within beginShape/endShape)
+  emitConnectionVertices(view, dataTrail, fromIdx, toIdx) {
+    const fromAug = this.getAugmentedPoint(view, dataTrail[fromIdx])
+    const toAug = this.getAugmentedPoint(view, dataTrail[toIdx])
+    this.sk.vertex(fromAug.pos.viewXPos, fromAug.pos.floorPlanYPos, fromAug.pos.zPos)
+    this.sk.vertex(toAug.pos.viewXPos, toAug.pos.floorPlanYPos, toAug.pos.zPos)
+  }
+
+  // Draw connection to next point if it exists and is visible (for slow path)
+  drawConnectionIfVisible(dataTrail, segmentEnd, codes) {
+    if (segmentEnd + 1 >= dataTrail.length) return
+
+    const nextPoint = dataTrail[segmentEnd + 1]
+    const nextAug = this.getAugmentedPoint(this.sk.PLAN, nextPoint)
+    if (!this.drawUtils.isVisible(nextAug.point, nextAug.pos, nextAug.point.stopLength)) return
+
+    this.sk.strokeWeight(movementStrokeWeight)
+    this.setStroke(this.drawUtils.setCodeColor(codes))
+
+    // Draw connection in both views
+    for (const view of [this.sk.SPACETIME, this.sk.PLAN]) {
+      this.sk.beginShape(this.sk.LINES)
+      this.emitConnectionVertices(view, dataTrail, segmentEnd, segmentEnd + 1)
+      this.sk.endShape()
     }
   }
 
