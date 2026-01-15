@@ -1,6 +1,7 @@
 import { writable } from 'svelte/store'
 
 export interface ConfigStoreState {
+  advancedMode: boolean
   isPathColorMode: boolean
   dataHasCodes: boolean
   circleToggle: boolean
@@ -31,6 +32,7 @@ export interface ConfigStoreState {
 export type ConfigStoreType = ConfigStoreState
 
 export const initialConfig: ConfigStoreState = {
+  advancedMode: false,
   isPathColorMode: false,
   dataHasCodes: false,
   circleToggle: false,

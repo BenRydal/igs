@@ -33,6 +33,7 @@
   import MdMoreVert from '~icons/mdi/dots-vertical'
   import MdMenu from '~icons/mdi/menu'
   import MdClose from '~icons/mdi/close'
+  import MdTune from '~icons/mdi/tune'
 
   import type { User } from '../models/user'
 
@@ -65,6 +66,7 @@
   import DataImporter from '$lib/components/import/DataImporter.svelte'
   import MapStyleSelector from '$lib/components/MapStyleSelector.svelte'
   import { capitalizeFirstLetter, capitalizeEachWord } from '$lib/utils/string'
+  import { loadAdvancedMode, saveAdvancedMode } from '$lib/utils/advanced-mode-storage'
 
   import CodeStore from '../stores/codeStore'
   import ConfigStore from '../stores/configStore'
@@ -292,12 +294,34 @@
     onVideoVisibilityChange(willBeVisible)
   }
 
-  function resetSettings() {
-    ConfigStore.update(() => ({ ...initialConfig }))
+  function toggleAdvancedMode() {
+    const newValue = !$ConfigStore.advancedMode
 
-    if (p5Instance) {
-      p5Instance.loop()
+    // When switching to simple mode, reset advanced-only features
+    // so user isn't stuck with hidden active modes
+    if (!newValue) {
+      ConfigStore.update((c) => ({
+        ...c,
+        advancedMode: false,
+        circleToggle: false,
+        sliceToggle: false,
+        highlightToggle: false,
+        movementToggle: false,
+        stopsToggle: false,
+      }))
+      p5Instance?.loop()
+    } else {
+      ConfigStore.update((c) => ({ ...c, advancedMode: true }))
     }
+
+    saveAdvancedMode(newValue)
+  }
+
+  function resetSettings() {
+    // Preserve advancedMode (UI preference) when resetting visualization settings
+    const preserveAdvancedMode = $ConfigStore.advancedMode
+    ConfigStore.update(() => ({ ...initialConfig, advancedMode: preserveAdvancedMode }))
+    p5Instance?.loop()
   }
 
   function handleConfigChangeFromInput(e: Event, key: keyof ConfigStoreType) {
@@ -626,6 +650,12 @@
 
   // Add event handlers for dropdowns
   onMount(() => {
+    // Load advanced mode from localStorage
+    const savedAdvancedMode = loadAdvancedMode()
+    if (savedAdvancedMode) {
+      ConfigStore.update((c) => ({ ...c, advancedMode: true }))
+    }
+
     // Global click handler to close dropdowns when clicking outside
     const handleGlobalClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement
@@ -793,44 +823,46 @@
 
   <!-- Desktop menu - hidden on mobile -->
   <div class="hidden lg:flex items-center justify-end flex-1 px-2">
-    <details class="dropdown" use:clickOutside>
-      <summary class="btn btn-sm ml-4 gap-1 flex items-center">
-        {@render icon(MdFilterList)}
-        Filter
-        {@render chevronDown()}
-      </summary>
-      <ul class="menu dropdown-content rounded-box z-[1] w-52 p-2 shadow bg-base-100">
-        {#each filterToggleOptions as toggle}
-          <li>
-            <button
-              onclick={() => toggleSelection(toggle, filterToggleOptions)}
-              class="w-full text-left flex items-center"
-            >
-              {@render check($ConfigStore[toggle])}
-              {capitalizeFirstLetter(toggle.replace('Toggle', ''))}
-            </button>
+    {#if $ConfigStore.advancedMode}
+      <details class="dropdown" use:clickOutside>
+        <summary class="btn btn-sm ml-4 gap-1 flex items-center">
+          {@render icon(MdFilterList)}
+          Filter
+          {@render chevronDown()}
+        </summary>
+        <ul class="menu dropdown-content rounded-box z-[1] w-52 p-2 shadow bg-base-100">
+          {#each filterToggleOptions as toggle}
+            <li>
+              <button
+                onclick={() => toggleSelection(toggle, filterToggleOptions)}
+                class="w-full text-left flex items-center"
+              >
+                {@render check($ConfigStore[toggle])}
+                {capitalizeFirstLetter(toggle.replace('Toggle', ''))}
+              </button>
+            </li>
+          {/each}
+          <li class="cursor-none">
+            <p>Stop Length: {formattedStopLength} sec</p>
           </li>
-        {/each}
-        <li class="cursor-none">
-          <p>Stop Length: {formattedStopLength} sec</p>
-        </li>
-        <li>
-          <label for="stopLengthRange" class="sr-only">Adjust stop length</label>
-          <input
-            id="stopLengthRange"
-            type="range"
-            min="1"
-            max={$ConfigStore.maxStopLength}
-            value={$ConfigStore.stopSliderValue}
-            class="range"
-            oninput={(e) => handleConfigChangeFromInput(e, 'stopSliderValue')}
-          />
-        </li>
-      </ul>
-    </details>
+          <li>
+            <label for="stopLengthRange" class="sr-only">Adjust stop length</label>
+            <input
+              id="stopLengthRange"
+              type="range"
+              min="1"
+              max={$ConfigStore.maxStopLength}
+              value={$ConfigStore.stopSliderValue}
+              class="range"
+              oninput={(e) => handleConfigChangeFromInput(e, 'stopSliderValue')}
+            />
+          </li>
+        </ul>
+      </details>
+    {/if}
 
-    <!-- Select Dropdown (only shown in 2D mode) -->
-    {#if !is3DMode}
+    <!-- Select Dropdown (only shown in 2D mode and advanced mode) -->
+    {#if !is3DMode && $ConfigStore.advancedMode}
       <details class="dropdown" use:clickOutside>
         <summary class="btn btn-sm ml-4 gap-1 flex items-center">
           {@render icon(MdSelectAll)}
@@ -908,118 +940,124 @@
           </button>
         </li>
 
-        <div class="divider my-1"></div>
-        <li class="menu-title px-2 py-0 text-xs opacity-60">Grouped turns</li>
+        {#if $ConfigStore.advancedMode}
+          <div class="divider my-1"></div>
+          <li class="menu-title px-2 py-0 text-xs opacity-60">Grouped turns</li>
 
-        <li>
-          <button
-            onclick={() => {
-              handleConfigChange('showSpeakerStripes', !$ConfigStore.showSpeakerStripes)
-            }}
-            class="w-full text-left flex items-center"
-          >
-            {@render check($ConfigStore.showSpeakerStripes)}
-            Combine speakers
-          </button>
-        </li>
-        <li class="px-2 py-1">
-          <div class="w-full">
-            <p class="text-xs mb-1">Group within {$ConfigStore.clusterTimeThreshold} seconds</p>
-            <input
-              id="clusterTimeRange"
-              type="range"
-              min="1"
-              max="60"
-              value={$ConfigStore.clusterTimeThreshold}
-              class="range range-xs"
-              oninput={(e) => handleConfigChangeFromInput(e, 'clusterTimeThreshold')}
-            />
-          </div>
-        </li>
-        <li class="px-2 py-1">
-          <div class="w-full">
-            <p class="text-xs mb-1">Group within {$ConfigStore.clusterSpaceThreshold}px distance</p>
-            <input
-              id="clusterSpaceRange"
-              type="range"
-              min="0"
-              max="200"
-              value={$ConfigStore.clusterSpaceThreshold}
-              class="range range-xs"
-              oninput={(e) => handleConfigChangeFromInput(e, 'clusterSpaceThreshold')}
-            />
-          </div>
-        </li>
+          <li>
+            <button
+              onclick={() => {
+                handleConfigChange('showSpeakerStripes', !$ConfigStore.showSpeakerStripes)
+              }}
+              class="w-full text-left flex items-center"
+            >
+              {@render check($ConfigStore.showSpeakerStripes)}
+              Combine speakers
+            </button>
+          </li>
+          <li class="px-2 py-1">
+            <div class="w-full">
+              <p class="text-xs mb-1">Group within {$ConfigStore.clusterTimeThreshold} seconds</p>
+              <input
+                id="clusterTimeRange"
+                type="range"
+                min="1"
+                max="60"
+                value={$ConfigStore.clusterTimeThreshold}
+                class="range range-xs"
+                oninput={(e) => handleConfigChangeFromInput(e, 'clusterTimeThreshold')}
+              />
+            </div>
+          </li>
+          <li class="px-2 py-1">
+            <div class="w-full">
+              <p class="text-xs mb-1">Group within {$ConfigStore.clusterSpaceThreshold}px distance</p>
+              <input
+                id="clusterSpaceRange"
+                type="range"
+                min="0"
+                max="200"
+                value={$ConfigStore.clusterSpaceThreshold}
+                class="range range-xs"
+                oninput={(e) => handleConfigChangeFromInput(e, 'clusterSpaceThreshold')}
+              />
+            </div>
+          </li>
 
-        <div class="divider my-1"></div>
-        <li class="menu-title px-2 py-0 text-xs opacity-60">Individual turns</li>
+          <div class="divider my-1"></div>
+          <li class="menu-title px-2 py-0 text-xs opacity-60">Individual turns</li>
 
-        <li class="px-2 py-1">
-          <div class="w-full">
-            <p class="text-xs mb-1">Turn width: {$ConfigStore.conversationRectWidth}px</p>
-            <input
-              id="rectWidthRange"
-              type="range"
-              min="1"
-              max="30"
-              value={$ConfigStore.conversationRectWidth}
-              class="range range-xs"
-              oninput={(e) => handleConfigChangeFromInput(e, 'conversationRectWidth')}
-            />
-          </div>
-        </li>
+          <li class="px-2 py-1">
+            <div class="w-full">
+              <p class="text-xs mb-1">Turn width: {$ConfigStore.conversationRectWidth}px</p>
+              <input
+                id="rectWidthRange"
+                type="range"
+                min="1"
+                max="30"
+                value={$ConfigStore.conversationRectWidth}
+                class="range range-xs"
+                oninput={(e) => handleConfigChangeFromInput(e, 'conversationRectWidth')}
+              />
+            </div>
+          </li>
+        {/if}
       </ul>
     </details>
 
-    <!-- Map Style Selector (GPS mode only) -->
-    <MapStyleSelector />
+    {#if $ConfigStore.advancedMode}
+      <!-- Map Style Selector (GPS mode only, advanced) -->
+      <MapStyleSelector />
 
-    <!-- Clear Data Dropdown -->
-    <details class="dropdown" use:clickOutside>
-      <summary class="btn btn-sm ml-4 gap-1 flex items-center">
-        {@render icon(MdDelete)}
-        Clear
-        {@render chevronDown()}
-      </summary>
-      <ul class="menu dropdown-content rounded-box z-[1] w-52 p-2 shadow bg-base-100">
-        <li><button onclick={clearMovementData}>Movement</button></li>
-        <li><button onclick={clearConversationData}>Conversation</button></li>
-        <li><button onclick={clearCodeData}>Codes</button></li>
-        <li><button onclick={resetVideo}>Video</button></li>
-        <li><button onclick={clearAllDataLocal} class="text-error">All Data</button></li>
-      </ul>
-    </details>
+      <!-- Clear Data Dropdown (advanced) -->
+      <details class="dropdown" use:clickOutside>
+        <summary class="btn btn-sm ml-4 gap-1 flex items-center">
+          {@render icon(MdDelete)}
+          Clear
+          {@render chevronDown()}
+        </summary>
+        <ul class="menu dropdown-content rounded-box z-[1] w-52 p-2 shadow bg-base-100">
+          <li><button onclick={clearMovementData}>Movement</button></li>
+          <li><button onclick={clearConversationData}>Conversation</button></li>
+          <li><button onclick={clearCodeData}>Codes</button></li>
+          <li><button onclick={resetVideo}>Video</button></li>
+          <li><button onclick={clearAllDataLocal} class="text-error">All Data</button></li>
+        </ul>
+      </details>
+    {/if}
 
     {@render navDivider()}
 
     <div class="flex items-center gap-1">
-      <IconButton
-        id="btn-rotate-left"
-        icon={MdRotateLeft}
-        tooltip={'Rotate Left'}
-        onclick={() => {
-          p5Instance.floorPlan.setRotateLeft()
-          p5Instance.loop()
-        }}
-      />
-      <IconButton
-        id="btn-rotate-right"
-        icon={MdRotateRight}
-        tooltip={'Rotate Right'}
-        onclick={() => {
-          p5Instance.floorPlan.setRotateRight()
-          p5Instance.loop()
-        }}
-      />
-      <IconButton
-        id="btn-aspect-ratio"
-        icon={currentConfig.preserveFloorplanAspectRatio ? MdAspectRatio : MdFitToPageOutline}
-        tooltip={currentConfig.preserveFloorplanAspectRatio ? 'Stretch to Fill' : 'Preserve Aspect Ratio'}
-        onclick={() => {
-          handleConfigChange('preserveFloorplanAspectRatio', !currentConfig.preserveFloorplanAspectRatio)
-          p5Instance?.loop()
-        }}
-      />
+      {#if $ConfigStore.advancedMode}
+        <IconButton
+          id="btn-rotate-left"
+          icon={MdRotateLeft}
+          tooltip={'Rotate Left'}
+          onclick={() => {
+            p5Instance.floorPlan.setRotateLeft()
+            p5Instance.loop()
+          }}
+        />
+        <IconButton
+          id="btn-rotate-right"
+          icon={MdRotateRight}
+          tooltip={'Rotate Right'}
+          onclick={() => {
+            p5Instance.floorPlan.setRotateRight()
+            p5Instance.loop()
+          }}
+        />
+        <IconButton
+          id="btn-aspect-ratio"
+          icon={currentConfig.preserveFloorplanAspectRatio ? MdAspectRatio : MdFitToPageOutline}
+          tooltip={currentConfig.preserveFloorplanAspectRatio ? 'Stretch to Fill' : 'Preserve Aspect Ratio'}
+          onclick={() => {
+            handleConfigChange('preserveFloorplanAspectRatio', !currentConfig.preserveFloorplanAspectRatio)
+            p5Instance?.loop()
+          }}
+        />
+      {/if}
       <IconButton
         id="btn-toggle-3d"
         icon={Md3DRotation}
@@ -1047,37 +1085,49 @@
         onclick={() => ($isModalOpen = !$isModalOpen)}
       />
 
-      <!-- More menu (Download, Keyboard, Settings) -->
-      <details class="dropdown dropdown-end" use:clickOutside>
-        <summary class="btn btn-sm btn-ghost btn-square">
-          <div class="w-5 h-5"><MdMoreVert /></div>
-        </summary>
-        <ul class="menu dropdown-content rounded-box z-[1] w-48 p-2 shadow bg-base-100">
-          <li>
-            <button onclick={() => p5Instance.saveCodeFile()} class="flex items-center gap-2">
-              {@render icon(MdCloudDownload)}
-              Download Codes
-            </button>
-          </li>
-          <li>
-            <button
-              onclick={() => window.dispatchEvent(new CustomEvent('igs:open-cheatsheet'))}
-              class="flex items-center gap-2"
-            >
-              {@render icon(MdKeyboard)}
-              Keyboard Shortcuts
-            </button>
-          </li>
-          <li>
-            <button onclick={() => (showSettings = true)} class="flex items-center gap-2">
-              {@render icon(MdSettings)}
-              Settings
-            </button>
-          </li>
-        </ul>
-      </details>
+      {#if $ConfigStore.advancedMode}
+        <!-- More menu (Download, Keyboard, Settings) - advanced only -->
+        <details class="dropdown dropdown-end" use:clickOutside>
+          <summary class="btn btn-sm btn-ghost btn-square">
+            <div class="w-5 h-5"><MdMoreVert /></div>
+          </summary>
+          <ul class="menu dropdown-content rounded-box z-[1] w-48 p-2 shadow bg-base-100">
+            <li>
+              <button onclick={() => p5Instance.saveCodeFile()} class="flex items-center gap-2">
+                {@render icon(MdCloudDownload)}
+                Download Codes
+              </button>
+            </li>
+            <li>
+              <button
+                onclick={() => window.dispatchEvent(new CustomEvent('igs:open-cheatsheet'))}
+                class="flex items-center gap-2"
+              >
+                {@render icon(MdKeyboard)}
+                Keyboard Shortcuts
+              </button>
+            </li>
+            <li>
+              <button onclick={() => (showSettings = true)} class="flex items-center gap-2">
+                {@render icon(MdSettings)}
+                Settings
+              </button>
+            </li>
+          </ul>
+        </details>
+      {/if}
 
       {@render navDivider()}
+
+      <!-- Advanced Mode Toggle -->
+      <button
+        class="btn btn-sm gap-1"
+        class:btn-primary={$ConfigStore.advancedMode}
+        onclick={toggleAdvancedMode}
+      >
+        <div class="w-4 h-4"><MdTune /></div>
+        Advanced
+      </button>
 
       <!-- Examples Dropdown -->
       <FloatingDropdown
@@ -1151,35 +1201,37 @@
     >
       <!-- Dropdown buttons -->
       <div class="flex flex-wrap gap-2 justify-center mb-6">
-        <details class="dropdown dropdown-bottom" use:clickOutside>
-          <summary class="btn btn-sm gap-1">{@render icon(MdFilterList)}Filter</summary>
-          <ul class="dropdown-content menu bg-base-200 rounded-box z-[60] w-48 p-2 shadow mt-1">
-            {#each filterToggleOptions as toggle}
-              <li>
-                <button onclick={() => toggleSelection(toggle, filterToggleOptions)}
-                  >{@render check($ConfigStore[toggle])}{capitalizeFirstLetter(
-                    toggle.replace('Toggle', '')
-                  )}</button
-                >
+        {#if $ConfigStore.advancedMode}
+          <details class="dropdown dropdown-bottom" use:clickOutside>
+            <summary class="btn btn-sm gap-1">{@render icon(MdFilterList)}Filter</summary>
+            <ul class="dropdown-content menu bg-base-200 rounded-box z-[60] w-48 p-2 shadow mt-1">
+              {#each filterToggleOptions as toggle}
+                <li>
+                  <button onclick={() => toggleSelection(toggle, filterToggleOptions)}
+                    >{@render check($ConfigStore[toggle])}{capitalizeFirstLetter(
+                      toggle.replace('Toggle', '')
+                    )}</button
+                  >
+                </li>
+              {/each}
+              <li class="px-2 py-1">
+                <div class="flex flex-col w-full">
+                  <span class="text-xs">Stop: {formattedStopLength}s</span>
+                  <input
+                    type="range"
+                    min="1"
+                    max={$ConfigStore.maxStopLength}
+                    value={$ConfigStore.stopSliderValue}
+                    class="range range-xs"
+                    oninput={(e) => handleConfigChangeFromInput(e, 'stopSliderValue')}
+                  />
+                </div>
               </li>
-            {/each}
-            <li class="px-2 py-1">
-              <div class="flex flex-col w-full">
-                <span class="text-xs">Stop: {formattedStopLength}s</span>
-                <input
-                  type="range"
-                  min="1"
-                  max={$ConfigStore.maxStopLength}
-                  value={$ConfigStore.stopSliderValue}
-                  class="range range-xs"
-                  oninput={(e) => handleConfigChangeFromInput(e, 'stopSliderValue')}
-                />
-              </div>
-            </li>
-          </ul>
-        </details>
+            </ul>
+          </details>
+        {/if}
 
-        {#if !is3DMode}
+        {#if !is3DMode && $ConfigStore.advancedMode}
           <details class="dropdown dropdown-bottom" use:clickOutside>
             <summary class="btn btn-sm gap-1">{@render icon(MdSelectAll)}Select</summary>
             <ul class="dropdown-content menu bg-base-200 rounded-box z-[60] w-56 p-2 shadow mt-1">
@@ -1237,63 +1289,66 @@
                 >{@render check($ConfigStore.alignToggle)}Align to side</button
               >
             </li>
-            <div class="divider my-1"></div>
-            <li class="menu-title px-2 py-0 text-xs opacity-60">Grouped turns</li>
-            <li>
-              <button
-                onclick={() =>
-                  handleConfigChange('showSpeakerStripes', !$ConfigStore.showSpeakerStripes)}
-                >{@render check($ConfigStore.showSpeakerStripes)}Combine speakers</button
-              >
-            </li>
-            <li class="px-2 py-1">
-              <div class="w-full">
-                <p class="text-xs mb-1">Group within {$ConfigStore.clusterTimeThreshold} seconds</p>
-                <input
-                  type="range"
-                  min="1"
-                  max="60"
-                  value={$ConfigStore.clusterTimeThreshold}
-                  class="range range-xs"
-                  oninput={(e) => handleConfigChangeFromInput(e, 'clusterTimeThreshold')}
-                />
-              </div>
-            </li>
-            <li class="px-2 py-1">
-              <div class="w-full">
-                <p class="text-xs mb-1">
-                  Group within {$ConfigStore.clusterSpaceThreshold}px distance
-                </p>
-                <input
-                  type="range"
-                  min="0"
-                  max="200"
-                  value={$ConfigStore.clusterSpaceThreshold}
-                  class="range range-xs"
-                  oninput={(e) => handleConfigChangeFromInput(e, 'clusterSpaceThreshold')}
-                />
-              </div>
-            </li>
-            <div class="divider my-1"></div>
-            <li class="menu-title px-2 py-0 text-xs opacity-60">Individual turns</li>
-            <li class="px-2 py-1">
-              <div class="w-full">
-                <p class="text-xs mb-1">Turn width: {$ConfigStore.conversationRectWidth}px</p>
-                <input
-                  type="range"
-                  min="1"
-                  max="30"
-                  value={$ConfigStore.conversationRectWidth}
-                  class="range range-xs"
-                  oninput={(e) => handleConfigChangeFromInput(e, 'conversationRectWidth')}
-                />
-              </div>
-            </li>
+            {#if $ConfigStore.advancedMode}
+              <div class="divider my-1"></div>
+              <li class="menu-title px-2 py-0 text-xs opacity-60">Grouped turns</li>
+              <li>
+                <button
+                  onclick={() =>
+                    handleConfigChange('showSpeakerStripes', !$ConfigStore.showSpeakerStripes)}
+                  >{@render check($ConfigStore.showSpeakerStripes)}Combine speakers</button
+                >
+              </li>
+              <li class="px-2 py-1">
+                <div class="w-full">
+                  <p class="text-xs mb-1">Group within {$ConfigStore.clusterTimeThreshold} seconds</p>
+                  <input
+                    type="range"
+                    min="1"
+                    max="60"
+                    value={$ConfigStore.clusterTimeThreshold}
+                    class="range range-xs"
+                    oninput={(e) => handleConfigChangeFromInput(e, 'clusterTimeThreshold')}
+                  />
+                </div>
+              </li>
+              <li class="px-2 py-1">
+                <div class="w-full">
+                  <p class="text-xs mb-1">
+                    Group within {$ConfigStore.clusterSpaceThreshold}px distance
+                  </p>
+                  <input
+                    type="range"
+                    min="0"
+                    max="200"
+                    value={$ConfigStore.clusterSpaceThreshold}
+                    class="range range-xs"
+                    oninput={(e) => handleConfigChangeFromInput(e, 'clusterSpaceThreshold')}
+                  />
+                </div>
+              </li>
+              <div class="divider my-1"></div>
+              <li class="menu-title px-2 py-0 text-xs opacity-60">Individual turns</li>
+              <li class="px-2 py-1">
+                <div class="w-full">
+                  <p class="text-xs mb-1">Turn width: {$ConfigStore.conversationRectWidth}px</p>
+                  <input
+                    type="range"
+                    min="1"
+                    max="30"
+                    value={$ConfigStore.conversationRectWidth}
+                    class="range range-xs"
+                    oninput={(e) => handleConfigChangeFromInput(e, 'conversationRectWidth')}
+                  />
+                </div>
+              </li>
+            {/if}
           </ul>
         </details>
 
-        <details class="dropdown dropdown-bottom dropdown-end" use:clickOutside>
-          <summary class="btn btn-sm gap-1">{@render icon(MdDelete)}Clear</summary>
+        {#if $ConfigStore.advancedMode}
+          <details class="dropdown dropdown-bottom dropdown-end" use:clickOutside>
+            <summary class="btn btn-sm gap-1">{@render icon(MdDelete)}Clear</summary>
           <ul class="dropdown-content menu bg-base-200 rounded-box z-[60] w-40 p-2 shadow mt-1">
             <li>
               <button
@@ -1337,7 +1392,8 @@
               >
             </li>
           </ul>
-        </details>
+          </details>
+        {/if}
 
         <details class="dropdown dropdown-bottom" use:clickOutside>
           <summary class="btn btn-sm gap-1"
@@ -1394,33 +1450,35 @@
 
       <!-- Icon buttons -->
       <div class="flex flex-wrap gap-3 justify-center">
-        <IconButton
-          icon={MdRotateLeft}
-          tooltip="Rotate Left"
-          onclick={() => {
-            p5Instance.floorPlan.setRotateLeft()
-            p5Instance.loop()
-            mobileMenuOpen = false
-          }}
-        />
-        <IconButton
-          icon={MdRotateRight}
-          tooltip="Rotate Right"
-          onclick={() => {
-            p5Instance.floorPlan.setRotateRight()
-            p5Instance.loop()
-            mobileMenuOpen = false
-          }}
-        />
-        <IconButton
-          icon={currentConfig.preserveFloorplanAspectRatio ? MdAspectRatio : MdFitToPageOutline}
-          tooltip={currentConfig.preserveFloorplanAspectRatio ? 'Stretch to Fill' : 'Preserve Aspect Ratio'}
-          onclick={() => {
-            handleConfigChange('preserveFloorplanAspectRatio', !currentConfig.preserveFloorplanAspectRatio)
-            p5Instance?.loop()
-            mobileMenuOpen = false
-          }}
-        />
+        {#if $ConfigStore.advancedMode}
+          <IconButton
+            icon={MdRotateLeft}
+            tooltip="Rotate Left"
+            onclick={() => {
+              p5Instance.floorPlan.setRotateLeft()
+              p5Instance.loop()
+              mobileMenuOpen = false
+            }}
+          />
+          <IconButton
+            icon={MdRotateRight}
+            tooltip="Rotate Right"
+            onclick={() => {
+              p5Instance.floorPlan.setRotateRight()
+              p5Instance.loop()
+              mobileMenuOpen = false
+            }}
+          />
+          <IconButton
+            icon={currentConfig.preserveFloorplanAspectRatio ? MdAspectRatio : MdFitToPageOutline}
+            tooltip={currentConfig.preserveFloorplanAspectRatio ? 'Stretch to Fill' : 'Preserve Aspect Ratio'}
+            onclick={() => {
+              handleConfigChange('preserveFloorplanAspectRatio', !currentConfig.preserveFloorplanAspectRatio)
+              p5Instance?.loop()
+              mobileMenuOpen = false
+            }}
+          />
+        {/if}
         <IconButton
           icon={Md3DRotation}
           tooltip="Toggle 2D/3D"
@@ -1454,30 +1512,49 @@
             mobileMenuOpen = false
           }}
         />
-        <IconButton
-          icon={MdCloudDownload}
-          tooltip="Download Codes"
+        {#if $ConfigStore.advancedMode}
+          <IconButton
+            icon={MdCloudDownload}
+            tooltip="Download Codes"
+            onclick={() => {
+              p5Instance.saveCodeFile()
+              mobileMenuOpen = false
+            }}
+          />
+          <IconButton
+            icon={MdKeyboard}
+            tooltip="Keyboard Shortcuts"
+            onclick={() => {
+              window.dispatchEvent(new CustomEvent('igs:open-cheatsheet'))
+              mobileMenuOpen = false
+            }}
+          />
+          <IconButton
+            icon={MdSettings}
+            tooltip="Settings"
+            onclick={() => {
+              showSettings = true
+              mobileMenuOpen = false
+            }}
+          />
+        {/if}
+      </div>
+
+      <div class="divider my-2"></div>
+
+      <!-- Advanced Mode Toggle -->
+      <div class="flex justify-center">
+        <button
+          class="btn btn-sm gap-1"
+          class:btn-primary={$ConfigStore.advancedMode}
           onclick={() => {
-            p5Instance.saveCodeFile()
+            toggleAdvancedMode()
             mobileMenuOpen = false
           }}
-        />
-        <IconButton
-          icon={MdKeyboard}
-          tooltip="Keyboard Shortcuts"
-          onclick={() => {
-            window.dispatchEvent(new CustomEvent('igs:open-cheatsheet'))
-            mobileMenuOpen = false
-          }}
-        />
-        <IconButton
-          icon={MdSettings}
-          tooltip="Settings"
-          onclick={() => {
-            showSettings = true
-            mobileMenuOpen = false
-          }}
-        />
+        >
+          <div class="w-4 h-4"><MdTune /></div>
+          Advanced
+        </button>
       </div>
     </div>
   {/if}
@@ -1736,7 +1813,7 @@
       }
     }}
   >
-    {#if $ConfigStore.dataHasCodes}
+    {#if $ConfigStore.dataHasCodes && $ConfigStore.advancedMode}
       <div class="relative mr-2">
         <button
           class="btn"
@@ -1826,20 +1903,126 @@
       </div>
     {/if}
 
-    <!-- User Buttons with Eye Icon -->
+    <!-- User Buttons -->
     {#each $UserStore as user}
       {@const visible = isUserVisible(user)}
       {@const buttonStyle = `color: ${visible ? user.color : '#999'}; opacity: ${visible ? 1 : 0.5};`}
       <div class="relative flex-shrink-0 mr-2">
-        <div class="join">
-          <!-- Visibility toggle (eye icon) -->
+        {#if $ConfigStore.advancedMode}
+          <!-- Advanced mode: joined eye + name with dropdown -->
+          <div class="join">
+            <!-- Visibility toggle (eye icon) -->
+            <button
+              class="btn join-item px-2"
+              style={buttonStyle}
+              onclick={(event) => {
+                event.stopPropagation()
+                toggleUserVisibility(user)
+              }}
+              title={visible ? 'Hide user' : 'Show user'}
+            >
+              {#if visible}
+                <MdVisibility class="w-5 h-5" />
+              {:else}
+                <MdVisibilityOff class="w-5 h-5" />
+              {/if}
+            </button>
+
+            <!-- Name button opens dropdown -->
+            <button
+              class="btn join-item px-3 max-w-40 truncate"
+              style={buttonStyle}
+              onclick={(event) => {
+                event.stopPropagation()
+                toggleDropdown(`dropdown-${user.name}`, `btn-${user.name}`)
+              }}
+              id={`btn-${user.name}`}
+              title={user.name}
+            >
+              {user.name}
+            </button>
+          </div>
+
+          <!-- User dropdown (advanced only) -->
+          <div
+            id={`dropdown-${user.name}`}
+            class="hidden bg-base-100 rounded-box p-2 shadow absolute"
+            style="z-index: 9999;"
+          >
+            <ul class="w-52">
+              <!-- Name Input -->
+              <li class="py-2">
+                <input
+                  type="text"
+                  class="input input-bordered input-sm w-full"
+                  value={user.name}
+                  onchange={(e) => {
+                    const oldName = user.name
+                    const newName = e.currentTarget.value.trim()
+                    if (newName && newName !== oldName) {
+                      UserStore.update((users) =>
+                        users.map((u) => (u.name === oldName ? { ...u, name: newName } : u))
+                      )
+                      closeAllDropdowns()
+                      p5Instance?.loop()
+                    }
+                  }}
+                  placeholder="User name"
+                />
+              </li>
+              <!-- Movement -->
+              <li class="py-2">
+                <label class="flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    class="checkbox mr-2"
+                    checked={user.enabled}
+                    onchange={() => {
+                      toggleUserEnabled(user.name)
+                      p5Instance?.loop()
+                    }}
+                  />
+                  Movement
+                </label>
+              </li>
+              <!-- Talk -->
+              <li class="py-2">
+                <label class="flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    class="checkbox mr-2"
+                    checked={user.conversation_enabled}
+                    onchange={() => {
+                      toggleUserConversationEnabled(user.name)
+                      p5Instance?.loop()
+                    }}
+                  />
+                  Talk
+                </label>
+              </li>
+              <!-- Color -->
+              <li class="py-2">
+                <div class="flex items-center">
+                  <input
+                    type="color"
+                    class="color-picker max-w-[24px] max-h-[28px] mr-2"
+                    value={user.color}
+                    onchange={(e) => {
+                      setUserColor(user.name, e.currentTarget.value)
+                      p5Instance?.loop()
+                    }}
+                  />
+                  <span>Color</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+        {:else}
+          <!-- Simple mode: single button that toggles visibility -->
           <button
-            class="btn join-item px-2"
+            class="btn gap-2 max-w-48 truncate"
             style={buttonStyle}
-            onclick={(event) => {
-              event.stopPropagation()
-              toggleUserVisibility(user)
-            }}
+            onclick={() => toggleUserVisibility(user)}
             title={visible ? 'Hide user' : 'Show user'}
           >
             {#if visible}
@@ -1847,97 +2030,9 @@
             {:else}
               <MdVisibilityOff class="w-5 h-5" />
             {/if}
-          </button>
-
-          <!-- Name button opens dropdown -->
-          <button
-            class="btn join-item px-3 max-w-40 truncate"
-            style={buttonStyle}
-            onclick={(event) => {
-              event.stopPropagation()
-              toggleDropdown(`dropdown-${user.name}`, `btn-${user.name}`)
-            }}
-            id={`btn-${user.name}`}
-            title={user.name}
-          >
             {user.name}
           </button>
-        </div>
-
-        <!-- User dropdown -->
-        <div
-          id={`dropdown-${user.name}`}
-          class="hidden bg-base-100 rounded-box p-2 shadow absolute"
-          style="z-index: 9999;"
-        >
-          <ul class="w-52">
-            <!-- Name Input -->
-            <li class="py-2">
-              <input
-                type="text"
-                class="input input-bordered input-sm w-full"
-                value={user.name}
-                onchange={(e) => {
-                  const oldName = user.name
-                  const newName = e.currentTarget.value.trim()
-                  if (newName && newName !== oldName) {
-                    UserStore.update((users) =>
-                      users.map((u) => (u.name === oldName ? { ...u, name: newName } : u))
-                    )
-                    closeAllDropdowns()
-                    p5Instance?.loop()
-                  }
-                }}
-                placeholder="User name"
-              />
-            </li>
-            <!-- Movement -->
-            <li class="py-2">
-              <label class="flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  class="checkbox mr-2"
-                  checked={user.enabled}
-                  onchange={() => {
-                    toggleUserEnabled(user.name)
-                    p5Instance?.loop()
-                  }}
-                />
-                Movement
-              </label>
-            </li>
-            <!-- Talk -->
-            <li class="py-2">
-              <label class="flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  class="checkbox mr-2"
-                  checked={user.conversation_enabled}
-                  onchange={() => {
-                    toggleUserConversationEnabled(user.name)
-                    p5Instance?.loop()
-                  }}
-                />
-                Talk
-              </label>
-            </li>
-            <!-- Color -->
-            <li class="py-2">
-              <div class="flex items-center">
-                <input
-                  type="color"
-                  class="color-picker max-w-[24px] max-h-[28px] mr-2"
-                  value={user.color}
-                  onchange={(e) => {
-                    setUserColor(user.name, e.currentTarget.value)
-                    p5Instance?.loop()
-                  }}
-                />
-                <span>Color</span>
-              </div>
-            </li>
-          </ul>
-        </div>
+        {/if}
       </div>
     {/each}
   </div>
