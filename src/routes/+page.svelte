@@ -116,7 +116,7 @@
       label: 'Classrooms',
       icon: MdSchool,
       items: [
-        { value: 'example-10', label: '8th Grade AP Math Lesson' },
+        { value: 'example-3', label: '8th Grade Science Lesson' },
         { value: 'example-4', label: '3rd Grade Discussion Odd/Even Numbers' },
       ],
     },
