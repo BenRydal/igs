@@ -3,8 +3,17 @@ import { timelineV2Store } from '../timeline/store'
 import VideoStore from '../../stores/videoStore'
 import PlaybackStore from '../../stores/playbackStore'
 
+// ============================================================
+// MODULE STATE (subscribed from stores)
+// ============================================================
+
+// Config: rendering settings
 let maxStopLength, isPathColorMode, movementStrokeWeight, stopStrokeWeight
+// Config: spatial mode toggles
 let circleToggle, sliceToggle, movementToggle, stopsToggle, highlightToggle
+// Playback state
+let videoCurrentTime = 0
+let playbackMode = 'stopped'
 
 ConfigStore.subscribe((data) => {
   maxStopLength = data.maxStopLength
@@ -17,9 +26,6 @@ ConfigStore.subscribe((data) => {
   stopsToggle = data.stopsToggle
   highlightToggle = data.highlightToggle
 })
-
-let videoCurrentTime = 0
-let playbackMode = 'stopped'
 
 VideoStore.subscribe((data) => {
   videoCurrentTime = data.currentTime
@@ -35,7 +41,7 @@ export class DrawMovement {
   // Minimum pixel distance between rendered vertices (skip closer points)
   // Higher values = fewer vertices = better performance, but less detail when zoomed in
   // 8 pixels provides good balance - visually indistinguishable from full detail at typical zoom
-  static MIN_PIXEL_DISTANCE = 8
+  static MIN_PIXEL_DISTANCE_SQ = 8 * 8 // Minimum pixel distance squared for decimation
 
   constructor(sketch, drawUtils) {
     this.sk = sketch
@@ -52,20 +58,24 @@ export class DrawMovement {
     if (this.dot !== null) this.drawDot(this.dot)
   }
 
+  // ============================================================
+  // PATH SELECTION
+  // Determines which rendering path to use based on current state.
+  // Fast path: no checks, Medium path: time filtering, Slow path: per-point visibility
+  // ============================================================
+
+  // Check if no spatial/type filters are active (allows batched drawing)
+  hasNoSpecialModes() {
+    const noSpatialModes = !circleToggle && !sliceToggle && !highlightToggle
+    const noTypeFilters = !movementToggle && !stopsToggle
+    return noSpatialModes && noTypeFilters
+  }
+
   // Check if we can use fast path (skip ALL visibility checks)
   canUseFastPath(state) {
     const isFullTimeline = state.viewStart <= state.dataStart && state.viewEnd >= state.dataEnd
     const notAnimating = playbackMode === 'stopped'
-    const noSpecialModes = !circleToggle && !sliceToggle && !highlightToggle && !movementToggle && !stopsToggle
-    return isFullTimeline && notAnimating && noSpecialModes
-  }
-
-  // Check if we can use medium path (time-based filtering only, still batched)
-  canUseMediumPath() {
-    // Medium path works when only time-based filtering is needed (no spatial checks)
-    const noSpatialModes = !circleToggle && !sliceToggle && !highlightToggle
-    const noTypeFilters = !movementToggle && !stopsToggle
-    return noSpatialModes && noTypeFilters
+    return isFullTimeline && notAnimating && this.hasNoSpecialModes()
   }
 
   // Binary search to find first index where time >= targetTime
@@ -111,6 +121,11 @@ export class DrawMovement {
     return { startTime, endTime }
   }
 
+  // ============================================================
+  // MAIN DRAW FLOW
+  // Entry point that routes to fast/medium/slow rendering paths.
+  // ============================================================
+
   setDraw(dataTrail) {
     if (dataTrail.length === 0) return
 
@@ -122,7 +137,7 @@ export class DrawMovement {
     if (this.canUseFastPath(state)) {
       // FAST PATH: Draw everything, no visibility checks
       this.drawBatched(dataTrail, 0, dataTrail.length - 1)
-    } else if (this.canUseMediumPath()) {
+    } else if (this.hasNoSpecialModes()) {
       // MEDIUM PATH: Use binary search to find visible range, then batch
       const { startTime, endTime } = this.getVisibleTimeRange(state)
       const startIdx = this.findTimeIndex(dataTrail, startTime, true)
@@ -139,7 +154,7 @@ export class DrawMovement {
 
         if (this.drawUtils.isVisible(aug.point, aug.pos, aug.point.stopLength)) {
           const segmentEnd = this.findSegmentEnd(dataTrail, i)
-          this.setLineStyles(point.stopLength, point.codes)
+          this.applySegmentStyle(point.stopLength, point.codes)
           this.drawSegment(this.sk.SPACETIME, dataTrail, i, segmentEnd)
           if (this.drawUtils.isStopped(point.stopLength)) {
             this.drawStopCircle(aug)
@@ -148,13 +163,20 @@ export class DrawMovement {
           }
 
           // Draw connecting line to next segment if next point is visible
-          this.drawConnectionIfVisible(dataTrail, segmentEnd, point.codes)
+          this.drawConnectionIfVisible(this.sk.SPACETIME, dataTrail, segmentEnd, point.codes)
+          this.drawConnectionIfVisible(this.sk.PLAN, dataTrail, segmentEnd, point.codes)
 
           i = segmentEnd
         }
       }
     }
   }
+
+  // ============================================================
+  // BATCHED DRAWING
+  // High-performance rendering for fast/medium paths.
+  // Minimizes draw calls by batching segments of the same type.
+  // ============================================================
 
   // Batched drawing for fast and medium paths
   drawBatched(dataTrail, startIdx, endIdx) {
@@ -164,54 +186,17 @@ export class DrawMovement {
       // Single color mode: batch all segments by type
       this.sk.stroke(this.shade)
 
-      // Draw moving segments to SPACETIME
-      this.sk.strokeWeight(movementStrokeWeight)
-      this.sk.beginShape(this.sk.LINES)
-      for (const seg of segments) {
-        if (!seg.isStopped) {
-          this.drawSegmentVerticesAsLines(this.sk.SPACETIME, dataTrail, seg.start, seg.end)
-        }
-      }
-      this.sk.endShape()
+      // Draw to SPACETIME: moving segments, then stopped segments
+      this.drawBatchedSegments(this.sk.SPACETIME, dataTrail, segments, false, movementStrokeWeight)
+      this.drawBatchedSegments(this.sk.SPACETIME, dataTrail, segments, true, stopStrokeWeight)
 
-      // Draw stopped segments to SPACETIME
-      this.sk.strokeWeight(stopStrokeWeight)
-      this.sk.beginShape(this.sk.LINES)
-      for (const seg of segments) {
-        if (seg.isStopped) {
-          this.drawSegmentVerticesAsLines(this.sk.SPACETIME, dataTrail, seg.start, seg.end)
-        }
-      }
-      this.sk.endShape()
-
-      // Draw connecting lines between segments (fixes gaps at transitions)
-      // Use movement weight for transitions as they represent movement into/out of stops
-      this.sk.strokeWeight(movementStrokeWeight)
-      this.drawSegmentConnections(this.sk.SPACETIME, dataTrail, segments)
-      this.drawSegmentConnections(this.sk.PLAN, dataTrail, segments)
-
-      // Draw moving segments to PLAN
-      this.sk.strokeWeight(movementStrokeWeight)
-      this.sk.beginShape(this.sk.LINES)
-      for (const seg of segments) {
-        if (!seg.isStopped) {
-          this.drawSegmentVerticesAsLines(this.sk.PLAN, dataTrail, seg.start, seg.end)
-        }
-      }
-      this.sk.endShape()
-
-      // Draw stop circles on floor plan
-      this.sk.strokeWeight(stopStrokeWeight)
-      for (const seg of segments) {
-        if (seg.isStopped) {
-          const aug = this.getAugmentedPoint(this.sk.PLAN, dataTrail[seg.start])
-          this.drawStopCircle(aug)
-        }
-      }
+      // Draw to PLAN: moving segments as lines, stopped segments as circles
+      this.drawBatchedSegments(this.sk.PLAN, dataTrail, segments, false, movementStrokeWeight)
+      this.drawAllStopCircles(dataTrail, segments)
     } else {
       // Path color mode: separate shapes per segment for different colors
       for (const seg of segments) {
-        this.setLineStyles(dataTrail[seg.start].stopLength, seg.codes)
+        this.applySegmentStyle(dataTrail[seg.start].stopLength, seg.codes)
         this.drawSegment(this.sk.SPACETIME, dataTrail, seg.start, seg.end)
 
         if (seg.isStopped) {
@@ -221,32 +206,57 @@ export class DrawMovement {
           this.drawSegment(this.sk.PLAN, dataTrail, seg.start, seg.end)
         }
       }
-      // Draw connecting lines between segments (fixes gaps at transitions)
-      // For path color mode, use movement weight for all connections
-      this.sk.strokeWeight(movementStrokeWeight)
-      this.drawSegmentConnectionsWithColor(this.sk.SPACETIME, dataTrail, segments)
-      this.drawSegmentConnectionsWithColor(this.sk.PLAN, dataTrail, segments)
     }
+
+    // Draw connections to both views (shared by both modes)
+    // Re-set stroke since drawStopCircle calls noStroke()
+    if (!isPathColorMode) this.sk.stroke(this.shade)
+    this.sk.strokeWeight(movementStrokeWeight)
+    this.drawSegmentConnections(this.sk.SPACETIME, dataTrail, segments)
+    this.drawSegmentConnections(this.sk.PLAN, dataTrail, segments)
   }
 
-  // Draw connecting lines between consecutive segments (single color mode - batched)
-  drawSegmentConnections(view, dataTrail, segments) {
-    if (segments.length < 2) return
+  // Draw all segments matching isStopped in a single batched draw call
+  drawBatchedSegments(view, dataTrail, segments, isStopped, weight) {
+    this.sk.strokeWeight(weight)
     this.sk.beginShape(this.sk.LINES)
-    for (let i = 0; i < segments.length - 1; i++) {
-      this.emitConnectionVertices(view, dataTrail, segments[i].end, segments[i + 1].start)
+    for (const seg of segments) {
+      if (seg.isStopped === isStopped) {
+        this.drawSegmentVerticesAsLines(view, dataTrail, seg.start, seg.end)
+      }
     }
     this.sk.endShape()
   }
 
-  // Draw connecting lines between segments with per-connection color (path color mode)
-  drawSegmentConnectionsWithColor(view, dataTrail, segments) {
+  // Draw stop circles for all stopped segments
+  drawAllStopCircles(dataTrail, segments) {
+    for (const seg of segments) {
+      if (seg.isStopped) {
+        const aug = this.getAugmentedPoint(this.sk.PLAN, dataTrail[seg.start])
+        this.drawStopCircle(aug)
+      }
+    }
+  }
+
+  // Draw connecting lines between consecutive segments (fixes gaps at transitions)
+  drawSegmentConnections(view, dataTrail, segments) {
     if (segments.length < 2) return
-    for (let i = 0; i < segments.length - 1; i++) {
-      this.setStroke(this.drawUtils.setCodeColor(segments[i].codes))
+
+    if (!isPathColorMode) {
+      // Single color mode: batch all connections in one draw call
       this.sk.beginShape(this.sk.LINES)
-      this.emitConnectionVertices(view, dataTrail, segments[i].end, segments[i + 1].start)
+      for (let i = 0; i < segments.length - 1; i++) {
+        this.emitConnectionVertices(view, dataTrail, segments[i].end, segments[i + 1].start)
+      }
       this.sk.endShape()
+    } else {
+      // Path color mode: separate draw call per connection for different colors
+      for (let i = 0; i < segments.length - 1; i++) {
+        this.setStroke(this.drawUtils.setCodeColor(segments[i].codes))
+        this.sk.beginShape(this.sk.LINES)
+        this.emitConnectionVertices(view, dataTrail, segments[i].end, segments[i + 1].start)
+        this.sk.endShape()
+      }
     }
   }
 
@@ -259,7 +269,7 @@ export class DrawMovement {
   }
 
   // Draw connection to next point if it exists and is visible (for slow path)
-  drawConnectionIfVisible(dataTrail, segmentEnd, codes) {
+  drawConnectionIfVisible(view, dataTrail, segmentEnd, codes) {
     if (segmentEnd + 1 >= dataTrail.length) return
 
     const nextPoint = dataTrail[segmentEnd + 1]
@@ -268,14 +278,15 @@ export class DrawMovement {
 
     this.sk.strokeWeight(movementStrokeWeight)
     this.setStroke(this.drawUtils.setCodeColor(codes))
-
-    // Draw connection in both views
-    for (const view of [this.sk.SPACETIME, this.sk.PLAN]) {
-      this.sk.beginShape(this.sk.LINES)
-      this.emitConnectionVertices(view, dataTrail, segmentEnd, segmentEnd + 1)
-      this.sk.endShape()
-    }
+    this.sk.beginShape(this.sk.LINES)
+    this.emitConnectionVertices(view, dataTrail, segmentEnd, segmentEnd + 1)
+    this.sk.endShape()
   }
+
+  // ============================================================
+  // SEGMENT COMPUTATION
+  // Breaks data trail into segments based on stopped state and codes.
+  // ============================================================
 
   // Compute segments within a specific index range
   computeSegmentsInRange(dataTrail, startIdx, endIdx) {
@@ -348,10 +359,14 @@ export class DrawMovement {
     return dataTrail.length - 1
   }
 
+  // ============================================================
+  // PRIMITIVE DRAWING
+  // Low-level drawing operations for segments, vertices, and shapes.
+  // ============================================================
+
   // Draw segment vertices as LINES pairs (for batched drawing)
   // LINES mode draws separate line segments between each pair of vertices
   drawSegmentVerticesAsLines(view, dataTrail, start, end) {
-    const minDistSq = DrawMovement.MIN_PIXEL_DISTANCE * DrawMovement.MIN_PIXEL_DISTANCE
     let lastX = -Infinity, lastY = -Infinity, lastZ = -Infinity
     let prevX, prevY, prevZ
     let hasPrev = false
@@ -363,6 +378,7 @@ export class DrawMovement {
       const y = aug.pos.floorPlanYPos
       const z = aug.pos.zPos
 
+      // Side effect: record dot position for hover/playback indicator
       if (view === this.sk.SPACETIME) this.recordDot(aug)
 
       // Apply decimation
@@ -372,7 +388,7 @@ export class DrawMovement {
       const distSq = dx * dx + dy * dy + dz * dz
 
       const isFirstOrLast = i === start || i === end
-      if (isFirstOrLast || distSq >= minDistSq) {
+      if (isFirstOrLast || distSq >= DrawMovement.MIN_PIXEL_DISTANCE_SQ) {
         if (hasPrev) {
           // Output line segment from prev to current
           this.sk.vertex(prevX, prevY, prevZ)
@@ -413,7 +429,12 @@ export class DrawMovement {
     this.sk.noFill()
   }
 
-  setLineStyles(stopLength, codes) {
+  // ============================================================
+  // STYLING
+  // Stroke and fill management for path color mode.
+  // ============================================================
+
+  applySegmentStyle(stopLength, codes) {
     this.setStroke(this.drawUtils.setCodeColor(codes))
     if (this.drawUtils.isStopped(stopLength)) {
       this.sk.strokeWeight(stopStrokeWeight)
@@ -431,6 +452,12 @@ export class DrawMovement {
     if (!isPathColorMode) this.sk.stroke(this.shade)
     else this.sk.stroke(color)
   }
+
+  // ============================================================
+  // DOT RENDERING
+  // Shows a dot on the path at the current playback position or mouse hover.
+  // Note: recordDot() is called as a side effect from drawSegmentVerticesAsLines()
+  // ============================================================
 
   getNewDot(augmentedPoint, curDot) {
     const [xPos, yPos, zPos, timePos, map3DMouse, codeColor] = this.getDotValues(augmentedPoint)
@@ -454,7 +481,8 @@ export class DrawMovement {
       return null
     }
     // When stopped, show dot at mouse position if hovering over timeline
-    if (this.isMouseOverTimelineAndValid(map3DMouse, timePos, curDot)) {
+    const isOverTimeline = this.sk.isMouseOverTimeline() && this.compareToCurDot(map3DMouse, timePos, curDot)
+    if (isOverTimeline) {
       return this.createDot(xPos, yPos, zPos, map3DMouse, codeColor, Math.abs(map3DMouse - timePos))
     }
     return null
@@ -469,10 +497,6 @@ export class DrawMovement {
       this.sk.mapToSelectTimeThenPixelTime(this.sk.winMouseX),
       this.drawUtils.setCodeColor(augmentedPoint.point.codes),
     ]
-  }
-
-  isMouseOverTimelineAndValid(map3DMouse, timePos, curDot) {
-    return this.sk.isMouseOverTimeline() && this.compareToCurDot(map3DMouse, timePos, curDot)
   }
 
   getVideoSelectTime() {
@@ -517,6 +541,11 @@ export class DrawMovement {
   recordDot(augmentPoint) {
     const newDot = this.getNewDot(augmentPoint, this.dot)
     if (newDot !== null) {
+      // During animation, only update if this point is at or after current dot's time
+      // (needed because segments are drawn by type, not time order)
+      if (playbackMode === 'playing-animation' && this.dot !== null && newDot.timePos < this.dot.timePos) {
+        return
+      }
       this.dot = newDot
     }
   }
