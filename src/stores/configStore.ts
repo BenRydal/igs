@@ -26,6 +26,7 @@ export interface ConfigStoreState {
   clusterSpaceThreshold: number // pixels - distance to start new cluster
   showSpeakerStripes: boolean // Combine speakers into shared conversation clusters with proportional coloring
   preserveFloorplanAspectRatio: boolean // Keep floorplan proportions instead of stretching to fill
+  showConversationRects: boolean // Show conversation rectangles on visualization (floor plan and space-time)
 }
 
 // Legacy type alias for backwards compatibility
@@ -57,6 +58,7 @@ export const initialConfig: ConfigStoreState = {
   clusterSpaceThreshold: 50,
   showSpeakerStripes: true,
   preserveFloorplanAspectRatio: false,
+  showConversationRects: false,
 }
 
 const ConfigStore = writable<ConfigStoreState>(initialConfig)

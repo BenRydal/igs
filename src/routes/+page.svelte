@@ -930,6 +930,19 @@
             Transcript Panel
           </button>
         </li>
+        <div class="divider my-1"></div>
+        <li>
+          <button
+            onclick={() => {
+              handleConfigChange('showConversationRects', !$ConfigStore.showConversationRects)
+              p5Instance?.loop()
+            }}
+            class="w-full text-left flex items-center"
+          >
+            {@render check($ConfigStore.showConversationRects)}
+            Show speech bubbles
+          </button>
+        </li>
         <li>
           <button
             onclick={() => toggleSelection('alignToggle', conversationToggleOptions)}
@@ -941,7 +954,6 @@
         </li>
 
         {#if $ConfigStore.advancedMode}
-          <div class="divider my-1"></div>
           <li class="menu-title px-2 py-0 text-xs opacity-60">Grouped turns</li>
 
           <li>
@@ -971,7 +983,9 @@
           </li>
           <li class="px-2 py-1">
             <div class="w-full">
-              <p class="text-xs mb-1">Group within {$ConfigStore.clusterSpaceThreshold}px distance</p>
+              <p class="text-xs mb-1">
+                Group within {$ConfigStore.clusterSpaceThreshold}px distance
+              </p>
               <input
                 id="clusterSpaceRange"
                 type="range"
@@ -1051,9 +1065,14 @@
         <IconButton
           id="btn-aspect-ratio"
           icon={currentConfig.preserveFloorplanAspectRatio ? MdAspectRatio : MdFitToPageOutline}
-          tooltip={currentConfig.preserveFloorplanAspectRatio ? 'Stretch to Fill' : 'Preserve Aspect Ratio'}
+          tooltip={currentConfig.preserveFloorplanAspectRatio
+            ? 'Stretch to Fill'
+            : 'Preserve Aspect Ratio'}
           onclick={() => {
-            handleConfigChange('preserveFloorplanAspectRatio', !currentConfig.preserveFloorplanAspectRatio)
+            handleConfigChange(
+              'preserveFloorplanAspectRatio',
+              !currentConfig.preserveFloorplanAspectRatio
+            )
             p5Instance?.loop()
           }}
         />
@@ -1284,13 +1303,21 @@
                 >{@render check(isTranscriptVisible)}Transcript</button
               >
             </li>
+            <div class="divider my-1"></div>
+            <li>
+              <button
+                onclick={() => {
+                  handleConfigChange('showConversationRects', !$ConfigStore.showConversationRects)
+                  p5Instance?.loop()
+                }}>{@render check($ConfigStore.showConversationRects)}Show speech bubbles</button
+              >
+            </li>
             <li>
               <button onclick={() => toggleSelection('alignToggle', conversationToggleOptions)}
                 >{@render check($ConfigStore.alignToggle)}Align to side</button
               >
             </li>
             {#if $ConfigStore.advancedMode}
-              <div class="divider my-1"></div>
               <li class="menu-title px-2 py-0 text-xs opacity-60">Grouped turns</li>
               <li>
                 <button
@@ -1301,7 +1328,9 @@
               </li>
               <li class="px-2 py-1">
                 <div class="w-full">
-                  <p class="text-xs mb-1">Group within {$ConfigStore.clusterTimeThreshold} seconds</p>
+                  <p class="text-xs mb-1">
+                    Group within {$ConfigStore.clusterTimeThreshold} seconds
+                  </p>
                   <input
                     type="range"
                     min="1"
@@ -1349,49 +1378,49 @@
         {#if $ConfigStore.advancedMode}
           <details class="dropdown dropdown-bottom dropdown-end" use:clickOutside>
             <summary class="btn btn-sm gap-1">{@render icon(MdDelete)}Clear</summary>
-          <ul class="dropdown-content menu bg-base-200 rounded-box z-[60] w-40 p-2 shadow mt-1">
-            <li>
-              <button
-                onclick={() => {
-                  clearMovementData()
-                  mobileMenuOpen = false
-                }}>Movement</button
-              >
-            </li>
-            <li>
-              <button
-                onclick={() => {
-                  clearConversationData()
-                  mobileMenuOpen = false
-                }}>Conversation</button
-              >
-            </li>
-            <li>
-              <button
-                onclick={() => {
-                  clearCodeData()
-                  mobileMenuOpen = false
-                }}>Codes</button
-              >
-            </li>
-            <li>
-              <button
-                onclick={() => {
-                  resetVideo()
-                  mobileMenuOpen = false
-                }}>Video</button
-              >
-            </li>
-            <li>
-              <button
-                onclick={() => {
-                  clearAllDataLocal()
-                  mobileMenuOpen = false
-                }}
-                class="text-error">All Data</button
-              >
-            </li>
-          </ul>
+            <ul class="dropdown-content menu bg-base-200 rounded-box z-[60] w-40 p-2 shadow mt-1">
+              <li>
+                <button
+                  onclick={() => {
+                    clearMovementData()
+                    mobileMenuOpen = false
+                  }}>Movement</button
+                >
+              </li>
+              <li>
+                <button
+                  onclick={() => {
+                    clearConversationData()
+                    mobileMenuOpen = false
+                  }}>Conversation</button
+                >
+              </li>
+              <li>
+                <button
+                  onclick={() => {
+                    clearCodeData()
+                    mobileMenuOpen = false
+                  }}>Codes</button
+                >
+              </li>
+              <li>
+                <button
+                  onclick={() => {
+                    resetVideo()
+                    mobileMenuOpen = false
+                  }}>Video</button
+                >
+              </li>
+              <li>
+                <button
+                  onclick={() => {
+                    clearAllDataLocal()
+                    mobileMenuOpen = false
+                  }}
+                  class="text-error">All Data</button
+                >
+              </li>
+            </ul>
           </details>
         {/if}
 
@@ -1471,9 +1500,14 @@
           />
           <IconButton
             icon={currentConfig.preserveFloorplanAspectRatio ? MdAspectRatio : MdFitToPageOutline}
-            tooltip={currentConfig.preserveFloorplanAspectRatio ? 'Stretch to Fill' : 'Preserve Aspect Ratio'}
+            tooltip={currentConfig.preserveFloorplanAspectRatio
+              ? 'Stretch to Fill'
+              : 'Preserve Aspect Ratio'}
             onclick={() => {
-              handleConfigChange('preserveFloorplanAspectRatio', !currentConfig.preserveFloorplanAspectRatio)
+              handleConfigChange(
+                'preserveFloorplanAspectRatio',
+                !currentConfig.preserveFloorplanAspectRatio
+              )
               p5Instance?.loop()
               mobileMenuOpen = false
             }}
@@ -1801,9 +1835,7 @@
   </div>
 {/if}
 
-<div
-  class="btm-nav fixed bottom-0 left-0 right-0 flex justify-between min-h-24 z-50 p-0"
->
+<div class="btm-nav fixed bottom-0 left-0 right-0 flex justify-between min-h-24 z-50 p-0">
   <div
     class="flex flex-1 min-w-0 flex-row justify-start items-center bg-[#f6f5f3] px-4 lg:px-8 overflow-x-auto"
     onwheel={(e) => {
@@ -2123,7 +2155,9 @@
     overflow: hidden;
   }
 
-  #main-content.split-screen-mode #p5-canvas-container :global(div:not(.timeline-tooltip):not(.tooltip-wrapper):not(.tooltip-content):not(.triangle)) {
+  #main-content.split-screen-mode
+    #p5-canvas-container
+    :global(div:not(.timeline-tooltip):not(.tooltip-wrapper):not(.tooltip-content):not(.triangle)) {
     width: 100% !important;
     overflow: hidden;
   }

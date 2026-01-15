@@ -15,6 +15,7 @@ import { MIN_RECT_SIZE, MAX_RECT_SIZE } from './draw-utils'
 
 let alignToggle, isPathColorMode, conversationRectWidth
 let clusterTimeThreshold, clusterSpaceThreshold, showSpeakerStripes
+let showConversationRects
 let searchRegex = null
 
 const TAIL_HEIGHT = 8
@@ -31,6 +32,7 @@ ConfigStore.subscribe((data) => {
   clusterTimeThreshold = data.clusterTimeThreshold
   clusterSpaceThreshold = data.clusterSpaceThreshold
   showSpeakerStripes = data.showSpeakerStripes
+  showConversationRects = data.showConversationRects
   searchRegex = data.wordToSearch
     ? new RegExp(data.wordToSearch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i')
     : null
@@ -49,6 +51,8 @@ export class DrawConversation {
   // --- Core drawing entry point ---
 
   drawAllConversations(mergedPoints) {
+    if (!showConversationRects) return
+
     this.is3D = this.sk.handle3D.getIs3DMode()
     if (this.is3D) {
       this.translateZoom = Math.abs(this.sk.handle3D.getCurTranslatePos().zoom)
