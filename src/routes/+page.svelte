@@ -50,6 +50,7 @@
   import SplitScreenVideo from '$lib/components/SplitScreenVideo.svelte'
   import TranscriptPanel from '$lib/components/TranscriptPanel.svelte'
   import ConversationTooltip from '$lib/components/ConversationTooltip.svelte'
+  import SpaceTimeTooltip from '$lib/components/SpaceTimeTooltip.svelte'
 
   import { Core } from '$lib'
   import { EXAMPLE_DATASETS } from '$lib/core/example-datasets'
@@ -183,6 +184,7 @@
   let is3DMode = $state(true)
   let timelineEndTime = $state(0)
   let isTranscriptVisible = $state(true)
+  let spaceTimeTooltip: SpaceTimeTooltip
   let mobileMenuOpen = $state(false)
 
   $effect(() => {
@@ -496,12 +498,14 @@
 
     // Trigger redraw
     p5Instance?.loop()
+    spaceTimeTooltip?.trigger()
   }
 
   async function updateExampleDataDropDown(event) {
     clearAllDataLocal()
     await core.handleExampleDropdown(event)
     p5Instance.loop()
+    spaceTimeTooltip?.trigger()
   }
 
   // Local version that handles UI cleanup and non-store data
@@ -1622,6 +1626,7 @@
       <VideoContainer />
     {/if}
     <ConversationTooltip hideTooltip={isTranscriptVisible} />
+    <SpaceTimeTooltip bind:this={spaceTimeTooltip} />
   </div>
 </div>
 
