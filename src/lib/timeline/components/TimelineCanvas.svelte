@@ -6,7 +6,6 @@
 	import type { HitTarget, TimelineState } from '../types';
 	import P5Store from '../../../stores/p5Store';
 	import VideoStore, { requestSeek } from '../../../stores/videoStore';
-	import { isPlaying } from '../../../stores/playbackStore';
 	import { PLAYHEAD_HIT_TOLERANCE } from '../constants';
 
 	/** Canvas element reference */
@@ -63,10 +62,9 @@
 	function syncCurrentTime(time: number): void {
 		timelineV2Store.setCurrentTime(time);
 
-		// Seek video if visible and not playing
+		// Seek video if visible (works whether playing or paused)
 		const videoState = get(VideoStore);
-		const playing = get(isPlaying);
-		if (videoState.isVisible && !playing) {
+		if (videoState.isVisible) {
 			requestSeek(time);
 		}
 
