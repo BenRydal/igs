@@ -304,15 +304,11 @@
 			// Zoom centered on mouse position
 			const zoomFactor = e.deltaY > 0 ? 1.15 : 0.87;
 			timelineV2Store.zoom(zoomFactor, centerTime);
-		} else if (e.shiftKey) {
-			// Horizontal scroll
-			const viewDuration = currentState.viewEnd - currentState.viewStart;
-			const panAmount = (e.deltaY / renderer.width) * viewDuration * 0.5;
-			timelineV2Store.pan(panAmount);
 		} else {
-			// Default: horizontal pan
+			// Pan - use deltaX for horizontal scroll, deltaY for vertical scroll wheel
 			const viewDuration = currentState.viewEnd - currentState.viewStart;
-			const panAmount = (e.deltaY / renderer.width) * viewDuration * 0.3;
+			const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+			const panAmount = (delta / renderer.width) * viewDuration * 0.5;
 			timelineV2Store.pan(panAmount);
 		}
 
