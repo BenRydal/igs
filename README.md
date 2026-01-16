@@ -86,8 +86,6 @@ You can also load:
 - **Floorplan images** (PNG, JPG) as background for indoor data
 - **Video** (MP4, YouTube URL) synced to timeline
 
-📄 [View Data Formatting Guide](https://www.interactiongeography.org/guide)
-
 ---
 
 ## Tech Stack
