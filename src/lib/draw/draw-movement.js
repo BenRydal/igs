@@ -1,3 +1,4 @@
+import { get } from 'svelte/store'
 import ConfigStore from '../../stores/configStore'
 import CodeStore from '../../stores/codeStore'
 import { timelineV2Store } from '../timeline/store'
@@ -12,8 +13,6 @@ import PlaybackStore from '../../stores/playbackStore'
 let maxStopLength, isPathColorMode, movementStrokeWeight, stopStrokeWeight
 // Config: spatial mode toggles
 let circleToggle, sliceToggle, movementToggle, stopsToggle, highlightToggle
-// Code filtering state
-let hasDisabledCodes = false
 // Playback state
 let videoCurrentTime = 0
 let playbackMode = 'stopped'
@@ -28,11 +27,6 @@ ConfigStore.subscribe((data) => {
   movementToggle = data.movementToggle
   stopsToggle = data.stopsToggle
   highlightToggle = data.highlightToggle
-})
-
-CodeStore.subscribe((codes) => {
-  // Check if any codes are disabled (need to filter visibility)
-  hasDisabledCodes = codes.some((code) => !code.enabled)
 })
 
 VideoStore.subscribe((data) => {
@@ -56,14 +50,35 @@ export class DrawMovement {
     this.drawUtils = drawUtils
     this.dot = null
     this.shade = null
+    // Cached code visibility state (updated once per frame in setData)
+    this.enabledCodes = new Set()
+    this.noCodesEnabled = true
   }
 
   setData(user) {
     this.dot = null
     this.sk.noFill()
     this.shade = user.color
+    this.cacheEnabledCodes()
     this.setDraw(user.dataTrail)
     if (this.dot !== null) this.drawDot(this.dot)
+  }
+
+  // Cache enabled codes once per frame for O(1) lookups during segment filtering
+  cacheEnabledCodes() {
+    const codes = get(CodeStore)
+    this.enabledCodes = new Set(codes.filter((c) => c.enabled).map((c) => c.code))
+    // Match original behavior: if no "no codes" entry exists, default to showing segments without codes
+    const noCodesEntry = codes.find((c) => c.code === 'no codes')
+    this.noCodesEnabled = noCodesEntry ? noCodesEntry.enabled : true
+  }
+
+  // Check if a segment should be visible based on its codes
+  isSegmentVisible(segmentCodes) {
+    if (segmentCodes.length === 0) {
+      return this.noCodesEnabled
+    }
+    return segmentCodes.some((code) => this.enabledCodes.has(code))
   }
 
   // ============================================================
@@ -72,12 +87,12 @@ export class DrawMovement {
   // Fast path: no checks, Medium path: time filtering, Slow path: per-point visibility
   // ============================================================
 
-  // Check if no spatial/type/code filters are active (allows batched drawing)
+  // Check if no spatial/type filters are active (allows batched drawing)
+  // Note: code filtering is handled at segment level in drawBatched(), not here
   hasNoSpecialModes() {
     const noSpatialModes = !circleToggle && !sliceToggle && !highlightToggle
     const noTypeFilters = !movementToggle && !stopsToggle
-    const noCodeFilters = !hasDisabledCodes
-    return noSpatialModes && noTypeFilters && noCodeFilters
+    return noSpatialModes && noTypeFilters
   }
 
   // Check if we can use fast path (skip ALL visibility checks)
@@ -189,7 +204,9 @@ export class DrawMovement {
 
   // Batched drawing for fast and medium paths
   drawBatched(dataTrail, startIdx, endIdx) {
-    const segments = this.computeSegmentsInRange(dataTrail, startIdx, endIdx)
+    const allSegments = this.computeSegmentsInRange(dataTrail, startIdx, endIdx)
+    // Filter segments by code visibility (O(1) check per segment using cached enabled codes)
+    const segments = allSegments.filter((seg) => this.isSegmentVisible(seg.codes))
 
     if (!isPathColorMode) {
       // Single color mode: batch all segments by type
@@ -247,7 +264,12 @@ export class DrawMovement {
     }
   }
 
-  // Draw connecting lines between consecutive segments (fixes gaps at transitions)
+  // Check if two segments are adjacent in the original data
+  areSegmentsAdjacent(seg1, seg2) {
+    return seg1.end + 1 === seg2.start
+  }
+
+  // Draw connecting lines between adjacent segments (prevents gaps at segment transitions)
   drawSegmentConnections(view, dataTrail, segments) {
     if (segments.length < 2) return
 
@@ -255,16 +277,20 @@ export class DrawMovement {
       // Single color mode: batch all connections in one draw call
       this.sk.beginShape(this.sk.LINES)
       for (let i = 0; i < segments.length - 1; i++) {
-        this.emitConnectionVertices(view, dataTrail, segments[i].end, segments[i + 1].start)
+        if (this.areSegmentsAdjacent(segments[i], segments[i + 1])) {
+          this.emitConnectionVertices(view, dataTrail, segments[i].end, segments[i + 1].start)
+        }
       }
       this.sk.endShape()
     } else {
       // Path color mode: separate draw call per connection for different colors
       for (let i = 0; i < segments.length - 1; i++) {
-        this.setStroke(this.drawUtils.setCodeColor(segments[i].codes))
-        this.sk.beginShape(this.sk.LINES)
-        this.emitConnectionVertices(view, dataTrail, segments[i].end, segments[i + 1].start)
-        this.sk.endShape()
+        if (this.areSegmentsAdjacent(segments[i], segments[i + 1])) {
+          this.setStroke(this.drawUtils.setCodeColor(segments[i].codes))
+          this.sk.beginShape(this.sk.LINES)
+          this.emitConnectionVertices(view, dataTrail, segments[i].end, segments[i + 1].start)
+          this.sk.endShape()
+        }
       }
     }
   }
