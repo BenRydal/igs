@@ -76,7 +76,7 @@
   import { timelineV2Store } from '$lib/timeline/store'
   import { initialConfig } from '../stores/configStore'
   import { setSelectorSize, setSlicerSize } from '$lib/history/config-actions'
-  import { setUserEnabled, setUserConversationEnabled } from '$lib/history/user-actions'
+  import { toggleUserVisibility as toggleUserVisibilityAction } from '$lib/history/user-actions'
   import {
     clearUsers,
     clearCodes,
@@ -578,10 +578,7 @@
    * Toggle both movement and talk visibility for a user
    */
   function toggleUserVisibility(user: User) {
-    const currentlyVisible = isUserVisible(user)
-    // If either is on, turn both off. If both are off, turn both on.
-    setUserEnabled(user.name, !currentlyVisible)
-    setUserConversationEnabled(user.name, !currentlyVisible)
+    toggleUserVisibilityAction(user.name, isUserVisible(user))
     p5Instance?.loop()
   }
 
