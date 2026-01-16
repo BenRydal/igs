@@ -15,8 +15,6 @@
   import MdCheck from '~icons/mdi/check'
   import MdSettings from '~icons/mdi/cog'
   import MdFileUploadOutline from '~icons/mdi/file-upload-outline'
-  import MdVisibility from '~icons/mdi/eye'
-  import MdVisibilityOff from '~icons/mdi/eye-off'
   import MdFilterList from '~icons/mdi/filter-variant'
   import MdSelectAll from '~icons/mdi/selection'
   import MdChat from '~icons/mdi/chat'
@@ -66,6 +64,9 @@
   import { OnboardingTour, shouldShowTour } from '$lib/tour'
   import DataImporter from '$lib/components/import/DataImporter.svelte'
   import MapStyleSelector from '$lib/components/MapStyleSelector.svelte'
+  import UserButtonGroup from '$lib/components/UserButtonGroup.svelte'
+  import UserDropdown from '$lib/components/UserDropdown.svelte'
+  import CodesButton from '$lib/components/CodesButton.svelte'
   import { capitalizeFirstLetter, capitalizeEachWord } from '$lib/utils/string'
   import { loadAdvancedMode, saveAdvancedMode } from '$lib/utils/advanced-mode-storage'
 
@@ -74,22 +75,12 @@
   import type { ConfigStoreType } from '../stores/configStore'
   import { timelineV2Store } from '$lib/timeline/store'
   import { initialConfig } from '../stores/configStore'
-  import { computePosition, flip, shift, offset } from '@floating-ui/dom'
-  import { setSelectorSize, setSlicerSize, toggleColorMode } from '$lib/history/config-actions'
-  import {
-    toggleUserEnabled,
-    toggleUserConversationEnabled,
-    setUserColor,
-    setUserEnabled,
-    setUserConversationEnabled,
-  } from '$lib/history/user-actions'
+  import { setSelectorSize, setSlicerSize } from '$lib/history/config-actions'
+  import { setUserEnabled, setUserConversationEnabled } from '$lib/history/user-actions'
   import {
     clearUsers,
     clearCodes,
     clearAllData as clearAllDataWithHistory,
-    setCodeEnabled,
-    toggleAllCodes,
-    setCodeColor,
   } from '$lib/history/data-actions'
 
   // Define ToggleKey type to fix TypeScript errors
@@ -278,14 +269,6 @@
   // Modal state - opens immediately for first-time visitors
   let isModalOpen = writable(false)
 
-  let sortedCodes = $derived(
-    [...$CodeStore].sort((a, b) => {
-      if (a.code.toLowerCase() === 'no codes') return 1
-      if (b.code.toLowerCase() === 'no codes') return -1
-      return a.code.localeCompare(b.code)
-    })
-  )
-
   let formattedStopLength = $derived($ConfigStore.stopSliderValue.toFixed(0))
 
   function toggleVideo() {
@@ -348,11 +331,6 @@
       return updatedStore
     })
     p5Instance?.loop()
-  }
-
-  function toggleSelectAllCodes() {
-    toggleAllCodes()
-    p5Instance.loop()
   }
 
   function clickOutside(node) {
@@ -513,7 +491,8 @@
     resetVideo()
     resetGPS()
 
-    closeAllDropdowns()
+    // Close any open user dropdown
+    activeDropdownUser = null
 
     // Use history-tracked function for store clearing
     clearAllDataWithHistory()
@@ -573,65 +552,19 @@
     p5Instance.loop()
   }
 
-  // Track which dropdown is currently open
-  let openDropdownId = $state<string | null>(null)
+  // State for user dropdown
+  let activeDropdownUser = $state<User | null>(null)
+  let dropdownAnchorX = $state(0)
+  let dropdownAnchorY = $state(0)
 
-  function closeAllDropdowns() {
-    // If no dropdown is open, do nothing
-    if (!openDropdownId) return
-
-    // Get the currently open dropdown
-    const dropdown = document.getElementById(openDropdownId)
-    if (dropdown) {
-      dropdown.classList.add('hidden')
-
-      // If it's in the body, move it back to its original position
-      if (dropdown.parentNode === document.body) {
-        const parentId = openDropdownId.replace('dropdown-', 'dropdown-container-')
-        const parent = document.getElementById(parentId)
-        if (parent) {
-          parent.appendChild(dropdown)
-        }
-      }
-    }
-
-    openDropdownId = null
+  function handleOpenUserDropdown(user: User, event: MouseEvent) {
+    activeDropdownUser = user
+    dropdownAnchorX = event.clientX
+    dropdownAnchorY = event.clientY
   }
 
-  function toggleDropdown(id: string, buttonId: string) {
-    const dropdown = document.getElementById(id)
-    const button = document.getElementById(buttonId)
-
-    if (!dropdown || !button) return
-
-    const isCurrentlyOpen = openDropdownId === id
-
-    // Close all dropdowns first
-    closeAllDropdowns()
-
-    // If this dropdown wasn't already open, open it
-    if (!isCurrentlyOpen) {
-      // Show the dropdown
-      dropdown.classList.remove('hidden')
-
-      // Move dropdown to body to avoid clipping by overflow
-      document.body.appendChild(dropdown)
-
-      // Position the dropdown using Floating UI
-      computePosition(button, dropdown, {
-        placement: 'top',
-        middleware: [offset(6), flip(), shift({ padding: 5 })],
-      }).then(({ x, y }) => {
-        Object.assign(dropdown.style, {
-          left: `${x}px`,
-          top: `${y}px`,
-          position: 'absolute',
-          zIndex: '9999', // Higher z-index to ensure it's above canvas
-        })
-      })
-
-      openDropdownId = id
-    }
+  function handleCloseUserDropdown() {
+    activeDropdownUser = null
   }
 
   /**
@@ -658,40 +591,6 @@
     const savedAdvancedMode = loadAdvancedMode()
     if (savedAdvancedMode) {
       ConfigStore.update((c) => ({ ...c, advancedMode: true }))
-    }
-
-    // Global click handler to close dropdowns when clicking outside
-    const handleGlobalClick = (event: MouseEvent) => {
-      const target = event.target as HTMLElement
-      const isButton =
-        document.getElementById('btn-codes')?.contains(target) ||
-        Array.from($UserStore).some((user) => {
-          const button = document.getElementById(`btn-${user.name}`)
-          return button && button.contains(target)
-        })
-
-      const isInsideDropdown =
-        document.getElementById('dropdown-codes')?.contains(target) ||
-        Array.from($UserStore).some((user) => {
-          const dropdown = document.getElementById(`dropdown-${user.name}`)
-          return dropdown && dropdown.contains(target)
-        })
-
-      if (!isButton && !isInsideDropdown) {
-        closeAllDropdowns()
-      }
-    }
-
-    document.addEventListener('click', handleGlobalClick)
-
-    // Scroll handler to close dropdowns when scrolling
-    const handleScroll = () => {
-      closeAllDropdowns()
-    }
-
-    const userContainer = document.querySelector('.btm-nav .overflow-x-auto')
-    if (userContainer) {
-      userContainer.addEventListener('scroll', handleScroll)
     }
 
     // Keyboard shortcut event handlers
@@ -758,14 +657,6 @@
 
     // Cleanup function
     return () => {
-      // Remove global click handler
-      document.removeEventListener('click', handleGlobalClick)
-
-      // Remove scroll handler
-      if (userContainer) {
-        userContainer.removeEventListener('scroll', handleScroll)
-      }
-
       // Remove keyboard shortcut handlers
       window.removeEventListener('igs:toggle-3d', handleToggle3D)
       window.removeEventListener('igs:rotate-floorplan', handleRotateFloorplan)
@@ -1840,7 +1731,7 @@
   </div>
 {/if}
 
-<div class="btm-nav fixed bottom-0 left-0 right-0 flex justify-between min-h-24 z-50 p-0">
+<div class="btm-nav fixed bottom-0 left-0 right-0 flex justify-between min-h-16 z-50 p-0">
   <div
     class="flex flex-1 min-w-0 flex-row justify-start items-center bg-[#f6f5f3] px-4 lg:px-8 overflow-x-auto"
     onwheel={(e) => {
@@ -1850,238 +1741,36 @@
       }
     }}
   >
-    {#if $ConfigStore.dataHasCodes && $ConfigStore.advancedMode}
-      <div class="relative mr-2">
-        <button
-          class="btn"
-          onclick={(event) => {
-            // Stop event propagation to prevent the global click handler from closing the dropdown
-            event.stopPropagation()
-
-            // Toggle the dropdown
-            toggleDropdown('dropdown-codes', 'btn-codes')
-          }}
-          id="btn-codes"
-        >
-          CODES
-          <MdChevronDown class="w-4 h-4 -ml-1" />
-        </button>
-
-        <div id="dropdown-container-codes">
-          <div
-            id="dropdown-codes"
-            class="hidden bg-base-100 rounded-box p-2 shadow absolute"
-            style="z-index: 9999;"
-          >
-            <ul class="menu w-64 max-h-[75vh] overflow-y-auto flex-nowrap">
-              <li>
-                <div class="flex items-center">
-                  <input
-                    id="enableAllCodes"
-                    type="checkbox"
-                    class="checkbox"
-                    checked={$CodeStore.every((code) => code.enabled)}
-                    onchange={toggleSelectAllCodes}
-                  />
-                  Enable All
-                </div>
-                <div class="flex items-center">
-                  <input
-                    id="colorByCodes"
-                    type="checkbox"
-                    class="checkbox"
-                    checked={$ConfigStore.isPathColorMode}
-                    onchange={() => {
-                      toggleColorMode()
-                      p5Instance?.loop()
-                    }}
-                  />
-                  Color by Codes
-                </div>
-                <div class="divider" />
-              </li>
-              {#each sortedCodes as code, index}
-                <li><h3 class="pointer-events-none">{code.code.toUpperCase()}</h3></li>
-                <li>
-                  <div class="flex items-center">
-                    <input
-                      id="codeCheckbox-{code.code}"
-                      type="checkbox"
-                      class="checkbox"
-                      checked={code.enabled}
-                      onchange={(e) => {
-                        setCodeEnabled(code.code, e.target.checked)
-                        p5Instance?.loop()
-                      }}
-                    />
-                    Enabled
-                  </div>
-                </li>
-                <li>
-                  <div class="flex items-center">
-                    <input
-                      type="color"
-                      class="color-picker max-w-[24px] max-h-[28px]"
-                      value={code.color}
-                      onchange={(e) => {
-                        setCodeColor(code.code, e.target.value)
-                        p5Instance?.loop()
-                      }}
-                    />
-                    Color
-                  </div>
-                </li>
-                {#if index !== sortedCodes.length - 1}
-                  <div class="divider" />
-                {/if}
-              {/each}
-            </ul>
-          </div>
-        </div>
+    {#if $ConfigStore.dataHasCodes}
+      <div class="mr-2">
+        <CodesButton />
       </div>
     {/if}
 
     <!-- User Buttons -->
-    {#each $UserStore as user}
-      {@const visible = isUserVisible(user)}
-      {@const buttonStyle = `color: ${visible ? user.color : '#999'}; opacity: ${visible ? 1 : 0.5};`}
-      <div class="relative flex-shrink-0 mr-2">
-        {#if $ConfigStore.advancedMode}
-          <!-- Advanced mode: joined eye + name with dropdown -->
-          <div class="join">
-            <!-- Visibility toggle (eye icon) -->
-            <button
-              class="btn join-item px-2"
-              style={buttonStyle}
-              onclick={(event) => {
-                event.stopPropagation()
-                toggleUserVisibility(user)
-              }}
-              title={visible ? 'Hide user' : 'Show user'}
-            >
-              {#if visible}
-                <MdVisibility class="w-5 h-5" />
-              {:else}
-                <MdVisibilityOff class="w-5 h-5" />
-              {/if}
-            </button>
-
-            <!-- Name button opens dropdown -->
-            <button
-              class="btn join-item px-3 max-w-40 truncate"
-              style={buttonStyle}
-              onclick={(event) => {
-                event.stopPropagation()
-                toggleDropdown(`dropdown-${user.name}`, `btn-${user.name}`)
-              }}
-              id={`btn-${user.name}`}
-              title={user.name}
-            >
-              {user.name}
-            </button>
-          </div>
-
-          <!-- User dropdown (advanced only) -->
-          <div
-            id={`dropdown-${user.name}`}
-            class="hidden bg-base-100 rounded-box p-2 shadow absolute"
-            style="z-index: 9999;"
-          >
-            <ul class="w-52">
-              <!-- Name Input -->
-              <li class="py-2">
-                <input
-                  type="text"
-                  class="input input-bordered input-sm w-full"
-                  value={user.name}
-                  onchange={(e) => {
-                    const oldName = user.name
-                    const newName = e.currentTarget.value.trim()
-                    if (newName && newName !== oldName) {
-                      UserStore.update((users) =>
-                        users.map((u) => (u.name === oldName ? { ...u, name: newName } : u))
-                      )
-                      closeAllDropdowns()
-                      p5Instance?.loop()
-                    }
-                  }}
-                  placeholder="User name"
-                />
-              </li>
-              <!-- Movement -->
-              <li class="py-2">
-                <label class="flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    class="checkbox mr-2"
-                    checked={user.enabled}
-                    onchange={() => {
-                      toggleUserEnabled(user.name)
-                      p5Instance?.loop()
-                    }}
-                  />
-                  Movement
-                </label>
-              </li>
-              <!-- Talk -->
-              <li class="py-2">
-                <label class="flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    class="checkbox mr-2"
-                    checked={user.conversation_enabled}
-                    onchange={() => {
-                      toggleUserConversationEnabled(user.name)
-                      p5Instance?.loop()
-                    }}
-                  />
-                  Talk
-                </label>
-              </li>
-              <!-- Color -->
-              <li class="py-2">
-                <div class="flex items-center">
-                  <input
-                    type="color"
-                    class="color-picker max-w-[24px] max-h-[28px] mr-2"
-                    value={user.color}
-                    onchange={(e) => {
-                      setUserColor(user.name, e.currentTarget.value)
-                      p5Instance?.loop()
-                    }}
-                  />
-                  <span>Color</span>
-                </div>
-              </li>
-            </ul>
-          </div>
-        {:else}
-          <!-- Simple mode: single button that toggles visibility -->
-          <button
-            class="btn gap-2 max-w-48 truncate"
-            style={buttonStyle}
-            onclick={() => toggleUserVisibility(user)}
-            title={visible ? 'Hide user' : 'Show user'}
-          >
-            {#if visible}
-              <MdVisibility class="w-5 h-5" />
-            {:else}
-              <MdVisibilityOff class="w-5 h-5" />
-            {/if}
-            {user.name}
-          </button>
-        {/if}
-      </div>
-    {/each}
+    <UserButtonGroup
+      users={$UserStore}
+      {isUserVisible}
+      onToggleVisibility={(user) => toggleUserVisibility(user)}
+      onOpenDropdown={handleOpenUserDropdown}
+    />
   </div>
+
+  <!-- User Dropdown (shown when right-click/long-press on user button) -->
+  <UserDropdown
+    user={activeDropdownUser}
+    anchorX={dropdownAnchorX}
+    anchorY={dropdownAnchorY}
+    onClose={handleCloseUserDropdown}
+  />
 
   <!-- Right Side: Timeline -->
   <div
     id="timeline-panel"
-    class="flex flex-1 items-center bg-[#f6f5f3] overflow-visible py-1 px-2 lg:px-4"
-    style="min-width: 280px;"
+    class="flex flex-1 items-center bg-[#f6f5f3] overflow-visible py-0.5 px-2 lg:px-4"
+    style="min-width: 200px;"
   >
-    <TimelineContainer height={50} showControls={true} embedded={true} />
+    <TimelineContainer height={40} showControls={true} embedded={true} />
   </div>
 </div>
 

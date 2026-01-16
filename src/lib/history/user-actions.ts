@@ -121,6 +121,31 @@ export function setUserConversationEnabled(userId: string, enabled: boolean): vo
 }
 
 /**
+ * Rename user with undo
+ */
+export function setUserName(oldName: string, newName: string): void {
+  const users = get(UserStore)
+  const user = users.find((u) => u.name === oldName)
+  if (!user) return
+  if (oldName === newName) return
+
+  UserStore.update((list) => list.map((u) => (u.name === oldName ? { ...u, name: newName } : u)))
+
+  historyStore.push({
+    actionType: 'user.rename',
+    actionLabel: `Renamed ${oldName} to ${newName}`,
+    undo: () =>
+      UserStore.update((list) =>
+        list.map((u) => (u.name === newName ? { ...u, name: oldName } : u))
+      ),
+    redo: () =>
+      UserStore.update((list) =>
+        list.map((u) => (u.name === oldName ? { ...u, name: newName } : u))
+      ),
+  })
+}
+
+/**
  * Change user color with undo
  */
 export function setUserColor(userId: string, color: string): void {
