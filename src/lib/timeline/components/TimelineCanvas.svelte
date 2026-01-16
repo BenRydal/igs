@@ -6,7 +6,8 @@
 	import type { HitTarget, TimelineState } from '../types';
 	import P5Store from '../../../stores/p5Store';
 	import VideoStore, { requestSeek } from '../../../stores/videoStore';
-	import { isPlaying } from '../../../stores/playbackStore';
+	import UserStore from '../../../stores/userStore';
+	import ConfigStore from '../../../stores/configStore';
 	import { PLAYHEAD_HIT_TOLERANCE } from '../constants';
 
 	/** Canvas element reference */
@@ -39,6 +40,16 @@
 		renderer?.setState(state);
 	});
 
+	/** Subscribe to user store changes to update activity gradient */
+	const unsubscribeUsers = UserStore.subscribe(() => {
+		renderer?.requestRender();
+	});
+
+	/** Subscribe to config store changes (e.g., activity gradient toggle) */
+	const unsubscribeConfig = ConfigStore.subscribe(() => {
+		renderer?.requestRender();
+	});
+
 	/**
 	 * Update the X positions for coordinate transforms.
 	 */
@@ -63,10 +74,9 @@
 	function syncCurrentTime(time: number): void {
 		timelineV2Store.setCurrentTime(time);
 
-		// Seek video if visible and not playing
+		// Seek video if visible (works whether playing or paused)
 		const videoState = get(VideoStore);
-		const playing = get(isPlaying);
-		if (videoState.isVisible && !playing) {
+		if (videoState.isVisible) {
 			requestSeek(time);
 		}
 
@@ -110,6 +120,8 @@
 
 	onDestroy(() => {
 		unsubscribe();
+		unsubscribeUsers();
+		unsubscribeConfig();
 		renderer?.destroy();
 	});
 
@@ -292,15 +304,11 @@
 			// Zoom centered on mouse position
 			const zoomFactor = e.deltaY > 0 ? 1.15 : 0.87;
 			timelineV2Store.zoom(zoomFactor, centerTime);
-		} else if (e.shiftKey) {
-			// Horizontal scroll
-			const viewDuration = currentState.viewEnd - currentState.viewStart;
-			const panAmount = (e.deltaY / renderer.width) * viewDuration * 0.5;
-			timelineV2Store.pan(panAmount);
 		} else {
-			// Default: horizontal pan
+			// Pan - use deltaX for horizontal scroll, deltaY for vertical scroll wheel
 			const viewDuration = currentState.viewEnd - currentState.viewStart;
-			const panAmount = (e.deltaY / renderer.width) * viewDuration * 0.3;
+			const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+			const panAmount = (delta / renderer.width) * viewDuration * 0.5;
 			timelineV2Store.pan(panAmount);
 		}
 

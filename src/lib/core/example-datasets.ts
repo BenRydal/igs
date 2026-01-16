@@ -12,7 +12,7 @@ export interface ExampleDataset {
 
 export const EXAMPLE_DATASETS: Record<string, ExampleDataset> = {
   'example-1': {
-    files: ['jordan.csv', 'possession.csv'],
+    files: ['jordan.csv', 'possession.csv', 'conversation.csv'],
     videoId: 'iiMjfVOj8po',
     duration: '37 sec',
   },

@@ -7,6 +7,7 @@
 import type { TimelineState, RenderLayer, RenderContext } from '../types';
 import { mapRange, getDevicePixelRatio } from '../utils';
 import { BackgroundLayer } from './layers/background';
+import { ActivityGradientLayer } from './layers/activity-gradient';
 import { PlayheadLayer } from './layers/playhead';
 import { HoverLayer } from './layers/hover';
 import { ZoomSelectionLayer } from './layers/zoom-selection';
@@ -30,6 +31,7 @@ export class TimelineRenderer {
 		// Layer stack (render order: bottom to top)
 		this.layers = [
 			new BackgroundLayer(),
+			new ActivityGradientLayer(),
 			new PlayheadLayer(),
 			new ZoomSelectionLayer(),
 			new HoverLayer()

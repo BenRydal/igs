@@ -1,6 +1,7 @@
 import { writable } from 'svelte/store'
 
 export interface ConfigStoreState {
+  advancedMode: boolean
   isPathColorMode: boolean
   dataHasCodes: boolean
   circleToggle: boolean
@@ -25,12 +26,15 @@ export interface ConfigStoreState {
   clusterSpaceThreshold: number // pixels - distance to start new cluster
   showSpeakerStripes: boolean // Combine speakers into shared conversation clusters with proportional coloring
   preserveFloorplanAspectRatio: boolean // Keep floorplan proportions instead of stretching to fill
+  showConversationRects: boolean // Show conversation rectangles on visualization (floor plan and space-time)
+  showActivityGradient: boolean // Show movement activity gradient on timeline
 }
 
 // Legacy type alias for backwards compatibility
 export type ConfigStoreType = ConfigStoreState
 
 export const initialConfig: ConfigStoreState = {
+  advancedMode: false,
   isPathColorMode: false,
   dataHasCodes: false,
   circleToggle: false,
@@ -55,6 +59,8 @@ export const initialConfig: ConfigStoreState = {
   clusterSpaceThreshold: 50,
   showSpeakerStripes: true,
   preserveFloorplanAspectRatio: false,
+  showConversationRects: false,
+  showActivityGradient: false,
 }
 
 const ConfigStore = writable<ConfigStoreState>(initialConfig)

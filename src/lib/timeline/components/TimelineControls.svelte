@@ -13,6 +13,7 @@
 	import MdMagnifyMinus from '~icons/mdi/magnify-minus-outline';
 	import MdFitToScreen from '~icons/mdi/fit-to-screen-outline';
 
+
 	/** Speed presets - these map to animationRate values */
 	const SPEED_PRESETS = [0.025, 0.05, 0.1, 0.25, 0.5, 1.0];
 	const SPEED_LABELS = ['0.5x', '1x', '2x', '5x', '10x', '20x'];
@@ -58,9 +59,9 @@
 	}
 </script>
 
-<div class="flex items-center gap-3 px-3 py-1.5 bg-[#f6f5f3] border-t border-gray-200">
+<div class="flex items-center gap-2 px-2 py-1 bg-[#f6f5f3]">
 	<!-- Playback controls -->
-	<div class="flex items-center gap-1 bg-white border border-gray-200 rounded-full pl-0.5 pr-1 py-0.5">
+	<div class="flex items-center gap-0.5 bg-white border border-gray-200 rounded-full pl-0.5 pr-1 py-0.5">
 		<button
 			class="btn btn-circle btn-primary btn-xs"
 			onclick={togglePlayback}
@@ -81,9 +82,9 @@
 		>
 			<MdReplay class="w-3.5 h-3.5" />
 		</button>
-		<span class="w-px h-3.5 bg-gray-200"></span>
+		<span class="w-px h-3 bg-gray-200"></span>
 		<button
-			class="btn btn-ghost btn-xs px-1.5 font-mono font-semibold"
+			class="btn btn-ghost btn-xs px-1 font-mono text-xs font-semibold"
 			onclick={cycleSpeed}
 			title="Click to change speed (Shift+click for slower)"
 			aria-label="Playback speed"
@@ -123,13 +124,40 @@
 	{#if $isZoomed}
 		<span class="text-xs text-gray-500 font-medium">{$zoomLevel.toFixed(1)}x</span>
 	{:else}
-		<span class="text-xs text-gray-400">Drag to zoom · Ctrl+scroll to zoom</span>
+		<span class="zoom-hint">Drag to zoom</span>
+	{/if}
+
+	<!-- Activity gradient toggle (advanced mode only) -->
+	{#if $ConfigStore.advancedMode}
+		<button
+			class="flex items-center gap-1.5 px-1.5 py-0.5 rounded hover:bg-gray-200/50 transition-colors cursor-pointer"
+			class:opacity-50={!$ConfigStore.showActivityGradient}
+			title={$ConfigStore.showActivityGradient ? 'Hide activity gradient' : 'Show activity gradient'}
+			onclick={() => ConfigStore.update((c) => ({ ...c, showActivityGradient: !c.showActivityGradient }))}
+		>
+			<span class="text-[10px] text-gray-400">stopped</span>
+			<div class="w-10 h-1.5 rounded-sm" style="background: linear-gradient(to right, rgba(0,0,0,0.1), rgba(0,0,0,0.4))"></div>
+			<span class="text-[10px] text-gray-400">moving</span>
+		</button>
 	{/if}
 
 	<!-- Time display -->
-	<div class="flex items-center gap-1 ml-auto bg-gray-100 px-2 py-0.5 rounded">
-		<span class="font-mono text-sm font-semibold text-red-500">{formatTime(currentTime)}</span>
-		<span class="text-gray-400 text-sm">/</span>
-		<span class="font-mono text-sm text-gray-500">{formatTime(duration)}</span>
+	<div class="flex items-center gap-1 ml-auto font-mono text-xs">
+		<span class="font-semibold text-red-500">{formatTime(currentTime)}</span>
+		<span class="text-gray-400">/</span>
+		<span class="text-gray-500">{formatTime(duration)}</span>
 	</div>
 </div>
+
+<style>
+	.zoom-hint {
+		font-size: 0.75rem;
+		color: #9ca3af;
+		animation: fade-out 15s forwards;
+	}
+
+	@keyframes fade-out {
+		0%, 80% { opacity: 1; }
+		100% { opacity: 0; }
+	}
+</style>

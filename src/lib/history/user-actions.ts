@@ -1,7 +1,6 @@
 import { get } from 'svelte/store'
 import UserStore from '../../stores/userStore'
 import { historyStore } from '../../stores/historyStore'
-import type { User } from '../../models/user'
 import { deepClone } from './index'
 
 /**
@@ -28,35 +27,6 @@ export function toggleUserEnabled(userId: string): void {
     redo: () =>
       UserStore.update((list) =>
         list.map((u) => (u.name === userId ? { ...u, enabled: !wasEnabled } : u))
-      ),
-  })
-}
-
-/**
- * Set user visibility to a specific value with undo
- */
-export function setUserEnabled(userId: string, enabled: boolean): void {
-  const users = get(UserStore)
-  const user = users.find((u) => u.name === userId)
-  if (!user) return
-
-  const wasEnabled = user.enabled
-  if (wasEnabled === enabled) return
-
-  UserStore.update((list) =>
-    list.map((u) => (u.name === userId ? { ...u, enabled } : u))
-  )
-
-  historyStore.push({
-    actionType: 'user.toggle',
-    actionLabel: `${enabled ? 'Showed' : 'Hid'} ${userId}`,
-    undo: () =>
-      UserStore.update((list) =>
-        list.map((u) => (u.name === userId ? { ...u, enabled: wasEnabled } : u))
-      ),
-    redo: () =>
-      UserStore.update((list) =>
-        list.map((u) => (u.name === userId ? { ...u, enabled } : u))
       ),
   })
 }
@@ -92,30 +62,26 @@ export function toggleUserConversationEnabled(userId: string): void {
 }
 
 /**
- * Set user conversation visibility to a specific value with undo
+ * Rename user with undo
  */
-export function setUserConversationEnabled(userId: string, enabled: boolean): void {
+export function setUserName(oldName: string, newName: string): void {
   const users = get(UserStore)
-  const user = users.find((u) => u.name === userId)
+  const user = users.find((u) => u.name === oldName)
   if (!user) return
+  if (oldName === newName) return
 
-  const wasEnabled = user.conversation_enabled
-  if (wasEnabled === enabled) return
-
-  UserStore.update((list) =>
-    list.map((u) => (u.name === userId ? { ...u, conversation_enabled: enabled } : u))
-  )
+  UserStore.update((list) => list.map((u) => (u.name === oldName ? { ...u, name: newName } : u)))
 
   historyStore.push({
-    actionType: 'user.toggle',
-    actionLabel: `${enabled ? 'Showed' : 'Hid'} ${userId} conversation`,
+    actionType: 'user.rename',
+    actionLabel: `Renamed ${oldName} to ${newName}`,
     undo: () =>
       UserStore.update((list) =>
-        list.map((u) => (u.name === userId ? { ...u, conversation_enabled: wasEnabled } : u))
+        list.map((u) => (u.name === newName ? { ...u, name: oldName } : u))
       ),
     redo: () =>
       UserStore.update((list) =>
-        list.map((u) => (u.name === userId ? { ...u, conversation_enabled: enabled } : u))
+        list.map((u) => (u.name === oldName ? { ...u, name: newName } : u))
       ),
   })
 }
@@ -142,6 +108,44 @@ export function setUserColor(userId: string, color: string): void {
       ),
     redo: () =>
       UserStore.update((list) => list.map((u) => (u.name === userId ? { ...u, color } : u))),
+  })
+}
+
+/**
+ * Toggle both movement and conversation visibility for a user with a single undo
+ */
+export function toggleUserVisibility(userId: string, currentlyVisible: boolean): void {
+  const users = get(UserStore)
+  const user = users.find((u) => u.name === userId)
+  if (!user) return
+
+  const wasEnabled = user.enabled
+  const wasConversationEnabled = user.conversation_enabled
+  const newValue = !currentlyVisible
+
+  UserStore.update((list) =>
+    list.map((u) =>
+      u.name === userId ? { ...u, enabled: newValue, conversation_enabled: newValue } : u
+    )
+  )
+
+  historyStore.push({
+    actionType: 'user.toggle',
+    actionLabel: `${newValue ? 'Showed' : 'Hid'} ${userId}`,
+    undo: () =>
+      UserStore.update((list) =>
+        list.map((u) =>
+          u.name === userId
+            ? { ...u, enabled: wasEnabled, conversation_enabled: wasConversationEnabled }
+            : u
+        )
+      ),
+    redo: () =>
+      UserStore.update((list) =>
+        list.map((u) =>
+          u.name === userId ? { ...u, enabled: newValue, conversation_enabled: newValue } : u
+        )
+      ),
   })
 }
 
