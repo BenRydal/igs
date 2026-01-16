@@ -27,6 +27,7 @@ export interface ConfigStoreState {
   showSpeakerStripes: boolean // Combine speakers into shared conversation clusters with proportional coloring
   preserveFloorplanAspectRatio: boolean // Keep floorplan proportions instead of stretching to fill
   showConversationRects: boolean // Show conversation rectangles on visualization (floor plan and space-time)
+  showActivityGradient: boolean // Show movement activity gradient on timeline
 }
 
 // Legacy type alias for backwards compatibility
@@ -59,6 +60,7 @@ export const initialConfig: ConfigStoreState = {
   showSpeakerStripes: true,
   preserveFloorplanAspectRatio: false,
   showConversationRects: false,
+  showActivityGradient: false,
 }
 
 const ConfigStore = writable<ConfigStoreState>(initialConfig)

@@ -6,6 +6,8 @@
 	import type { HitTarget, TimelineState } from '../types';
 	import P5Store from '../../../stores/p5Store';
 	import VideoStore, { requestSeek } from '../../../stores/videoStore';
+	import UserStore from '../../../stores/userStore';
+	import ConfigStore from '../../../stores/configStore';
 	import { PLAYHEAD_HIT_TOLERANCE } from '../constants';
 
 	/** Canvas element reference */
@@ -36,6 +38,16 @@
 	const unsubscribe = timelineV2Store.subscribe((state) => {
 		currentState = state;
 		renderer?.setState(state);
+	});
+
+	/** Subscribe to user store changes to update activity gradient */
+	const unsubscribeUsers = UserStore.subscribe(() => {
+		renderer?.requestRender();
+	});
+
+	/** Subscribe to config store changes (e.g., activity gradient toggle) */
+	const unsubscribeConfig = ConfigStore.subscribe(() => {
+		renderer?.requestRender();
 	});
 
 	/**
@@ -108,6 +120,8 @@
 
 	onDestroy(() => {
 		unsubscribe();
+		unsubscribeUsers();
+		unsubscribeConfig();
 		renderer?.destroy();
 	});
 

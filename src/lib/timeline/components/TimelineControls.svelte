@@ -123,8 +123,23 @@
 	{#if $isZoomed}
 		<span class="text-xs text-gray-500 font-medium">{$zoomLevel.toFixed(1)}x</span>
 	{:else}
-		<span class="text-xs text-gray-400">Drag to zoom · Ctrl+scroll to zoom</span>
+		<span class="text-xs text-gray-400">Drag to zoom</span>
 	{/if}
+
+	<!-- Activity legend (clickable to toggle) -->
+	<button
+		class="flex items-center gap-1.5 hover:bg-gray-200/50 rounded px-1.5 py-0.5 transition-colors cursor-pointer"
+		class:opacity-50={!$ConfigStore.showActivityGradient}
+		title={$ConfigStore.showActivityGradient ? 'Click to hide activity gradient' : 'Click to show activity gradient'}
+		onclick={() => ConfigStore.update((c) => ({ ...c, showActivityGradient: !c.showActivityGradient }))}
+	>
+		<span class="text-xs text-gray-400">Activity</span>
+		<div class="flex items-center gap-0.5">
+			<span class="text-[10px] text-gray-400">low</span>
+			<div class="w-12 h-2 rounded-sm" style="background: linear-gradient(to right, rgba(0,0,0,0.08), rgba(0,0,0,0.4))"></div>
+			<span class="text-[10px] text-gray-400">high</span>
+		</div>
+	</button>
 
 	<!-- Time display -->
 	<div class="flex items-center gap-1 ml-auto bg-gray-100 px-2 py-0.5 rounded">
