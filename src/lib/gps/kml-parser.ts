@@ -163,7 +163,9 @@ export class KMLParser {
       // Check for timestamp coverage
       const pointsWithTime = points.filter((p) => p.time !== null).length
       if (pointsWithTime === 0) {
-        warnings.push(`Track "${trackName}" has no timestamps - points will be evenly spaced`)
+        // Skip tracks without timestamps - IGS requires time data for space-time visualization
+        warnings.push(`Track "${trackName}" skipped - no timestamps found`)
+        continue
       } else if (pointsWithTime < points.length) {
         warnings.push(
           `Track "${trackName}": ${points.length - pointsWithTime} of ${points.length} points missing timestamps`
@@ -174,7 +176,10 @@ export class KMLParser {
     }
 
     if (tracks.length === 0) {
-      return errorResult('No tracks (LineString or gx:Track) found in KML file.', warnings)
+      return errorResult(
+        'No tracks with timestamps found. IGS requires timestamped GPS data for space-time visualization.',
+        warnings
+      )
     }
 
     return { success: true, tracks, warnings }

@@ -245,7 +245,7 @@
       </p>
 
       <div class="space-y-6">
-        <!-- GPX Option -->
+        <!-- GPX/KML Option -->
         <div class="card bg-base-200">
           <div class="card-body">
             <div class="flex items-center gap-2 mb-2">
@@ -253,18 +253,28 @@
               <span class="badge badge-success badge-sm">Easiest</span>
             </div>
             <p class="text-base-content/70 mb-3">
-              Most fitness apps let you export activities as GPX files. IGS reads these directly.
+              Most fitness apps let you export activities as GPX or KML files. IGS reads these
+              directly.
             </p>
             <div class="flex flex-wrap gap-2">
               <span class="badge badge-outline">Strava</span>
               <span class="badge badge-outline">Garmin</span>
               <span class="badge badge-outline">AllTrails</span>
               <span class="badge badge-outline">Apple Fitness</span>
+              <span class="badge badge-outline">Google Earth</span>
               <span class="badge badge-outline">Google Maps Timeline</span>
             </div>
             <p class="text-sm text-base-content/60 mt-3">
-              Look for "Export GPX" or "Download GPX" in your app's activity details.
+              Look for "Export GPX" or "Export KML" in your app's activity details.
             </p>
+            <div class="alert mt-3">
+              <div>
+                <p class="text-sm">
+                  <strong>Note:</strong> GPX and KML files must contain timestamps. Static routes or
+                  hand-drawn paths without time data are not supported.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 

@@ -36,6 +36,7 @@ import { loadMapAsFloorPlan, isMapboxConfigured } from '../gps/mapbox-service'
 import { validateGPSData } from '../gps/gps-validation'
 import { GPXParser } from '../gps/gpx-parser'
 import { KMLParser } from '../gps/kml-parser'
+import { SUPPORTED_EXTENSIONS } from '../validation/file-types'
 
 export class Core {
   sketch: p5
@@ -77,7 +78,9 @@ export class Core {
     } else if (fileName.endsWith('.mp4') || file.type === 'video/mp4') {
       this.prepVideoFromFile(URL.createObjectURL(file))
     } else {
-      toastStore.error('Error loading file. Please make sure your file is an accepted format')
+      toastStore.error(
+        `Unsupported file type. Supported formats: ${SUPPORTED_EXTENSIONS.map((e) => `.${e}`).join(', ')}`
+      )
     }
   }
 

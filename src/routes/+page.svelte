@@ -489,7 +489,6 @@
   // Local version that handles UI cleanup and non-store data
   function clearAllDataLocal() {
     resetVideo()
-    resetGPS()
 
     // Close any open user dropdown
     activeDropdownUser = null
@@ -500,6 +499,8 @@
     core.codeData = []
     core.movementData = []
     core.conversationData = []
+    resetGPS()
+    core.gpsMovementData = []
 
     ConfigStore.update((config) => ({
       ...config,
@@ -517,6 +518,8 @@
   function clearMovementData() {
     clearUsers()
     core.movementData = []
+    core.gpsMovementData = []
+    resetGPS()
     p5Instance.loop()
   }
 
