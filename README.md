@@ -75,16 +75,18 @@ IGS accepts CSV files with the following formats:
 
 | Data Type | Required Headers | Example |
 |-----------|-----------------|---------|
-| **Movement** | `time, x, y` | `0, 100, 200` |
+| **Indoor Movement** | `time, x, y` | `0, 100, 200` |
+| **GPS Movement** | `time, lat, lng` | `0, 40.7128, -74.0060` |
 | **Conversation** | `time, speaker, talk` | `5, Alice, Hello everyone` |
 | **Codes (multi)** | `code, start, end` | `teaching, 0, 30` |
 | **Codes (single)** | `start, end` | `0, 30` (filename = code) |
 
 You can also load:
-- **Floorplan images** (PNG, JPG) as background
+- **GPX/KML files** for GPS tracks (must contain timestamps)
+- **Floorplan images** (PNG, JPG) as background for indoor data
 - **Video** (MP4, YouTube URL) synced to timeline
 
-📄 [Download Data Formatting Guide (PDF)](./static/images/data_formatting_guide.pdf)
+📄 [View Data Formatting Guide](https://www.interactiongeography.org/guide)
 
 ---
 
