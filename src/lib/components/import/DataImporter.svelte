@@ -2,6 +2,12 @@
   import { onMount, onDestroy } from 'svelte'
   import { Z_INDEX } from '$lib/styles/z-index'
   import { formatFileSize, getFileSizeLimit } from '$lib/validation/rules'
+  import {
+    SUPPORTED_EXTENSIONS,
+    ACCEPT_STRING,
+    getFileTypeInfo,
+    getFileExtension,
+  } from '$lib/validation/file-types'
   import { toastStore } from '../../../stores/toastStore'
   import { openModal, closeModal } from '../../../stores/modalStore'
   import { loadVideo, reset as resetVideo } from '../../../stores/videoStore'
@@ -35,29 +41,15 @@
   let youtubeUrl = $state('')
   let youtubeError = $state('')
 
-  // File type info for display
-  const fileTypeInfo: Record<string, { label: string; icon: string; color: string }> = {
-    csv: { label: 'CSV Data', icon: '📊', color: 'badge-info' },
-    gpx: { label: 'GPS Track', icon: '📍', color: 'badge-info' },
-    png: { label: 'Floor Plan', icon: '🗺️', color: 'badge-success' },
-    jpg: { label: 'Floor Plan', icon: '🗺️', color: 'badge-success' },
-    jpeg: { label: 'Floor Plan', icon: '🗺️', color: 'badge-success' },
-    mp4: { label: 'Video', icon: '🎬', color: 'badge-warning' },
-  }
-
-  /**
-   * Get file extension
-   */
-  function getFileExtension(filename: string): string {
-    return filename.split('.').pop()?.toLowerCase() || ''
-  }
+  /** Default display info for unknown file types */
+  const UNKNOWN_FILE_TYPE = { label: 'Unknown', icon: '📄', color: 'badge-ghost' }
 
   /**
    * Get file type display info
    */
   function getFileTypeDisplay(file: File) {
     const ext = getFileExtension(file.name)
-    return fileTypeInfo[ext] || { label: 'Unknown', icon: '📄', color: 'badge-ghost' }
+    return getFileTypeInfo(ext) || UNKNOWN_FILE_TYPE
   }
 
   /**
@@ -129,10 +121,9 @@
   async function addFiles(newFiles: File[]): Promise<void> {
     try {
       // Filter to only supported file types
-      const supportedExtensions = ['csv', 'png', 'jpg', 'jpeg', 'mp4', 'gpx']
       const validFiles = newFiles.filter((file) => {
         const ext = getFileExtension(file.name)
-        return supportedExtensions.includes(ext)
+        return SUPPORTED_EXTENSIONS.includes(ext)
       })
 
       // Check if any unsupported files were filtered out
@@ -334,7 +325,7 @@
       <!-- Supported file types info -->
       <div class="mb-4 flex flex-wrap gap-2 justify-center">
         <span class="badge badge-outline gap-1">📊 CSV</span>
-        <span class="badge badge-outline gap-1">📍 GPX</span>
+        <span class="badge badge-outline gap-1">📍 GPX/KML</span>
         <span class="badge badge-outline gap-1">🗺️ PNG/JPG</span>
         <span class="badge badge-outline gap-1">🎬 MP4/YouTube</span>
       </div>
@@ -359,7 +350,7 @@
           id="file-input-import"
           type="file"
           multiple
-          accept=".csv,.png,.jpg,.jpeg,.mp4,.gpx"
+          accept={ACCEPT_STRING}
           onchange={handleFileInput}
           class="hidden"
         />
