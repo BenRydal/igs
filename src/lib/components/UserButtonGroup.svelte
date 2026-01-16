@@ -16,16 +16,16 @@
     isUserVisible,
     onToggleVisibility,
     onOpenDropdown,
-    maxVisible = 6,
+    maxVisible = 5,
   }: Props = $props()
 
   let isExpanded = $state(false)
 
   const visibleUsers = $derived(
-    isExpanded || users.length <= maxVisible ? users : users.slice(0, maxVisible - 1)
+    isExpanded || users.length <= maxVisible ? users : users.slice(0, maxVisible)
   )
 
-  const hiddenCount = $derived(users.length - maxVisible + 1)
+  const hiddenCount = $derived(users.length - maxVisible)
   const showExpandButton = $derived(users.length > maxVisible)
 
   function toggleExpanded() {
