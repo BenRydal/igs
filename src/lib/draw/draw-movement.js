@@ -1,4 +1,5 @@
 import ConfigStore from '../../stores/configStore'
+import CodeStore from '../../stores/codeStore'
 import { timelineV2Store } from '../timeline/store'
 import VideoStore from '../../stores/videoStore'
 import PlaybackStore from '../../stores/playbackStore'
@@ -11,6 +12,8 @@ import PlaybackStore from '../../stores/playbackStore'
 let maxStopLength, isPathColorMode, movementStrokeWeight, stopStrokeWeight
 // Config: spatial mode toggles
 let circleToggle, sliceToggle, movementToggle, stopsToggle, highlightToggle
+// Code filtering state
+let hasDisabledCodes = false
 // Playback state
 let videoCurrentTime = 0
 let playbackMode = 'stopped'
@@ -25,6 +28,11 @@ ConfigStore.subscribe((data) => {
   movementToggle = data.movementToggle
   stopsToggle = data.stopsToggle
   highlightToggle = data.highlightToggle
+})
+
+CodeStore.subscribe((codes) => {
+  // Check if any codes are disabled (need to filter visibility)
+  hasDisabledCodes = codes.some((code) => !code.enabled)
 })
 
 VideoStore.subscribe((data) => {
@@ -64,11 +72,12 @@ export class DrawMovement {
   // Fast path: no checks, Medium path: time filtering, Slow path: per-point visibility
   // ============================================================
 
-  // Check if no spatial/type filters are active (allows batched drawing)
+  // Check if no spatial/type/code filters are active (allows batched drawing)
   hasNoSpecialModes() {
     const noSpatialModes = !circleToggle && !sliceToggle && !highlightToggle
     const noTypeFilters = !movementToggle && !stopsToggle
-    return noSpatialModes && noTypeFilters
+    const noCodeFilters = !hasDisabledCodes
+    return noSpatialModes && noTypeFilters && noCodeFilters
   }
 
   // Check if we can use fast path (skip ALL visibility checks)
