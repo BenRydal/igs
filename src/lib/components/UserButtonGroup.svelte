@@ -16,7 +16,7 @@
     isUserVisible,
     onToggleVisibility,
     onOpenDropdown,
-    maxVisible = 4,
+    maxVisible = 6,
   }: Props = $props()
 
   let isExpanded = $state(false)
