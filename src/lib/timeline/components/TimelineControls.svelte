@@ -13,6 +13,7 @@
 	import MdMagnifyMinus from '~icons/mdi/magnify-minus-outline';
 	import MdFitToScreen from '~icons/mdi/fit-to-screen-outline';
 
+
 	/** Speed presets - these map to animationRate values */
 	const SPEED_PRESETS = [0.025, 0.05, 0.1, 0.25, 0.5, 1.0];
 	const SPEED_LABELS = ['0.5x', '1x', '2x', '5x', '10x', '20x'];
@@ -123,21 +124,22 @@
 	{#if $isZoomed}
 		<span class="text-xs text-gray-500 font-medium">{$zoomLevel.toFixed(1)}x</span>
 	{:else}
-		<span class="text-xs text-gray-400">Drag to zoom</span>
+		<span class="zoom-hint">Drag to zoom</span>
 	{/if}
 
-	<!-- Activity gradient toggle -->
-	<button
-		class="flex items-center gap-1.5 px-1.5 py-0.5 rounded hover:bg-gray-200/50 transition-colors cursor-pointer"
-		class:opacity-50={!$ConfigStore.showActivityGradient}
-		title={$ConfigStore.showActivityGradient ? 'Hide activity gradient' : 'Show activity gradient'}
-		onclick={() => ConfigStore.update((c) => ({ ...c, showActivityGradient: !c.showActivityGradient }))}
-	>
-		<span class="text-xs text-gray-500">Activity</span>
-		<span class="text-[10px] text-gray-400">low</span>
-		<div class="w-10 h-1.5 rounded-sm" style="background: linear-gradient(to right, rgba(0,0,0,0.1), rgba(0,0,0,0.4))"></div>
-		<span class="text-[10px] text-gray-400">high</span>
-	</button>
+	<!-- Activity gradient toggle (advanced mode only) -->
+	{#if $ConfigStore.advancedMode}
+		<button
+			class="flex items-center gap-1.5 px-1.5 py-0.5 rounded hover:bg-gray-200/50 transition-colors cursor-pointer"
+			class:opacity-50={!$ConfigStore.showActivityGradient}
+			title={$ConfigStore.showActivityGradient ? 'Hide activity gradient' : 'Show activity gradient'}
+			onclick={() => ConfigStore.update((c) => ({ ...c, showActivityGradient: !c.showActivityGradient }))}
+		>
+			<span class="text-[10px] text-gray-400">stopped</span>
+			<div class="w-10 h-1.5 rounded-sm" style="background: linear-gradient(to right, rgba(0,0,0,0.1), rgba(0,0,0,0.4))"></div>
+			<span class="text-[10px] text-gray-400">moving</span>
+		</button>
+	{/if}
 
 	<!-- Time display -->
 	<div class="flex items-center gap-1 ml-auto font-mono text-xs">
@@ -146,3 +148,16 @@
 		<span class="text-gray-500">{formatTime(duration)}</span>
 	</div>
 </div>
+
+<style>
+	.zoom-hint {
+		font-size: 0.75rem;
+		color: #9ca3af;
+		animation: fade-out 15s forwards;
+	}
+
+	@keyframes fade-out {
+		0%, 80% { opacity: 1; }
+		100% { opacity: 0; }
+	}
+</style>
