@@ -5,7 +5,7 @@
   import { CommandPalette } from '$lib/components/command-palette'
   import KeyboardCheatsheet from '$lib/components/KeyboardCheatsheet.svelte'
   import { registerAllShortcuts, attachKeyboardHandler } from '$lib/keyboard'
-  import { registerUndoRedoShortcuts } from '$lib/history'
+  import { registerUndoRedoShortcuts } from '$lib/history/keyboard'
   import { setupModalListeners } from '../stores/modalStore'
 
   // State for modals

@@ -27,7 +27,6 @@
 
 /**
  * Deep clone utility for undo/redo state preservation
- * Uses structuredClone if available, otherwise JSON parse/stringify
  */
 export function deepClone<T>(obj: T): T {
   if (typeof structuredClone === 'function') {
@@ -52,6 +51,3 @@ export * from './undoable'
 export * from './config-actions'
 export * from './user-actions'
 export * from './data-actions'
-
-// Keyboard shortcuts
-export * from './keyboard'
