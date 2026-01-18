@@ -655,6 +655,12 @@
     window.addEventListener('igs:toggle-help', handleToggleHelp)
     window.addEventListener('igs:load-example', handleLoadExample)
 
+    // Clear data event listeners (for command palette)
+    window.addEventListener('igs:clear-movement', clearMovementData)
+    window.addEventListener('igs:clear-conversation', clearConversationData)
+    window.addEventListener('igs:clear-codes', clearCodeData)
+    window.addEventListener('igs:clear-all', clearAllDataLocal)
+
     // Cleanup function
     return () => {
       // Remove keyboard shortcut handlers
@@ -664,6 +670,12 @@
       window.removeEventListener('igs:download-codes', handleDownloadCodes)
       window.removeEventListener('igs:toggle-help', handleToggleHelp)
       window.removeEventListener('igs:load-example', handleLoadExample)
+
+      // Remove clear data event listeners
+      window.removeEventListener('igs:clear-movement', clearMovementData)
+      window.removeEventListener('igs:clear-conversation', clearConversationData)
+      window.removeEventListener('igs:clear-codes', clearCodeData)
+      window.removeEventListener('igs:clear-all', clearAllDataLocal)
     }
   })
 </script>

@@ -5,7 +5,7 @@
   import { Z_INDEX } from '$lib/styles/z-index'
   import type { Command, HighlightSegment } from './types'
   import { searchCommands, getHighlightSegments } from './fuzzy-search'
-  import { getAllCommands, getCategoryLabel } from './commands'
+  import { getCommands, getCategoryLabel } from '$lib/app-actions'
   import { getRecentCommands, addRecentCommand, type RecentCommandEntry } from './recent-commands'
   import CommandButton from './CommandButton.svelte'
 
@@ -24,7 +24,7 @@
   let previouslyFocusedElement: HTMLElement | null = null
 
   // Get all commands
-  const allCommands = getAllCommands()
+  const allCommands = getCommands()
 
   // Derived state for search results
   let searchResults = $derived.by(() => {

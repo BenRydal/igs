@@ -29,10 +29,3 @@ export {
   clearRecentCommands,
   type RecentCommandEntry,
 } from './recent-commands'
-
-export {
-  getAllCommands,
-  getCommandsByCategory,
-  findCommandById,
-  getCategoryLabel,
-} from './commands'

@@ -25,13 +25,4 @@
 export { registry } from './registry'
 export { attachKeyboardHandler, detachKeyboardHandler, isHandlerAttached } from './handler'
 export type { KeyboardShortcut, ShortcutCategory, KeyboardEventMatch } from './types'
-export {
-  registerAllShortcuts,
-  unregisterAllShortcuts,
-  playbackShortcuts,
-  viewShortcuts,
-  selectionShortcuts,
-  dataShortcuts,
-  modalShortcuts,
-  allShortcuts,
-} from './shortcuts'
+export { registerAllShortcuts, unregisterAllShortcuts, allShortcuts } from './shortcuts'
