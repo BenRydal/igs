@@ -46,6 +46,13 @@ export class DrawUtils {
 
   setCodeColor(searchCodes) {
     const entries = get(CodeStore)
+
+    // Handle data points with no codes - look up the "no codes" entry color
+    if (searchCodes.length === 0) {
+      const noCodesEntry = entries.find((e) => e.code === 'no codes')
+      return noCodesEntry ? noCodesEntry.color : '#808080'
+    }
+
     let matchedEntries = entries.filter((e) => searchCodes.includes(e.code))
 
     if (matchedEntries.length === 1) {
@@ -55,7 +62,6 @@ export class DrawUtils {
       // that change would be. Currently default multiple codes to black.
       return '#000000'
     } else {
-      //console.log('No matching codes found');
       return '#808080' // Default color if no codes match
     }
   }
