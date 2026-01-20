@@ -110,7 +110,7 @@
         <a href="https://www.youtube.com/watch?v=smoxv9AspHA" target="_blank" class="btn btn-ghost gap-1.5">
           <MdPlayCircle class="text-lg" /> Watch Demo
         </a>
-        <a href="/guide" class="btn btn-ghost gap-1.5">
+        <a href="/guide" target="_blank" class="btn btn-ghost gap-1.5">
           <MdFileDocument class="text-lg" /> Data Format Guide
         </a>
         <a href="https://forms.gle/M1gvdgSvdH9yXAABA" target="_blank" class="btn btn-ghost gap-1.5">

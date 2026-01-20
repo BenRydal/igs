@@ -40,22 +40,6 @@
 </svelte:head>
 
 <div class="min-h-screen bg-base-100">
-  <!-- Header -->
-  <header class="sticky top-0 z-10 bg-base-100 border-b border-base-300 px-4 py-3">
-    <div class="max-w-3xl mx-auto flex items-center gap-4">
-      <a href="/" class="btn btn-ghost btn-sm gap-2">
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M15 19l-7-7 7-7"
-          />
-        </svg>
-        Back to IGS
-      </a>
-    </div>
-  </header>
 
   <!-- Content -->
   <main class="max-w-3xl mx-auto px-4 py-8">
