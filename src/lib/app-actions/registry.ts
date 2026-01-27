@@ -359,9 +359,9 @@ const exampleActions: AppAction[] = [
   },
   {
     id: 'example-ap-math',
-    label: 'Load: AP Math Lesson',
-    description: 'Classroom example dataset',
-    keywords: ['example', 'classroom', 'math', 'ap'],
+    label: 'Load: Clark AP Math Lesson',
+    description: 'TAU Project',
+    keywords: ['example', 'classroom', 'math', 'ap', 'clark', 'tau'],
     icon: '📐',
     category: 'examples',
     action: () => window.dispatchEvent(new CustomEvent('igs:load-example', { detail: { value: 'example-10' } })),

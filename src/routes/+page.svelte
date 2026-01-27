@@ -23,6 +23,7 @@
   import MdSports from '~icons/mdi/basketball'
   import MdMuseum from '~icons/mdi/bank'
   import MdSchool from '~icons/mdi/school'
+  import MdTeacher from '~icons/mdi/human-male-board'
   import MdWalk from '~icons/mdi/walk'
   import MdVideo from '~icons/mdi/video-vintage'
   import MdMusic from '~icons/mdi/music'
@@ -120,6 +121,11 @@
         { value: 'example-12', label: 'Civil Rights Tour: Creating the Route' },
         { value: 'example-13', label: 'Civil Rights Tour: Walking the Route' },
       ],
+    },
+    {
+      label: 'TAU Project',
+      icon: MdTeacher,
+      items: [{ value: 'example-10', label: 'Clark AP Math Lesson' }],
     },
     // Hidden temporarily - uncomment when ready to show
     // {
