@@ -2,10 +2,20 @@ import { FloorPlanContainer } from './floorplan-container.js'
 import { Highlight } from './highlight.js'
 import { timelineV2Store } from '../timeline/store'
 import ConfigStore from '../../stores/configStore'
-import { get } from 'svelte/store'
 
 /** Padding between floorplan edge and timeline data start */
 const FLOORPLAN_TIMELINE_GAP = 20
+
+// Module-level config state (avoids get() calls during rendering)
+let viewMode = '3d'
+let circleToggle = false
+let sliceToggle = false
+
+ConfigStore.subscribe((data) => {
+  viewMode = data.viewMode
+  circleToggle = data.circleToggle
+  sliceToggle = data.sliceToggle
+})
 
 export class SketchGUI {
   constructor(sketch) {
@@ -19,21 +29,26 @@ export class SketchGUI {
   }
 
   update2D() {
-    const config = get(ConfigStore)
+    const isMapView = viewMode === 'map'
 
-    // Draw slicer line in 2D mode when hovering over timeline
-    if (this.sk.isMouseOverTimeline() && !this.sk.handle3D.getIs3DMode()) {
+    // Draw slicer line in 2D mode when hovering over timeline (not in map mode)
+    if (this.sk.isMouseOverTimeline() && !this.sk.handle3D.getIs3DMode() && !isMapView) {
       this.drawSlicerLine()
     }
 
     if (!this.sk.handle3D.getIs3DModeOrTransitioning()) {
-      if (config.circleToggle) this.fpContainer.drawRegionSelector()
-      else if (config.sliceToggle) this.fpContainer.drawSlicerSelector()
+      if (circleToggle) this.fpContainer.drawRegionSelector()
+      else if (sliceToggle) this.fpContainer.drawSlicerSelector()
     }
   }
 
   update3D() {
+    // Highlights work in all view modes
     this.highlight.setDraw()
+
+    // Skip 3D-specific UI elements in map mode
+    if (this.sk.handle3D.isMapView()) return
+
     if (this.sk.isMouseOverTimeline() && this.sk.handle3D.getIs3DMode()) {
       this.draw3DSlicerRect(
         this.fpContainer.getContainer(),

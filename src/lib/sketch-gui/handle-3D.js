@@ -1,10 +1,20 @@
+import ConfigStore from '../../stores/configStore'
+
+// Module-level state (avoids get() calls during rendering)
+let viewMode = '3d'
+
+ConfigStore.subscribe((data) => {
+  viewMode = data.viewMode
+})
+
+const VIEW_MODE_CYCLE = { '3d': '2d', '2d': 'map', map: '3d' }
+
 /**
- * Class to control 3D view and transitioning between 2D and 3D views
+ * Class to control view modes (3D, 2D, Map) and transitioning between them
  */
 export class Handle3D {
-  constructor(sketch, is3DMode) {
+  constructor(sketch) {
     this.sk = sketch
-    this.is3DMode = is3DMode
     this.isTransitioning = false
     this.translate = {
       zoom: -(this.sk.height / 1.5),
@@ -20,15 +30,26 @@ export class Handle3D {
     }
   }
 
+  /**
+   * Cycle through view modes: 3D -> 2D -> Map -> 3D
+   */
   update() {
-    this.toggleIs3D()
-    this.setIsTransitioning(true)
+    const currentMode = viewMode
+    const nextMode = VIEW_MODE_CYCLE[currentMode]
+
+    ConfigStore.update((c) => ({ ...c, viewMode: nextMode }))
+
+    // Animate transition when moving to/from 3D mode
+    if (currentMode === '3d' || nextMode === '3d') {
+      this.setIsTransitioning(true)
+    }
+
     this.sk.loop()
   }
 
   update3DTranslation() {
     if (this.isTransitioning) {
-      if (this.is3DMode) this.isTransitioning = this.updatePositions()
+      if (this.getIs3DMode()) this.isTransitioning = this.updatePositions()
       else this.isTransitioning = this.resetPositions()
     }
     const curPos = this.getCurTranslatePos()
@@ -62,16 +83,16 @@ export class Handle3D {
     return false
   }
 
-  toggleIs3D() {
-    this.is3DMode = !this.is3DMode
-  }
-
   setIsTransitioning(value) {
     this.isTransitioning = value
   }
 
   getIs3DMode() {
-    return this.is3DMode
+    return viewMode === '3d'
+  }
+
+  isMapView() {
+    return viewMode === 'map'
   }
 
   getIsTransitioning() {
@@ -79,7 +100,7 @@ export class Handle3D {
   }
 
   getIs3DModeOrTransitioning() {
-    return this.is3DMode || this.isTransitioning
+    return this.getIs3DMode() || this.isTransitioning
   }
 
   getCurTranslatePos() {

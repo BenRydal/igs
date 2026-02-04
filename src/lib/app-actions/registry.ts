@@ -148,9 +148,9 @@ const selectionActions: AppAction[] = [
 const viewActions: AppAction[] = [
   {
     id: 'toggle-3d',
-    label: 'Toggle 2D/3D View',
-    description: 'Switch between 2D and 3D visualization',
-    keywords: ['3d', '2d', 'dimension', 'view', 'toggle'],
+    label: 'Cycle View Mode',
+    description: 'Cycle through 3D, 2D, and Map views',
+    keywords: ['3d', '2d', 'map', 'dimension', 'view', 'toggle', 'cycle'],
     icon: '🔄',
     category: 'view',
     shortcut: { key: 'd' },

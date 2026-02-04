@@ -51,7 +51,7 @@ export const igsSketch = (p5: any) => {
   p5.setup = () => {
     p5.createCanvas(window.innerWidth, getAvailableHeight(), p5.WEBGL)
     p5.gui = new SketchGUI(p5)
-    p5.handle3D = new Handle3D(p5, true)
+    p5.handle3D = new Handle3D(p5)
     p5.floorPlan = new FloorPlan(p5)
 
     // Constants
@@ -120,7 +120,7 @@ export const igsSketch = (p5: any) => {
   p5.windowResized = () => {
     p5.resizeCanvas(window.innerWidth, getAvailableHeight())
     p5.gui = new SketchGUI(p5)
-    p5.handle3D = new Handle3D(p5, p5.handle3D.getIs3DMode())
+    p5.handle3D = new Handle3D(p5)
     applyStyles()
     p5.loop()
   }
@@ -132,7 +132,7 @@ export const igsSketch = (p5: any) => {
   p5.recreateCanvas = () => {
     p5.createCanvas(window.innerWidth, getAvailableHeight(), p5.WEBGL)
     p5.gui = new SketchGUI(p5)
-    p5.handle3D = new Handle3D(p5, true)
+    p5.handle3D = new Handle3D(p5)
     p5.floorPlan = new FloorPlan(p5)
     applyStyles()
     p5.loop()
@@ -145,11 +145,14 @@ export const igsSketch = (p5: any) => {
   /**
    * Check if mouse is over the timeline interaction area.
    * Uses winMouseX/Y (viewport coordinates) to match timeline bounds.
+   * In 3D and map modes, only triggers when over the actual timeline UI (below canvas).
+   * In 2D mode, triggers when over the timeline area on the canvas.
    */
   p5.isMouseOverTimeline = () => {
     const state = timelineV2Store.getState()
     const inXBounds = p5.winMouseX >= state.leftX && p5.winMouseX <= state.rightX
-    if (p5.handle3D.getIs3DMode()) {
+    // In 3D and map modes, require mouse to be below canvas (over timeline UI)
+    if (p5.handle3D.getIs3DMode() || p5.handle3D.isMapView()) {
       return inXBounds && p5.winMouseY > p5.height
     }
     return inXBounds

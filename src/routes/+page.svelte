@@ -10,6 +10,8 @@
   import MdAspectRatio from '~icons/mdi/aspect-ratio'
   import MdFitToPageOutline from '~icons/mdi/fit-to-page-outline'
   import Md3DRotation from '~icons/mdi/rotate-3d-variant'
+  import MdTimeline from '~icons/mdi/chart-timeline-variant'
+  import MdMap from '~icons/mdi/map'
   import MdVideocam from '~icons/mdi/video'
   import MdVideocamOff from '~icons/mdi/video-off'
   import MdCheck from '~icons/mdi/check'
@@ -73,7 +75,7 @@
 
   import CodeStore from '../stores/codeStore'
   import ConfigStore from '../stores/configStore'
-  import type { ConfigStoreType } from '../stores/configStore'
+  import type { ConfigStoreType, ViewMode } from '../stores/configStore'
   import { timelineV2Store } from '$lib/timeline/store'
   import { initialConfig } from '../stores/configStore'
   import { setSelectorSize, setSlicerSize } from '$lib/history/config-actions'
@@ -178,7 +180,7 @@
   let core: Core
   let isVideoShowing = $state(false)
   let isVideoPlaying = $state(false)
-  let is3DMode = $state(true)
+  let viewMode = $state<ViewMode>('3d')
   let timelineEndTime = $state(0)
   let isTranscriptVisible = $state(true)
   let spaceTimeTooltip: SpaceTimeTooltip
@@ -186,6 +188,7 @@
 
   $effect(() => {
     currentConfig = $ConfigStore
+    viewMode = $ConfigStore.viewMode
   })
 
   $effect(() => {
@@ -513,6 +516,7 @@
       dataHasCodes: false,
       isPathColorMode: false,
       maxStopLength: 0,
+      viewMode: '3d',
     }))
 
     // Recreate canvas to get fresh WebGL context (helps Safari performance)
@@ -599,11 +603,11 @@
       ConfigStore.update((c) => ({ ...c, advancedMode: true }))
     }
 
-    // Keyboard shortcut event handlers
+    // Keyboard shortcut event handlers - cycles view modes: 3D -> 2D -> Map
     const handleToggle3D = () => {
       if (p5Instance?.handle3D) {
         p5Instance.handle3D.update()
-        is3DMode = p5Instance.handle3D.getIs3DMode()
+        // viewMode is updated via ConfigStore subscription in $effect
       }
     }
 
@@ -774,8 +778,8 @@
       </details>
     {/if}
 
-    <!-- Select Dropdown (only shown in 2D mode and advanced mode) -->
-    {#if !is3DMode && $ConfigStore.advancedMode}
+    <!-- Select Dropdown (only shown in 2D/Map mode and advanced mode) -->
+    {#if viewMode !== '3d' && $ConfigStore.advancedMode}
       <details class="dropdown" use:clickOutside>
         <summary class="btn btn-sm ml-4 gap-1 flex items-center">
           {@render icon(MdSelectAll)}
@@ -992,11 +996,11 @@
       {/if}
       <IconButton
         id="btn-toggle-3d"
-        icon={Md3DRotation}
-        tooltip={'Toggle 2D/3D'}
+        icon={viewMode === '3d' ? Md3DRotation : viewMode === '2d' ? MdTimeline : MdMap}
+        tooltip={viewMode === '3d' ? '3D View' : viewMode === '2d' ? '2D View' : 'Map View'}
         onclick={() => {
           p5Instance.handle3D.update()
-          is3DMode = p5Instance.handle3D.getIs3DMode()
+          // viewMode is updated via ConfigStore subscription in $effect
         }}
       />
       <IconButton
@@ -1163,7 +1167,7 @@
           </details>
         {/if}
 
-        {#if !is3DMode && $ConfigStore.advancedMode}
+        {#if viewMode !== '3d' && $ConfigStore.advancedMode}
           <details class="dropdown dropdown-bottom" use:clickOutside>
             <summary class="btn btn-sm gap-1">{@render icon(MdSelectAll)}Select</summary>
             <ul class="dropdown-content menu bg-base-200 rounded-box z-[60] w-56 p-2 shadow mt-1">
@@ -1427,11 +1431,11 @@
           />
         {/if}
         <IconButton
-          icon={Md3DRotation}
-          tooltip="Toggle 2D/3D"
+          icon={viewMode === '3d' ? Md3DRotation : viewMode === '2d' ? MdTimeline : MdMap}
+          tooltip={viewMode === '3d' ? '3D View' : viewMode === '2d' ? '2D View' : 'Map View'}
           onclick={() => {
             p5Instance.handle3D.update()
-            is3DMode = p5Instance.handle3D.getIs3DMode()
+            // viewMode is updated via ConfigStore subscription in $effect
             mobileMenuOpen = false
           }}
         />

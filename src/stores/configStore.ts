@@ -1,9 +1,12 @@
 import { writable } from 'svelte/store'
 
+export type ViewMode = '3d' | '2d' | 'map'
+
 export interface ConfigStoreState {
   advancedMode: boolean
   isPathColorMode: boolean
   dataHasCodes: boolean
+  viewMode: ViewMode
   circleToggle: boolean
   sliceToggle: boolean
   movementToggle: boolean
@@ -37,6 +40,7 @@ export const initialConfig: ConfigStoreState = {
   advancedMode: false,
   isPathColorMode: false,
   dataHasCodes: false,
+  viewMode: '3d',
   circleToggle: false,
   sliceToggle: false,
   movementToggle: false,

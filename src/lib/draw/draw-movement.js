@@ -13,6 +13,8 @@ import PlaybackStore from '../../stores/playbackStore'
 let maxStopLength, isPathColorMode, movementStrokeWeight, stopStrokeWeight
 // Config: spatial mode toggles
 let circleToggle, sliceToggle, movementToggle, stopsToggle, highlightToggle
+// Config: view mode
+let viewMode = '3d'
 // Playback state
 let videoCurrentTime = 0
 let playbackMode = 'stopped'
@@ -27,6 +29,7 @@ ConfigStore.subscribe((data) => {
   movementToggle = data.movementToggle
   stopsToggle = data.stopsToggle
   highlightToggle = data.highlightToggle
+  viewMode = data.viewMode
 })
 
 VideoStore.subscribe((data) => {
@@ -172,6 +175,7 @@ export class DrawMovement {
       }
     } else {
       // SLOW PATH: Per-point visibility checks (spatial modes active)
+      const isMapView = viewMode === 'map'
       for (let i = 0; i < dataTrail.length; i++) {
         const point = dataTrail[i]
         const aug = this.getAugmentedPoint(this.sk.PLAN, point)
@@ -179,7 +183,9 @@ export class DrawMovement {
         if (this.drawUtils.isVisible(aug.point, aug.pos, aug.point.stopLength)) {
           const segmentEnd = this.findSegmentEnd(dataTrail, i)
           this.applySegmentStyle(point.stopLength, point.codes)
-          this.drawSegment(this.sk.SPACETIME, dataTrail, i, segmentEnd)
+          if (!isMapView) {
+            this.drawSegment(this.sk.SPACETIME, dataTrail, i, segmentEnd)
+          }
           if (this.drawUtils.isStopped(point.stopLength)) {
             this.drawStopCircle(aug)
           } else {
@@ -187,7 +193,9 @@ export class DrawMovement {
           }
 
           // Draw connecting line to next segment if next point is visible
-          this.drawConnectionIfVisible(this.sk.SPACETIME, dataTrail, segmentEnd, point.codes)
+          if (!isMapView) {
+            this.drawConnectionIfVisible(this.sk.SPACETIME, dataTrail, segmentEnd, point.codes)
+          }
           this.drawConnectionIfVisible(this.sk.PLAN, dataTrail, segmentEnd, point.codes)
 
           i = segmentEnd
@@ -208,13 +216,18 @@ export class DrawMovement {
     // Filter segments by code visibility (O(1) check per segment using cached enabled codes)
     const segments = allSegments.filter((seg) => this.isSegmentVisible(seg.codes))
 
+    // Skip SPACETIME drawing in map mode (floor plan only)
+    const isMapView = viewMode === 'map'
+
     if (!isPathColorMode) {
       // Single color mode: batch all segments by type
       this.sk.stroke(this.shade)
 
-      // Draw to SPACETIME: moving segments, then stopped segments
-      this.drawBatchedSegments(this.sk.SPACETIME, dataTrail, segments, false, movementStrokeWeight)
-      this.drawBatchedSegments(this.sk.SPACETIME, dataTrail, segments, true, stopStrokeWeight)
+      // Draw to SPACETIME: moving segments, then stopped segments (skip in map mode)
+      if (!isMapView) {
+        this.drawBatchedSegments(this.sk.SPACETIME, dataTrail, segments, false, movementStrokeWeight)
+        this.drawBatchedSegments(this.sk.SPACETIME, dataTrail, segments, true, stopStrokeWeight)
+      }
 
       // Draw to PLAN: moving segments as lines, stopped segments as circles
       this.drawBatchedSegments(this.sk.PLAN, dataTrail, segments, false, movementStrokeWeight)
@@ -223,7 +236,9 @@ export class DrawMovement {
       // Path color mode: separate shapes per segment for different colors
       for (const seg of segments) {
         this.applySegmentStyle(dataTrail[seg.start].stopLength, seg.codes)
-        this.drawSegment(this.sk.SPACETIME, dataTrail, seg.start, seg.end)
+        if (!isMapView) {
+          this.drawSegment(this.sk.SPACETIME, dataTrail, seg.start, seg.end)
+        }
 
         if (seg.isStopped) {
           const aug = this.getAugmentedPoint(this.sk.PLAN, dataTrail[seg.start])
@@ -238,7 +253,9 @@ export class DrawMovement {
     // Re-set stroke since drawStopCircle calls noStroke()
     if (!isPathColorMode) this.sk.stroke(this.shade)
     this.sk.strokeWeight(movementStrokeWeight)
-    this.drawSegmentConnections(this.sk.SPACETIME, dataTrail, segments)
+    if (!isMapView) {
+      this.drawSegmentConnections(this.sk.SPACETIME, dataTrail, segments)
+    }
     this.drawSegmentConnections(this.sk.PLAN, dataTrail, segments)
   }
 
@@ -414,7 +431,9 @@ export class DrawMovement {
       const z = aug.pos.zPos
 
       // Side effect: record dot position for hover/playback indicator
-      if (view === this.sk.SPACETIME) this.recordDot(aug)
+      // In map mode, record from PLAN view since we skip SPACETIME drawing
+      const shouldRecordDot = view === this.sk.SPACETIME || (view === this.sk.PLAN && viewMode === 'map')
+      if (shouldRecordDot) this.recordDot(aug)
 
       // Apply decimation
       const dx = x - lastX
@@ -554,6 +573,8 @@ export class DrawMovement {
   drawDot(curDot) {
     const dotSize = this.sk.width / 50
     this.drawFloorPlanDot(curDot, dotSize)
+    // In map mode, only show floor plan dot (no timeline dot)
+    if (viewMode === 'map') return
     if (this.sk.handle3D.getIs3DMode()) this.draw3DSpaceTimeDot(curDot)
     else this.sk.circle(curDot.timePos, curDot.yPos, dotSize)
   }

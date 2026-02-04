@@ -1,4 +1,12 @@
 import { timelineV2Store } from '../timeline/store'
+import ConfigStore from '../../stores/configStore'
+
+// Module-level view mode state
+let viewMode = '3d'
+
+ConfigStore.subscribe((data) => {
+  viewMode = data.viewMode
+})
 
 export class Highlight {
   constructor(sketch, bottomBounds) {
@@ -155,14 +163,8 @@ export class Highlight {
    * Returns true if no highlightRects or if data is within bounds of a highlighRect
    */
   overHighlightArray(xPos, yPos, xPosTime) {
-    if (!this.highlightArray.length)
-      return true // return true if no data
-    else {
-      for (const highlightRect of this.highlightArray) {
-        if (this.overHighlightRect(highlightRect, xPos, yPos, xPosTime)) return true
-      }
-      return false
-    }
+    if (!this.highlightArray.length) return true
+    return this.highlightArray.some((rect) => this.overHighlightRect(rect, xPos, yPos, xPosTime))
   }
 
   /**
@@ -174,6 +176,9 @@ export class Highlight {
       if (timelineV2Store.overAxis(highlightRect.xPos))
         return this.betweenX(xPosTime, highlightRect) && this.betweenY(yPos, highlightRect)
       else return this.betweenX(xPos, highlightRect) && this.betweenY(yPos, highlightRect)
+    } else if (viewMode === 'map') {
+      // In map mode, only check floor plan (no timeline view)
+      return this.betweenX(xPos, highlightRect) && this.betweenY(yPos, highlightRect)
     } else {
       return (
         (this.betweenX(xPos, highlightRect) || this.betweenX(xPosTime, highlightRect)) &&

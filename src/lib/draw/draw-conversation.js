@@ -16,6 +16,7 @@ import { MIN_RECT_SIZE, MAX_RECT_SIZE } from './draw-utils'
 let alignToggle, isPathColorMode, conversationRectWidth
 let clusterTimeThreshold, clusterSpaceThreshold, showSpeakerStripes
 let showConversationRects
+let viewMode = '3d'
 let searchRegex = null
 
 const TAIL_HEIGHT = 8
@@ -33,6 +34,7 @@ ConfigStore.subscribe((data) => {
   clusterSpaceThreshold = data.clusterSpaceThreshold
   showSpeakerStripes = data.showSpeakerStripes
   showConversationRects = data.showConversationRects
+  viewMode = data.viewMode
   searchRegex = data.wordToSearch
     ? new RegExp(data.wordToSearch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i')
     : null
@@ -68,6 +70,8 @@ export class DrawConversation {
   // --- Detailed view (zoomed in) ---
 
   drawDetailed(mergedPoints) {
+    const isMapView = viewMode === 'map'
+
     for (const { point, speaker, color } of mergedPoints) {
       if (!this.isValidPoint(point)) continue
 
@@ -84,11 +88,14 @@ export class DrawConversation {
 
       if (this.is3D) {
         this.sk.rect(fpX, fpY, -conversationRectWidth, -pos.rectHeight)
-        this.drawQuad3D(pos.selTimelineXPos, pos.rectWidth, pos.rectHeight, fpX, fpY)
+        if (!isMapView) {
+          this.drawQuad3D(pos.selTimelineXPos, pos.rectWidth, pos.rectHeight, fpX, fpY)
+        }
       } else {
-        const isHovered =
-          this.sk.overRect(fpX, fpY, conversationRectWidth, pos.rectHeight) ||
-          this.sk.overRect(pos.selTimelineXPos, pos.adjustYPos, pos.rectWidth, pos.rectHeight)
+        const isHovered = isMapView
+          ? this.sk.overRect(fpX, fpY, conversationRectWidth, pos.rectHeight)
+          : this.sk.overRect(fpX, fpY, conversationRectWidth, pos.rectHeight) ||
+            this.sk.overRect(pos.selTimelineXPos, pos.adjustYPos, pos.rectWidth, pos.rectHeight)
         if (isHovered) {
           this.setHoverStroke()
           setHoveredConversation(
@@ -98,7 +105,9 @@ export class DrawConversation {
           )
         }
         this.sk.rect(fpX, fpY, conversationRectWidth, pos.rectHeight)
-        this.sk.rect(pos.selTimelineXPos, pos.adjustYPos, pos.rectWidth, pos.rectHeight)
+        if (!isMapView) {
+          this.sk.rect(pos.selTimelineXPos, pos.adjustYPos, pos.rectWidth, pos.rectHeight)
+        }
       }
     }
   }
@@ -148,6 +157,7 @@ export class DrawConversation {
   }
 
   drawAggregated3D(pos, size, width, speakerProportions, primaryColor) {
+    const isMapView = viewMode === 'map'
     const yPos = alignToggle
       ? this.sk.gui.fpContainer.getContainer().height
       : pos.floorPlanYPos - RECT_GAP
@@ -156,18 +166,22 @@ export class DrawConversation {
 
     if (speakerProportions) {
       this.drawStripedRect3D(fpX3D, yPos, size, size, speakerProportions)
-      this.drawStripedQuad3D(
-        pos.selTimelineXPos,
-        width,
-        size,
-        stFpX,
-        pos.floorPlanYPos,
-        speakerProportions
-      )
+      if (!isMapView) {
+        this.drawStripedQuad3D(
+          pos.selTimelineXPos,
+          width,
+          size,
+          stFpX,
+          pos.floorPlanYPos,
+          speakerProportions
+        )
+      }
     } else {
       this.setFill(primaryColor)
       this.sk.rect(fpX3D, yPos, -size, -size)
-      this.drawQuad3D(pos.selTimelineXPos, width, size, stFpX, pos.floorPlanYPos)
+      if (!isMapView) {
+        this.drawQuad3D(pos.selTimelineXPos, width, size, stFpX, pos.floorPlanYPos)
+      }
     }
 
     // Tails
@@ -180,13 +194,18 @@ export class DrawConversation {
       pos.floorPlanXPos,
       yPos + TAIL_HEIGHT
     )
-    this.drawTail3D(pos.selTimelineXPos, stFpX, pos.floorPlanYPos)
+    if (!isMapView) {
+      this.drawTail3D(pos.selTimelineXPos, stFpX, pos.floorPlanYPos)
+    }
   }
 
   drawAggregated2D(cluster, pos, fpX, fpY, size, width, speakerProportions, primaryColor) {
-    const isHovered =
-      this.sk.overRect(fpX, fpY, size, size) ||
-      this.sk.overRect(pos.selTimelineXPos, fpY, width, size)
+    const isMapView = viewMode === 'map'
+
+    const isHovered = isMapView
+      ? this.sk.overRect(fpX, fpY, size, size)
+      : this.sk.overRect(fpX, fpY, size, size) ||
+        this.sk.overRect(pos.selTimelineXPos, fpY, width, size)
 
     if (isHovered) {
       setHoveredConversation(
@@ -203,12 +222,16 @@ export class DrawConversation {
 
     if (speakerProportions) {
       this.drawStripedRect(fpX, fpY, size, size, speakerProportions, isHovered)
-      this.drawStripedRect(pos.selTimelineXPos, fpY, width, size, speakerProportions, isHovered)
+      if (!isMapView) {
+        this.drawStripedRect(pos.selTimelineXPos, fpY, width, size, speakerProportions, isHovered)
+      }
     } else {
       this.setFill(primaryColor)
       if (isHovered) this.setHoverStroke()
       this.sk.rect(fpX, fpY, size, size)
-      this.sk.rect(pos.selTimelineXPos, fpY, width, size)
+      if (!isMapView) {
+        this.sk.rect(pos.selTimelineXPos, fpY, width, size)
+      }
     }
 
     // Tails
@@ -228,14 +251,16 @@ export class DrawConversation {
       tailCenterX,
       tailY + TAIL_HEIGHT
     )
-    this.sk.triangle(
-      pos.selTimelineXPos,
-      tailY,
-      pos.selTimelineXPos + TAIL_WIDTH,
-      tailY,
-      pos.selTimelineXPos,
-      tailY + TAIL_HEIGHT
-    )
+    if (!isMapView) {
+      this.sk.triangle(
+        pos.selTimelineXPos,
+        tailY,
+        pos.selTimelineXPos + TAIL_WIDTH,
+        tailY,
+        pos.selTimelineXPos,
+        tailY + TAIL_HEIGHT
+      )
+    }
   }
 
   // --- Striped drawing methods ---
