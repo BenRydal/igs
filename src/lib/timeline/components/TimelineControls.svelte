@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { timelineV2Store, isZoomed, zoomLevel } from '../store';
-	import { formatTime } from '../utils';
+	import { timelineV2Store } from '../store';
+	import { formatTime } from 'svelte-interactive-timeline';
 	import { isPlaying, togglePlayback, pause as pausePlayback } from '../../../stores/playbackStore';
 	import ConfigStore from '../../../stores/configStore';
 	import P5Store from '../../../stores/p5Store';
@@ -13,14 +13,17 @@
 	import MdMagnifyMinus from '~icons/mdi/magnify-minus-outline';
 	import MdFitToScreen from '~icons/mdi/fit-to-screen-outline';
 
-
 	/** Speed presets - these map to animationRate values */
 	const SPEED_PRESETS = [0.025, 0.05, 0.1, 0.25, 0.5, 1.0];
 	const SPEED_LABELS = ['0.5x', '1x', '2x', '5x', '10x', '20x'];
 	const DEFAULT_SPEED_INDEX = 1; // 1x
 
-	let currentTime = $derived($timelineV2Store.currentTime);
-	let duration = $derived($timelineV2Store.viewEnd - $timelineV2Store.viewStart);
+	// Use store's reactive getters directly
+	let currentTime = $derived(timelineV2Store.currentTime);
+	let viewDuration = $derived(timelineV2Store.viewDuration);
+	let isZoomed = $derived(timelineV2Store.isZoomed);
+	let zoomLevel = $derived(timelineV2Store.zoomLevel);
+
 	let speedIndex = $derived.by(() => {
 		const idx = SPEED_PRESETS.indexOf($ConfigStore.animationRate);
 		return idx >= 0 ? idx : DEFAULT_SPEED_INDEX;
@@ -29,7 +32,7 @@
 
 	function reset() {
 		pausePlayback();
-		timelineV2Store.setCurrentTime($timelineV2Store.viewStart);
+		timelineV2Store.setCurrentTime(timelineV2Store.viewStart);
 	}
 
 	function cycleSpeed(e: MouseEvent) {
@@ -108,7 +111,7 @@
 			onclick={zoomToFit}
 			title="Fit to view (0)"
 			aria-label="Fit to view"
-			disabled={!$isZoomed}
+			disabled={!isZoomed}
 		>
 			<MdFitToScreen class="w-3.5 h-3.5" />
 		</button>
@@ -121,8 +124,8 @@
 			<MdMagnifyPlus class="w-3.5 h-3.5" />
 		</button>
 	</div>
-	{#if $isZoomed}
-		<span class="text-xs text-gray-500 font-medium">{$zoomLevel.toFixed(1)}x</span>
+	{#if isZoomed}
+		<span class="text-xs text-gray-500 font-medium">{zoomLevel.toFixed(1)}x</span>
 	{:else}
 		<span class="zoom-hint">Drag to zoom</span>
 	{/if}
@@ -145,7 +148,7 @@
 	<div class="flex items-center gap-1 ml-auto font-mono text-xs">
 		<span class="font-semibold text-red-500">{formatTime(currentTime)}</span>
 		<span class="text-gray-400">/</span>
-		<span class="text-gray-500">{formatTime(duration)}</span>
+		<span class="text-gray-500">{formatTime(viewDuration)}</span>
 	</div>
 </div>
 
