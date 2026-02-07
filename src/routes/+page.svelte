@@ -125,7 +125,13 @@
     {
       label: 'TAU Project',
       icon: MdTeacher,
-      items: [{ value: 'example-10', label: 'Clark AP Math Lesson' }],
+      items: [
+        { value: 'example-10', label: 'Clark AP Math Lesson' },
+        { value: 'example-17', label: 'Sandy Math Lesson (2022)' },
+        { value: 'example-18', label: 'Sandy Math Lesson (2023)' },
+        { value: 'example-19', label: 'Sofia Math Lesson' },
+        { value: 'example-20', label: 'Vince Math Lesson' },
+      ],
     },
     // Hidden temporarily - uncomment when ready to show
     // {

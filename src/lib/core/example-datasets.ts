@@ -99,6 +99,22 @@ export const EXAMPLE_DATASETS: Record<string, ExampleDataset> = {
     ],
     duration: '22 sec',
   },
+  'example-17': {
+    files: ['teacher.csv', 'blue.csv', 'green.csv', 'pink.csv', 'whiteboard.csv'],
+    duration: '1h 27m',
+  },
+  'example-18': {
+    files: ['teacher.csv', 'codes.csv'],
+    duration: '1h 14m',
+  },
+  'example-19': {
+    files: ['teacher.csv', 'lesson.csv', 'conversation.csv'],
+    duration: '50 min',
+  },
+  'example-20': {
+    files: ['teacher.csv', 'codes.csv'],
+    duration: '1h 21m',
+  },
 } as const
 
 export type ExampleId = keyof typeof EXAMPLE_DATASETS | ''

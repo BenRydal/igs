@@ -429,6 +429,42 @@ const exampleActions: AppAction[] = [
     category: 'examples',
     action: () => window.dispatchEvent(new CustomEvent('igs:load-example', { detail: { value: 'example-9' } })),
   },
+  {
+    id: 'example-sandy-2022',
+    label: 'Load: Sandy Math Lesson (2022)',
+    description: 'TAU Project',
+    keywords: ['example', 'tau', 'math', 'sandy', 'classroom'],
+    icon: '📐',
+    category: 'examples',
+    action: () => window.dispatchEvent(new CustomEvent('igs:load-example', { detail: { value: 'example-17' } })),
+  },
+  {
+    id: 'example-sandy-2023',
+    label: 'Load: Sandy Math Lesson (2023)',
+    description: 'TAU Project',
+    keywords: ['example', 'tau', 'math', 'sandy', 'classroom'],
+    icon: '📐',
+    category: 'examples',
+    action: () => window.dispatchEvent(new CustomEvent('igs:load-example', { detail: { value: 'example-18' } })),
+  },
+  {
+    id: 'example-sofia',
+    label: 'Load: Sofia Math Lesson',
+    description: 'TAU Project',
+    keywords: ['example', 'tau', 'math', 'sofia', 'classroom'],
+    icon: '📐',
+    category: 'examples',
+    action: () => window.dispatchEvent(new CustomEvent('igs:load-example', { detail: { value: 'example-19' } })),
+  },
+  {
+    id: 'example-vince',
+    label: 'Load: Vince Math Lesson',
+    description: 'TAU Project',
+    keywords: ['example', 'tau', 'math', 'vince', 'classroom'],
+    icon: '📐',
+    category: 'examples',
+    action: () => window.dispatchEvent(new CustomEvent('igs:load-example', { detail: { value: 'example-20' } })),
+  },
 ]
 
 // ==================== SETTINGS ACTIONS ====================
