@@ -3,12 +3,14 @@
 	import { get } from 'svelte/store';
 	import { timelineV2Store } from '../store';
 	import { TimelineRenderer } from '../rendering/renderer';
-	import type { HitTarget, TimelineState } from '../types';
+	import { defaultLayoutConfig, type HitTarget } from 'svelte-interactive-timeline';
 	import P5Store from '../../../stores/p5Store';
 	import VideoStore, { requestSeek } from '../../../stores/videoStore';
 	import UserStore from '../../../stores/userStore';
 	import ConfigStore from '../../../stores/configStore';
-	import { PLAYHEAD_HIT_TOLERANCE } from '../constants';
+
+	const PLAYHEAD_HIT_TOLERANCE = defaultLayoutConfig.playheadHitTolerance;
+	const DRAG_THRESHOLD = defaultLayoutConfig.dragThreshold;
 
 	/** Canvas element reference */
 	let canvas: HTMLCanvasElement;
@@ -19,9 +21,6 @@
 	/** Container for resize observer */
 	let container: HTMLDivElement;
 
-	/** Current state snapshot for hit testing */
-	let currentState: TimelineState;
-
 	/** Pan state */
 	let panStartX = 0;
 	let panStartViewStart = 0;
@@ -29,24 +28,25 @@
 
 	/** Zoom region state */
 	let zoomStartX = 0;
-	const DRAG_THRESHOLD = 5; // pixels - distinguishes click from drag
 
 	/** p5 instance for triggering redraws */
 	let p5Instance = $derived($P5Store);
 
-	/** Subscribe to store changes */
-	const unsubscribe = timelineV2Store.subscribe((state) => {
-		currentState = state;
+	// Use $effect to react to timeline store changes and update renderer
+	$effect(() => {
+		const state = timelineV2Store.getState();
 		renderer?.setState(state);
 	});
 
-	/** Subscribe to user store changes to update activity gradient */
-	const unsubscribeUsers = UserStore.subscribe(() => {
+	// React to user store changes (for activity gradient)
+	$effect(() => {
+		$UserStore;
 		renderer?.requestRender();
 	});
 
-	/** Subscribe to config store changes (e.g., activity gradient toggle) */
-	const unsubscribeConfig = ConfigStore.subscribe(() => {
+	// React to config store changes (e.g., activity gradient toggle)
+	$effect(() => {
+		$ConfigStore;
 		renderer?.requestRender();
 	});
 
@@ -57,15 +57,10 @@
 		if (!container) return;
 
 		const rect = container.getBoundingClientRect();
-		const leftX = rect.left;
-		const rightX = rect.right;
-
-		timelineV2Store.updateXPositions(leftX, rightX);
+		timelineV2Store.updateXPositions(rect.left, rect.right);
 
 		// Trigger p5 redraw
-		if (p5Instance) {
-			p5Instance.loop();
-		}
+		p5Instance?.loop();
 	}
 
 	/**
@@ -74,21 +69,19 @@
 	function syncCurrentTime(time: number): void {
 		timelineV2Store.setCurrentTime(time);
 
-		// Seek video if visible (works whether playing or paused)
+		// Seek video if visible
 		const videoState = get(VideoStore);
 		if (videoState.isVisible) {
 			requestSeek(time);
 		}
 
 		// Trigger p5 redraw
-		if (p5Instance) {
-			p5Instance.loop();
-		}
+		p5Instance?.loop();
 	}
 
 	onMount(() => {
-		// Initialize renderer
-		renderer = new TimelineRenderer(canvas, currentState);
+		// Initialize renderer with current state
+		renderer = new TimelineRenderer(canvas, timelineV2Store.getState());
 
 		// Setup resize observer
 		const resizeObserver = new ResizeObserver((entries) => {
@@ -96,7 +89,6 @@
 			if (entry) {
 				const { width, height } = entry.contentRect;
 				renderer?.resize(width, height);
-				// Update X positions for coordinate conversion
 				updateXPositions();
 			}
 		});
@@ -105,8 +97,6 @@
 		// Initial size
 		const rect = container.getBoundingClientRect();
 		renderer.resize(rect.width, rect.height);
-
-		// Initial X positions update
 		updateXPositions();
 
 		// Also update on window resize
@@ -119,9 +109,6 @@
 	});
 
 	onDestroy(() => {
-		unsubscribe();
-		unsubscribeUsers();
-		unsubscribeConfig();
 		renderer?.destroy();
 	});
 
@@ -129,16 +116,14 @@
 	 * Hit test to determine what element is at position
 	 */
 	function hitTest(x: number): HitTarget {
-		if (!renderer || !currentState) return 'empty';
+		if (!renderer) return 'empty';
 
-		const playheadX = renderer.timeToPixel(currentState.currentTime);
+		const playheadX = renderer.timeToPixel(timelineV2Store.currentTime);
 
-		// Playhead (full height, including handle area)
 		if (Math.abs(x - playheadX) < PLAYHEAD_HIT_TOLERANCE) {
 			return 'playhead';
 		}
 
-		// Track area (clicking anywhere else seeks)
 		return 'track';
 	}
 
@@ -173,15 +158,15 @@
 				break;
 
 			case 'track':
-				// Middle click or alt+click to pan
 				if (e.button === 1 || e.altKey) {
+					// Middle click or alt+click to pan
 					timelineV2Store.setDragging('pan');
 					panStartX = x;
-					panStartViewStart = currentState.viewStart;
-					panStartViewEnd = currentState.viewEnd;
+					panStartViewStart = timelineV2Store.viewStart;
+					panStartViewEnd = timelineV2Store.viewEnd;
 					canvas.style.cursor = 'grabbing';
 				} else {
-					// Start potential zoom region (will become seek if no drag)
+					// Start potential zoom region
 					timelineV2Store.setDragging('zoom-region');
 					timelineV2Store.setZoomSelection(time, time);
 					zoomStartX = x;
@@ -207,8 +192,8 @@
 		const y = e.clientY - rect.top;
 		const time = renderer.pixelToTime(x);
 
-		if (currentState.isDragging) {
-			switch (currentState.isDragging) {
+		if (timelineV2Store.isDragging) {
+			switch (timelineV2Store.isDragging) {
 				case 'playhead':
 					syncCurrentTime(time);
 					break;
@@ -217,14 +202,15 @@
 					const deltaX = x - panStartX;
 					const viewDuration = panStartViewEnd - panStartViewStart;
 					const deltaTime = -(deltaX / renderer.width) * viewDuration;
-					const newStart = panStartViewStart + deltaTime;
-					const newEnd = panStartViewEnd + deltaTime;
-					timelineV2Store.setView(newStart, newEnd);
+					timelineV2Store.setView(
+						panStartViewStart + deltaTime,
+						panStartViewEnd + deltaTime
+					);
 					break;
 				}
 
 				case 'zoom-region':
-					timelineV2Store.setZoomSelection(currentState.zoomSelectionStart, time);
+					timelineV2Store.setZoomSelection(timelineV2Store.zoomSelectionStart, time);
 					break;
 			}
 		} else {
@@ -235,9 +221,8 @@
 				timelineV2Store.setHover(null);
 			}
 
-			// Update cursor based on what's under mouse
-			const target = hitTest(x);
-			canvas.style.cursor = getCursor(target);
+			// Update cursor
+			canvas.style.cursor = getCursor(hitTest(x));
 		}
 	}
 
@@ -245,46 +230,37 @@
 	 * Pointer up handler
 	 */
 	function onPointerUp(e: PointerEvent) {
-		if (!renderer) return;
+		if (!renderer || !timelineV2Store.isDragging) return;
 
-		if (currentState.isDragging) {
-			const rect = canvas.getBoundingClientRect();
-			const x = e.clientX - rect.left;
+		const rect = canvas.getBoundingClientRect();
+		const x = e.clientX - rect.left;
 
-			// Handle zoom-region completion
-			if (currentState.isDragging === 'zoom-region') {
-				const dragDistance = Math.abs(x - zoomStartX);
+		if (timelineV2Store.isDragging === 'zoom-region') {
+			const dragDistance = Math.abs(x - zoomStartX);
 
-				if (dragDistance < DRAG_THRESHOLD) {
-					// It was a click, not a drag - seek to this position
-					const time = renderer.pixelToTime(x);
-					syncCurrentTime(time);
-					timelineV2Store.setZoomSelection(null, null);
-					timelineV2Store.setDragging(null);
-				} else {
-					// It was a drag - apply zoom
-					timelineV2Store.applyZoomSelection();
-					// Trigger p5 redraw
-					if (p5Instance) {
-						p5Instance.loop();
-					}
-				}
-			} else {
+			if (dragDistance < DRAG_THRESHOLD) {
+				// Click - seek to position
+				syncCurrentTime(renderer.pixelToTime(x));
+				timelineV2Store.setZoomSelection(null, null);
 				timelineV2Store.setDragging(null);
+			} else {
+				// Drag - apply zoom
+				timelineV2Store.applyZoomSelection();
+				p5Instance?.loop();
 			}
-			canvas.releasePointerCapture(e.pointerId);
-
-			// Reset cursor
-			const target = hitTest(x);
-			canvas.style.cursor = getCursor(target);
+		} else {
+			timelineV2Store.setDragging(null);
 		}
+
+		canvas.releasePointerCapture(e.pointerId);
+		canvas.style.cursor = getCursor(hitTest(x));
 	}
 
 	/**
 	 * Pointer leave handler
 	 */
 	function onPointerLeave() {
-		if (!currentState.isDragging) {
+		if (!timelineV2Store.isDragging) {
 			timelineV2Store.setHover(null);
 		}
 	}
@@ -305,19 +281,14 @@
 			const zoomFactor = e.deltaY > 0 ? 1.15 : 0.87;
 			timelineV2Store.zoom(zoomFactor, centerTime);
 		} else {
-			// Pan - use deltaX for horizontal scroll, deltaY for vertical scroll wheel
-			const viewDuration = currentState.viewEnd - currentState.viewStart;
+			// Pan
 			const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-			const panAmount = (delta / renderer.width) * viewDuration * 0.5;
+			const panAmount = (delta / renderer.width) * timelineV2Store.viewDuration * 0.5;
 			timelineV2Store.pan(panAmount);
 		}
 
-		// Trigger p5 redraw to update visualization
-		if (p5Instance) {
-			p5Instance.loop();
-		}
+		p5Instance?.loop();
 	}
-
 </script>
 
 <div bind:this={container} class="w-full h-full min-h-10 relative">

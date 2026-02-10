@@ -13,7 +13,7 @@
  */
 
 import { get } from 'svelte/store';
-import type { RenderContext, RenderLayer } from '../../types';
+import type { RenderContext, RenderLayer } from 'svelte-interactive-timeline';
 import UserStore from '../../../../stores/userStore';
 import ConfigStore from '../../../../stores/configStore';
 import type { User } from '../../../../models/user';

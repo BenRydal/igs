@@ -56,6 +56,7 @@
     "luxon": "^3.7.2",
     "p5": "^1.11.11",
     "p5-svelte": "^3.1.2",
-    "papaparse": "^5.5.3"
+    "papaparse": "^5.5.3",
+    "svelte-interactive-timeline": "file:../svelte-interactive-timeline"
   }
 }
