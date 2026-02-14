@@ -90,9 +90,7 @@ export class DrawMovement {
   // Check if no spatial/type filters are active (allows batched drawing)
   // Note: code filtering is handled at segment level in drawBatched(), not here
   hasNoSpecialModes() {
-    const noSpatialModes = !circleToggle && !sliceToggle && !highlightToggle
-    const noTypeFilters = !movementToggle && !stopsToggle
-    return noSpatialModes && noTypeFilters
+    return !circleToggle && !sliceToggle && !highlightToggle && !movementToggle && !stopsToggle
   }
 
   // Check if we can use fast path (skip ALL visibility checks)
@@ -134,14 +132,11 @@ export class DrawMovement {
 
   // Get visible time range based on current state
   getVisibleTimeRange(state) {
-    let startTime = state.viewStart
-    let endTime = state.viewEnd
-
+    const startTime = state.viewStart
     // If animating, cap at current playback time
-    if (playbackMode !== 'stopped') {
-      endTime = Math.min(endTime, state.currentTime)
-    }
-
+    const endTime = playbackMode !== 'stopped'
+      ? Math.min(state.viewEnd, state.currentTime)
+      : state.viewEnd
     return { startTime, endTime }
   }
 
@@ -181,7 +176,8 @@ export class DrawMovement {
           this.applySegmentStyle(point.stopLength, point.codes)
           this.drawSegment(this.sk.SPACETIME, dataTrail, i, segmentEnd)
           if (this.drawUtils.isStopped(point.stopLength)) {
-            this.drawStopCircle(aug)
+            const segDuration = this.getSegmentDuration(dataTrail, i, segmentEnd)
+            this.drawStopCircle(aug, segDuration)
           } else {
             this.drawSegment(this.sk.PLAN, dataTrail, i, segmentEnd)
           }
@@ -221,16 +217,19 @@ export class DrawMovement {
       this.drawAllStopCircles(dataTrail, segments)
     } else {
       // Path color mode: separate shapes per segment for different colors
+      // Pass 1: draw all spacetime segments + plan movement segments
       for (const seg of segments) {
         this.applySegmentStyle(dataTrail[seg.start].stopLength, seg.codes)
         this.drawSegment(this.sk.SPACETIME, dataTrail, seg.start, seg.end)
 
-        if (seg.isStopped) {
-          const aug = this.getAugmentedPoint(this.sk.PLAN, dataTrail[seg.start])
-          this.drawStopCircle(aug)
-        } else {
+        if (!seg.isStopped) {
           this.drawSegment(this.sk.PLAN, dataTrail, seg.start, seg.end)
         }
+      }
+      // Pass 2: draw stop circles sorted largest-first for bullseye effect
+      for (const seg of this.getStoppedSegmentsByDuration(dataTrail, segments)) {
+        const aug = this.getAugmentedPoint(this.sk.PLAN, dataTrail[seg.start])
+        this.drawStopCircle(aug, this.getSegmentDuration(dataTrail, seg.start, seg.end))
       }
     }
 
@@ -254,13 +253,23 @@ export class DrawMovement {
     this.sk.endShape()
   }
 
-  // Draw stop circles for all stopped segments
+  // Get stopped segments sorted largest-first so overlapping stops
+  // (code-split or same-location) render as bullseye pattern (big behind small)
+  getStoppedSegmentsByDuration(dataTrail, segments) {
+    const stopped = segments.filter((seg) => seg.isStopped)
+    stopped.sort(
+      (a, b) =>
+        this.getSegmentDuration(dataTrail, b.start, b.end) -
+        this.getSegmentDuration(dataTrail, a.start, a.end)
+    )
+    return stopped
+  }
+
+  // Draw stop circles for all stopped segments (single-color mode)
   drawAllStopCircles(dataTrail, segments) {
-    for (const seg of segments) {
-      if (seg.isStopped) {
-        const aug = this.getAugmentedPoint(this.sk.PLAN, dataTrail[seg.start])
-        this.drawStopCircle(aug)
-      }
+    for (const seg of this.getStoppedSegmentsByDuration(dataTrail, segments)) {
+      const aug = this.getAugmentedPoint(this.sk.PLAN, dataTrail[seg.start])
+      this.drawStopCircle(aug, this.getSegmentDuration(dataTrail, seg.start, seg.end))
     }
   }
 
@@ -360,6 +369,11 @@ export class DrawMovement {
     return segments
   }
 
+  // Get the time duration of a segment (for sizing stop circles by segment, not total stop)
+  getSegmentDuration(dataTrail, startIdx, endIdx) {
+    return (dataTrail[endIdx].time ?? 0) - (dataTrail[startIdx].time ?? 0)
+  }
+
   // Fast array comparison - avoids JSON.stringify overhead
   codesEqual(codes1, codes2) {
     if (!codes1 || !codes2) return codes1 === codes2
@@ -450,15 +464,12 @@ export class DrawMovement {
     return this.drawUtils.createAugmentPoint(view, point, point.time)
   }
 
-  drawStopCircle(augmentedPoint) {
+  drawStopCircle(augmentedPoint, duration = null) {
     this.sk.noStroke()
     this.setFill(this.drawUtils.setCodeColor(augmentedPoint.point.codes))
     const stopSize = this.sk.map(
-      augmentedPoint.point.stopLength,
-      0,
-      maxStopLength,
-      5,
-      DrawMovement.LARGEST_STOP_PIXEL_SIZE
+      duration ?? augmentedPoint.point.stopLength,
+      0, maxStopLength, 5, DrawMovement.LARGEST_STOP_PIXEL_SIZE
     )
     this.sk.circle(augmentedPoint.pos.viewXPos, augmentedPoint.pos.floorPlanYPos, stopSize)
     this.sk.noFill()
@@ -471,11 +482,7 @@ export class DrawMovement {
 
   applySegmentStyle(stopLength, codes) {
     this.setStroke(this.drawUtils.setCodeColor(codes))
-    if (this.drawUtils.isStopped(stopLength)) {
-      this.sk.strokeWeight(stopStrokeWeight)
-    } else {
-      this.sk.strokeWeight(movementStrokeWeight)
-    }
+    this.sk.strokeWeight(this.drawUtils.isStopped(stopLength) ? stopStrokeWeight : movementStrokeWeight)
   }
 
   setFill(color) {
@@ -540,11 +547,8 @@ export class DrawMovement {
   }
 
   compareToCurDot(pixelStart, pixelEnd, curDot) {
-    let pixelAmountToCompare = this.sk.width // if dot has not been set yet, compare to this width
-    if (curDot !== null) pixelAmountToCompare = curDot.lengthToCompare
-    return (
-      pixelStart >= pixelEnd - pixelAmountToCompare && pixelStart <= pixelEnd + pixelAmountToCompare
-    )
+    const range = curDot !== null ? curDot.lengthToCompare : this.sk.width
+    return pixelStart >= pixelEnd - range && pixelStart <= pixelEnd + range
   }
 
   createDot(xPos, yPos, zPos, timePos, color, lengthToCompare) {
