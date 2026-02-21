@@ -563,7 +563,7 @@
       })
     )
 
-    ConfigStore.update((currentConfig) => ({ ...currentConfig, dataHasCodes: false }))
+    ConfigStore.update((currentConfig) => ({ ...currentConfig, dataHasCodes: false, isPathColorMode: false }))
     p5Instance.loop()
   }
 
