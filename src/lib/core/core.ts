@@ -209,8 +209,9 @@ export class Core {
    * Converts time values to relative seconds from the first timestamp
    */
   private preprocessTimeData(results: PapaParseResult<CsvRow>): TimeParseOutput {
-    // All known time column names - TimeParser will filter to those that exist
-    const timeColumns = ['time', 'start', 'end']
+    // Only preprocess the 'time' column. Code files use 'start'/'end' columns
+    // which are already in relative seconds and must NOT be re-zeroed.
+    const timeColumns = ['time']
     return TimeParser.preprocess(results, { timeColumns })
   }
 
@@ -742,8 +743,8 @@ export class Core {
         curMaxStopLength = stopDuration
       }
 
-      // Mark all points in this stop (except first) with the duration
-      for (let k = i + 1; k < j; k++) {
+      // Mark all points in this stop with the duration
+      for (let k = i; k < j; k++) {
         data[k].stopLength = stopDuration
       }
 

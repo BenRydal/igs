@@ -9,6 +9,7 @@ import { isAnyModalOpen } from '../../stores/modalStore'
 import { toastStore } from '../../stores/toastStore'
 import type { User } from '../../models/user'
 import { FloorPlan, SketchGUI, Handle3D, SetPathData } from '..'
+import { generateCodeCSV, downloadFile } from '../utils/download'
 
 let users: User[] = []
 let highlightToggle: boolean
@@ -168,43 +169,26 @@ export const igsSketch = (p5: any) => {
   }
 
   p5.saveCodeFile = () => {
-    if (p5.dataIsLoaded(p5.floorPlan.getImg()) && p5.arrayIsLoaded(users)) {
-      const setPathData = new SetPathData(p5)
-      let dataSaved = false // Flag to track if data was saved
-      for (const user of users) {
-        if (user.enabled) {
-          const [startTimeArray, endTimeArray] = setPathData.getCodeFileArrays(user.dataTrail)
-          if (startTimeArray.length > 0 && endTimeArray.length > 0) {
-            const tableData = p5.writeTable(startTimeArray, endTimeArray)
-            p5.saveTable(tableData, user.name, 'csv')
-            dataSaved = true // Set flag to true if data is saved
-            break // Save only the first enabled user
-          }
-        }
-      }
-      // If no data was saved, show the toast
-      if (!dataSaved) {
-        toastStore.info('There is no data to include in a code file')
-        console.log('There is no data to include in a code file')
-      }
+    if (!p5.dataIsLoaded(p5.floorPlan.getImg()) || !p5.arrayIsLoaded(users)) return
+
+    const setPathData = new SetPathData(p5)
+    const user = users.find((u) => u.enabled)
+    if (!user) {
+      toastStore.info('There is no data to include in a code file')
+      return
     }
+
+    const [startTimes, endTimes] = setPathData.getCodeFileArrays(user.dataTrail)
+    if (startTimes.length === 0) {
+      toastStore.info('There is no data to include in a code file')
+      return
+    }
+
+    downloadFile(generateCodeCSV(startTimes, endTimes), `${user.name}.csv`)
   }
 
   p5.arrayIsLoaded = (data: any) => {
     return Array.isArray(data) && data.length
-  }
-
-  p5.writeTable = (startTimesArray: any, endTimesArray: any) => {
-    const headers = ['start', 'end']
-    const table = new p5.Table()
-    table.addColumn(headers[0])
-    table.addColumn(headers[1])
-    for (let i = 0; i < startTimesArray.length; i++) {
-      const newRow = table.addRow()
-      newRow.setNum(headers[0], startTimesArray[i])
-      newRow.setNum(headers[1], endTimesArray[i])
-    }
-    return table
   }
 
   p5.updateAnimation = () => {
