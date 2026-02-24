@@ -1,0 +1,29 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata from 'preferred-citation'."
+title: Interaction Geography Slicer
+type: software
+authors:
+  - family-names: Shapiro
+    given-names: Ben Rydal
+  - family-names: Zhao
+    given-names: Edwin
+repository-code: https://github.com/BenRydal/igs
+url: https://www.interactiongeography.org
+license: GPL-3.0
+preferred-citation:
+  type: article
+  authors:
+    - family-names: Shapiro
+      given-names: Ben Rydal
+    - family-names: Silvis
+      given-names: Deborah
+    - family-names: Hall
+      given-names: Rogers
+  title: "Visualization as theory and experience: interactive qualitative data visualization for the learning sciences"
+  journal: Journal of the Learning Sciences
+  volume: 34
+  issue: 5
+  start: 840
+  end: 871
+  year: 2025
+  doi: 10.1080/10508406.2025.2537945

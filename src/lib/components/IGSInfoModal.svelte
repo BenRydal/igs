@@ -12,8 +12,6 @@
 
   let { isModalOpen = writable(false) } = $props()
 
-  let showCitation = $state(false)
-
   const examples = [
     { id: 'example-1', title: "Jordan's Last Shot", duration: '37 sec', image: '/images/1-example-jordan.webp' },
     { id: 'example-2', title: 'Museum Gallery Visit', duration: '8 min', image: '/images/2-example-museum.webp' },
@@ -27,7 +25,6 @@
   }
 
   function closeModal() {
-    showCitation = false
     $isModalOpen = false
   }
 
@@ -133,20 +130,10 @@
           <span>•</span>
           <a href="https://github.com/BenRydal/igs" target="_blank" class="hover:underline">Open source (GPL v3)</a>
           <span>•</span>
-          <button onclick={() => (showCitation = !showCitation)} class="hover:underline cursor-pointer">Citation</button>
+          <a href="https://doi.org/10.1080/10508406.2025.2537945" target="_blank" class="text-emerald-600 hover:underline"
+            >Shapiro, Silvis, & Hall (2025). <em>Visualization as Theory and Experience</em></a
+          >
         </div>
-
-        {#if showCitation}
-          <div class="mt-4 p-4 bg-base-200 rounded-lg text-left text-sm">
-            <p class="text-gray-600">
-              Shapiro, B.R., Metts, E., & Zhao, E. (2025). The Interaction Geography Slicer: Designing
-              Exploratory Spatial Data Visualization Tools for Teachers' Reflective Practice. CHI '25.
-              <a href="https://doi.org/10.1145/3706598.3713499" target="_blank" class="text-blue-600 hover:underline">
-                https://doi.org/10.1145/3706598.3713499
-              </a>
-            </p>
-          </div>
-        {/if}
       </div>
     </div>
   </div>
