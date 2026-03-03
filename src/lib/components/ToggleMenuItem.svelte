@@ -1,5 +1,5 @@
 <script lang="ts">
-  import MdCheck from '~icons/mdi/check'
+  import { Check } from '@lucide/svelte'
 
   interface Props {
     label: string
@@ -61,7 +61,7 @@
     {:else if showCheckIcon}
       <div class="w-4 h-4 mr-2 flex items-center justify-center">
         {#if checked}
-          <MdCheck />
+          <Check size={16} />
         {/if}
       </div>
     {/if}

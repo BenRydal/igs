@@ -3,10 +3,7 @@
   import VideoStore, { toggleMute, toggleSplitScreen, setCurrentTime } from '../../stores/videoStore'
   import { isPlayingVideo } from '../../stores/playbackStore'
   import { getCurrentTime, type VideoPlayer } from '../video/video-service'
-  import MdVolumeUp from '~icons/mdi/volume-high'
-  import MdVolumeOff from '~icons/mdi/volume-off'
-  import MdArrowExpandHorizontal from '~icons/mdi/arrow-expand-horizontal'
-  import MdArrowCollapseHorizontal from '~icons/mdi/arrow-collapse-horizontal'
+  import { Volume2, VolumeX, MoveHorizontal, Shrink } from '@lucide/svelte'
 
   interface Props {
     player: VideoPlayer | null
@@ -65,9 +62,9 @@
 >
   <button class="control-btn" onclick={handleMute} aria-label={isMuted ? 'Unmute' : 'Mute'}>
     {#if isMuted}
-      <MdVolumeOff />
+      <VolumeX size={22} />
     {:else}
-      <MdVolumeUp />
+      <Volume2 size={22} />
     {/if}
   </button>
   <button
@@ -77,9 +74,9 @@
     title={isSplitScreen ? 'Exit split screen' : 'Split screen'}
   >
     {#if isSplitScreen}
-      <MdArrowCollapseHorizontal />
+      <Shrink size={22} />
     {:else}
-      <MdArrowExpandHorizontal />
+      <MoveHorizontal size={22} />
     {/if}
   </button>
 </div>

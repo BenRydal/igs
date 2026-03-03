@@ -1,6 +1,5 @@
 <script lang="ts">
-  import MdMap from '~icons/mdi/map'
-  import MdCheck from '~icons/mdi/check'
+  import { Map, Check } from '@lucide/svelte'
   import GPSStore, { setMapStyle } from '../../stores/gpsStore'
   import P5Store from '../../stores/p5Store'
   import { loadMapAsFloorPlan } from '$lib/gps/mapbox-service'
@@ -33,7 +32,7 @@
 {#if $GPSStore.isGPSMode}
   <details class="dropdown" use:clickOutsideClose>
     <summary class="btn btn-sm ml-4 gap-1 flex items-center" class:loading={$GPSStore.isLoading}>
-      <div class="w-4 h-4"><MdMap /></div>
+      <div class="w-4 h-4"><Map size={16} /></div>
       Map
       <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -52,7 +51,7 @@
           >
             <div class="w-4 h-4 mr-2">
               {#if isSelected}
-                <MdCheck />
+                <Check size={16} />
               {/if}
             </div>
             {style.label}

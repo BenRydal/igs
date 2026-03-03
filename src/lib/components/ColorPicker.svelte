@@ -21,7 +21,7 @@
     class: className = '',
     swatches = [
       '#ef4444',
-      '#3b82f6',
+      'var(--color-info, #9ad4e4)',
       '#10b981',
       '#f59e0b',
       '#8b5cf6',
@@ -204,7 +204,7 @@
   }
 
   .color-picker-input:focus {
-    outline: 2px solid #3b82f6;
+    outline: 2px solid var(--color-info, #9ad4e4);
     outline-offset: 2px;
   }
 
@@ -238,7 +238,7 @@
   }
 
   .swatch-toggle:focus {
-    outline: 2px solid #3b82f6;
+    outline: 2px solid var(--color-info, #9ad4e4);
     outline-offset: 2px;
   }
 
@@ -288,16 +288,16 @@
 
   .swatch-item:hover {
     transform: scale(1.1);
-    border-color: #3b82f6;
+    border-color: var(--color-info, #9ad4e4);
   }
 
   .swatch-item:focus {
-    outline: 2px solid #3b82f6;
+    outline: 2px solid var(--color-info, #9ad4e4);
     outline-offset: 2px;
   }
 
   .swatch-item.selected {
-    border-color: #1e293b;
+    border-color: var(--viz-gray-800);
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
   }
 

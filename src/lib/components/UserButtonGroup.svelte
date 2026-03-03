@@ -1,5 +1,5 @@
 <script lang="ts">
-  import MdChevronLeft from '~icons/mdi/chevron-left'
+  import { ChevronLeft } from '@lucide/svelte'
   import type { User } from '../../models/user'
   import UserButton from './UserButton.svelte'
 
@@ -46,7 +46,7 @@
   {#if showExpandButton}
     <button class="expand-button" onclick={toggleExpanded} title={isExpanded ? 'Show fewer' : `Show ${hiddenCount} more`}>
       {#if isExpanded}
-        <MdChevronLeft class="collapse-icon" />
+        <ChevronLeft class="collapse-icon" size={16} />
       {:else}
         +{hiddenCount}
       {/if}

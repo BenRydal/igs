@@ -1,5 +1,5 @@
 <script lang="ts">
-  import MdDotsVertical from '~icons/mdi/dots-vertical'
+  import { EllipsisVertical } from '@lucide/svelte'
   import type { User } from '../../models/user'
 
   interface Props {
@@ -31,7 +31,7 @@
     onclick={handleSettingsClick}
     title="Settings"
   >
-    <MdDotsVertical class="settings-icon" />
+    <EllipsisVertical class="settings-icon" size={16} />
   </button>
 </div>
 
@@ -39,13 +39,13 @@
   .user-button-container {
     display: inline-flex;
     align-items: center;
-    background-color: #e5e5e5;
+    background-color: var(--viz-gray-200);
     border-radius: 9999px;
     transition: opacity 0.15s;
   }
 
   .user-button-container:hover {
-    background-color: #d4d4d4;
+    background-color: var(--viz-gray-300);
   }
 
   .user-button-container.hidden-state {
@@ -62,7 +62,7 @@
     cursor: pointer;
     font-size: 0.875rem;
     font-weight: 500;
-    color: #1f2937;
+    color: var(--viz-gray-800);
     user-select: none;
     max-width: 8rem;
   }
@@ -77,12 +77,12 @@
     background: transparent;
     border: none;
     cursor: pointer;
-    color: #6b7280;
+    color: var(--viz-gray-500);
     transition: color 0.15s;
   }
 
   .settings-button:hover {
-    color: #1f2937;
+    color: var(--viz-gray-800);
   }
 
   .settings-icon {

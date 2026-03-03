@@ -7,8 +7,7 @@
   import { timelineV2Store } from '../timeline/store'
   import P5Store from '../../stores/p5Store'
   import { formatTime, parseTime } from '../utils/format'
-  import MdClose from '~icons/mdi/close'
-  import MdPencil from '~icons/mdi/pencil'
+  import { X, Pencil } from '@lucide/svelte'
 
   interface TranscriptEntry {
     time: number
@@ -252,7 +251,7 @@
         onclick={() => isVisible = false}
         aria-label="Close transcript"
       >
-        <MdClose />
+        <X size={16} />
       </button>
     </div>
 
@@ -267,7 +266,7 @@
       />
       {#if searchQuery}
         <button class="icon-btn" onclick={() => setSearch('')} aria-label="Clear search">
-          <MdClose />
+          <X size={16} />
         </button>
         <span class="search-count">{transcriptEntries.length}/{allEntries.length}</span>
       {/if}
@@ -328,7 +327,7 @@
                   onclick={(e) => startEditing(entry, index, e)}
                   aria-label="Edit entry"
                 >
-                  <MdPencil />
+                  <Pencil size={14} />
                 </button>
               </div>
               <div class="entry-text">{@html highlightMatch(entry.text)}</div>

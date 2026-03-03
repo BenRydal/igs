@@ -252,7 +252,7 @@
 <style>
   .video-container {
     position: absolute;
-    z-index: 100;
+    z-index: var(--z-video-container, 100);
     border: 2px solid rgba(0, 0, 0, 0.5);
     border-radius: 6px;
     overflow: hidden;
@@ -267,7 +267,7 @@
 
   .drag-handle {
     height: 24px;
-    background: linear-gradient(to bottom, #444, #333);
+    background: linear-gradient(to bottom, var(--viz-gray-700), var(--viz-gray-800));
     cursor: grab;
     display: flex;
     justify-content: center;
@@ -277,7 +277,7 @@
 
   .drag-handle.dragging {
     cursor: grabbing;
-    background: linear-gradient(to bottom, #555, #444);
+    background: linear-gradient(to bottom, #555, var(--viz-gray-700));
   }
 
   .drag-dots {
@@ -288,7 +288,7 @@
 
   .video-area {
     position: relative;
-    background: #000;
+    background: var(--viz-gray-900);
   }
 
   .click-shield {
