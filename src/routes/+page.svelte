@@ -58,7 +58,7 @@
   import { onMount } from 'svelte'
   import IconButton from '$lib/components/IconButton.svelte'
   import IgsInfoModal from '$lib/components/IGSInfoModal.svelte'
-  import { TimelineContainer } from '$lib/timeline'
+  import { IgsTimeline } from '$lib/timeline-migration'
   import DataPointTable from '$lib/components/DataPointTable.svelte'
   import ModeIndicator from '$lib/components/ModeIndicator.svelte'
   import FloatingDropdown from '$lib/components/FloatingDropdown.svelte'
@@ -1794,7 +1794,7 @@
     class="flex flex-1 items-center bg-[#f6f5f3] overflow-visible py-0.5 px-2 lg:px-4"
     style="min-width: 200px;"
   >
-    <TimelineContainer height={40} showControls={true} embedded={true} />
+    <IgsTimeline store={timelineV2Store} height={40} showControls={true} embedded={true} />
   </div>
 </div>
 

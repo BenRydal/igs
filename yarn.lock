@@ -2192,6 +2192,7 @@ __metadata:
     prettier-plugin-svelte: "npm:^3.4.0"
     svelte: "npm:^5.0.0"
     svelte-check: "npm:^4.0.0"
+    svelte-interactive-timeline: "npm:^0.1.0"
     tailwindcss: "npm:^4.0.0"
     typescript: "npm:^5.9.3"
     typescript-eslint: "npm:^8.0.0"
@@ -3420,6 +3421,15 @@ __metadata:
     svelte:
       optional: true
   checksum: 36711e4150155948b4df50e8e5c6cd5fcd8fc6a997ae0cde18e3d2c9ed01ed01524911eb85449fc3484a00f65ae0e1932311abd287345002a406a465ee1bb282
+  languageName: node
+  linkType: hard
+
+"svelte-interactive-timeline@npm:^0.1.0":
+  version: 0.1.0
+  resolution: "svelte-interactive-timeline@npm:0.1.0"
+  peerDependencies:
+    svelte: ^5.0.0
+  checksum: 7c9d881e417292106d8b2f90c5f37cf9f075d226fdb545178cabd224bde3189859a7c809067ae732cb11e3812b1de8b9147de4ea64372e52f724045f79eb7fe4
   languageName: node
   linkType: hard
 
