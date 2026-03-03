@@ -2,37 +2,39 @@
   import P5, { type Sketch } from 'p5-svelte'
 
   import type p5 from 'p5'
-  import MdHelpOutline from '~icons/mdi/help-circle-outline'
-  import MdKeyboard from '~icons/mdi/keyboard'
-  import MdCloudDownload from '~icons/mdi/cloud-download'
-  import MdRotateLeft from '~icons/mdi/rotate-left'
-  import MdRotateRight from '~icons/mdi/rotate-right'
-  import MdAspectRatio from '~icons/mdi/aspect-ratio'
-  import MdFitToPageOutline from '~icons/mdi/fit-to-page-outline'
-  import Md3DRotation from '~icons/mdi/rotate-3d-variant'
-  import MdVideocam from '~icons/mdi/video'
-  import MdVideocamOff from '~icons/mdi/video-off'
-  import MdCheck from '~icons/mdi/check'
-  import MdSettings from '~icons/mdi/cog'
-  import MdFileUploadOutline from '~icons/mdi/file-upload-outline'
-  import MdFilterList from '~icons/mdi/filter-variant'
-  import MdSelectAll from '~icons/mdi/selection'
-  import MdChat from '~icons/mdi/chat'
-  import MdDelete from '~icons/mdi/delete'
-  import MdFolder from '~icons/mdi/folder-open'
-  import MdSports from '~icons/mdi/basketball'
-  import MdMuseum from '~icons/mdi/bank'
-  import MdSchool from '~icons/mdi/school'
-  import MdTeacher from '~icons/mdi/human-male-board'
-  import MdWalk from '~icons/mdi/walk'
-  import MdVideo from '~icons/mdi/video-vintage'
-  import MdMusic from '~icons/mdi/music'
-  import MdChevronDown from '~icons/mdi/chevron-down'
-  import MdChevronRight from '~icons/mdi/chevron-right'
-  import MdMoreVert from '~icons/mdi/dots-vertical'
-  import MdMenu from '~icons/mdi/menu'
-  import MdClose from '~icons/mdi/close'
-  import MdTune from '~icons/mdi/tune'
+  import {
+    CircleHelp,
+    Keyboard,
+    CloudDownload,
+    RotateCcw,
+    RotateCw,
+    RectangleHorizontal,
+    Maximize,
+    Rotate3d,
+    Video,
+    VideoOff,
+    Check,
+    Settings,
+    FileUp,
+    Filter,
+    BoxSelect,
+    MessageSquare,
+    Trash2,
+    FolderOpen,
+    Dribbble,
+    Landmark,
+    GraduationCap,
+    Presentation,
+    Footprints,
+    Clapperboard,
+    Music,
+    ChevronDown,
+    ChevronRight,
+    EllipsisVertical,
+    Menu,
+    X,
+    SlidersHorizontal,
+  } from '@lucide/svelte'
 
   import type { User } from '../models/user'
 
@@ -94,12 +96,12 @@
   const dropdownOptions = [
     {
       label: 'Sports',
-      icon: MdSports,
+      icon: Dribbble,
       items: [{ value: 'example-1', label: "Michael Jordan's Last Shot" }],
     },
     {
       label: 'Museums',
-      icon: MdMuseum,
+      icon: Landmark,
       items: [
         { value: 'example-2', label: 'Single Gallery' },
         { value: 'example-11', label: 'Complete Visit' },
@@ -107,7 +109,7 @@
     },
     {
       label: 'Classrooms',
-      icon: MdSchool,
+      icon: GraduationCap,
       items: [
         { value: 'example-3', label: '8th Grade Science Lesson' },
         { value: 'example-4', label: '3rd Grade Discussion Odd/Even Numbers' },
@@ -115,7 +117,7 @@
     },
     {
       label: 'Walking Tours',
-      icon: MdWalk,
+      icon: Footprints,
       items: [
         { value: 'example-14', label: 'Jefferson Street Tour' },
         { value: 'example-12', label: 'Civil Rights Tour: Creating the Route' },
@@ -124,7 +126,7 @@
     },
     {
       label: 'TAU Project',
-      icon: MdTeacher,
+      icon: Presentation,
       items: [
         { value: 'example-10', label: 'Clark AP Math Lesson' },
         { value: 'example-17', label: 'Sandy Math Lesson (2022)' },
@@ -136,7 +138,7 @@
     // Hidden temporarily - uncomment when ready to show
     // {
     //   label: 'Music Performance',
-    //   icon: MdMusic,
+    //   icon: Music,
     //   items: [
     //     { value: 'example-15', label: 'Trio' },
     //     { value: 'example-16', label: 'Full Band' },
@@ -144,7 +146,7 @@
     // },
     {
       label: 'TIMSS Classroom Video Study',
-      icon: MdVideo,
+      icon: Clapperboard,
       items: [
         { value: 'example-3', label: 'US: Weather' },
         { value: 'example-5', label: 'Czech: Density' },
@@ -704,7 +706,7 @@
 
 {#snippet check(condition: boolean)}
   <div class="w-4 h-4 mr-2">
-    {#if condition}<MdCheck />{/if}
+    {#if condition}<Check size={16} />{/if}
   </div>
 {/snippet}
 
@@ -732,9 +734,9 @@
     >
       <div class="w-6 h-6">
         {#if mobileMenuOpen}
-          <MdClose />
+          <X />
         {:else}
-          <MdMenu />
+          <Menu />
         {/if}
       </div>
     </button>
@@ -745,7 +747,7 @@
     {#if $ConfigStore.advancedMode}
       <details class="dropdown" use:clickOutside>
         <summary class="btn btn-sm ml-4 gap-1 flex items-center">
-          {@render icon(MdFilterList)}
+          {@render icon(Filter)}
           Filter
           {@render chevronDown()}
         </summary>
@@ -784,7 +786,7 @@
     {#if !is3DMode && $ConfigStore.advancedMode}
       <details class="dropdown" use:clickOutside>
         <summary class="btn btn-sm ml-4 gap-1 flex items-center">
-          {@render icon(MdSelectAll)}
+          {@render icon(BoxSelect)}
           Select
           {@render chevronDown()}
         </summary>
@@ -835,7 +837,7 @@
     <!-- Talk Dropdown -->
     <details id="talk-dropdown" class="dropdown" use:clickOutside>
       <summary class="btn btn-sm ml-4 gap-1 flex items-center">
-        {@render icon(MdChat)}
+        {@render icon(MessageSquare)}
         Talk
         {@render chevronDown()}
       </summary>
@@ -945,7 +947,7 @@
       <!-- Clear Data Dropdown (advanced) -->
       <details class="dropdown" use:clickOutside>
         <summary class="btn btn-sm ml-4 gap-1 flex items-center">
-          {@render icon(MdDelete)}
+          {@render icon(Trash2)}
           Clear
           {@render chevronDown()}
         </summary>
@@ -965,7 +967,7 @@
       {#if $ConfigStore.advancedMode}
         <IconButton
           id="btn-rotate-left"
-          icon={MdRotateLeft}
+          icon={RotateCcw}
           tooltip={'Rotate Left'}
           onclick={() => {
             p5Instance.floorPlan.setRotateLeft()
@@ -974,7 +976,7 @@
         />
         <IconButton
           id="btn-rotate-right"
-          icon={MdRotateRight}
+          icon={RotateCw}
           tooltip={'Rotate Right'}
           onclick={() => {
             p5Instance.floorPlan.setRotateRight()
@@ -983,7 +985,7 @@
         />
         <IconButton
           id="btn-aspect-ratio"
-          icon={currentConfig.preserveFloorplanAspectRatio ? MdAspectRatio : MdFitToPageOutline}
+          icon={currentConfig.preserveFloorplanAspectRatio ? RectangleHorizontal : Maximize}
           tooltip={currentConfig.preserveFloorplanAspectRatio
             ? 'Stretch to Fill'
             : 'Preserve Aspect Ratio'}
@@ -998,7 +1000,7 @@
       {/if}
       <IconButton
         id="btn-toggle-3d"
-        icon={Md3DRotation}
+        icon={Rotate3d}
         tooltip={'Toggle 2D/3D'}
         onclick={() => {
           p5Instance.handle3D.update()
@@ -1007,18 +1009,18 @@
       />
       <IconButton
         id="btn-toggle-video"
-        icon={isVideoShowing ? MdVideocam : MdVideocamOff}
+        icon={isVideoShowing ? Video : VideoOff}
         tooltip={'Show/Hide Video'}
         onclick={toggleVideo}
       />
       <IconButton
-        icon={MdFileUploadOutline}
+        icon={FileUp}
         tooltip={'Import Files'}
         onclick={() => (showImportDialog = true)}
       />
 
       <IconButton
-        icon={MdHelpOutline}
+        icon={CircleHelp}
         tooltip={'Help'}
         onclick={() => ($isModalOpen = !$isModalOpen)}
       />
@@ -1027,12 +1029,12 @@
         <!-- More menu (Download, Keyboard, Settings) - advanced only -->
         <details class="dropdown dropdown-end" use:clickOutside>
           <summary class="btn btn-sm btn-ghost btn-square">
-            <div class="w-5 h-5"><MdMoreVert /></div>
+            <div class="w-5 h-5"><EllipsisVertical size={20} /></div>
           </summary>
           <ul class="menu dropdown-content rounded-box z-[1] w-48 p-2 shadow bg-base-100">
             <li>
               <button onclick={() => p5Instance.saveCodeFile()} class="flex items-center gap-2">
-                {@render icon(MdCloudDownload)}
+                {@render icon(CloudDownload)}
                 Download Codes
               </button>
             </li>
@@ -1041,13 +1043,13 @@
                 onclick={() => window.dispatchEvent(new CustomEvent('igs:open-cheatsheet'))}
                 class="flex items-center gap-2"
               >
-                {@render icon(MdKeyboard)}
+                {@render icon(Keyboard)}
                 Keyboard Shortcuts
               </button>
             </li>
             <li>
               <button onclick={() => (showSettings = true)} class="flex items-center gap-2">
-                {@render icon(MdSettings)}
+                {@render icon(Settings)}
                 Settings
               </button>
             </li>
@@ -1063,7 +1065,7 @@
         class:btn-primary={$ConfigStore.advancedMode}
         onclick={toggleAdvancedMode}
       >
-        <div class="w-4 h-4"><MdTune /></div>
+        <div class="w-4 h-4"><SlidersHorizontal size={16} /></div>
         Advanced
       </button>
 
@@ -1074,7 +1076,7 @@
         contentClass="menu rounded-box w-72 p-2 shadow bg-base-100 max-h-[60vh] overflow-y-auto"
       >
         {#snippet buttonChildren()}
-          {@render icon(MdFolder)}
+          {@render icon(FolderOpen)}
           <span class="max-w-32 truncate">{selectedDropDownOption || 'Examples'}</span>
           {@render chevronDown()}
         {/snippet}
@@ -1089,7 +1091,7 @@
                 onclick={() => toggleCategory(group.label)}
               >
                 <svelte:component
-                  this={expandedCategories.has(group.label) ? MdChevronDown : MdChevronRight}
+                  this={expandedCategories.has(group.label) ? ChevronDown : ChevronRight}
                   class="w-4 h-4 opacity-50"
                 />
                 <svelte:component this={group.icon} class="w-4 h-4" />
@@ -1141,7 +1143,7 @@
       <div class="flex flex-wrap gap-2 justify-center mb-6">
         {#if $ConfigStore.advancedMode}
           <details class="dropdown dropdown-bottom" use:clickOutside>
-            <summary class="btn btn-sm gap-1">{@render icon(MdFilterList)}Filter</summary>
+            <summary class="btn btn-sm gap-1">{@render icon(Filter)}Filter</summary>
             <ul class="dropdown-content menu bg-base-200 rounded-box z-[60] w-48 p-2 shadow mt-1">
               {#each filterToggleOptions as toggle}
                 <li>
@@ -1171,7 +1173,7 @@
 
         {#if !is3DMode && $ConfigStore.advancedMode}
           <details class="dropdown dropdown-bottom" use:clickOutside>
-            <summary class="btn btn-sm gap-1">{@render icon(MdSelectAll)}Select</summary>
+            <summary class="btn btn-sm gap-1">{@render icon(BoxSelect)}Select</summary>
             <ul class="dropdown-content menu bg-base-200 rounded-box z-[60] w-56 p-2 shadow mt-1">
               {#each selectToggleOptions as toggle}
                 <li>
@@ -1215,7 +1217,7 @@
         {/if}
 
         <details class="dropdown dropdown-bottom" use:clickOutside>
-          <summary class="btn btn-sm gap-1">{@render icon(MdChat)}Talk</summary>
+          <summary class="btn btn-sm gap-1">{@render icon(MessageSquare)}Talk</summary>
           <ul class="dropdown-content menu bg-base-200 rounded-box z-[60] w-64 p-2 shadow mt-1">
             <li>
               <button onclick={() => (isTranscriptVisible = !isTranscriptVisible)}
@@ -1296,7 +1298,7 @@
 
         {#if $ConfigStore.advancedMode}
           <details class="dropdown dropdown-bottom dropdown-end" use:clickOutside>
-            <summary class="btn btn-sm gap-1">{@render icon(MdDelete)}Clear</summary>
+            <summary class="btn btn-sm gap-1">{@render icon(Trash2)}Clear</summary>
             <ul class="dropdown-content menu bg-base-200 rounded-box z-[60] w-40 p-2 shadow mt-1">
               <li>
                 <button
@@ -1345,7 +1347,7 @@
 
         <details class="dropdown dropdown-bottom" use:clickOutside>
           <summary class="btn btn-sm gap-1"
-            >{@render icon(MdFolder)}{selectedDropDownOption || 'Examples'}</summary
+            >{@render icon(FolderOpen)}{selectedDropDownOption || 'Examples'}</summary
           >
           <ul
             class="dropdown-content menu bg-base-200 rounded-box z-[60] w-72 p-2 shadow mt-1 max-h-60 overflow-y-auto"
@@ -1360,7 +1362,7 @@
                   onclick={() => toggleCategory(group.label)}
                 >
                   <svelte:component
-                    this={expandedCategories.has(group.label) ? MdChevronDown : MdChevronRight}
+                    this={expandedCategories.has(group.label) ? ChevronDown : ChevronRight}
                     class="w-4 h-4 opacity-50"
                   />
                   <svelte:component this={group.icon} class="w-4 h-4" />
@@ -1400,7 +1402,7 @@
       <div class="flex flex-wrap gap-3 justify-center">
         {#if $ConfigStore.advancedMode}
           <IconButton
-            icon={MdRotateLeft}
+            icon={RotateCcw}
             tooltip="Rotate Left"
             onclick={() => {
               p5Instance.floorPlan.setRotateLeft()
@@ -1409,7 +1411,7 @@
             }}
           />
           <IconButton
-            icon={MdRotateRight}
+            icon={RotateCw}
             tooltip="Rotate Right"
             onclick={() => {
               p5Instance.floorPlan.setRotateRight()
@@ -1418,7 +1420,7 @@
             }}
           />
           <IconButton
-            icon={currentConfig.preserveFloorplanAspectRatio ? MdAspectRatio : MdFitToPageOutline}
+            icon={currentConfig.preserveFloorplanAspectRatio ? RectangleHorizontal : Maximize}
             tooltip={currentConfig.preserveFloorplanAspectRatio
               ? 'Stretch to Fill'
               : 'Preserve Aspect Ratio'}
@@ -1433,7 +1435,7 @@
           />
         {/if}
         <IconButton
-          icon={Md3DRotation}
+          icon={Rotate3d}
           tooltip="Toggle 2D/3D"
           onclick={() => {
             p5Instance.handle3D.update()
@@ -1442,7 +1444,7 @@
           }}
         />
         <IconButton
-          icon={isVideoShowing ? MdVideocam : MdVideocamOff}
+          icon={isVideoShowing ? Video : VideoOff}
           tooltip="Show/Hide Video"
           onclick={() => {
             toggleVideo()
@@ -1450,7 +1452,7 @@
           }}
         />
         <IconButton
-          icon={MdFileUploadOutline}
+          icon={FileUp}
           tooltip="Import Files"
           onclick={() => {
             showImportDialog = true
@@ -1458,7 +1460,7 @@
           }}
         />
         <IconButton
-          icon={MdHelpOutline}
+          icon={CircleHelp}
           tooltip="Help"
           onclick={() => {
             $isModalOpen = !$isModalOpen
@@ -1467,7 +1469,7 @@
         />
         {#if $ConfigStore.advancedMode}
           <IconButton
-            icon={MdCloudDownload}
+            icon={CloudDownload}
             tooltip="Download Codes"
             onclick={() => {
               p5Instance.saveCodeFile()
@@ -1475,7 +1477,7 @@
             }}
           />
           <IconButton
-            icon={MdKeyboard}
+            icon={Keyboard}
             tooltip="Keyboard Shortcuts"
             onclick={() => {
               window.dispatchEvent(new CustomEvent('igs:open-cheatsheet'))
@@ -1483,7 +1485,7 @@
             }}
           />
           <IconButton
-            icon={MdSettings}
+            icon={Settings}
             tooltip="Settings"
             onclick={() => {
               showSettings = true
@@ -1505,7 +1507,7 @@
             mobileMenuOpen = false
           }}
         >
-          <div class="w-4 h-4"><MdTune /></div>
+          <div class="w-4 h-4"><SlidersHorizontal size={16} /></div>
           Advanced
         </button>
       </div>
@@ -1561,7 +1563,7 @@
       <div class="flex justify-between mb-4">
         <h3 class="font-bold text-lg">Settings</h3>
         <button class="btn btn-circle btn-sm" onclick={() => (showSettings = false)}>
-          <MdClose class="h-5 w-5" />
+          <X size={20} />
         </button>
       </div>
 
@@ -1698,7 +1700,7 @@
         </div>
 
         <button class="btn btn-circle btn-sm" onclick={() => (showDataPopup = false)}>
-          <MdClose class="h-5 w-5" />
+          <X size={20} />
         </button>
       </div>
 

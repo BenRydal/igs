@@ -10,7 +10,7 @@
 
 .divider {
   height: 1px;
-  background: #e5e7eb;
+  background: var(--viz-gray-200);
   margin: 0.25rem 0;
 }
 

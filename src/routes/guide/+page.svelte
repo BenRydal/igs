@@ -1,10 +1,5 @@
 <script lang="ts">
-  import MdFloorPlan from '~icons/mdi/floor-plan'
-  import MdMapMarkerPath from '~icons/mdi/map-marker-path'
-  import MdChat from '~icons/mdi/chat-outline'
-  import MdVideo from '~icons/mdi/video-outline'
-  import MdTag from '~icons/mdi/tag-outline'
-  import MdClock from '~icons/mdi/clock-outline'
+  import { LayoutGrid, MapPin, MessageCircle, Video, Tag, Clock } from '@lucide/svelte'
 
   const faqItems = [
     {
@@ -60,7 +55,7 @@
         <a href="#indoor" class="card bg-base-200 hover:bg-base-300 transition-colors">
           <div class="card-body">
             <div class="w-12 h-12 rounded-full bg-info/10 flex items-center justify-center mb-3">
-              <MdFloorPlan class="text-2xl text-info" />
+              <LayoutGrid class="text-info" size={24} />
             </div>
             <h3 class="card-title text-lg">Indoor Movement</h3>
             <p class="text-sm text-base-content/70 mb-2">
@@ -78,7 +73,7 @@
         <a href="#outdoor" class="card bg-base-200 hover:bg-base-300 transition-colors">
           <div class="card-body">
             <div class="w-12 h-12 rounded-full bg-success/10 flex items-center justify-center mb-3">
-              <MdMapMarkerPath class="text-2xl text-success" />
+              <MapPin class="text-success" size={24} />
             </div>
             <h3 class="card-title text-lg">Outdoor / GPS Movement</h3>
             <p class="text-sm text-base-content/70 mb-2">
@@ -120,7 +115,7 @@
     <section id="indoor" class="mb-12 scroll-mt-20">
       <div class="flex items-center gap-3 mb-4">
         <div class="w-10 h-10 rounded-full bg-info/10 flex items-center justify-center">
-          <MdFloorPlan class="text-xl text-info" />
+          <LayoutGrid class="text-info" size={20} />
         </div>
         <h2 class="text-xl font-bold">Indoor Movement</h2>
       </div>
@@ -219,7 +214,7 @@
     <section id="outdoor" class="mb-12 scroll-mt-20">
       <div class="flex items-center gap-3 mb-4">
         <div class="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center">
-          <MdMapMarkerPath class="text-xl text-success" />
+          <MapPin class="text-success" size={20} />
         </div>
         <h2 class="text-xl font-bold">Outdoor / GPS Movement</h2>
       </div>
@@ -316,7 +311,7 @@
     <section id="conversation" class="mb-12 scroll-mt-20">
       <div class="flex items-center gap-3 mb-4">
         <div class="w-10 h-10 rounded-full bg-info/10 flex items-center justify-center">
-          <MdChat class="text-xl text-info" />
+          <MessageCircle class="text-info" size={20} />
         </div>
         <h2 class="text-xl font-bold">Adding Conversation</h2>
         <span class="badge badge-ghost">Optional</span>
@@ -370,7 +365,7 @@
     <section id="video" class="mb-12 scroll-mt-20">
       <div class="flex items-center gap-3 mb-4">
         <div class="w-10 h-10 rounded-full bg-warning/10 flex items-center justify-center">
-          <MdVideo class="text-xl text-warning" />
+          <Video class="text-warning" size={20} />
         </div>
         <h2 class="text-xl font-bold">Adding Video</h2>
         <span class="badge badge-ghost">Optional</span>
@@ -393,7 +388,7 @@
     <section id="codes" class="mb-12 scroll-mt-20">
       <div class="flex items-center gap-3 mb-4">
         <div class="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center">
-          <MdTag class="text-xl text-secondary" />
+          <Tag class="text-secondary" size={20} />
         </div>
         <h2 class="text-xl font-bold">Adding Codes / Annotations</h2>
         <span class="badge badge-ghost">Optional</span>
@@ -450,7 +445,7 @@
     <section id="time" class="mb-12 scroll-mt-20">
       <div class="flex items-center gap-3 mb-4">
         <div class="w-10 h-10 rounded-full bg-base-300 flex items-center justify-center">
-          <MdClock class="text-xl text-base-content/70" />
+          <Clock class="text-base-content/70" size={20} />
         </div>
         <h2 class="text-xl font-bold">Time Formats</h2>
       </div>

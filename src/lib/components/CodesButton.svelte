@@ -4,7 +4,7 @@
   import { clickOutside } from '$lib/actions/clickOutside'
   import { Z_INDEX } from '$lib/styles/z-index'
   import '$lib/styles/dropdown.css'
-  import MdChevronDown from '~icons/mdi/chevron-down'
+  import { ChevronDown } from '@lucide/svelte'
   import CodeStore from '../../stores/codeStore'
   import ConfigStore from '../../stores/configStore'
   import P5Store from '../../stores/p5Store'
@@ -73,7 +73,7 @@
   aria-expanded={isOpen}
 >
   Codes
-  <MdChevronDown class="chevron" />
+  <ChevronDown class="chevron" size={16} />
 </button>
 
 {#if isOpen}
