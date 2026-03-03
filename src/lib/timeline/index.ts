@@ -1,22 +1,28 @@
 /**
  * Timeline Module
  *
- * Custom canvas-based timeline component with zoom and pan.
+ * Re-exports from the npm package and local store wrapper.
  */
 
-// Components
-export { default as TimelineContainer } from './components/TimelineContainer.svelte';
-export { default as TimelineCanvas } from './components/TimelineCanvas.svelte';
-export { default as TimelineControls } from './components/TimelineControls.svelte';
+// Store (now backed by npm package)
+export { timelineV2Store, viewDuration, dataDuration, zoomLevel, isZoomed } from './store';
 
-// Store
-export { timelineV2Store, zoomLevel, isZoomed } from './store';
+// Types and utilities from the npm package
+export type {
+	TimelineState,
+	RenderContext,
+	RenderLayer,
+	DragTarget,
+	HitTarget
+} from 'svelte-interactive-timeline';
+export {
+	formatTime,
+	clamp,
+	mapRange,
+	generateGridLines,
+	calculateGridInterval,
+	TimelineRenderer
+} from 'svelte-interactive-timeline';
 
-// Types
-export type { TimelineState, RenderContext, RenderLayer, DragTarget, HitTarget } from './types';
-
-// Utilities
-export { formatTime, clamp, mapRange, generateGridLines, calculateGridInterval } from './utils';
-
-// Renderer (for advanced use)
-export { TimelineRenderer } from './rendering/renderer';
+// New wrapper component
+export { IgsTimeline } from '../timeline-migration';

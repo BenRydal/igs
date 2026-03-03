@@ -1,8 +1,11 @@
 /**
- * Activity Gradient Layer
+ * Activity Gradient Layer (Migration Adapter)
  *
  * Renders a colored gradient bar showing movement activity intensity over time.
  * Darker = more movement activity, lighter = less activity or stationary.
+ *
+ * Ported from src/lib/timeline/rendering/layers/activity-gradient.ts to work
+ * with the shared svelte-interactive-timeline library's RenderLayer interface.
  *
  * Calculation:
  * 1. Divide timeline into NUM_BUCKETS time buckets
@@ -13,10 +16,10 @@
  */
 
 import { get } from 'svelte/store';
-import type { RenderContext, RenderLayer } from '../../types';
-import UserStore from '../../../../stores/userStore';
-import ConfigStore from '../../../../stores/configStore';
-import type { User } from '../../../../models/user';
+import type { RenderLayer, RenderContext } from 'svelte-interactive-timeline';
+import UserStore from '../../stores/userStore';
+import ConfigStore from '../../stores/configStore';
+import type { User } from '../../models/user';
 
 /** Number of buckets to divide timeline into */
 const NUM_BUCKETS = 200;
