@@ -6,8 +6,8 @@
  * File size limits in bytes to prevent DoS attacks
  */
 export const FILE_SIZE_LIMITS = {
-  CSV: 10 * 1024 * 1024, // 10MB
-  IMAGE: 25 * 1024 * 1024, // 25MB
+  CSV: 100 * 1024 * 1024, // 100MB
+  IMAGE: 50 * 1024 * 1024, // 50MB
   VIDEO: 10 * 1024 * 1024 * 1024, // 10GB
   DEFAULT: 50 * 1024 * 1024, // 50MB
 } as const
