@@ -5,6 +5,7 @@ import { get } from 'svelte/store'
 import { CoreUtils } from './core-utils'
 import { getExampleDataset } from './example-datasets'
 import { TimeParser, type TimeParseOutput } from './time-parser'
+import { TimeUtils } from './time-utils'
 import type {
   MovementRow,
   GPSMovementRow,
@@ -216,6 +217,24 @@ export class Core {
   }
 
   /**
+   * Converts time-formatted start/end values (HH:MM:SS, MM:SS) to numeric seconds.
+   * Values already numeric are left unchanged.
+   */
+  private convertCodeTimeColumns(data: CsvRow[]): void {
+    for (const row of data) {
+      for (const col of ['start', 'end']) {
+        const value = row[col]
+        if (typeof value === 'string') {
+          const seconds = TimeUtils.toSeconds(value)
+          if (seconds !== null) {
+            row[col] = seconds
+          }
+        }
+      }
+    }
+  }
+
+  /**
    * Loads and processes GPX file data
    * Parses XML, extracts tracks, and routes to GPS processing pipeline
    *
@@ -302,6 +321,9 @@ export class Core {
   // NOTE: GPS movement should be processed before regular movement as it has different headers
   processResultsData = async (results: PapaParseResult<CsvRow>, fileName: string): Promise<void> => {
     const csvData = results.data
+
+    this.convertCodeTimeColumns(csvData)
+
     // Check for GPS movement data first (lat/lng headers)
     // GPS processing is async (loads map image), await to ensure it completes before other files process
     if (this.coreUtils.testGPSMovement(results)) {

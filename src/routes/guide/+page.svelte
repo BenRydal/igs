@@ -462,7 +462,7 @@
 
       <div class="card bg-base-200">
         <div class="card-body">
-          <p class="font-medium mb-3">All of these work:</p>
+          <p class="font-medium mb-3">Movement and conversation files support all of these:</p>
           <div class="overflow-x-auto">
             <table class="table table-sm">
               <tbody class="text-base-content/70">
@@ -491,6 +491,28 @@
           </div>
           <p class="text-sm text-base-content/60 mt-4">
             IGS automatically converts everything to relative time, starting from 0.
+          </p>
+          <p class="font-medium mt-4 mb-3">Code files support:</p>
+          <div class="overflow-x-auto">
+            <table class="table table-sm">
+              <tbody class="text-base-content/70">
+                <tr>
+                  <td class="font-medium">Seconds</td>
+                  <td><code>0</code>, <code>30</code>, <code>125.5</code></td>
+                </tr>
+                <tr>
+                  <td class="font-medium">Minutes:Seconds</td>
+                  <td><code>1:30</code>, <code>5:00</code></td>
+                </tr>
+                <tr>
+                  <td class="font-medium">Hours:Minutes:Seconds</td>
+                  <td><code>0:01:30</code>, <code>1:05:00</code></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="text-sm text-base-content/60 mt-4">
+            Code file times should be relative to the start of your recording (not absolute timestamps).
           </p>
         </div>
       </div>

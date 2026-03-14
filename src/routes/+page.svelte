@@ -1765,7 +1765,7 @@
       }
     }}
   >
-    {#if $ConfigStore.dataHasCodes && $ConfigStore.advancedMode}
+    {#if $ConfigStore.dataHasCodes}
       <div class="mr-2">
         <CodesButton />
       </div>
