@@ -2,9 +2,7 @@
   import { onMount } from 'svelte'
   import ConfigStore from '../../stores/configStore'
   import { Z_INDEX } from '$lib/styles/z-index'
-  import MdCircleOutline from '~icons/mdi/circle-outline'
-  import MdChartPie from '~icons/mdi/chart-pie'
-  import MdFormatColorHighlight from '~icons/mdi/format-color-highlight'
+  import { Circle, PieChart, Highlighter } from '@lucide/svelte'
 
   interface Props {
     class?: string
@@ -15,7 +13,7 @@
   // Mode configuration
   const modes = {
     circle: {
-      icon: MdCircleOutline,
+      icon: Circle,
       label: 'Circle Mode',
       description: 'Hover to highlight points within a circle',
       shortcut: '1',
@@ -24,7 +22,7 @@
       borderColor: 'border-primary/30',
     },
     slice: {
-      icon: MdChartPie,
+      icon: PieChart,
       label: 'Slice Mode',
       description: 'Hover to highlight points within a pie slice',
       shortcut: '2',
@@ -33,7 +31,7 @@
       borderColor: 'border-secondary/30',
     },
     highlight: {
-      icon: MdFormatColorHighlight,
+      icon: Highlighter,
       label: 'Highlight Mode',
       description: 'Hover to highlight individual points',
       shortcut: '3',
@@ -98,11 +96,11 @@
       <!-- Icon -->
       <div class="mode-icon">
         {#if activeMode === 'circle'}
-          <MdCircleOutline />
+          <Circle size={24} />
         {:else if activeMode === 'slice'}
-          <MdChartPie />
+          <PieChart size={24} />
         {:else if activeMode === 'highlight'}
-          <MdFormatColorHighlight />
+          <Highlighter size={24} />
         {/if}
       </div>
 

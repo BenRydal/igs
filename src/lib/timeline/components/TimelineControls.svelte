@@ -5,13 +5,8 @@
 	import ConfigStore from '../../../stores/configStore';
 	import P5Store from '../../../stores/p5Store';
 
-	// MDI Icons
-	import MdPlayArrow from '~icons/mdi/play-arrow';
-	import MdPause from '~icons/mdi/pause';
-	import MdReplay from '~icons/mdi/replay';
-	import MdMagnifyPlus from '~icons/mdi/magnify-plus-outline';
-	import MdMagnifyMinus from '~icons/mdi/magnify-minus-outline';
-	import MdFitToScreen from '~icons/mdi/fit-to-screen-outline';
+	// Lucide Icons
+	import { Play, Pause, RotateCcw, ZoomIn, ZoomOut, Maximize } from '@lucide/svelte';
 
 
 	/** Speed presets - these map to animationRate values */
@@ -69,9 +64,9 @@
 			aria-label={$isPlaying ? 'Pause' : 'Play'}
 		>
 			{#if $isPlaying}
-				<MdPause class="w-3.5 h-3.5" />
+				<Pause size={14} />
 			{:else}
-				<MdPlayArrow class="w-3.5 h-3.5" />
+				<Play size={14} />
 			{/if}
 		</button>
 		<button
@@ -80,7 +75,7 @@
 			title="Reset to start"
 			aria-label="Reset"
 		>
-			<MdReplay class="w-3.5 h-3.5" />
+			<RotateCcw size={14} />
 		</button>
 		<span class="w-px h-3 bg-gray-200"></span>
 		<button
@@ -101,7 +96,7 @@
 			title="Zoom out (−)"
 			aria-label="Zoom out"
 		>
-			<MdMagnifyMinus class="w-3.5 h-3.5" />
+			<ZoomOut size={14} />
 		</button>
 		<button
 			class="btn btn-ghost btn-square btn-xs"
@@ -110,7 +105,7 @@
 			aria-label="Fit to view"
 			disabled={!$isZoomed}
 		>
-			<MdFitToScreen class="w-3.5 h-3.5" />
+			<Maximize size={14} />
 		</button>
 		<button
 			class="btn btn-ghost btn-square btn-xs"
@@ -118,7 +113,7 @@
 			title="Zoom in (+)"
 			aria-label="Zoom in"
 		>
-			<MdMagnifyPlus class="w-3.5 h-3.5" />
+			<ZoomIn size={14} />
 		</button>
 	</div>
 	{#if $isZoomed}

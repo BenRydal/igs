@@ -183,14 +183,14 @@
   .name-input {
     width: 100%;
     padding: 0.375rem 0.5rem;
-    border: 1px solid #d1d5db;
+    border: 1px solid var(--viz-gray-300);
     border-radius: 0.375rem;
     font-size: 0.875rem;
   }
 
   .name-input:focus {
     outline: none;
-    border-color: #3b82f6;
+    border-color: var(--color-info, #9ad4e4);
     box-shadow: 0 0 0 2px rgb(59 130 246 / 0.2);
   }
 </style>

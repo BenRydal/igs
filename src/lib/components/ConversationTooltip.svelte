@@ -121,8 +121,8 @@
     position: relative;
     max-width: 320px;
     min-width: 200px;
-    background: #fefefe;
-    border: 1px solid #e0e0e0;
+    background: var(--color-base-100, #fbfcfd);
+    border: 1px solid var(--viz-gray-200);
     border-radius: 10px;
     box-shadow:
       0 2px 4px rgba(0, 0, 0, 0.04),
@@ -149,28 +149,28 @@
   .point-left .triangle {
     top: var(--triangle-y, 12px);
     left: -9px;
-    border-right-color: #e0e0e0;
+    border-right-color: var(--viz-gray-200);
     border-left-width: 0;
   }
 
   .point-left .triangle::after {
     top: -9px;
     left: 1px;
-    border-right-color: #fefefe;
+    border-right-color: var(--color-base-100, #fbfcfd);
     border-left-width: 0;
   }
 
   .point-right .triangle {
     top: var(--triangle-y, 12px);
     right: -9px;
-    border-left-color: #e0e0e0;
+    border-left-color: var(--viz-gray-200);
     border-right-width: 0;
   }
 
   .point-right .triangle::after {
     top: -9px;
     right: 1px;
-    border-left-color: #fefefe;
+    border-left-color: var(--color-base-100, #fbfcfd);
     border-right-width: 0;
   }
 
@@ -183,7 +183,7 @@
   .turn {
     padding: 8px 10px;
     border-radius: 6px;
-    background: #f8f9fa;
+    background: var(--viz-gray-50);
     border-left: 3px solid var(--speaker-color, #666);
   }
 
@@ -196,7 +196,7 @@
 
   .turn-time {
     font-size: 10px;
-    color: #888;
+    color: var(--viz-gray-500);
     font-family: ui-monospace, 'SF Mono', Monaco, monospace;
     background: rgba(0, 0, 0, 0.05);
     padding: 2px 5px;
@@ -211,17 +211,17 @@
 
   .turn-text {
     font-size: 13px;
-    color: #444;
+    color: var(--viz-gray-800);
     line-height: 1.5;
   }
 
   .more-indicator {
     font-size: 11px;
-    color: #888;
+    color: var(--viz-gray-500);
     text-align: center;
     padding: 8px 0 2px;
     margin-top: 4px;
-    border-top: 1px solid #eee;
+    border-top: 1px solid var(--viz-gray-200);
     font-style: italic;
   }
 </style>
