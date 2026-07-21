@@ -5,7 +5,7 @@
   import ConfigStore from '../../stores/configStore'
   import { requestSeek, hasVideoSource } from '../../stores/videoStore'
   import { timelineV2Store } from '../timeline/store'
-  import P5Store from '../../stores/p5Store'
+  import { redrawCanvas } from '$lib/utils/p5'
   import { formatTime, parseTime } from '../utils/format'
   import MdClose from '~icons/mdi/close'
   import MdPencil from '~icons/mdi/pencil'
@@ -79,10 +79,11 @@
                 text: point.speech,
                 color: user.color,
                 userIndex,
-                pointIndex
+                pointIndex,
               }))
-              .filter((entry): entry is TranscriptEntry =>
-                entry.text != null && entry.text.trim() !== '' && entry.time != null
+              .filter(
+                (entry): entry is TranscriptEntry =>
+                  entry.text != null && entry.text.trim() !== '' && entry.time != null
               )
           : []
       )
@@ -93,13 +94,13 @@
   let transcriptEntries = $derived.by(() => {
     if (!searchQuery) return allEntries
     const query = searchQuery.toLowerCase()
-    return allEntries.filter(entry => entry.text.toLowerCase().includes(query))
+    return allEntries.filter((entry) => entry.text.toLowerCase().includes(query))
   })
 
   // Update search query in ConfigStore (trim to avoid whitespace-only searches)
   function setSearch(value: string) {
-    ConfigStore.update(config => ({ ...config, wordToSearch: value.trim() }))
-    $P5Store?.loop()
+    ConfigStore.update((config) => ({ ...config, wordToSearch: value.trim() }))
+    redrawCanvas()
   }
 
   // Highlight matching text in search results
@@ -141,7 +142,7 @@
       requestSeek(entry.time)
     }
 
-    $P5Store?.loop()
+    redrawCanvas()
   }
 
   function startEditing(entry: TranscriptEntry, index: number, e: MouseEvent) {
@@ -152,11 +153,11 @@
   }
 
   function deleteEntry(entry: TranscriptEntry) {
-    UserStore.update(users => {
+    UserStore.update((users) => {
       users[entry.userIndex].dataTrail[entry.pointIndex].speech = ''
       return users
     })
-    $P5Store?.loop()
+    redrawCanvas()
     cancelEditing()
   }
 
@@ -174,14 +175,14 @@
       return
     }
 
-    UserStore.update(users => {
+    UserStore.update((users) => {
       const point = users[entry.userIndex].dataTrail[entry.pointIndex]
       point.time = newTime
       point.speech = editText
       return users
     })
 
-    $P5Store?.loop()
+    redrawCanvas()
     cancelEditing()
   }
 
@@ -209,8 +210,14 @@
     if (isDragging) {
       // Keep at least 50px visible so panel is always recoverable
       const margin = 50
-      posX = Math.max(-width + margin, Math.min(dragStartPosX + e.clientX - dragStartX, window.innerWidth - margin))
-      posY = Math.max(0, Math.min(dragStartPosY + e.clientY - dragStartY, window.innerHeight - margin))
+      posX = Math.max(
+        -width + margin,
+        Math.min(dragStartPosX + e.clientX - dragStartX, window.innerWidth - margin)
+      )
+      posY = Math.max(
+        0,
+        Math.min(dragStartPosY + e.clientY - dragStartY, window.innerHeight - margin)
+      )
     }
     if (isResizing) {
       width = Math.max(MIN_WIDTH, resizeStartWidth + (e.clientX - resizeStartX))
@@ -247,11 +254,7 @@
       aria-label="Drag to move transcript panel"
     >
       <span class="panel-title">Transcript</span>
-      <button
-        class="icon-btn"
-        onclick={() => isVisible = false}
-        aria-label="Close transcript"
-      >
+      <button class="icon-btn" onclick={() => (isVisible = false)} aria-label="Close transcript">
         <MdClose />
       </button>
     </div>
@@ -289,7 +292,7 @@
                     class="edit-time"
                     class:error={editTimeError}
                     bind:value={editTime}
-                    oninput={() => editTimeError = ''}
+                    oninput={() => (editTimeError = '')}
                     placeholder="0:00"
                   />
                   {#if editTimeError}
@@ -298,11 +301,7 @@
                 </div>
                 <span class="edit-speaker-label" style="color: {entry.color}">{entry.speaker}</span>
               </div>
-              <textarea
-                class="edit-text"
-                bind:value={editText}
-                rows="3"
-              ></textarea>
+              <textarea class="edit-text" bind:value={editText} rows="3"></textarea>
               <div class="edit-actions">
                 <button class="btn-delete" onclick={() => deleteEntry(entry)}>Delete</button>
                 <button class="btn-cancel" onclick={cancelEditing}>Cancel</button>
@@ -338,10 +337,7 @@
       {/if}
     </div>
 
-    <button
-      class="resize-handle"
-      onmousedown={handleResizeStart}
-      aria-label="Resize panel"
+    <button class="resize-handle" onmousedown={handleResizeStart} aria-label="Resize panel"
     ></button>
   </div>
 {/if}
@@ -573,7 +569,9 @@
     justify-content: flex-end;
   }
 
-  .btn-save, .btn-cancel, .btn-delete {
+  .btn-save,
+  .btn-cancel,
+  .btn-delete {
     padding: 4px 12px;
     font-size: 12px;
     border-radius: 4px;

@@ -1,7 +1,7 @@
 <script lang="ts">
-  import P5, { type Sketch } from 'p5-svelte'
+  import { P5Canvas } from 'svelte-p5'
 
-  import type p5 from 'p5'
+  import type { IgsP5 } from '$lib/p5/igs-p5'
   import MdHelpOutline from '~icons/mdi/help-circle-outline'
   import MdKeyboard from '~icons/mdi/keyboard'
   import MdCloudDownload from '~icons/mdi/cloud-download'
@@ -180,7 +180,7 @@
   let currentConfig = $state<ConfigStoreType>($ConfigStore)
 
   let users = $state<User[]>([])
-  let p5Instance = $state<p5 | null>(null)
+  let p5Instance = $state<IgsP5 | null>(null)
   let core: Core
   let isVideoShowing = $state(false)
   let isVideoPlaying = $state(false)
@@ -274,9 +274,53 @@
     }
   })
 
-  const sketch: Sketch = (p5: p5) => {
-    igsSketch(p5)
-  }
+  // Keep #p5-canvas-container's height truthful: the sketch sizes the canvas
+  // from the container rect, so the container must be bounded by the real
+  // (measured, not hardcoded) navbar + bottom-nav heights.
+  $effect(() => {
+    const main = document.getElementById('main-content')
+    const navbar = document.querySelector('.navbar')
+    const btmNav = document.querySelector('.btm-nav')
+    if (!main) return
+
+    const setCanvasHeight = () => {
+      const navH = (navbar as HTMLElement | null)?.offsetHeight ?? 0
+      const btmH = (btmNav as HTMLElement | null)?.offsetHeight ?? 0
+      main.style.setProperty('--igs-canvas-h', `calc(100vh - ${navH}px - ${btmH}px)`)
+    }
+    setCanvasHeight()
+
+    const ro = new ResizeObserver(setCanvasHeight)
+    if (navbar) ro.observe(navbar)
+    if (btmNav) ro.observe(btmNav)
+    return () => ro.disconnect()
+  })
+
+  // Resize the canvas when its container changes size — EXCEPT in split-screen
+  // mode. Split-screen deliberately keeps the canvas at full window width and
+  // squishes it with CSS (see the split-screen-mode style rules below), because
+  // the sketch draws space-time x-positions at viewport coordinates taken from
+  // the timeline's getBoundingClientRect(). Truly resizing the canvas while
+  // split would break that invariant; the synthetic window resize dispatched
+  // on split-screen enter/exit handles those transitions instead. The seam
+  // gets fixed (canvas-relative coordinates) in the layout-chrome phase.
+  $effect(() => {
+    const container = document.getElementById('p5-canvas-container')
+    if (!container) return
+
+    let raf = 0
+    const ro = new ResizeObserver(() => {
+      cancelAnimationFrame(raf)
+      raf = requestAnimationFrame(() => {
+        if (!isSplitScreen) p5Instance?.windowResized?.()
+      })
+    })
+    ro.observe(container)
+    return () => {
+      cancelAnimationFrame(raf)
+      ro.disconnect()
+    }
+  })
 
   // Modal state - opens immediately for first-time visitors
   let isModalOpen = writable(false)
@@ -494,7 +538,7 @@
   async function updateExampleDataDropDown(event) {
     clearAllDataLocal()
     await core.handleExampleDropdown(event)
-    p5Instance.loop()
+    p5Instance?.loop()
     spaceTimeTooltip?.trigger()
   }
 
@@ -523,7 +567,7 @@
 
     // Recreate canvas to get fresh WebGL context (helps Safari performance)
     if (p5Instance?.recreateCanvas) {
-      p5Instance.recreateCanvas()
+      p5Instance?.recreateCanvas()
     }
   }
 
@@ -532,7 +576,7 @@
     core.movementData = []
     core.gpsMovementData = []
     resetGPS()
-    p5Instance.loop()
+    p5Instance?.loop()
   }
 
   function clearConversationData() {
@@ -547,7 +591,7 @@
       })
     )
     core.conversationData = []
-    p5Instance.loop()
+    p5Instance?.loop()
   }
 
   function clearCodeData() {
@@ -563,8 +607,12 @@
       })
     )
 
-    ConfigStore.update((currentConfig) => ({ ...currentConfig, dataHasCodes: false, isPathColorMode: false }))
-    p5Instance.loop()
+    ConfigStore.update((currentConfig) => ({
+      ...currentConfig,
+      dataHasCodes: false,
+      isPathColorMode: false,
+    }))
+    p5Instance?.loop()
   }
 
   // State for user dropdown
@@ -608,8 +656,8 @@
     // Keyboard shortcut event handlers
     const handleToggle3D = () => {
       if (p5Instance?.handle3D) {
-        p5Instance.handle3D.update()
-        is3DMode = p5Instance.handle3D.getIs3DMode()
+        p5Instance?.handle3D.update()
+        is3DMode = p5Instance?.handle3D.getIs3DMode() ?? is3DMode
       }
     }
 
@@ -617,11 +665,11 @@
       const customEvent = event as CustomEvent<{ direction: 'left' | 'right' }>
       if (p5Instance?.floorPlan) {
         if (customEvent.detail.direction === 'left') {
-          p5Instance.floorPlan.setRotateLeft()
+          p5Instance?.floorPlan.setRotateLeft()
         } else {
-          p5Instance.floorPlan.setRotateRight()
+          p5Instance?.floorPlan.setRotateRight()
         }
-        p5Instance.loop()
+        p5Instance?.loop()
       }
     }
 
@@ -631,7 +679,7 @@
 
     const handleDownloadCodes = () => {
       if (p5Instance) {
-        p5Instance.saveCodeFile()
+        p5Instance?.saveCodeFile()
       }
     }
 
@@ -968,8 +1016,8 @@
           icon={MdRotateLeft}
           tooltip={'Rotate Left'}
           onclick={() => {
-            p5Instance.floorPlan.setRotateLeft()
-            p5Instance.loop()
+            p5Instance?.floorPlan.setRotateLeft()
+            p5Instance?.loop()
           }}
         />
         <IconButton
@@ -977,8 +1025,8 @@
           icon={MdRotateRight}
           tooltip={'Rotate Right'}
           onclick={() => {
-            p5Instance.floorPlan.setRotateRight()
-            p5Instance.loop()
+            p5Instance?.floorPlan.setRotateRight()
+            p5Instance?.loop()
           }}
         />
         <IconButton
@@ -1001,8 +1049,8 @@
         icon={Md3DRotation}
         tooltip={'Toggle 2D/3D'}
         onclick={() => {
-          p5Instance.handle3D.update()
-          is3DMode = p5Instance.handle3D.getIs3DMode()
+          p5Instance?.handle3D.update()
+          is3DMode = p5Instance?.handle3D.getIs3DMode() ?? is3DMode
         }}
       />
       <IconButton
@@ -1031,7 +1079,7 @@
           </summary>
           <ul class="menu dropdown-content rounded-box z-[1] w-48 p-2 shadow bg-base-100">
             <li>
-              <button onclick={() => p5Instance.saveCodeFile()} class="flex items-center gap-2">
+              <button onclick={() => p5Instance?.saveCodeFile()} class="flex items-center gap-2">
                 {@render icon(MdCloudDownload)}
                 Download Codes
               </button>
@@ -1403,8 +1451,8 @@
             icon={MdRotateLeft}
             tooltip="Rotate Left"
             onclick={() => {
-              p5Instance.floorPlan.setRotateLeft()
-              p5Instance.loop()
+              p5Instance?.floorPlan.setRotateLeft()
+              p5Instance?.loop()
               mobileMenuOpen = false
             }}
           />
@@ -1412,8 +1460,8 @@
             icon={MdRotateRight}
             tooltip="Rotate Right"
             onclick={() => {
-              p5Instance.floorPlan.setRotateRight()
-              p5Instance.loop()
+              p5Instance?.floorPlan.setRotateRight()
+              p5Instance?.loop()
               mobileMenuOpen = false
             }}
           />
@@ -1436,8 +1484,8 @@
           icon={Md3DRotation}
           tooltip="Toggle 2D/3D"
           onclick={() => {
-            p5Instance.handle3D.update()
-            is3DMode = p5Instance.handle3D.getIs3DMode()
+            p5Instance?.handle3D.update()
+            is3DMode = p5Instance?.handle3D.getIs3DMode() ?? is3DMode
             mobileMenuOpen = false
           }}
         />
@@ -1470,7 +1518,7 @@
             icon={MdCloudDownload}
             tooltip="Download Codes"
             onclick={() => {
-              p5Instance.saveCodeFile()
+              p5Instance?.saveCodeFile()
               mobileMenuOpen = false
             }}
           />
@@ -1536,7 +1584,7 @@
     class="canvas-pane"
     class:cursor-crosshair={currentConfig.highlightToggle}
   >
-    <P5 {sketch} />
+    <P5Canvas sketch={igsSketch} />
     {#if !isSplitScreen}
       <VideoContainer />
     {/if}
@@ -1814,6 +1862,13 @@
   #main-content {
     position: relative;
     width: 100%;
+  }
+
+  /* Bounded height so the sketch can size the canvas from the container rect.
+     --igs-canvas-h is kept current by a ResizeObserver on .navbar/.btm-nav.
+     The split-screen rules below override this with height: 100%. */
+  #p5-canvas-container {
+    height: var(--igs-canvas-h, calc(100vh - 10rem));
   }
 
   #main-content.split-screen-mode {

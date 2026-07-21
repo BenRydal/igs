@@ -1,7 +1,7 @@
 import { writable, derived, get } from 'svelte/store'
 import VideoStore, { requestSeek } from './videoStore'
 import { timelineV2Store } from '../lib/timeline/store'
-import P5Store from './p5Store'
+import { redrawCanvas } from '../lib/utils/p5'
 
 export type PlaybackMode = 'stopped' | 'playing-video' | 'playing-animation'
 
@@ -33,7 +33,7 @@ export function getMode(): PlaybackMode {
  */
 export function setMode(mode: PlaybackMode): void {
   PlaybackStore.update((state) => ({ ...state, mode }))
-  triggerRedraw()
+  redrawCanvas()
 }
 
 /**
@@ -116,16 +116,6 @@ export function onAnimationEnd(): void {
   const videoState = get(VideoStore)
   if (videoState.isVisible) {
     requestSeek(state.viewStart)
-  }
-}
-
-/**
- * Trigger p5 redraw
- */
-function triggerRedraw(): void {
-  const p5 = get(P5Store)
-  if (p5) {
-    p5.loop()
   }
 }
 

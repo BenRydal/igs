@@ -1,4 +1,5 @@
 import { get } from 'svelte/store'
+import { hitTest, type SketchFn } from 'svelte-p5'
 import P5Store from '../../stores/p5Store'
 import UserStore from '../../stores/userStore'
 import { timelineV2Store } from '../timeline/store'
@@ -10,6 +11,7 @@ import { toastStore } from '../../stores/toastStore'
 import type { User } from '../../models/user'
 import { FloorPlan, SketchGUI, Handle3D, SetPathData } from '..'
 import { generateCodeCSV, downloadFile } from '../utils/download'
+import type { IgsSketchExt } from './igs-p5'
 
 let users: User[] = []
 let highlightToggle: boolean
@@ -34,14 +36,24 @@ isAnyModalOpen.subscribe((data) => {
   isModalOpen = data
 })
 
-export const igsSketch = (p5: any) => {
+export const igsSketch: SketchFn<IgsSketchExt> = (p5) => {
   P5Store.set(p5)
 
-  // Helper to calculate available canvas height
-  const getAvailableHeight = () => {
-    const navbarHeight = (document.querySelector('.navbar') as HTMLElement).offsetHeight
-    const bottomNavHeight = (document.querySelector('.btm-nav') as HTMLElement).offsetHeight
-    return window.innerHeight - navbarHeight - bottomNavHeight
+  p5.getContainerSize = () => {
+    const container = document.getElementById('p5-canvas-container')
+    if (container) {
+      const rect = container.getBoundingClientRect()
+      if (rect.width > 0 && rect.height > 0) {
+        return { width: Math.floor(rect.width), height: Math.floor(rect.height) }
+      }
+    }
+    // Fallback for calls before layout settles: replicate the historical
+    // window-minus-chrome measurement.
+    const navbarHeight =
+      (document.querySelector('.navbar') as HTMLElement | null)?.offsetHeight ?? 0
+    const bottomNavHeight =
+      (document.querySelector('.btm-nav') as HTMLElement | null)?.offsetHeight ?? 0
+    return { width: window.innerWidth, height: window.innerHeight - navbarHeight - bottomNavHeight }
   }
 
   const applyStyles = () => {
@@ -50,7 +62,8 @@ export const igsSketch = (p5: any) => {
   }
 
   p5.setup = () => {
-    p5.createCanvas(window.innerWidth, getAvailableHeight(), p5.WEBGL)
+    const { width, height } = p5.getContainerSize()
+    p5.createCanvas(width, height, p5.WEBGL)
     p5.gui = new SketchGUI(p5)
     p5.handle3D = new Handle3D(p5, true)
     p5.floorPlan = new FloorPlan(p5)
@@ -95,7 +108,7 @@ export const igsSketch = (p5: any) => {
     }
   }
 
-  p5.dataIsLoaded = (data: any) => {
+  p5.dataIsLoaded = (data: unknown) => {
     return data != null // in javascript this tests for both undefined and null values
   }
 
@@ -110,16 +123,17 @@ export const igsSketch = (p5: any) => {
     }
   }
 
-  // TODO: This needs to be moved eventually
-  // Used by `timeline-panel.js` to determine whether to draw the timeline
   p5.overRect = (x: number, y: number, boxWidth: number, boxHeight: number) => {
-    return (
-      p5.mouseX >= x && p5.mouseX <= x + boxWidth && p5.mouseY >= y && p5.mouseY <= y + boxHeight
-    )
+    return hitTest.rect(p5.mouseX, p5.mouseY, x, y, boxWidth, boxHeight)
+  }
+
+  p5.overCircle = (x: number, y: number, diameter: number) => {
+    return hitTest.circle(p5.mouseX, p5.mouseY, x, y, diameter)
   }
 
   p5.windowResized = () => {
-    p5.resizeCanvas(window.innerWidth, getAvailableHeight())
+    const { width, height } = p5.getContainerSize()
+    p5.resizeCanvas(width, height)
     p5.gui = new SketchGUI(p5)
     p5.handle3D = new Handle3D(p5, p5.handle3D.getIs3DMode())
     applyStyles()
@@ -129,18 +143,18 @@ export const igsSketch = (p5: any) => {
   /**
    * Recreate the canvas to reset WebGL state
    * This helps with Safari performance issues after loading large datasets
+   *
+   * Raw-p5 escape hatch: replaced by svelte-p5's `{#key}` remount +
+   * WEBGL_lose_context recipe in the layout-chrome phase of the migration.
    */
   p5.recreateCanvas = () => {
-    p5.createCanvas(window.innerWidth, getAvailableHeight(), p5.WEBGL)
+    const { width, height } = p5.getContainerSize()
+    p5.createCanvas(width, height, p5.WEBGL)
     p5.gui = new SketchGUI(p5)
     p5.handle3D = new Handle3D(p5, true)
     p5.floorPlan = new FloorPlan(p5)
     applyStyles()
     p5.loop()
-  }
-
-  p5.overCircle = (x: number, y: number, diameter: number) => {
-    return p5.sqrt(p5.sq(x - p5.mouseX) + p5.sq(y - p5.mouseY)) < diameter / 2
   }
 
   /**
@@ -187,8 +201,8 @@ export const igsSketch = (p5: any) => {
     downloadFile(generateCodeCSV(startTimes, endTimes), `${user.name}.csv`)
   }
 
-  p5.arrayIsLoaded = (data: any) => {
-    return Array.isArray(data) && data.length
+  p5.arrayIsLoaded = (data: unknown) => {
+    return Array.isArray(data) && data.length > 0
   }
 
   p5.updateAnimation = () => {
@@ -215,11 +229,11 @@ export const igsSketch = (p5: any) => {
     timelineV2Store.setCurrentTime(timeToSet)
   }
 
-  p5.mapToSelectTimeThenPixelTime = (value) => {
+  p5.mapToSelectTimeThenPixelTime = (value: number) => {
     return p5.mapSelectTimeToPixelTime(timelineV2Store.pixelToViewPixel(value))
   }
 
-  p5.mapSelectTimeToPixelTime = (value) => {
+  p5.mapSelectTimeToPixelTime = (value: number) => {
     const spaceTimeCubeBottom = p5.height / 10
     const spaceTimeCubeTop = p5.height / 1.6
     if (p5.handle3D.getIs3DMode())

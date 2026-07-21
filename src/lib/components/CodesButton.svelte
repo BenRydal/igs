@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { onDestroy } from 'svelte'
   import { computePosition, flip, shift, offset } from '@floating-ui/dom'
   import { clickOutside } from '$lib/actions/clickOutside'
   import { Z_INDEX } from '$lib/styles/z-index'
@@ -7,21 +6,13 @@
   import MdChevronDown from '~icons/mdi/chevron-down'
   import CodeStore from '../../stores/codeStore'
   import ConfigStore from '../../stores/configStore'
-  import P5Store from '../../stores/p5Store'
+  import { redrawCanvas } from '$lib/utils/p5'
   import { toggleColorMode } from '$lib/history/config-actions'
   import { setCodeEnabled, toggleAllCodes, setCodeColor } from '$lib/history/data-actions'
-  import type p5 from 'p5'
 
   let buttonElement = $state<HTMLButtonElement | null>(null)
   let dropdownElement = $state<HTMLDivElement | null>(null)
   let isOpen = $state(false)
-  let p5Instance: p5 | null = null
-
-  const unsubscribeP5 = P5Store.subscribe((instance) => {
-    p5Instance = instance
-  })
-
-  onDestroy(unsubscribeP5)
 
   const sortedCodes = $derived(
     [...$CodeStore].sort((a, b) => {
@@ -54,12 +45,12 @@
 
   function handleCodeChange(code: string, enabled: boolean) {
     setCodeEnabled(code, enabled)
-    p5Instance?.loop()
+    redrawCanvas()
   }
 
   function handleColorChange(code: string, color: string) {
     setCodeColor(code, color)
-    p5Instance?.loop()
+    redrawCanvas()
   }
 </script>
 
@@ -92,7 +83,10 @@
             type="checkbox"
             class="checkbox"
             checked={allEnabled}
-            onchange={() => { toggleAllCodes(); p5Instance?.loop() }}
+            onchange={() => {
+              toggleAllCodes()
+              redrawCanvas()
+            }}
           />
           Enable All
         </label>
@@ -104,7 +98,10 @@
             type="checkbox"
             class="checkbox"
             checked={$ConfigStore.isPathColorMode}
-            onchange={() => { toggleColorMode(); p5Instance?.loop() }}
+            onchange={() => {
+              toggleColorMode()
+              redrawCanvas()
+            }}
           />
           Color by Codes
         </label>
