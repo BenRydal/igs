@@ -1,15 +1,15 @@
 <script lang="ts">
-  import type { Snippet } from 'svelte'
+  import type { Component, Snippet } from 'svelte'
 
   let {
-    icon,
+    icon: Icon,
     tooltip = '',
     id = '',
     onclick,
     children,
     active = false,
   }: {
-    icon?: ConstructorOfATypedSvelteComponent
+    icon?: Component
     tooltip?: string
     id?: string
     onclick?: (event: MouseEvent) => void
@@ -19,9 +19,15 @@
 </script>
 
 <div class="tooltip tooltip-bottom" data-tip={tooltip}>
-  <button class="btn btn-square btn-ghost icon-btn" class:btn-active={active} type="button" {id} {onclick}>
-    {#if icon}
-      <svelte:component this={icon} />
+  <button
+    class="btn btn-square btn-ghost icon-btn"
+    class:btn-active={active}
+    type="button"
+    {id}
+    {onclick}
+  >
+    {#if Icon}
+      <Icon />
     {:else if children}
       {@render children()}
     {/if}

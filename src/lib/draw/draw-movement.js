@@ -3,6 +3,22 @@ import { drawState } from './draw-state'
 import CodeStore from '../../stores/codeStore'
 import { timelineV2Store } from '../timeline/store'
 
+/** @typedef {import('../p5/igs-p5').IgsP5} IgsP5 */
+/** @typedef {import('./draw-utils').DrawUtils} DrawUtils */
+/** @typedef {import('./draw-utils').MovementPos} MovementPos */
+/** @typedef {import('../../models/dataPoint').DataPoint} DataPoint */
+/** @typedef {import('../../models/user').User} User */
+/**
+ * A run of consecutive points sharing stopped-state and codes.
+ * @typedef {{ start: number, end: number, isStopped: boolean, codes: string[] }} Segment
+ */
+/** @typedef {{ point: DataPoint, pos: MovementPos }} AugPoint */
+/**
+ * Hover/playback indicator on the path.
+ * @typedef {{ xPos: number, yPos: number, zPos: number, timePos: number, color: string, lengthToCompare: number | null }} Dot
+ */
+/** @typedef {import('../timeline/types').TimelineState} TimelineState */
+
 export class DrawMovement {
   // Static constants
   static LARGEST_STOP_PIXEL_SIZE = 50
@@ -11,16 +27,23 @@ export class DrawMovement {
   // 8 pixels provides good balance - visually indistinguishable from full detail at typical zoom
   static MIN_PIXEL_DISTANCE_SQ = 8 * 8 // Minimum pixel distance squared for decimation
 
+  /**
+   * @param {IgsP5} sketch
+   * @param {DrawUtils} drawUtils
+   */
   constructor(sketch, drawUtils) {
     this.sk = sketch
     this.drawUtils = drawUtils
+    /** @type {Dot | null} */
     this.dot = null
-    this.shade = null
+    /** @type {string} */
+    this.shade = ''
     // Cached code visibility state (updated once per frame in setData)
     this.enabledCodes = new Set()
     this.noCodesEnabled = true
   }
 
+  /** @param {User} user */
   setData(user) {
     this.dot = null
     this.sk.noFill()
@@ -40,6 +63,7 @@ export class DrawMovement {
   }
 
   // Check if a segment should be visible based on its codes
+  /** @param {string[]} segmentCodes */
   isSegmentVisible(segmentCodes) {
     if (segmentCodes.length === 0) {
       return this.noCodesEnabled
@@ -66,6 +90,7 @@ export class DrawMovement {
   }
 
   // Check if we can use fast path (skip ALL visibility checks)
+  /** @param {TimelineState} state */
   canUseFastPath(state) {
     const isFullTimeline = state.viewStart <= state.dataStart && state.viewEnd >= state.dataEnd
     const notAnimating = drawState.playbackMode === 'stopped'
@@ -73,6 +98,11 @@ export class DrawMovement {
   }
 
   // Binary search to find first index where time >= targetTime
+  /**
+   * @param {DataPoint[]} dataTrail
+   * @param {number} targetTime
+   * @param {boolean} [findFirst]
+   */
   findTimeIndex(dataTrail, targetTime, findFirst = true) {
     let low = 0
     let high = dataTrail.length - 1
@@ -80,7 +110,7 @@ export class DrawMovement {
 
     while (low <= high) {
       const mid = (low + high) >>> 1
-      const midTime = dataTrail[mid].time
+      const midTime = dataTrail[mid].time ?? 0
 
       if (findFirst) {
         if (midTime >= targetTime) {
@@ -103,6 +133,7 @@ export class DrawMovement {
   }
 
   // Get visible time range based on current state
+  /** @param {TimelineState} state */
   getVisibleTimeRange(state) {
     const startTime = state.viewStart
     // If animating, cap at current playback time
@@ -118,6 +149,7 @@ export class DrawMovement {
   // Entry point that routes to fast/medium/slow rendering paths.
   // ============================================================
 
+  /** @param {DataPoint[]} dataTrail */
   setDraw(dataTrail) {
     if (dataTrail.length === 0) return
 
@@ -172,6 +204,11 @@ export class DrawMovement {
   // ============================================================
 
   // Batched drawing for fast and medium paths
+  /**
+   * @param {DataPoint[]} dataTrail
+   * @param {number} startIdx
+   * @param {number} endIdx
+   */
   drawBatched(dataTrail, startIdx, endIdx) {
     const allSegments = this.computeSegmentsInRange(dataTrail, startIdx, endIdx)
     // Filter segments by code visibility (O(1) check per segment using cached enabled codes)
@@ -233,6 +270,13 @@ export class DrawMovement {
   }
 
   // Draw all segments matching isStopped in a single batched draw call
+  /**
+   * @param {number} view
+   * @param {DataPoint[]} dataTrail
+   * @param {Segment[]} segments
+   * @param {boolean} isStopped
+   * @param {number} weight
+   */
   drawBatchedSegments(view, dataTrail, segments, isStopped, weight) {
     this.sk.strokeWeight(weight)
     this.sk.beginShape(this.sk.LINES)
@@ -246,6 +290,10 @@ export class DrawMovement {
 
   // Get stopped segments sorted largest-first so overlapping stops
   // (code-split or same-location) render as bullseye pattern (big behind small)
+  /**
+   * @param {DataPoint[]} dataTrail
+   * @param {Segment[]} segments
+   */
   getStoppedSegmentsByDuration(dataTrail, segments) {
     const stopped = segments.filter((seg) => seg.isStopped)
     stopped.sort(
@@ -257,6 +305,10 @@ export class DrawMovement {
   }
 
   // Draw stop circles for all stopped segments (single-color mode)
+  /**
+   * @param {DataPoint[]} dataTrail
+   * @param {Segment[]} segments
+   */
   drawAllStopCircles(dataTrail, segments) {
     for (const seg of this.getStoppedSegmentsByDuration(dataTrail, segments)) {
       const aug = this.getAugmentedPoint(this.sk.PLAN, dataTrail[seg.start])
@@ -265,11 +317,20 @@ export class DrawMovement {
   }
 
   // Check if two segments are adjacent in the original data
+  /**
+   * @param {Segment} seg1
+   * @param {Segment} seg2
+   */
   areSegmentsAdjacent(seg1, seg2) {
     return seg1.end + 1 === seg2.start
   }
 
   // Draw connecting lines between adjacent segments (prevents gaps at segment transitions)
+  /**
+   * @param {number} view
+   * @param {DataPoint[]} dataTrail
+   * @param {Segment[]} segments
+   */
   drawSegmentConnections(view, dataTrail, segments) {
     if (segments.length < 2) return
 
@@ -296,6 +357,12 @@ export class DrawMovement {
   }
 
   // Emit vertex pair for a connection line (used within beginShape/endShape)
+  /**
+   * @param {number} view
+   * @param {DataPoint[]} dataTrail
+   * @param {number} fromIdx
+   * @param {number} toIdx
+   */
   emitConnectionVertices(view, dataTrail, fromIdx, toIdx) {
     const fromAug = this.getAugmentedPoint(view, dataTrail[fromIdx])
     const toAug = this.getAugmentedPoint(view, dataTrail[toIdx])
@@ -304,6 +371,12 @@ export class DrawMovement {
   }
 
   // Draw connection to next point if it exists and is visible (for slow path)
+  /**
+   * @param {number} view
+   * @param {DataPoint[]} dataTrail
+   * @param {number} segmentEnd
+   * @param {string[]} codes
+   */
   drawConnectionIfVisible(view, dataTrail, segmentEnd, codes) {
     if (segmentEnd + 1 >= dataTrail.length) return
 
@@ -324,9 +397,16 @@ export class DrawMovement {
   // ============================================================
 
   // Compute segments within a specific index range
+  /**
+   * @param {DataPoint[]} dataTrail
+   * @param {number} startIdx
+   * @param {number} endIdx
+   * @returns {Segment[]}
+   */
   computeSegmentsInRange(dataTrail, startIdx, endIdx) {
     if (startIdx > endIdx) return []
 
+    /** @type {Segment[]} */
     const segments = []
     let segStart = startIdx
 
@@ -361,11 +441,20 @@ export class DrawMovement {
   }
 
   // Get the time duration of a segment (for sizing stop circles by segment, not total stop)
+  /**
+   * @param {DataPoint[]} dataTrail
+   * @param {number} startIdx
+   * @param {number} endIdx
+   */
   getSegmentDuration(dataTrail, startIdx, endIdx) {
     return (dataTrail[endIdx].time ?? 0) - (dataTrail[startIdx].time ?? 0)
   }
 
   // Fast array comparison - avoids JSON.stringify overhead
+  /**
+   * @param {string[]} codes1
+   * @param {string[]} codes2
+   */
   codesEqual(codes1, codes2) {
     if (!codes1 || !codes2) return codes1 === codes2
     if (codes1.length !== codes2.length) return false
@@ -376,6 +465,10 @@ export class DrawMovement {
   }
 
   // Find the end of the segment where stopLength, codes, or visibility changes
+  /**
+   * @param {DataPoint[]} dataTrail
+   * @param {number} start
+   */
   findSegmentEnd(dataTrail, start) {
     const startPoint = dataTrail[start]
     const startStopped = this.drawUtils.isStopped(startPoint.stopLength)
@@ -406,11 +499,19 @@ export class DrawMovement {
 
   // Draw segment vertices as LINES pairs (for batched drawing)
   // LINES mode draws separate line segments between each pair of vertices
+  /**
+   * @param {number} view
+   * @param {DataPoint[]} dataTrail
+   * @param {number} start
+   * @param {number} end
+   */
   drawSegmentVerticesAsLines(view, dataTrail, start, end) {
     let lastX = -Infinity,
       lastY = -Infinity,
       lastZ = -Infinity
-    let prevX, prevY, prevZ
+    let prevX = 0,
+      prevY = 0,
+      prevZ = 0
     let hasPrev = false
 
     for (let i = start; i <= end; i++) {
@@ -447,16 +548,31 @@ export class DrawMovement {
     }
   }
 
+  /**
+   * @param {number} view
+   * @param {DataPoint[]} dataTrail
+   * @param {number} start
+   * @param {number} end
+   */
   drawSegment(view, dataTrail, start, end) {
     this.sk.beginShape(this.sk.LINES)
     this.drawSegmentVerticesAsLines(view, dataTrail, start, end)
     this.sk.endShape()
   }
 
+  /**
+   * @param {number} view
+   * @param {DataPoint} point
+   * @returns {AugPoint}
+   */
   getAugmentedPoint(view, point) {
-    return this.drawUtils.createAugmentPoint(view, point, point.time)
+    return this.drawUtils.createAugmentPoint(view, point, point.time ?? 0)
   }
 
+  /**
+   * @param {AugPoint} augmentedPoint
+   * @param {number | null} [duration]
+   */
   drawStopCircle(augmentedPoint, duration = null) {
     this.sk.noStroke()
     this.setFill(this.drawUtils.setCodeColor(augmentedPoint.point.codes))
@@ -476,6 +592,10 @@ export class DrawMovement {
   // Stroke and fill management for path color mode.
   // ============================================================
 
+  /**
+   * @param {number} stopLength
+   * @param {string[]} codes
+   */
   applySegmentStyle(stopLength, codes) {
     this.setStroke(this.drawUtils.setCodeColor(codes))
     this.sk.strokeWeight(
@@ -485,11 +605,13 @@ export class DrawMovement {
     )
   }
 
+  /** @param {string} color */
   setFill(color) {
     if (!drawState.config.isPathColorMode) this.sk.fill(this.shade)
     else this.sk.fill(color)
   }
 
+  /** @param {string} color */
   setStroke(color) {
     if (!drawState.config.isPathColorMode) this.sk.stroke(this.shade)
     else this.sk.stroke(color)
@@ -501,6 +623,10 @@ export class DrawMovement {
   // Note: recordDot() is called as a side effect from drawSegmentVerticesAsLines()
   // ============================================================
 
+  /**
+   * @param {AugPoint} augmentedPoint
+   * @param {Dot | null} curDot
+   */
   getNewDot(augmentedPoint, curDot) {
     const [xPos, yPos, zPos, timePos, map3DMouse, codeColor] = this.getDotValues(augmentedPoint)
 
@@ -531,6 +657,10 @@ export class DrawMovement {
     return null
   }
 
+  /**
+   * @param {AugPoint} augmentedPoint
+   * @returns {[number, number, number, number, number, string]}
+   */
   getDotValues(augmentedPoint) {
     return [
       augmentedPoint.pos.floorPlanXPos,
@@ -547,15 +677,32 @@ export class DrawMovement {
     return this.sk.mapSelectTimeToPixelTime(videoPixelTime)
   }
 
+  /**
+   * @param {number} pixelStart
+   * @param {number} pixelEnd
+   * @param {Dot | null} curDot
+   */
   compareToCurDot(pixelStart, pixelEnd, curDot) {
-    const range = curDot !== null ? curDot.lengthToCompare : this.sk.width
+    // lengthToCompare is null for playback dots; treat as exact-match range
+    // (mirrors the pre-typing arithmetic where null coerced to 0)
+    const range = curDot !== null ? (curDot.lengthToCompare ?? 0) : this.sk.width
     return pixelStart >= pixelEnd - range && pixelStart <= pixelEnd + range
   }
 
+  /**
+   * @param {number} xPos
+   * @param {number} yPos
+   * @param {number} zPos
+   * @param {number} timePos
+   * @param {string} color
+   * @param {number | null} lengthToCompare
+   * @returns {Dot}
+   */
   createDot(xPos, yPos, zPos, timePos, color, lengthToCompare) {
     return { xPos, yPos, zPos, timePos, color, lengthToCompare }
   }
 
+  /** @param {Dot} curDot */
   drawDot(curDot) {
     const dotSize = this.sk.width / 50
     this.drawFloorPlanDot(curDot, dotSize)
@@ -563,6 +710,10 @@ export class DrawMovement {
     else this.sk.circle(curDot.timePos, curDot.yPos, dotSize)
   }
 
+  /**
+   * @param {Dot} curDot
+   * @param {number} dotSize
+   */
   drawFloorPlanDot(curDot, dotSize) {
     this.sk.stroke(0)
     this.sk.strokeWeight(5)
@@ -570,6 +721,7 @@ export class DrawMovement {
     this.sk.circle(curDot.xPos, curDot.yPos, dotSize)
   }
 
+  /** @param {Dot} curDot */
   draw3DSpaceTimeDot(curDot) {
     this.sk.strokeWeight(25)
     this.setStroke(curDot.color)
@@ -578,6 +730,7 @@ export class DrawMovement {
     this.sk.line(curDot.xPos, curDot.yPos, 0, curDot.xPos, curDot.yPos, curDot.zPos)
   }
 
+  /** @param {AugPoint} augmentPoint */
   recordDot(augmentPoint) {
     const newDot = this.getNewDot(augmentPoint, this.dot)
     if (newDot !== null) {

@@ -26,7 +26,6 @@
   import MdTeacher from '~icons/mdi/human-male-board'
   import MdWalk from '~icons/mdi/walk'
   import MdVideo from '~icons/mdi/video-vintage'
-  import MdMusic from '~icons/mdi/music'
   import MdChevronDown from '~icons/mdi/chevron-down'
   import MdChevronRight from '~icons/mdi/chevron-right'
   import MdMoreVert from '~icons/mdi/dots-vertical'
@@ -35,7 +34,6 @@
   import MdTune from '~icons/mdi/tune'
 
   import type { User } from '../models/user'
-
   import UserStore from '../stores/userStore'
   import P5Store from '../stores/p5Store'
   import VideoStore, {
@@ -53,9 +51,11 @@
 
   import { Core } from '$lib'
   import { EXAMPLE_DATASETS } from '$lib/core/example-datasets'
+  import type { ExampleSelectEvent } from '$lib/core/types'
   import { igsSketch } from '$lib/p5/igsSketch'
   import { writable } from 'svelte/store'
-  import { onMount, tick } from 'svelte'
+  import { onMount, tick, type Component } from 'svelte'
+  import { SvelteSet } from 'svelte/reactivity'
   import IconButton from '$lib/components/IconButton.svelte'
   import IgsInfoModal from '$lib/components/IGSInfoModal.svelte'
   import { TimelineContainer } from '$lib/timeline'
@@ -84,8 +84,10 @@
     clearAllData as clearAllDataWithHistory,
   } from '$lib/history/data-actions'
 
-  // Define ToggleKey type to fix TypeScript errors
-  type ToggleKey = string
+  // Boolean config keys: what the toggle handlers may flip
+  type ToggleKey = {
+    [K in keyof ConfigStoreType]: ConfigStoreType[K] extends boolean ? K : never
+  }[keyof ConfigStoreType]
 
   const filterToggleOptions = ['movementToggle', 'stopsToggle'] as const
   const selectToggleOptions = ['circleToggle', 'sliceToggle', 'highlightToggle'] as const
@@ -162,37 +164,29 @@
   }
 
   // Track which categories are expanded (all expanded by default)
-  let expandedCategories = $state<Set<string>>(new Set(dropdownOptions.map((g) => g.label)))
+  const expandedCategories = new SvelteSet(dropdownOptions.map((g) => g.label))
 
   function toggleCategory(label: string) {
-    const newSet = new Set(expandedCategories)
-    if (newSet.has(label)) {
-      newSet.delete(label)
+    if (expandedCategories.has(label)) {
+      expandedCategories.delete(label)
     } else {
-      newSet.add(label)
+      expandedCategories.add(label)
     }
-    expandedCategories = newSet
   }
 
   let showDataPopup = $state(false)
   let showSettings = $state(false)
   let showImportDialog = $state(false)
-  let currentConfig = $state<ConfigStoreType>($ConfigStore)
+  const currentConfig = $derived($ConfigStore)
 
-  let users = $state<User[]>([])
   let p5Instance = $state<IgsP5 | null>(null)
   let core: Core
   let isVideoShowing = $state(false)
-  let isVideoPlaying = $state(false)
   let is3DMode = $state(true)
   let timelineEndTime = $state(0)
   let isTranscriptVisible = $state(true)
   let spaceTimeTooltip: SpaceTimeTooltip
   let mobileMenuOpen = $state(false)
-
-  $effect(() => {
-    currentConfig = $ConfigStore
-  })
 
   $effect(() => {
     const unsubscribe = timelineV2Store.subscribe((state) => {
@@ -215,12 +209,7 @@
   $effect(() => {
     const videoState = $VideoStore
     isVideoShowing = videoState.isVisible
-    isVideoPlaying = videoState.isPlaying
     isSplitScreen = videoState.isSplitScreen
-  })
-
-  $effect(() => {
-    users = $UserStore
   })
 
   $effect(() => {
@@ -279,12 +268,12 @@
     p5Instance?.loop() // Trigger redraw
   }
 
-  function handleConfigChange(key: keyof ConfigStoreType, value: any) {
+  function handleConfigChange(key: keyof ConfigStoreType, value: ConfigStoreType[keyof ConfigStoreType]) {
     ConfigStore.update((store) => ({ ...store, [key]: value }))
     p5Instance?.loop()
   }
 
-  function toggleSelection(selection: ToggleKey, toggleOptions: ToggleKey[]) {
+  function toggleSelection(selection: ToggleKey, toggleOptions: readonly ToggleKey[]) {
     ConfigStore.update((store: ConfigStoreType) => {
       const updatedStore = { ...store }
       toggleOptions.forEach((key) => {
@@ -297,9 +286,9 @@
     p5Instance?.loop()
   }
 
-  function clickOutside(node) {
-    const handleClick = (event) => {
-      if (!node.contains(event.target)) {
+  function clickOutside(node: HTMLElement) {
+    const handleClick = (event: MouseEvent) => {
+      if (!node.contains(event.target as Node)) {
         node.removeAttribute('open')
       }
     }
@@ -443,7 +432,7 @@
     spaceTimeTooltip?.trigger()
   }
 
-  async function updateExampleDataDropDown(event) {
+  async function updateExampleDataDropDown(event: ExampleSelectEvent) {
     await clearAllDataLocal()
     await core.handleExampleDropdown(event)
     p5Instance?.loop()
@@ -674,7 +663,7 @@
   </svg>
 {/snippet}
 
-{#snippet icon(Icon: any)}
+{#snippet icon(Icon: Component)}
   <div class="w-4 h-4"><Icon /></div>
 {/snippet}
 
@@ -729,7 +718,7 @@
                 {@render chevronDown()}
               </summary>
               <ul class="menu dropdown-content rounded-box z-[1] w-52 p-2 shadow bg-base-100">
-                {#each filterToggleOptions as toggle}
+                {#each filterToggleOptions as toggle (toggle)}
                   <li>
                     <button
                       onclick={() => toggleSelection(toggle, filterToggleOptions)}
@@ -768,7 +757,7 @@
                 {@render chevronDown()}
               </summary>
               <ul class="menu dropdown-content rounded-box z-[1] w-52 p-2 shadow bg-base-100">
-                {#each selectToggleOptions as toggle}
+                {#each selectToggleOptions as toggle (toggle)}
                   <li>
                     <button
                       onclick={() => toggleSelection(toggle, selectToggleOptions)}
@@ -789,7 +778,7 @@
                     max="300"
                     step="10"
                     bind:value={currentConfig.selectorSize}
-                    oninput={(e) => setSelectorSize(parseFloat(e.target.value))}
+                    oninput={(e) => setSelectorSize(parseFloat(e.currentTarget.value))}
                     class="range range-sm w-full"
                   />
                 </li>
@@ -803,7 +792,7 @@
                     max="100"
                     step="5"
                     bind:value={currentConfig.slicerSize}
-                    oninput={(e) => setSlicerSize(parseFloat(e.target.value))}
+                    oninput={(e) => setSlicerSize(parseFloat(e.currentTarget.value))}
                     class="range range-sm w-full"
                   />
                 </li>
@@ -947,7 +936,7 @@
               <IconButton
                 id="btn-rotate-left"
                 icon={MdRotateLeft}
-                tooltip={'Rotate Left'}
+                tooltip="Rotate Left"
                 onclick={() => {
                   p5Instance?.floorPlan.setRotateLeft()
                   p5Instance?.loop()
@@ -956,7 +945,7 @@
               <IconButton
                 id="btn-rotate-right"
                 icon={MdRotateRight}
-                tooltip={'Rotate Right'}
+                tooltip="Rotate Right"
                 onclick={() => {
                   p5Instance?.floorPlan.setRotateRight()
                   p5Instance?.loop()
@@ -982,7 +971,7 @@
             <IconButton
               id="btn-toggle-3d"
               icon={Md3DRotation}
-              tooltip={'Toggle 2D/3D'}
+              tooltip="Toggle 2D/3D"
               onclick={() => {
                 p5Instance?.handle3D.update()
                 is3DMode = p5Instance?.handle3D.getIs3DMode() ?? is3DMode
@@ -991,18 +980,18 @@
             <IconButton
               id="btn-toggle-video"
               icon={isVideoShowing ? MdVideocam : MdVideocamOff}
-              tooltip={'Show/Hide Video'}
+              tooltip="Show/Hide Video"
               onclick={toggleVideo}
             />
             <IconButton
               icon={MdFileUploadOutline}
-              tooltip={'Import Files'}
+              tooltip="Import Files"
               onclick={() => (showImportDialog = true)}
             />
 
             <IconButton
               icon={MdHelpOutline}
-              tooltip={'Help'}
+              tooltip="Help"
               onclick={() => ($isModalOpen = !$isModalOpen)}
             />
 
@@ -1065,7 +1054,7 @@
                 {@render chevronDown()}
               {/snippet}
               <ul>
-                {#each dropdownOptions as group, groupIndex}
+                {#each dropdownOptions as group, groupIndex (group.label)}
                   {#if groupIndex > 0}
                     <li class="my-1"><hr class="border-base-300" /></li>
                   {/if}
@@ -1083,7 +1072,7 @@
                     </button>
                   </li>
                   {#if expandedCategories.has(group.label)}
-                    {#each group.items as item}
+                    {#each group.items as item (item.value)}
                       {@const isSelected = selectedDropDownOption === item.label}
                       <li class="pl-2 w-full">
                         <button
@@ -1131,7 +1120,7 @@
                   <ul
                     class="dropdown-content menu bg-base-200 rounded-box z-[60] w-48 p-2 shadow mt-1"
                   >
-                    {#each filterToggleOptions as toggle}
+                    {#each filterToggleOptions as toggle (toggle)}
                       <li>
                         <button onclick={() => toggleSelection(toggle, filterToggleOptions)}
                           >{@render check($ConfigStore[toggle])}{capitalizeFirstLetter(
@@ -1163,7 +1152,7 @@
                   <ul
                     class="dropdown-content menu bg-base-200 rounded-box z-[60] w-56 p-2 shadow mt-1"
                   >
-                    {#each selectToggleOptions as toggle}
+                    {#each selectToggleOptions as toggle (toggle)}
                       <li>
                         <button onclick={() => toggleSelection(toggle, selectToggleOptions)}
                           >{@render check($ConfigStore[toggle])}{capitalizeFirstLetter(
@@ -1181,7 +1170,7 @@
                           max="300"
                           step="10"
                           bind:value={currentConfig.selectorSize}
-                          oninput={(e) => setSelectorSize(parseFloat(e.target.value))}
+                          oninput={(e) => setSelectorSize(parseFloat(e.currentTarget.value))}
                           class="range range-xs"
                         />
                       </div>
@@ -1195,7 +1184,7 @@
                           max="100"
                           step="5"
                           bind:value={currentConfig.slicerSize}
-                          oninput={(e) => setSlicerSize(parseFloat(e.target.value))}
+                          oninput={(e) => setSlicerSize(parseFloat(e.currentTarget.value))}
                           class="range range-xs"
                         />
                       </div>
@@ -1354,7 +1343,7 @@
                 <ul
                   class="dropdown-content menu bg-base-200 rounded-box z-[60] w-72 p-2 shadow mt-1 max-h-60 overflow-y-auto"
                 >
-                  {#each dropdownOptions as group, groupIndex}
+                  {#each dropdownOptions as group, groupIndex (group.label)}
                     {#if groupIndex > 0}
                       <li class="my-1"><hr class="border-base-300" /></li>
                     {/if}
@@ -1374,7 +1363,7 @@
                       </button>
                     </li>
                     {#if expandedCategories.has(group.label)}
-                      {#each group.items as item}
+                      {#each group.items as item (item.value)}
                         {@const isSelected = selectedDropDownOption === item.label}
                         <li class="pl-2 w-full">
                           <button
@@ -1631,7 +1620,7 @@
             max="1"
             step="0.01"
             bind:value={currentConfig.animationRate}
-            oninput={(e) => handleConfigChange('animationRate', parseFloat(e.target.value))}
+            oninput={(e) => handleConfigChange('animationRate', parseFloat(e.currentTarget.value))}
             class="range range-primary"
           />
         </div>
@@ -1648,7 +1637,8 @@
             max="5"
             step="0.1"
             bind:value={currentConfig.samplingInterval}
-            oninput={(e) => handleConfigChange('samplingInterval', parseFloat(e.target.value))}
+            oninput={(e) =>
+              handleConfigChange('samplingInterval', parseFloat(e.currentTarget.value))}
             class="range range-primary"
           />
         </div>
@@ -1665,7 +1655,8 @@
             max="10000"
             step="100"
             bind:value={currentConfig.smallDataThreshold}
-            oninput={(e) => handleConfigChange('smallDataThreshold', parseInt(e.target.value))}
+            oninput={(e) =>
+              handleConfigChange('smallDataThreshold', parseInt(e.currentTarget.value))}
             class="range range-primary"
           />
         </div>
@@ -1682,7 +1673,8 @@
             max="20"
             step="1"
             bind:value={currentConfig.movementStrokeWeight}
-            oninput={(e) => handleConfigChange('movementStrokeWeight', parseInt(e.target.value))}
+            oninput={(e) =>
+              handleConfigChange('movementStrokeWeight', parseInt(e.currentTarget.value))}
             class="range range-primary"
           />
         </div>
@@ -1699,7 +1691,7 @@
             max="20"
             step="1"
             bind:value={currentConfig.stopStrokeWeight}
-            oninput={(e) => handleConfigChange('stopStrokeWeight', parseInt(e.target.value))}
+            oninput={(e) => handleConfigChange('stopStrokeWeight', parseInt(e.currentTarget.value))}
             class="range range-primary"
           />
         </div>
@@ -1712,7 +1704,7 @@
             type="text"
             bind:value={timelineEndTime}
             oninput={(e) => {
-              let value = parseInt(e.target.value.replace(/\D/g, '')) || 0
+              let value = parseInt(e.currentTarget.value.replace(/\D/g, '')) || 0
               timelineV2Store.initialize(value, 0)
             }}
             class="input input-bordered"
@@ -1760,14 +1752,14 @@
           <div class="flex-col my-4">
             <h4 class="font-bold my-2">Codes:</h4>
             <div class="grid grid-cols-5 gap-4">
-              {#each $CodeStore as code}
+              {#each $CodeStore as code (code.code)}
                 <div class="badge badge-neutral">{code.code}</div>
               {/each}
             </div>
           </div>
 
           <h4 class="font-bold">Users:</h4>
-          {#each $UserStore as user}
+          {#each $UserStore as user (user.name)}
             <div class="my-4">
               <div
                 tabindex="0"

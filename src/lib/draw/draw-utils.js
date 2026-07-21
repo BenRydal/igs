@@ -7,15 +7,26 @@ import CodeStore from '../../stores/codeStore'
 import { get } from 'svelte/store'
 import { drawState } from './draw-state'
 
+/** @typedef {import('../p5/igs-p5').IgsP5} IgsP5 */
+/** @typedef {import('../../models/dataPoint').DataPoint} DataPoint */
+/**
+ * Scaled pixel values shared by movement and conversation drawing.
+ * @typedef {{ timelineXPos: number, selTimelineXPos: number, floorPlanXPos: number, floorPlanYPos: number }} SharedPos
+ */
+/** @typedef {SharedPos & { viewXPos: number, zPos: number }} MovementPos */
+/** @typedef {SharedPos & { rectHeight: number, rectWidth: number, adjustYPos: number }} ConversationPos */
+
 // Shared constants for conversation rect sizing
 export const MIN_RECT_SIZE = 15
 export const MAX_RECT_SIZE = 80
 
 export class DrawUtils {
+  /** @param {IgsP5} sketch */
   constructor(sketch) {
     this.sk = sketch
   }
 
+  /** @param {string[]} searchCodes */
   setCodeColor(searchCodes) {
     const entries = get(CodeStore)
 
@@ -38,6 +49,7 @@ export class DrawUtils {
     }
   }
 
+  /** @param {string[]} codesArray */
   isShowingInCodeList(codesArray) {
     const entries = get(CodeStore)
     if (codesArray.length === 0) {
@@ -49,6 +61,11 @@ export class DrawUtils {
     }
   }
 
+  /**
+   * @param {DataPoint} point
+   * @param {SharedPos} curPos
+   * @param {number} stopLength
+   */
   isVisible(point, curPos, stopLength) {
     return (
       this.isShowingInGUI(curPos.timelineXPos) &&
@@ -57,14 +74,17 @@ export class DrawUtils {
     )
   }
 
+  /** @param {number} stopLength */
   isStopped(stopLength) {
     return stopLength >= drawState.config.stopSliderValue
   }
 
+  /** @param {number} pixelTime viewport pixel on the timeline axis */
   isShowingInGUI(pixelTime) {
     return timelineV2Store.overAxis(pixelTime) && this.isShowingInAnimation(pixelTime)
   }
 
+  /** @param {number} value viewport pixel on the timeline axis */
   isShowingInAnimation(value) {
     if (drawState.playbackMode !== 'stopped') {
       const state = timelineV2Store.getState()
@@ -73,6 +93,10 @@ export class DrawUtils {
     return true
   }
 
+  /**
+   * @param {SharedPos} curPos
+   * @param {boolean} pointIsStopped
+   */
   selectMode(curPos, pointIsStopped) {
     const { floorPlanXPos, floorPlanYPos, selTimelineXPos, timelineXPos } = curPos
     const is3DMode = this.sk.handle3D.getIs3DModeOrTransitioning()
@@ -102,6 +126,11 @@ export class DrawUtils {
     return true
   }
 
+  /**
+   * @param {number} view PLAN or SPACETIME constant
+   * @param {DataPoint} point
+   * @param {number} time
+   */
   createAugmentPoint(view, point, time) {
     return {
       point,
@@ -112,15 +141,18 @@ export class DrawUtils {
   /**
    * Returns scaled pixel values for a point to graphical display
    * IMPORTANT: currently view parameter can be either one of 2 constants or "null" for conversation drawing
-   * @param  {Movement Or Conversation Point} point
-   * @param  {Integer} time
+   * @param {DataPoint} point
+   * @param {number} time
+   * @returns {SharedPos}
    */
   getSharedPosValues(point, time) {
     const timelineXPos = timelineV2Store.timeToPixel(time)
     const selTimelineXPos = this.sk.mapSelectTimeToPixelTime(timelineXPos)
+    // Movement/conversation points always carry coordinates by the time they
+    // reach the draw layer; the ?? 0 satisfies DataPoint's nullable typing.
     const [floorPlanXPos, floorPlanYPos] = this.sk.floorPlan.getScaledXYPos(
-      point.x,
-      point.y,
+      point.x ?? 0,
+      point.y ?? 0,
       this.sk.gui.fpContainer.getContainer()
     )
     return {
@@ -132,8 +164,10 @@ export class DrawUtils {
   }
 
   /**
-   * @param  {MovementPoint} point
-   * @param  {Integer} view
+   * @param {DataPoint} point
+   * @param {number} view PLAN or SPACETIME constant
+   * @param {number} time
+   * @returns {MovementPos}
    */
   getScaledMovementPos(point, view, time) {
     const pos = this.getSharedPosValues(point, time)
@@ -147,8 +181,12 @@ export class DrawUtils {
     }
   }
 
+  /**
+   * @param {DataPoint} point
+   * @returns {ConversationPos}
+   */
   getScaledConversationPos(point) {
-    const pos = this.getSharedPosValues(point, point.time)
+    const pos = this.getSharedPosValues(point, point.time ?? 0)
     // Height: content length (how much text)
     const rectHeight = this.sk.map(
       point.speech.length,
@@ -168,6 +206,11 @@ export class DrawUtils {
     }
   }
 
+  /**
+   * @param {number} view
+   * @param {number} floorPlanXPos
+   * @param {number} selTimelineXPos
+   */
   getViewXPos(view, floorPlanXPos, selTimelineXPos) {
     if (view === this.sk.PLAN) return floorPlanXPos
     else {
@@ -176,6 +219,10 @@ export class DrawUtils {
     }
   }
 
+  /**
+   * @param {number} view
+   * @param {number} selTimelineXPos
+   */
   getZPos(view, selTimelineXPos) {
     if (view === this.sk.PLAN) return 0
     else {
@@ -186,6 +233,8 @@ export class DrawUtils {
 
   /**
    * Adjusts Y positioning of conversation rectangles correctly for align and 3 D views
+   * @param {number} floorPlanYPos
+   * @param {number} rectLength
    */
   getConversationAdjustYPos(floorPlanYPos, rectLength) {
     if (drawState.config.alignToggle) {

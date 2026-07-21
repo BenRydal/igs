@@ -6,7 +6,12 @@ export class DataPoint {
   stopLength: number
   codes: string[]
 
-  constructor(speech: string, time = null, x = null, y = null) {
+  constructor(
+    speech: string,
+    time: number | null = null,
+    x: number | null = null,
+    y: number | null = null
+  ) {
     this.speech = speech
     this.time = time
     this.x = x

@@ -1,7 +1,13 @@
 /**
  * Class to control 3D view and transitioning between 2D and 3D views
  */
+/** @typedef {import('../p5/igs-p5').IgsP5} IgsP5 */
+
 export class Handle3D {
+  /**
+   * @param {IgsP5} sketch
+   * @param {boolean} is3DMode
+   */
   constructor(sketch, is3DMode) {
     this.sk = sketch
     this.is3DMode = is3DMode
@@ -66,6 +72,7 @@ export class Handle3D {
     this.is3DMode = !this.is3DMode
   }
 
+  /** @param {boolean} value */
   setIsTransitioning(value) {
     this.isTransitioning = value
   }

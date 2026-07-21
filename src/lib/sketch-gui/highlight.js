@@ -1,11 +1,21 @@
 import { timelineV2Store } from '../timeline/store'
 
+/** @typedef {import('../p5/igs-p5').IgsP5} IgsP5 */
+/** @typedef {{ xPos: number, yPos: number, width: number, height: number }} HighlightRect */
+
 export class Highlight {
+  /**
+   * @param {IgsP5} sketch
+   * @param {number} bottomBounds
+   */
   constructor(sketch, bottomBounds) {
     this.sk = sketch
+    /** @type {number | null} */
     this.curXTop = null // top corner of highlight region
+    /** @type {number | null} */
     this.curYTop = null
-    this.highlightArray = [] // holds highlightRect objects which are pixel positions of user drawn rectangles
+    /** @type {HighlightRect[]} holds pixel positions of user drawn rectangles */
+    this.highlightArray = []
     this.bounds = {
       // currently the canvas boundary
       xPos: 0,
@@ -42,11 +52,14 @@ export class Highlight {
    * Returns top corner and width/height of user drawn selection rectangle dragged in any direction
    */
   createHighlightRect() {
+    // Only called while isHighlighting() (curX/YTop non-null)
+    const xTop = this.curXTop ?? 0
+    const yTop = this.curYTop ?? 0
     return {
-      xPos: Math.min(this.curXTop, this.sk.mouseX),
-      yPos: Math.min(this.curYTop, this.sk.mouseY),
-      width: Math.abs(this.sk.mouseX - this.curXTop),
-      height: Math.abs(this.sk.mouseY - this.curYTop),
+      xPos: Math.min(xTop, this.sk.mouseX),
+      yPos: Math.min(yTop, this.sk.mouseY),
+      width: Math.abs(this.sk.mouseX - xTop),
+      height: Math.abs(this.sk.mouseY - yTop),
     }
   }
 
@@ -63,12 +76,10 @@ export class Highlight {
    * Current highlight being recorded is drawn simply as a rectangle based on user mouse position and a starting point
    */
   drawCurHighlight() {
-    this.sk.rect(
-      this.curXTop,
-      this.curYTop,
-      this.sk.mouseX - this.curXTop,
-      this.sk.mouseY - this.curYTop
-    )
+    // Only called while isHighlighting() (curX/YTop non-null)
+    const xTop = this.curXTop ?? 0
+    const yTop = this.curYTop ?? 0
+    this.sk.rect(xTop, yTop, this.sk.mouseX - xTop, this.sk.mouseY - yTop)
   }
 
   /**
@@ -97,6 +108,7 @@ export class Highlight {
    * Draws 3D cube corresponding to time selected by user (vertical axis)
    * NOTE: rect is drawn across entire floorPlan along the x dimension/axis while the y is constrained to user selection (in other words, a user can't select portions of the x axis when user highlights over the timeline)
    */
+  /** @param {HighlightRect} highlightRect */
   draw3DHighlightRect(highlightRect) {
     // Map method maintains highlight rect scaling if user adjusts timeline.
     // The map functions take viewport pixels; highlightRect is canvas-space.
@@ -161,6 +173,11 @@ export class Highlight {
    * Called from draw movement/conversation methods (params are numbers from CurPos object)
    * Returns true if no highlightRects or if data is within bounds of a highlighRect
    */
+  /**
+   * @param {number} xPos
+   * @param {number} yPos
+   * @param {number} xPosTime
+   */
   overHighlightArray(xPos, yPos, xPosTime) {
     if (!this.highlightArray.length)
       return true // return true if no data
@@ -174,6 +191,12 @@ export class Highlight {
 
   /**
    * NOTE: If in 3D mode, you need to first test if highlightRect was selected on floor plan or timeline
+   */
+  /**
+   * @param {HighlightRect} highlightRect
+   * @param {number} xPos
+   * @param {number} yPos
+   * @param {number} xPosTimeToMap
    */
   overHighlightRect(highlightRect, xPos, yPos, xPosTimeToMap) {
     // Map method maintains highlight rect scaling if user adjusts timeline.
@@ -192,10 +215,18 @@ export class Highlight {
     }
   }
 
+  /**
+   * @param {number} xPos
+   * @param {HighlightRect} highlightRect
+   */
   betweenX(xPos, highlightRect) {
     return xPos >= highlightRect.xPos && xPos <= highlightRect.xPos + highlightRect.width
   }
 
+  /**
+   * @param {number} yPos
+   * @param {HighlightRect} highlightRect
+   */
   betweenY(yPos, highlightRect) {
     return yPos >= highlightRect.yPos && yPos <= highlightRect.yPos + highlightRect.height
   }

@@ -7,14 +7,22 @@ import { DrawMovement } from './draw-movement.js'
 import { DrawConversation } from './draw-conversation.js'
 import { DrawUtils } from './draw-utils.js'
 
+/** @typedef {import('../p5/igs-p5').IgsP5} IgsP5 */
+/** @typedef {import('../../models/user').User} User */
+/** @typedef {import('../../models/dataPoint').DataPoint} DataPoint */
+
 export class SetPathData {
+  /** @param {IgsP5} sketch */
   constructor(sketch) {
     this.sk = sketch
     this.drawUtils = new DrawUtils(sketch)
+    /** @type {{ point: DataPoint, speaker: string, color: string }[] | null} */
     this.mergedConversationCache = null
+    /** @type {string | null} */
     this.cacheKey = null
   }
 
+  /** @param {User[]} userList */
   setMovementAndConversation(userList) {
     const drawConversation = new DrawConversation(this.sk, this.drawUtils)
     const drawMovement = new DrawMovement(this.sk, this.drawUtils)
@@ -31,7 +39,7 @@ export class SetPathData {
         this.mergedConversationCache = this.mergeConversationData(conversationUsers)
         this.cacheKey = cacheKey
       }
-      drawConversation.drawAllConversations(this.mergedConversationCache)
+      drawConversation.drawAllConversations(this.mergedConversationCache ?? [])
     }
 
     // Draw movement after conversation so dots display on top
@@ -45,6 +53,7 @@ export class SetPathData {
   /**
    * K-way merge of pre-sorted user dataTrails into single time-sorted array.
    * Only includes points with speech. O(n) since inputs are already sorted.
+   * @param {User[]} users
    */
   mergeConversationData(users) {
     const iterators = users.map((user) => ({
@@ -61,12 +70,19 @@ export class SetPathData {
       let minIt = null
 
       for (const it of iterators) {
-        // Skip points without speech
-        while (it.idx < it.trail.length && !it.trail[it.idx].speech) it.idx++
+        // Skip points without speech (or without a usable time)
+        while (
+          it.idx < it.trail.length &&
+          (!it.trail[it.idx].speech || it.trail[it.idx].time == null)
+        )
+          it.idx++
 
-        if (it.idx < it.trail.length && it.trail[it.idx].time < minTime) {
-          minTime = it.trail[it.idx].time
-          minIt = it
+        if (it.idx < it.trail.length) {
+          const time = it.trail[it.idx].time
+          if (time != null && time < minTime) {
+            minTime = time
+            minIt = it
+          }
         }
       }
 
@@ -83,6 +99,7 @@ export class SetPathData {
     return merged
   }
 
+  /** @param {DataPoint[]} dataTrail */
   getCodeFileArrays(dataTrail) {
     if (dataTrail.length < 2) {
       console.error('dataTrail must contain at least two elements.')
@@ -95,7 +112,7 @@ export class SetPathData {
 
     for (let i = 1; i < dataTrail.length; i++) {
       const point = dataTrail[i]
-      const augmented = this.drawUtils.createAugmentPoint(this.sk.PLAN, point, point.time)
+      const augmented = this.drawUtils.createAugmentPoint(this.sk.PLAN, point, point.time ?? 0)
       const visible = this.drawUtils.isVisible(
         augmented.point,
         augmented.pos,
@@ -104,14 +121,14 @@ export class SetPathData {
 
       if (visible && !recording) {
         recording = true
-        startTimes.push(point.time)
+        startTimes.push(point.time ?? 0)
       } else if (!visible && recording) {
         recording = false
-        endTimes.push(dataTrail[i - 1].time)
+        endTimes.push(dataTrail[i - 1].time ?? 0)
       }
 
       if (i === dataTrail.length - 1 && recording) {
-        endTimes.push(point.time)
+        endTimes.push(point.time ?? 0)
       }
     }
 

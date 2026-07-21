@@ -4,10 +4,13 @@ import { timelineV2Store } from '../timeline/store'
 import ConfigStore from '../../stores/configStore'
 import { get } from 'svelte/store'
 
+/** @typedef {import('../p5/igs-p5').IgsP5} IgsP5 */
+
 /** Padding between floorplan edge and timeline data start */
 const FLOORPLAN_TIMELINE_GAP = 20
 
 export class SketchGUI {
+  /** @param {IgsP5} sketch */
   constructor(sketch) {
     this.sk = sketch
     this.displayBottom = this.sk.height
@@ -56,6 +59,10 @@ export class SketchGUI {
     this.sk.line(this.sk.mouseX, 0, this.sk.mouseX, this.sk.height)
   }
 
+  /**
+   * @param {{ width: number, height: number }} container
+   * @param {number} zPos position along the space-time cube's time axis
+   */
   draw3DSlicerRect(container, zPos) {
     this.sk.fill(255, 50)
     this.sk.stroke(0)

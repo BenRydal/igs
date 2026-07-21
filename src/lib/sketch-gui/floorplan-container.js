@@ -1,7 +1,14 @@
 import ConfigStore from '../../stores/configStore'
 import { get } from 'svelte/store'
 
+/** @typedef {import('../p5/igs-p5').IgsP5} IgsP5 */
+
 export class FloorPlanContainer {
+  /**
+   * @param {IgsP5} sketch
+   * @param {number} start container width (capped at the timeline's left edge)
+   * @param {number} height container height
+   */
   constructor(sketch, start, height) {
     this.sk = sketch
     this.width = start
@@ -34,6 +41,11 @@ export class FloorPlanContainer {
     this.sk.stroke(0)
   }
 
+  /**
+   * @param {number} xPos
+   * @param {number} yPos
+   * @param {number} xPosTime
+   */
   overCursor(xPos, yPos, xPosTime) {
     const selectorSize = this.getSelectorSize()
     return (
@@ -42,6 +54,10 @@ export class FloorPlanContainer {
     )
   }
 
+  /**
+   * @param {number} xPos
+   * @param {number} xPosTime
+   */
   overSlicer(xPos, xPosTime) {
     const slicerSize = this.getSlicerSize()
     return (
