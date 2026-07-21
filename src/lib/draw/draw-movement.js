@@ -1,41 +1,7 @@
 import { get } from 'svelte/store'
-import ConfigStore from '../../stores/configStore'
+import { drawState } from './draw-state'
 import CodeStore from '../../stores/codeStore'
 import { timelineV2Store } from '../timeline/store'
-import VideoStore from '../../stores/videoStore'
-import PlaybackStore from '../../stores/playbackStore'
-
-// ============================================================
-// MODULE STATE (subscribed from stores)
-// ============================================================
-
-// Config: rendering settings
-let maxStopLength, isPathColorMode, movementStrokeWeight, stopStrokeWeight
-// Config: spatial mode toggles
-let circleToggle, sliceToggle, movementToggle, stopsToggle, highlightToggle
-// Playback state
-let videoCurrentTime = 0
-let playbackMode = 'stopped'
-
-ConfigStore.subscribe((data) => {
-  maxStopLength = data.maxStopLength
-  isPathColorMode = data.isPathColorMode
-  movementStrokeWeight = data.movementStrokeWeight
-  stopStrokeWeight = data.stopStrokeWeight
-  circleToggle = data.circleToggle
-  sliceToggle = data.sliceToggle
-  movementToggle = data.movementToggle
-  stopsToggle = data.stopsToggle
-  highlightToggle = data.highlightToggle
-})
-
-VideoStore.subscribe((data) => {
-  videoCurrentTime = data.currentTime
-})
-
-PlaybackStore.subscribe((data) => {
-  playbackMode = data.mode
-})
 
 export class DrawMovement {
   // Static constants
@@ -90,13 +56,19 @@ export class DrawMovement {
   // Check if no spatial/type filters are active (allows batched drawing)
   // Note: code filtering is handled at segment level in drawBatched(), not here
   hasNoSpecialModes() {
-    return !circleToggle && !sliceToggle && !highlightToggle && !movementToggle && !stopsToggle
+    return (
+      !drawState.config.circleToggle &&
+      !drawState.config.sliceToggle &&
+      !drawState.config.highlightToggle &&
+      !drawState.config.movementToggle &&
+      !drawState.config.stopsToggle
+    )
   }
 
   // Check if we can use fast path (skip ALL visibility checks)
   canUseFastPath(state) {
     const isFullTimeline = state.viewStart <= state.dataStart && state.viewEnd >= state.dataEnd
-    const notAnimating = playbackMode === 'stopped'
+    const notAnimating = drawState.playbackMode === 'stopped'
     return isFullTimeline && notAnimating && this.hasNoSpecialModes()
   }
 
@@ -134,9 +106,10 @@ export class DrawMovement {
   getVisibleTimeRange(state) {
     const startTime = state.viewStart
     // If animating, cap at current playback time
-    const endTime = playbackMode !== 'stopped'
-      ? Math.min(state.viewEnd, state.currentTime)
-      : state.viewEnd
+    const endTime =
+      drawState.playbackMode !== 'stopped'
+        ? Math.min(state.viewEnd, state.currentTime)
+        : state.viewEnd
     return { startTime, endTime }
   }
 
@@ -204,16 +177,34 @@ export class DrawMovement {
     // Filter segments by code visibility (O(1) check per segment using cached enabled codes)
     const segments = allSegments.filter((seg) => this.isSegmentVisible(seg.codes))
 
-    if (!isPathColorMode) {
+    if (!drawState.config.isPathColorMode) {
       // Single color mode: batch all segments by type
       this.sk.stroke(this.shade)
 
       // Draw to SPACETIME: moving segments, then stopped segments
-      this.drawBatchedSegments(this.sk.SPACETIME, dataTrail, segments, false, movementStrokeWeight)
-      this.drawBatchedSegments(this.sk.SPACETIME, dataTrail, segments, true, stopStrokeWeight)
+      this.drawBatchedSegments(
+        this.sk.SPACETIME,
+        dataTrail,
+        segments,
+        false,
+        drawState.config.movementStrokeWeight
+      )
+      this.drawBatchedSegments(
+        this.sk.SPACETIME,
+        dataTrail,
+        segments,
+        true,
+        drawState.config.stopStrokeWeight
+      )
 
       // Draw to PLAN: moving segments as lines, stopped segments as circles
-      this.drawBatchedSegments(this.sk.PLAN, dataTrail, segments, false, movementStrokeWeight)
+      this.drawBatchedSegments(
+        this.sk.PLAN,
+        dataTrail,
+        segments,
+        false,
+        drawState.config.movementStrokeWeight
+      )
       this.drawAllStopCircles(dataTrail, segments)
     } else {
       // Path color mode: separate shapes per segment for different colors
@@ -235,8 +226,8 @@ export class DrawMovement {
 
     // Draw connections to both views (shared by both modes)
     // Re-set stroke since drawStopCircle calls noStroke()
-    if (!isPathColorMode) this.sk.stroke(this.shade)
-    this.sk.strokeWeight(movementStrokeWeight)
+    if (!drawState.config.isPathColorMode) this.sk.stroke(this.shade)
+    this.sk.strokeWeight(drawState.config.movementStrokeWeight)
     this.drawSegmentConnections(this.sk.SPACETIME, dataTrail, segments)
     this.drawSegmentConnections(this.sk.PLAN, dataTrail, segments)
   }
@@ -282,7 +273,7 @@ export class DrawMovement {
   drawSegmentConnections(view, dataTrail, segments) {
     if (segments.length < 2) return
 
-    if (!isPathColorMode) {
+    if (!drawState.config.isPathColorMode) {
       // Single color mode: batch all connections in one draw call
       this.sk.beginShape(this.sk.LINES)
       for (let i = 0; i < segments.length - 1; i++) {
@@ -320,7 +311,7 @@ export class DrawMovement {
     const nextAug = this.getAugmentedPoint(this.sk.PLAN, nextPoint)
     if (!this.drawUtils.isVisible(nextAug.point, nextAug.pos, nextAug.point.stopLength)) return
 
-    this.sk.strokeWeight(movementStrokeWeight)
+    this.sk.strokeWeight(drawState.config.movementStrokeWeight)
     this.setStroke(this.drawUtils.setCodeColor(codes))
     this.sk.beginShape(this.sk.LINES)
     this.emitConnectionVertices(view, dataTrail, segmentEnd, segmentEnd + 1)
@@ -351,7 +342,7 @@ export class DrawMovement {
           start: segStart,
           end: i - 1,
           isStopped: prevStopped,
-          codes: prevPoint.codes
+          codes: prevPoint.codes,
         })
         segStart = i
       }
@@ -363,7 +354,7 @@ export class DrawMovement {
       start: segStart,
       end: endIdx,
       isStopped: this.drawUtils.isStopped(lastPoint.stopLength),
-      codes: lastPoint.codes
+      codes: lastPoint.codes,
     })
 
     return segments
@@ -416,7 +407,9 @@ export class DrawMovement {
   // Draw segment vertices as LINES pairs (for batched drawing)
   // LINES mode draws separate line segments between each pair of vertices
   drawSegmentVerticesAsLines(view, dataTrail, start, end) {
-    let lastX = -Infinity, lastY = -Infinity, lastZ = -Infinity
+    let lastX = -Infinity,
+      lastY = -Infinity,
+      lastZ = -Infinity
     let prevX, prevY, prevZ
     let hasPrev = false
 
@@ -469,7 +462,10 @@ export class DrawMovement {
     this.setFill(this.drawUtils.setCodeColor(augmentedPoint.point.codes))
     const stopSize = this.sk.map(
       duration ?? augmentedPoint.point.stopLength,
-      0, maxStopLength, 5, DrawMovement.LARGEST_STOP_PIXEL_SIZE
+      0,
+      drawState.config.maxStopLength,
+      5,
+      DrawMovement.LARGEST_STOP_PIXEL_SIZE
     )
     this.sk.circle(augmentedPoint.pos.viewXPos, augmentedPoint.pos.floorPlanYPos, stopSize)
     this.sk.noFill()
@@ -482,16 +478,20 @@ export class DrawMovement {
 
   applySegmentStyle(stopLength, codes) {
     this.setStroke(this.drawUtils.setCodeColor(codes))
-    this.sk.strokeWeight(this.drawUtils.isStopped(stopLength) ? stopStrokeWeight : movementStrokeWeight)
+    this.sk.strokeWeight(
+      this.drawUtils.isStopped(stopLength)
+        ? drawState.config.stopStrokeWeight
+        : drawState.config.movementStrokeWeight
+    )
   }
 
   setFill(color) {
-    if (!isPathColorMode) this.sk.fill(this.shade)
+    if (!drawState.config.isPathColorMode) this.sk.fill(this.shade)
     else this.sk.fill(color)
   }
 
   setStroke(color) {
-    if (!isPathColorMode) this.sk.stroke(this.shade)
+    if (!drawState.config.isPathColorMode) this.sk.stroke(this.shade)
     else this.sk.stroke(color)
   }
 
@@ -505,10 +505,10 @@ export class DrawMovement {
     const [xPos, yPos, zPos, timePos, map3DMouse, codeColor] = this.getDotValues(augmentedPoint)
 
     // When playing, always show dot at current playback position (not mouse position)
-    if (playbackMode === 'playing-animation') {
+    if (drawState.playbackMode === 'playing-animation') {
       return this.createDot(xPos, yPos, zPos, timePos, codeColor, null)
     }
-    if (playbackMode === 'playing-video') {
+    if (drawState.playbackMode === 'playing-video') {
       const videoSelectTime = this.getVideoSelectTime()
       if (this.compareToCurDot(videoSelectTime, timePos, curDot)) {
         return this.createDot(
@@ -523,7 +523,8 @@ export class DrawMovement {
       return null
     }
     // When stopped, show dot at mouse position if hovering over timeline
-    const isOverTimeline = this.sk.isMouseOverTimeline() && this.compareToCurDot(map3DMouse, timePos, curDot)
+    const isOverTimeline =
+      this.sk.isMouseOverTimeline() && this.compareToCurDot(map3DMouse, timePos, curDot)
     if (isOverTimeline) {
       return this.createDot(xPos, yPos, zPos, map3DMouse, codeColor, Math.abs(map3DMouse - timePos))
     }
@@ -542,7 +543,7 @@ export class DrawMovement {
   }
 
   getVideoSelectTime() {
-    const videoPixelTime = timelineV2Store.timeToPixel(videoCurrentTime)
+    const videoPixelTime = timelineV2Store.timeToPixel(drawState.videoCurrentTime)
     return this.sk.mapSelectTimeToPixelTime(videoPixelTime)
   }
 
@@ -582,7 +583,11 @@ export class DrawMovement {
     if (newDot !== null) {
       // During animation, only update if this point is at or after current dot's time
       // (needed because segments are drawn by type, not time order)
-      if (playbackMode === 'playing-animation' && this.dot !== null && newDot.timePos < this.dot.timePos) {
+      if (
+        drawState.playbackMode === 'playing-animation' &&
+        this.dot !== null &&
+        newDot.timePos < this.dot.timePos
+      ) {
         return
       }
       this.dot = newDot

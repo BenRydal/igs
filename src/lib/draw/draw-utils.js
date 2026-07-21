@@ -4,40 +4,12 @@
 
 import { timelineV2Store } from '../timeline/store'
 import CodeStore from '../../stores/codeStore'
-import ConfigStore from '../../stores/configStore'
-import PlaybackStore from '../../stores/playbackStore'
 import { get } from 'svelte/store'
+import { drawState } from './draw-state'
 
 // Shared constants for conversation rect sizing
 export const MIN_RECT_SIZE = 15
 export const MAX_RECT_SIZE = 80
-
-let stopSliderValue,
-  alignToggle,
-  maxTurnLength,
-  conversationRectWidth,
-  circleToggle,
-  sliceToggle,
-  movementToggle,
-  stopsToggle,
-  highlightToggle,
-  playbackMode = 'stopped'
-
-ConfigStore.subscribe((data) => {
-  alignToggle = data.alignToggle
-  stopSliderValue = data.stopSliderValue
-  maxTurnLength = data.maxTurnLength
-  conversationRectWidth = data.conversationRectWidth
-  circleToggle = data.circleToggle
-  sliceToggle = data.sliceToggle
-  movementToggle = data.movementToggle
-  stopsToggle = data.stopsToggle
-  highlightToggle = data.highlightToggle
-})
-
-PlaybackStore.subscribe((data) => {
-  playbackMode = data.mode
-})
 
 export class DrawUtils {
   constructor(sketch) {
@@ -86,7 +58,7 @@ export class DrawUtils {
   }
 
   isStopped(stopLength) {
-    return stopLength >= stopSliderValue
+    return stopLength >= drawState.config.stopSliderValue
   }
 
   isShowingInGUI(pixelTime) {
@@ -94,7 +66,7 @@ export class DrawUtils {
   }
 
   isShowingInAnimation(value) {
-    if (playbackMode !== 'stopped') {
+    if (drawState.playbackMode !== 'stopped') {
       const state = timelineV2Store.getState()
       return timelineV2Store.pixelToTime(value) < state.currentTime
     }
@@ -105,25 +77,25 @@ export class DrawUtils {
     const { floorPlanXPos, floorPlanYPos, selTimelineXPos, timelineXPos } = curPos
     const is3DMode = this.sk.handle3D.getIs3DModeOrTransitioning()
 
-    if (circleToggle) {
+    if (drawState.config.circleToggle) {
       if (is3DMode) return true
       return this.sk.gui.fpContainer.overCursor(floorPlanXPos, floorPlanYPos, selTimelineXPos)
     }
 
-    if (sliceToggle) {
+    if (drawState.config.sliceToggle) {
       if (is3DMode) return true
       return this.sk.gui.fpContainer.overSlicer(floorPlanXPos, selTimelineXPos)
     }
 
-    if (movementToggle) {
+    if (drawState.config.movementToggle) {
       return !pointIsStopped
     }
 
-    if (stopsToggle) {
+    if (drawState.config.stopsToggle) {
       return pointIsStopped
     }
 
-    if (highlightToggle) {
+    if (drawState.config.highlightToggle) {
       return this.sk.gui.highlight.overHighlightArray(floorPlanXPos, floorPlanYPos, timelineXPos)
     }
 
@@ -181,7 +153,7 @@ export class DrawUtils {
     const rectHeight = this.sk.map(
       point.speech.length,
       0,
-      maxTurnLength,
+      drawState.config.maxTurnLength,
       MIN_RECT_SIZE,
       MAX_RECT_SIZE
     )
@@ -191,7 +163,7 @@ export class DrawUtils {
       floorPlanXPos: pos.floorPlanXPos,
       floorPlanYPos: pos.floorPlanYPos,
       rectHeight,
-      rectWidth: conversationRectWidth,
+      rectWidth: drawState.config.conversationRectWidth,
       adjustYPos: this.getConversationAdjustYPos(pos.floorPlanYPos, rectHeight),
     }
   }
@@ -216,7 +188,7 @@ export class DrawUtils {
    * Adjusts Y positioning of conversation rectangles correctly for align and 3 D views
    */
   getConversationAdjustYPos(floorPlanYPos, rectLength) {
-    if (alignToggle) {
+    if (drawState.config.alignToggle) {
       if (this.sk.handle3D.getIs3DMode()) return this.sk.gui.fpContainer.getContainer().height
       else return 0
     } else if (this.sk.handle3D.getIs3DMode()) {

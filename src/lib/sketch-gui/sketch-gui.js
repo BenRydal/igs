@@ -11,9 +11,11 @@ export class SketchGUI {
   constructor(sketch) {
     this.sk = sketch
     this.displayBottom = this.sk.height
-    // Cap container width to canvas width for split-screen mode, with gap for timeline
+    // Cap container width so the floorplan never extends past the timeline's
+    // left edge (leftX is viewport-space; convert to canvas-space first).
     const state = timelineV2Store.getState()
-    const containerWidth = Math.min(state.leftX, this.sk.width) - FLOORPLAN_TIMELINE_GAP
+    const containerWidth =
+      Math.min(state.leftX - this.sk.canvasLeft, this.sk.width) - FLOORPLAN_TIMELINE_GAP
     this.fpContainer = new FloorPlanContainer(this.sk, containerWidth, this.displayBottom)
     this.highlight = new Highlight(this.sk, this.displayBottom)
   }

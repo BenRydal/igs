@@ -77,7 +77,11 @@ export class Highlight {
    * @param  {HighlightRect} highlightRect
    */
   drawHighlightRects(highlightRect) {
-    if (this.sk.handle3D.getIs3DMode() && timelineV2Store.overAxis(highlightRect.xPos)) {
+    // highlightRect is canvas-space; overAxis expects viewport pixels
+    if (
+      this.sk.handle3D.getIs3DMode() &&
+      timelineV2Store.overAxis(highlightRect.xPos + this.sk.canvasLeft)
+    ) {
       this.draw3DHighlightRect(highlightRect)
     } else {
       this.sk.rect(
@@ -94,9 +98,12 @@ export class Highlight {
    * NOTE: rect is drawn across entire floorPlan along the x dimension/axis while the y is constrained to user selection (in other words, a user can't select portions of the x axis when user highlights over the timeline)
    */
   draw3DHighlightRect(highlightRect) {
-    // Map method maintains highlight rect scaling if user adjusts timeline
-    const zPosStart = this.sk.mapToSelectTimeThenPixelTime(highlightRect.xPos)
-    const zPosEnd = this.sk.mapToSelectTimeThenPixelTime(highlightRect.xPos + highlightRect.width)
+    // Map method maintains highlight rect scaling if user adjusts timeline.
+    // The map functions take viewport pixels; highlightRect is canvas-space.
+    const zPosStart = this.sk.mapToSelectTimeThenPixelTime(highlightRect.xPos + this.sk.canvasLeft)
+    const zPosEnd = this.sk.mapToSelectTimeThenPixelTime(
+      highlightRect.xPos + highlightRect.width + this.sk.canvasLeft
+    )
 
     const span = this.sk.gui.fpContainer.getContainer().width // span 3D rects full span of floor plan container
     // cube top
@@ -169,9 +176,12 @@ export class Highlight {
    * NOTE: If in 3D mode, you need to first test if highlightRect was selected on floor plan or timeline
    */
   overHighlightRect(highlightRect, xPos, yPos, xPosTimeToMap) {
-    const xPosTime = timelineV2Store.viewPixelToPixel(xPosTimeToMap) // Map method maintains highlight rect scaling if user adjusts timeline, make sure to test 2D only
+    // Map method maintains highlight rect scaling if user adjusts timeline.
+    // xPosTimeToMap is a viewport pixel; highlightRect is canvas-space, so
+    // the zoom-adjusted result must be shifted into canvas coordinates.
+    const xPosTime = timelineV2Store.viewPixelToPixel(xPosTimeToMap) - this.sk.canvasLeft
     if (this.sk.handle3D.getIs3DMode()) {
-      if (timelineV2Store.overAxis(highlightRect.xPos))
+      if (timelineV2Store.overAxis(highlightRect.xPos + this.sk.canvasLeft))
         return this.betweenX(xPosTime, highlightRect) && this.betweenY(yPos, highlightRect)
       else return this.betweenX(xPos, highlightRect) && this.betweenY(yPos, highlightRect)
     } else {

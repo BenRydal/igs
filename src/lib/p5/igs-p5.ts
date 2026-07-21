@@ -25,6 +25,15 @@ export interface IgsSketchExt {
   /** Current canvas size derived from the canvas container element */
   getContainerSize(): { width: number; height: number }
 
+  /**
+   * The canvas's viewport-left offset, cached once per frame. Timeline x
+   * bounds (timelineV2Store.leftX/rightX) are viewport coordinates; anything
+   * drawn on the canvas must subtract this to become canvas-relative.
+   */
+  canvasLeft: number
+  /** Refreshes the cached canvasLeft from the container's bounding rect */
+  updateCanvasOffset(): void
+
   /** True when the value is neither null nor undefined */
   dataIsLoaded(data: unknown): boolean
   /** True when the value is a non-empty array */
@@ -54,12 +63,11 @@ export interface IgsSketchExt {
   mapToSelectTimeThenPixelTime(value: number): number
 
   /**
-   * Destroys and recreates the WEBGL canvas to reset GL state (Safari
-   * degrades after large data loads). Raw-p5 escape hatch: to be replaced
-   * by svelte-p5's `{#key}` remount + WEBGL_lose_context recipe in the
-   * layout-chrome phase of the migration.
+   * Rebuilds size-dependent state (SketchGUI, Handle3D) after a resize.
+   * Driven by the library <Sketch>'s onResize callback — the single resize
+   * path; the sketch intentionally defines no p5-native windowResized.
    */
-  recreateCanvas(): void
+  rebuildAfterResize(): void
 }
 
 /** The IGS p5 instance: p5 plus everything the sketch installs on it. */
