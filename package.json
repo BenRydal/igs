@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "packageManager": "yarn@4.0.1",
+  "packageManager": "yarn@4.17.1",
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
@@ -58,6 +58,8 @@
     "luxon": "^3.7.2",
     "p5": "^1.11.11",
     "papaparse": "^5.5.3",
-    "svelte-p5": "https://pkg.pr.new/svelte-p5@ec4a794.tgz"
+    "svelte-p5": "https://pkg.pr.new/svelte-p5@3d05643.tgz",
+    "svelte-p5-components": "https://pkg.pr.new/svelte-p5-components@3d05643.tgz",
+    "svelte-p5-viz": "https://pkg.pr.new/svelte-p5-viz@3d05643.tgz"
   }
 }
