@@ -25,14 +25,11 @@
 
     // Listen for custom events dispatched by shortcuts
     const handleCheatsheet = () => (showCheatsheet = true)
-    const handleCommandPalette = () => (showCommandPalette = true)
 
     window.addEventListener('igs:open-cheatsheet', handleCheatsheet)
-    window.addEventListener('igs:open-command-palette', handleCommandPalette)
 
     return () => {
       window.removeEventListener('igs:open-cheatsheet', handleCheatsheet)
-      window.removeEventListener('igs:open-command-palette', handleCommandPalette)
       cleanupModalListeners()
     }
   })

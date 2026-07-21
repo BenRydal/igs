@@ -23,6 +23,6 @@
  */
 
 export { registry } from './registry'
-export { attachKeyboardHandler, detachKeyboardHandler, isHandlerAttached } from './handler'
-export type { KeyboardShortcut, ShortcutCategory, KeyboardEventMatch } from './types'
-export { registerAllShortcuts, unregisterAllShortcuts, allShortcuts } from './shortcuts'
+export { attachKeyboardHandler } from './handler'
+export type { KeyboardShortcut, ShortcutCategory } from './types'
+export { registerAllShortcuts } from './shortcuts'

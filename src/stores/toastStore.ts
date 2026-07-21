@@ -93,18 +93,10 @@ function createToastStore() {
     update((toasts) => toasts.filter((t) => t.id !== id))
   }
 
-  /**
-   * Clear all toasts
-   */
-  function clear(): void {
-    update(() => [])
-  }
-
   return {
     subscribe,
     add,
     remove,
-    clear,
     // Convenience methods
     info: (msg: string, opts?: ToastOptions) => add(msg, 'info', opts),
     success: (msg: string, opts?: ToastOptions) => add(msg, 'success', opts),
@@ -117,12 +109,3 @@ function createToastStore() {
  * Global toast store instance
  */
 export const toastStore = createToastStore()
-
-/**
- * Convenience function for adding toasts
- *
- * @example
- * showToast('Operation complete', 'success');
- * showToast('Failed to save', 'error', { duration: 5000 });
- */
-export const showToast = toastStore.add

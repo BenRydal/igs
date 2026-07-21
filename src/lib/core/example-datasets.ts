@@ -27,7 +27,14 @@ export const EXAMPLE_DATASETS: Record<string, ExampleDataset> = {
     duration: '56 min',
   },
   'example-4': {
-    files: ['cassandra.csv', 'mei.csv', 'nathan.csv', 'sean.csv', 'teacher.csv', 'conversation.csv'],
+    files: [
+      'cassandra.csv',
+      'mei.csv',
+      'nathan.csv',
+      'sean.csv',
+      'teacher.csv',
+      'conversation.csv',
+    ],
     videoId: 'OJSZCK4GPQY',
     duration: '7 min',
   },
@@ -116,8 +123,6 @@ export const EXAMPLE_DATASETS: Record<string, ExampleDataset> = {
     duration: '1h 21m',
   },
 } as const
-
-export type ExampleId = keyof typeof EXAMPLE_DATASETS | ''
 
 /**
  * Get example dataset configuration by ID

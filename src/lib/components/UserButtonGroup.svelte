@@ -11,13 +11,7 @@
     maxVisible?: number
   }
 
-  let {
-    users,
-    isUserVisible,
-    onToggleVisibility,
-    onOpenDropdown,
-    maxVisible = 5,
-  }: Props = $props()
+  let { users, isUserVisible, onToggleVisibility, onOpenDropdown, maxVisible = 5 }: Props = $props()
 
   let isExpanded = $state(false)
 
@@ -44,9 +38,13 @@
   {/each}
 
   {#if showExpandButton}
-    <button class="expand-button" onclick={toggleExpanded} title={isExpanded ? 'Show fewer' : `Show ${hiddenCount} more`}>
+    <button
+      class="expand-button"
+      onclick={toggleExpanded}
+      title={isExpanded ? 'Show fewer' : `Show ${hiddenCount} more`}
+    >
       {#if isExpanded}
-        <MdChevronLeft class="collapse-icon" />
+        <MdChevronLeft />
       {:else}
         +{hiddenCount}
       {/if}
@@ -85,10 +83,5 @@
 
   .expand-button:active {
     background-color: #c4c4c4;
-  }
-
-  .collapse-icon {
-    width: 1rem;
-    height: 1rem;
   }
 </style>

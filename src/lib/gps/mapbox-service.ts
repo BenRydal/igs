@@ -114,8 +114,6 @@ export async function loadMapAsFloorPlan(
         mapUrl,
         (img: any) => {
           sketch.floorPlan.img = img
-          sketch.floorPlan.width = img.width
-          sketch.floorPlan.height = img.height
           setLoading(false)
           sketch.loop()
           resolve()

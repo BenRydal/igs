@@ -5,9 +5,6 @@
  * Both keyboard shortcuts and command palette derive from this registry.
  */
 
-// Types
-export type { AppAction, ActionCategory, ShortcutConfig } from './types'
-
 // Registry
 export { findActionById, getCategoryLabel } from './registry'
 

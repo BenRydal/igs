@@ -51,22 +51,6 @@ export class TimeUtils {
   }
 
   /**
-   * Formats seconds into HH:MM:SS
-   */
-  static formatTime(seconds: number): string {
-    const duration = Duration.fromObject({ seconds: Math.round(seconds) })
-    return duration.toFormat('hh:mm:ss')
-  }
-
-  /**
-   * Formats seconds into MM:SS if under an hour otherwise HH:MM:SS
-   */
-  static formatTimeAuto(seconds: number): string {
-    const duration = Duration.fromObject({ seconds: Math.round(seconds) })
-    return seconds < 3600 ? duration.toFormat('mm:ss') : duration.toFormat('hh:mm:ss')
-  }
-
-  /**
    * Detects the time format from a sample value
    * Returns null if format cannot be determined
    */

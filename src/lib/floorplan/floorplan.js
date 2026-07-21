@@ -1,4 +1,3 @@
-import { toastStore } from '../../stores/toastStore'
 import GPSStore from '../../stores/gpsStore'
 import ConfigStore from '../../stores/configStore'
 import { get } from 'svelte/store'
@@ -14,10 +13,6 @@ export class FloorPlan {
     this.sk = sk
     /** @type {import('p5').Image | null} */
     this.img = null
-    /** @type {number | null} */
-    this.width = null
-    /** @type {number | null} */
-    this.height = null
     this.curFloorPlanRotation = 1 // [0-3] 4 rotation modes none, 90, 180, 270
   }
 
@@ -60,27 +55,6 @@ export class FloorPlan {
     }
 
     return { width, height, offsetX, offsetY }
-  }
-
-  /**
-   * Creates P5 image file from path and updates core floorPlan image and input width/heights to properly scale and display data
-   * @param  {String} filePath
-   */
-  update(filePath) {
-    this.sk.loadImage(
-      filePath,
-      (img) => {
-        this.img = img
-        this.width = img.width
-        this.height = img.height
-        this.sk.loop() // rerun P5 draw loop after loading image
-      },
-      () => {
-        toastStore.error(
-          'Error loading floor plan image file. Please make sure it is correctly formatted as a PNG or JPG image file.'
-        )
-      }
-    )
   }
 
   /**
@@ -194,11 +168,5 @@ export class FloorPlan {
 
   getImg() {
     return this.img
-  }
-
-  clear() {
-    this.img = null
-    this.width = null
-    this.height = null
   }
 }

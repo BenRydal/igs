@@ -64,7 +64,7 @@
   aria-expanded={isOpen}
 >
   Codes
-  <MdChevronDown class="chevron" />
+  <MdChevronDown />
 </button>
 
 {#if isOpen}
@@ -163,12 +163,6 @@
 
   .codes-button:active {
     background-color: #c4c4c4;
-  }
-
-  .chevron {
-    width: 1rem;
-    height: 1rem;
-    margin-left: -0.125rem;
   }
 
   .codes-dropdown {

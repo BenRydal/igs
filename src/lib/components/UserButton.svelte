@@ -26,12 +26,8 @@
     <span class="color-chip" style:background-color={user.color}></span>
     <span class="user-name">{user.name}</span>
   </button>
-  <button
-    class="settings-button"
-    onclick={handleSettingsClick}
-    title="Settings"
-  >
-    <MdDotsVertical class="settings-icon" />
+  <button class="settings-button" onclick={handleSettingsClick} title="Settings">
+    <MdDotsVertical />
   </button>
 </div>
 
@@ -83,11 +79,6 @@
 
   .settings-button:hover {
     color: #1f2937;
-  }
-
-  .settings-icon {
-    width: 16px;
-    height: 16px;
   }
 
   .color-chip {

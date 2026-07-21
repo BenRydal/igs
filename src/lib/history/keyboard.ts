@@ -24,7 +24,6 @@ const redoAction = () => {
 }
 
 /** Shortcut IDs for cleanup */
-const SHORTCUT_IDS = ['undo', 'redo', 'redo-y'] as const
 
 /**
  * Check if the current platform is Mac
@@ -75,11 +74,4 @@ export function registerUndoRedoShortcuts(): void {
   ]
 
   shortcuts.forEach((shortcut) => registry.register(shortcut))
-}
-
-/**
- * Unregister undo/redo keyboard shortcuts
- */
-export function unregisterUndoRedoShortcuts(): void {
-  SHORTCUT_IDS.forEach((id) => registry.unregister(id))
 }

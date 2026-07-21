@@ -2,7 +2,7 @@ import { get } from 'svelte/store'
 import UserStore from '../../stores/userStore'
 import CodeStore from '../../stores/codeStore'
 import { historyStore } from '../../stores/historyStore'
-import { deepClone } from './index'
+import { deepClone } from './deep-clone'
 
 /**
  * Clear all user data with undo
@@ -65,34 +65,6 @@ export function clearAllData(): void {
 }
 
 /**
- * Toggle a specific code's enabled state with undo
- */
-export function toggleCodeEnabled(codeName: string): void {
-  const codes = get(CodeStore)
-  const code = codes.find((c) => c.code === codeName)
-  if (!code) return
-
-  const wasEnabled = code.enabled
-
-  CodeStore.update((list) =>
-    list.map((c) => (c.code === codeName ? { ...c, enabled: !c.enabled } : c))
-  )
-
-  historyStore.push({
-    actionType: 'code.toggle',
-    actionLabel: `${wasEnabled ? 'Disabled' : 'Enabled'} ${codeName}`,
-    undo: () =>
-      CodeStore.update((list) =>
-        list.map((c) => (c.code === codeName ? { ...c, enabled: wasEnabled } : c))
-      ),
-    redo: () =>
-      CodeStore.update((list) =>
-        list.map((c) => (c.code === codeName ? { ...c, enabled: !wasEnabled } : c))
-      ),
-  })
-}
-
-/**
  * Set a code's enabled state with undo
  */
 export function setCodeEnabled(codeName: string, enabled: boolean): void {
@@ -102,9 +74,7 @@ export function setCodeEnabled(codeName: string, enabled: boolean): void {
 
   const wasEnabled = code.enabled
 
-  CodeStore.update((list) =>
-    list.map((c) => (c.code === codeName ? { ...c, enabled } : c))
-  )
+  CodeStore.update((list) => list.map((c) => (c.code === codeName ? { ...c, enabled } : c)))
 
   historyStore.push({
     actionType: 'code.toggle',
@@ -114,9 +84,7 @@ export function setCodeEnabled(codeName: string, enabled: boolean): void {
         list.map((c) => (c.code === codeName ? { ...c, enabled: wasEnabled } : c))
       ),
     redo: () =>
-      CodeStore.update((list) =>
-        list.map((c) => (c.code === codeName ? { ...c, enabled } : c))
-      ),
+      CodeStore.update((list) => list.map((c) => (c.code === codeName ? { ...c, enabled } : c))),
   })
 }
 
@@ -131,9 +99,7 @@ export function setCodeColor(codeName: string, color: string): void {
   const oldColor = code.color
   if (oldColor === color) return
 
-  CodeStore.update((list) =>
-    list.map((c) => (c.code === codeName ? { ...c, color } : c))
-  )
+  CodeStore.update((list) => list.map((c) => (c.code === codeName ? { ...c, color } : c)))
 
   historyStore.push({
     actionType: 'code.color',
@@ -143,9 +109,7 @@ export function setCodeColor(codeName: string, color: string): void {
         list.map((c) => (c.code === codeName ? { ...c, color: oldColor } : c))
       ),
     redo: () =>
-      CodeStore.update((list) =>
-        list.map((c) => (c.code === codeName ? { ...c, color } : c))
-      ),
+      CodeStore.update((list) => list.map((c) => (c.code === codeName ? { ...c, color } : c))),
   })
 }
 

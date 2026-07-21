@@ -1,7 +1,7 @@
 import { get } from 'svelte/store'
 import UserStore from '../../stores/userStore'
 import { historyStore } from '../../stores/historyStore'
-import { deepClone } from './index'
+import { deepClone } from './deep-clone'
 
 /**
  * Toggle user visibility with undo
@@ -146,55 +146,5 @@ export function toggleUserVisibility(userId: string, currentlyVisible: boolean):
           u.name === userId ? { ...u, enabled: newValue, conversation_enabled: newValue } : u
         )
       ),
-  })
-}
-
-/**
- * Toggle all users visibility
- */
-export function toggleAllUsers(enabled: boolean): void {
-  const before = deepClone(get(UserStore).map((u) => ({ name: u.name, enabled: u.enabled })))
-
-  UserStore.update((list) => list.map((u) => ({ ...u, enabled })))
-
-  historyStore.push({
-    actionType: 'user.toggle',
-    actionLabel: `${enabled ? 'Showed' : 'Hid'} all users`,
-    undo: () =>
-      UserStore.update((list) =>
-        list.map((u) => {
-          const prev = before.find((b) => b.name === u.name)
-          return prev ? { ...u, enabled: prev.enabled } : u
-        })
-      ),
-    redo: () => UserStore.update((list) => list.map((u) => ({ ...u, enabled }))),
-  })
-}
-
-/**
- * Toggle all users conversation visibility
- */
-export function toggleAllUsersConversation(enabled: boolean): void {
-  const before = deepClone(
-    get(UserStore).map((u) => ({
-      name: u.name,
-      conversation_enabled: u.conversation_enabled,
-    }))
-  )
-
-  UserStore.update((list) => list.map((u) => ({ ...u, conversation_enabled: enabled })))
-
-  historyStore.push({
-    actionType: 'user.toggle',
-    actionLabel: `${enabled ? 'Showed' : 'Hid'} all conversations`,
-    undo: () =>
-      UserStore.update((list) =>
-        list.map((u) => {
-          const prev = before.find((b) => b.name === u.name)
-          return prev ? { ...u, conversation_enabled: prev.conversation_enabled } : u
-        })
-      ),
-    redo: () =>
-      UserStore.update((list) => list.map((u) => ({ ...u, conversation_enabled: enabled }))),
   })
 }

@@ -119,14 +119,6 @@ export type ExampleId =
   | 'example-16'
 
 /**
- * Example data configuration
- */
-export interface ExampleConfig {
-  files: string[]
-  videoId?: string
-}
-
-/**
  * Example dropdown selection. Only the selected value is consumed, and
  * callers dispatch plain `{ target: { value } }` objects (not real DOM
  * events), so the shape is deliberately minimal.

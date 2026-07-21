@@ -302,8 +302,6 @@ export class Core {
   loadFloorplanImage = (path: string) => {
     this.sketch.loadImage(path, (img) => {
       this.sketch.floorPlan.img = img
-      this.sketch.floorPlan.width = img.width
-      this.sketch.floorPlan.height = img.height
       this.sketch.loop()
     })
   }

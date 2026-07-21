@@ -268,7 +268,10 @@
     p5Instance?.loop() // Trigger redraw
   }
 
-  function handleConfigChange(key: keyof ConfigStoreType, value: ConfigStoreType[keyof ConfigStoreType]) {
+  function handleConfigChange(
+    key: keyof ConfigStoreType,
+    value: ConfigStoreType[keyof ConfigStoreType]
+  ) {
     ConfigStore.update((store) => ({ ...store, [key]: value }))
     p5Instance?.loop()
   }
@@ -590,10 +593,6 @@
       }
     }
 
-    const handleToggleVideo = () => {
-      toggleVideo()
-    }
-
     const handleDownloadCodes = () => {
       if (p5Instance) {
         p5Instance?.saveCodeFile()
@@ -627,7 +626,6 @@
     // Register event listeners
     window.addEventListener('igs:toggle-3d', handleToggle3D)
     window.addEventListener('igs:rotate-floorplan', handleRotateFloorplan)
-    window.addEventListener('igs:toggle-video', handleToggleVideo)
     window.addEventListener('igs:download-codes', handleDownloadCodes)
     window.addEventListener('igs:toggle-help', handleToggleHelp)
     window.addEventListener('igs:load-example', handleLoadExample)
@@ -643,7 +641,6 @@
       // Remove keyboard shortcut handlers
       window.removeEventListener('igs:toggle-3d', handleToggle3D)
       window.removeEventListener('igs:rotate-floorplan', handleRotateFloorplan)
-      window.removeEventListener('igs:toggle-video', handleToggleVideo)
       window.removeEventListener('igs:download-codes', handleDownloadCodes)
       window.removeEventListener('igs:toggle-help', handleToggleHelp)
       window.removeEventListener('igs:load-example', handleLoadExample)
@@ -1830,13 +1827,5 @@
     width: 100%;
     height: 100%;
     overflow: hidden;
-  }
-
-  .color-picker {
-    width: 30px;
-    height: 30px;
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
   }
 </style>

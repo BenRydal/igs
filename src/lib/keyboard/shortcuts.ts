@@ -92,14 +92,3 @@ export function registerAllShortcuts(): void {
     throw error
   }
 }
-
-/**
- * Unregister all IGS keyboard shortcuts
- * Useful for cleanup or hot module replacement
- */
-export function unregisterAllShortcuts(): void {
-  allShortcuts.forEach((shortcut) => {
-    registry.unregister(shortcut.id)
-  })
-  console.log(`Unregistered ${allShortcuts.length} keyboard shortcuts`)
-}
