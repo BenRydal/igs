@@ -2530,9 +2530,9 @@ __metadata:
     prettier-plugin-svelte: "npm:^3.4.0"
     svelte: "npm:^5.0.0"
     svelte-check: "npm:^4.0.0"
-    svelte-p5: "https://pkg.pr.new/svelte-p5@3d05643.tgz"
-    svelte-p5-components: "https://pkg.pr.new/svelte-p5-components@3d05643.tgz"
-    svelte-p5-viz: "https://pkg.pr.new/svelte-p5-viz@3d05643.tgz"
+    svelte-p5: "npm:^0.4.0"
+    svelte-p5-components: "npm:^0.6.0"
+    svelte-p5-viz: "npm:^0.2.1"
     tailwindcss: "npm:^4.0.0"
     typescript: "npm:^5.9.3"
     typescript-eslint: "npm:^8.0.0"
@@ -3979,38 +3979,38 @@ __metadata:
   languageName: node
   linkType: hard
 
-"svelte-p5-components@https://pkg.pr.new/svelte-p5-components@3d05643.tgz":
-  version: 0.5.0
-  resolution: "svelte-p5-components@https://pkg.pr.new/svelte-p5-components@3d05643.tgz"
+"svelte-p5-components@npm:^0.6.0":
+  version: 0.6.0
+  resolution: "svelte-p5-components@npm:0.6.0"
   dependencies:
     "@neodrag/core": "npm:3.0.0-next.8"
     "@neodrag/svelte": "npm:3.0.0-next.8"
   peerDependencies:
     p5: ">=1.11.0 <3"
     svelte: ^5.0.0
-    svelte-p5: ">=0.3.0 <1"
-  checksum: 10c0/e249766ea0eca222eab58fb93ef7a724c2fa97c6fed18a1accc6ca3aedb7b90ed61d5e0068e38387c19901bbd47f6fb7ad5cc0068d47e760e211309d6e264c6b
+    svelte-p5: ">=0.4.0"
+  checksum: 10c0/4f0725489029065bf28074bc898d8e55121019bd0de51bae85b0ba75e476430b3fd8c3bdd46fcc55d61e78f30dc7295a69dbfdab1c038df5733a671fdb9d2fb9
   languageName: node
   linkType: hard
 
-"svelte-p5-viz@https://pkg.pr.new/svelte-p5-viz@3d05643.tgz":
-  version: 0.2.0
-  resolution: "svelte-p5-viz@https://pkg.pr.new/svelte-p5-viz@3d05643.tgz"
+"svelte-p5-viz@npm:^0.2.1":
+  version: 0.2.1
+  resolution: "svelte-p5-viz@npm:0.2.1"
   peerDependencies:
     p5: ">=1.11.0 <3"
     svelte: ^5.0.0
     svelte-p5: "workspace:^"
-  checksum: 10c0/4577fbf1204d5f1a38dbc60cec52f322a26270d2834c0876d78afcb45defbbaeacf55fd89dbd26b9d350047c5e076ddd1f1b03353cc09f476e4383a51032827b
+  checksum: 10c0/0465c5dd7f753908521001a77f0e025a92506ab1c396d8c27946053e353da2a2452852e9a2cb149e5bd34e12ce316f8d54761b46928bb731a2edb8e8f205834c
   languageName: node
   linkType: hard
 
-"svelte-p5@https://pkg.pr.new/svelte-p5@3d05643.tgz":
-  version: 0.3.0
-  resolution: "svelte-p5@https://pkg.pr.new/svelte-p5@3d05643.tgz"
+"svelte-p5@npm:^0.4.0":
+  version: 0.4.0
+  resolution: "svelte-p5@npm:0.4.0"
   peerDependencies:
     p5: ">=1.11.0 <3"
     svelte: ^5.0.0
-  checksum: 10c0/e13465ef4ab07a658ab94d274ff2edd93033beac62d642377bf7d45747d90d74a29e5da28cf1b600dbe1e2a41466d22da53bd6d363dbbb74ecee454a72881957
+  checksum: 10c0/ab366447e2dd11c9c22527564643af20cd6befaebd4fcb8f7e40709d04a84c5a5985723f32c771b293d7cb3103fd7af66aa0809bfe36b6c1d02d2e613c7dde78
   languageName: node
   linkType: hard
 

@@ -58,8 +58,8 @@
     "luxon": "^3.7.2",
     "p5": "^1.11.11",
     "papaparse": "^5.5.3",
-    "svelte-p5": "https://pkg.pr.new/svelte-p5@3d05643.tgz",
-    "svelte-p5-components": "https://pkg.pr.new/svelte-p5-components@3d05643.tgz",
-    "svelte-p5-viz": "https://pkg.pr.new/svelte-p5-viz@3d05643.tgz"
+    "svelte-p5": "^0.4.0",
+    "svelte-p5-components": "^0.6.0",
+    "svelte-p5-viz": "^0.2.1"
   }
 }
