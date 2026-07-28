@@ -73,6 +73,42 @@
     measure()
     return () => cancelAnimationFrame(raf)
   })
+
+  // Width is the only size state; height follows it, which is what keeps the
+  // window at 16:9. DraggableWindow's native `resize: both` is disabled in CSS
+  // so the two can't fight over the element's inline size.
+  let width = $state(DEFAULT_WIDTH)
+  let height = $derived(width / ASPECT_RATIO + CHROME_HEIGHT)
+
+  let resizeStartX = 0
+  let resizeStartWidth = 0
+  let maxWidth = Infinity
+
+  function startResize(e: PointerEvent) {
+    e.preventDefault()
+    e.stopPropagation()
+    resizeStartX = e.clientX
+    resizeStartWidth = width
+    const shell = (e.currentTarget as HTMLElement).closest('.video-window-shell')
+    const win = (e.currentTarget as HTMLElement).closest('.draggable-window')
+    // Cap growth at the canvas pane, otherwise DraggableWindow's parent clamp
+    // snaps the window to (0,0) once it outgrows its container.
+    maxWidth =
+      shell && win
+        ? shell.getBoundingClientRect().right - win.getBoundingClientRect().left - 10
+        : Infinity
+    ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
+  }
+
+  function trackResize(e: PointerEvent) {
+    const el = e.currentTarget as HTMLElement
+    if (!el.hasPointerCapture(e.pointerId)) return
+    width = Math.min(maxWidth, Math.max(MIN_WIDTH, resizeStartWidth + (e.clientX - resizeStartX)))
+  }
+
+  function endResize(e: PointerEvent) {
+    ;(e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId)
+  }
 </script>
 
 {#if initial}
@@ -81,8 +117,8 @@
       title="Video"
       initialX={initial.x}
       initialY={initial.y}
-      width={DEFAULT_WIDTH}
-      height={DEFAULT_WIDTH / ASPECT_RATIO + CHROME_HEIGHT}
+      {width}
+      {height}
       minWidth={MIN_WIDTH}
       minHeight={MIN_WIDTH / ASPECT_RATIO + CHROME_HEIGHT}
       constrained="parent"
@@ -97,6 +133,16 @@
         <div class="controls-bar">
           <VideoControls player={syncState.player} />
         </div>
+
+        <!-- Pointer capture keeps the drag alive over the YouTube iframe. -->
+        <button
+          class="resize-grip"
+          aria-label="Resize video"
+          onpointerdown={startResize}
+          onpointermove={trackResize}
+          onpointerup={endResize}
+          onpointercancel={endResize}
+        ></button>
       </div>
     </DraggableWindow>
   </div>
@@ -111,10 +157,18 @@
     position: absolute;
     inset: 0;
     pointer-events: none;
+    /* Contains DraggableWindow's unbounded z-index so it can't reach a modal. */
+    isolation: isolate;
   }
 
   .video-window-shell > :global(*) {
     pointer-events: auto;
+  }
+
+  /* The native corner gripper is invisible against the controls bar and can't
+     hold 16:9 — .resize-grip replaces it. */
+  .video-window-shell :global(.draggable-window) {
+    resize: none;
   }
 
   .video-window-shell.shell-hidden {
@@ -146,5 +200,32 @@
     left: 0;
     right: 0;
     z-index: 2;
+  }
+
+  .resize-grip {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 18px;
+    height: 18px;
+    z-index: 3;
+    padding: 0;
+    border: none;
+    cursor: nwse-resize;
+    touch-action: none;
+    background: linear-gradient(
+      135deg,
+      transparent 50%,
+      rgba(255, 255, 255, 0.5) 50%,
+      rgba(255, 255, 255, 0.5) 65%,
+      transparent 65%,
+      transparent 78%,
+      rgba(255, 255, 255, 0.5) 78%
+    );
+  }
+
+  .resize-grip:hover,
+  .resize-grip:focus-visible {
+    background-color: rgba(100, 150, 255, 0.35);
   }
 </style>
