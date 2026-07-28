@@ -90,18 +90,12 @@ export function setCurrentTime(time: number): void {
 }
 
 let seekRequestId = 0
+/** Latch, not a queue: consumers dedupe on `id` and it stands until superseded. */
 export function requestSeek(time: number): void {
   seekRequestId++
   VideoStore.update((state) => ({
     ...state,
     seekRequest: { time, id: seekRequestId },
-  }))
-}
-
-export function clearSeekRequest(): void {
-  VideoStore.update((state) => ({
-    ...state,
-    seekRequest: null,
   }))
 }
 

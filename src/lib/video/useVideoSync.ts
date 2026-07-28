@@ -3,8 +3,15 @@
  * Used by both VideoContainer and SplitScreenVideo components
  */
 import { get } from 'svelte/store'
-import VideoStore, { clearSeekRequest } from '../../stores/videoStore'
-import { playVideo, pauseVideo, seekTo, muteVideo, unmuteVideo, type VideoPlayer } from './video-service'
+import VideoStore from '../../stores/videoStore'
+import {
+  playVideo,
+  pauseVideo,
+  seekTo,
+  muteVideo,
+  unmuteVideo,
+  type VideoPlayer,
+} from './video-service'
 
 export interface VideoSyncState {
   player: VideoPlayer | null
@@ -18,7 +25,9 @@ export function createVideoSyncState(): VideoSyncState {
     player: null,
     prevIsPlaying: null,
     prevIsMuted: null,
-    lastSeekRequestId: 0,
+    // Seeded so a later-mounting player ignores the in-flight request rather
+    // than replaying it; its start position comes from handlePlayerReady.
+    lastSeekRequestId: get(VideoStore).seekRequest?.id ?? 0,
   }
 }
 
@@ -38,7 +47,8 @@ export function handleSeekRequest(
     if (!isPlaying) {
       pauseVideo(state.player)
     }
-    clearSeekRequest()
+    // Deliberately not cleared: `lastSeekRequestId` dedupes per consumer, and
+    // clearing would starve every consumer but the first to run.
   }
 }
 
@@ -65,11 +75,7 @@ export function syncPlaybackState(
 /**
  * Sync mute state with the video player
  */
-export function syncMuteState(
-  state: VideoSyncState,
-  isMuted: boolean,
-  isLoaded: boolean
-): void {
+export function syncMuteState(state: VideoSyncState, isMuted: boolean, isLoaded: boolean): void {
   if (!state.player || !isLoaded) return
 
   if (isMuted !== state.prevIsMuted) {
