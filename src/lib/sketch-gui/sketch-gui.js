@@ -9,6 +9,9 @@ import { get } from 'svelte/store'
 /** Padding between floorplan edge and timeline data start */
 const FLOORPLAN_TIMELINE_GAP = 20
 
+/** Floor for the floorplan container so it can never collapse or invert */
+const MIN_FLOORPLAN_WIDTH = 1
+
 export class SketchGUI {
   /** @param {IgsP5} sketch */
   constructor(sketch) {
@@ -16,9 +19,12 @@ export class SketchGUI {
     this.displayBottom = this.sk.height
     // Cap container width so the floorplan never extends past the timeline's
     // left edge (leftX is viewport-space; convert to canvas-space first).
+    // The floor guards against a negative width, which maps data off-canvas.
     const state = timelineV2Store.getState()
-    const containerWidth =
+    const containerWidth = Math.max(
+      MIN_FLOORPLAN_WIDTH,
       Math.min(state.leftX - this.sk.canvasLeft, this.sk.width) - FLOORPLAN_TIMELINE_GAP
+    )
     this.fpContainer = new FloorPlanContainer(this.sk, containerWidth, this.displayBottom)
     this.highlight = new Highlight(this.sk, this.displayBottom)
   }

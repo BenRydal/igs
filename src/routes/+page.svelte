@@ -177,6 +177,9 @@
   let showDataPopup = $state(false)
   let showSettings = $state(false)
   let showImportDialog = $state(false)
+  /** Read-only view of the store. Sliders bind one-way and write via their
+   *  `oninput` handlers — `bind:value` here would mutate the store's object in
+   *  place, ahead of the handler, and break undo. */
   const currentConfig = $derived($ConfigStore)
 
   let p5Instance = $state<IgsP5 | null>(null)
@@ -198,6 +201,10 @@
   let isSplitScreen = $state(false)
   /** SplitPane sizes as percentages: [video, canvas] */
   let splitSizes = $state<[number, number]>([40, 60])
+  /** SplitPane's `--split-divider-size`. */
+  const SPLIT_DIVIDER_PX = 8
+  /** Drives `pane-inert` and defers the sketch rebuild until the drag ends. */
+  let isDraggingSplit = $state(false)
   /**
    * Bumping this remounts <Sketch> via {#key}, destroying and recreating the
    * WEBGL canvas. Used after clearing large datasets (Safari degrades when a
@@ -1516,16 +1523,36 @@
         collapsed={!isSplitScreen}
         collapsedPanel="first"
         onresize={() => p5Instance?.loop()}
+        ondragstart={() => (isDraggingSplit = true)}
+        ondragend={() => {
+          isDraggingSplit = false
+          p5Instance?.rebuildAfterResize()
+        }}
       >
         {#snippet first()}
-          <div class="split-video-pane">
-            <SplitScreenVideo />
+          <!-- SplitPane collapses by width, not {#if}, so this guard is what
+               keeps a second VideoPlayer from staying mounted and competing
+               for every seek. -->
+          <div class="split-video-pane" class:pane-inert={isDraggingSplit}>
+            {#if isSplitScreen}
+              <SplitScreenVideo />
+            {/if}
           </div>
         {/snippet}
         {#snippet second()}
-          <div id="p5-canvas-container" class:cursor-crosshair={currentConfig.highlightToggle}>
+          <div
+            id="p5-canvas-container"
+            class:cursor-crosshair={currentConfig.highlightToggle}
+            class:pane-inert={isDraggingSplit}
+          >
             {#key canvasEpoch}
-              <Sketch sketch={igsSketch} onResize={(p) => p.rebuildAfterResize()} />
+              <Sketch
+                sketch={igsSketch}
+                onResize={(p) => {
+                  if (isDraggingSplit) p.loop()
+                  else p.rebuildAfterResize()
+                }}
+              />
             {/key}
             {#if !isSplitScreen}
               <VideoContainer />
@@ -1539,8 +1566,16 @@
 
     {#snippet bottom()}
       <div class="btm-nav flex justify-between min-h-16 p-0">
+        <!-- The bottom bar spans the window but the canvas only occupies the
+             right pane, so in split mode this is widened to put the timeline
+             at the canvas pane's midpoint. The sketch derives the floorplan /
+             space-time boundary from `leftX - canvasLeft`; without this the
+             floorplan collapses, then inverts past a ~50% split. -->
         <div
           class="flex flex-1 min-w-0 flex-row justify-start items-center bg-[#f6f5f3] px-4 lg:px-8 overflow-x-auto"
+          style={isSplitScreen
+            ? `flex: 0 1 calc(50% + ${splitSizes[0] / 2}% + ${SPLIT_DIVIDER_PX / 2}px)`
+            : ''}
           onwheel={(e) => {
             if (e.deltaY !== 0) {
               e.preventDefault()
@@ -1814,6 +1849,9 @@
      the navbar (top snippet) and the bottom bar (bottom snippet). */
   .app-frame {
     height: 100vh;
+    /* dvh so the bottom bar isn't pushed under a mobile URL bar; nothing here
+       scrolls, so it would be unreachable. */
+    height: 100dvh;
   }
 
   .split-video-pane {
@@ -1827,5 +1865,17 @@
     width: 100%;
     height: 100%;
     overflow: hidden;
+  }
+
+  /* Stops the YouTube iframe swallowing the pointermove/pointerup SplitPane
+     listens for on `document`. */
+  .pane-inert {
+    pointer-events: none;
+  }
+
+  /* SplitPane's panels sum to 100% with `flex-shrink: 0` and then add an 8px
+     divider, clipping the canvas pane's right edge. Let them shrink. */
+  .app-frame :global(.split-pane__panel) {
+    flex-shrink: 1;
   }
 </style>

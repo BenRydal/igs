@@ -139,8 +139,13 @@ export const igsSketch: SketchFn<IgsSketchExt> = (p5) => {
    * would add a second, p5-native resize path on window resize events.
    */
   p5.rebuildAfterResize = () => {
+    // The ResizeObserver can fire before setup() installs these.
+    if (!p5.gui || !p5.handle3D) return
     p5.updateCanvasOffset()
+    // highlightArray is the active data filter, so carry it across the rebuild.
+    const prevHighlight = p5.gui.highlight.highlightArray
     p5.gui = new SketchGUI(p5)
+    p5.gui.highlight.highlightArray = prevHighlight
     p5.handle3D = new Handle3D(p5, p5.handle3D.getIs3DMode())
     applyStyles()
     p5.loop()
