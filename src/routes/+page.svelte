@@ -774,7 +774,7 @@
                     min="20"
                     max="300"
                     step="10"
-                    bind:value={currentConfig.selectorSize}
+                    value={currentConfig.selectorSize}
                     oninput={(e) => setSelectorSize(parseFloat(e.currentTarget.value))}
                     class="range range-sm w-full"
                   />
@@ -788,7 +788,7 @@
                     min="5"
                     max="100"
                     step="5"
-                    bind:value={currentConfig.slicerSize}
+                    value={currentConfig.slicerSize}
                     oninput={(e) => setSlicerSize(parseFloat(e.currentTarget.value))}
                     class="range range-sm w-full"
                   />
@@ -1166,7 +1166,7 @@
                           min="20"
                           max="300"
                           step="10"
-                          bind:value={currentConfig.selectorSize}
+                          value={currentConfig.selectorSize}
                           oninput={(e) => setSelectorSize(parseFloat(e.currentTarget.value))}
                           class="range range-xs"
                         />
@@ -1180,7 +1180,7 @@
                           min="5"
                           max="100"
                           step="5"
-                          bind:value={currentConfig.slicerSize}
+                          value={currentConfig.slicerSize}
                           oninput={(e) => setSlicerSize(parseFloat(e.currentTarget.value))}
                           class="range range-xs"
                         />
@@ -1616,7 +1616,7 @@
             min="0.01"
             max="1"
             step="0.01"
-            bind:value={currentConfig.animationRate}
+            value={currentConfig.animationRate}
             oninput={(e) => handleConfigChange('animationRate', parseFloat(e.currentTarget.value))}
             class="range range-primary"
           />
@@ -1633,7 +1633,7 @@
             min="0.1"
             max="5"
             step="0.1"
-            bind:value={currentConfig.samplingInterval}
+            value={currentConfig.samplingInterval}
             oninput={(e) =>
               handleConfigChange('samplingInterval', parseFloat(e.currentTarget.value))}
             class="range range-primary"
@@ -1651,7 +1651,7 @@
             min="500"
             max="10000"
             step="100"
-            bind:value={currentConfig.smallDataThreshold}
+            value={currentConfig.smallDataThreshold}
             oninput={(e) =>
               handleConfigChange('smallDataThreshold', parseInt(e.currentTarget.value))}
             class="range range-primary"
@@ -1669,7 +1669,7 @@
             min="1"
             max="20"
             step="1"
-            bind:value={currentConfig.movementStrokeWeight}
+            value={currentConfig.movementStrokeWeight}
             oninput={(e) =>
               handleConfigChange('movementStrokeWeight', parseInt(e.currentTarget.value))}
             class="range range-primary"
@@ -1687,7 +1687,7 @@
             min="1"
             max="20"
             step="1"
-            bind:value={currentConfig.stopStrokeWeight}
+            value={currentConfig.stopStrokeWeight}
             oninput={(e) => handleConfigChange('stopStrokeWeight', parseInt(e.currentTarget.value))}
             class="range range-primary"
           />
