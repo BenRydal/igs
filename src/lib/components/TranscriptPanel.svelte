@@ -161,7 +161,11 @@
   }
 </script>
 
-{#if isVisible}
+<!-- Rendered unconditionally and hidden with visibility: DraggableWindow owns
+     its position and size internally, so unmounting would reset them on every
+     toggle. `isolation` keeps its z-index (which the library increments without
+     bound) from ever climbing over a modal. -->
+<div class="transcript-shell" class:shell-hidden={!isVisible}>
   <DraggableWindow
     title="Transcript"
     initialX={20}
@@ -256,9 +260,29 @@
       </div>
     </div>
   </DraggableWindow>
-{/if}
+</div>
 
 <style>
+  .transcript-shell {
+    position: fixed;
+    inset: 0;
+    z-index: 99; /* below Z_INDEX.MODAL_BACKDROP */
+    isolation: isolate;
+    pointer-events: none;
+  }
+
+  .transcript-shell > :global(*) {
+    pointer-events: auto;
+  }
+
+  .transcript-shell.shell-hidden {
+    visibility: hidden;
+  }
+
+  .transcript-shell.shell-hidden > :global(*) {
+    pointer-events: none;
+  }
+
   .transcript-body {
     display: flex;
     flex-direction: column;
