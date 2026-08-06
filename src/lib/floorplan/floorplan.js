@@ -1,15 +1,18 @@
-import { toastStore } from '../../stores/toastStore'
 import GPSStore from '../../stores/gpsStore'
 import ConfigStore from '../../stores/configStore'
 import { get } from 'svelte/store'
 import { GPS_NORMALIZED_SIZE } from '../gps/gps-transformer'
 
+/** @typedef {import('../p5/igs-p5').IgsP5} IgsP5 */
+/** @typedef {{ width: number, height: number }} ContainerSize */
+/** @typedef {{ width: number, height: number, offsetX: number, offsetY: number }} EffectiveDims */
+
 export class FloorPlan {
+  /** @param {IgsP5} sk */
   constructor(sk) {
     this.sk = sk
+    /** @type {import('p5').Image | null} */
     this.img = null
-    this.width = null
-    this.height = null
     this.curFloorPlanRotation = 1 // [0-3] 4 rotation modes none, 90, 180, 270
   }
 
@@ -17,6 +20,8 @@ export class FloorPlan {
    * Calculate effective dimensions for the floorplan within the container.
    * When preserveFloorplanAspectRatio is true, maintains image proportions.
    * Returns { width, height, offsetX, offsetY } for positioning.
+   * @param {ContainerSize} container
+   * @returns {EffectiveDims}
    */
   getEffectiveDimensions(container) {
     const config = get(ConfigStore)
@@ -53,28 +58,8 @@ export class FloorPlan {
   }
 
   /**
-   * Creates P5 image file from path and updates core floorPlan image and input width/heights to properly scale and display data
-   * @param  {String} filePath
-   */
-  update(filePath) {
-    this.sk.loadImage(
-      filePath,
-      (img) => {
-        this.img = img
-        this.width = img.width
-        this.height = img.height
-        this.sk.loop() // rerun P5 draw loop after loading image
-      },
-      () => {
-        toastStore.error(
-          'Error loading floor plan image file. Please make sure it is correctly formatted as a PNG or JPG image file.'
-        )
-      }
-    )
-  }
-
-  /**
    * Organizes floor plan drawing methods with correct rotation angle and corresponding width/height that vary based on rotation angle
+   * @param {ContainerSize} container
    */
   setFloorPlan(container) {
     const eff = this.getEffectiveDimensions(container)
@@ -105,10 +90,14 @@ export class FloorPlan {
   /**
    * Converts x/y pixel positions from data point to floor plan depending on floor plan rotation mode
    * In GPS mode, coordinates are in normalized 0-1000 space; in regular mode, based on image dimensions
-   * @param  {Float} xPos
-   * @param  {Float} yPos
+   * @param {number} xPos
+   * @param {number} yPos
+   * @param {ContainerSize} container
    */
   getScaledXYPos(xPos, yPos, container) {
+    // Callers only invoke this with a loaded floorplan (guarded via getImg());
+    // the early return is defensive and satisfies null narrowing.
+    if (!this.img) return [0, 0]
     const gpsState = get(GPSStore)
     const eff = this.getEffectiveDimensions(container)
 
@@ -123,7 +112,10 @@ export class FloorPlan {
       case 1:
         return [eff.offsetX + eff.width - normY * eff.width, eff.offsetY + normX * eff.height]
       case 2:
-        return [eff.offsetX + eff.width - normX * eff.width, eff.offsetY + eff.height - normY * eff.height]
+        return [
+          eff.offsetX + eff.width - normX * eff.width,
+          eff.offsetY + eff.height - normY * eff.height,
+        ]
       case 3:
         return [eff.offsetX + normY * eff.width, eff.offsetY + eff.height - normX * eff.height]
       default:
@@ -133,8 +125,11 @@ export class FloorPlan {
 
   /**
    * NOTE: When drawing floor plan, translate down on z axis -1 pixel so shapes are drawn cleanly on top of the floor plan
+   * @param {number} width
+   * @param {number} height
    */
   draw(width, height) {
+    if (!this.img) return
     if (this.sk.handle3D.getIs3DMode()) {
       this.sk.push()
       this.sk.translate(0, 0, -1)
@@ -146,6 +141,12 @@ export class FloorPlan {
     }
   }
 
+  /**
+   * @param {number} angle
+   * @param {number} width
+   * @param {number} height
+   * @param {EffectiveDims} container
+   */
   rotateAndDraw(angle, width, height, container) {
     this.sk.push()
     this.sk.imageMode(this.sk.CENTER) // important method to include here
@@ -167,11 +168,5 @@ export class FloorPlan {
 
   getImg() {
     return this.img
-  }
-
-  clear() {
-    this.img = null
-    this.width = null
-    this.height = null
   }
 }

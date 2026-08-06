@@ -1,4 +1,4 @@
-import type p5 from 'p5'
+import type { IgsP5 } from '../p5/igs-p5'
 import Papa from 'papaparse'
 import { get } from 'svelte/store'
 
@@ -40,14 +40,15 @@ import { KMLParser } from '../gps/kml-parser'
 import { SUPPORTED_EXTENSIONS } from '../validation/file-types'
 
 export class Core {
-  sketch: p5
+  sketch: IgsP5
   coreUtils: CoreUtils
   codeData: CodeEntry[] = []
   conversationData: ConversationRow[] | null = null
   movementData: MovementDataFile[] = []
-  gpsMovementData: { fileName: string; gpsData: { time: number; lat: number; lng: number }[] }[] = []
+  gpsMovementData: { fileName: string; gpsData: { time: number; lat: number; lng: number }[] }[] =
+    []
 
-  constructor(sketch: p5) {
+  constructor(sketch: IgsP5) {
     this.sketch = sketch
     this.coreUtils = new CoreUtils()
   }
@@ -301,8 +302,6 @@ export class Core {
   loadFloorplanImage = (path: string) => {
     this.sketch.loadImage(path, (img) => {
       this.sketch.floorPlan.img = img
-      this.sketch.floorPlan.width = img.width
-      this.sketch.floorPlan.height = img.height
       this.sketch.loop()
     })
   }
@@ -319,7 +318,10 @@ export class Core {
    */
   // NOTE: multicode should be processed before single code file as headers of multicode have one additional column
   // NOTE: GPS movement should be processed before regular movement as it has different headers
-  processResultsData = async (results: PapaParseResult<CsvRow>, fileName: string): Promise<void> => {
+  processResultsData = async (
+    results: PapaParseResult<CsvRow>,
+    fileName: string
+  ): Promise<void> => {
     const csvData = results.data
 
     this.convertCodeTimeColumns(csvData)
@@ -338,9 +340,7 @@ export class Core {
     if (this.coreUtils.testMovement(results)) {
       // Regular movement data (x/y headers) - reset GPS mode if active
       if (getGPSState().isGPSMode) {
-        toastStore.warning(
-          'Loading indoor movement alongside GPS data. Coordinates may not align.'
-        )
+        toastStore.warning('Loading indoor movement alongside GPS data. Coordinates may not align.')
         resetGPS()
         this.gpsMovementData = []
       }
@@ -456,9 +456,7 @@ export class Core {
 
     // Warn if loading GPS data alongside existing indoor movement data
     if (this.movementData.length > 0 && !getGPSState().isGPSMode) {
-      toastStore.warning(
-        'Loading GPS data alongside indoor movement. Coordinates may not align.'
-      )
+      toastStore.warning('Loading GPS data alongside indoor movement. Coordinates may not align.')
     }
 
     // Normalize GPS data to consistent field names and filter invalid points
@@ -496,7 +494,9 @@ export class Core {
     const validatedData = validationResult.filteredData
 
     if (validatedData.length === 0) {
-      toastStore.error('No valid GPS points remaining after filtering. All points had impossible speeds.')
+      toastStore.error(
+        'No valid GPS points remaining after filtering. All points had impossible speeds.'
+      )
       return
     }
 
@@ -540,7 +540,13 @@ export class Core {
     // Convert all GPS data to pixels using unified bounds and add to movementData
     for (const { fileName, gpsData } of this.gpsMovementData) {
       const pixelData: MovementRow[] = gpsData.map((row) => {
-        const [x, y] = GPSTransformer.toPixels(row.lat, row.lng, bounds, GPS_NORMALIZED_SIZE, GPS_NORMALIZED_SIZE)
+        const [x, y] = GPSTransformer.toPixels(
+          row.lat,
+          row.lng,
+          bounds,
+          GPS_NORMALIZED_SIZE,
+          GPS_NORMALIZED_SIZE
+        )
         return { time: row.time, x, y }
       })
       this.movementData.push({ fileName, csvData: pixelData })

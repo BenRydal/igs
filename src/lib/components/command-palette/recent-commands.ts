@@ -93,16 +93,3 @@ export function addRecentCommand(commandId: string): void {
     console.error('Failed to save recent command:', error)
   }
 }
-
-/**
- * Clear all recent commands
- */
-export function clearRecentCommands(): void {
-  if (typeof window === 'undefined') return
-
-  try {
-    localStorage.removeItem(STORAGE_KEY)
-  } catch (error) {
-    console.error('Failed to clear recent commands:', error)
-  }
-}

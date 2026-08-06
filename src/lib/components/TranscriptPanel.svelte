@@ -1,11 +1,11 @@
 <script lang="ts">
-  import { onMount } from 'svelte'
+  import { DraggableWindow } from 'svelte-p5-components'
   import UserStore from '../../stores/userStore'
   import HoveredConversationStore from '../../stores/interactionStore'
   import ConfigStore from '../../stores/configStore'
   import { requestSeek, hasVideoSource } from '../../stores/videoStore'
   import { timelineV2Store } from '../timeline/store'
-  import P5Store from '../../stores/p5Store'
+  import { redrawCanvas } from '$lib/utils/p5'
   import { formatTime, parseTime } from '../utils/format'
   import MdClose from '~icons/mdi/close'
   import MdPencil from '~icons/mdi/pencil'
@@ -24,32 +24,6 @@
 
   // Search state - derived from ConfigStore (single source of truth)
   let searchQuery = $derived($ConfigStore.wordToSearch)
-
-  // Panel dimensions
-  const MIN_WIDTH = 280
-  const MIN_HEIGHT = 200
-  const DEFAULT_WIDTH = 320
-  const DEFAULT_HEIGHT = 400
-
-  // Panel state
-  let posX = $state(20)
-  let posY = $state(80)
-  let width = $state(DEFAULT_WIDTH)
-  let height = $state(DEFAULT_HEIGHT)
-
-  // Drag state
-  let isDragging = $state(false)
-  let dragStartX = 0
-  let dragStartY = 0
-  let dragStartPosX = 0
-  let dragStartPosY = 0
-
-  // Resize state
-  let isResizing = $state(false)
-  let resizeStartX = 0
-  let resizeStartY = 0
-  let resizeStartWidth = 0
-  let resizeStartHeight = 0
 
   // Edit state
   let editingIndex = $state<number | null>(null)
@@ -79,10 +53,11 @@
                 text: point.speech,
                 color: user.color,
                 userIndex,
-                pointIndex
+                pointIndex,
               }))
-              .filter((entry): entry is TranscriptEntry =>
-                entry.text != null && entry.text.trim() !== '' && entry.time != null
+              .filter(
+                (entry): entry is TranscriptEntry =>
+                  entry.text != null && entry.text.trim() !== '' && entry.time != null
               )
           : []
       )
@@ -93,13 +68,13 @@
   let transcriptEntries = $derived.by(() => {
     if (!searchQuery) return allEntries
     const query = searchQuery.toLowerCase()
-    return allEntries.filter(entry => entry.text.toLowerCase().includes(query))
+    return allEntries.filter((entry) => entry.text.toLowerCase().includes(query))
   })
 
   // Update search query in ConfigStore (trim to avoid whitespace-only searches)
   function setSearch(value: string) {
-    ConfigStore.update(config => ({ ...config, wordToSearch: value.trim() }))
-    $P5Store?.loop()
+    ConfigStore.update((config) => ({ ...config, wordToSearch: value.trim() }))
+    redrawCanvas()
   }
 
   // Highlight matching text in search results
@@ -141,7 +116,7 @@
       requestSeek(entry.time)
     }
 
-    $P5Store?.loop()
+    redrawCanvas()
   }
 
   function startEditing(entry: TranscriptEntry, index: number, e: MouseEvent) {
@@ -152,11 +127,11 @@
   }
 
   function deleteEntry(entry: TranscriptEntry) {
-    UserStore.update(users => {
+    UserStore.update((users) => {
       users[entry.userIndex].dataTrail[entry.pointIndex].speech = ''
       return users
     })
-    $P5Store?.loop()
+    redrawCanvas()
     cancelEditing()
   }
 
@@ -174,216 +149,144 @@
       return
     }
 
-    UserStore.update(users => {
+    UserStore.update((users) => {
       const point = users[entry.userIndex].dataTrail[entry.pointIndex]
       point.time = newTime
       point.speech = editText
       return users
     })
 
-    $P5Store?.loop()
+    redrawCanvas()
     cancelEditing()
   }
-
-  function handleDragStart(e: MouseEvent) {
-    if (isResizing) return
-    isDragging = true
-    dragStartX = e.clientX
-    dragStartY = e.clientY
-    dragStartPosX = posX
-    dragStartPosY = posY
-    e.preventDefault()
-  }
-
-  function handleResizeStart(e: MouseEvent) {
-    isResizing = true
-    resizeStartX = e.clientX
-    resizeStartY = e.clientY
-    resizeStartWidth = width
-    resizeStartHeight = height
-    e.preventDefault()
-    e.stopPropagation()
-  }
-
-  function handleMouseMove(e: MouseEvent) {
-    if (isDragging) {
-      // Keep at least 50px visible so panel is always recoverable
-      const margin = 50
-      posX = Math.max(-width + margin, Math.min(dragStartPosX + e.clientX - dragStartX, window.innerWidth - margin))
-      posY = Math.max(0, Math.min(dragStartPosY + e.clientY - dragStartY, window.innerHeight - margin))
-    }
-    if (isResizing) {
-      width = Math.max(MIN_WIDTH, resizeStartWidth + (e.clientX - resizeStartX))
-      height = Math.max(MIN_HEIGHT, resizeStartHeight + (e.clientY - resizeStartY))
-    }
-  }
-
-  function handleMouseUp() {
-    isDragging = false
-    isResizing = false
-  }
-
-  onMount(() => {
-    document.addEventListener('mousemove', handleMouseMove)
-    document.addEventListener('mouseup', handleMouseUp)
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove)
-      document.removeEventListener('mouseup', handleMouseUp)
-    }
-  })
 </script>
 
-{#if isVisible}
-  <div
-    class="transcript-panel"
-    style="left: {posX}px; top: {posY}px; width: {width}px; height: {height}px;"
+<!-- Rendered unconditionally and hidden with visibility: DraggableWindow owns
+     its position and size internally, so unmounting would reset them on every
+     toggle. `isolation` keeps its z-index (which the library increments without
+     bound) from ever climbing over a modal. -->
+<div class="transcript-shell" class:shell-hidden={!isVisible}>
+  <DraggableWindow
+    title="Transcript"
+    initialX={20}
+    initialY={80}
+    width={320}
+    height={400}
+    minWidth={280}
+    minHeight={200}
+    constrained="viewport"
+    minVisible={50}
+    onClose={() => (isVisible = false)}
   >
-    <div
-      class="panel-header"
-      class:dragging={isDragging}
-      onmousedown={handleDragStart}
-      role="button"
-      tabindex="0"
-      aria-label="Drag to move transcript panel"
-    >
-      <span class="panel-title">Transcript</span>
-      <button
-        class="icon-btn"
-        onclick={() => isVisible = false}
-        aria-label="Close transcript"
-      >
-        <MdClose />
-      </button>
-    </div>
+    <div class="transcript-body">
+      <!-- Search bar -->
+      <div class="search-bar">
+        <input
+          type="text"
+          placeholder="Search transcript..."
+          value={searchQuery}
+          oninput={(e) => setSearch((e.target as HTMLInputElement).value)}
+          class="search-input"
+        />
+        {#if searchQuery}
+          <button class="icon-btn" onclick={() => setSearch('')} aria-label="Clear search">
+            <MdClose />
+          </button>
+          <span class="search-count">{transcriptEntries.length}/{allEntries.length}</span>
+        {/if}
+      </div>
 
-    <!-- Search bar -->
-    <div class="search-bar">
-      <input
-        type="text"
-        placeholder="Search transcript..."
-        value={searchQuery}
-        oninput={(e) => setSearch((e.target as HTMLInputElement).value)}
-        class="search-input"
-      />
-      {#if searchQuery}
-        <button class="icon-btn" onclick={() => setSearch('')} aria-label="Clear search">
-          <MdClose />
-        </button>
-        <span class="search-count">{transcriptEntries.length}/{allEntries.length}</span>
-      {/if}
-    </div>
-
-    <div class="transcript-content" bind:this={scrollContainer}>
-      {#if allEntries.length === 0}
-        <div class="empty-state">No conversation data loaded.</div>
-      {:else if transcriptEntries.length === 0}
-        <div class="empty-state">No matches found for "{searchQuery}"</div>
-      {:else}
-        {#each transcriptEntries as entry, index}
-          {#if editingIndex === index}
-            <div class="transcript-entry editing" data-index={index}>
-              <div class="edit-row">
-                <div class="time-field">
-                  <input
-                    type="text"
-                    class="edit-time"
-                    class:error={editTimeError}
-                    bind:value={editTime}
-                    oninput={() => editTimeError = ''}
-                    placeholder="0:00"
-                  />
-                  {#if editTimeError}
-                    <span class="time-error">{editTimeError}</span>
-                  {/if}
+      <div class="transcript-content" bind:this={scrollContainer}>
+        {#if allEntries.length === 0}
+          <div class="empty-state">No conversation data loaded.</div>
+        {:else if transcriptEntries.length === 0}
+          <div class="empty-state">No matches found for "{searchQuery}"</div>
+        {:else}
+          {#each transcriptEntries as entry, index (`${entry.userIndex}-${entry.pointIndex}`)}
+            {#if editingIndex === index}
+              <div class="transcript-entry editing" data-index={index}>
+                <div class="edit-row">
+                  <div class="time-field">
+                    <input
+                      type="text"
+                      class="edit-time"
+                      class:error={editTimeError}
+                      bind:value={editTime}
+                      oninput={() => (editTimeError = '')}
+                      placeholder="0:00"
+                    />
+                    {#if editTimeError}
+                      <span class="time-error">{editTimeError}</span>
+                    {/if}
+                  </div>
+                  <span class="edit-speaker-label" style="color: {entry.color}"
+                    >{entry.speaker}</span
+                  >
                 </div>
-                <span class="edit-speaker-label" style="color: {entry.color}">{entry.speaker}</span>
+                <textarea class="edit-text" bind:value={editText} rows="3"></textarea>
+                <div class="edit-actions">
+                  <button class="btn-delete" onclick={() => deleteEntry(entry)}>Delete</button>
+                  <button class="btn-cancel" onclick={cancelEditing}>Cancel</button>
+                  <button class="btn-save" onclick={() => saveEditing(entry)}>Save</button>
+                </div>
               </div>
-              <textarea
-                class="edit-text"
-                bind:value={editText}
-                rows="3"
-              ></textarea>
-              <div class="edit-actions">
-                <button class="btn-delete" onclick={() => deleteEntry(entry)}>Delete</button>
-                <button class="btn-cancel" onclick={cancelEditing}>Cancel</button>
-                <button class="btn-save" onclick={() => saveEditing(entry)}>Save</button>
+            {:else}
+              <div
+                class="transcript-entry"
+                class:active={index === activeEntryIndex}
+                style="--speaker-color: {entry.color}"
+                data-index={index}
+                onclick={() => handleEntryClick(entry)}
+                onkeydown={(e) => e.key === 'Enter' && handleEntryClick(entry)}
+                role="button"
+                tabindex="0"
+              >
+                <div class="entry-header">
+                  <span class="entry-time">{formatTime(entry.time)}</span>
+                  <span class="entry-speaker" style="color: {entry.color}">{entry.speaker}</span>
+                  <button
+                    class="icon-btn edit-btn"
+                    onclick={(e) => startEditing(entry, index, e)}
+                    aria-label="Edit entry"
+                  >
+                    <MdPencil />
+                  </button>
+                </div>
+                <div class="entry-text">{@html highlightMatch(entry.text)}</div>
               </div>
-            </div>
-          {:else}
-            <div
-              class="transcript-entry"
-              class:active={index === activeEntryIndex}
-              style="--speaker-color: {entry.color}"
-              data-index={index}
-              onclick={() => handleEntryClick(entry)}
-              onkeydown={(e) => e.key === 'Enter' && handleEntryClick(entry)}
-              role="button"
-              tabindex="0"
-            >
-              <div class="entry-header">
-                <span class="entry-time">{formatTime(entry.time)}</span>
-                <span class="entry-speaker" style="color: {entry.color}">{entry.speaker}</span>
-                <button
-                  class="icon-btn edit-btn"
-                  onclick={(e) => startEditing(entry, index, e)}
-                  aria-label="Edit entry"
-                >
-                  <MdPencil />
-                </button>
-              </div>
-              <div class="entry-text">{@html highlightMatch(entry.text)}</div>
-            </div>
-          {/if}
-        {/each}
-      {/if}
+            {/if}
+          {/each}
+        {/if}
+      </div>
     </div>
-
-    <button
-      class="resize-handle"
-      onmousedown={handleResizeStart}
-      aria-label="Resize panel"
-    ></button>
-  </div>
-{/if}
+  </DraggableWindow>
+</div>
 
 <style>
-  .transcript-panel {
+  .transcript-shell {
     position: fixed;
-    z-index: 100;
-    background: #fefefe;
-    border: 1px solid #e0e0e0;
-    border-radius: 10px;
-    box-shadow:
-      0 2px 4px rgba(0, 0, 0, 0.04),
-      0 8px 16px rgba(0, 0, 0, 0.08),
-      0 16px 32px rgba(0, 0, 0, 0.04);
+    inset: 0;
+    z-index: 99; /* below Z_INDEX.MODAL_BACKDROP */
+    isolation: isolate;
+    pointer-events: none;
+  }
+
+  .transcript-shell > :global(*) {
+    pointer-events: auto;
+  }
+
+  .transcript-shell.shell-hidden {
+    visibility: hidden;
+  }
+
+  .transcript-shell.shell-hidden > :global(*) {
+    pointer-events: none;
+  }
+
+  .transcript-body {
     display: flex;
     flex-direction: column;
-    overflow: hidden;
-  }
-
-  .panel-header {
-    height: 28px;
-    background: #f5f5f5;
-    border-bottom: 1px solid #e0e0e0;
-    cursor: grab;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 8px;
-    user-select: none;
-    flex-shrink: 0;
-  }
-
-  .panel-header.dragging {
-    cursor: grabbing;
-    background: #ebebeb;
-  }
-
-  .panel-title {
-    font-size: 12px;
-    font-weight: 600;
-    color: #333;
+    height: 100%;
   }
 
   .icon-btn {
@@ -412,6 +315,7 @@
     padding: 6px 8px;
     border-bottom: 1px solid #e0e0e0;
     background: #fafafa;
+    flex-shrink: 0;
   }
 
   .search-input {
@@ -573,7 +477,9 @@
     justify-content: flex-end;
   }
 
-  .btn-save, .btn-cancel, .btn-delete {
+  .btn-save,
+  .btn-cancel,
+  .btn-delete {
     padding: 4px 12px;
     font-size: 12px;
     border-radius: 4px;
@@ -610,21 +516,5 @@
 
   .btn-cancel:hover {
     background: #f5f5f5;
-  }
-
-  .resize-handle {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    width: 16px;
-    height: 16px;
-    cursor: se-resize;
-    background: linear-gradient(135deg, transparent 50%, #ccc 50%);
-    border: none;
-    border-radius: 0 0 8px 0;
-  }
-
-  .resize-handle:hover {
-    background: linear-gradient(135deg, transparent 50%, #999 50%);
   }
 </style>

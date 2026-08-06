@@ -1,5 +1,5 @@
-import ConfigStore from '../../stores/configStore'
 import { timelineV2Store } from '../timeline/store'
+import { drawState } from './draw-state'
 import { setHoveredConversation, clearHoveredConversation } from '../../stores/interactionStore'
 import { MIN_RECT_SIZE, MAX_RECT_SIZE } from './draw-utils'
 
@@ -13,11 +13,6 @@ import { MIN_RECT_SIZE, MAX_RECT_SIZE } from './draw-utils'
  * - Single color: Each speaker's clusters drawn separately
  */
 
-let alignToggle, isPathColorMode, conversationRectWidth
-let clusterTimeThreshold, clusterSpaceThreshold, showSpeakerStripes
-let showConversationRects
-let searchRegex = null
-
 const TAIL_HEIGHT = 8
 const TAIL_WIDTH = 10
 const RECT_GAP = 12
@@ -25,23 +20,27 @@ const RECT_ALPHA = 180
 const JITTER_AMOUNT = 8
 const MIN_TEXT_FOR_SCALING = 100 // Prevents tiny clusters from appearing huge
 
-ConfigStore.subscribe((data) => {
-  alignToggle = data.alignToggle
-  isPathColorMode = data.isPathColorMode
-  conversationRectWidth = data.conversationRectWidth
-  clusterTimeThreshold = data.clusterTimeThreshold
-  clusterSpaceThreshold = data.clusterSpaceThreshold
-  showSpeakerStripes = data.showSpeakerStripes
-  showConversationRects = data.showConversationRects
-  searchRegex = data.wordToSearch
-    ? new RegExp(data.wordToSearch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i')
-    : null
-})
+/** @typedef {import('../p5/igs-p5').IgsP5} IgsP5 */
+/** @typedef {import('./draw-utils').DrawUtils} DrawUtils */
+/** @typedef {import('./draw-utils').ConversationPos} ConversationPos */
+/** @typedef {import('../../models/dataPoint').DataPoint} DataPoint */
+/**
+ * A conversation point merged across users, time-sorted (see SetPathData).
+ * @typedef {{ point: DataPoint, speaker: string, color: string }} MergedPoint
+ */
+/** @typedef {MergedPoint[]} Cluster */
+/** @typedef {{ speaker: string, color: string, textLength: number, proportion: number }} SpeakerProportion */
 
 export class DrawConversation {
+  /**
+   * @param {IgsP5} sketch
+   * @param {DrawUtils} drawUtils
+   */
   constructor(sketch, drawUtils) {
     this.sk = sketch
     this.drawUtils = drawUtils
+    this.is3D = false
+    this.translateZoom = 0
   }
 
   static clearHoverState() {
@@ -50,8 +49,9 @@ export class DrawConversation {
 
   // --- Core drawing entry point ---
 
+  /** @param {MergedPoint[]} mergedPoints */
   drawAllConversations(mergedPoints) {
-    if (!showConversationRects) return
+    if (!drawState.config.showConversationRects) return
 
     this.is3D = this.sk.handle3D.getIs3DMode()
     if (this.is3D) {
@@ -67,6 +67,7 @@ export class DrawConversation {
 
   // --- Detailed view (zoomed in) ---
 
+  /** @param {MergedPoint[]} mergedPoints */
   drawDetailed(mergedPoints) {
     for (const { point, speaker, color } of mergedPoints) {
       if (!this.isValidPoint(point)) continue
@@ -74,30 +75,33 @@ export class DrawConversation {
       const pos = this.drawUtils.getScaledConversationPos(point)
       if (!this.drawUtils.isVisible(point, pos, point.stopLength)) continue
 
-      const jitterX = ((point.time * 7) % JITTER_AMOUNT) - JITTER_AMOUNT / 2
-      const jitterY = ((point.time * 13) % JITTER_AMOUNT) - JITTER_AMOUNT / 2
+      const time = point.time ?? 0
+      const jitterX = ((time * 7) % JITTER_AMOUNT) - JITTER_AMOUNT / 2
+      const jitterY = ((time * 13) % JITTER_AMOUNT) - JITTER_AMOUNT / 2
       const fpX = pos.floorPlanXPos + jitterX
       const fpY = pos.adjustYPos + jitterY
-      const fillColor = isPathColorMode ? this.drawUtils.setCodeColor(point.codes) : color
+      const fillColor = drawState.config.isPathColorMode
+        ? this.drawUtils.setCodeColor(point.codes)
+        : color
 
       this.setFill(fillColor)
 
       if (this.is3D) {
-        this.sk.rect(fpX, fpY, -conversationRectWidth, -pos.rectHeight)
+        this.sk.rect(fpX, fpY, -drawState.config.conversationRectWidth, -pos.rectHeight)
         this.drawQuad3D(pos.selTimelineXPos, pos.rectWidth, pos.rectHeight, fpX, fpY)
       } else {
         const isHovered =
-          this.sk.overRect(fpX, fpY, conversationRectWidth, pos.rectHeight) ||
+          this.sk.overRect(fpX, fpY, drawState.config.conversationRectWidth, pos.rectHeight) ||
           this.sk.overRect(pos.selTimelineXPos, pos.adjustYPos, pos.rectWidth, pos.rectHeight)
         if (isHovered) {
           this.setHoverStroke()
           setHoveredConversation(
-            [{ time: point.time, speaker, text: point.speech, color }],
+            [{ time, speaker, text: point.speech, color }],
             this.sk.winMouseX,
             this.sk.winMouseY
           )
         }
-        this.sk.rect(fpX, fpY, conversationRectWidth, pos.rectHeight)
+        this.sk.rect(fpX, fpY, drawState.config.conversationRectWidth, pos.rectHeight)
         this.sk.rect(pos.selTimelineXPos, pos.adjustYPos, pos.rectWidth, pos.rectHeight)
       }
     }
@@ -105,6 +109,7 @@ export class DrawConversation {
 
   // --- Aggregated view (zoomed out) ---
 
+  /** @param {MergedPoint[]} mergedPoints */
   drawAggregated(mergedPoints) {
     // Compute combined clusters with text lengths (used for max calculation and possibly drawing)
     const combinedStats = this.clusterPoints(mergedPoints, true).map((cluster) => ({
@@ -114,7 +119,7 @@ export class DrawConversation {
     const maxTextLength = Math.max(...combinedStats.map((c) => c.textLength), MIN_TEXT_FOR_SCALING)
 
     // Use combined clusters if stripes enabled, otherwise re-cluster with speaker breaks
-    const clusterStats = showSpeakerStripes
+    const clusterStats = drawState.config.showSpeakerStripes
       ? combinedStats
       : this.clusterPoints(mergedPoints, false).map((cluster) => ({
           cluster,
@@ -132,9 +137,11 @@ export class DrawConversation {
       const width = Math.max(10, Math.abs(endPos.selTimelineXPos - pos.selTimelineXPos))
 
       const fpX = pos.floorPlanXPos - size / 2
-      const fpY = alignToggle ? 0 : pos.floorPlanYPos - size - RECT_GAP
+      const fpY = drawState.config.alignToggle ? 0 : pos.floorPlanYPos - size - RECT_GAP
       const speakerProportions =
-        showSpeakerStripes && !isPathColorMode ? this.getSpeakerProportions(cluster) : null
+        drawState.config.showSpeakerStripes && !drawState.config.isPathColorMode
+          ? this.getSpeakerProportions(cluster)
+          : null
       const primaryColor = this.getPrimaryColor(first, speakerProportions)
 
       this.sk.noStroke()
@@ -147,8 +154,15 @@ export class DrawConversation {
     }
   }
 
+  /**
+   * @param {ConversationPos} pos
+   * @param {number} size
+   * @param {number} width
+   * @param {SpeakerProportion[] | null} speakerProportions
+   * @param {string} primaryColor
+   */
   drawAggregated3D(pos, size, width, speakerProportions, primaryColor) {
-    const yPos = alignToggle
+    const yPos = drawState.config.alignToggle
       ? this.sk.gui.fpContainer.getContainer().height
       : pos.floorPlanYPos - RECT_GAP
     const fpX3D = pos.floorPlanXPos + size / 2
@@ -183,6 +197,16 @@ export class DrawConversation {
     this.drawTail3D(pos.selTimelineXPos, stFpX, pos.floorPlanYPos)
   }
 
+  /**
+   * @param {Cluster} cluster
+   * @param {ConversationPos} pos
+   * @param {number} fpX
+   * @param {number} fpY
+   * @param {number} size
+   * @param {number} width
+   * @param {SpeakerProportion[] | null} speakerProportions
+   * @param {string} primaryColor
+   */
   drawAggregated2D(cluster, pos, fpX, fpY, size, width, speakerProportions, primaryColor) {
     const isHovered =
       this.sk.overRect(fpX, fpY, size, size) ||
@@ -191,7 +215,7 @@ export class DrawConversation {
     if (isHovered) {
       setHoveredConversation(
         cluster.map((p) => ({
-          time: p.point.time,
+          time: p.point.time ?? 0,
           speaker: p.speaker,
           text: p.point.speech,
           color: p.color,
@@ -240,6 +264,14 @@ export class DrawConversation {
 
   // --- Striped drawing methods ---
 
+  /**
+   * @param {number} x
+   * @param {number} y
+   * @param {number} width
+   * @param {number} height
+   * @param {SpeakerProportion[]} speakerProportions
+   * @param {boolean} isHovered
+   */
   drawStripedRect(x, y, width, height, speakerProportions, isHovered) {
     // Draw stripes without stroke
     let currentX = x
@@ -257,6 +289,13 @@ export class DrawConversation {
     }
   }
 
+  /**
+   * @param {number} x
+   * @param {number} y
+   * @param {number} width
+   * @param {number} height
+   * @param {SpeakerProportion[]} speakerProportions
+   */
   drawStripedRect3D(x, y, width, height, speakerProportions) {
     let currentX = x
     for (const sp of speakerProportions) {
@@ -267,6 +306,14 @@ export class DrawConversation {
     }
   }
 
+  /**
+   * @param {number} xPos
+   * @param {number} width
+   * @param {number} height
+   * @param {number} fpX
+   * @param {number} fpY
+   * @param {SpeakerProportion[]} speakerProportions
+   */
   drawStripedQuad3D(xPos, width, height, fpX, fpY, speakerProportions) {
     const z = this.translateZoom
     let currentXPos = xPos
@@ -275,7 +322,7 @@ export class DrawConversation {
       const stripeWidth = width * sp.proportion
       this.setFill(sp.color)
 
-      if (alignToggle) {
+      if (drawState.config.alignToggle) {
         this.sk.quad(
           0,
           z,
@@ -312,9 +359,16 @@ export class DrawConversation {
 
   // --- 3D primitives ---
 
+  /**
+   * @param {number} xPos
+   * @param {number} width
+   * @param {number} height
+   * @param {number} fpX
+   * @param {number} fpY
+   */
   drawQuad3D(xPos, width, height, fpX, fpY) {
     const z = this.translateZoom
-    if (alignToggle) {
+    if (drawState.config.alignToggle) {
       this.sk.quad(0, z, xPos, height, z, xPos, height, z, xPos + width, 0, z, xPos + width)
     } else {
       this.sk.quad(
@@ -334,10 +388,15 @@ export class DrawConversation {
     }
   }
 
+  /**
+   * @param {number} xPos
+   * @param {number} fpX
+   * @param {number} fpY
+   */
   drawTail3D(xPos, fpX, fpY) {
     const z = this.translateZoom
     this.sk.beginShape()
-    if (alignToggle) {
+    if (drawState.config.alignToggle) {
       this.sk.vertex(0, z, xPos)
       this.sk.vertex(0, z, xPos + TAIL_WIDTH)
       this.sk.vertex(-TAIL_HEIGHT, z, xPos)
@@ -351,24 +410,34 @@ export class DrawConversation {
 
   // --- Clustering ---
 
-  clusterPoints(mergedPoints, forceCombineMode = showSpeakerStripes) {
+  /**
+   * @param {MergedPoint[]} mergedPoints
+   * @param {boolean} [forceCombineMode]
+   * @returns {Cluster[]}
+   */
+  clusterPoints(mergedPoints, forceCombineMode = drawState.config.showSpeakerStripes) {
+    /** @type {Cluster[]} */
     const clusters = []
+    /** @type {Cluster} */
     let current = []
+    /** @type {DataPoint | null} */
     let lastPoint = null
+    /** @type {string | null} */
     let lastSpeaker = null
-    const spaceThresholdSq = clusterSpaceThreshold * clusterSpaceThreshold
+    const spaceThresholdSq =
+      drawState.config.clusterSpaceThreshold * drawState.config.clusterSpaceThreshold
 
     for (const item of mergedPoints) {
       if (!this.isValidPoint(item.point)) continue
 
-      if (!current.length) {
+      if (!current.length || !lastPoint) {
         current.push(item)
       } else {
-        const dx = item.point.x - lastPoint.x
-        const dy = item.point.y - lastPoint.y
+        const dx = (item.point.x ?? 0) - (lastPoint.x ?? 0)
+        const dy = (item.point.y ?? 0) - (lastPoint.y ?? 0)
         const shouldBreak =
           (!forceCombineMode && item.speaker !== lastSpeaker) ||
-          item.point.time - lastPoint.time > clusterTimeThreshold ||
+          (item.point.time ?? 0) - (lastPoint.time ?? 0) > drawState.config.clusterTimeThreshold ||
           dx * dx + dy * dy > spaceThresholdSq
 
         if (shouldBreak) {
@@ -385,6 +454,10 @@ export class DrawConversation {
     return clusters
   }
 
+  /**
+   * @param {Cluster} cluster
+   * @returns {SpeakerProportion[]}
+   */
   getSpeakerProportions(cluster) {
     const stats = new Map()
     let total = 0
@@ -407,15 +480,24 @@ export class DrawConversation {
 
   // --- Helpers ---
 
+  /** @param {DataPoint} point */
   isValidPoint(point) {
-    return point.speech && (!searchRegex || searchRegex.test(point.speech))
+    return point.speech && (!drawState.searchRegex || drawState.searchRegex.test(point.speech))
   }
 
+  /**
+   * @param {MergedPoint} first
+   * @param {SpeakerProportion[] | null} speakerProportions
+   */
   getPrimaryColor(first, speakerProportions) {
-    if (isPathColorMode) return this.drawUtils.setCodeColor(first.point.codes)
+    if (drawState.config.isPathColorMode) return this.drawUtils.setCodeColor(first.point.codes)
     return speakerProportions ? speakerProportions[0].color : first.color
   }
 
+  /**
+   * @param {string} color
+   * @param {boolean} [clearStroke]
+   */
   setFill(color, clearStroke = true) {
     if (clearStroke) this.sk.noStroke()
     this.sk.fill(this.sk.red(color), this.sk.green(color), this.sk.blue(color), RECT_ALPHA)

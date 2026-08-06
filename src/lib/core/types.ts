@@ -6,7 +6,7 @@
  * Movement data CSV row structure
  * All headers are lowercase (transformed by PapaParse)
  */
-export interface MovementRow {
+export type MovementRow = {
   time: number
   x: number
   y: number
@@ -17,7 +17,7 @@ export interface MovementRow {
  * Supports both 'lat/lng' and 'latitude/longitude' headers
  * All headers are lowercase (transformed by PapaParse)
  */
-export interface GPSMovementRow {
+export type GPSMovementRow = {
   time: number
   lat?: number
   lng?: number
@@ -29,7 +29,7 @@ export interface GPSMovementRow {
  * Conversation data CSV row structure
  * All headers are lowercase (transformed by PapaParse)
  */
-export interface ConversationRow {
+export type ConversationRow = {
   time: number
   speaker: string
   talk: string | number | boolean
@@ -39,7 +39,7 @@ export interface ConversationRow {
  * Single code CSV row structure (filename becomes code name)
  * All headers are lowercase (transformed by PapaParse)
  */
-export interface SingleCodeRow {
+export type SingleCodeRow = {
   start: number
   end: number
 }
@@ -48,7 +48,7 @@ export interface SingleCodeRow {
  * Multi-code CSV row structure (code name in column)
  * All headers are lowercase (transformed by PapaParse)
  */
-export interface MultiCodeRow {
+export type MultiCodeRow = {
   code: string
   start: number
   end: number
@@ -119,16 +119,10 @@ export type ExampleId =
   | 'example-16'
 
 /**
- * Example data configuration
+ * Example dropdown selection. Only the selected value is consumed, and
+ * callers dispatch plain `{ target: { value } }` objects (not real DOM
+ * events), so the shape is deliberately minimal.
  */
-export interface ExampleConfig {
-  files: string[]
-  videoId?: string
-}
-
-/**
- * Example dropdown event target
- */
-export interface ExampleSelectEvent extends Event {
-  target: HTMLSelectElement
+export interface ExampleSelectEvent {
+  target: { value: string }
 }

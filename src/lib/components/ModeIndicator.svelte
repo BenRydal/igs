@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte'
-  import ConfigStore from '../../stores/configStore'
+  import ConfigStore, { type ConfigStoreType } from '../../stores/configStore'
   import { Z_INDEX } from '$lib/styles/z-index'
   import MdCircleOutline from '~icons/mdi/circle-outline'
   import MdChartPie from '~icons/mdi/chart-pie'
@@ -46,7 +46,7 @@
   type ModeKey = keyof typeof modes
 
   // Subscribe to config store
-  let config = $state<typeof ConfigStore>()
+  let config = $state<ConfigStoreType>()
   let activeMode = $derived.by(() => {
     if (!config) return null
     if (config.circleToggle) return 'circle' as const

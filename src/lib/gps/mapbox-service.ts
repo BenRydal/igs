@@ -1,5 +1,6 @@
 /// <reference types="vite/client" />
 import type { GPSBounds, MapboxStyle } from './gps-types'
+import type { IgsP5 } from '../p5/igs-p5'
 import { setLoading } from '../../stores/gpsStore'
 import { toastStore } from '../../stores/toastStore'
 import { GPSTransformer } from './gps-transformer'
@@ -65,7 +66,7 @@ export function buildStaticMapUrl(
  * @param style - Mapbox map style
  */
 export async function loadMapAsFloorPlan(
-  sketch: any,
+  sketch: IgsP5,
   bounds: GPSBounds,
   style: MapboxStyle
 ): Promise<void> {
@@ -113,8 +114,6 @@ export async function loadMapAsFloorPlan(
         mapUrl,
         (img: any) => {
           sketch.floorPlan.img = img
-          sketch.floorPlan.width = img.width
-          sketch.floorPlan.height = img.height
           setLoading(false)
           sketch.loop()
           resolve()

@@ -1,6 +1,4 @@
-import { writable, derived, get } from 'svelte/store'
-
-const HISTORY_STORAGE_KEY = 'igs-history-state'
+import { writable, get } from 'svelte/store'
 
 export type UndoableAction =
   | 'config.toggle'
@@ -22,13 +20,6 @@ export interface HistoryEntry {
   redo: () => void // Function to redo this action
 }
 
-export interface PersistedHistoryEntry {
-  id: string
-  actionType: string
-  actionLabel: string
-  timestamp: number
-}
-
 // Legacy type alias for backwards compatibility
 export type HistoryAction = Omit<HistoryEntry, 'id' | 'timestamp'>
 
@@ -45,34 +36,6 @@ const initialState: HistoryState = {
   isUndoing: false,
   maxSize: 50,
 }
-
-
-/**
- * Save minimal history state to sessionStorage
- * Only saves the last 20 entries for display purposes
- */
-function persistHistory(past: HistoryEntry[]): void {
-  // Guard against SSR - sessionStorage is only available in browser
-  if (typeof window === 'undefined' || typeof sessionStorage === 'undefined') {
-    return
-  }
-
-  try {
-    const toSave: PersistedHistoryEntry[] = past.slice(-20).map((entry) => ({
-      id: entry.id,
-      actionType: entry.actionType,
-      actionLabel: entry.actionLabel,
-      timestamp: entry.timestamp,
-    }))
-    sessionStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(toSave))
-  } catch (e) {
-    // Storage might be full or unavailable
-    console.warn('Failed to persist history:', e)
-  }
-}
-
-// Debounce timeout for persisting history
-let persistTimeout: ReturnType<typeof setTimeout> | null = null
 
 function createHistoryStore() {
   const { subscribe, set, update } = writable<HistoryState>(initialState)
@@ -220,28 +183,7 @@ function createHistoryStore() {
 
       return actionLabel
     },
-
-    /**
-     * Clear both past and future history
-     */
-    clear(): void {
-      set({
-        ...initialState,
-        maxSize: get({ subscribe }).maxSize,
-      })
-    },
   }
 }
 
 export const historyStore = createHistoryStore()
-
-// Subscribe to store changes and persist history (debounced)
-historyStore.subscribe((state) => {
-  if (persistTimeout) clearTimeout(persistTimeout)
-  persistTimeout = setTimeout(() => {
-    persistHistory(state.past)
-  }, 1000) // Debounce 1 second
-})
-
-export const canUndo = derived(historyStore, ($h) => $h.past.length > 0)
-export const canRedo = derived(historyStore, ($h) => $h.future.length > 0)

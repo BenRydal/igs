@@ -51,26 +51,6 @@ export interface Command {
 }
 
 /**
- * Grouped commands by category
- */
-export interface CommandGroup {
-  /**
-   * Unique identifier for the group
-   */
-  id: string
-
-  /**
-   * Display label for the group
-   */
-  label: string
-
-  /**
-   * Commands in this group
-   */
-  commands: Command[]
-}
-
-/**
  * Fuzzy search match result
  */
 export interface FuzzyMatch {

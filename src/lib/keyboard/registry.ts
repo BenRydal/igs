@@ -43,66 +43,11 @@ class ShortcutRegistry {
   }
 
   /**
-   * Unregister a keyboard shortcut
-   * @param id The ID of the shortcut to remove
-   * @returns true if shortcut was removed, false if not found
-   */
-  unregister(id: string): boolean {
-    return this.shortcuts.delete(id)
-  }
-
-  /**
-   * Enable a registered shortcut
-   * @param id The ID of the shortcut to enable
-   * @returns true if shortcut was found and enabled
-   */
-  enable(id: string): boolean {
-    const shortcut = this.shortcuts.get(id)
-    if (shortcut) {
-      shortcut.enabled = true
-      return true
-    }
-    return false
-  }
-
-  /**
-   * Disable a registered shortcut
-   * @param id The ID of the shortcut to disable
-   * @returns true if shortcut was found and disabled
-   */
-  disable(id: string): boolean {
-    const shortcut = this.shortcuts.get(id)
-    if (shortcut) {
-      shortcut.enabled = false
-      return true
-    }
-    return false
-  }
-
-  /**
-   * Get a specific shortcut by ID
-   * @param id The ID of the shortcut
-   * @returns The shortcut or undefined if not found
-   */
-  get(id: string): KeyboardShortcut | undefined {
-    return this.shortcuts.get(id)
-  }
-
-  /**
    * Get all registered shortcuts
    * @returns Array of all shortcuts
    */
   getAll(): KeyboardShortcut[] {
     return Array.from(this.shortcuts.values())
-  }
-
-  /**
-   * Get shortcuts by category
-   * @param category The category to filter by
-   * @returns Array of shortcuts in the specified category
-   */
-  getByCategory(category: KeyboardShortcut['category']): KeyboardShortcut[] {
-    return Array.from(this.shortcuts.values()).filter((shortcut) => shortcut.category === category)
   }
 
   /**
@@ -165,20 +110,6 @@ class ShortcutRegistry {
       !!aModifiers.shift === !!bModifiers.shift &&
       !!aModifiers.meta === !!bModifiers.meta
     )
-  }
-
-  /**
-   * Clear all registered shortcuts
-   */
-  clear(): void {
-    this.shortcuts.clear()
-  }
-
-  /**
-   * Get the number of registered shortcuts
-   */
-  get size(): number {
-    return this.shortcuts.size
   }
 }
 

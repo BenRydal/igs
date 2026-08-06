@@ -1,7 +1,7 @@
 import { get } from 'svelte/store'
 import ConfigStore, { type ConfigStoreType, initialConfig } from '../../stores/configStore'
 import { historyStore } from '../../stores/historyStore'
-import { deepClone } from './index'
+import { deepClone } from './deep-clone'
 
 /**
  * Toggle a boolean config value with undo support
@@ -94,22 +94,6 @@ export function setConfigString(key: keyof ConfigStoreType, value: string, label
   })
 }
 
-/**
- * Reset config to defaults with undo support
- */
-export function resetConfig(): void {
-  const before = deepClone(get(ConfigStore))
-
-  ConfigStore.set(initialConfig)
-
-  historyStore.push({
-    actionType: 'config.reset',
-    actionLabel: 'Reset settings',
-    undo: () => ConfigStore.set(deepClone(before)),
-    redo: () => ConfigStore.set(initialConfig),
-  })
-}
-
 // Specific toggle helpers for common operations
 export const toggleMovement = () => toggleConfig('movementToggle', 'movement trails')
 export const toggleStops = () => toggleConfig('stopsToggle', 'stop points')
@@ -118,28 +102,14 @@ export const toggleSlice = () => toggleConfig('sliceToggle', 'slice selection')
 export const toggleHighlight = () => toggleConfig('highlightToggle', 'highlight mode')
 export const toggleAlign = () => toggleConfig('alignToggle', 'talk alignment')
 export const toggleColorMode = () => toggleConfig('isPathColorMode', 'color by codes')
-export const toggleDataHasCodes = () => toggleConfig('dataHasCodes', 'data has codes')
 
 // Numeric value helpers
 export const setAnimationRate = (value: number) =>
   setConfigNumber('animationRate', value, 'animation speed')
-export const setSamplingInterval = (value: number) =>
-  setConfigNumber('samplingInterval', value, 'sampling interval')
-export const setStopSliderValue = (value: number) =>
-  setConfigNumber('stopSliderValue', value, 'stop threshold')
-export const setConversationRectWidth = (value: number) =>
-  setConfigNumber('conversationRectWidth', value, 'conversation width')
-export const setMovementStrokeWeight = (value: number) =>
-  setConfigNumber('movementStrokeWeight', value, 'movement stroke')
-export const setStopStrokeWeight = (value: number) =>
-  setConfigNumber('stopStrokeWeight', value, 'stop stroke')
 
 // String value helpers
-export const setWordToSearch = (value: string) =>
-  setConfigString('wordToSearch', value, 'search word')
 
 // Selector size helpers
 export const setSelectorSize = (value: number) =>
   setConfigNumber('selectorSize', value, 'circle size')
-export const setSlicerSize = (value: number) =>
-  setConfigNumber('slicerSize', value, 'slicer width')
+export const setSlicerSize = (value: number) => setConfigNumber('slicerSize', value, 'slicer width')

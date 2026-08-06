@@ -4,46 +4,29 @@
 
 import { timelineV2Store } from '../timeline/store'
 import CodeStore from '../../stores/codeStore'
-import ConfigStore from '../../stores/configStore'
-import PlaybackStore from '../../stores/playbackStore'
 import { get } from 'svelte/store'
+import { drawState } from './draw-state'
+
+/** @typedef {import('../p5/igs-p5').IgsP5} IgsP5 */
+/** @typedef {import('../../models/dataPoint').DataPoint} DataPoint */
+/**
+ * Scaled pixel values shared by movement and conversation drawing.
+ * @typedef {{ timelineXPos: number, selTimelineXPos: number, floorPlanXPos: number, floorPlanYPos: number }} SharedPos
+ */
+/** @typedef {SharedPos & { viewXPos: number, zPos: number }} MovementPos */
+/** @typedef {SharedPos & { rectHeight: number, rectWidth: number, adjustYPos: number }} ConversationPos */
 
 // Shared constants for conversation rect sizing
 export const MIN_RECT_SIZE = 15
 export const MAX_RECT_SIZE = 80
 
-let stopSliderValue,
-  alignToggle,
-  maxTurnLength,
-  conversationRectWidth,
-  circleToggle,
-  sliceToggle,
-  movementToggle,
-  stopsToggle,
-  highlightToggle,
-  playbackMode = 'stopped'
-
-ConfigStore.subscribe((data) => {
-  alignToggle = data.alignToggle
-  stopSliderValue = data.stopSliderValue
-  maxTurnLength = data.maxTurnLength
-  conversationRectWidth = data.conversationRectWidth
-  circleToggle = data.circleToggle
-  sliceToggle = data.sliceToggle
-  movementToggle = data.movementToggle
-  stopsToggle = data.stopsToggle
-  highlightToggle = data.highlightToggle
-})
-
-PlaybackStore.subscribe((data) => {
-  playbackMode = data.mode
-})
-
 export class DrawUtils {
+  /** @param {IgsP5} sketch */
   constructor(sketch) {
     this.sk = sketch
   }
 
+  /** @param {string[]} searchCodes */
   setCodeColor(searchCodes) {
     const entries = get(CodeStore)
 
@@ -66,6 +49,7 @@ export class DrawUtils {
     }
   }
 
+  /** @param {string[]} codesArray */
   isShowingInCodeList(codesArray) {
     const entries = get(CodeStore)
     if (codesArray.length === 0) {
@@ -77,6 +61,11 @@ export class DrawUtils {
     }
   }
 
+  /**
+   * @param {DataPoint} point
+   * @param {SharedPos} curPos
+   * @param {number} stopLength
+   */
   isVisible(point, curPos, stopLength) {
     return (
       this.isShowingInGUI(curPos.timelineXPos) &&
@@ -85,51 +74,63 @@ export class DrawUtils {
     )
   }
 
+  /** @param {number} stopLength */
   isStopped(stopLength) {
-    return stopLength >= stopSliderValue
+    return stopLength >= drawState.config.stopSliderValue
   }
 
+  /** @param {number} pixelTime viewport pixel on the timeline axis */
   isShowingInGUI(pixelTime) {
     return timelineV2Store.overAxis(pixelTime) && this.isShowingInAnimation(pixelTime)
   }
 
+  /** @param {number} value viewport pixel on the timeline axis */
   isShowingInAnimation(value) {
-    if (playbackMode !== 'stopped') {
+    if (drawState.playbackMode !== 'stopped') {
       const state = timelineV2Store.getState()
       return timelineV2Store.pixelToTime(value) < state.currentTime
     }
     return true
   }
 
+  /**
+   * @param {SharedPos} curPos
+   * @param {boolean} pointIsStopped
+   */
   selectMode(curPos, pointIsStopped) {
     const { floorPlanXPos, floorPlanYPos, selTimelineXPos, timelineXPos } = curPos
     const is3DMode = this.sk.handle3D.getIs3DModeOrTransitioning()
 
-    if (circleToggle) {
+    if (drawState.config.circleToggle) {
       if (is3DMode) return true
       return this.sk.gui.fpContainer.overCursor(floorPlanXPos, floorPlanYPos, selTimelineXPos)
     }
 
-    if (sliceToggle) {
+    if (drawState.config.sliceToggle) {
       if (is3DMode) return true
       return this.sk.gui.fpContainer.overSlicer(floorPlanXPos, selTimelineXPos)
     }
 
-    if (movementToggle) {
+    if (drawState.config.movementToggle) {
       return !pointIsStopped
     }
 
-    if (stopsToggle) {
+    if (drawState.config.stopsToggle) {
       return pointIsStopped
     }
 
-    if (highlightToggle) {
+    if (drawState.config.highlightToggle) {
       return this.sk.gui.highlight.overHighlightArray(floorPlanXPos, floorPlanYPos, timelineXPos)
     }
 
     return true
   }
 
+  /**
+   * @param {number} view PLAN or SPACETIME constant
+   * @param {DataPoint} point
+   * @param {number} time
+   */
   createAugmentPoint(view, point, time) {
     return {
       point,
@@ -140,15 +141,18 @@ export class DrawUtils {
   /**
    * Returns scaled pixel values for a point to graphical display
    * IMPORTANT: currently view parameter can be either one of 2 constants or "null" for conversation drawing
-   * @param  {Movement Or Conversation Point} point
-   * @param  {Integer} time
+   * @param {DataPoint} point
+   * @param {number} time
+   * @returns {SharedPos}
    */
   getSharedPosValues(point, time) {
     const timelineXPos = timelineV2Store.timeToPixel(time)
     const selTimelineXPos = this.sk.mapSelectTimeToPixelTime(timelineXPos)
+    // Movement/conversation points always carry coordinates by the time they
+    // reach the draw layer; the ?? 0 satisfies DataPoint's nullable typing.
     const [floorPlanXPos, floorPlanYPos] = this.sk.floorPlan.getScaledXYPos(
-      point.x,
-      point.y,
+      point.x ?? 0,
+      point.y ?? 0,
       this.sk.gui.fpContainer.getContainer()
     )
     return {
@@ -160,8 +164,10 @@ export class DrawUtils {
   }
 
   /**
-   * @param  {MovementPoint} point
-   * @param  {Integer} view
+   * @param {DataPoint} point
+   * @param {number} view PLAN or SPACETIME constant
+   * @param {number} time
+   * @returns {MovementPos}
    */
   getScaledMovementPos(point, view, time) {
     const pos = this.getSharedPosValues(point, time)
@@ -175,13 +181,17 @@ export class DrawUtils {
     }
   }
 
+  /**
+   * @param {DataPoint} point
+   * @returns {ConversationPos}
+   */
   getScaledConversationPos(point) {
-    const pos = this.getSharedPosValues(point, point.time)
+    const pos = this.getSharedPosValues(point, point.time ?? 0)
     // Height: content length (how much text)
     const rectHeight = this.sk.map(
       point.speech.length,
       0,
-      maxTurnLength,
+      drawState.config.maxTurnLength,
       MIN_RECT_SIZE,
       MAX_RECT_SIZE
     )
@@ -191,11 +201,16 @@ export class DrawUtils {
       floorPlanXPos: pos.floorPlanXPos,
       floorPlanYPos: pos.floorPlanYPos,
       rectHeight,
-      rectWidth: conversationRectWidth,
+      rectWidth: drawState.config.conversationRectWidth,
       adjustYPos: this.getConversationAdjustYPos(pos.floorPlanYPos, rectHeight),
     }
   }
 
+  /**
+   * @param {number} view
+   * @param {number} floorPlanXPos
+   * @param {number} selTimelineXPos
+   */
   getViewXPos(view, floorPlanXPos, selTimelineXPos) {
     if (view === this.sk.PLAN) return floorPlanXPos
     else {
@@ -204,6 +219,10 @@ export class DrawUtils {
     }
   }
 
+  /**
+   * @param {number} view
+   * @param {number} selTimelineXPos
+   */
   getZPos(view, selTimelineXPos) {
     if (view === this.sk.PLAN) return 0
     else {
@@ -214,9 +233,11 @@ export class DrawUtils {
 
   /**
    * Adjusts Y positioning of conversation rectangles correctly for align and 3 D views
+   * @param {number} floorPlanYPos
+   * @param {number} rectLength
    */
   getConversationAdjustYPos(floorPlanYPos, rectLength) {
-    if (alignToggle) {
+    if (drawState.config.alignToggle) {
       if (this.sk.handle3D.getIs3DMode()) return this.sk.gui.fpContainer.getContainer().height
       else return 0
     } else if (this.sk.handle3D.getIs3DMode()) {

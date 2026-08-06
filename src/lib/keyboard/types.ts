@@ -71,14 +71,3 @@ export interface ShortcutCategory {
   label: string
   shortcuts: KeyboardShortcut[]
 }
-
-/**
- * Internal representation of a keyboard event for matching
- */
-export interface KeyboardEventMatch {
-  key: string
-  ctrl: boolean
-  alt: boolean
-  shift: boolean
-  meta: boolean
-}

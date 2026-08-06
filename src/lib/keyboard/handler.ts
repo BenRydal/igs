@@ -1,4 +1,4 @@
-import type { KeyboardShortcut, KeyboardEventMatch } from './types'
+import type { KeyboardShortcut } from './types'
 import { registry } from './registry'
 import { redrawCanvas } from '../utils/p5'
 
@@ -26,21 +26,6 @@ function shouldIgnoreEvent(): boolean {
   }
 
   return false
-}
-
-/**
- * Convert a KeyboardEvent to a normalized event match object
- * @param event The keyboard event
- * @returns Normalized event match object
- */
-function eventToMatch(event: KeyboardEvent): KeyboardEventMatch {
-  return {
-    key: event.key,
-    ctrl: event.ctrlKey,
-    alt: event.altKey,
-    shift: event.shiftKey,
-    meta: event.metaKey,
-  }
 }
 
 /**
@@ -134,26 +119,4 @@ export function attachKeyboardHandler(): void {
 
   document.addEventListener('keydown', keydownHandler)
   isAttached = true
-}
-
-/**
- * Detach the global keyboard shortcut handler
- * Call this when cleaning up (e.g., component unmount)
- */
-export function detachKeyboardHandler(): void {
-  if (!isAttached) {
-    console.warn('Keyboard handler is not attached')
-    return
-  }
-
-  document.removeEventListener('keydown', keydownHandler)
-  isAttached = false
-}
-
-/**
- * Check if the keyboard handler is currently attached
- * @returns true if handler is attached
- */
-export function isHandlerAttached(): boolean {
-  return isAttached
 }

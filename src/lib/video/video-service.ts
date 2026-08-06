@@ -189,20 +189,6 @@ export function getCurrentTime(player: VideoPlayer): number {
   }
 }
 
-export function getDuration(player: VideoPlayer): number {
-  if (!player) return 0
-  try {
-    if (isYouTubePlayer(player)) {
-      if (!isYouTubePlayerReady(player)) return 0
-      return player.getDuration()
-    } else {
-      return player.duration
-    }
-  } catch {
-    return 0
-  }
-}
-
 export function muteVideo(player: VideoPlayer): void {
   if (!player) return
   try {
