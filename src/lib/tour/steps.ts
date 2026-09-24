@@ -61,12 +61,12 @@ export const tourSteps: TourStep[] = [
     },
   },
   {
-    element: '.btm-nav .flex-1',
+    element: '.activity-bar__item[aria-label="People"]',
     popover: {
-      title: 'Manage Users & Codes',
+      title: 'Manage People',
       description:
-        'When data is loaded, individual users appear here. Click to show/hide user data and manage codes.',
-      side: 'top',
+        'When data is loaded, each person appears here. Show or hide their movement and talk, rename them, or change their color. Codes appear in the bottom bar.',
+      side: 'right',
       align: 'start',
     },
   },

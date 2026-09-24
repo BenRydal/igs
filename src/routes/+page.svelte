@@ -1,5 +1,13 @@
 <script lang="ts">
-  import { Sketch, CanvasFrame, SplitPane, ActivityBar, SidePanel } from 'svelte-p5-components'
+  import {
+    Sketch,
+    CanvasFrame,
+    SplitPane,
+    ActivityBar,
+    SidePanel,
+    EntityToggleList,
+    type Entity,
+  } from 'svelte-p5-components'
 
   import type { IgsP5 } from '$lib/p5/igs-p5'
   import MdHelpOutline from '~icons/mdi/help-circle-outline'
@@ -27,6 +35,7 @@
   import MdChevronRight from '~icons/mdi/chevron-right'
   import MdClose from '~icons/mdi/close'
   import MdFloorPlan from '~icons/mdi/floor-plan'
+  import MdAccountGroup from '~icons/mdi/account-group'
   import MdTableEye from '~icons/mdi/table-eye'
 
   import type { User } from '../models/user'
@@ -60,8 +69,6 @@
   import { OnboardingTour, shouldShowTour } from '$lib/tour'
   import DataImporter from '$lib/components/import/DataImporter.svelte'
   import MapStyleSelector from '$lib/components/MapStyleSelector.svelte'
-  import UserButtonGroup from '$lib/components/UserButtonGroup.svelte'
-  import UserDropdown from '$lib/components/UserDropdown.svelte'
   import CodesButton from '$lib/components/CodesButton.svelte'
   import { capitalizeFirstLetter, capitalizeEachWord } from '$lib/utils/string'
   import { loadAdvancedMode, saveAdvancedMode } from '$lib/utils/advanced-mode-storage'
@@ -73,7 +80,13 @@
   import { timelineV2Store } from '$lib/timeline/store'
   import { initialConfig } from '../stores/configStore'
   import { setSelectorSize, setSlicerSize } from '$lib/history/config-actions'
-  import { toggleUserVisibility as toggleUserVisibilityAction } from '$lib/history/user-actions'
+  import {
+    toggleUserVisibility as toggleUserVisibilityAction,
+    toggleUserEnabled,
+    toggleUserConversationEnabled,
+    setUserName,
+    createUserColorDrag,
+  } from '$lib/history/user-actions'
   import {
     clearUsers,
     clearCodes,
@@ -223,9 +236,10 @@
   // Modal state - opens immediately for first-time visitors
   let isModalOpen = writable(false)
 
-  type RailTab = 'data' | 'talk' | 'filters' | 'select' | 'view' | 'settings'
+  type RailTab = 'data' | 'people' | 'talk' | 'filters' | 'select' | 'view' | 'settings'
   const RAIL_LABELS: Record<RailTab | 'help', string> = {
     data: 'Data',
+    people: 'People',
     talk: 'Talk',
     filters: 'Filters',
     select: 'Select',
@@ -482,9 +496,6 @@
   async function clearAllDataLocal() {
     resetVideo()
 
-    // Close any open user dropdown
-    activeDropdownUser = null
-
     // Use history-tracked function for store clearing
     clearAllDataWithHistory()
 
@@ -557,21 +568,6 @@
     p5Instance?.loop()
   }
 
-  // State for user dropdown
-  let activeDropdownUser = $state<User | null>(null)
-  let dropdownAnchorX = $state(0)
-  let dropdownAnchorY = $state(0)
-
-  function handleOpenUserDropdown(user: User, event: MouseEvent) {
-    activeDropdownUser = user
-    dropdownAnchorX = event.clientX
-    dropdownAnchorY = event.clientY
-  }
-
-  function handleCloseUserDropdown() {
-    activeDropdownUser = null
-  }
-
   /**
    * Check if a user is visible (either movement or talk enabled)
    */
@@ -584,6 +580,26 @@
    */
   function toggleUserVisibility(user: User) {
     toggleUserVisibilityAction(user.name, isUserVisible(user))
+    p5Instance?.loop()
+  }
+
+  const userEntities = $derived<Entity[]>(
+    $UserStore.map((user) => ({
+      id: user.name,
+      label: user.name,
+      color: user.color,
+      visible: isUserVisible(user),
+    }))
+  )
+
+  function findUser(id: string): User | undefined {
+    return $UserStore.find((u) => u.name === id)
+  }
+
+  const userColorDrag = createUserColorDrag()
+
+  function handleUserColorInput(id: string, color: string) {
+    userColorDrag.input(id, color)
     p5Instance?.loop()
   }
 
@@ -781,6 +797,67 @@
         </ul>
       {/snippet}
       {@render panelSection('Clear', clearBody)}
+    {/if}
+  </div>
+{/snippet}
+
+{#snippet userControls(entity: Entity)}
+  {@const user = findUser(entity.id)}
+  {#if user}
+    <div class="flex items-center gap-1">
+      <button
+        class="btn btn-ghost btn-xs btn-square"
+        class:opacity-40={!user.enabled}
+        aria-pressed={user.enabled}
+        aria-label="{user.enabled ? 'Hide' : 'Show'} movement for {user.name}"
+        title="Movement"
+        onclick={() => {
+          toggleUserEnabled(user.name)
+          p5Instance?.loop()
+        }}
+      >
+        {@render icon(MdWalk)}
+      </button>
+      <button
+        class="btn btn-ghost btn-xs btn-square"
+        class:opacity-40={!user.conversation_enabled}
+        aria-pressed={user.conversation_enabled}
+        aria-label="{user.conversation_enabled ? 'Hide' : 'Show'} talk for {user.name}"
+        title="Talk"
+        onclick={() => {
+          toggleUserConversationEnabled(user.name)
+          p5Instance?.loop()
+        }}
+      >
+        {@render icon(MdChat)}
+      </button>
+    </div>
+  {/if}
+{/snippet}
+
+{#snippet peoplePanel()}
+  <div class="flex flex-col gap-6 px-3 py-4">
+    {#if userEntities.length === 0}
+      <p class="text-sm opacity-70">Load an example or import data to see people here.</p>
+    {:else}
+      <p class="text-xs opacity-70">
+        Click a name to show or hide everything for that person. The icons toggle movement and talk
+        separately.
+      </p>
+      <EntityToggleList
+        entities={userEntities}
+        onToggle={(id) => {
+          const user = findUser(id)
+          if (user) toggleUserVisibility(user)
+        }}
+        onColorChange={handleUserColorInput}
+        onRename={(id, next) => {
+          setUserName(id, next)
+          p5Instance?.loop()
+        }}
+        controls={userControls}
+        class="igs-people"
+      />
     {/if}
   </div>
 {/snippet}
@@ -1077,6 +1154,7 @@
 {/snippet}
 
 {#snippet dataIcon()}<MdFolder />{/snippet}
+{#snippet peopleIcon()}<MdAccountGroup />{/snippet}
 {#snippet talkIcon()}<MdChat />{/snippet}
 {#snippet filtersIcon()}<MdFilterList />{/snippet}
 {#snippet selectIcon()}<MdSelectAll />{/snippet}
@@ -1129,6 +1207,7 @@
           onSelect={handleRailSelect}
           items={[
             { id: 'data', label: RAIL_LABELS.data, icon: dataIcon },
+            { id: 'people', label: RAIL_LABELS.people, icon: peopleIcon },
             { id: 'talk', label: RAIL_LABELS.talk, icon: talkIcon },
             ...($ConfigStore.advancedMode
               ? [{ id: 'filters', label: RAIL_LABELS.filters, icon: filtersIcon }]
@@ -1163,6 +1242,8 @@
           >
             {#if lastTab === 'data'}
               {@render dataPanel()}
+            {:else if lastTab === 'people'}
+              {@render peoplePanel()}
             {:else if lastTab === 'talk'}
               {@render talkPanel()}
             {:else if lastTab === 'filters'}
@@ -1253,23 +1334,7 @@
               <CodesButton />
             </div>
           {/if}
-
-          <!-- User Buttons -->
-          <UserButtonGroup
-            users={$UserStore}
-            {isUserVisible}
-            onToggleVisibility={(user) => toggleUserVisibility(user)}
-            onOpenDropdown={handleOpenUserDropdown}
-          />
         </div>
-
-        <!-- User Dropdown (shown when right-click/long-press on user button) -->
-        <UserDropdown
-          user={activeDropdownUser}
-          anchorX={dropdownAnchorX}
-          anchorY={dropdownAnchorY}
-          onClose={handleCloseUserDropdown}
-        />
 
         <!-- Right Side: Timeline -->
         <div
@@ -1428,6 +1493,15 @@
     .igs-sidepanel-shell {
       transition: none;
     }
+  }
+
+  :global(.igs-people .entity-toggle-list__item) {
+    flex: 1 1 100%;
+  }
+
+  :global(.igs-people .entity-toggle-list__label) {
+    flex: 1 1 auto;
+    min-width: 0;
   }
 
   .split-video-pane {
