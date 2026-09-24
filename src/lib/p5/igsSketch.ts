@@ -12,7 +12,7 @@ import { FloorPlan, SketchGUI, Handle3D, SetPathData } from '..'
 import { drawState } from '../draw/draw-state'
 import { generateCodeCSV, downloadFile } from '../utils/download'
 import type { IgsSketchExt } from './igs-p5'
-import { mondrianFrame, mondrianPress } from '../mondrian/sketch-hooks'
+import { mondrianFrame, mondrianPress, startsIn3D } from '../mondrian/sketch-hooks'
 
 let users: User[] = []
 let isModalOpen = false
@@ -61,7 +61,7 @@ export const igsSketch: SketchFn<IgsSketchExt> = (p5) => {
     p5.createCanvas(width, height, p5.WEBGL)
     p5.updateCanvasOffset()
     p5.gui = new SketchGUI(p5)
-    p5.handle3D = new Handle3D(p5, true)
+    p5.handle3D = new Handle3D(p5, startsIn3D())
     p5.floorPlan = new FloorPlan(p5)
 
     // Constants

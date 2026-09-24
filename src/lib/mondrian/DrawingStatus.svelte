@@ -1,6 +1,6 @@
 <script lang="ts">
   import floorplanStore from '../../stores/floorplanStore'
-  import { appMode, recorder } from './session'
+  import { recorder } from './session'
 
   const message = $derived.by(() => {
     if (!$floorplanStore) return 'Load a floorplan to start drawing'
@@ -10,12 +10,10 @@
   })
 </script>
 
-{#if $appMode === 'mondrian'}
-  <div class="drawing-status" class:recording={$recorder.recording} role="status">
-    {#if $recorder.recording}<span class="dot" aria-hidden="true"></span>{/if}
-    {message}
-  </div>
-{/if}
+<div class="drawing-status" class:recording={$recorder.recording} role="status">
+  {#if $recorder.recording}<span class="dot" aria-hidden="true"></span>{/if}
+  {message}
+</div>
 
 <style>
   .drawing-status {

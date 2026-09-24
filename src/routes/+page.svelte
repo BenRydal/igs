@@ -80,6 +80,11 @@
   import RecordingPanel from '$lib/mondrian/RecordingPanel.svelte'
   import DrawingStatus from '$lib/mondrian/DrawingStatus.svelte'
   import RecoveryPrompt from '$lib/persistence/RecoveryPrompt.svelte'
+  import { DRAWING_FLOORPLANS, type DrawingFloorplan } from '$lib/mondrian/floorplans'
+  import floorplanStore from '../stores/floorplanStore'
+  import { page } from '$app/state'
+  import { replaceState } from '$app/navigation'
+  import { browser } from '$app/environment'
   import {
     startAutosave,
     resumeAutosave,
@@ -95,6 +100,8 @@
     stopRecording,
     ensureTimelineCovers,
     setTrailFinalizer,
+    modeFromParam,
+    MODE_PARAM,
     type AppMode,
   } from '$lib/mondrian/session'
   import TimelineControls from '$lib/timeline/components/TimelineControls.svelte'
@@ -259,6 +266,7 @@
     if (p5Instance) {
       core = new Core(p5Instance)
       setTrailFinalizer((trail) => core.updateStopValues(trail))
+      loadPlaceholderFloorplan()
     }
   })
 
@@ -312,7 +320,7 @@
   const DRAWING_TABS: RailTab[] = ['draw', 'data', 'recording']
 
   function isTabAvailable(tab: RailTab): boolean {
-    if ($appMode === 'mondrian') return DRAWING_TABS.includes(tab)
+    if (toolMode === 'mondrian') return DRAWING_TABS.includes(tab)
     if (tab === 'draw' || tab === 'recording') return false
     if (tab === 'filters' || tab === 'view') return $ConfigStore.advancedMode
     if (tab === 'select') return $ConfigStore.advancedMode && !is3DMode
@@ -323,6 +331,36 @@
   $effect(() => {
     if (activeTab && !isTabAvailable(activeTab)) activeTab = null
   })
+
+  // From the URL on server and client alike, so SSR and hydration render the same tool.
+  const landingMode = modeFromParam(page.url.searchParams.get(MODE_PARAM))
+  let toolMode = $state<AppMode>(landingMode)
+  // The sketch reads the module store; set it before the canvas mounts (browser only, since
+  // module state set during SSR would leak across requests).
+  if (browser) appMode.set(landingMode)
+  let mounted = false
+
+  function syncModeToUrl(mode: AppMode) {
+    if (!mounted) return
+    // page.url can lag behind a shallow replaceState; the address bar is the source of truth.
+    const url = new URL(window.location.href)
+    if (modeFromParam(url.searchParams.get(MODE_PARAM)) === mode) return
+    if (mode === 'igs') url.searchParams.delete(MODE_PARAM)
+    else url.searchParams.set(MODE_PARAM, mode)
+    replaceState(url, page.state)
+  }
+
+  let placeholderWanted = false
+
+  /** Drawing mode always lands on something drawable; waits for Core, and for any restore offer. */
+  function loadPlaceholderFloorplan() {
+    if (!placeholderWanted || !core) return
+    placeholderWanted = false
+    if (get(floorplanStore) || get(recoveryOffer)) return
+    core.loadFloorplanImage(DRAWING_FLOORPLANS[0].path)
+    selectedDropDownOption = DRAWING_FLOORPLANS[0].label
+    ensureTimelineCovers(get(mondrianSettings).speculateDuration)
+  }
 
   // What drawing mode changed on entry, restored on the way back out.
   let restoreOnExit: { transcript: boolean; splitScreen: boolean; was3D: boolean } | null = null
@@ -354,6 +392,8 @@
     instantPanel = false
     activeTab = 'draw'
     lastTab = 'draw'
+    placeholderWanted = true
+    loadPlaceholderFloorplan()
     p5Instance?.loop()
   }
 
@@ -372,11 +412,30 @@
     p5Instance?.loop()
   }
 
+  // A video that finishes loading while drawing (e.g. from an example) goes beside the canvas.
+  let videoWasLoaded = false
   $effect(() => {
-    const mode = $appMode
+    const loaded = $VideoStore.isLoaded
     untrack(() => {
+      const justLoaded = loaded && !videoWasLoaded
+      videoWasLoaded = loaded
+      if (!justLoaded || toolMode !== 'mondrian') return
+      const video = get(VideoStore)
+      if (!video.isSplitScreen) {
+        toggleSplitScreen()
+        if (restoreOnExit) restoreOnExit.splitScreen = true
+      }
+      ensureTimelineCovers(video.duration)
+    })
+  })
+
+  $effect(() => {
+    const mode = toolMode
+    untrack(() => {
+      appMode.set(mode)
       if (mode === appliedMode) return
       appliedMode = mode
+      syncModeToUrl(mode)
       if (mode === 'mondrian') enterDrawingMode()
       else exitDrawingMode()
     })
@@ -579,12 +638,33 @@
     spaceTimeTooltip?.trigger()
   }
 
+  // Drawing mode loads an example as a blank exercise: its floorplan and video only.
   async function updateExampleDataDropDown(event: ExampleSelectEvent) {
     await clearAllDataLocal()
-    await core.handleExampleDropdown(event)
+    await core.handleExampleDropdown(event, { mediaOnly: toolMode === 'mondrian' })
     p5Instance?.loop()
     spaceTimeTooltip?.trigger()
   }
+
+  async function loadDrawingFloorplan(floorplan: DrawingFloorplan) {
+    await clearAllDataLocal()
+    core.loadFloorplanImage(floorplan.path)
+    selectedDropDownOption = floorplan.label
+    ensureTimelineCovers(get(mondrianSettings).speculateDuration)
+    p5Instance?.loop()
+  }
+
+  /** GPS examples build their map from the movement data, so drawing mode cannot use them. */
+  const exampleGroups = $derived(
+    toolMode === 'mondrian'
+      ? dropdownOptions
+          .map((group) => ({
+            ...group,
+            items: group.items.filter((item) => !EXAMPLE_DATASETS[item.value]?.isGPS),
+          }))
+          .filter((group) => group.items.length > 0)
+      : dropdownOptions
+  )
 
   /** Resolves once the {#key}-remounted canvas has published a fresh instance. */
   function waitForCanvasRemount(prev: IgsP5 | null): Promise<IgsP5> {
@@ -756,7 +836,7 @@
 
     // Keyboard shortcut event handlers
     const handleToggle3D = () => {
-      if (get(appMode) === 'mondrian') return
+      if (toolMode === 'mondrian') return
       if (p5Instance?.handle3D) {
         p5Instance?.handle3D.update()
         is3DMode = p5Instance?.handle3D.getIs3DMode() ?? is3DMode
@@ -808,8 +888,10 @@
       flushSync()
     }
 
-    // Show welcome modal immediately for first-time visitors
-    if (shouldShowTour()) {
+    mounted = true
+
+    // Show welcome modal immediately for first-time visitors; it introduces IGS, not drawing
+    if (shouldShowTour() && toolMode === 'igs') {
       isModalOpen.set(true)
     }
 
@@ -903,9 +985,34 @@
     {/snippet}
     {@render panelSection('Your data', importBody)}
 
+    {#if toolMode === 'mondrian'}
+      {#snippet floorplansBody()}
+        <p class="text-xs opacity-70">A floorplan on its own, for drawing without video.</p>
+        <ul class="menu w-full p-0">
+          {#each DRAWING_FLOORPLANS as floorplan (floorplan.value)}
+            <li>
+              <button
+                class:bg-primary={selectedDropDownOption === floorplan.label}
+                class:bg-opacity-20={selectedDropDownOption === floorplan.label}
+                onclick={() => loadDrawingFloorplan(floorplan)}
+              >
+                {floorplan.label}
+              </button>
+            </li>
+          {/each}
+        </ul>
+      {/snippet}
+      {@render panelSection('Floorplans', floorplansBody)}
+    {/if}
+
     {#snippet examplesBody()}
+      {#if toolMode === 'mondrian'}
+        <p class="text-xs opacity-70">
+          Loads the example's floorplan and video only, to transcribe from scratch.
+        </p>
+      {/if}
       <ul class="menu w-full p-0">
-        {#each dropdownOptions as group (group.label)}
+        {#each exampleGroups as group (group.label)}
           <li>
             <button
               class="menu-title flex items-center gap-2 w-full hover:bg-base-200 rounded-lg px-2 py-1 cursor-pointer"
@@ -1345,8 +1452,8 @@
           {/if}
         </div>
         <div class="flex-none flex items-center gap-1 px-2">
-          <ModeSwitcher />
-          {#if $appMode === 'igs'}
+          <ModeSwitcher mode={toolMode} onchange={(next) => (toolMode = next)} />
+          {#if toolMode === 'igs'}
             <IconButton
               id="btn-toggle-3d"
               icon={Md3DRotation}
@@ -1372,7 +1479,7 @@
         <ActivityBar
           activeId={activeTab ?? undefined}
           onSelect={handleRailSelect}
-          items={$appMode === 'mondrian'
+          items={toolMode === 'mondrian'
             ? [
                 { id: 'draw', label: RAIL_LABELS.draw, icon: drawIcon },
                 { id: 'data', label: RAIL_LABELS.data, icon: dataIcon },
@@ -1487,9 +1594,11 @@
               <VideoContainer />
             {/if}
             <TranscriptPanel bind:isVisible={isTranscriptVisible} />
-            <DrawingStatus />
+            {#if toolMode === 'mondrian'}
+              <DrawingStatus />
+            {/if}
             <ConversationTooltip hideTooltip={isTranscriptVisible} />
-            {#if $appMode === 'igs'}
+            {#if toolMode === 'igs'}
               <SpaceTimeTooltip bind:this={spaceTimeTooltip} />
             {/if}
           </div>

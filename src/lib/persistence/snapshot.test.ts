@@ -53,7 +53,7 @@ describe('session snapshot', () => {
   it('offers a session back only when it holds something', () => {
     expect(isWorthRestoring(undefined)).toBe(false)
     expect(isWorthRestoring(toSnapshot(state({ users: [], hasFloorplan: false })))).toBe(false)
-    expect(isWorthRestoring(toSnapshot(state({ users: [] })))).toBe(true)
+    expect(isWorthRestoring(toSnapshot(state({ users: [] })))).toBe(false)
     expect(isWorthRestoring({ ...toSnapshot(state()), version: 0 })).toBe(false)
   })
 })

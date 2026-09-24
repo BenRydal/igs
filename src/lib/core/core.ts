@@ -130,7 +130,11 @@ export class Core {
    * </select>
    * ```
    */
-  handleExampleDropdown = async (event: ExampleSelectEvent): Promise<void> => {
+  /** `mediaOnly` loads just the floorplan and video: a blank transcription exercise. */
+  handleExampleDropdown = async (
+    event: ExampleSelectEvent,
+    { mediaOnly = false }: { mediaOnly?: boolean } = {}
+  ): Promise<void> => {
     // Clear all previous data when switching datasets
     pausePlayback()
     this.movementData = []
@@ -149,7 +153,7 @@ export class Core {
       if (!isGPS) {
         await this.loadFloorplanImage(`/data/${selectedValue}/floorplan.png`)
       }
-      for (const file of files) {
+      for (const file of mediaOnly ? [] : files) {
         await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, file)
       }
       if (videoId) {

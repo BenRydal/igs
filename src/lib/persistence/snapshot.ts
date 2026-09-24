@@ -77,15 +77,11 @@ export function toSnapshot(state: SessionState, savedAt = Date.now()): SessionSn
   }
 }
 
-/** A session worth offering back: someone to show, or a floorplan to draw on. */
+/** A session worth offering back has at least one person; a floorplan alone may be the placeholder. */
 export function isWorthRestoring(
   snapshot: SessionSnapshot | undefined
 ): snapshot is SessionSnapshot {
-  return (
-    !!snapshot &&
-    snapshot.version === SNAPSHOT_VERSION &&
-    (snapshot.users.length > 0 || snapshot.hasFloorplan)
-  )
+  return !!snapshot && snapshot.version === SNAPSHOT_VERSION && snapshot.users.length > 0
 }
 
 export function usersFromSnapshot(snapshot: SessionSnapshot): User[] {

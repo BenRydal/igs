@@ -5,6 +5,11 @@ import { timelineV2Store } from '../timeline/store'
 import { toData } from '../floorplan/transform'
 import { appMode, recorder, recordFrame, toggleRecording } from './session'
 
+/** Drawing is plan-view only, so a sketch created in drawing mode starts in 2D. */
+export function startsIn3D(): boolean {
+  return get(appMode) !== 'mondrian'
+}
+
 function drawingActive(p5: IgsP5): boolean {
   return get(appMode) === 'mondrian' && !p5.handle3D.getIs3DModeOrTransitioning()
 }

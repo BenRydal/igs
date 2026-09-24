@@ -13,6 +13,13 @@ export type AppMode = 'igs' | 'mondrian'
 /** Which tool the shared session is shown in. Switching never touches the data. */
 export const appMode = writable<AppMode>('igs')
 
+/** `?mode=mondrian` lands in drawing mode; anything else is IGS. */
+export const MODE_PARAM = 'mode'
+
+export function modeFromParam(value: string | null): AppMode {
+  return value === 'mondrian' ? 'mondrian' : 'igs'
+}
+
 export interface MondrianSettings extends SamplerOptions {
   /** Timeline length in seconds when drawing without a video. */
   speculateDuration: number
@@ -89,6 +96,14 @@ export function toggleRecording(): boolean {
   }
   return startRecording()
 }
+
+// If the person being drawn disappears (cleared or replaced data), fall back to the first person.
+UserStore.subscribe((users) => {
+  const { drawAs } = get(recorder)
+  if (drawAs === null || users.some((u) => u.name === drawAs)) return
+  if (take) stopRecording()
+  recorder.update((r) => ({ ...r, drawAs: users[0]?.name ?? null }))
+})
 
 // Pausing from anywhere (timeline controls, end of the timeline) ends the take.
 PlaybackStore.subscribe((state) => {
