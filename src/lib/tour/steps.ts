@@ -12,23 +12,13 @@ export const tourSteps: TourStep[] = [
     },
   },
   {
-    element: '#examples-dropdown',
+    element: '.activity-bar__item[aria-label="Data"]',
     popover: {
-      title: 'Try Example Data',
+      title: 'Load Data',
       description:
-        'Start exploring immediately! Select from sample datasets including sports, museums, and classrooms.',
-      side: 'bottom',
-      align: 'end',
-    },
-  },
-  {
-    element: '[data-tip="Import Files"]',
-    popover: {
-      title: 'Upload Your Data',
-      description:
-        'Import your own data: CSV files of movement and conversation, images for floor plans, and MP4 videos. All processing happens locally in your browser.',
-      side: 'bottom',
-      align: 'end',
+        'Start with a sample dataset from sports, museums, and classrooms, or import your own: CSV files of movement and conversation, images for floor plans, and MP4 videos. All processing happens locally in your browser.',
+      side: 'right',
+      align: 'start',
     },
   },
   {
@@ -42,22 +32,22 @@ export const tourSteps: TourStep[] = [
     },
   },
   {
-    element: '.navbar details:nth-of-type(1)',
+    element: '.activity-bar',
     popover: {
-      title: 'Filter and Select Options',
+      title: 'Panels',
       description:
-        "Control what's displayed by filtering and selecting movement and conversation data in different ways.",
-      side: 'bottom',
+        'Each icon opens a panel beside the canvas. Turn on Advanced mode in Settings for filtering, selection, and floor plan controls.',
+      side: 'right',
       align: 'start',
     },
   },
   {
-    element: '#talk-dropdown',
+    element: '.activity-bar__item[aria-label="Talk"]',
     popover: {
       title: 'Conversation Controls',
       description:
         'Adjust how conversation data is displayed, grouped, and aligned. Search through conversations too!',
-      side: 'bottom',
+      side: 'right',
       align: 'start',
     },
   },
@@ -91,12 +81,12 @@ export const tourSteps: TourStep[] = [
     },
   },
   {
-    element: '[data-tip="Help"]',
+    element: '.activity-bar__item[aria-label="Help"]',
     popover: {
       title: 'Need Help?',
       description:
         'Access documentation anytime. You can restart this tour from the Help menu whenever you need a refresher.',
-      side: 'bottom',
+      side: 'right',
       align: 'end',
     },
   },

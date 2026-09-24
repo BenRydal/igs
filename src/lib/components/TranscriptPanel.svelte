@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from 'svelte'
   import { DraggableWindow } from 'svelte-p5-components'
   import UserStore from '../../stores/userStore'
   import HoveredConversationStore from '../../stores/interactionStore'
@@ -21,6 +22,29 @@
 
   // Props
   let { isVisible = $bindable(false) }: { isVisible?: boolean } = $props()
+
+  const DEFAULT_WIDTH = 320
+  const DEFAULT_HEIGHT = 400
+  // Mount once the canvas pane has a real size: the parent-bounds plugin
+  // throws if the window starts larger than its container.
+  let size = $state<{ width: number; height: number } | null>(null)
+
+  onMount(() => {
+    let raf = 0
+    const measure = () => {
+      const rect = document.getElementById('p5-canvas-container')?.getBoundingClientRect()
+      if (rect && rect.width > 200 && rect.height > 200) {
+        size = {
+          width: Math.min(DEFAULT_WIDTH, rect.width - 20),
+          height: Math.min(DEFAULT_HEIGHT, rect.height - 20),
+        }
+      } else {
+        raf = requestAnimationFrame(measure)
+      }
+    }
+    measure()
+    return () => cancelAnimationFrame(raf)
+  })
 
   // Search state - derived from ConfigStore (single source of truth)
   let searchQuery = $derived($ConfigStore.wordToSearch)
@@ -166,105 +190,107 @@
      toggle. `isolation` keeps its z-index (which the library increments without
      bound) from ever climbing over a modal. -->
 <div class="transcript-shell" class:shell-hidden={!isVisible}>
-  <DraggableWindow
-    title="Transcript"
-    initialX={20}
-    initialY={80}
-    width={320}
-    height={400}
-    minWidth={280}
-    minHeight={200}
-    constrained="viewport"
-    minVisible={50}
-    onClose={() => (isVisible = false)}
-  >
-    <div class="transcript-body">
-      <!-- Search bar -->
-      <div class="search-bar">
-        <input
-          type="text"
-          placeholder="Search transcript..."
-          value={searchQuery}
-          oninput={(e) => setSearch((e.target as HTMLInputElement).value)}
-          class="search-input"
-        />
-        {#if searchQuery}
-          <button class="icon-btn" onclick={() => setSearch('')} aria-label="Clear search">
-            <MdClose />
-          </button>
-          <span class="search-count">{transcriptEntries.length}/{allEntries.length}</span>
-        {/if}
-      </div>
+  {#if size}
+    <DraggableWindow
+      title="Transcript"
+      initialX={10}
+      initialY={10}
+      width={size.width}
+      height={size.height}
+      minWidth={Math.min(280, size.width)}
+      minHeight={Math.min(200, size.height)}
+      constrained="parent"
+      minVisible={50}
+      onClose={() => (isVisible = false)}
+    >
+      <div class="transcript-body">
+        <!-- Search bar -->
+        <div class="search-bar">
+          <input
+            type="text"
+            placeholder="Search transcript..."
+            value={searchQuery}
+            oninput={(e) => setSearch((e.target as HTMLInputElement).value)}
+            class="search-input"
+          />
+          {#if searchQuery}
+            <button class="icon-btn" onclick={() => setSearch('')} aria-label="Clear search">
+              <MdClose />
+            </button>
+            <span class="search-count">{transcriptEntries.length}/{allEntries.length}</span>
+          {/if}
+        </div>
 
-      <div class="transcript-content" bind:this={scrollContainer}>
-        {#if allEntries.length === 0}
-          <div class="empty-state">No conversation data loaded.</div>
-        {:else if transcriptEntries.length === 0}
-          <div class="empty-state">No matches found for "{searchQuery}"</div>
-        {:else}
-          {#each transcriptEntries as entry, index (`${entry.userIndex}-${entry.pointIndex}`)}
-            {#if editingIndex === index}
-              <div class="transcript-entry editing" data-index={index}>
-                <div class="edit-row">
-                  <div class="time-field">
-                    <input
-                      type="text"
-                      class="edit-time"
-                      class:error={editTimeError}
-                      bind:value={editTime}
-                      oninput={() => (editTimeError = '')}
-                      placeholder="0:00"
-                    />
-                    {#if editTimeError}
-                      <span class="time-error">{editTimeError}</span>
-                    {/if}
+        <div class="transcript-content" bind:this={scrollContainer}>
+          {#if allEntries.length === 0}
+            <div class="empty-state">No conversation data loaded.</div>
+          {:else if transcriptEntries.length === 0}
+            <div class="empty-state">No matches found for "{searchQuery}"</div>
+          {:else}
+            {#each transcriptEntries as entry, index (`${entry.userIndex}-${entry.pointIndex}`)}
+              {#if editingIndex === index}
+                <div class="transcript-entry editing" data-index={index}>
+                  <div class="edit-row">
+                    <div class="time-field">
+                      <input
+                        type="text"
+                        class="edit-time"
+                        class:error={editTimeError}
+                        bind:value={editTime}
+                        oninput={() => (editTimeError = '')}
+                        placeholder="0:00"
+                      />
+                      {#if editTimeError}
+                        <span class="time-error">{editTimeError}</span>
+                      {/if}
+                    </div>
+                    <span class="edit-speaker-label" style="color: {entry.color}"
+                      >{entry.speaker}</span
+                    >
                   </div>
-                  <span class="edit-speaker-label" style="color: {entry.color}"
-                    >{entry.speaker}</span
-                  >
+                  <textarea class="edit-text" bind:value={editText} rows="3"></textarea>
+                  <div class="edit-actions">
+                    <button class="btn-delete" onclick={() => deleteEntry(entry)}>Delete</button>
+                    <button class="btn-cancel" onclick={cancelEditing}>Cancel</button>
+                    <button class="btn-save" onclick={() => saveEditing(entry)}>Save</button>
+                  </div>
                 </div>
-                <textarea class="edit-text" bind:value={editText} rows="3"></textarea>
-                <div class="edit-actions">
-                  <button class="btn-delete" onclick={() => deleteEntry(entry)}>Delete</button>
-                  <button class="btn-cancel" onclick={cancelEditing}>Cancel</button>
-                  <button class="btn-save" onclick={() => saveEditing(entry)}>Save</button>
+              {:else}
+                <div
+                  class="transcript-entry"
+                  class:active={index === activeEntryIndex}
+                  style="--speaker-color: {entry.color}"
+                  data-index={index}
+                  onclick={() => handleEntryClick(entry)}
+                  onkeydown={(e) => e.key === 'Enter' && handleEntryClick(entry)}
+                  role="button"
+                  tabindex="0"
+                >
+                  <div class="entry-header">
+                    <span class="entry-time">{formatTime(entry.time)}</span>
+                    <span class="entry-speaker" style="color: {entry.color}">{entry.speaker}</span>
+                    <button
+                      class="icon-btn edit-btn"
+                      onclick={(e) => startEditing(entry, index, e)}
+                      aria-label="Edit entry"
+                    >
+                      <MdPencil />
+                    </button>
+                  </div>
+                  <div class="entry-text">{@html highlightMatch(entry.text)}</div>
                 </div>
-              </div>
-            {:else}
-              <div
-                class="transcript-entry"
-                class:active={index === activeEntryIndex}
-                style="--speaker-color: {entry.color}"
-                data-index={index}
-                onclick={() => handleEntryClick(entry)}
-                onkeydown={(e) => e.key === 'Enter' && handleEntryClick(entry)}
-                role="button"
-                tabindex="0"
-              >
-                <div class="entry-header">
-                  <span class="entry-time">{formatTime(entry.time)}</span>
-                  <span class="entry-speaker" style="color: {entry.color}">{entry.speaker}</span>
-                  <button
-                    class="icon-btn edit-btn"
-                    onclick={(e) => startEditing(entry, index, e)}
-                    aria-label="Edit entry"
-                  >
-                    <MdPencil />
-                  </button>
-                </div>
-                <div class="entry-text">{@html highlightMatch(entry.text)}</div>
-              </div>
-            {/if}
-          {/each}
-        {/if}
+              {/if}
+            {/each}
+          {/if}
+        </div>
       </div>
-    </div>
-  </DraggableWindow>
+    </DraggableWindow>
+  {/if}
 </div>
 
 <style>
   .transcript-shell {
-    position: fixed;
+    position: absolute;
     inset: 0;
     z-index: 99; /* below Z_INDEX.MODAL_BACKDROP */
     isolation: isolate;
