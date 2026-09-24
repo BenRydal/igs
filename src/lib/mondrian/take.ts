@@ -15,8 +15,9 @@ export class Take<P extends Timed> {
   /** after[cut..] is later than the take's latest point. */
   private cut = 0
 
+  /** `base` is the trail before this take; it is never mutated, so undo can restore it. */
   constructor(
-    base: readonly P[],
+    readonly base: P[],
     readonly startTime: number
   ) {
     const split = base.findIndex((p) => timeOf(p) >= startTime)

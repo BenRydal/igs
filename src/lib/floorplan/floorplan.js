@@ -3,6 +3,7 @@ import ConfigStore from '../../stores/configStore'
 import { get } from 'svelte/store'
 import { GPS_NORMALIZED_SIZE } from '../gps/gps-transformer'
 import { effectiveRect, toCanvas } from './transform'
+import floorplanStore from '../../stores/floorplanStore'
 
 /** @typedef {import('../p5/igs-p5').IgsP5} IgsP5 */
 /** @typedef {{ width: number, height: number }} ContainerSize */
@@ -13,8 +14,20 @@ export class FloorPlan {
   constructor(sk) {
     this.sk = sk
     /** @type {import('p5').Image | null} */
+    this._img = null
     this.img = null
     this.curFloorPlanRotation = 1 // [0-3] 4 rotation modes none, 90, 180, 270
+  }
+
+  /** @returns {import('p5').Image | null} */
+  get img() {
+    return this._img
+  }
+
+  /** Every assignment publishes the size, so UI can react to a floorplan loading. */
+  set img(value) {
+    this._img = value
+    floorplanStore.set(value ? { width: value.width, height: value.height } : null)
   }
 
   /**
