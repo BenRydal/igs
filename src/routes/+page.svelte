@@ -49,6 +49,7 @@
     toggleSplitScreen,
     reset as resetVideo,
     hasVideoSource,
+    loadVideo,
   } from '../stores/videoStore'
   import GPSStore, { resetGPS } from '../stores/gpsStore'
   import { onVideoVisibilityChange } from '../stores/playbackStore'
@@ -78,6 +79,14 @@
   import DrawPanel from '$lib/mondrian/DrawPanel.svelte'
   import RecordingPanel from '$lib/mondrian/RecordingPanel.svelte'
   import DrawingStatus from '$lib/mondrian/DrawingStatus.svelte'
+  import RecoveryPrompt from '$lib/persistence/RecoveryPrompt.svelte'
+  import {
+    startAutosave,
+    resumeAutosave,
+    recoveryOffer,
+    type RecoveryOffer,
+  } from '$lib/persistence/autosave'
+  import { usersFromSnapshot } from '$lib/persistence/snapshot'
   import {
     appMode,
     recorder,
@@ -702,8 +711,43 @@
     p5Instance?.loop()
   }
 
+  function floorplanBlob(): Promise<Blob | null> {
+    // p5.Image keeps a backing canvas at runtime that its type definitions omit.
+    const canvas = (p5Instance?.floorPlan.img as unknown as { canvas?: HTMLCanvasElement } | null)
+      ?.canvas
+    if (!canvas) return Promise.resolve(null)
+    return new Promise((resolve) => canvas.toBlob(resolve, 'image/png'))
+  }
+
+  async function restoreSession({ snapshot, floorplan, video }: RecoveryOffer) {
+    if (floorplan) core.loadFloorplanImage(URL.createObjectURL(floorplan))
+    UserStore.set(usersFromSnapshot(snapshot))
+    CodeStore.set(snapshot.codes)
+    ConfigStore.update((c) => ({ ...snapshot.config, advancedMode: c.advancedMode }))
+    if (snapshot.video?.type === 'youtube') loadVideo(snapshot.video)
+    else if (video) core.prepVideoFromFile(URL.createObjectURL(video))
+    const { dataStart, dataEnd, currentTime } = snapshot.timeline
+    if (dataEnd > 0) {
+      timelineV2Store.initialize(dataEnd, dataStart)
+      timelineV2Store.setCurrentTime(currentTime)
+    }
+    mondrianSettings.set(snapshot.mondrian.settings)
+    setDrawAs(snapshot.mondrian.drawAs)
+    resumeAutosave()
+    p5Instance?.loop()
+  }
+
   // Add event handlers for dropdowns
   onMount(() => {
+    let stopAutosave: (() => void) | undefined
+    let unmounted = false
+    void startAutosave({ floorplanBlob }).then((stop) => {
+      if (unmounted) return stop()
+      stopAutosave = stop
+      // A session to come back to matters more than the welcome screen.
+      if (get(recoveryOffer)) isModalOpen.set(false)
+    })
+
     // Load advanced mode from localStorage
     const savedAdvancedMode = loadAdvancedMode()
     if (savedAdvancedMode) {
@@ -785,6 +829,8 @@
 
     // Cleanup function
     return () => {
+      unmounted = true
+      stopAutosave?.()
       // Remove keyboard shortcut handlers
       window.removeEventListener('igs:toggle-3d', handleToggle3D)
       window.removeEventListener('igs:rotate-floorplan', handleRotateFloorplan)
@@ -1563,6 +1609,8 @@
 {/if}
 
 <IgsInfoModal {isModalOpen} />
+
+<RecoveryPrompt onRestore={restoreSession} />
 
 <OnboardingTour />
 
