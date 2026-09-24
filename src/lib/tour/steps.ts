@@ -1,5 +1,28 @@
 import type { TourStep } from './types'
 
+const railItem = (label: string) => `.activity-bar__item[aria-label="${label}"]`
+
+/** Opens a left-bar panel, then resolves an element inside it (or the fallback). */
+function inPanel(tab: string, selector: string, fallback: string): () => Element {
+  return () => {
+    window.dispatchEvent(new CustomEvent('igs:open-panel', { detail: { tab } }))
+    return (
+      document.querySelector(selector) ??
+      document.querySelector(fallback) ??
+      document.querySelector('.activity-bar') ??
+      document.body
+    )
+  }
+}
+
+/** Filters only exist in advanced mode; otherwise point at the toggle that reveals them. */
+function filterStep(): Element {
+  if (document.querySelector(railItem('Filters'))) {
+    return inPanel('filters', '#igs-side-panel', railItem('Filters'))()
+  }
+  return inPanel('settings', '#advanced-mode-toggle', railItem('Settings'))()
+}
+
 export const tourSteps: TourStep[] = [
   {
     element: '.navbar',
@@ -12,11 +35,21 @@ export const tourSteps: TourStep[] = [
     },
   },
   {
-    element: '.activity-bar__item[aria-label="Data"]',
+    element: inPanel('data', '#igs-side-panel', railItem('Data')),
     popover: {
-      title: 'Load Data',
+      title: 'Try Example Data',
       description:
-        'Start with a sample dataset from sports, museums, and classrooms, or import your own: CSV files of movement and conversation, images for floor plans, and MP4 videos. All processing happens locally in your browser.',
+        'Start exploring immediately! Select from sample datasets including sports, museums, and classrooms.',
+      side: 'right',
+      align: 'start',
+    },
+  },
+  {
+    element: inPanel('data', '#btn-import-files', railItem('Data')),
+    popover: {
+      title: 'Upload Your Data',
+      description:
+        'Import your own data: CSV files of movement and conversation, images for floor plans, and MP4 videos. All processing happens locally in your browser.',
       side: 'right',
       align: 'start',
     },
@@ -32,17 +65,17 @@ export const tourSteps: TourStep[] = [
     },
   },
   {
-    element: '.activity-bar',
+    element: filterStep,
     popover: {
-      title: 'Panels',
+      title: 'Filter and Select Options',
       description:
-        'Each icon opens a panel beside the canvas. Turn on Advanced mode in Settings for filtering, selection, and floor plan controls.',
+        "Control what's displayed by filtering and selecting movement and conversation data in different ways.",
       side: 'right',
       align: 'start',
     },
   },
   {
-    element: '.activity-bar__item[aria-label="Talk"]',
+    element: inPanel('talk', '#igs-side-panel', railItem('Talk')),
     popover: {
       title: 'Conversation Controls',
       description:
@@ -61,17 +94,17 @@ export const tourSteps: TourStep[] = [
     },
   },
   {
-    element: '.activity-bar__item[aria-label="People"]',
+    element: inPanel('people', '#igs-side-panel', railItem('People')),
     popover: {
-      title: 'Manage People',
+      title: 'Manage Users & Codes',
       description:
-        'When data is loaded, each person appears here. Show or hide their movement and talk, rename them, or change their color. Codes appear in the bottom bar.',
+        'When data is loaded, individual users appear here. Click to show/hide user data and manage codes.',
       side: 'right',
       align: 'start',
     },
   },
   {
-    element: '#timeline-panel',
+    element: '.btm-nav',
     popover: {
       title: 'Control Time',
       description:
@@ -81,13 +114,13 @@ export const tourSteps: TourStep[] = [
     },
   },
   {
-    element: '.activity-bar__item[aria-label="Help"]',
+    element: railItem('Help'),
     popover: {
       title: 'Need Help?',
       description:
         'Access documentation anytime. You can restart this tour from the Help menu whenever you need a refresher.',
       side: 'right',
-      align: 'end',
+      align: 'start',
     },
   },
 ]

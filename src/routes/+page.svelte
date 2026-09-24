@@ -36,6 +36,7 @@
   import MdClose from '~icons/mdi/close'
   import MdFloorPlan from '~icons/mdi/floor-plan'
   import MdAccountGroup from '~icons/mdi/account-group'
+  import MdTagMultiple from '~icons/mdi/tag-multiple'
   import MdTableEye from '~icons/mdi/table-eye'
 
   import type { User } from '../models/user'
@@ -59,7 +60,7 @@
   import type { ExampleSelectEvent } from '$lib/core/types'
   import { igsSketch } from '$lib/p5/igsSketch'
   import { writable } from 'svelte/store'
-  import { onMount, tick, type Component, type Snippet } from 'svelte'
+  import { onMount, tick, flushSync, type Component, type Snippet } from 'svelte'
   import { SvelteSet } from 'svelte/reactivity'
   import IconButton from '$lib/components/IconButton.svelte'
   import IgsInfoModal from '$lib/components/IGSInfoModal.svelte'
@@ -69,7 +70,8 @@
   import { OnboardingTour, shouldShowTour } from '$lib/tour'
   import DataImporter from '$lib/components/import/DataImporter.svelte'
   import MapStyleSelector from '$lib/components/MapStyleSelector.svelte'
-  import CodesButton from '$lib/components/CodesButton.svelte'
+  import CodesPanel from '$lib/components/CodesPanel.svelte'
+  import TimelineControls from '$lib/timeline/components/TimelineControls.svelte'
   import { capitalizeFirstLetter, capitalizeEachWord } from '$lib/utils/string'
   import { loadAdvancedMode, saveAdvancedMode } from '$lib/utils/advanced-mode-storage'
   import { Z_INDEX } from '$lib/styles/z-index'
@@ -236,10 +238,11 @@
   // Modal state - opens immediately for first-time visitors
   let isModalOpen = writable(false)
 
-  type RailTab = 'data' | 'people' | 'talk' | 'filters' | 'select' | 'view' | 'settings'
+  type RailTab = 'data' | 'people' | 'codes' | 'talk' | 'filters' | 'select' | 'view' | 'settings'
   const RAIL_LABELS: Record<RailTab | 'help', string> = {
     data: 'Data',
     people: 'People',
+    codes: 'Codes',
     talk: 'Talk',
     filters: 'Filters',
     select: 'Select',
@@ -253,6 +256,8 @@
   let panelWidth = $state(300)
   /** Rail plus open panel: how far the canvas is pushed right. */
   let railWidth = $state(0)
+  /** Set when the tour opens a panel, so its highlight lands on the final layout. */
+  let instantPanel = $state(false)
 
   function handleRailSelect(id: string) {
     if (id === 'help') {
@@ -260,6 +265,7 @@
       return
     }
     const tab = id as RailTab
+    instantPanel = false
     activeTab = activeTab === tab ? null : tab
     if (activeTab) lastTab = activeTab
   }
@@ -267,6 +273,7 @@
   function isTabAvailable(tab: RailTab): boolean {
     if (tab === 'filters' || tab === 'view') return $ConfigStore.advancedMode
     if (tab === 'select') return $ConfigStore.advancedMode && !is3DMode
+    if (tab === 'codes') return $ConfigStore.dataHasCodes
     return true
   }
 
@@ -656,6 +663,14 @@
       }
     }
 
+    const handleOpenPanel = (event: Event) => {
+      const tab = (event as CustomEvent<{ tab: RailTab | null }>).detail?.tab ?? null
+      instantPanel = true
+      activeTab = tab && isTabAvailable(tab) ? tab : null
+      if (activeTab) lastTab = activeTab
+      flushSync()
+    }
+
     // Show welcome modal immediately for first-time visitors
     if (shouldShowTour()) {
       isModalOpen.set(true)
@@ -667,6 +682,7 @@
     window.addEventListener('igs:download-codes', handleDownloadCodes)
     window.addEventListener('igs:toggle-help', handleToggleHelp)
     window.addEventListener('igs:load-example', handleLoadExample)
+    window.addEventListener('igs:open-panel', handleOpenPanel)
 
     // Clear data event listeners (for command palette)
     window.addEventListener('igs:clear-movement', clearMovementData)
@@ -682,6 +698,7 @@
       window.removeEventListener('igs:download-codes', handleDownloadCodes)
       window.removeEventListener('igs:toggle-help', handleToggleHelp)
       window.removeEventListener('igs:load-example', handleLoadExample)
+      window.removeEventListener('igs:open-panel', handleOpenPanel)
 
       // Remove clear data event listeners
       window.removeEventListener('igs:clear-movement', clearMovementData)
@@ -736,7 +753,11 @@
 {#snippet dataPanel()}
   <div class="flex flex-col gap-6 px-3 py-4">
     {#snippet importBody()}
-      <button class="btn btn-sm btn-primary gap-2" onclick={() => (showImportDialog = true)}>
+      <button
+        id="btn-import-files"
+        class="btn btn-sm btn-primary gap-2"
+        onclick={() => (showImportDialog = true)}
+      >
         {@render icon(MdFileUploadOutline)}
         Import files
       </button>
@@ -1045,6 +1066,7 @@
     <label class="flex items-center justify-between gap-2 cursor-pointer">
       <span class="text-sm font-medium">Advanced mode</span>
       <input
+        id="advanced-mode-toggle"
         type="checkbox"
         class="toggle toggle-primary toggle-sm"
         checked={$ConfigStore.advancedMode}
@@ -1155,6 +1177,7 @@
 
 {#snippet dataIcon()}<MdFolder />{/snippet}
 {#snippet peopleIcon()}<MdAccountGroup />{/snippet}
+{#snippet codesIcon()}<MdTagMultiple />{/snippet}
 {#snippet talkIcon()}<MdChat />{/snippet}
 {#snippet filtersIcon()}<MdFilterList />{/snippet}
 {#snippet selectIcon()}<MdSelectAll />{/snippet}
@@ -1208,6 +1231,9 @@
           items={[
             { id: 'data', label: RAIL_LABELS.data, icon: dataIcon },
             { id: 'people', label: RAIL_LABELS.people, icon: peopleIcon },
+            ...($ConfigStore.dataHasCodes
+              ? [{ id: 'codes', label: RAIL_LABELS.codes, icon: codesIcon }]
+              : []),
             { id: 'talk', label: RAIL_LABELS.talk, icon: talkIcon },
             ...($ConfigStore.advancedMode
               ? [{ id: 'filters', label: RAIL_LABELS.filters, icon: filtersIcon }]
@@ -1230,6 +1256,7 @@
           aria-label={`${RAIL_LABELS[lastTab]} panel`}
           class="igs-sidepanel-shell"
           class:igs-sidepanel-shell--open={activeTab !== null}
+          class:igs-sidepanel-shell--instant={instantPanel}
           style:width={`${activeTab ? panelWidth : 0}px`}
           style:--igs-drawer-z={Z_INDEX.DRAWER}
           inert={activeTab === null}
@@ -1244,6 +1271,8 @@
               {@render dataPanel()}
             {:else if lastTab === 'people'}
               {@render peoplePanel()}
+            {:else if lastTab === 'codes'}
+              <CodesPanel />
             {:else if lastTab === 'talk'}
               {@render talkPanel()}
             {:else if lastTab === 'filters'}
@@ -1313,12 +1342,13 @@
     {#snippet bottom()}
       <div class="btm-nav flex justify-between min-h-16 p-0">
         <!-- The bottom bar spans the window but the canvas sits right of the rail
-             (and the video pane in split mode), so this width puts the timeline at
-             the canvas pane's midpoint. The sketch derives the floorplan /
+             (and the video pane in split mode), so this width puts the timeline track
+             at the canvas pane's midpoint. The sketch derives the floorplan /
              space-time boundary from `leftX - canvasLeft`; without this the
              floorplan collapses, then inverts past a ~50% split. -->
         <div
-          class="flex min-w-0 flex-row justify-start items-center bg-[#f6f5f3] px-4 lg:px-8 overflow-x-auto"
+          id="timeline-controls"
+          class="flex min-w-0 flex-row justify-end items-center bg-[#f6f5f3] px-2 overflow-x-auto"
           style={`flex: 0 1 calc(${railWidth}px + (100% - ${railWidth}px) * ${
             isSplitScreen ? 0.5 + splitSizes[0] / 200 : 0.5
           } + ${isSplitScreen ? SPLIT_DIVIDER_PX / 2 : 0}px)`}
@@ -1329,20 +1359,16 @@
             }
           }}
         >
-          {#if $ConfigStore.dataHasCodes}
-            <div class="mr-2">
-              <CodesButton />
-            </div>
-          {/if}
+          <TimelineControls />
         </div>
 
-        <!-- Right Side: Timeline -->
+        <!-- Right side: the track, which doubles as the 2D view's time axis -->
         <div
           id="timeline-panel"
           class="flex flex-1 items-center bg-[#f6f5f3] overflow-visible py-0.5 px-2 lg:px-4"
           style="min-width: 200px;"
         >
-          <TimelineContainer height={40} showControls={true} embedded={true} />
+          <TimelineContainer height={52} showControls={false} embedded={true} />
         </div>
       </div>
     {/snippet}
@@ -1493,6 +1519,10 @@
     .igs-sidepanel-shell {
       transition: none;
     }
+  }
+
+  .igs-sidepanel-shell--instant {
+    transition: none;
   }
 
   :global(.igs-people .entity-toggle-list__item) {
