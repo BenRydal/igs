@@ -2538,8 +2538,8 @@ __metadata:
     svelte: "npm:^5.0.0"
     svelte-check: "npm:^4.0.0"
     svelte-eslint-parser: "npm:^1.0.0"
-    svelte-p5: "npm:^0.4.0"
-    svelte-p5-components: "npm:^0.6.0"
+    svelte-p5: "npm:^1.0.0"
+    svelte-p5-components: "npm:^1.0.0"
     tailwindcss: "npm:^4.0.0"
     typescript: "npm:^5.9.3"
     unplugin-icons: "npm:^22.5.0"
@@ -4003,27 +4003,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"svelte-p5-components@npm:^0.6.0":
-  version: 0.6.0
-  resolution: "svelte-p5-components@npm:0.6.0"
+"svelte-p5-components@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "svelte-p5-components@npm:1.0.0"
   dependencies:
     "@neodrag/core": "npm:3.0.0-next.8"
     "@neodrag/svelte": "npm:3.0.0-next.8"
   peerDependencies:
     p5: ">=1.11.0 <3"
     svelte: ^5.0.0
-    svelte-p5: ">=0.4.0"
-  checksum: 10c0/4f0725489029065bf28074bc898d8e55121019bd0de51bae85b0ba75e476430b3fd8c3bdd46fcc55d61e78f30dc7295a69dbfdab1c038df5733a671fdb9d2fb9
+    svelte-p5: ^1.0.0
+  checksum: 10c0/7f989127eee1fdd15cb93f38f9f1bd714abe2f57cb121e3bd86e81dc62c9c8cd1f3baaa759fac8fb64e2e074a45858e0ffcf8afafe6c641c803d9113b622ccc3
   languageName: node
   linkType: hard
 
-"svelte-p5@npm:^0.4.0":
-  version: 0.4.0
-  resolution: "svelte-p5@npm:0.4.0"
+"svelte-p5@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "svelte-p5@npm:1.0.0"
   peerDependencies:
     p5: ">=1.11.0 <3"
     svelte: ^5.0.0
-  checksum: 10c0/ab366447e2dd11c9c22527564643af20cd6befaebd4fcb8f7e40709d04a84c5a5985723f32c771b293d7cb3103fd7af66aa0809bfe36b6c1d02d2e613c7dde78
+  checksum: 10c0/2d3c75959988cc78fb6503bd4defb75f3e0e0f78799308269e34e54f15daa95a43d5f1534022dbc1ef3f0474b955163efc8b7e540d855067376017a77a8bea1a
   languageName: node
   linkType: hard
 
