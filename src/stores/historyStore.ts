@@ -7,6 +7,8 @@ export type UndoableAction =
   | 'config.reset'
   | 'user.toggle'
   | 'user.color'
+  | 'user.add'
+  | 'user.trail'
   | 'code.toggle'
   | 'code.color'
   | 'data.clear'

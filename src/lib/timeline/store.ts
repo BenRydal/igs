@@ -57,6 +57,18 @@ function createTimelineStore() {
       }))
     },
 
+    /**
+     * Grow the data range to include `endTime` without moving the playhead.
+     * A view showing the whole range keeps showing it; a zoomed view stays put.
+     */
+    extendDataEnd(endTime: number) {
+      update((s) => {
+        if (endTime <= s.dataEnd) return s
+        const showingAll = s.viewStart <= s.dataStart && s.viewEnd >= s.dataEnd
+        return { ...s, dataEnd: endTime, viewEnd: showingAll ? endTime : s.viewEnd }
+      })
+    },
+
     // ==================== Playhead ====================
 
     /**

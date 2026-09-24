@@ -3,7 +3,8 @@ import { get } from 'svelte/store'
 import UserStore from '../../stores/userStore'
 import { historyStore } from '../../stores/historyStore'
 import { User } from '../../models/user'
-import { createUserColorDrag, setUserColor } from './user-actions'
+import { createUserColorDrag, setUserColor, addUser, commitTake } from './user-actions'
+import { DataPoint } from '../../models/dataPoint'
 
 const colorOf = (name: string) => get(UserStore).find((u) => u.name === name)?.color
 const historyLength = () => get(historyStore).past.length
@@ -74,5 +75,51 @@ describe('setUserColor', () => {
 
     historyStore.undo()
     expect(colorOf('ana')).toBe('#000000')
+  })
+})
+
+describe('addUser', () => {
+  beforeEach(() => UserStore.set([new User([], '#6a3d9a', true, 'ana')]))
+
+  it('adds a person with the next unused color, undoably', () => {
+    expect(addUser('  cam ')).toBe(true)
+    const cam = get(UserStore).find((u) => u.name === 'cam')
+    expect(cam?.color).toBe('#ff7f00')
+    expect(cam?.dataTrail).toEqual([])
+
+    historyStore.undo()
+    expect(get(UserStore).map((u) => u.name)).toEqual(['ana'])
+    historyStore.redo()
+    expect(get(UserStore).map((u) => u.name)).toEqual(['ana', 'cam'])
+  })
+
+  it('rejects an empty or duplicate name', () => {
+    const before = historyLength()
+    expect(addUser('ana')).toBe(false)
+    expect(addUser('   ')).toBe(false)
+    expect(historyLength()).toBe(before)
+  })
+})
+
+describe('commitTake', () => {
+  const trailOf = (name: string) => get(UserStore).find((u) => u.name === name)?.dataTrail ?? []
+
+  it('swaps the trail as one undo step and recomputes derived values each way', () => {
+    UserStore.set([new User([], '#000000', true, 'ana')])
+    const before = [new DataPoint('', 0, 1, 1)]
+    const after = [new DataPoint('', 0, 1, 1), new DataPoint('', 1, 5, 5)]
+    const finalized: number[] = []
+
+    commitTake('ana', before, after, (trail) => finalized.push(trail.length))
+    expect(trailOf('ana')).toBe(after)
+    expect(get(UserStore)[0].movementIsLoaded).toBe(true)
+
+    historyStore.undo()
+    expect(trailOf('ana')).toBe(before)
+    expect(get(UserStore)[0].movementIsLoaded).toBe(false)
+
+    historyStore.redo()
+    expect(trailOf('ana')).toBe(after)
+    expect(finalized).toEqual([2, 1, 2])
   })
 })

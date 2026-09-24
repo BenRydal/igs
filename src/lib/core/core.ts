@@ -21,7 +21,7 @@ import type {
 } from './types.js'
 
 import { DataPoint } from '../../models/dataPoint.js'
-import { User } from '../../models/user.js'
+import { User, nextUserColor } from '../../models/user.js'
 import { USER_COLORS } from '../constants/index.js'
 
 import UserStore from '../../stores/userStore'
@@ -745,9 +745,7 @@ export class Core {
   }
 
   createNewUser(users: User[], userName: string) {
-    const availableColors = USER_COLORS.filter((color) => !users.some((u) => u.color === color))
-    const userColor = availableColors.length > 0 ? availableColors[0] : '#000000' // Default to black if no more unique colors available
-    return new User([], userColor, true, userName)
+    return new User([], nextUserColor(users), true, userName)
   }
 
   updateStopValues(data: DataPoint[]): void {
