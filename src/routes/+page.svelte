@@ -48,7 +48,7 @@
     hasVideoSource,
   } from '../stores/videoStore'
   import GPSStore, { resetGPS } from '../stores/gpsStore'
-  import { onVideoVisibilityChange } from '../stores/playbackStore'
+  import { onVideoVisibilityChange, pause as pausePlayback } from '../stores/playbackStore'
   import VideoContainer from '$lib/components/VideoContainer.svelte'
   import SplitScreenVideo from '$lib/components/SplitScreenVideo.svelte'
   import TranscriptPanel from '$lib/components/TranscriptPanel.svelte'
@@ -75,6 +75,13 @@
   import { capitalizeFirstLetter, capitalizeEachWord } from '$lib/utils/string'
   import { loadAdvancedMode, saveAdvancedMode } from '$lib/utils/advanced-mode-storage'
   import { Z_INDEX } from '$lib/styles/z-index'
+  import MondrianTool from '$lib/mondrian-tool/MondrianTool.svelte'
+  import ToolSwitcher from '$lib/mondrian-bridge/ToolSwitcher.svelte'
+  import { activeTool, toolFromParam, TOOL_PARAM, type Tool } from '$lib/mondrian-bridge/tool'
+  import { syncMondrianIntoIgs, handIgsMediaToMondrian } from '$lib/mondrian-bridge/sync'
+  import { page } from '$app/state'
+  import { replaceState } from '$app/navigation'
+  import { browser } from '$app/environment'
 
   import CodeStore from '../stores/codeStore'
   import ConfigStore from '../stores/configStore'
@@ -234,6 +241,38 @@
       core = new Core(p5Instance)
     }
   })
+
+  // From the URL on server and client alike, so SSR and hydration render the same tool.
+  const landingTool = toolFromParam(page.url.searchParams.get(TOOL_PARAM))
+  let tool = $state<Tool>(landingTool)
+  if (browser) activeTool.set(landingTool)
+  // Mondrian mounts on first use and then stays mounted, so its video and drawing survive switching.
+  let mondrianMounted = $state(landingTool === 'mondrian')
+  let mondrian = $state<MondrianTool>()
+
+  async function switchTool(next: Tool) {
+    if (next === tool) return
+    if (next === 'igs' && mondrian && core) syncMondrianIntoIgs(core, mondrian)
+    if (next === 'mondrian') pausePlayback()
+    mondrianMounted = true
+    tool = next
+    activeTool.set(next)
+    syncToolToUrl(next)
+    if (next === 'igs') {
+      p5Instance?.loop()
+      return
+    }
+    await tick()
+    requestAnimationFrame(() => mondrian && handIgsMediaToMondrian(p5Instance, mondrian))
+  }
+
+  function syncToolToUrl(next: Tool) {
+    // page.url can lag behind a shallow replaceState; the address bar is the source of truth.
+    const url = new URL(window.location.href)
+    if (next === 'igs') url.searchParams.delete(TOOL_PARAM)
+    else url.searchParams.set(TOOL_PARAM, next)
+    replaceState(url, page.state)
+  }
 
   // Modal state - opens immediately for first-time visitors
   let isModalOpen = writable(false)
@@ -672,7 +711,7 @@
     }
 
     // Show welcome modal immediately for first-time visitors
-    if (shouldShowTour()) {
+    if (shouldShowTour() && landingTool === 'igs') {
       isModalOpen.set(true)
     }
 
@@ -1204,6 +1243,7 @@
           {/if}
         </div>
         <div class="flex-none flex items-center gap-1 px-2">
+          <ToolSwitcher {tool} onchange={switchTool} />
           <IconButton
             id="btn-toggle-3d"
             icon={Md3DRotation}
@@ -1452,6 +1492,25 @@
 
 <IgsInfoModal {isModalOpen} />
 
+{#snippet mondrianSwitcher()}
+  <ToolSwitcher {tool} onchange={switchTool} />
+{/snippet}
+
+{#if mondrianMounted}
+  <div
+    class="mondrian-layer"
+    class:mondrian-layer--hidden={tool !== 'mondrian'}
+    style:z-index={Z_INDEX.DRAWER}
+    inert={tool !== 'mondrian'}
+  >
+    <MondrianTool
+      bind:this={mondrian}
+      active={tool === 'mondrian'}
+      toolSwitcher={mondrianSwitcher}
+    />
+  </div>
+{/if}
+
 <OnboardingTour />
 
 <ModeIndicator />
@@ -1532,6 +1591,19 @@
   :global(.igs-people .entity-toggle-list__label) {
     flex: 1 1 auto;
     min-width: 0;
+  }
+
+  /* Mondrian covers IGS rather than replacing it, so both keep their size and state. */
+  .mondrian-layer {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    background: var(--color-base-100);
+  }
+
+  .mondrian-layer--hidden {
+    visibility: hidden;
+    pointer-events: none;
   }
 
   .split-video-pane {

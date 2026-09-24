@@ -24,6 +24,8 @@
   export let onNewPath: () => void
   export let onSelectExample: (data: string) => void
   export let onModeSwitch: () => void
+  /** IGS's tool switcher, shown at the end of both toolbars. */
+  export let toolSwitcher: import('svelte').Snippet | undefined = undefined
 
   let showModal = false
   let showClearAllModal = false
@@ -548,10 +550,12 @@
     <button class="btn btn-ghost" on:click={openWelcomeModal}>
       <IconHelp class="w-5 h-5" />
     </button>
+    {#if toolSwitcher}{@render toolSwitcher()}{/if}
   </div>
 
   <!-- Mobile Navigation - visible on small screens -->
   <div class="flex lg:hidden items-center gap-1">
+    {#if toolSwitcher}{@render toolSwitcher()}{/if}
     <!-- Quick action buttons always visible on mobile -->
     <button class="btn btn-ghost btn-sm" on:click={() => (showUploadModal = true)} title="Upload">
       <IconUpload class="w-5 h-5" />

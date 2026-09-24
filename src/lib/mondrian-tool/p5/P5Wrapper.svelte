@@ -12,6 +12,7 @@
     handleRewindTranscription,
     handleForwardSpeculateMode,
     handleRewindSpeculateMode,
+    toggleDrawingNoVideo,
   } from '../stores/drawingState'
   import IconRewind from '~icons/material-symbols/fast-rewind'
   import IconForward from '~icons/material-symbols/fast-forward'
@@ -33,6 +34,19 @@
   let isDraggingSplitter = false
   let videoElement: p5.Element | null = null
   let p5Instance: p5
+  /** False while IGS is showing: pauses the draw loop and the F/R shortcuts. */
+  export let active = true
+
+  $: if (p5Instance) {
+    if (active) p5Instance.loop()
+    else p5Instance.noLoop()
+  }
+
+  // Leaving for IGS ends a recording through Mondrian's own stop paths.
+  $: if (!active && videoHtmlElement && !videoHtmlElement.paused) videoHtmlElement.pause()
+  $: if (!active && $drawingState.isDrawing && !$drawingConfig.isTranscriptionMode) {
+    toggleDrawingNoVideo()
+  }
   let lastVideoTime = 0
   const colors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF']
 
@@ -70,6 +84,7 @@
 
   onMount(() => {
     const handleKeydown = (e: KeyboardEvent) => {
+      if (!active) return
       if (e.key.toLowerCase() === 'f') {
         e.preventDefault()
         if ($drawingConfig.isTranscriptionMode && videoHtmlElement) {
@@ -180,6 +195,7 @@
 
     // Shared handler for mouse/touch press on canvas
     const handleCanvasPress = (event: MouseEvent | TouchEvent): boolean | void => {
+      if (!active) return false
       const target = event?.target as HTMLElement
       if (target?.closest('[data-ui-element]')) return false
 
@@ -502,7 +518,8 @@
   role="application"
   aria-label="Drawing Canvas"
 >
-  <P5Canvas {sketch} />
+  <!-- The sketch moves its canvas into containerDiv; keep the emptied, full-size host out of flow. -->
+  <P5Canvas {sketch} class="absolute pointer-events-none" />
 
   <!-- Empty State -->
   {#if !$drawingState.imageElement}

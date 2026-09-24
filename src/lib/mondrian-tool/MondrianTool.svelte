@@ -3,7 +3,7 @@
   import Navbar from '$lib/mondrian-tool/components/nav/Navbar.svelte'
   import PathStats from '$lib/mondrian-tool/components/PathStats.svelte'
   import RecoveryModal from '$lib/mondrian-tool/components/RecoveryModal.svelte'
-  import { onMount } from 'svelte'
+  import { onMount, type Snippet } from 'svelte'
   import { get } from 'svelte/store'
   import { drawingState } from '$lib/mondrian-tool/stores/drawingState'
   import { drawingConfig } from '$lib/mondrian-tool/stores/drawingConfig'
@@ -17,7 +17,38 @@
   } from '$lib/mondrian-tool/stores/sessionRecovery'
   import IconWarning from '~icons/material-symbols/warning-outline'
 
+  let { toolSwitcher, active = true }: { toolSwitcher?: Snippet; active?: boolean } = $props()
+
   let p5Component: P5Wrapper
+  let videoUrl: string | null = null
+
+  // The bridge to IGS goes through these, so it never reaches into Mondrian's internals.
+  export function getFloorPlanDataUrl(): string | null {
+    return p5Component?.getFloorPlanDataUrl() ?? null
+  }
+
+  export function getVideoUrl(): string | null {
+    return videoUrl
+  }
+
+  export function hasFloorPlan(): boolean {
+    return get(drawingState).imageElement !== null
+  }
+
+  export function receiveFloorPlan(url: string) {
+    const image = new window.Image()
+    image.onload = () => p5Component.setImage(image)
+    image.src = url
+  }
+
+  export function receiveVideo(url: string) {
+    const video = window.document.createElement('video')
+    video.src = url
+    video.autoplay = false
+    video.loop = false
+    p5Component.setVideo(video)
+    videoUrl = url
+  }
   let showRecoveryModal = $state(false)
   let recoveredSession = $state<SavedSession | null>(null)
   let showEmptyPathWarning = $state(false)
@@ -165,6 +196,7 @@
       video.autoplay = false
       video.loop = false
       p5Component.setVideo(video)
+      videoUrl = video.src
     }
   }
 
@@ -194,6 +226,7 @@
   function handleModeSwitch() {
     p5Component.clearDrawing()
     p5Component.clearVideo()
+    videoUrl = null
     p5Component.startNewPath()
     clearSavedSession()
   }
@@ -232,9 +265,10 @@
   onClear={handleClear}
   onNewPath={handleNewPath}
   onModeSwitch={handleModeSwitch}
+  {toolSwitcher}
 />
 <div class="relative">
-  <P5Wrapper bind:this={p5Component} />
+  <P5Wrapper bind:this={p5Component} {active} />
   <PathStats />
 </div>
 
