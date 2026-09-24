@@ -29,13 +29,17 @@
         <!-- Header -->
         <div class="mb-6">
           <h2 class="text-3xl md:text-4xl font-bold mb-2">Mondrian</h2>
-          <p class="text-base-content/70 text-lg">Transcribe movement from video into position data</p>
+          <p class="text-base-content/70 text-lg">
+            Transcribe movement from video into position data
+          </p>
         </div>
 
         <!-- Quick Start Steps -->
         <div class="space-y-4 flex-1">
           <div class="flex gap-4 items-start">
-            <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+            <div
+              class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0"
+            >
               <IconUpload class="w-5 h-5 text-primary" />
             </div>
             <div>
@@ -47,7 +51,9 @@
           </div>
 
           <div class="flex gap-4 items-start">
-            <div class="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center flex-shrink-0">
+            <div
+              class="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center flex-shrink-0"
+            >
               <IconClick class="w-5 h-5 text-secondary" />
             </div>
             <div>
@@ -59,19 +65,24 @@
           </div>
 
           <div class="flex gap-4 items-start">
-            <div class="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0">
+            <div
+              class="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0"
+            >
               <IconKeyboard class="w-5 h-5 text-accent" />
             </div>
             <div>
               <h4 class="font-semibold">Keyboard shortcuts</h4>
               <p class="text-base-content/60">
-                <kbd class="kbd kbd-sm">F</kbd> forward, <kbd class="kbd kbd-sm">R</kbd> rewind through video and recording
+                <kbd class="kbd kbd-sm">F</kbd> forward, <kbd class="kbd kbd-sm">R</kbd> rewind through
+                video and recording
               </p>
             </div>
           </div>
 
           <div class="flex gap-4 items-start">
-            <div class="w-10 h-10 rounded-full bg-info/10 flex items-center justify-center flex-shrink-0">
+            <div
+              class="w-10 h-10 rounded-full bg-info/10 flex items-center justify-center flex-shrink-0"
+            >
               <IconDownload class="w-5 h-5 text-info" />
             </div>
             <div>
@@ -84,9 +95,13 @@
         </div>
 
         <!-- Privacy note -->
-        <div class="flex items-center gap-2 text-sm text-green-700 mt-5 pt-4 border-t border-base-200">
+        <div
+          class="flex items-center gap-2 text-sm text-green-700 mt-5 pt-4 border-t border-base-200"
+        >
           <IconShield class="w-5 h-5 flex-shrink-0" />
-          <span>All data stays in your browser. Auto-backup saves your work locally in case of errors.</span>
+          <span
+            >All data stays in your browser. Auto-backup saves your work locally in case of errors.</span
+          >
         </div>
 
         <!-- Footer actions -->
@@ -107,19 +122,26 @@
                 Try Example
               </button>
             {/if}
-            <button class="btn btn-primary" on:click={onClose}>
-              Get Started
-            </button>
+            <button class="btn btn-primary" on:click={onClose}> Get Started </button>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Footer -->
-    <div class="border-t border-base-300 bg-base-200/50 px-4 py-3 text-sm text-base-content/50 flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
-      <a href="https://github.com/BenRydal/mondrian-transcription" class="hover:underline" target="_blank">Open source (GPL v3)</a>
+    <div
+      class="border-t border-base-300 bg-base-200/50 px-4 py-3 text-sm text-base-content/50 flex flex-wrap items-center justify-center gap-x-3 gap-y-1"
+    >
+      <a
+        href="https://github.com/BenRydal/mondrian-transcription"
+        class="hover:underline"
+        target="_blank">Open source (GPL v3)</a
+      >
       <span>·</span>
-      <a href="https://doi.org/10.1080/10508406.2025.2537945" target="_blank" class="text-primary hover:underline"
+      <a
+        href="https://doi.org/10.1080/10508406.2025.2537945"
+        target="_blank"
+        class="text-primary hover:underline"
         >Shapiro, Silvis, & Hall (2025). <em>Visualization as Theory and Experience</em></a
       >
     </div>

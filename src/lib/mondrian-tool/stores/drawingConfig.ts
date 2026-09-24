@@ -60,10 +60,7 @@ const ROTATION_ANGLES: RotationAngle[] = [0, 90, 180, 270]
 export function rotateFloorPlan(direction: 'cw' | 'ccw') {
   drawingConfig.update((config) => {
     const currentIndex = ROTATION_ANGLES.indexOf(config.floorPlanRotation)
-    const newIndex =
-      direction === 'cw'
-        ? (currentIndex + 1) % 4
-        : (currentIndex - 1 + 4) % 4
+    const newIndex = direction === 'cw' ? (currentIndex + 1) % 4 : (currentIndex - 1 + 4) % 4
     return { ...config, floorPlanRotation: ROTATION_ANGLES[newIndex] }
   })
 }

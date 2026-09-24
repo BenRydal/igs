@@ -1,6 +1,12 @@
 <script lang="ts">
   import { onMount } from 'svelte'
-  import { drawingState, renamePathById, deletePathById, togglePathVisibility, updatePathColor } from '$lib/mondrian-tool/stores/drawingState'
+  import {
+    drawingState,
+    renamePathById,
+    deletePathById,
+    togglePathVisibility,
+    updatePathColor,
+  } from '$lib/mondrian-tool/stores/drawingState'
   import { drawingConfig } from '$lib/mondrian-tool/stores/drawingConfig'
   import IconVisibility from '~icons/material-symbols/visibility'
   import IconVisibilityOff from '~icons/material-symbols/visibility-off'
@@ -233,9 +239,7 @@
 <dialog class="modal" class:modal-open={pendingDeletePathId !== null} data-ui-element>
   <div class="modal-box w-72">
     <h2 class="text-lg font-semibold mb-4">Delete Path?</h2>
-    <p class="mb-6 text-sm">
-      This will delete the selected path and all its recorded points.
-    </p>
+    <p class="mb-6 text-sm">This will delete the selected path and all its recorded points.</p>
     <div class="modal-action">
       <button class="btn btn-sm" on:click={cancelDelete}>Cancel</button>
       <button class="btn btn-sm btn-error" on:click={confirmDelete}>Delete</button>

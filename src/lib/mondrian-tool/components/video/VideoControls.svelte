@@ -1,9 +1,6 @@
 <script lang="ts">
   import { onMount, afterUpdate } from 'svelte'
-  import {
-    handleForwardTranscription,
-    handleRewindTranscription,
-  } from '../../stores/drawingState'
+  import { handleForwardTranscription, handleRewindTranscription } from '../../stores/drawingState'
   import IconRewind from '~icons/material-symbols/fast-rewind'
   import IconForward from '~icons/material-symbols/fast-forward'
 
