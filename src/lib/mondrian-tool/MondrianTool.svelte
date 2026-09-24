@@ -3,7 +3,8 @@
   import Navbar from '$lib/mondrian-tool/components/nav/Navbar.svelte'
   import PathStats from '$lib/mondrian-tool/components/PathStats.svelte'
   import RecoveryModal from '$lib/mondrian-tool/components/RecoveryModal.svelte'
-  import { onMount, type Snippet } from 'svelte'
+  import { onMount, tick, type Snippet } from 'svelte'
+  import SpaceTimePreview from '../mondrian-bridge/SpaceTimePreview.svelte'
   import { get } from 'svelte/store'
   import { drawingState } from '$lib/mondrian-tool/stores/drawingState'
   import { drawingConfig } from '$lib/mondrian-tool/stores/drawingConfig'
@@ -21,6 +22,17 @@
 
   let p5Component: P5Wrapper
   let videoUrl: string | null = null
+
+  // Speculate only: transcribing needs full attention, so it never shows a time view.
+  let showSpaceTime = $state(false)
+  const speculating = $derived(!$drawingConfig.isTranscriptionMode)
+  const spaceTimeShown = $derived(speculating && showSpaceTime)
+
+  // P5Wrapper sizes its canvas on window resize, so nudge it when the panel opens or closes.
+  $effect(() => {
+    void spaceTimeShown
+    tick().then(() => window.dispatchEvent(new Event('resize')))
+  })
 
   // The bridge to IGS goes through these, so it never reaches into Mondrian's internals.
   export function getFloorPlanDataUrl(): string | null {
@@ -267,9 +279,25 @@
   onModeSwitch={handleModeSwitch}
   {toolSwitcher}
 />
-<div class="relative">
-  <P5Wrapper bind:this={p5Component} {active} />
-  <PathStats />
+<div class="relative flex">
+  <div class="relative flex-1 min-w-0">
+    <P5Wrapper bind:this={p5Component} {active} />
+    <PathStats />
+    {#if speculating}
+      <button
+        type="button"
+        data-ui-element
+        class="btn btn-sm absolute top-3 right-3 z-10"
+        class:btn-primary={showSpaceTime}
+        onclick={() => (showSpaceTime = !showSpaceTime)}
+      >
+        {showSpaceTime ? 'Hide space-time' : 'Show space-time'}
+      </button>
+    {/if}
+  </div>
+  {#if spaceTimeShown}
+    <SpaceTimePreview {active} class="w-2/5 h-[calc(100vh-64px)]" />
+  {/if}
 </div>
 
 {#if showEmptyPathWarning}
