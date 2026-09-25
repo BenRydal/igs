@@ -1452,7 +1452,6 @@
           {/if}
         </div>
         <div class="flex-none flex items-center gap-1 px-2">
-          <ModeSwitcher mode={toolMode} onchange={(next) => (toolMode = next)} />
           {#if toolMode === 'igs'}
             <IconButton
               id="btn-toggle-3d"
@@ -1470,6 +1469,7 @@
             tooltip="Show/Hide Video"
             onclick={toggleVideo}
           />
+          <ModeSwitcher mode={toolMode} onchange={(next) => (toolMode = next)} />
         </div>
       </div>
     {/snippet}
