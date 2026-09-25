@@ -1243,7 +1243,6 @@
           {/if}
         </div>
         <div class="flex-none flex items-center gap-1 px-2">
-          <ToolSwitcher {tool} onchange={switchTool} />
           <IconButton
             id="btn-toggle-3d"
             icon={Md3DRotation}
@@ -1259,6 +1258,7 @@
             tooltip="Show/Hide Video"
             onclick={toggleVideo}
           />
+          <ToolSwitcher {tool} onchange={switchTool} />
         </div>
       </div>
     {/snippet}

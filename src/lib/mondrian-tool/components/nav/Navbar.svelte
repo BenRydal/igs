@@ -555,7 +555,6 @@
 
   <!-- Mobile Navigation - visible on small screens -->
   <div class="flex lg:hidden items-center gap-1">
-    {#if toolSwitcher}{@render toolSwitcher()}{/if}
     <!-- Quick action buttons always visible on mobile -->
     <button class="btn btn-ghost btn-sm" on:click={() => (showUploadModal = true)} title="Upload">
       <IconUpload class="w-5 h-5" />
@@ -598,6 +597,7 @@
         <IconMenu class="w-6 h-6" />
       {/if}
     </button>
+    {#if toolSwitcher}{@render toolSwitcher()}{/if}
   </div>
 </div>
 
