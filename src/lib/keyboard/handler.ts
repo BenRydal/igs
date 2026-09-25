@@ -1,6 +1,8 @@
 import type { KeyboardShortcut } from './types'
 import { registry } from './registry'
 import { redrawCanvas } from '../utils/p5'
+import { get } from 'svelte/store'
+import { activeTool } from '../mondrian-bridge/tool'
 
 /**
  * Elements that should ignore keyboard shortcuts when focused
@@ -104,6 +106,8 @@ function handleKeyboardEvent(event: KeyboardEvent): boolean {
  */
 let isAttached = false
 const keydownHandler = (event: KeyboardEvent) => {
+  // Mondrian has its own shortcuts; IGS's stay out of the way while it is showing.
+  if (get(activeTool) !== 'igs') return
   handleKeyboardEvent(event)
 }
 

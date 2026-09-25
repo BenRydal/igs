@@ -412,6 +412,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@iconify-json/material-symbols@npm:^1.2.93":
+  version: 1.2.93
+  resolution: "@iconify-json/material-symbols@npm:1.2.93"
+  dependencies:
+    "@iconify/types": "npm:*"
+  checksum: 10c0/e97dc3ee37da4fd97ea1d8809e53d681a2b04c256c5b405fb9cd48328c6bcf76304fa1044d896d65472f0e434a24428ba96bc087a3118ac1bd7f3d627456e845
+  languageName: node
+  linkType: hard
+
 "@iconify-json/mdi@npm:^1.2.3":
   version: 1.2.3
   resolution: "@iconify-json/mdi@npm:1.2.3"
@@ -2309,6 +2318,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"fflate@npm:^0.8.2":
+  version: 0.8.3
+  resolution: "fflate@npm:0.8.3"
+  checksum: 10c0/eab181ca37f5348ae76d4b6f840e0026e30220e33153289ac942222d8b9638237d486507dbcc09878d724095bd354993a2ee48bbee99c8f2c6440d4448719aa7
+  languageName: node
+  linkType: hard
+
 "file-entry-cache@npm:^8.0.0":
   version: 8.0.0
   resolution: "file-entry-cache@npm:8.0.0"
@@ -2513,6 +2529,7 @@ __metadata:
   dependencies:
     "@eslint/js": "npm:^9.0.0"
     "@floating-ui/dom": "npm:^1.7.4"
+    "@iconify-json/material-symbols": "npm:^1.2.93"
     "@iconify-json/mdi": "npm:^1.2.3"
     "@sveltejs/adapter-auto": "npm:^3.3.1"
     "@sveltejs/adapter-vercel": "npm:^5.4.5"
@@ -2529,6 +2546,7 @@ __metadata:
     eslint: "npm:^9.0.0"
     eslint-config-prettier: "npm:^9.1.0"
     eslint-plugin-svelte: "npm:^3.0.0"
+    fflate: "npm:^0.8.2"
     globals: "npm:^15.0.0"
     luxon: "npm:^3.7.2"
     p5: "npm:^1.11.11"
