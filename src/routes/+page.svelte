@@ -55,6 +55,10 @@
   import { igsSketch } from '$lib/p5/igsSketch'
   import { writable } from 'svelte/store'
   import { onMount, tick, type Component } from 'svelte'
+  import { replaceState } from '$app/navigation'
+  import { page } from '$app/state'
+  import { toastStore } from '../stores/toastStore'
+  import { receiveFromMondrian, wantsMondrianImport } from '$lib/handoff/receive-from-mondrian'
   import { SvelteSet } from 'svelte/reactivity'
   import IconButton from '$lib/components/IconButton.svelte'
   import IgsInfoModal from '$lib/components/IGSInfoModal.svelte'
@@ -225,6 +229,36 @@
       core = new Core(p5Instance)
     }
   })
+
+  /** Resolves once Core exists; the importer needs it and Mondrian's files can arrive first. */
+  async function coreReady(): Promise<void> {
+    if (core) return
+    await new Promise<void>((resolve) => {
+      const unsub = P5Store.subscribe((instance) => {
+        if (!instance) return
+        queueMicrotask(() => unsub())
+        resolve()
+      })
+    })
+    await tick()
+  }
+
+  async function importFromMondrian(opener: Window) {
+    const files = await receiveFromMondrian(opener, {
+      dev: import.meta.env.DEV,
+      extraOrigins: (import.meta.env.VITE_MONDRIAN_ORIGINS ?? '').split(',').filter(Boolean),
+    })
+    const url = new URL(window.location.href)
+    url.searchParams.delete('import')
+    replaceState(url, page.state)
+    if (!files) {
+      toastStore.error("Couldn't receive data from Mondrian. Import its ZIP instead.")
+      return
+    }
+    await coreReady()
+    await handleImportFiles(files, true)
+    toastStore.success(`Loaded ${files.length} files from Mondrian`)
+  }
 
   // Modal state - opens immediately for first-time visitors
   let isModalOpen = writable(false)
@@ -625,8 +659,11 @@
       }
     }
 
+    const importing = wantsMondrianImport(new URL(window.location.href)) && !!window.opener
+    if (importing) void importFromMondrian(window.opener)
+
     // Show welcome modal immediately for first-time visitors
-    if (shouldShowTour()) {
+    if (shouldShowTour() && !importing) {
       isModalOpen.set(true)
     }
 
