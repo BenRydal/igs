@@ -21,7 +21,7 @@ import type {
 } from './types.js'
 
 import { DataPoint } from '../../models/dataPoint.js'
-import { User } from '../../models/user.js'
+import { User, nextUserColor } from '../../models/user.js'
 import { USER_COLORS } from '../constants/index.js'
 
 import UserStore from '../../stores/userStore'
@@ -130,7 +130,11 @@ export class Core {
    * </select>
    * ```
    */
-  handleExampleDropdown = async (event: ExampleSelectEvent): Promise<void> => {
+  /** `mediaOnly` loads just the floorplan and video: a blank transcription exercise. */
+  handleExampleDropdown = async (
+    event: ExampleSelectEvent,
+    { mediaOnly = false }: { mediaOnly?: boolean } = {}
+  ): Promise<void> => {
     // Clear all previous data when switching datasets
     pausePlayback()
     this.movementData = []
@@ -149,7 +153,7 @@ export class Core {
       if (!isGPS) {
         await this.loadFloorplanImage(`/data/${selectedValue}/floorplan.png`)
       }
-      for (const file of files) {
+      for (const file of mediaOnly ? [] : files) {
         await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, file)
       }
       if (videoId) {
@@ -745,9 +749,7 @@ export class Core {
   }
 
   createNewUser(users: User[], userName: string) {
-    const availableColors = USER_COLORS.filter((color) => !users.some((u) => u.color === color))
-    const userColor = availableColors.length > 0 ? availableColors[0] : '#000000' // Default to black if no more unique colors available
-    return new User([], userColor, true, userName)
+    return new User([], nextUserColor(users), true, userName)
   }
 
   updateStopValues(data: DataPoint[]): void {

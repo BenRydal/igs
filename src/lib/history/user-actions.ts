@@ -2,6 +2,8 @@ import { get } from 'svelte/store'
 import UserStore from '../../stores/userStore'
 import { historyStore } from '../../stores/historyStore'
 import { deepClone } from './deep-clone'
+import { User, nextUserColor } from '../../models/user'
+import type { DataPoint } from '../../models/dataPoint'
 
 /**
  * Toggle user visibility with undo
@@ -179,5 +181,58 @@ export function toggleUserVisibility(userId: string, currentlyVisible: boolean):
           u.name === userId ? { ...u, enabled: newValue, conversation_enabled: newValue } : u
         )
       ),
+  })
+}
+
+/**
+ * Add a person with no data yet, with undo. Returns false if the name is taken.
+ */
+export function addUser(name: string): boolean {
+  const trimmed = name.trim()
+  if (!trimmed || get(UserStore).some((u) => u.name === trimmed)) return false
+
+  const user = new User([], nextUserColor(get(UserStore)), true, trimmed)
+  const add = () => UserStore.update((list) => [...list, user])
+  const remove = () => UserStore.update((list) => list.filter((u) => u.name !== trimmed))
+  add()
+
+  historyStore.push({
+    actionType: 'user.add',
+    actionLabel: `Added ${trimmed}`,
+    undo: remove,
+    redo: add,
+  })
+  return true
+}
+
+/**
+ * Replace a person's movement trail with the result of a recording take, as one undo step.
+ * `finalize` recomputes derived per-point values (stops), since trails share point objects.
+ */
+export function commitTake(
+  userId: string,
+  before: DataPoint[],
+  after: DataPoint[],
+  finalize: (trail: DataPoint[]) => void = () => {}
+): void {
+  const user = get(UserStore).find((u) => u.name === userId)
+  if (!user) return
+  const wasLoaded = user.movementIsLoaded
+
+  const apply = (trail: DataPoint[], loaded: boolean) => {
+    finalize(trail)
+    UserStore.update((list) =>
+      list.map((u) =>
+        u.name === userId ? { ...u, dataTrail: trail, movementIsLoaded: loaded } : u
+      )
+    )
+  }
+  apply(after, true)
+
+  historyStore.push({
+    actionType: 'user.trail',
+    actionLabel: `Recorded ${userId}`,
+    undo: () => apply(before, wasLoaded),
+    redo: () => apply(after, true),
   })
 }

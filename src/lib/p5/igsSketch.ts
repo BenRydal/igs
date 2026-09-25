@@ -12,6 +12,7 @@ import { FloorPlan, SketchGUI, Handle3D, SetPathData } from '..'
 import { drawState } from '../draw/draw-state'
 import { generateCodeCSV, downloadFile } from '../utils/download'
 import type { IgsSketchExt } from './igs-p5'
+import { mondrianFrame, mondrianPress, startsIn3D } from '../mondrian/sketch-hooks'
 
 let users: User[] = []
 let isModalOpen = false
@@ -60,7 +61,7 @@ export const igsSketch: SketchFn<IgsSketchExt> = (p5) => {
     p5.createCanvas(width, height, p5.WEBGL)
     p5.updateCanvasOffset()
     p5.gui = new SketchGUI(p5)
-    p5.handle3D = new Handle3D(p5, true)
+    p5.handle3D = new Handle3D(p5, startsIn3D())
     p5.floorPlan = new FloorPlan(p5)
 
     // Constants
@@ -84,6 +85,7 @@ export const igsSketch: SketchFn<IgsSketchExt> = (p5) => {
 
     if (p5.handle3D.getIs3DModeOrTransitioning()) p5.pop()
     p5.gui.update2D() // draw all other canvas GUI elements in 2D mode
+    mondrianFrame(p5)
 
     // Update animation if playing
     if (drawState.playbackMode !== 'stopped') {
@@ -164,7 +166,11 @@ export const igsSketch: SketchFn<IgsSketchExt> = (p5) => {
     return inXBounds
   }
 
-  p5.mousePressed = () => {
+  p5.mousePressed = (event?: MouseEvent) => {
+    if (mondrianPress(p5, event)) {
+      p5.loop()
+      return
+    }
     if (drawState.config.highlightToggle && !p5.handle3D.getIs3DModeOrTransitioning())
       p5.gui.highlight.handleMousePressed()
     p5.loop()

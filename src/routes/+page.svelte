@@ -37,6 +37,8 @@
   import MdFloorPlan from '~icons/mdi/floor-plan'
   import MdAccountGroup from '~icons/mdi/account-group'
   import MdTagMultiple from '~icons/mdi/tag-multiple'
+  import MdDraw from '~icons/mdi/draw'
+  import MdRecordSettings from '~icons/mdi/record-circle-outline'
   import MdTableEye from '~icons/mdi/table-eye'
 
   import type { User } from '../models/user'
@@ -44,8 +46,10 @@
   import P5Store from '../stores/p5Store'
   import VideoStore, {
     toggleVisibility,
+    toggleSplitScreen,
     reset as resetVideo,
     hasVideoSource,
+    loadVideo,
   } from '../stores/videoStore'
   import GPSStore, { resetGPS } from '../stores/gpsStore'
   import { onVideoVisibilityChange } from '../stores/playbackStore'
@@ -59,8 +63,8 @@
   import { EXAMPLE_DATASETS } from '$lib/core/example-datasets'
   import type { ExampleSelectEvent } from '$lib/core/types'
   import { igsSketch } from '$lib/p5/igsSketch'
-  import { writable } from 'svelte/store'
-  import { onMount, tick, flushSync, type Component, type Snippet } from 'svelte'
+  import { get, writable } from 'svelte/store'
+  import { onMount, tick, flushSync, untrack, type Component, type Snippet } from 'svelte'
   import { SvelteSet } from 'svelte/reactivity'
   import IconButton from '$lib/components/IconButton.svelte'
   import IgsInfoModal from '$lib/components/IGSInfoModal.svelte'
@@ -71,6 +75,35 @@
   import DataImporter from '$lib/components/import/DataImporter.svelte'
   import MapStyleSelector from '$lib/components/MapStyleSelector.svelte'
   import CodesPanel from '$lib/components/CodesPanel.svelte'
+  import ModeSwitcher from '$lib/mondrian/ModeSwitcher.svelte'
+  import DrawPanel from '$lib/mondrian/DrawPanel.svelte'
+  import RecordingPanel from '$lib/mondrian/RecordingPanel.svelte'
+  import DrawingStatus from '$lib/mondrian/DrawingStatus.svelte'
+  import RecoveryPrompt from '$lib/persistence/RecoveryPrompt.svelte'
+  import { DRAWING_FLOORPLANS, type DrawingFloorplan } from '$lib/mondrian/floorplans'
+  import floorplanStore from '../stores/floorplanStore'
+  import { page } from '$app/state'
+  import { replaceState } from '$app/navigation'
+  import { browser } from '$app/environment'
+  import {
+    startAutosave,
+    resumeAutosave,
+    recoveryOffer,
+    type RecoveryOffer,
+  } from '$lib/persistence/autosave'
+  import { usersFromSnapshot } from '$lib/persistence/snapshot'
+  import {
+    appMode,
+    recorder,
+    mondrianSettings,
+    setDrawAs,
+    stopRecording,
+    ensureTimelineCovers,
+    setTrailFinalizer,
+    modeFromParam,
+    MODE_PARAM,
+    type AppMode,
+  } from '$lib/mondrian/session'
   import TimelineControls from '$lib/timeline/components/TimelineControls.svelte'
   import { capitalizeFirstLetter, capitalizeEachWord } from '$lib/utils/string'
   import { loadAdvancedMode, saveAdvancedMode } from '$lib/utils/advanced-mode-storage'
@@ -198,7 +231,7 @@
   let is3DMode = $state(true)
   let timelineEndTime = $state(0)
   let isTranscriptVisible = $state(true)
-  let spaceTimeTooltip: SpaceTimeTooltip
+  let spaceTimeTooltip = $state<SpaceTimeTooltip>()
 
   $effect(() => {
     const unsubscribe = timelineV2Store.subscribe((state) => {
@@ -232,14 +265,28 @@
     p5Instance = $P5Store
     if (p5Instance) {
       core = new Core(p5Instance)
+      setTrailFinalizer((trail) => core.updateStopValues(trail))
+      loadPlaceholderFloorplan()
     }
   })
 
   // Modal state - opens immediately for first-time visitors
   let isModalOpen = writable(false)
 
-  type RailTab = 'data' | 'people' | 'codes' | 'talk' | 'filters' | 'select' | 'view' | 'settings'
+  type RailTab =
+    | 'draw'
+    | 'recording'
+    | 'data'
+    | 'people'
+    | 'codes'
+    | 'talk'
+    | 'filters'
+    | 'select'
+    | 'view'
+    | 'settings'
   const RAIL_LABELS: Record<RailTab | 'help', string> = {
+    draw: 'Draw',
+    recording: 'Recording',
     data: 'Data',
     people: 'People',
     codes: 'Codes',
@@ -270,7 +317,11 @@
     if (activeTab) lastTab = activeTab
   }
 
+  const DRAWING_TABS: RailTab[] = ['draw', 'data', 'recording']
+
   function isTabAvailable(tab: RailTab): boolean {
+    if (toolMode === 'mondrian') return DRAWING_TABS.includes(tab)
+    if (tab === 'draw' || tab === 'recording') return false
     if (tab === 'filters' || tab === 'view') return $ConfigStore.advancedMode
     if (tab === 'select') return $ConfigStore.advancedMode && !is3DMode
     if (tab === 'codes') return $ConfigStore.dataHasCodes
@@ -279,6 +330,115 @@
 
   $effect(() => {
     if (activeTab && !isTabAvailable(activeTab)) activeTab = null
+  })
+
+  // From the URL on server and client alike, so SSR and hydration render the same tool.
+  const landingMode = modeFromParam(page.url.searchParams.get(MODE_PARAM))
+  let toolMode = $state<AppMode>(landingMode)
+  // The sketch reads the module store; set it before the canvas mounts (browser only, since
+  // module state set during SSR would leak across requests).
+  if (browser) appMode.set(landingMode)
+  let mounted = false
+
+  function syncModeToUrl(mode: AppMode) {
+    if (!mounted) return
+    // page.url can lag behind a shallow replaceState; the address bar is the source of truth.
+    const url = new URL(window.location.href)
+    if (modeFromParam(url.searchParams.get(MODE_PARAM)) === mode) return
+    if (mode === 'igs') url.searchParams.delete(MODE_PARAM)
+    else url.searchParams.set(MODE_PARAM, mode)
+    replaceState(url, page.state)
+  }
+
+  let placeholderWanted = false
+
+  /** Drawing mode always lands on something drawable; waits for Core, and for any restore offer. */
+  function loadPlaceholderFloorplan() {
+    if (!placeholderWanted || !core) return
+    placeholderWanted = false
+    if (get(floorplanStore) || get(recoveryOffer)) return
+    core.loadFloorplanImage(DRAWING_FLOORPLANS[0].path)
+    selectedDropDownOption = DRAWING_FLOORPLANS[0].label
+    ensureTimelineCovers(get(mondrianSettings).speculateDuration)
+  }
+
+  // What drawing mode changed on entry, restored on the way back out.
+  let restoreOnExit: { transcript: boolean; splitScreen: boolean; was3D: boolean } | null = null
+  let appliedMode: AppMode = 'igs'
+
+  function enterDrawingMode() {
+    const was3D = p5Instance?.handle3D.getIs3DMode() ?? false
+    if (was3D && p5Instance) {
+      p5Instance.handle3D.update()
+      is3DMode = false
+    }
+    ConfigStore.update((c) => ({
+      ...c,
+      circleToggle: false,
+      sliceToggle: false,
+      highlightToggle: false,
+    }))
+    const video = get(VideoStore)
+    restoreOnExit = {
+      transcript: isTranscriptVisible,
+      splitScreen: video.isLoaded && !video.isSplitScreen,
+      was3D,
+    }
+    isTranscriptVisible = false
+    if (restoreOnExit.splitScreen) toggleSplitScreen()
+    ensureTimelineCovers(video.isLoaded ? video.duration : $mondrianSettings.speculateDuration)
+    const users = get(UserStore)
+    if (!$recorder.drawAs && users.length > 0) setDrawAs(users[0].name)
+    instantPanel = false
+    activeTab = 'draw'
+    lastTab = 'draw'
+    placeholderWanted = true
+    loadPlaceholderFloorplan()
+    p5Instance?.loop()
+  }
+
+  function exitDrawingMode() {
+    stopRecording()
+    if (restoreOnExit) {
+      isTranscriptVisible = restoreOnExit.transcript
+      if (restoreOnExit.splitScreen && get(VideoStore).isSplitScreen) toggleSplitScreen()
+      if (restoreOnExit.was3D && p5Instance && !p5Instance.handle3D.getIs3DMode()) {
+        p5Instance.handle3D.update()
+        is3DMode = true
+      }
+    }
+    restoreOnExit = null
+    activeTab = null
+    p5Instance?.loop()
+  }
+
+  // A video that finishes loading while drawing (e.g. from an example) goes beside the canvas.
+  let videoWasLoaded = false
+  $effect(() => {
+    const loaded = $VideoStore.isLoaded
+    untrack(() => {
+      const justLoaded = loaded && !videoWasLoaded
+      videoWasLoaded = loaded
+      if (!justLoaded || toolMode !== 'mondrian') return
+      const video = get(VideoStore)
+      if (!video.isSplitScreen) {
+        toggleSplitScreen()
+        if (restoreOnExit) restoreOnExit.splitScreen = true
+      }
+      ensureTimelineCovers(video.duration)
+    })
+  })
+
+  $effect(() => {
+    const mode = toolMode
+    untrack(() => {
+      appMode.set(mode)
+      if (mode === appliedMode) return
+      appliedMode = mode
+      syncModeToUrl(mode)
+      if (mode === 'mondrian') enterDrawingMode()
+      else exitDrawingMode()
+    })
   })
 
   let formattedStopLength = $derived($ConfigStore.stopSliderValue.toFixed(0))
@@ -478,12 +638,33 @@
     spaceTimeTooltip?.trigger()
   }
 
+  // Drawing mode loads an example as a blank exercise: its floorplan and video only.
   async function updateExampleDataDropDown(event: ExampleSelectEvent) {
     await clearAllDataLocal()
-    await core.handleExampleDropdown(event)
+    await core.handleExampleDropdown(event, { mediaOnly: toolMode === 'mondrian' })
     p5Instance?.loop()
     spaceTimeTooltip?.trigger()
   }
+
+  async function loadDrawingFloorplan(floorplan: DrawingFloorplan) {
+    await clearAllDataLocal()
+    core.loadFloorplanImage(floorplan.path)
+    selectedDropDownOption = floorplan.label
+    ensureTimelineCovers(get(mondrianSettings).speculateDuration)
+    p5Instance?.loop()
+  }
+
+  /** GPS examples build their map from the movement data, so drawing mode cannot use them. */
+  const exampleGroups = $derived(
+    toolMode === 'mondrian'
+      ? dropdownOptions
+          .map((group) => ({
+            ...group,
+            items: group.items.filter((item) => !EXAMPLE_DATASETS[item.value]?.isGPS),
+          }))
+          .filter((group) => group.items.length > 0)
+      : dropdownOptions
+  )
 
   /** Resolves once the {#key}-remounted canvas has published a fresh instance. */
   function waitForCanvasRemount(prev: IgsP5 | null): Promise<IgsP5> {
@@ -610,8 +791,43 @@
     p5Instance?.loop()
   }
 
+  function floorplanBlob(): Promise<Blob | null> {
+    // p5.Image keeps a backing canvas at runtime that its type definitions omit.
+    const canvas = (p5Instance?.floorPlan.img as unknown as { canvas?: HTMLCanvasElement } | null)
+      ?.canvas
+    if (!canvas) return Promise.resolve(null)
+    return new Promise((resolve) => canvas.toBlob(resolve, 'image/png'))
+  }
+
+  async function restoreSession({ snapshot, floorplan, video }: RecoveryOffer) {
+    if (floorplan) core.loadFloorplanImage(URL.createObjectURL(floorplan))
+    UserStore.set(usersFromSnapshot(snapshot))
+    CodeStore.set(snapshot.codes)
+    ConfigStore.update((c) => ({ ...snapshot.config, advancedMode: c.advancedMode }))
+    if (snapshot.video?.type === 'youtube') loadVideo(snapshot.video)
+    else if (video) core.prepVideoFromFile(URL.createObjectURL(video))
+    const { dataStart, dataEnd, currentTime } = snapshot.timeline
+    if (dataEnd > 0) {
+      timelineV2Store.initialize(dataEnd, dataStart)
+      timelineV2Store.setCurrentTime(currentTime)
+    }
+    mondrianSettings.set(snapshot.mondrian.settings)
+    setDrawAs(snapshot.mondrian.drawAs)
+    resumeAutosave()
+    p5Instance?.loop()
+  }
+
   // Add event handlers for dropdowns
   onMount(() => {
+    let stopAutosave: (() => void) | undefined
+    let unmounted = false
+    void startAutosave({ floorplanBlob }).then((stop) => {
+      if (unmounted) return stop()
+      stopAutosave = stop
+      // A session to come back to matters more than the welcome screen.
+      if (get(recoveryOffer)) isModalOpen.set(false)
+    })
+
     // Load advanced mode from localStorage
     const savedAdvancedMode = loadAdvancedMode()
     if (savedAdvancedMode) {
@@ -620,6 +836,7 @@
 
     // Keyboard shortcut event handlers
     const handleToggle3D = () => {
+      if (toolMode === 'mondrian') return
       if (p5Instance?.handle3D) {
         p5Instance?.handle3D.update()
         is3DMode = p5Instance?.handle3D.getIs3DMode() ?? is3DMode
@@ -671,8 +888,10 @@
       flushSync()
     }
 
-    // Show welcome modal immediately for first-time visitors
-    if (shouldShowTour()) {
+    mounted = true
+
+    // Show welcome modal immediately for first-time visitors; it introduces IGS, not drawing
+    if (shouldShowTour() && toolMode === 'igs') {
       isModalOpen.set(true)
     }
 
@@ -692,6 +911,8 @@
 
     // Cleanup function
     return () => {
+      unmounted = true
+      stopAutosave?.()
       // Remove keyboard shortcut handlers
       window.removeEventListener('igs:toggle-3d', handleToggle3D)
       window.removeEventListener('igs:rotate-floorplan', handleRotateFloorplan)
@@ -764,9 +985,34 @@
     {/snippet}
     {@render panelSection('Your data', importBody)}
 
+    {#if toolMode === 'mondrian'}
+      {#snippet floorplansBody()}
+        <p class="text-xs opacity-70">A floorplan on its own, for drawing without video.</p>
+        <ul class="menu w-full p-0">
+          {#each DRAWING_FLOORPLANS as floorplan (floorplan.value)}
+            <li>
+              <button
+                class:bg-primary={selectedDropDownOption === floorplan.label}
+                class:bg-opacity-20={selectedDropDownOption === floorplan.label}
+                onclick={() => loadDrawingFloorplan(floorplan)}
+              >
+                {floorplan.label}
+              </button>
+            </li>
+          {/each}
+        </ul>
+      {/snippet}
+      {@render panelSection('Floorplans', floorplansBody)}
+    {/if}
+
     {#snippet examplesBody()}
+      {#if toolMode === 'mondrian'}
+        <p class="text-xs opacity-70">
+          Loads the example's floorplan and video only, to transcribe from scratch.
+        </p>
+      {/if}
       <ul class="menu w-full p-0">
-        {#each dropdownOptions as group (group.label)}
+        {#each exampleGroups as group (group.label)}
           <li>
             <button
               class="menu-title flex items-center gap-2 w-full hover:bg-base-200 rounded-lg px-2 py-1 cursor-pointer"
@@ -1176,6 +1422,8 @@
 {/snippet}
 
 {#snippet dataIcon()}<MdFolder />{/snippet}
+{#snippet drawIcon()}<MdDraw />{/snippet}
+{#snippet recordingIcon()}<MdRecordSettings />{/snippet}
 {#snippet peopleIcon()}<MdAccountGroup />{/snippet}
 {#snippet codesIcon()}<MdTagMultiple />{/snippet}
 {#snippet talkIcon()}<MdChat />{/snippet}
@@ -1204,21 +1452,24 @@
           {/if}
         </div>
         <div class="flex-none flex items-center gap-1 px-2">
-          <IconButton
-            id="btn-toggle-3d"
-            icon={Md3DRotation}
-            tooltip="Toggle 2D/3D"
-            onclick={() => {
-              p5Instance?.handle3D.update()
-              is3DMode = p5Instance?.handle3D.getIs3DMode() ?? is3DMode
-            }}
-          />
+          {#if toolMode === 'igs'}
+            <IconButton
+              id="btn-toggle-3d"
+              icon={Md3DRotation}
+              tooltip="Toggle 2D/3D"
+              onclick={() => {
+                p5Instance?.handle3D.update()
+                is3DMode = p5Instance?.handle3D.getIs3DMode() ?? is3DMode
+              }}
+            />
+          {/if}
           <IconButton
             id="btn-toggle-video"
             icon={isVideoShowing ? MdVideocam : MdVideocamOff}
             tooltip="Show/Hide Video"
             onclick={toggleVideo}
           />
+          <ModeSwitcher mode={toolMode} onchange={(next) => (toolMode = next)} />
         </div>
       </div>
     {/snippet}
@@ -1228,25 +1479,32 @@
         <ActivityBar
           activeId={activeTab ?? undefined}
           onSelect={handleRailSelect}
-          items={[
-            { id: 'data', label: RAIL_LABELS.data, icon: dataIcon },
-            { id: 'people', label: RAIL_LABELS.people, icon: peopleIcon },
-            ...($ConfigStore.dataHasCodes
-              ? [{ id: 'codes', label: RAIL_LABELS.codes, icon: codesIcon }]
-              : []),
-            { id: 'talk', label: RAIL_LABELS.talk, icon: talkIcon },
-            ...($ConfigStore.advancedMode
-              ? [{ id: 'filters', label: RAIL_LABELS.filters, icon: filtersIcon }]
-              : []),
-            ...($ConfigStore.advancedMode && !is3DMode
-              ? [{ id: 'select', label: RAIL_LABELS.select, icon: selectIcon }]
-              : []),
-            ...($ConfigStore.advancedMode
-              ? [{ id: 'view', label: RAIL_LABELS.view, icon: viewIcon }]
-              : []),
-            { id: 'settings', label: RAIL_LABELS.settings, icon: settingsIcon },
-            { id: 'help', label: RAIL_LABELS.help, icon: helpIcon },
-          ]}
+          items={toolMode === 'mondrian'
+            ? [
+                { id: 'draw', label: RAIL_LABELS.draw, icon: drawIcon },
+                { id: 'data', label: RAIL_LABELS.data, icon: dataIcon },
+                { id: 'recording', label: RAIL_LABELS.recording, icon: recordingIcon },
+                { id: 'help', label: RAIL_LABELS.help, icon: helpIcon },
+              ]
+            : [
+                { id: 'data', label: RAIL_LABELS.data, icon: dataIcon },
+                { id: 'people', label: RAIL_LABELS.people, icon: peopleIcon },
+                ...($ConfigStore.dataHasCodes
+                  ? [{ id: 'codes', label: RAIL_LABELS.codes, icon: codesIcon }]
+                  : []),
+                { id: 'talk', label: RAIL_LABELS.talk, icon: talkIcon },
+                ...($ConfigStore.advancedMode
+                  ? [{ id: 'filters', label: RAIL_LABELS.filters, icon: filtersIcon }]
+                  : []),
+                ...($ConfigStore.advancedMode && !is3DMode
+                  ? [{ id: 'select', label: RAIL_LABELS.select, icon: selectIcon }]
+                  : []),
+                ...($ConfigStore.advancedMode
+                  ? [{ id: 'view', label: RAIL_LABELS.view, icon: viewIcon }]
+                  : []),
+                { id: 'settings', label: RAIL_LABELS.settings, icon: settingsIcon },
+                { id: 'help', label: RAIL_LABELS.help, icon: helpIcon },
+              ]}
         />
         <!-- SidePanel stays mounted; the shell animates its occupied width so the
              canvas container reflows smoothly instead of jumping. -->
@@ -1267,7 +1525,11 @@
             bind:width={panelWidth}
             onClose={() => (activeTab = null)}
           >
-            {#if lastTab === 'data'}
+            {#if lastTab === 'draw'}
+              <DrawPanel />
+            {:else if lastTab === 'recording'}
+              <RecordingPanel />
+            {:else if lastTab === 'data'}
               {@render dataPanel()}
             {:else if lastTab === 'people'}
               {@render peoplePanel()}
@@ -1332,8 +1594,13 @@
               <VideoContainer />
             {/if}
             <TranscriptPanel bind:isVisible={isTranscriptVisible} />
+            {#if toolMode === 'mondrian'}
+              <DrawingStatus />
+            {/if}
             <ConversationTooltip hideTooltip={isTranscriptVisible} />
-            <SpaceTimeTooltip bind:this={spaceTimeTooltip} />
+            {#if toolMode === 'igs'}
+              <SpaceTimeTooltip bind:this={spaceTimeTooltip} />
+            {/if}
           </div>
         {/snippet}
       </SplitPane>
@@ -1451,6 +1718,8 @@
 {/if}
 
 <IgsInfoModal {isModalOpen} />
+
+<RecoveryPrompt onRestore={restoreSession} />
 
 <OnboardingTour />
 
