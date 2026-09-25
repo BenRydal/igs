@@ -7,6 +7,7 @@
   import IconImage from '~icons/material-symbols/image'
   import IconVideo from '~icons/material-symbols/videocam'
   import IconMenu from '~icons/material-symbols/menu'
+  import IconAdd from '~icons/material-symbols/add'
   import IconClose from '~icons/material-symbols/close'
   import IconRotateLeft from '~icons/material-symbols/rotate-left'
   import IconRotateRight from '~icons/material-symbols/rotate-right'
@@ -583,7 +584,10 @@
         <IconRotateRight class="w-5 h-5" />
       </button>
     {/if}
-    <button class="btn btn-neutral btn-sm" on:click={onNewPath} title="New Path"> New Path </button>
+    <button class="btn btn-neutral btn-sm max-sm:btn-square" on:click={onNewPath} title="New Path">
+      <IconAdd class="w-5 h-5 sm:hidden" aria-hidden="true" />
+      <span class="max-sm:sr-only">New Path</span>
+    </button>
 
     <!-- Hamburger Menu Button -->
     <button
