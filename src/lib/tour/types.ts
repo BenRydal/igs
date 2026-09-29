@@ -1,5 +1,5 @@
 export interface TourStep {
-  element: string // CSS selector
+  element: string | (() => Element) // CSS selector, or resolved at highlight time
   popover: {
     title: string
     description: string

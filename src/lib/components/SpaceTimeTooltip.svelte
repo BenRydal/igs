@@ -20,13 +20,17 @@
 </script>
 
 {#if show}
-  <div class="fixed top-20 right-4 z-50 max-w-sm bg-base-100 rounded-lg shadow-xl p-5 border border-base-300">
+  <div
+    class="fixed top-20 right-4 left-16 sm:left-auto z-50 max-w-sm bg-base-100 rounded-lg shadow-xl p-5 border border-base-300"
+  >
     <h3 class="font-semibold text-base mb-2">Understanding the 3D View</h3>
     <p class="text-base-content/70 text-sm leading-relaxed">
-      In this space-time view, the Z-axis represents time while the X/Y axes correspond to the floor plan.
+      In this space-time view, the Z-axis represents time while the X/Y axes correspond to the floor
+      plan.
     </p>
     <p class="text-base-content/70 text-sm leading-relaxed mt-2">
-      Stops appear as circles on the floor plan (larger circles = longer stops) and as thick lines in the space-time view.
+      Stops appear as circles on the floor plan (larger circles = longer stops) and as thick lines
+      in the space-time view.
     </p>
     <div class="mt-4 flex items-center justify-between">
       <label class="flex items-center gap-2 cursor-pointer">

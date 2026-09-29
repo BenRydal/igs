@@ -1,5 +1,13 @@
 <script lang="ts">
-  import { Sketch, CanvasFrame, SplitPane } from 'svelte-p5-components'
+  import {
+    Sketch,
+    CanvasFrame,
+    SplitPane,
+    ActivityBar,
+    SidePanel,
+    EntityToggleList,
+    type Entity,
+  } from 'svelte-p5-components'
 
   import type { IgsP5 } from '$lib/p5/igs-p5'
   import MdHelpOutline from '~icons/mdi/help-circle-outline'
@@ -7,8 +15,6 @@
   import MdCloudDownload from '~icons/mdi/cloud-download'
   import MdRotateLeft from '~icons/mdi/rotate-left'
   import MdRotateRight from '~icons/mdi/rotate-right'
-  import MdAspectRatio from '~icons/mdi/aspect-ratio'
-  import MdFitToPageOutline from '~icons/mdi/fit-to-page-outline'
   import Md3DRotation from '~icons/mdi/rotate-3d-variant'
   import MdVideocam from '~icons/mdi/video'
   import MdVideocamOff from '~icons/mdi/video-off'
@@ -18,7 +24,6 @@
   import MdFilterList from '~icons/mdi/filter-variant'
   import MdSelectAll from '~icons/mdi/selection'
   import MdChat from '~icons/mdi/chat'
-  import MdDelete from '~icons/mdi/delete'
   import MdFolder from '~icons/mdi/folder-open'
   import MdSports from '~icons/mdi/basketball'
   import MdMuseum from '~icons/mdi/bank'
@@ -28,10 +33,11 @@
   import MdVideo from '~icons/mdi/video-vintage'
   import MdChevronDown from '~icons/mdi/chevron-down'
   import MdChevronRight from '~icons/mdi/chevron-right'
-  import MdMoreVert from '~icons/mdi/dots-vertical'
-  import MdMenu from '~icons/mdi/menu'
   import MdClose from '~icons/mdi/close'
-  import MdTune from '~icons/mdi/tune'
+  import MdFloorPlan from '~icons/mdi/floor-plan'
+  import MdAccountGroup from '~icons/mdi/account-group'
+  import MdTagMultiple from '~icons/mdi/tag-multiple'
+  import MdTableEye from '~icons/mdi/table-eye'
 
   import type { User } from '../models/user'
   import UserStore from '../stores/userStore'
@@ -41,7 +47,7 @@
     reset as resetVideo,
     hasVideoSource,
   } from '../stores/videoStore'
-  import { resetGPS } from '../stores/gpsStore'
+  import GPSStore, { resetGPS } from '../stores/gpsStore'
   import { onVideoVisibilityChange } from '../stores/playbackStore'
   import VideoContainer from '$lib/components/VideoContainer.svelte'
   import SplitScreenVideo from '$lib/components/SplitScreenVideo.svelte'
@@ -54,22 +60,21 @@
   import type { ExampleSelectEvent } from '$lib/core/types'
   import { igsSketch } from '$lib/p5/igsSketch'
   import { writable } from 'svelte/store'
-  import { onMount, tick, type Component } from 'svelte'
+  import { onMount, tick, flushSync, type Component, type Snippet } from 'svelte'
   import { SvelteSet } from 'svelte/reactivity'
   import IconButton from '$lib/components/IconButton.svelte'
   import IgsInfoModal from '$lib/components/IGSInfoModal.svelte'
   import { TimelineContainer } from '$lib/timeline'
   import DataPointTable from '$lib/components/DataPointTable.svelte'
   import ModeIndicator from '$lib/components/ModeIndicator.svelte'
-  import FloatingDropdown from '$lib/components/FloatingDropdown.svelte'
   import { OnboardingTour, shouldShowTour } from '$lib/tour'
   import DataImporter from '$lib/components/import/DataImporter.svelte'
   import MapStyleSelector from '$lib/components/MapStyleSelector.svelte'
-  import UserButtonGroup from '$lib/components/UserButtonGroup.svelte'
-  import UserDropdown from '$lib/components/UserDropdown.svelte'
-  import CodesButton from '$lib/components/CodesButton.svelte'
+  import CodesPanel from '$lib/components/CodesPanel.svelte'
+  import TimelineControls from '$lib/timeline/components/TimelineControls.svelte'
   import { capitalizeFirstLetter, capitalizeEachWord } from '$lib/utils/string'
   import { loadAdvancedMode, saveAdvancedMode } from '$lib/utils/advanced-mode-storage'
+  import { Z_INDEX } from '$lib/styles/z-index'
 
   import CodeStore from '../stores/codeStore'
   import ConfigStore from '../stores/configStore'
@@ -77,7 +82,13 @@
   import { timelineV2Store } from '$lib/timeline/store'
   import { initialConfig } from '../stores/configStore'
   import { setSelectorSize, setSlicerSize } from '$lib/history/config-actions'
-  import { toggleUserVisibility as toggleUserVisibilityAction } from '$lib/history/user-actions'
+  import {
+    toggleUserVisibility as toggleUserVisibilityAction,
+    toggleUserEnabled,
+    toggleUserConversationEnabled,
+    setUserName,
+    createUserColorDrag,
+  } from '$lib/history/user-actions'
   import {
     clearUsers,
     clearCodes,
@@ -175,7 +186,6 @@
   }
 
   let showDataPopup = $state(false)
-  let showSettings = $state(false)
   let showImportDialog = $state(false)
   /** Read-only view of the store. Sliders bind one-way and write via their
    *  `oninput` handlers — `bind:value` here would mutate the store's object in
@@ -189,7 +199,6 @@
   let timelineEndTime = $state(0)
   let isTranscriptVisible = $state(true)
   let spaceTimeTooltip: SpaceTimeTooltip
-  let mobileMenuOpen = $state(false)
 
   $effect(() => {
     const unsubscribe = timelineV2Store.subscribe((state) => {
@@ -228,6 +237,49 @@
 
   // Modal state - opens immediately for first-time visitors
   let isModalOpen = writable(false)
+
+  type RailTab = 'data' | 'people' | 'codes' | 'talk' | 'filters' | 'select' | 'view' | 'settings'
+  const RAIL_LABELS: Record<RailTab | 'help', string> = {
+    data: 'Data',
+    people: 'People',
+    codes: 'Codes',
+    talk: 'Talk',
+    filters: 'Filters',
+    select: 'Select',
+    view: 'View',
+    settings: 'Settings',
+    help: 'Help',
+  }
+  let activeTab = $state<RailTab | null>(null)
+  // The panel keeps rendering this while it slides closed, so it never blanks mid-exit.
+  let lastTab = $state<RailTab>('data')
+  let panelWidth = $state(300)
+  /** Rail plus open panel: how far the canvas is pushed right. */
+  let railWidth = $state(0)
+  /** Set when the tour opens a panel, so its highlight lands on the final layout. */
+  let instantPanel = $state(false)
+
+  function handleRailSelect(id: string) {
+    if (id === 'help') {
+      $isModalOpen = !$isModalOpen
+      return
+    }
+    const tab = id as RailTab
+    instantPanel = false
+    activeTab = activeTab === tab ? null : tab
+    if (activeTab) lastTab = activeTab
+  }
+
+  function isTabAvailable(tab: RailTab): boolean {
+    if (tab === 'filters' || tab === 'view') return $ConfigStore.advancedMode
+    if (tab === 'select') return $ConfigStore.advancedMode && !is3DMode
+    if (tab === 'codes') return $ConfigStore.dataHasCodes
+    return true
+  }
+
+  $effect(() => {
+    if (activeTab && !isTabAvailable(activeTab)) activeTab = null
+  })
 
   let formattedStopLength = $derived($ConfigStore.stopSliderValue.toFixed(0))
 
@@ -294,22 +346,6 @@
       return updatedStore
     })
     p5Instance?.loop()
-  }
-
-  function clickOutside(node: HTMLElement) {
-    const handleClick = (event: MouseEvent) => {
-      if (!node.contains(event.target as Node)) {
-        node.removeAttribute('open')
-      }
-    }
-
-    document.addEventListener('click', handleClick, true)
-
-    return {
-      destroy() {
-        document.removeEventListener('click', handleClick, true)
-      },
-    }
   }
 
   /**
@@ -467,9 +503,6 @@
   async function clearAllDataLocal() {
     resetVideo()
 
-    // Close any open user dropdown
-    activeDropdownUser = null
-
     // Use history-tracked function for store clearing
     clearAllDataWithHistory()
 
@@ -542,21 +575,6 @@
     p5Instance?.loop()
   }
 
-  // State for user dropdown
-  let activeDropdownUser = $state<User | null>(null)
-  let dropdownAnchorX = $state(0)
-  let dropdownAnchorY = $state(0)
-
-  function handleOpenUserDropdown(user: User, event: MouseEvent) {
-    activeDropdownUser = user
-    dropdownAnchorX = event.clientX
-    dropdownAnchorY = event.clientY
-  }
-
-  function handleCloseUserDropdown() {
-    activeDropdownUser = null
-  }
-
   /**
    * Check if a user is visible (either movement or talk enabled)
    */
@@ -569,6 +587,26 @@
    */
   function toggleUserVisibility(user: User) {
     toggleUserVisibilityAction(user.name, isUserVisible(user))
+    p5Instance?.loop()
+  }
+
+  const userEntities = $derived<Entity[]>(
+    $UserStore.map((user) => ({
+      id: user.name,
+      label: user.name,
+      color: user.color,
+      visible: isUserVisible(user),
+    }))
+  )
+
+  function findUser(id: string): User | undefined {
+    return $UserStore.find((u) => u.name === id)
+  }
+
+  const userColorDrag = createUserColorDrag()
+
+  function handleUserColorInput(id: string, color: string) {
+    userColorDrag.input(id, color)
     p5Instance?.loop()
   }
 
@@ -625,6 +663,14 @@
       }
     }
 
+    const handleOpenPanel = (event: Event) => {
+      const tab = (event as CustomEvent<{ tab: RailTab | null }>).detail?.tab ?? null
+      instantPanel = true
+      activeTab = tab && isTabAvailable(tab) ? tab : null
+      if (activeTab) lastTab = activeTab
+      flushSync()
+    }
+
     // Show welcome modal immediately for first-time visitors
     if (shouldShowTour()) {
       isModalOpen.set(true)
@@ -636,6 +682,7 @@
     window.addEventListener('igs:download-codes', handleDownloadCodes)
     window.addEventListener('igs:toggle-help', handleToggleHelp)
     window.addEventListener('igs:load-example', handleLoadExample)
+    window.addEventListener('igs:open-panel', handleOpenPanel)
 
     // Clear data event listeners (for command palette)
     window.addEventListener('igs:clear-movement', clearMovementData)
@@ -651,6 +698,7 @@
       window.removeEventListener('igs:download-codes', handleDownloadCodes)
       window.removeEventListener('igs:toggle-help', handleToggleHelp)
       window.removeEventListener('igs:load-example', handleLoadExample)
+      window.removeEventListener('igs:open-panel', handleOpenPanel)
 
       // Remove clear data event listeners
       window.removeEventListener('igs:clear-movement', clearMovementData)
@@ -660,12 +708,6 @@
     }
   })
 </script>
-
-{#snippet chevronDown()}
-  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-  </svg>
-{/snippet}
 
 {#snippet icon(Icon: Component)}
   <div class="w-4 h-4"><Icon /></div>
@@ -677,9 +719,471 @@
   </div>
 {/snippet}
 
-{#snippet navDivider()}
-  <div class="divider divider-horizontal mx-2 h-6 self-center"></div>
+{#snippet toggleRow(label: string, on: boolean, onclick: () => void)}
+  <li>
+    <button {onclick} class="w-full text-left flex items-center" aria-pressed={on}>
+      {@render check(on)}
+      {label}
+    </button>
+  </li>
 {/snippet}
+
+{#snippet rangeRow(
+  label: string,
+  id: string,
+  min: number,
+  max: number,
+  step: number,
+  value: number,
+  oninput: (e: Event & { currentTarget: HTMLInputElement }) => void
+)}
+  <div class="flex flex-col gap-1">
+    <label for={id} class="text-xs">{label}</label>
+    <input {id} type="range" {min} {max} {step} {value} class="range range-xs" {oninput} />
+  </div>
+{/snippet}
+
+{#snippet panelSection(title: string, body: Snippet)}
+  <section class="flex flex-col gap-2">
+    <h3 class="text-xs font-semibold uppercase tracking-wide opacity-60">{title}</h3>
+    {@render body()}
+  </section>
+{/snippet}
+
+{#snippet dataPanel()}
+  <div class="flex flex-col gap-6 px-3 py-4">
+    {#snippet importBody()}
+      <button
+        id="btn-import-files"
+        class="btn btn-sm btn-primary gap-2"
+        onclick={() => (showImportDialog = true)}
+      >
+        {@render icon(MdFileUploadOutline)}
+        Import files
+      </button>
+    {/snippet}
+    {@render panelSection('Your data', importBody)}
+
+    {#snippet examplesBody()}
+      <ul class="menu w-full p-0">
+        {#each dropdownOptions as group (group.label)}
+          <li>
+            <button
+              class="menu-title flex items-center gap-2 w-full hover:bg-base-200 rounded-lg px-2 py-1 cursor-pointer"
+              onclick={() => toggleCategory(group.label)}
+              aria-expanded={expandedCategories.has(group.label)}
+            >
+              <svelte:component
+                this={expandedCategories.has(group.label) ? MdChevronDown : MdChevronRight}
+                class="w-4 h-4 opacity-50"
+              />
+              <svelte:component this={group.icon} class="w-4 h-4" />
+              <span>{group.label}</span>
+            </button>
+          </li>
+          {#if expandedCategories.has(group.label)}
+            {#each group.items as item (item.value)}
+              {@const isSelected = selectedDropDownOption === item.label}
+              <li class="pl-2 w-full">
+                <button
+                  onclick={() => {
+                    updateExampleDataDropDown({ target: { value: item.value } })
+                    selectedDropDownOption = item.label
+                  }}
+                  class="flex items-center gap-2 w-full cursor-pointer {isSelected
+                    ? 'bg-primary/20 font-medium'
+                    : ''}"
+                >
+                  <span class="truncate flex-1">{item.label}</span>
+                  <span class="badge badge-ghost badge-sm opacity-60 shrink-0"
+                    >{getDatasetDuration(item.value)}</span
+                  >
+                </button>
+              </li>
+            {/each}
+          {/if}
+        {/each}
+      </ul>
+    {/snippet}
+    <div id="examples-list">{@render panelSection('Examples', examplesBody)}</div>
+
+    {#if $ConfigStore.advancedMode}
+      {#snippet clearBody()}
+        <ul class="menu w-full p-0">
+          <li><button onclick={clearMovementData}>Movement</button></li>
+          <li><button onclick={clearConversationData}>Conversation</button></li>
+          <li><button onclick={clearCodeData}>Codes</button></li>
+          <li><button onclick={resetVideo}>Video</button></li>
+          <li><button onclick={clearAllDataLocal} class="text-error">All data</button></li>
+        </ul>
+      {/snippet}
+      {@render panelSection('Clear', clearBody)}
+    {/if}
+  </div>
+{/snippet}
+
+{#snippet userControls(entity: Entity)}
+  {@const user = findUser(entity.id)}
+  {#if user}
+    <div class="flex items-center gap-1">
+      <button
+        class="btn btn-ghost btn-xs btn-square"
+        class:opacity-40={!user.enabled}
+        aria-pressed={user.enabled}
+        aria-label="{user.enabled ? 'Hide' : 'Show'} movement for {user.name}"
+        title="Movement"
+        onclick={() => {
+          toggleUserEnabled(user.name)
+          p5Instance?.loop()
+        }}
+      >
+        {@render icon(MdWalk)}
+      </button>
+      <button
+        class="btn btn-ghost btn-xs btn-square"
+        class:opacity-40={!user.conversation_enabled}
+        aria-pressed={user.conversation_enabled}
+        aria-label="{user.conversation_enabled ? 'Hide' : 'Show'} talk for {user.name}"
+        title="Talk"
+        onclick={() => {
+          toggleUserConversationEnabled(user.name)
+          p5Instance?.loop()
+        }}
+      >
+        {@render icon(MdChat)}
+      </button>
+    </div>
+  {/if}
+{/snippet}
+
+{#snippet peoplePanel()}
+  <div class="flex flex-col gap-6 px-3 py-4">
+    {#if userEntities.length === 0}
+      <p class="text-sm opacity-70">Load an example or import data to see people here.</p>
+    {:else}
+      <p class="text-xs opacity-70">
+        Click a name to show or hide everything for that person. The icons toggle movement and talk
+        separately.
+      </p>
+      <EntityToggleList
+        entities={userEntities}
+        onToggle={(id) => {
+          const user = findUser(id)
+          if (user) toggleUserVisibility(user)
+        }}
+        onColorChange={handleUserColorInput}
+        onRename={(id, next) => {
+          setUserName(id, next)
+          p5Instance?.loop()
+        }}
+        controls={userControls}
+        class="igs-people"
+      />
+    {/if}
+  </div>
+{/snippet}
+
+{#snippet talkPanel()}
+  <div class="flex flex-col gap-6 px-3 py-4">
+    {#snippet displayBody()}
+      <ul class="menu w-full p-0">
+        {@render toggleRow(
+          'Transcript panel',
+          isTranscriptVisible,
+          () => (isTranscriptVisible = !isTranscriptVisible)
+        )}
+        {@render toggleRow('Show speech bubbles', $ConfigStore.showConversationRects, () =>
+          handleConfigChange('showConversationRects', !$ConfigStore.showConversationRects)
+        )}
+        {@render toggleRow('Align to side', $ConfigStore.alignToggle, () =>
+          toggleSelection('alignToggle', conversationToggleOptions)
+        )}
+      </ul>
+    {/snippet}
+    {@render panelSection('Display', displayBody)}
+
+    {#if $ConfigStore.advancedMode}
+      {#snippet groupedBody()}
+        <ul class="menu w-full p-0">
+          {@render toggleRow('Combine speakers', $ConfigStore.showSpeakerStripes, () =>
+            handleConfigChange('showSpeakerStripes', !$ConfigStore.showSpeakerStripes)
+          )}
+        </ul>
+        {@render rangeRow(
+          `Group within ${$ConfigStore.clusterTimeThreshold} seconds`,
+          'clusterTimeRange',
+          1,
+          60,
+          1,
+          $ConfigStore.clusterTimeThreshold,
+          (e) => handleConfigChangeFromInput(e, 'clusterTimeThreshold')
+        )}
+        {@render rangeRow(
+          `Group within ${$ConfigStore.clusterSpaceThreshold}px distance`,
+          'clusterSpaceRange',
+          0,
+          200,
+          1,
+          $ConfigStore.clusterSpaceThreshold,
+          (e) => handleConfigChangeFromInput(e, 'clusterSpaceThreshold')
+        )}
+      {/snippet}
+      {@render panelSection('Grouped turns', groupedBody)}
+
+      {#snippet individualBody()}
+        {@render rangeRow(
+          `Turn width: ${$ConfigStore.conversationRectWidth}px`,
+          'rectWidthRange',
+          1,
+          30,
+          1,
+          $ConfigStore.conversationRectWidth,
+          (e) => handleConfigChangeFromInput(e, 'conversationRectWidth')
+        )}
+      {/snippet}
+      {@render panelSection('Individual turns', individualBody)}
+    {/if}
+  </div>
+{/snippet}
+
+{#snippet filtersPanel()}
+  <div class="flex flex-col gap-6 px-3 py-4">
+    {#snippet movementBody()}
+      <ul class="menu w-full p-0">
+        {#each filterToggleOptions as toggle (toggle)}
+          {@render toggleRow(
+            capitalizeFirstLetter(toggle.replace('Toggle', '')),
+            $ConfigStore[toggle],
+            () => toggleSelection(toggle, filterToggleOptions)
+          )}
+        {/each}
+      </ul>
+      {@render rangeRow(
+        `Stop length: ${formattedStopLength} sec`,
+        'stopLengthRange',
+        1,
+        $ConfigStore.maxStopLength,
+        1,
+        $ConfigStore.stopSliderValue,
+        (e) => handleConfigChangeFromInput(e, 'stopSliderValue')
+      )}
+    {/snippet}
+    {@render panelSection('Movement', movementBody)}
+  </div>
+{/snippet}
+
+{#snippet selectPanel()}
+  <div class="flex flex-col gap-6 px-3 py-4">
+    {#snippet modeBody()}
+      <ul class="menu w-full p-0">
+        {#each selectToggleOptions as toggle (toggle)}
+          {@render toggleRow(
+            capitalizeFirstLetter(toggle.replace('Toggle', '')),
+            $ConfigStore[toggle],
+            () => toggleSelection(toggle, selectToggleOptions)
+          )}
+        {/each}
+      </ul>
+    {/snippet}
+    {@render panelSection('Mode', modeBody)}
+
+    {#snippet sizeBody()}
+      {@render rangeRow(
+        `Circle size: ${currentConfig.selectorSize}px`,
+        'selectorSizeRange',
+        20,
+        300,
+        10,
+        currentConfig.selectorSize,
+        (e) => setSelectorSize(parseFloat(e.currentTarget.value))
+      )}
+      {@render rangeRow(
+        `Slicer width: ${currentConfig.slicerSize}px`,
+        'slicerSizeRange',
+        5,
+        100,
+        5,
+        currentConfig.slicerSize,
+        (e) => setSlicerSize(parseFloat(e.currentTarget.value))
+      )}
+    {/snippet}
+    {@render panelSection('Size', sizeBody)}
+  </div>
+{/snippet}
+
+{#snippet viewPanel()}
+  <div class="flex flex-col gap-6 px-3 py-4">
+    {#snippet floorplanBody()}
+      <div class="flex flex-wrap gap-2">
+        <button
+          id="btn-rotate-left"
+          class="btn btn-sm gap-2"
+          onclick={() => {
+            p5Instance?.floorPlan.setRotateLeft()
+            p5Instance?.loop()
+          }}
+        >
+          {@render icon(MdRotateLeft)}
+          Rotate left
+        </button>
+        <button
+          id="btn-rotate-right"
+          class="btn btn-sm gap-2"
+          onclick={() => {
+            p5Instance?.floorPlan.setRotateRight()
+            p5Instance?.loop()
+          }}
+        >
+          {@render icon(MdRotateRight)}
+          Rotate right
+        </button>
+      </div>
+      <ul class="menu w-full p-0">
+        {@render toggleRow(
+          'Preserve aspect ratio',
+          currentConfig.preserveFloorplanAspectRatio,
+          () =>
+            handleConfigChange(
+              'preserveFloorplanAspectRatio',
+              !currentConfig.preserveFloorplanAspectRatio
+            )
+        )}
+      </ul>
+    {/snippet}
+    {@render panelSection('Floor plan', floorplanBody)}
+
+    {#if $GPSStore.isGPSMode}
+      {#snippet mapBody()}
+        <MapStyleSelector />
+      {/snippet}
+      {@render panelSection('Map style', mapBody)}
+    {/if}
+  </div>
+{/snippet}
+
+{#snippet settingsPanel()}
+  <div class="flex flex-col gap-6 px-3 py-4">
+    <label class="flex items-center justify-between gap-2 cursor-pointer">
+      <span class="text-sm font-medium">Advanced mode</span>
+      <input
+        id="advanced-mode-toggle"
+        type="checkbox"
+        class="toggle toggle-primary toggle-sm"
+        checked={$ConfigStore.advancedMode}
+        onchange={toggleAdvancedMode}
+      />
+    </label>
+
+    {#if $ConfigStore.advancedMode}
+      {#snippet drawingBody()}
+        {@render rangeRow(
+          `Animation rate: ${currentConfig.animationRate}`,
+          'animationRate',
+          0.01,
+          1,
+          0.01,
+          currentConfig.animationRate,
+          (e) => handleConfigChange('animationRate', parseFloat(e.currentTarget.value))
+        )}
+        {@render rangeRow(
+          `Sampling interval: ${currentConfig.samplingInterval} sec`,
+          'samplingInterval',
+          0.1,
+          5,
+          0.1,
+          currentConfig.samplingInterval,
+          (e) => handleConfigChange('samplingInterval', parseFloat(e.currentTarget.value))
+        )}
+        {@render rangeRow(
+          `Small data threshold: ${currentConfig.smallDataThreshold}`,
+          'smallDataThreshold',
+          500,
+          10000,
+          100,
+          currentConfig.smallDataThreshold,
+          (e) => handleConfigChange('smallDataThreshold', parseInt(e.currentTarget.value))
+        )}
+        {@render rangeRow(
+          `Movement line weight: ${currentConfig.movementStrokeWeight}`,
+          'movementStrokeWeight',
+          1,
+          20,
+          1,
+          currentConfig.movementStrokeWeight,
+          (e) => handleConfigChange('movementStrokeWeight', parseInt(e.currentTarget.value))
+        )}
+        {@render rangeRow(
+          `Stop line weight: ${currentConfig.stopStrokeWeight}`,
+          'stopStrokeWeight',
+          1,
+          20,
+          1,
+          currentConfig.stopStrokeWeight,
+          (e) => handleConfigChange('stopStrokeWeight', parseInt(e.currentTarget.value))
+        )}
+        <div class="flex flex-col gap-1">
+          <label for="inputSeconds" class="text-xs">End time (seconds)</label>
+          <input
+            id="inputSeconds"
+            type="text"
+            inputmode="numeric"
+            bind:value={timelineEndTime}
+            oninput={(e) => {
+              let value = parseInt(e.currentTarget.value.replace(/\D/g, '')) || 0
+              timelineV2Store.initialize(value, 0)
+            }}
+            class="input input-bordered input-sm"
+          />
+        </div>
+      {/snippet}
+      {@render panelSection('Drawing', drawingBody)}
+
+      {#snippet toolsBody()}
+        <ul class="menu w-full p-0">
+          <li>
+            <button onclick={() => (showDataPopup = true)} class="flex items-center gap-2">
+              {@render icon(MdTableEye)}
+              Data explorer
+            </button>
+          </li>
+          <li>
+            <button onclick={() => p5Instance?.saveCodeFile()} class="flex items-center gap-2">
+              {@render icon(MdCloudDownload)}
+              Download codes
+            </button>
+          </li>
+          <li>
+            <button
+              onclick={() => window.dispatchEvent(new CustomEvent('igs:open-cheatsheet'))}
+              class="flex items-center gap-2"
+            >
+              {@render icon(MdKeyboard)}
+              Keyboard shortcuts
+            </button>
+          </li>
+        </ul>
+        <button class="btn btn-sm btn-warning self-start" onclick={resetSettings}>
+          Reset settings
+        </button>
+      {/snippet}
+      {@render panelSection('Tools', toolsBody)}
+    {:else}
+      <p class="text-sm opacity-70">
+        Advanced mode adds filters, selection tools, floor plan controls and drawing settings.
+      </p>
+    {/if}
+  </div>
+{/snippet}
+
+{#snippet dataIcon()}<MdFolder />{/snippet}
+{#snippet peopleIcon()}<MdAccountGroup />{/snippet}
+{#snippet codesIcon()}<MdTagMultiple />{/snippet}
+{#snippet talkIcon()}<MdChat />{/snippet}
+{#snippet filtersIcon()}<MdFilterList />{/snippet}
+{#snippet selectIcon()}<MdSelectAll />{/snippet}
+{#snippet viewIcon()}<MdFloorPlan />{/snippet}
+{#snippet settingsIcon()}<MdSettings />{/snippet}
+{#snippet helpIcon()}<MdHelpOutline />{/snippet}
 
 <svelte:head>
   <title>IGS</title>
@@ -689,830 +1193,100 @@
   <CanvasFrame>
     {#snippet top()}
       <div class="navbar min-h-16 bg-[#ffffff] relative">
-        <div class="flex-1 px-2 lg:flex-none">
+        <div class="flex-1 min-w-0 px-2 flex items-center gap-4">
           <a class="text-2xl font-bold text-black italic" href="https://interactiongeography.org"
             >IGS</a
           >
-        </div>
-
-        <!-- Hamburger button - visible on mobile only, positioned to the right -->
-        <div class="flex-none lg:hidden">
-          <button
-            class="btn btn-ghost btn-square"
-            onclick={() => (mobileMenuOpen = !mobileMenuOpen)}
-            aria-label="Toggle menu"
-          >
-            <div class="w-6 h-6">
-              {#if mobileMenuOpen}
-                <MdClose />
-              {:else}
-                <MdMenu />
-              {/if}
-            </div>
-          </button>
-        </div>
-
-        <!-- Desktop menu - hidden on mobile -->
-        <div class="hidden lg:flex items-center justify-end flex-1 px-2">
-          {#if $ConfigStore.advancedMode}
-            <details class="dropdown" use:clickOutside>
-              <summary class="btn btn-sm ml-4 gap-1 flex items-center">
-                {@render icon(MdFilterList)}
-                Filter
-                {@render chevronDown()}
-              </summary>
-              <ul class="menu dropdown-content rounded-box z-[1] w-52 p-2 shadow bg-base-100">
-                {#each filterToggleOptions as toggle (toggle)}
-                  <li>
-                    <button
-                      onclick={() => toggleSelection(toggle, filterToggleOptions)}
-                      class="w-full text-left flex items-center"
-                    >
-                      {@render check($ConfigStore[toggle])}
-                      {capitalizeFirstLetter(toggle.replace('Toggle', ''))}
-                    </button>
-                  </li>
-                {/each}
-                <li class="cursor-none">
-                  <p>Stop Length: {formattedStopLength} sec</p>
-                </li>
-                <li>
-                  <label for="stopLengthRange" class="sr-only">Adjust stop length</label>
-                  <input
-                    id="stopLengthRange"
-                    type="range"
-                    min="1"
-                    max={$ConfigStore.maxStopLength}
-                    value={$ConfigStore.stopSliderValue}
-                    class="range"
-                    oninput={(e) => handleConfigChangeFromInput(e, 'stopSliderValue')}
-                  />
-                </li>
-              </ul>
-            </details>
-          {/if}
-
-          <!-- Select Dropdown (only shown in 2D mode and advanced mode) -->
-          {#if !is3DMode && $ConfigStore.advancedMode}
-            <details class="dropdown" use:clickOutside>
-              <summary class="btn btn-sm ml-4 gap-1 flex items-center">
-                {@render icon(MdSelectAll)}
-                Select
-                {@render chevronDown()}
-              </summary>
-              <ul class="menu dropdown-content rounded-box z-[1] w-52 p-2 shadow bg-base-100">
-                {#each selectToggleOptions as toggle (toggle)}
-                  <li>
-                    <button
-                      onclick={() => toggleSelection(toggle, selectToggleOptions)}
-                      class="w-full text-left flex items-center"
-                    >
-                      {@render check($ConfigStore[toggle])}
-                      {capitalizeFirstLetter(toggle.replace('Toggle', ''))}
-                    </button>
-                  </li>
-                {/each}
-                <li class="px-4 py-2">
-                  <label class="block text-sm font-medium mb-1">
-                    Circle Size: {currentConfig.selectorSize}px
-                  </label>
-                  <input
-                    type="range"
-                    min="20"
-                    max="300"
-                    step="10"
-                    value={currentConfig.selectorSize}
-                    oninput={(e) => setSelectorSize(parseFloat(e.currentTarget.value))}
-                    class="range range-sm w-full"
-                  />
-                </li>
-                <li class="px-4 py-2">
-                  <label class="block text-sm font-medium mb-1">
-                    Slicer Width: {currentConfig.slicerSize}px
-                  </label>
-                  <input
-                    type="range"
-                    min="5"
-                    max="100"
-                    step="5"
-                    value={currentConfig.slicerSize}
-                    oninput={(e) => setSlicerSize(parseFloat(e.currentTarget.value))}
-                    class="range range-sm w-full"
-                  />
-                </li>
-              </ul>
-            </details>
-          {/if}
-
-          <!-- Talk Dropdown -->
-          <details id="talk-dropdown" class="dropdown" use:clickOutside>
-            <summary class="btn btn-sm ml-4 gap-1 flex items-center">
-              {@render icon(MdChat)}
-              Talk
-              {@render chevronDown()}
-            </summary>
-            <ul class="menu dropdown-content rounded-box z-[1] w-64 p-2 shadow bg-base-100">
-              <li>
-                <button
-                  onclick={() => (isTranscriptVisible = !isTranscriptVisible)}
-                  class="w-full text-left flex items-center"
-                >
-                  {@render check(isTranscriptVisible)}
-                  Transcript Panel
-                </button>
-              </li>
-              <div class="divider my-1"></div>
-              <li>
-                <button
-                  onclick={() => {
-                    handleConfigChange('showConversationRects', !$ConfigStore.showConversationRects)
-                    p5Instance?.loop()
-                  }}
-                  class="w-full text-left flex items-center"
-                >
-                  {@render check($ConfigStore.showConversationRects)}
-                  Show speech bubbles
-                </button>
-              </li>
-              <li>
-                <button
-                  onclick={() => toggleSelection('alignToggle', conversationToggleOptions)}
-                  class="w-full text-left flex items-center"
-                >
-                  {@render check($ConfigStore.alignToggle)}
-                  Align to side
-                </button>
-              </li>
-
-              {#if $ConfigStore.advancedMode}
-                <li class="menu-title px-2 py-0 text-xs opacity-60">Grouped turns</li>
-
-                <li>
-                  <button
-                    onclick={() => {
-                      handleConfigChange('showSpeakerStripes', !$ConfigStore.showSpeakerStripes)
-                    }}
-                    class="w-full text-left flex items-center"
-                  >
-                    {@render check($ConfigStore.showSpeakerStripes)}
-                    Combine speakers
-                  </button>
-                </li>
-                <li class="px-2 py-1">
-                  <div class="w-full">
-                    <p class="text-xs mb-1">
-                      Group within {$ConfigStore.clusterTimeThreshold} seconds
-                    </p>
-                    <input
-                      id="clusterTimeRange"
-                      type="range"
-                      min="1"
-                      max="60"
-                      value={$ConfigStore.clusterTimeThreshold}
-                      class="range range-xs"
-                      oninput={(e) => handleConfigChangeFromInput(e, 'clusterTimeThreshold')}
-                    />
-                  </div>
-                </li>
-                <li class="px-2 py-1">
-                  <div class="w-full">
-                    <p class="text-xs mb-1">
-                      Group within {$ConfigStore.clusterSpaceThreshold}px distance
-                    </p>
-                    <input
-                      id="clusterSpaceRange"
-                      type="range"
-                      min="0"
-                      max="200"
-                      value={$ConfigStore.clusterSpaceThreshold}
-                      class="range range-xs"
-                      oninput={(e) => handleConfigChangeFromInput(e, 'clusterSpaceThreshold')}
-                    />
-                  </div>
-                </li>
-
-                <div class="divider my-1"></div>
-                <li class="menu-title px-2 py-0 text-xs opacity-60">Individual turns</li>
-
-                <li class="px-2 py-1">
-                  <div class="w-full">
-                    <p class="text-xs mb-1">Turn width: {$ConfigStore.conversationRectWidth}px</p>
-                    <input
-                      id="rectWidthRange"
-                      type="range"
-                      min="1"
-                      max="30"
-                      value={$ConfigStore.conversationRectWidth}
-                      class="range range-xs"
-                      oninput={(e) => handleConfigChangeFromInput(e, 'conversationRectWidth')}
-                    />
-                  </div>
-                </li>
-              {/if}
-            </ul>
-          </details>
-
-          {#if $ConfigStore.advancedMode}
-            <!-- Map Style Selector (GPS mode only, advanced) -->
-            <MapStyleSelector />
-
-            <!-- Clear Data Dropdown (advanced) -->
-            <details class="dropdown" use:clickOutside>
-              <summary class="btn btn-sm ml-4 gap-1 flex items-center">
-                {@render icon(MdDelete)}
-                Clear
-                {@render chevronDown()}
-              </summary>
-              <ul class="menu dropdown-content rounded-box z-[1] w-52 p-2 shadow bg-base-100">
-                <li><button onclick={clearMovementData}>Movement</button></li>
-                <li><button onclick={clearConversationData}>Conversation</button></li>
-                <li><button onclick={clearCodeData}>Codes</button></li>
-                <li><button onclick={resetVideo}>Video</button></li>
-                <li><button onclick={clearAllDataLocal} class="text-error">All Data</button></li>
-              </ul>
-            </details>
-          {/if}
-
-          {@render navDivider()}
-
-          <div class="flex items-center gap-1">
-            {#if $ConfigStore.advancedMode}
-              <IconButton
-                id="btn-rotate-left"
-                icon={MdRotateLeft}
-                tooltip="Rotate Left"
-                onclick={() => {
-                  p5Instance?.floorPlan.setRotateLeft()
-                  p5Instance?.loop()
-                }}
-              />
-              <IconButton
-                id="btn-rotate-right"
-                icon={MdRotateRight}
-                tooltip="Rotate Right"
-                onclick={() => {
-                  p5Instance?.floorPlan.setRotateRight()
-                  p5Instance?.loop()
-                }}
-              />
-              <IconButton
-                id="btn-aspect-ratio"
-                icon={currentConfig.preserveFloorplanAspectRatio
-                  ? MdAspectRatio
-                  : MdFitToPageOutline}
-                tooltip={currentConfig.preserveFloorplanAspectRatio
-                  ? 'Stretch to Fill'
-                  : 'Preserve Aspect Ratio'}
-                onclick={() => {
-                  handleConfigChange(
-                    'preserveFloorplanAspectRatio',
-                    !currentConfig.preserveFloorplanAspectRatio
-                  )
-                  p5Instance?.loop()
-                }}
-              />
-            {/if}
-            <IconButton
-              id="btn-toggle-3d"
-              icon={Md3DRotation}
-              tooltip="Toggle 2D/3D"
-              onclick={() => {
-                p5Instance?.handle3D.update()
-                is3DMode = p5Instance?.handle3D.getIs3DMode() ?? is3DMode
-              }}
-            />
-            <IconButton
-              id="btn-toggle-video"
-              icon={isVideoShowing ? MdVideocam : MdVideocamOff}
-              tooltip="Show/Hide Video"
-              onclick={toggleVideo}
-            />
-            <IconButton
-              icon={MdFileUploadOutline}
-              tooltip="Import Files"
-              onclick={() => (showImportDialog = true)}
-            />
-
-            <IconButton
-              icon={MdHelpOutline}
-              tooltip="Help"
-              onclick={() => ($isModalOpen = !$isModalOpen)}
-            />
-
-            {#if $ConfigStore.advancedMode}
-              <!-- More menu (Download, Keyboard, Settings) - advanced only -->
-              <details class="dropdown dropdown-end" use:clickOutside>
-                <summary class="btn btn-sm btn-ghost btn-square">
-                  <div class="w-5 h-5"><MdMoreVert /></div>
-                </summary>
-                <ul class="menu dropdown-content rounded-box z-[1] w-48 p-2 shadow bg-base-100">
-                  <li>
-                    <button
-                      onclick={() => p5Instance?.saveCodeFile()}
-                      class="flex items-center gap-2"
-                    >
-                      {@render icon(MdCloudDownload)}
-                      Download Codes
-                    </button>
-                  </li>
-                  <li>
-                    <button
-                      onclick={() => window.dispatchEvent(new CustomEvent('igs:open-cheatsheet'))}
-                      class="flex items-center gap-2"
-                    >
-                      {@render icon(MdKeyboard)}
-                      Keyboard Shortcuts
-                    </button>
-                  </li>
-                  <li>
-                    <button onclick={() => (showSettings = true)} class="flex items-center gap-2">
-                      {@render icon(MdSettings)}
-                      Settings
-                    </button>
-                  </li>
-                </ul>
-              </details>
-            {/if}
-
-            {@render navDivider()}
-
-            <!-- Advanced Mode Toggle -->
-            <button
-              class="btn btn-sm gap-1"
-              class:btn-primary={$ConfigStore.advancedMode}
-              onclick={toggleAdvancedMode}
+          {#if selectedDropDownOption}
+            <span class="truncate text-sm opacity-70" title={selectedDropDownOption}
+              >{selectedDropDownOption}</span
             >
-              <div class="w-4 h-4"><MdTune /></div>
-              Advanced
-            </button>
-
-            <!-- Examples Dropdown -->
-            <FloatingDropdown
-              id="examples-dropdown"
-              buttonClass="btn btn-sm gap-1 flex items-center"
-              contentClass="menu rounded-box w-72 p-2 shadow bg-base-100 max-h-[60vh] overflow-y-auto"
-            >
-              {#snippet buttonChildren()}
-                {@render icon(MdFolder)}
-                <span class="max-w-32 truncate">{selectedDropDownOption || 'Examples'}</span>
-                {@render chevronDown()}
-              {/snippet}
-              <ul>
-                {#each dropdownOptions as group, groupIndex (group.label)}
-                  {#if groupIndex > 0}
-                    <li class="my-1"><hr class="border-base-300" /></li>
-                  {/if}
-                  <li>
-                    <button
-                      class="menu-title flex items-center gap-2 w-full hover:bg-base-200 rounded-lg px-2 py-1 cursor-pointer"
-                      onclick={() => toggleCategory(group.label)}
-                    >
-                      <svelte:component
-                        this={expandedCategories.has(group.label) ? MdChevronDown : MdChevronRight}
-                        class="w-4 h-4 opacity-50"
-                      />
-                      <svelte:component this={group.icon} class="w-4 h-4" />
-                      <span>{group.label}</span>
-                    </button>
-                  </li>
-                  {#if expandedCategories.has(group.label)}
-                    {#each group.items as item (item.value)}
-                      {@const isSelected = selectedDropDownOption === item.label}
-                      <li class="pl-2 w-full">
-                        <button
-                          onclick={() => {
-                            updateExampleDataDropDown({ target: { value: item.value } })
-                            selectedDropDownOption = item.label
-                          }}
-                          class="flex items-center gap-2 w-full cursor-pointer {isSelected
-                            ? 'bg-primary/20 font-medium'
-                            : ''}"
-                        >
-                          <span class="truncate flex-1">{item.label}</span>
-                          <span class="badge badge-ghost badge-sm opacity-60 shrink-0"
-                            >{getDatasetDuration(item.value)}</span
-                          >
-                        </button>
-                      </li>
-                    {/each}
-                  {/if}
-                {/each}
-              </ul>
-            </FloatingDropdown>
-          </div>
+          {/if}
         </div>
-
-        <!-- Mobile menu -->
-        {#if mobileMenuOpen}
-          <!-- Backdrop -->
-          <div
-            class="lg:hidden fixed inset-0 bg-black/20 z-40"
-            onclick={() => (mobileMenuOpen = false)}
-            role="button"
-            tabindex="-1"
-          ></div>
-
-          <!-- Menu panel -->
-          <div
-            class="lg:hidden absolute top-full left-0 right-0 bg-base-100 shadow-lg border-t z-50 max-h-[85vh] overflow-y-auto px-6 py-8"
-          >
-            <!-- Dropdown buttons -->
-            <div class="flex flex-wrap gap-2 justify-center mb-6">
-              {#if $ConfigStore.advancedMode}
-                <details class="dropdown dropdown-bottom" use:clickOutside>
-                  <summary class="btn btn-sm gap-1">{@render icon(MdFilterList)}Filter</summary>
-                  <ul
-                    class="dropdown-content menu bg-base-200 rounded-box z-[60] w-48 p-2 shadow mt-1"
-                  >
-                    {#each filterToggleOptions as toggle (toggle)}
-                      <li>
-                        <button onclick={() => toggleSelection(toggle, filterToggleOptions)}
-                          >{@render check($ConfigStore[toggle])}{capitalizeFirstLetter(
-                            toggle.replace('Toggle', '')
-                          )}</button
-                        >
-                      </li>
-                    {/each}
-                    <li class="px-2 py-1">
-                      <div class="flex flex-col w-full">
-                        <span class="text-xs">Stop: {formattedStopLength}s</span>
-                        <input
-                          type="range"
-                          min="1"
-                          max={$ConfigStore.maxStopLength}
-                          value={$ConfigStore.stopSliderValue}
-                          class="range range-xs"
-                          oninput={(e) => handleConfigChangeFromInput(e, 'stopSliderValue')}
-                        />
-                      </div>
-                    </li>
-                  </ul>
-                </details>
-              {/if}
-
-              {#if !is3DMode && $ConfigStore.advancedMode}
-                <details class="dropdown dropdown-bottom" use:clickOutside>
-                  <summary class="btn btn-sm gap-1">{@render icon(MdSelectAll)}Select</summary>
-                  <ul
-                    class="dropdown-content menu bg-base-200 rounded-box z-[60] w-56 p-2 shadow mt-1"
-                  >
-                    {#each selectToggleOptions as toggle (toggle)}
-                      <li>
-                        <button onclick={() => toggleSelection(toggle, selectToggleOptions)}
-                          >{@render check($ConfigStore[toggle])}{capitalizeFirstLetter(
-                            toggle.replace('Toggle', '')
-                          )}</button
-                        >
-                      </li>
-                    {/each}
-                    <li class="px-2 py-1">
-                      <div class="w-full">
-                        <p class="text-xs mb-1">Circle Size: {currentConfig.selectorSize}px</p>
-                        <input
-                          type="range"
-                          min="20"
-                          max="300"
-                          step="10"
-                          value={currentConfig.selectorSize}
-                          oninput={(e) => setSelectorSize(parseFloat(e.currentTarget.value))}
-                          class="range range-xs"
-                        />
-                      </div>
-                    </li>
-                    <li class="px-2 py-1">
-                      <div class="w-full">
-                        <p class="text-xs mb-1">Slicer Width: {currentConfig.slicerSize}px</p>
-                        <input
-                          type="range"
-                          min="5"
-                          max="100"
-                          step="5"
-                          value={currentConfig.slicerSize}
-                          oninput={(e) => setSlicerSize(parseFloat(e.currentTarget.value))}
-                          class="range range-xs"
-                        />
-                      </div>
-                    </li>
-                  </ul>
-                </details>
-              {/if}
-
-              <details class="dropdown dropdown-bottom" use:clickOutside>
-                <summary class="btn btn-sm gap-1">{@render icon(MdChat)}Talk</summary>
-                <ul
-                  class="dropdown-content menu bg-base-200 rounded-box z-[60] w-64 p-2 shadow mt-1"
-                >
-                  <li>
-                    <button onclick={() => (isTranscriptVisible = !isTranscriptVisible)}
-                      >{@render check(isTranscriptVisible)}Transcript</button
-                    >
-                  </li>
-                  <div class="divider my-1"></div>
-                  <li>
-                    <button
-                      onclick={() => {
-                        handleConfigChange(
-                          'showConversationRects',
-                          !$ConfigStore.showConversationRects
-                        )
-                        p5Instance?.loop()
-                      }}
-                      >{@render check($ConfigStore.showConversationRects)}Show speech bubbles</button
-                    >
-                  </li>
-                  <li>
-                    <button
-                      onclick={() => toggleSelection('alignToggle', conversationToggleOptions)}
-                      >{@render check($ConfigStore.alignToggle)}Align to side</button
-                    >
-                  </li>
-                  {#if $ConfigStore.advancedMode}
-                    <li class="menu-title px-2 py-0 text-xs opacity-60">Grouped turns</li>
-                    <li>
-                      <button
-                        onclick={() =>
-                          handleConfigChange(
-                            'showSpeakerStripes',
-                            !$ConfigStore.showSpeakerStripes
-                          )}
-                        >{@render check($ConfigStore.showSpeakerStripes)}Combine speakers</button
-                      >
-                    </li>
-                    <li class="px-2 py-1">
-                      <div class="w-full">
-                        <p class="text-xs mb-1">
-                          Group within {$ConfigStore.clusterTimeThreshold} seconds
-                        </p>
-                        <input
-                          type="range"
-                          min="1"
-                          max="60"
-                          value={$ConfigStore.clusterTimeThreshold}
-                          class="range range-xs"
-                          oninput={(e) => handleConfigChangeFromInput(e, 'clusterTimeThreshold')}
-                        />
-                      </div>
-                    </li>
-                    <li class="px-2 py-1">
-                      <div class="w-full">
-                        <p class="text-xs mb-1">
-                          Group within {$ConfigStore.clusterSpaceThreshold}px distance
-                        </p>
-                        <input
-                          type="range"
-                          min="0"
-                          max="200"
-                          value={$ConfigStore.clusterSpaceThreshold}
-                          class="range range-xs"
-                          oninput={(e) => handleConfigChangeFromInput(e, 'clusterSpaceThreshold')}
-                        />
-                      </div>
-                    </li>
-                    <div class="divider my-1"></div>
-                    <li class="menu-title px-2 py-0 text-xs opacity-60">Individual turns</li>
-                    <li class="px-2 py-1">
-                      <div class="w-full">
-                        <p class="text-xs mb-1">
-                          Turn width: {$ConfigStore.conversationRectWidth}px
-                        </p>
-                        <input
-                          type="range"
-                          min="1"
-                          max="30"
-                          value={$ConfigStore.conversationRectWidth}
-                          class="range range-xs"
-                          oninput={(e) => handleConfigChangeFromInput(e, 'conversationRectWidth')}
-                        />
-                      </div>
-                    </li>
-                  {/if}
-                </ul>
-              </details>
-
-              {#if $ConfigStore.advancedMode}
-                <details class="dropdown dropdown-bottom dropdown-end" use:clickOutside>
-                  <summary class="btn btn-sm gap-1">{@render icon(MdDelete)}Clear</summary>
-                  <ul
-                    class="dropdown-content menu bg-base-200 rounded-box z-[60] w-40 p-2 shadow mt-1"
-                  >
-                    <li>
-                      <button
-                        onclick={() => {
-                          clearMovementData()
-                          mobileMenuOpen = false
-                        }}>Movement</button
-                      >
-                    </li>
-                    <li>
-                      <button
-                        onclick={() => {
-                          clearConversationData()
-                          mobileMenuOpen = false
-                        }}>Conversation</button
-                      >
-                    </li>
-                    <li>
-                      <button
-                        onclick={() => {
-                          clearCodeData()
-                          mobileMenuOpen = false
-                        }}>Codes</button
-                      >
-                    </li>
-                    <li>
-                      <button
-                        onclick={() => {
-                          resetVideo()
-                          mobileMenuOpen = false
-                        }}>Video</button
-                      >
-                    </li>
-                    <li>
-                      <button
-                        onclick={() => {
-                          clearAllDataLocal()
-                          mobileMenuOpen = false
-                        }}
-                        class="text-error">All Data</button
-                      >
-                    </li>
-                  </ul>
-                </details>
-              {/if}
-
-              <details class="dropdown dropdown-bottom" use:clickOutside>
-                <summary class="btn btn-sm gap-1"
-                  >{@render icon(MdFolder)}{selectedDropDownOption || 'Examples'}</summary
-                >
-                <ul
-                  class="dropdown-content menu bg-base-200 rounded-box z-[60] w-72 p-2 shadow mt-1 max-h-60 overflow-y-auto"
-                >
-                  {#each dropdownOptions as group, groupIndex (group.label)}
-                    {#if groupIndex > 0}
-                      <li class="my-1"><hr class="border-base-300" /></li>
-                    {/if}
-                    <li>
-                      <button
-                        class="menu-title flex items-center gap-2 w-full hover:bg-base-300 rounded-lg px-2 py-1 cursor-pointer text-xs"
-                        onclick={() => toggleCategory(group.label)}
-                      >
-                        <svelte:component
-                          this={expandedCategories.has(group.label)
-                            ? MdChevronDown
-                            : MdChevronRight}
-                          class="w-4 h-4 opacity-50"
-                        />
-                        <svelte:component this={group.icon} class="w-4 h-4" />
-                        <span>{group.label}</span>
-                      </button>
-                    </li>
-                    {#if expandedCategories.has(group.label)}
-                      {#each group.items as item (item.value)}
-                        {@const isSelected = selectedDropDownOption === item.label}
-                        <li class="pl-2 w-full">
-                          <button
-                            onclick={() => {
-                              updateExampleDataDropDown({ target: { value: item.value } })
-                              selectedDropDownOption = item.label
-                              mobileMenuOpen = false
-                            }}
-                            class="flex items-center gap-2 w-full cursor-pointer {isSelected
-                              ? 'bg-primary/20 font-medium'
-                              : ''}"
-                          >
-                            <span class="truncate flex-1">{item.label}</span>
-                            <span class="badge badge-ghost badge-sm opacity-60 shrink-0"
-                              >{getDatasetDuration(item.value)}</span
-                            >
-                          </button>
-                        </li>
-                      {/each}
-                    {/if}
-                  {/each}
-                </ul>
-              </details>
-            </div>
-
-            <div class="divider my-2"></div>
-
-            <!-- Icon buttons -->
-            <div class="flex flex-wrap gap-3 justify-center">
-              {#if $ConfigStore.advancedMode}
-                <IconButton
-                  icon={MdRotateLeft}
-                  tooltip="Rotate Left"
-                  onclick={() => {
-                    p5Instance?.floorPlan.setRotateLeft()
-                    p5Instance?.loop()
-                    mobileMenuOpen = false
-                  }}
-                />
-                <IconButton
-                  icon={MdRotateRight}
-                  tooltip="Rotate Right"
-                  onclick={() => {
-                    p5Instance?.floorPlan.setRotateRight()
-                    p5Instance?.loop()
-                    mobileMenuOpen = false
-                  }}
-                />
-                <IconButton
-                  icon={currentConfig.preserveFloorplanAspectRatio
-                    ? MdAspectRatio
-                    : MdFitToPageOutline}
-                  tooltip={currentConfig.preserveFloorplanAspectRatio
-                    ? 'Stretch to Fill'
-                    : 'Preserve Aspect Ratio'}
-                  onclick={() => {
-                    handleConfigChange(
-                      'preserveFloorplanAspectRatio',
-                      !currentConfig.preserveFloorplanAspectRatio
-                    )
-                    p5Instance?.loop()
-                    mobileMenuOpen = false
-                  }}
-                />
-              {/if}
-              <IconButton
-                icon={Md3DRotation}
-                tooltip="Toggle 2D/3D"
-                onclick={() => {
-                  p5Instance?.handle3D.update()
-                  is3DMode = p5Instance?.handle3D.getIs3DMode() ?? is3DMode
-                  mobileMenuOpen = false
-                }}
-              />
-              <IconButton
-                icon={isVideoShowing ? MdVideocam : MdVideocamOff}
-                tooltip="Show/Hide Video"
-                onclick={() => {
-                  toggleVideo()
-                  mobileMenuOpen = false
-                }}
-              />
-              <IconButton
-                icon={MdFileUploadOutline}
-                tooltip="Import Files"
-                onclick={() => {
-                  showImportDialog = true
-                  mobileMenuOpen = false
-                }}
-              />
-              <IconButton
-                icon={MdHelpOutline}
-                tooltip="Help"
-                onclick={() => {
-                  $isModalOpen = !$isModalOpen
-                  mobileMenuOpen = false
-                }}
-              />
-              {#if $ConfigStore.advancedMode}
-                <IconButton
-                  icon={MdCloudDownload}
-                  tooltip="Download Codes"
-                  onclick={() => {
-                    p5Instance?.saveCodeFile()
-                    mobileMenuOpen = false
-                  }}
-                />
-                <IconButton
-                  icon={MdKeyboard}
-                  tooltip="Keyboard Shortcuts"
-                  onclick={() => {
-                    window.dispatchEvent(new CustomEvent('igs:open-cheatsheet'))
-                    mobileMenuOpen = false
-                  }}
-                />
-                <IconButton
-                  icon={MdSettings}
-                  tooltip="Settings"
-                  onclick={() => {
-                    showSettings = true
-                    mobileMenuOpen = false
-                  }}
-                />
-              {/if}
-            </div>
-
-            <div class="divider my-2"></div>
-
-            <!-- Advanced Mode Toggle -->
-            <div class="flex justify-center">
-              <button
-                class="btn btn-sm gap-1"
-                class:btn-primary={$ConfigStore.advancedMode}
-                onclick={() => {
-                  toggleAdvancedMode()
-                  mobileMenuOpen = false
-                }}
-              >
-                <div class="w-4 h-4"><MdTune /></div>
-                Advanced
-              </button>
-            </div>
-          </div>
-        {/if}
+        <div class="flex-none flex items-center gap-1 px-2">
+          <IconButton
+            id="btn-toggle-3d"
+            icon={Md3DRotation}
+            tooltip="Toggle 2D/3D"
+            onclick={() => {
+              p5Instance?.handle3D.update()
+              is3DMode = p5Instance?.handle3D.getIs3DMode() ?? is3DMode
+            }}
+          />
+          <IconButton
+            id="btn-toggle-video"
+            icon={isVideoShowing ? MdVideocam : MdVideocamOff}
+            tooltip="Show/Hide Video"
+            onclick={toggleVideo}
+          />
+        </div>
       </div>
+    {/snippet}
+
+    {#snippet leftRail()}
+      <nav class="igs-left-rail" aria-label="Sidebar navigation" bind:clientWidth={railWidth}>
+        <ActivityBar
+          activeId={activeTab ?? undefined}
+          onSelect={handleRailSelect}
+          items={[
+            { id: 'data', label: RAIL_LABELS.data, icon: dataIcon },
+            { id: 'people', label: RAIL_LABELS.people, icon: peopleIcon },
+            ...($ConfigStore.dataHasCodes
+              ? [{ id: 'codes', label: RAIL_LABELS.codes, icon: codesIcon }]
+              : []),
+            { id: 'talk', label: RAIL_LABELS.talk, icon: talkIcon },
+            ...($ConfigStore.advancedMode
+              ? [{ id: 'filters', label: RAIL_LABELS.filters, icon: filtersIcon }]
+              : []),
+            ...($ConfigStore.advancedMode && !is3DMode
+              ? [{ id: 'select', label: RAIL_LABELS.select, icon: selectIcon }]
+              : []),
+            ...($ConfigStore.advancedMode
+              ? [{ id: 'view', label: RAIL_LABELS.view, icon: viewIcon }]
+              : []),
+            { id: 'settings', label: RAIL_LABELS.settings, icon: settingsIcon },
+            { id: 'help', label: RAIL_LABELS.help, icon: helpIcon },
+          ]}
+        />
+        <!-- SidePanel stays mounted; the shell animates its occupied width so the
+             canvas container reflows smoothly instead of jumping. -->
+        <div
+          id="igs-side-panel"
+          role="tabpanel"
+          aria-label={`${RAIL_LABELS[lastTab]} panel`}
+          class="igs-sidepanel-shell"
+          class:igs-sidepanel-shell--open={activeTab !== null}
+          class:igs-sidepanel-shell--instant={instantPanel}
+          style:width={`${activeTab ? panelWidth : 0}px`}
+          style:--igs-drawer-z={Z_INDEX.DRAWER}
+          inert={activeTab === null}
+        >
+          <SidePanel
+            open={true}
+            title={RAIL_LABELS[lastTab]}
+            bind:width={panelWidth}
+            onClose={() => (activeTab = null)}
+          >
+            {#if lastTab === 'data'}
+              {@render dataPanel()}
+            {:else if lastTab === 'people'}
+              {@render peoplePanel()}
+            {:else if lastTab === 'codes'}
+              <CodesPanel />
+            {:else if lastTab === 'talk'}
+              {@render talkPanel()}
+            {:else if lastTab === 'filters'}
+              {@render filtersPanel()}
+            {:else if lastTab === 'select'}
+              {@render selectPanel()}
+            {:else if lastTab === 'view'}
+              {@render viewPanel()}
+            {:else if lastTab === 'settings'}
+              {@render settingsPanel()}
+            {/if}
+          </SidePanel>
+        </div>
+      </nav>
     {/snippet}
 
     {#snippet canvas()}
@@ -1557,6 +1331,7 @@
             {#if !isSplitScreen}
               <VideoContainer />
             {/if}
+            <TranscriptPanel bind:isVisible={isTranscriptVisible} />
             <ConversationTooltip hideTooltip={isTranscriptVisible} />
             <SpaceTimeTooltip bind:this={spaceTimeTooltip} />
           </div>
@@ -1566,16 +1341,17 @@
 
     {#snippet bottom()}
       <div class="btm-nav flex justify-between min-h-16 p-0">
-        <!-- The bottom bar spans the window but the canvas only occupies the
-             right pane, so in split mode this is widened to put the timeline
+        <!-- The bottom bar spans the window but the canvas sits right of the rail
+             (and the video pane in split mode), so this width puts the timeline track
              at the canvas pane's midpoint. The sketch derives the floorplan /
              space-time boundary from `leftX - canvasLeft`; without this the
              floorplan collapses, then inverts past a ~50% split. -->
         <div
-          class="flex flex-1 min-w-0 flex-row justify-start items-center bg-[#f6f5f3] px-4 lg:px-8 overflow-x-auto"
-          style={isSplitScreen
-            ? `flex: 0 1 calc(50% + ${splitSizes[0] / 2}% + ${SPLIT_DIVIDER_PX / 2}px)`
-            : ''}
+          id="timeline-controls"
+          class="flex min-w-0 flex-row justify-end items-center bg-[#f6f5f3] px-2 overflow-x-auto"
+          style={`flex: 0 1 calc(${railWidth}px + (100% - ${railWidth}px) * ${
+            isSplitScreen ? 0.5 + splitSizes[0] / 200 : 0.5
+          } + ${isSplitScreen ? SPLIT_DIVIDER_PX / 2 : 0}px)`}
           onwheel={(e) => {
             if (e.deltaY !== 0) {
               e.preventDefault()
@@ -1583,179 +1359,21 @@
             }
           }}
         >
-          {#if $ConfigStore.dataHasCodes}
-            <div class="mr-2">
-              <CodesButton />
-            </div>
-          {/if}
-
-          <!-- User Buttons -->
-          <UserButtonGroup
-            users={$UserStore}
-            {isUserVisible}
-            onToggleVisibility={(user) => toggleUserVisibility(user)}
-            onOpenDropdown={handleOpenUserDropdown}
-          />
+          <TimelineControls />
         </div>
 
-        <!-- User Dropdown (shown when right-click/long-press on user button) -->
-        <UserDropdown
-          user={activeDropdownUser}
-          anchorX={dropdownAnchorX}
-          anchorY={dropdownAnchorY}
-          onClose={handleCloseUserDropdown}
-        />
-
-        <!-- Right Side: Timeline -->
+        <!-- Right side: the track, which doubles as the 2D view's time axis -->
         <div
           id="timeline-panel"
           class="flex flex-1 items-center bg-[#f6f5f3] overflow-visible py-0.5 px-2 lg:px-4"
           style="min-width: 200px;"
         >
-          <TimelineContainer height={40} showControls={true} embedded={true} />
+          <TimelineContainer height={52} showControls={false} embedded={true} />
         </div>
       </div>
     {/snippet}
   </CanvasFrame>
 </div>
-
-<TranscriptPanel bind:isVisible={isTranscriptVisible} />
-
-{#if showSettings}
-  <div
-    class="modal modal-open"
-    onclick={(e) => {
-      if (e.target === e.currentTarget) showSettings = false
-    }}
-    onkeydown={(e) => {
-      if (e.key === 'Escape') showSettings = false
-    }}
-  >
-    <div class="modal-box w-11/12 max-w-md">
-      <div class="flex justify-between mb-4">
-        <h3 class="font-bold text-lg">Settings</h3>
-        <button class="btn btn-circle btn-sm" onclick={() => (showSettings = false)}>
-          <MdClose class="h-5 w-5" />
-        </button>
-      </div>
-
-      <div class="flex flex-col space-y-4">
-        <!-- Animation Rate -->
-        <div class="flex flex-col">
-          <label for="animationRate" class="font-medium"
-            >Animation Rate: {currentConfig.animationRate}</label
-          >
-          <input
-            id="animationRate"
-            type="range"
-            min="0.01"
-            max="1"
-            step="0.01"
-            value={currentConfig.animationRate}
-            oninput={(e) => handleConfigChange('animationRate', parseFloat(e.currentTarget.value))}
-            class="range range-primary"
-          />
-        </div>
-
-        <!-- Sampling Interval -->
-        <div class="flex flex-col">
-          <label for="samplingInterval" class="font-medium"
-            >Sampling Interval: {currentConfig.samplingInterval} sec</label
-          >
-          <input
-            id="samplingInterval"
-            type="range"
-            min="0.1"
-            max="5"
-            step="0.1"
-            value={currentConfig.samplingInterval}
-            oninput={(e) =>
-              handleConfigChange('samplingInterval', parseFloat(e.currentTarget.value))}
-            class="range range-primary"
-          />
-        </div>
-
-        <!-- Small Data Threshold -->
-        <div class="flex flex-col">
-          <label for="smallDataThreshold" class="font-medium"
-            >Small Data Threshold: {currentConfig.smallDataThreshold}</label
-          >
-          <input
-            id="smallDataThreshold"
-            type="range"
-            min="500"
-            max="10000"
-            step="100"
-            value={currentConfig.smallDataThreshold}
-            oninput={(e) =>
-              handleConfigChange('smallDataThreshold', parseInt(e.currentTarget.value))}
-            class="range range-primary"
-          />
-        </div>
-
-        <!-- Movement StrokeWeight -->
-        <div class="flex flex-col">
-          <label for="movementStrokeWeight" class="font-medium"
-            >Movement Line Weight: {currentConfig.movementStrokeWeight}</label
-          >
-          <input
-            id="movementStrokeWeight"
-            type="range"
-            min="1"
-            max="20"
-            step="1"
-            value={currentConfig.movementStrokeWeight}
-            oninput={(e) =>
-              handleConfigChange('movementStrokeWeight', parseInt(e.currentTarget.value))}
-            class="range range-primary"
-          />
-        </div>
-
-        <!-- Stop StrokeWeight -->
-        <div class="flex flex-col">
-          <label for="stopStrokeWeight" class="font-medium"
-            >Stop Line Weight: {currentConfig.stopStrokeWeight}</label
-          >
-          <input
-            id="stopStrokeWeight"
-            type="range"
-            min="1"
-            max="20"
-            step="1"
-            value={currentConfig.stopStrokeWeight}
-            oninput={(e) => handleConfigChange('stopStrokeWeight', parseInt(e.currentTarget.value))}
-            class="range range-primary"
-          />
-        </div>
-
-        <!-- Text Input for Seconds (Numeric Only) -->
-        <div class="flex flex-col">
-          <label for="inputSeconds" class="font-medium">End Time (seconds)</label>
-          <input
-            id="inputSeconds"
-            type="text"
-            bind:value={timelineEndTime}
-            oninput={(e) => {
-              let value = parseInt(e.currentTarget.value.replace(/\D/g, '')) || 0
-              timelineV2Store.initialize(value, 0)
-            }}
-            class="input input-bordered"
-          />
-        </div>
-      </div>
-
-      <div class="flex flex-col mt-4">
-        <button class="btn btn-sm ml-4" onclick={() => (showDataPopup = true)}>Data Explorer</button
-        >
-      </div>
-
-      <div class="modal-action">
-        <button class="btn btn-warning" onclick={resetSettings}> Reset Settings </button>
-        <button class="btn" onclick={() => (showSettings = false)}>Close</button>
-      </div>
-    </div>
-  </div>
-{/if}
 
 {#if showDataPopup}
   <div
@@ -1852,6 +1470,68 @@
     /* dvh so the bottom bar isn't pushed under a mobile URL bar; nothing here
        scrolls, so it would be unreachable. */
     height: 100dvh;
+  }
+
+  .igs-left-rail {
+    position: relative;
+    display: flex;
+    height: 100%;
+    min-height: 0;
+    border-right: 1px solid var(--color-base-300);
+    --activity-bar-bg: var(--color-base-100);
+    --activity-bar-border: var(--color-base-300);
+    --activity-bar-fg: color-mix(in srgb, var(--color-base-content) 60%, transparent);
+    --activity-bar-fg-hover: var(--color-base-content);
+    --activity-bar-bg-hover: var(--color-base-200);
+    --activity-bar-fg-active: var(--color-base-content);
+    --activity-bar-bg-active: color-mix(in srgb, var(--color-primary) 15%, transparent);
+    --activity-bar-accent: var(--color-primary);
+    --activity-bar-focus: var(--color-primary);
+    --side-panel-bg: var(--color-base-100);
+    --side-panel-border: var(--color-base-300);
+    --side-panel-title-fg: color-mix(in srgb, var(--color-base-content) 70%, transparent);
+    --side-panel-close-fg: color-mix(in srgb, var(--color-base-content) 70%, transparent);
+  }
+
+  .igs-sidepanel-shell {
+    display: flex;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+    transition: width 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  /* Below lg the panel overlays the canvas instead of squeezing it. */
+  @media (max-width: 1023px) {
+    .igs-sidepanel-shell {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 100%;
+      z-index: var(--igs-drawer-z);
+    }
+    .igs-sidepanel-shell--open {
+      box-shadow: 4px 0 12px rgb(0 0 0 / 0.12);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .igs-sidepanel-shell {
+      transition: none;
+    }
+  }
+
+  .igs-sidepanel-shell--instant {
+    transition: none;
+  }
+
+  :global(.igs-people .entity-toggle-list__item) {
+    flex: 1 1 100%;
+  }
+
+  :global(.igs-people .entity-toggle-list__label) {
+    flex: 1 1 auto;
+    min-width: 0;
   }
 
   .split-video-pane {

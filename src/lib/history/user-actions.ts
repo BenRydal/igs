@@ -90,11 +90,16 @@ export function setUserName(oldName: string, newName: string): void {
  * Change user color with undo
  */
 export function setUserColor(userId: string, color: string): void {
-  const users = get(UserStore)
-  const user = users.find((u) => u.name === userId)
+  const user = get(UserStore).find((u) => u.name === userId)
   if (!user) return
+  commitUserColor(userId, user.color, color)
+}
 
-  const oldColor = user.color
+/**
+ * Change user color with undo, from an explicit previous color
+ * (the store may already hold `color` after a live picker drag)
+ */
+export function commitUserColor(userId: string, oldColor: string, color: string): void {
   if (oldColor === color) return
 
   UserStore.update((list) => list.map((u) => (u.name === userId ? { ...u, color } : u)))
@@ -109,6 +114,34 @@ export function setUserColor(userId: string, color: string): void {
     redo: () =>
       UserStore.update((list) => list.map((u) => (u.name === userId ? { ...u, color } : u))),
   })
+}
+
+/**
+ * Live color edits (a picker drag) that record one undo step per drag, once
+ * input settles or another user's color starts changing
+ */
+export function createUserColorDrag(settleMs = 400) {
+  let pending: { id: string; from: string } | null = null
+  let timer: ReturnType<typeof setTimeout> | undefined
+
+  function flush(): void {
+    clearTimeout(timer)
+    if (!pending) return
+    const { id, from } = pending
+    pending = null
+    const to = get(UserStore).find((u) => u.name === id)?.color
+    if (to) commitUserColor(id, from, to)
+  }
+
+  function input(id: string, color: string): void {
+    if (pending && pending.id !== id) flush()
+    pending ??= { id, from: get(UserStore).find((u) => u.name === id)?.color ?? color }
+    UserStore.update((list) => list.map((u) => (u.name === id ? { ...u, color } : u)))
+    clearTimeout(timer)
+    timer = setTimeout(flush, settleMs)
+  }
+
+  return { input, flush }
 }
 
 /**

@@ -28,6 +28,7 @@
       steps: tourSteps,
       onDestroyStarted: () => {
         setTourCompleted()
+        window.dispatchEvent(new CustomEvent('igs:open-panel', { detail: { tab: null } }))
         driverInstance?.destroy()
       },
     })
