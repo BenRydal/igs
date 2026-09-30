@@ -115,8 +115,10 @@ export type ExampleId =
   | 'example-12'
   | 'example-13'
   | 'example-14'
-  | 'example-15'
-  | 'example-16'
+  | 'example-17'
+  | 'example-18'
+  | 'example-19'
+  | 'example-20'
 
 /**
  * Example dropdown selection. Only the selected value is consumed, and

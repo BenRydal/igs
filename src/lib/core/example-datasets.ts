@@ -1,32 +1,85 @@
 /**
  * Example datasets configuration for IGS
- * Each example includes CSV files and optional YouTube video ID
+ *
+ * This is the single source of truth for example datasets: the files that make
+ * up each one, the name it is shown under, the collection it belongs to, and
+ * the capabilities worth advertising in a picker. The sidebar, the command
+ * palette, and the welcome modal all read from here — do not re-declare a
+ * dataset's name or grouping anywhere else, or the three will drift apart.
+ *
+ * Note: `static/data/example-15` and `example-16` (music performance) hold CSVs
+ * with no entry here, so nothing loads them. They are kept on disk deliberately
+ * — add entries back to this map to bring them into the picker.
  */
 
+/** A collection groups datasets by where they came from. Membership is
+ *  exclusive: every dataset belongs to exactly one, so the picker can present
+ *  them as a tree without filing anything twice. */
+export type CollectionId = 'timss' | 'tau' | 'tours' | 'museums' | 'other'
+
+export interface Collection {
+  id: CollectionId
+  label: string
+}
+
+/** Display order in the picker. */
+export const COLLECTIONS: readonly Collection[] = [
+  { id: 'timss', label: 'TIMSS Video Study' },
+  { id: 'tau', label: 'TAU Project' },
+  { id: 'tours', label: 'Walking Tours' },
+  { id: 'museums', label: 'Museum Visits' },
+  { id: 'other', label: 'Other Examples' },
+] as const
+
 export interface ExampleDataset {
+  /** Canonical display name. The only place a dataset is named. */
+  label: string
+  collection: CollectionId
   files: string[]
   videoId?: string
   duration: string
   isGPS?: boolean
+  /** Ships a conversation file (time/speaker/talk), so the transcript panel has content. */
+  hasTranscript?: boolean
+  /** Ships a code file (start/end, optionally code), so coded intervals are available. */
+  hasCodes?: boolean
+  /** Pinned above the collections as the suggested starting point. Exactly one
+   *  dataset should set this; a featured dataset is not also listed under its
+   *  collection, so it still appears exactly once. */
+  featured?: boolean
 }
 
 export const EXAMPLE_DATASETS: Record<string, ExampleDataset> = {
   'example-1': {
+    label: "Michael Jordan's Last Shot",
+    collection: 'other',
     files: ['jordan.csv', 'possession.csv', 'conversation.csv'],
     videoId: 'iiMjfVOj8po',
     duration: '37 sec',
+    hasTranscript: true,
+    hasCodes: true,
+    featured: true,
   },
   'example-2': {
+    label: 'Museum: Single Gallery',
+    collection: 'museums',
     files: ['adhir.csv', 'blake.csv', 'jeans.csv', 'lily.csv', 'mae.csv', 'conversation.csv'],
     videoId: 'pWJ3xNk1Zpg',
     duration: '8 min',
+    hasTranscript: true,
   },
   'example-3': {
+    label: 'US: Weather',
+    collection: 'timss',
     files: ['teacher.csv', 'lesson-graph.csv', 'conversation.csv'],
     videoId: 'Iu0rxb-xkMk',
     duration: '56 min',
+    hasTranscript: true,
+    hasCodes: true,
   },
   'example-4': {
+    label: '3rd Grade: Odd & Even Numbers',
+    collection: 'other',
     files: [
       'cassandra.csv',
       'mei.csv',
@@ -37,92 +90,141 @@ export const EXAMPLE_DATASETS: Record<string, ExampleDataset> = {
     ],
     videoId: 'OJSZCK4GPQY',
     duration: '7 min',
+    hasTranscript: true,
   },
   'example-5': {
+    label: 'Czech Republic: Density',
+    collection: 'timss',
     files: ['teacher.csv', 'lesson-graph.csv', 'conversation.csv'],
     videoId: 'xrisdnH5GmQ',
     duration: '49 min',
+    hasTranscript: true,
+    hasCodes: true,
   },
   'example-6': {
+    label: 'Japan: Angles',
+    collection: 'timss',
     files: ['teacher.csv', 'lesson-graph.csv', 'conversation.csv'],
     videoId: 'nLDXU2c0vLw',
     duration: '52 min',
+    hasTranscript: true,
+    hasCodes: true,
   },
   'example-7': {
+    label: 'US: Linear Equations',
+    collection: 'timss',
     files: ['teacher.csv', 'lesson-graph.csv', 'conversation.csv'],
     videoId: '5Eg1fJ-ZpQs',
     duration: '44 min',
+    hasTranscript: true,
+    hasCodes: true,
   },
   'example-8': {
+    label: 'US: Rocks',
+    collection: 'timss',
     files: ['teacher.csv', 'lesson-graph.csv', 'conversation.csv'],
     videoId: 'gPb_ST74bpg',
     duration: '41 min',
+    hasTranscript: true,
+    hasCodes: true,
   },
   'example-9': {
+    label: 'Netherlands: Pythagorean Theorem',
+    collection: 'timss',
     files: ['teacher.csv', 'lesson-graph.csv', 'conversation.csv'],
     videoId: 'P5Lxj2nfGzc',
     duration: '50 min',
+    hasTranscript: true,
+    hasCodes: true,
   },
   'example-10': {
+    label: 'Clark Math Lesson',
+    collection: 'tau',
     files: ['teacher.csv', 'conversation.csv'],
     duration: '1h 35m',
+    hasTranscript: true,
   },
   'example-11': {
+    label: 'Museum: Complete Visit',
+    collection: 'museums',
     files: ['adhir.csv', 'blake.csv', 'jeans.csv', 'lily.csv', 'mae.csv'],
     duration: '47 min',
   },
   'example-12': {
+    label: 'Civil Rights Tour: Creating the Route',
+    collection: 'tours',
     files: ['Making Tour.csv', 'conversation.csv'],
     duration: '43 min',
     isGPS: true,
+    hasTranscript: true,
   },
   'example-13': {
+    label: 'Civil Rights Tour: Walking the Route',
+    collection: 'tours',
     files: ['Taking Tour.csv', 'conversation.csv'],
     duration: '50 min',
     isGPS: true,
+    hasTranscript: true,
   },
   'example-14': {
+    label: 'Jefferson Street Tour',
+    collection: 'tours',
     files: ['tour.csv', 'code.csv'],
     videoId: 'la2fkEnpUZs',
     duration: '3h 22m',
     isGPS: true,
-  },
-  'example-15': {
-    files: ['Drums-L.csv', 'Drums-R.csv', 'Bass-L.csv', 'Bass-R.csv', 'Bells-L.csv', 'Bells-R.csv'],
-    duration: '1 min',
-  },
-  'example-16': {
-    files: [
-      'Artist-L.csv',
-      'Artist-R.csv',
-      'Drums-L.csv',
-      'Drums-R.csv',
-      'Bass-L.csv',
-      'Bass-R.csv',
-      'Bells-L.csv',
-      'Bells-R.csv',
-      'Vocals-L.csv',
-      'Vocals-R.csv',
-    ],
-    duration: '22 sec',
+    hasCodes: true,
   },
   'example-17': {
+    label: 'Sandy Math Lesson 1',
+    collection: 'tau',
     files: ['teacher.csv', 'blue.csv', 'green.csv', 'pink.csv', 'whiteboard.csv'],
     duration: '1h 27m',
+    hasCodes: true,
   },
   'example-18': {
+    label: 'Sandy Math Lesson 2',
+    collection: 'tau',
     files: ['teacher.csv', 'codes.csv'],
     duration: '1h 14m',
+    hasCodes: true,
   },
   'example-19': {
+    label: 'Sofia Math Lesson',
+    collection: 'tau',
     files: ['teacher.csv', 'lesson.csv', 'conversation.csv'],
     duration: '50 min',
+    hasTranscript: true,
+    hasCodes: true,
   },
   'example-20': {
+    label: 'Vince Math Lesson',
+    collection: 'tau',
     files: ['teacher.csv', 'codes.csv'],
     duration: '1h 21m',
+    hasCodes: true,
   },
 } as const
+
+export interface ExampleEntry extends ExampleDataset {
+  id: string
+}
+
+/** Every dataset, in declaration order, with its id attached. */
+export const VISIBLE_EXAMPLES: readonly ExampleEntry[] = Object.entries(EXAMPLE_DATASETS).map(
+  ([id, dataset]) => ({ id, ...dataset })
+)
+
+/** The suggested starting point, pinned above the collections. */
+export const FEATURED_EXAMPLE: ExampleEntry | undefined = VISIBLE_EXAMPLES.find((e) => e.featured)
+
+/** Collections with their datasets, skipping the featured one (shown pinned
+ *  instead) and any collection left empty as a result. */
+export const EXAMPLE_COLLECTIONS: readonly (Collection & { items: readonly ExampleEntry[] })[] =
+  COLLECTIONS.map((collection) => ({
+    ...collection,
+    items: VISIBLE_EXAMPLES.filter((e) => e.collection === collection.id && !e.featured),
+  })).filter((collection) => collection.items.length > 0)
 
 /**
  * Get example dataset configuration by ID
@@ -131,4 +233,13 @@ export const EXAMPLE_DATASETS: Record<string, ExampleDataset> = {
  */
 export function getExampleDataset(id: string): ExampleDataset | undefined {
   return EXAMPLE_DATASETS[id]
+}
+
+/**
+ * Get an example dataset's display name by ID
+ * @param id - The example dataset ID
+ * @returns The canonical label, or an empty string if the id is unknown
+ */
+export function getExampleLabel(id: string): string {
+  return EXAMPLE_DATASETS[id]?.label ?? ''
 }
