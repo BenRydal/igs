@@ -431,7 +431,7 @@ const exampleActions: AppAction[] = [
   },
   {
     id: 'example-sandy-2022',
-    label: 'Load: Sandy Math Lesson (2022)',
+    label: 'Load: Sandy Math Lesson 1',
     description: 'TAU Project',
     keywords: ['example', 'tau', 'math', 'sandy', 'classroom'],
     icon: '📐',
@@ -440,7 +440,7 @@ const exampleActions: AppAction[] = [
   },
   {
     id: 'example-sandy-2023',
-    label: 'Load: Sandy Math Lesson (2023)',
+    label: 'Load: Sandy Math Lesson 2',
     description: 'TAU Project',
     keywords: ['example', 'tau', 'math', 'sandy', 'classroom'],
     icon: '📐',
