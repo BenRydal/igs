@@ -58,6 +58,7 @@
   import TranscriptPanel from '$lib/components/TranscriptPanel.svelte'
   import ConversationTooltip from '$lib/components/ConversationTooltip.svelte'
   import SpaceTimeTooltip from '$lib/components/SpaceTimeTooltip.svelte'
+  import AxesIndicator from '$lib/components/AxesIndicator.svelte'
 
   import { Core } from '$lib'
   import {
@@ -1369,6 +1370,9 @@
             <TranscriptPanel bind:isVisible={isTranscriptVisible} />
             <ConversationTooltip hideTooltip={isTranscriptVisible} />
             <SpaceTimeTooltip bind:this={spaceTimeTooltip} />
+            {#if is3DMode}
+              <AxesIndicator />
+            {/if}
           </div>
         {/snippet}
       </SplitPane>
