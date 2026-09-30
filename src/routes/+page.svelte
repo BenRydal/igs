@@ -25,6 +25,7 @@
   import MdSelectAll from '~icons/mdi/selection'
   import MdChat from '~icons/mdi/chat'
   import MdFolder from '~icons/mdi/folder-open'
+  import MdRoute from '~icons/mdi/routes'
   import MdMuseum from '~icons/mdi/bank'
   import MdTeacher from '~icons/mdi/human-male-board'
   import MdWalk from '~icons/mdi/walk'
@@ -177,6 +178,59 @@
   function collectionLabel(id: CollectionId) {
     return COLLECTIONS.find((c) => c.id === id)?.label ?? ''
   }
+
+  /** What is loaded right now, for the "Your data" inventory. Every count is
+   *  O(users) — deliberately not walking dataTrail, which runs to tens of
+   *  thousands of points on the longer datasets. */
+  type DataKind = {
+    key: string
+    label: string
+    icon: Component
+    /** Human-readable summary of what is loaded, or '' when nothing is. */
+    detail: string
+    clear: () => void
+  }
+
+  const loadedData = $derived.by<DataKind[]>(() => {
+    const users = $UserStore
+    const speakers = users.filter((u) => u.conversationIsLoaded).length
+    const codes = $CodeStore.length
+    const videoType = $VideoStore.source.type
+    const isGPS = $GPSStore.isGPSMode
+
+    return [
+      {
+        key: 'movement',
+        label: isGPS ? 'Movement (GPS)' : 'Movement',
+        icon: MdRoute,
+        detail: users.length ? `${users.length} ${users.length === 1 ? 'person' : 'people'}` : '',
+        clear: clearMovementData,
+      },
+      {
+        key: 'conversation',
+        label: 'Conversation',
+        icon: MdMessageText,
+        detail: speakers ? `${speakers} ${speakers === 1 ? 'speaker' : 'speakers'}` : '',
+        clear: clearConversationData,
+      },
+      {
+        key: 'codes',
+        label: 'Codes',
+        icon: MdTagOutline,
+        detail: codes ? `${codes} ${codes === 1 ? 'code' : 'codes'}` : '',
+        clear: clearCodeData,
+      },
+      {
+        key: 'video',
+        label: 'Video',
+        icon: MdVideocam,
+        detail: videoType === 'youtube' ? 'YouTube' : videoType === 'file' ? 'File' : '',
+        clear: resetVideo,
+      },
+    ]
+  })
+
+  const hasAnyData = $derived(loadedData.some((d) => d.detail !== ''))
 
   let showDataPopup = $state(false)
   let showImportDialog = $state(false)
@@ -772,17 +826,54 @@
 
 {#snippet dataPanel()}
   <div class="flex flex-col gap-6 px-3 py-4">
-    {#snippet importBody()}
-      <button
-        id="btn-import-files"
-        class="btn btn-sm btn-primary gap-2"
-        onclick={() => (showImportDialog = true)}
-      >
-        {@render icon(MdFileUploadOutline)}
-        Import files
-      </button>
+    {#snippet yourDataBody()}
+      {#if hasAnyData}
+        <ul class="flex flex-col gap-0.5">
+          {#each loadedData as kind (kind.key)}
+            {@const loaded = kind.detail !== ''}
+            <li
+              class="flex items-center gap-2 rounded-lg px-2 py-1 text-sm {loaded
+                ? ''
+                : 'opacity-40'}"
+            >
+              {@render icon(kind.icon)}
+              <span class="flex-1 truncate">{kind.label}</span>
+              <span class="text-xs opacity-60 shrink-0">{loaded ? kind.detail : 'None'}</span>
+              <button
+                class="btn btn-ghost btn-xs btn-square shrink-0"
+                onclick={kind.clear}
+                disabled={!loaded}
+                aria-label="Clear {kind.label.toLowerCase()}"
+                title="Clear {kind.label.toLowerCase()}"
+              >
+                {@render icon(MdClose)}
+              </button>
+            </li>
+          {/each}
+        </ul>
+      {:else}
+        <p class="text-xs opacity-60 px-2">
+          Nothing loaded yet — import your own files, or pick an example below.
+        </p>
+      {/if}
+
+      <div class="flex items-center gap-2">
+        <button
+          id="btn-import-files"
+          class="btn btn-sm btn-primary gap-2 flex-1"
+          onclick={() => (showImportDialog = true)}
+        >
+          {@render icon(MdFileUploadOutline)}
+          Import files
+        </button>
+        {#if hasAnyData}
+          <button class="btn btn-sm btn-ghost text-error" onclick={clearAllDataLocal}>
+            Clear all
+          </button>
+        {/if}
+      </div>
     {/snippet}
-    {@render panelSection('Your data', importBody)}
+    {@render panelSection('Your data', yourDataBody)}
 
     {#snippet examplesBody()}
       <label class="input input-sm input-bordered flex items-center gap-2 w-full">
@@ -842,19 +933,6 @@
       {/if}
     {/snippet}
     <div id="examples-list">{@render panelSection('Examples', examplesBody)}</div>
-
-    {#if $ConfigStore.advancedMode}
-      {#snippet clearBody()}
-        <ul class="menu w-full p-0">
-          <li><button onclick={clearMovementData}>Movement</button></li>
-          <li><button onclick={clearConversationData}>Conversation</button></li>
-          <li><button onclick={clearCodeData}>Codes</button></li>
-          <li><button onclick={resetVideo}>Video</button></li>
-          <li><button onclick={clearAllDataLocal} class="text-error">All data</button></li>
-        </ul>
-      {/snippet}
-      {@render panelSection('Clear', clearBody)}
-    {/if}
   </div>
 {/snippet}
 
