@@ -152,7 +152,7 @@
   {/if}
 
   <!-- Time display -->
-  <div class="flex items-center gap-1 ml-auto font-mono text-xs">
+  <div class="flex items-center gap-1 ml-auto font-mono text-sm">
     <span class="font-semibold text-red-500">{formatTime(currentTime)}</span>
     <span class="text-gray-400">/</span>
     <span class="text-gray-500">{formatTime(duration)}</span>

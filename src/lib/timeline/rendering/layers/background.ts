@@ -40,7 +40,7 @@ export class BackgroundLayer implements RenderLayer {
 		}
 
 		// Draw time labels on top of timeline (after grid lines so labels are on top)
-		c.font = `9px ${MONO_FONT}`;
+		c.font = `11px ${MONO_FONT}`;
 		c.textAlign = 'center';
 		c.textBaseline = 'middle';
 
@@ -56,7 +56,7 @@ export class BackgroundLayer implements RenderLayer {
 
 			// Draw subtle background behind label
 			c.fillStyle = Colors.LABEL_BG;
-			c.fillRect(x - textWidth / 2 - padding, LABEL_TOP_OFFSET - 6, textWidth + padding * 2, 12);
+			c.fillRect(x - textWidth / 2 - padding, LABEL_TOP_OFFSET - 7, textWidth + padding * 2, 14);
 
 			// Draw label
 			c.fillStyle = Colors.LABEL_TEXT;

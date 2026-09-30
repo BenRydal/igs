@@ -25,12 +25,17 @@
   import MdSelectAll from '~icons/mdi/selection'
   import MdChat from '~icons/mdi/chat'
   import MdFolder from '~icons/mdi/folder-open'
-  import MdSports from '~icons/mdi/basketball'
+  import MdRoute from '~icons/mdi/routes'
   import MdMuseum from '~icons/mdi/bank'
-  import MdSchool from '~icons/mdi/school'
   import MdTeacher from '~icons/mdi/human-male-board'
   import MdWalk from '~icons/mdi/walk'
   import MdVideo from '~icons/mdi/video-vintage'
+  import MdShapeOutline from '~icons/mdi/shape-outline'
+  import MdMagnify from '~icons/mdi/magnify'
+  import MdMapMarkerPath from '~icons/mdi/map-marker-path'
+  import MdMessageText from '~icons/mdi/message-text-outline'
+  import MdTagOutline from '~icons/mdi/tag-outline'
+  import MdStar from '~icons/mdi/star-outline'
   import MdChevronDown from '~icons/mdi/chevron-down'
   import MdChevronRight from '~icons/mdi/chevron-right'
   import MdClose from '~icons/mdi/close'
@@ -54,9 +59,19 @@
   import TranscriptPanel from '$lib/components/TranscriptPanel.svelte'
   import ConversationTooltip from '$lib/components/ConversationTooltip.svelte'
   import SpaceTimeTooltip from '$lib/components/SpaceTimeTooltip.svelte'
+  import AxesIndicator from '$lib/components/AxesIndicator.svelte'
 
   import { Core } from '$lib'
-  import { EXAMPLE_DATASETS } from '$lib/core/example-datasets'
+  import {
+    EXAMPLE_DATASETS,
+    EXAMPLE_COLLECTIONS,
+    COLLECTIONS,
+    VISIBLE_EXAMPLES,
+    FEATURED_EXAMPLE,
+    getExampleLabel,
+    type CollectionId,
+    type ExampleEntry,
+  } from '$lib/core/example-datasets'
   import type { ExampleSelectEvent } from '$lib/core/types'
   import { igsSketch } from '$lib/p5/igsSketch'
   import { writable } from 'svelte/store'
@@ -103,87 +118,119 @@
   const filterToggleOptions = ['movementToggle', 'stopsToggle'] as const
   const selectToggleOptions = ['circleToggle', 'sliceToggle', 'highlightToggle'] as const
   const conversationToggleOptions = ['alignToggle'] as const
-  let selectedDropDownOption = $state('')
-  const dropdownOptions = [
-    {
-      label: 'Sports',
-      icon: MdSports,
-      items: [{ value: 'example-1', label: "Michael Jordan's Last Shot" }],
-    },
-    {
-      label: 'Museums',
-      icon: MdMuseum,
-      items: [
-        { value: 'example-2', label: 'Single Gallery' },
-        { value: 'example-11', label: 'Complete Visit' },
-      ],
-    },
-    {
-      label: 'Classrooms',
-      icon: MdSchool,
-      items: [
-        { value: 'example-3', label: '8th Grade Science Lesson' },
-        { value: 'example-4', label: '3rd Grade Discussion Odd/Even Numbers' },
-      ],
-    },
-    {
-      label: 'Walking Tours',
-      icon: MdWalk,
-      items: [
-        { value: 'example-14', label: 'Jefferson Street Tour' },
-        { value: 'example-12', label: 'Civil Rights Tour: Creating the Route' },
-        { value: 'example-13', label: 'Civil Rights Tour: Walking the Route' },
-      ],
-    },
-    {
-      label: 'TAU Project',
-      icon: MdTeacher,
-      items: [
-        { value: 'example-10', label: 'Clark AP Math Lesson' },
-        { value: 'example-17', label: 'Sandy Math Lesson (2022)' },
-        { value: 'example-18', label: 'Sandy Math Lesson (2023)' },
-        { value: 'example-19', label: 'Sofia Math Lesson' },
-        { value: 'example-20', label: 'Vince Math Lesson' },
-      ],
-    },
-    // Hidden temporarily - uncomment when ready to show
-    // {
-    //   label: 'Music Performance',
-    //   icon: MdMusic,
-    //   items: [
-    //     { value: 'example-15', label: 'Trio' },
-    //     { value: 'example-16', label: 'Full Band' },
-    //   ],
-    // },
-    {
-      label: 'TIMSS Classroom Video Study',
-      icon: MdVideo,
-      items: [
-        { value: 'example-3', label: 'US: Weather' },
-        { value: 'example-5', label: 'Czech: Density' },
-        { value: 'example-6', label: 'Japan: Angles' },
-        { value: 'example-7', label: 'US: Linear Equations' },
-        { value: 'example-8', label: 'US: Rocks' },
-        { value: 'example-9', label: 'Netherlands: Pythagorean Theorem' },
-      ],
-    },
-  ]
+  /** Id of the currently loaded example, or '' for none/imported data. Keyed on
+   *  id rather than label so selection cannot be confused by name changes. */
+  let selectedExampleId = $state('')
+  const selectedExampleLabel = $derived(getExampleLabel(selectedExampleId))
 
-  // Helper to get dataset duration
-  function getDatasetDuration(value: string) {
-    return EXAMPLE_DATASETS[value]?.duration ?? ''
+  /** Collection icons live here, not in the dataset module, so core data stays
+   *  free of UI imports. */
+  const collectionIcons: Record<CollectionId, Component> = {
+    timss: MdVideo,
+    tau: MdTeacher,
+    tours: MdWalk,
+    museums: MdMuseum,
+    other: MdShapeOutline,
   }
 
-  // Track which categories are expanded (all expanded by default)
-  const expandedCategories = new SvelteSet(dropdownOptions.map((g) => g.label))
+  let exampleFilter = $state('')
+  const normalizedFilter = $derived(exampleFilter.trim().toLowerCase())
 
-  function toggleCategory(label: string) {
-    if (expandedCategories.has(label)) {
-      expandedCategories.delete(label)
+  /** Flat match list, used only while filtering. Matches on dataset name and on
+   *  collection name, so typing "tau" or "tour" narrows to that collection. */
+  const filteredExamples = $derived(
+    normalizedFilter
+      ? VISIBLE_EXAMPLES.filter((entry) => {
+          const collection = COLLECTIONS.find((c) => c.id === entry.collection)
+          return (
+            entry.label.toLowerCase().includes(normalizedFilter) ||
+            (collection?.label.toLowerCase().includes(normalizedFilter) ?? false)
+          )
+        })
+      : []
+  )
+
+  /** Collections start collapsed: the resting state is a short overview rather
+   *  than every dataset at once. Loading an example opens its collection. */
+  const expandedCollections = new SvelteSet<CollectionId>()
+
+  function toggleCollection(id: CollectionId) {
+    if (expandedCollections.has(id)) {
+      expandedCollections.delete(id)
     } else {
-      expandedCategories.add(label)
+      expandedCollections.add(id)
     }
   }
+
+  /** Records the selection and reveals it in the tree. Call after every load so
+   *  the sidebar, the command palette and the welcome modal stay in agreement. */
+  function markExampleSelected(id: string) {
+    selectedExampleId = id
+    const collection = EXAMPLE_DATASETS[id]?.collection
+    if (collection) expandedCollections.add(collection)
+  }
+
+  function loadExample(id: string) {
+    updateExampleDataDropDown({ target: { value: id } })
+    markExampleSelected(id)
+  }
+
+  function collectionLabel(id: CollectionId) {
+    return COLLECTIONS.find((c) => c.id === id)?.label ?? ''
+  }
+
+  /** What is loaded right now, for the "Your data" inventory. Every count is
+   *  O(users) — deliberately not walking dataTrail, which runs to tens of
+   *  thousands of points on the longer datasets. */
+  type DataKind = {
+    key: string
+    label: string
+    icon: Component
+    /** Human-readable summary of what is loaded, or '' when nothing is. */
+    detail: string
+    clear: () => void
+  }
+
+  const loadedData = $derived.by<DataKind[]>(() => {
+    const users = $UserStore
+    const speakers = users.filter((u) => u.conversationIsLoaded).length
+    const codes = $CodeStore.length
+    const videoType = $VideoStore.source.type
+    const isGPS = $GPSStore.isGPSMode
+
+    return [
+      {
+        key: 'movement',
+        label: isGPS ? 'Movement (GPS)' : 'Movement',
+        icon: MdRoute,
+        detail: users.length ? `${users.length} ${users.length === 1 ? 'person' : 'people'}` : '',
+        clear: clearMovementData,
+      },
+      {
+        key: 'conversation',
+        label: 'Conversation',
+        icon: MdMessageText,
+        detail: speakers ? `${speakers} ${speakers === 1 ? 'speaker' : 'speakers'}` : '',
+        clear: clearConversationData,
+      },
+      {
+        key: 'codes',
+        label: 'Codes',
+        icon: MdTagOutline,
+        detail: codes ? `${codes} ${codes === 1 ? 'code' : 'codes'}` : '',
+        clear: clearCodeData,
+      },
+      {
+        key: 'video',
+        label: 'Video',
+        icon: MdVideocam,
+        detail: videoType === 'youtube' ? 'YouTube' : videoType === 'file' ? 'File' : '',
+        clear: resetVideo,
+      },
+    ]
+  })
+
+  const hasAnyData = $derived(loadedData.some((d) => d.detail !== ''))
 
   let showDataPopup = $state(false)
   let showImportDialog = $state(false)
@@ -651,15 +698,7 @@
     const handleLoadExample = (event: Event) => {
       const customEvent = event as CustomEvent<{ value: string }>
       if (customEvent.detail?.value) {
-        updateExampleDataDropDown({ target: { value: customEvent.detail.value } })
-        // Find and set the label for the dropdown
-        for (const group of dropdownOptions) {
-          const item = group.items.find((i) => i.value === customEvent.detail.value)
-          if (item) {
-            selectedDropDownOption = item.label
-            break
-          }
-        }
+        loadExample(customEvent.detail.value)
       }
     }
 
@@ -743,6 +782,41 @@
   </div>
 {/snippet}
 
+{#snippet capability(Icon: Component, title: string)}
+  <span class="w-3.5 h-3.5 opacity-45 shrink-0" {title} aria-hidden="true"><Icon /></span>
+{/snippet}
+
+{#snippet exampleRow(entry: ExampleEntry, showCollection: boolean, featured = false)}
+  {@const isSelected = selectedExampleId === entry.id}
+  <li>
+    <button
+      onclick={() => loadExample(entry.id)}
+      aria-current={isSelected ? 'true' : undefined}
+      class="flex items-start gap-2 w-full cursor-pointer {isSelected
+        ? 'bg-primary/20 font-medium'
+        : ''}"
+    >
+      {#if featured}
+        <span class="w-4 h-4 mt-0.5 text-primary shrink-0"><MdStar /></span>
+      {/if}
+      <span class="flex flex-col gap-0.5 min-w-0 flex-1">
+        <span class="flex items-center gap-2 min-w-0">
+          <span class="truncate flex-1 text-left">{entry.label}</span>
+          <span class="text-xs opacity-50 shrink-0 tabular-nums">{entry.duration}</span>
+        </span>
+        <span class="flex items-center gap-1.5 text-xs opacity-70">
+          {#if featured}<span class="text-primary">Start here</span>{/if}
+          {#if showCollection}<span class="truncate">{collectionLabel(entry.collection)}</span>{/if}
+          {#if entry.videoId}{@render capability(MdVideocam, 'Has video')}{/if}
+          {#if entry.isGPS}{@render capability(MdMapMarkerPath, 'GPS data')}{/if}
+          {#if entry.hasTranscript}{@render capability(MdMessageText, 'Has transcript')}{/if}
+          {#if entry.hasCodes}{@render capability(MdTagOutline, 'Has codes')}{/if}
+        </span>
+      </span>
+    </button>
+  </li>
+{/snippet}
+
 {#snippet panelSection(title: string, body: Snippet)}
   <section class="flex flex-col gap-2">
     <h3 class="text-xs font-semibold uppercase tracking-wide opacity-60">{title}</h3>
@@ -752,73 +826,113 @@
 
 {#snippet dataPanel()}
   <div class="flex flex-col gap-6 px-3 py-4">
-    {#snippet importBody()}
-      <button
-        id="btn-import-files"
-        class="btn btn-sm btn-primary gap-2"
-        onclick={() => (showImportDialog = true)}
-      >
-        {@render icon(MdFileUploadOutline)}
-        Import files
-      </button>
+    {#snippet yourDataBody()}
+      {#if hasAnyData}
+        <ul class="flex flex-col gap-0.5">
+          {#each loadedData as kind (kind.key)}
+            {@const loaded = kind.detail !== ''}
+            <li
+              class="flex items-center gap-2 rounded-lg px-2 py-1 text-sm {loaded
+                ? ''
+                : 'opacity-40'}"
+            >
+              {@render icon(kind.icon)}
+              <span class="flex-1 truncate">{kind.label}</span>
+              <span class="text-xs opacity-60 shrink-0">{loaded ? kind.detail : 'None'}</span>
+              <button
+                class="btn btn-ghost btn-xs btn-square shrink-0"
+                onclick={kind.clear}
+                disabled={!loaded}
+                aria-label="Clear {kind.label.toLowerCase()}"
+                title="Clear {kind.label.toLowerCase()}"
+              >
+                {@render icon(MdClose)}
+              </button>
+            </li>
+          {/each}
+        </ul>
+      {:else}
+        <p class="text-xs opacity-60 px-2">
+          Nothing loaded yet — import your own files, or pick an example below.
+        </p>
+      {/if}
+
+      <div class="flex items-center gap-2">
+        <button
+          id="btn-import-files"
+          class="btn btn-sm btn-primary gap-2 flex-1"
+          onclick={() => (showImportDialog = true)}
+        >
+          {@render icon(MdFileUploadOutline)}
+          Import files
+        </button>
+        {#if hasAnyData}
+          <button class="btn btn-sm btn-ghost text-error" onclick={clearAllDataLocal}>
+            Clear all
+          </button>
+        {/if}
+      </div>
     {/snippet}
-    {@render panelSection('Your data', importBody)}
+    {@render panelSection('Your data', yourDataBody)}
 
     {#snippet examplesBody()}
-      <ul class="menu w-full p-0">
-        {#each dropdownOptions as group (group.label)}
-          <li>
-            <button
-              class="menu-title flex items-center gap-2 w-full hover:bg-base-200 rounded-lg px-2 py-1 cursor-pointer"
-              onclick={() => toggleCategory(group.label)}
-              aria-expanded={expandedCategories.has(group.label)}
-            >
-              <svelte:component
-                this={expandedCategories.has(group.label) ? MdChevronDown : MdChevronRight}
-                class="w-4 h-4 opacity-50"
-              />
-              <svelte:component this={group.icon} class="w-4 h-4" />
-              <span>{group.label}</span>
-            </button>
-          </li>
-          {#if expandedCategories.has(group.label)}
-            {#each group.items as item (item.value)}
-              {@const isSelected = selectedDropDownOption === item.label}
-              <li class="pl-2 w-full">
-                <button
-                  onclick={() => {
-                    updateExampleDataDropDown({ target: { value: item.value } })
-                    selectedDropDownOption = item.label
-                  }}
-                  class="flex items-center gap-2 w-full cursor-pointer {isSelected
-                    ? 'bg-primary/20 font-medium'
-                    : ''}"
-                >
-                  <span class="truncate flex-1">{item.label}</span>
-                  <span class="badge badge-ghost badge-sm opacity-60 shrink-0"
-                    >{getDatasetDuration(item.value)}</span
-                  >
-                </button>
-              </li>
+      <label class="input input-sm input-bordered flex items-center gap-2 w-full">
+        {@render icon(MdMagnify)}
+        <input
+          type="search"
+          class="grow min-w-0"
+          placeholder="Filter examples"
+          aria-label="Filter examples"
+          bind:value={exampleFilter}
+        />
+      </label>
+
+      {#if normalizedFilter}
+        {#if filteredExamples.length}
+          <ul class="menu w-full p-0">
+            {#each filteredExamples as entry (entry.id)}
+              {@render exampleRow(entry, true)}
             {/each}
-          {/if}
-        {/each}
-      </ul>
+          </ul>
+        {:else}
+          <p class="text-xs opacity-60 px-2 py-3">No examples match “{exampleFilter}”.</p>
+        {/if}
+      {:else}
+        {#if FEATURED_EXAMPLE}
+          <ul class="menu w-full p-0">
+            {@render exampleRow(FEATURED_EXAMPLE, false, true)}
+          </ul>
+        {/if}
+
+        <ul class="menu w-full p-0">
+          {#each EXAMPLE_COLLECTIONS as collection (collection.id)}
+            {@const isOpen = expandedCollections.has(collection.id)}
+            <li>
+              <button
+                class="flex items-center gap-2 w-full cursor-pointer"
+                onclick={() => toggleCollection(collection.id)}
+                aria-expanded={isOpen}
+                aria-controls="collection-{collection.id}"
+              >
+                {@render icon(isOpen ? MdChevronDown : MdChevronRight)}
+                {@render icon(collectionIcons[collection.id])}
+                <span class="flex-1 truncate text-left">{collection.label}</span>
+                <span class="text-xs opacity-50 shrink-0 tabular-nums">
+                  {collection.items.length}
+                </span>
+              </button>
+
+              <ul id="collection-{collection.id}" class="pl-2" hidden={!isOpen}>
+                {#each collection.items as entry (entry.id)}
+                  {@render exampleRow(entry, false)}
+                {/each}
+              </ul>
+            </li>
+          {/each}
+        </ul>
+      {/if}
     {/snippet}
     <div id="examples-list">{@render panelSection('Examples', examplesBody)}</div>
-
-    {#if $ConfigStore.advancedMode}
-      {#snippet clearBody()}
-        <ul class="menu w-full p-0">
-          <li><button onclick={clearMovementData}>Movement</button></li>
-          <li><button onclick={clearConversationData}>Conversation</button></li>
-          <li><button onclick={clearCodeData}>Codes</button></li>
-          <li><button onclick={resetVideo}>Video</button></li>
-          <li><button onclick={clearAllDataLocal} class="text-error">All data</button></li>
-        </ul>
-      {/snippet}
-      {@render panelSection('Clear', clearBody)}
-    {/if}
   </div>
 {/snippet}
 
@@ -1197,9 +1311,9 @@
           <a class="text-2xl font-bold text-black italic" href="https://interactiongeography.org"
             >IGS</a
           >
-          {#if selectedDropDownOption}
-            <span class="truncate text-sm opacity-70" title={selectedDropDownOption}
-              >{selectedDropDownOption}</span
+          {#if selectedExampleLabel}
+            <span class="truncate text-sm opacity-70" title={selectedExampleLabel}
+              >{selectedExampleLabel}</span
             >
           {/if}
         </div>
@@ -1334,6 +1448,9 @@
             <TranscriptPanel bind:isVisible={isTranscriptVisible} />
             <ConversationTooltip hideTooltip={isTranscriptVisible} />
             <SpaceTimeTooltip bind:this={spaceTimeTooltip} />
+            {#if is3DMode}
+              <AxesIndicator />
+            {/if}
           </div>
         {/snippet}
       </SplitPane>

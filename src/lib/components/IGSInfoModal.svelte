@@ -1,5 +1,6 @@
 <script lang="ts">
   import { writable } from 'svelte/store'
+  import { EXAMPLE_DATASETS } from '$lib/core/example-datasets'
   import { onMount, onDestroy } from 'svelte'
   import MdRoute from '~icons/mdi/routes'
   import MdChat from '~icons/mdi/chat-outline'
@@ -12,12 +13,19 @@
 
   let { isModalOpen = writable(false) } = $props()
 
+  /** Titles and durations come from EXAMPLE_DATASETS; only the thumbnail is
+   *  specific to this modal. */
   const examples = [
-    { id: 'example-1', title: "Jordan's Last Shot", duration: '37 sec', image: '/images/1-example-jordan.webp' },
-    { id: 'example-2', title: 'Museum Gallery Visit', duration: '8 min', image: '/images/2-example-museum.webp' },
-    { id: 'example-3', title: 'Classroom Lesson', duration: '56 min', image: '/images/3-example-timss.webp' },
-    { id: 'example-12', title: 'Walking Tour', duration: '43 min', image: '/images/4-example-tour.webp' },
-  ]
+    { id: 'example-1', image: '/images/1-example-jordan.webp' },
+    { id: 'example-2', image: '/images/2-example-museum.webp' },
+    { id: 'example-3', image: '/images/3-example-timss.webp' },
+    { id: 'example-12', image: '/images/4-example-tour.webp' },
+  ].map(({ id, image }) => ({
+    id,
+    image,
+    title: EXAMPLE_DATASETS[id]?.label ?? id,
+    duration: EXAMPLE_DATASETS[id]?.duration ?? '',
+  }))
 
   function loadExample(exampleId: string) {
     closeModal()
@@ -54,16 +62,20 @@
       <button
         onclick={closeModal}
         class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl leading-none cursor-pointer"
-        aria-label="Close"
-      >&times;</button>
+        aria-label="Close">&times;</button
+      >
 
       <!-- Header -->
       <div class="text-center mb-8">
         <h1 class="text-4xl font-bold text-gray-800">Interaction Geography Slicer</h1>
-        <p class="text-xl text-gray-500 mt-3">Dynamically visualize how people move and interact over space and time</p>
+        <p class="text-xl text-gray-500 mt-3">
+          Dynamically visualize how people move and interact over space and time
+        </p>
 
         <!-- Feature strip -->
-        <div class="flex flex-wrap items-center justify-center gap-x-5 gap-y-1 mt-5 text-base text-gray-400">
+        <div
+          class="flex flex-wrap items-center justify-center gap-x-5 gap-y-1 mt-5 text-base text-gray-400"
+        >
           <span class="flex items-center gap-1.5"><MdRoute /> Movement over time</span>
           <span class="flex items-center gap-1.5"><MdChat /> Conversation in space</span>
           <span class="flex items-center gap-1.5"><MdVideo /> Synced video</span>
@@ -74,7 +86,7 @@
       <!-- Example cards -->
       <p class="text-base text-gray-500 text-center mb-4 uppercase tracking-wide">Try an example</p>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        {#each examples as example}
+        {#each examples as example (example.id)}
           <button
             onclick={() => loadExample(example.id)}
             class="group flex flex-col rounded-lg border border-base-300 overflow-hidden hover:border-primary hover:shadow-md transition-all cursor-pointer"
@@ -85,7 +97,9 @@
                 alt={example.title}
                 class="w-full h-full object-cover group-hover:scale-105 transition-transform"
               />
-              <span class="absolute bottom-1 right-1 text-xs bg-black/60 text-white px-1.5 py-0.5 rounded">
+              <span
+                class="absolute bottom-1 right-1 text-xs bg-black/60 text-white px-1.5 py-0.5 rounded"
+              >
                 {example.duration}
               </span>
             </div>
@@ -99,12 +113,19 @@
       <!-- Secondary actions -->
       <div class="flex flex-wrap justify-center gap-3 mb-4">
         <button
-          onclick={() => { closeModal(); window.dispatchEvent(new Event('restart-tour')) }}
+          onclick={() => {
+            closeModal()
+            window.dispatchEvent(new Event('restart-tour'))
+          }}
           class="btn btn-ghost gap-1.5"
         >
           <MdCompass class="text-lg" /> Take a Tour
         </button>
-        <a href="https://www.youtube.com/watch?v=smoxv9AspHA" target="_blank" class="btn btn-ghost gap-1.5">
+        <a
+          href="https://www.youtube.com/watch?v=smoxv9AspHA"
+          target="_blank"
+          class="btn btn-ghost gap-1.5"
+        >
           <MdPlayCircle class="text-lg" /> Watch Demo
         </a>
         <a href="/guide" target="_blank" class="btn btn-ghost gap-1.5">
@@ -128,9 +149,14 @@
             100% private — runs in your browser
           </span>
           <span>•</span>
-          <a href="https://github.com/BenRydal/igs" target="_blank" class="hover:underline">Open source (GPL v3)</a>
+          <a href="https://github.com/BenRydal/igs" target="_blank" class="hover:underline"
+            >Open source (GPL v3)</a
+          >
           <span>•</span>
-          <a href="https://doi.org/10.1080/10508406.2025.2537945" target="_blank" class="text-emerald-600 hover:underline"
+          <a
+            href="https://doi.org/10.1080/10508406.2025.2537945"
+            target="_blank"
+            class="text-emerald-600 hover:underline"
             >Shapiro, Silvis, & Hall (2025). <em>Visualization as Theory and Experience</em></a
           >
         </div>

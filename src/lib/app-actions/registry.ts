@@ -12,6 +12,7 @@ import { toggleVisibility } from '../../stores/videoStore'
 import { togglePlayback, isPlaying } from '../../stores/playbackStore'
 import { timelineV2Store } from '../timeline/store'
 import { openModal } from '../../stores/modalStore'
+import { VISIBLE_EXAMPLES, COLLECTIONS } from '../core/example-datasets'
 
 // Import history-tracked action functions
 import {
@@ -165,7 +166,9 @@ const viewActions: AppAction[] = [
     category: 'view',
     shortcut: { key: 'r' },
     action: () =>
-      window.dispatchEvent(new CustomEvent('igs:rotate-floorplan', { detail: { direction: 'right' } })),
+      window.dispatchEvent(
+        new CustomEvent('igs:rotate-floorplan', { detail: { direction: 'right' } })
+      ),
   },
   {
     id: 'rotate-left',
@@ -176,7 +179,9 @@ const viewActions: AppAction[] = [
     category: 'view',
     shortcut: { key: 'R', modifiers: { shift: true } },
     action: () =>
-      window.dispatchEvent(new CustomEvent('igs:rotate-floorplan', { detail: { direction: 'left' } })),
+      window.dispatchEvent(
+        new CustomEvent('igs:rotate-floorplan', { detail: { direction: 'left' } })
+      ),
   },
   {
     id: 'toggle-video',
@@ -329,143 +334,48 @@ const clearActions: AppAction[] = [
 
 // ==================== EXAMPLE ACTIONS ====================
 
-const exampleActions: AppAction[] = [
-  {
-    id: 'example-jordan-shot',
-    label: "Load: Michael Jordan's Last Shot",
-    description: 'Sports example dataset',
-    keywords: ['example', 'sports', 'basketball', 'jordan'],
-    icon: '🏀',
+/** Palette-only trimmings, keyed by dataset id. Names and grouping are NOT
+ *  repeated here — they come from EXAMPLE_DATASETS so the palette can never
+ *  drift from the sidebar. */
+const exampleExtras: Record<string, { icon: string; keywords: string[] }> = {
+  'example-1': { icon: '🏀', keywords: ['sports', 'basketball', 'jordan'] },
+  'example-2': { icon: '🖼️', keywords: ['museum', 'gallery', 'family'] },
+  'example-3': { icon: '🌤️', keywords: ['science', 'weather', 'usa'] },
+  'example-4': { icon: '🔢', keywords: ['classroom', '3rd grade', 'numbers', 'odd', 'even'] },
+  'example-5': { icon: '⚗️', keywords: ['science', 'density', 'czech'] },
+  'example-6': { icon: '📐', keywords: ['math', 'angles', 'japan'] },
+  'example-7': { icon: '📈', keywords: ['math', 'linear', 'equations', 'usa'] },
+  'example-8': { icon: '🪨', keywords: ['science', 'rocks', 'geology', 'usa'] },
+  'example-9': { icon: '📐', keywords: ['math', 'pythagorean', 'theorem', 'netherlands'] },
+  'example-10': { icon: '📐', keywords: ['classroom', 'math', 'ap', 'clark'] },
+  'example-11': { icon: '👩‍🏫', keywords: ['museum', 'gallery', 'family', 'complete'] },
+  'example-12': { icon: '🚶', keywords: ['tour', 'gps', 'civil rights', 'making', 'route'] },
+  'example-13': { icon: '🚶', keywords: ['tour', 'gps', 'civil rights', 'taking', 'route'] },
+  'example-14': { icon: '🗺️', keywords: ['tour', 'gps', 'jefferson', 'street'] },
+  'example-17': { icon: '📐', keywords: ['math', 'sandy', 'classroom'] },
+  'example-18': { icon: '📐', keywords: ['math', 'sandy', 'classroom'] },
+  'example-19': { icon: '📐', keywords: ['math', 'sofia', 'classroom'] },
+  'example-20': { icon: '📐', keywords: ['math', 'vince', 'classroom'] },
+}
+
+const exampleActions: AppAction[] = VISIBLE_EXAMPLES.map((entry) => {
+  const extras = exampleExtras[entry.id]
+  const collection = COLLECTIONS.find((c) => c.id === entry.collection)
+  return {
+    id: `load-${entry.id}`,
+    label: `Load: ${entry.label}`,
+    description: collection ? `${collection.label} · ${entry.duration}` : entry.duration,
+    keywords: [
+      'example',
+      ...(collection ? [collection.label.toLowerCase()] : []),
+      ...(extras?.keywords ?? []),
+    ],
+    icon: extras?.icon ?? '📁',
     category: 'examples',
-    action: () => window.dispatchEvent(new CustomEvent('igs:load-example', { detail: { value: 'example-1' } })),
-  },
-  {
-    id: 'example-museum',
-    label: 'Load: Family Gallery Visit',
-    description: 'Museum example dataset',
-    keywords: ['example', 'museum', 'gallery', 'family'],
-    icon: '🖼️',
-    category: 'examples',
-    action: () => window.dispatchEvent(new CustomEvent('igs:load-example', { detail: { value: 'example-2' } })),
-  },
-  {
-    id: 'example-museum-complete',
-    label: 'Load: Family Museum Visit',
-    description: 'Museum example dataset',
-    keywords: ['example', 'museum', 'gallery', 'family'],
-    icon: '👩‍🏫',
-    category: 'examples',
-    action: () => window.dispatchEvent(new CustomEvent('igs:load-example', { detail: { value: 'example-11' } })),
-  },
-  {
-    id: 'example-ap-math',
-    label: 'Load: Clark AP Math Lesson',
-    description: 'TAU Project',
-    keywords: ['example', 'classroom', 'math', 'ap', 'clark', 'tau'],
-    icon: '📐',
-    category: 'examples',
-    action: () => window.dispatchEvent(new CustomEvent('igs:load-example', { detail: { value: 'example-10' } })),
-  },
-  {
-    id: 'example-3rd-grade',
-    label: 'Load: 3rd Grade Numbers Discussion',
-    description: 'Classroom example dataset',
-    keywords: ['example', 'classroom', '3rd grade', 'numbers'],
-    icon: '🔢',
-    category: 'examples',
-    action: () => window.dispatchEvent(new CustomEvent('igs:load-example', { detail: { value: 'example-4' } })),
-  },
-  {
-    id: 'example-us-science-weather',
-    label: 'Load: U.S. Science Lesson (weather)',
-    description: 'TIMSS video study example',
-    keywords: ['example', 'timss', 'science', 'weather', 'usa'],
-    icon: '🌤️',
-    category: 'examples',
-    action: () => window.dispatchEvent(new CustomEvent('igs:load-example', { detail: { value: 'example-3' } })),
-  },
-  {
-    id: 'example-czech-science',
-    label: 'Load: Czech Republic Science (density)',
-    description: 'TIMSS video study example',
-    keywords: ['example', 'timss', 'science', 'density', 'czech'],
-    icon: '⚗️',
-    category: 'examples',
-    action: () => window.dispatchEvent(new CustomEvent('igs:load-example', { detail: { value: 'example-5' } })),
-  },
-  {
-    id: 'example-japan-math',
-    label: 'Load: Japan Math Lesson (angles)',
-    description: 'TIMSS video study example',
-    keywords: ['example', 'timss', 'math', 'angles', 'japan'],
-    icon: '📐',
-    category: 'examples',
-    action: () => window.dispatchEvent(new CustomEvent('igs:load-example', { detail: { value: 'example-6' } })),
-  },
-  {
-    id: 'example-us-math-linear',
-    label: 'Load: U.S. Math Lesson (linear equations)',
-    description: 'TIMSS video study example',
-    keywords: ['example', 'timss', 'math', 'linear', 'equations', 'usa'],
-    icon: '📈',
-    category: 'examples',
-    action: () => window.dispatchEvent(new CustomEvent('igs:load-example', { detail: { value: 'example-7' } })),
-  },
-  {
-    id: 'example-us-science-rocks',
-    label: 'Load: U.S. Science Lesson (rocks)',
-    description: 'TIMSS video study example',
-    keywords: ['example', 'timss', 'science', 'rocks', 'geology', 'usa'],
-    icon: '🪨',
-    category: 'examples',
-    action: () => window.dispatchEvent(new CustomEvent('igs:load-example', { detail: { value: 'example-8' } })),
-  },
-  {
-    id: 'example-netherlands-math',
-    label: 'Load: Netherlands Math (pythagorean)',
-    description: 'TIMSS video study example',
-    keywords: ['example', 'timss', 'math', 'pythagorean', 'theorem', 'netherlands'],
-    icon: '📐',
-    category: 'examples',
-    action: () => window.dispatchEvent(new CustomEvent('igs:load-example', { detail: { value: 'example-9' } })),
-  },
-  {
-    id: 'example-sandy-2022',
-    label: 'Load: Sandy Math Lesson (2022)',
-    description: 'TAU Project',
-    keywords: ['example', 'tau', 'math', 'sandy', 'classroom'],
-    icon: '📐',
-    category: 'examples',
-    action: () => window.dispatchEvent(new CustomEvent('igs:load-example', { detail: { value: 'example-17' } })),
-  },
-  {
-    id: 'example-sandy-2023',
-    label: 'Load: Sandy Math Lesson (2023)',
-    description: 'TAU Project',
-    keywords: ['example', 'tau', 'math', 'sandy', 'classroom'],
-    icon: '📐',
-    category: 'examples',
-    action: () => window.dispatchEvent(new CustomEvent('igs:load-example', { detail: { value: 'example-18' } })),
-  },
-  {
-    id: 'example-sofia',
-    label: 'Load: Sofia Math Lesson',
-    description: 'TAU Project',
-    keywords: ['example', 'tau', 'math', 'sofia', 'classroom'],
-    icon: '📐',
-    category: 'examples',
-    action: () => window.dispatchEvent(new CustomEvent('igs:load-example', { detail: { value: 'example-19' } })),
-  },
-  {
-    id: 'example-vince',
-    label: 'Load: Vince Math Lesson',
-    description: 'TAU Project',
-    keywords: ['example', 'tau', 'math', 'vince', 'classroom'],
-    icon: '📐',
-    category: 'examples',
-    action: () => window.dispatchEvent(new CustomEvent('igs:load-example', { detail: { value: 'example-20' } })),
-  },
-]
+    action: () =>
+      window.dispatchEvent(new CustomEvent('igs:load-example', { detail: { value: entry.id } })),
+  }
+})
 
 // ==================== SETTINGS ACTIONS ====================
 

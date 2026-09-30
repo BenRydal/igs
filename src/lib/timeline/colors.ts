@@ -17,7 +17,7 @@ export const GRAY_800 = 'rgba(31, 41, 55, 0.95)'
 // Transparency helpers
 export const GRID_MAJOR = 'rgba(0, 0, 0, 0.12)'
 export const GRID_MINOR = 'rgba(0, 0, 0, 0.05)'
-export const LABEL_TEXT = 'rgba(0, 0, 0, 0.5)'
+export const LABEL_TEXT = 'rgba(0, 0, 0, 0.8)'
 export const LABEL_BG = 'rgba(255, 255, 255, 0.85)'
 export const HOVER_LINE = 'rgba(0, 0, 0, 0.2)'
 export const SHADOW = 'rgba(0, 0, 0, 0.15)'
