@@ -88,7 +88,6 @@
   import CodesPanel from '$lib/components/CodesPanel.svelte'
   import TimelineControls from '$lib/timeline/components/TimelineControls.svelte'
   import { capitalizeFirstLetter, capitalizeEachWord } from '$lib/utils/string'
-  import { loadAdvancedMode, saveAdvancedMode } from '$lib/utils/advanced-mode-storage'
   import { Z_INDEX } from '$lib/styles/z-index'
 
   import CodeStore from '../stores/codeStore'
@@ -318,8 +317,7 @@
   }
 
   function isTabAvailable(tab: RailTab): boolean {
-    if (tab === 'filters' || tab === 'view') return $ConfigStore.advancedMode
-    if (tab === 'select') return $ConfigStore.advancedMode && !is3DMode
+    if (tab === 'select') return !is3DMode
     if (tab === 'codes') return $ConfigStore.dataHasCodes
     return true
   }
@@ -338,33 +336,8 @@
     onVideoVisibilityChange(willBeVisible)
   }
 
-  function toggleAdvancedMode() {
-    const newValue = !$ConfigStore.advancedMode
-
-    // When switching to simple mode, reset advanced-only features
-    // so user isn't stuck with hidden active modes
-    if (!newValue) {
-      ConfigStore.update((c) => ({
-        ...c,
-        advancedMode: false,
-        circleToggle: false,
-        sliceToggle: false,
-        highlightToggle: false,
-        movementToggle: false,
-        stopsToggle: false,
-      }))
-      p5Instance?.loop()
-    } else {
-      ConfigStore.update((c) => ({ ...c, advancedMode: true }))
-    }
-
-    saveAdvancedMode(newValue)
-  }
-
   function resetSettings() {
-    // Preserve advancedMode (UI preference) when resetting visualization settings
-    const preserveAdvancedMode = $ConfigStore.advancedMode
-    ConfigStore.update(() => ({ ...initialConfig, advancedMode: preserveAdvancedMode }))
+    ConfigStore.update(() => ({ ...initialConfig }))
     p5Instance?.loop()
   }
 
@@ -659,12 +632,6 @@
 
   // Add event handlers for dropdowns
   onMount(() => {
-    // Load advanced mode from localStorage
-    const savedAdvancedMode = loadAdvancedMode()
-    if (savedAdvancedMode) {
-      ConfigStore.update((c) => ({ ...c, advancedMode: true }))
-    }
-
     // Keyboard shortcut event handlers
     const handleToggle3D = () => {
       if (p5Instance?.handle3D) {
@@ -1016,47 +983,45 @@
     {/snippet}
     {@render panelSection('Display', displayBody)}
 
-    {#if $ConfigStore.advancedMode}
-      {#snippet groupedBody()}
-        <ul class="menu w-full p-0">
-          {@render toggleRow('Combine speakers', $ConfigStore.showSpeakerStripes, () =>
-            handleConfigChange('showSpeakerStripes', !$ConfigStore.showSpeakerStripes)
-          )}
-        </ul>
-        {@render rangeRow(
-          `Group within ${$ConfigStore.clusterTimeThreshold} seconds`,
-          'clusterTimeRange',
-          1,
-          60,
-          1,
-          $ConfigStore.clusterTimeThreshold,
-          (e) => handleConfigChangeFromInput(e, 'clusterTimeThreshold')
+    {#snippet groupedBody()}
+      <ul class="menu w-full p-0">
+        {@render toggleRow('Combine speakers', $ConfigStore.showSpeakerStripes, () =>
+          handleConfigChange('showSpeakerStripes', !$ConfigStore.showSpeakerStripes)
         )}
-        {@render rangeRow(
-          `Group within ${$ConfigStore.clusterSpaceThreshold}px distance`,
-          'clusterSpaceRange',
-          0,
-          200,
-          1,
-          $ConfigStore.clusterSpaceThreshold,
-          (e) => handleConfigChangeFromInput(e, 'clusterSpaceThreshold')
-        )}
-      {/snippet}
-      {@render panelSection('Grouped turns', groupedBody)}
+      </ul>
+      {@render rangeRow(
+        `Group within ${$ConfigStore.clusterTimeThreshold} seconds`,
+        'clusterTimeRange',
+        1,
+        60,
+        1,
+        $ConfigStore.clusterTimeThreshold,
+        (e) => handleConfigChangeFromInput(e, 'clusterTimeThreshold')
+      )}
+      {@render rangeRow(
+        `Group within ${$ConfigStore.clusterSpaceThreshold}px distance`,
+        'clusterSpaceRange',
+        0,
+        200,
+        1,
+        $ConfigStore.clusterSpaceThreshold,
+        (e) => handleConfigChangeFromInput(e, 'clusterSpaceThreshold')
+      )}
+    {/snippet}
+    {@render panelSection('Grouped turns', groupedBody)}
 
-      {#snippet individualBody()}
-        {@render rangeRow(
-          `Turn width: ${$ConfigStore.conversationRectWidth}px`,
-          'rectWidthRange',
-          1,
-          30,
-          1,
-          $ConfigStore.conversationRectWidth,
-          (e) => handleConfigChangeFromInput(e, 'conversationRectWidth')
-        )}
-      {/snippet}
-      {@render panelSection('Individual turns', individualBody)}
-    {/if}
+    {#snippet individualBody()}
+      {@render rangeRow(
+        `Turn width: ${$ConfigStore.conversationRectWidth}px`,
+        'rectWidthRange',
+        1,
+        30,
+        1,
+        $ConfigStore.conversationRectWidth,
+        (e) => handleConfigChangeFromInput(e, 'conversationRectWidth')
+      )}
+    {/snippet}
+    {@render panelSection('Individual turns', individualBody)}
   </div>
 {/snippet}
 
@@ -1177,115 +1142,98 @@
 
 {#snippet settingsPanel()}
   <div class="flex flex-col gap-6 px-3 py-4">
-    <label class="flex items-center justify-between gap-2 cursor-pointer">
-      <span class="text-sm font-medium">Advanced mode</span>
-      <input
-        id="advanced-mode-toggle"
-        type="checkbox"
-        class="toggle toggle-primary toggle-sm"
-        checked={$ConfigStore.advancedMode}
-        onchange={toggleAdvancedMode}
-      />
-    </label>
+    {#snippet drawingBody()}
+      {@render rangeRow(
+        `Animation rate: ${currentConfig.animationRate}`,
+        'animationRate',
+        0.01,
+        1,
+        0.01,
+        currentConfig.animationRate,
+        (e) => handleConfigChange('animationRate', parseFloat(e.currentTarget.value))
+      )}
+      {@render rangeRow(
+        `Sampling interval: ${currentConfig.samplingInterval} sec`,
+        'samplingInterval',
+        0.1,
+        5,
+        0.1,
+        currentConfig.samplingInterval,
+        (e) => handleConfigChange('samplingInterval', parseFloat(e.currentTarget.value))
+      )}
+      {@render rangeRow(
+        `Small data threshold: ${currentConfig.smallDataThreshold}`,
+        'smallDataThreshold',
+        500,
+        10000,
+        100,
+        currentConfig.smallDataThreshold,
+        (e) => handleConfigChange('smallDataThreshold', parseInt(e.currentTarget.value))
+      )}
+      {@render rangeRow(
+        `Movement line weight: ${currentConfig.movementStrokeWeight}`,
+        'movementStrokeWeight',
+        1,
+        20,
+        1,
+        currentConfig.movementStrokeWeight,
+        (e) => handleConfigChange('movementStrokeWeight', parseInt(e.currentTarget.value))
+      )}
+      {@render rangeRow(
+        `Stop line weight: ${currentConfig.stopStrokeWeight}`,
+        'stopStrokeWeight',
+        1,
+        20,
+        1,
+        currentConfig.stopStrokeWeight,
+        (e) => handleConfigChange('stopStrokeWeight', parseInt(e.currentTarget.value))
+      )}
+      <div class="flex flex-col gap-1">
+        <label for="inputSeconds" class="text-xs">End time (seconds)</label>
+        <input
+          id="inputSeconds"
+          type="text"
+          inputmode="numeric"
+          bind:value={timelineEndTime}
+          oninput={(e) => {
+            let value = parseInt(e.currentTarget.value.replace(/\D/g, '')) || 0
+            timelineV2Store.initialize(value, 0)
+          }}
+          class="input input-bordered input-sm"
+        />
+      </div>
+    {/snippet}
+    {@render panelSection('Drawing', drawingBody)}
 
-    {#if $ConfigStore.advancedMode}
-      {#snippet drawingBody()}
-        {@render rangeRow(
-          `Animation rate: ${currentConfig.animationRate}`,
-          'animationRate',
-          0.01,
-          1,
-          0.01,
-          currentConfig.animationRate,
-          (e) => handleConfigChange('animationRate', parseFloat(e.currentTarget.value))
-        )}
-        {@render rangeRow(
-          `Sampling interval: ${currentConfig.samplingInterval} sec`,
-          'samplingInterval',
-          0.1,
-          5,
-          0.1,
-          currentConfig.samplingInterval,
-          (e) => handleConfigChange('samplingInterval', parseFloat(e.currentTarget.value))
-        )}
-        {@render rangeRow(
-          `Small data threshold: ${currentConfig.smallDataThreshold}`,
-          'smallDataThreshold',
-          500,
-          10000,
-          100,
-          currentConfig.smallDataThreshold,
-          (e) => handleConfigChange('smallDataThreshold', parseInt(e.currentTarget.value))
-        )}
-        {@render rangeRow(
-          `Movement line weight: ${currentConfig.movementStrokeWeight}`,
-          'movementStrokeWeight',
-          1,
-          20,
-          1,
-          currentConfig.movementStrokeWeight,
-          (e) => handleConfigChange('movementStrokeWeight', parseInt(e.currentTarget.value))
-        )}
-        {@render rangeRow(
-          `Stop line weight: ${currentConfig.stopStrokeWeight}`,
-          'stopStrokeWeight',
-          1,
-          20,
-          1,
-          currentConfig.stopStrokeWeight,
-          (e) => handleConfigChange('stopStrokeWeight', parseInt(e.currentTarget.value))
-        )}
-        <div class="flex flex-col gap-1">
-          <label for="inputSeconds" class="text-xs">End time (seconds)</label>
-          <input
-            id="inputSeconds"
-            type="text"
-            inputmode="numeric"
-            bind:value={timelineEndTime}
-            oninput={(e) => {
-              let value = parseInt(e.currentTarget.value.replace(/\D/g, '')) || 0
-              timelineV2Store.initialize(value, 0)
-            }}
-            class="input input-bordered input-sm"
-          />
-        </div>
-      {/snippet}
-      {@render panelSection('Drawing', drawingBody)}
-
-      {#snippet toolsBody()}
-        <ul class="menu w-full p-0">
-          <li>
-            <button onclick={() => (showDataPopup = true)} class="flex items-center gap-2">
-              {@render icon(MdTableEye)}
-              Data explorer
-            </button>
-          </li>
-          <li>
-            <button onclick={() => p5Instance?.saveCodeFile()} class="flex items-center gap-2">
-              {@render icon(MdCloudDownload)}
-              Download codes
-            </button>
-          </li>
-          <li>
-            <button
-              onclick={() => window.dispatchEvent(new CustomEvent('igs:open-cheatsheet'))}
-              class="flex items-center gap-2"
-            >
-              {@render icon(MdKeyboard)}
-              Keyboard shortcuts
-            </button>
-          </li>
-        </ul>
-        <button class="btn btn-sm btn-warning self-start" onclick={resetSettings}>
-          Reset settings
-        </button>
-      {/snippet}
-      {@render panelSection('Tools', toolsBody)}
-    {:else}
-      <p class="text-sm opacity-70">
-        Advanced mode adds filters, selection tools, floor plan controls and drawing settings.
-      </p>
-    {/if}
+    {#snippet toolsBody()}
+      <ul class="menu w-full p-0">
+        <li>
+          <button onclick={() => (showDataPopup = true)} class="flex items-center gap-2">
+            {@render icon(MdTableEye)}
+            Data explorer
+          </button>
+        </li>
+        <li>
+          <button onclick={() => p5Instance?.saveCodeFile()} class="flex items-center gap-2">
+            {@render icon(MdCloudDownload)}
+            Download codes
+          </button>
+        </li>
+        <li>
+          <button
+            onclick={() => window.dispatchEvent(new CustomEvent('igs:open-cheatsheet'))}
+            class="flex items-center gap-2"
+          >
+            {@render icon(MdKeyboard)}
+            Keyboard shortcuts
+          </button>
+        </li>
+      </ul>
+      <button class="btn btn-sm btn-warning self-start" onclick={resetSettings}>
+        Reset settings
+      </button>
+    {/snippet}
+    {@render panelSection('Tools', toolsBody)}
   </div>
 {/snippet}
 
@@ -1349,15 +1297,9 @@
               ? [{ id: 'codes', label: RAIL_LABELS.codes, icon: codesIcon }]
               : []),
             { id: 'talk', label: RAIL_LABELS.talk, icon: talkIcon },
-            ...($ConfigStore.advancedMode
-              ? [{ id: 'filters', label: RAIL_LABELS.filters, icon: filtersIcon }]
-              : []),
-            ...($ConfigStore.advancedMode && !is3DMode
-              ? [{ id: 'select', label: RAIL_LABELS.select, icon: selectIcon }]
-              : []),
-            ...($ConfigStore.advancedMode
-              ? [{ id: 'view', label: RAIL_LABELS.view, icon: viewIcon }]
-              : []),
+            { id: 'filters', label: RAIL_LABELS.filters, icon: filtersIcon },
+            ...(!is3DMode ? [{ id: 'select', label: RAIL_LABELS.select, icon: selectIcon }] : []),
+            { id: 'view', label: RAIL_LABELS.view, icon: viewIcon },
             { id: 'settings', label: RAIL_LABELS.settings, icon: settingsIcon },
             { id: 'help', label: RAIL_LABELS.help, icon: helpIcon },
           ]}
