@@ -13,8 +13,6 @@
   import MdHelpOutline from '~icons/mdi/help-circle-outline'
   import MdKeyboard from '~icons/mdi/keyboard'
   import MdCloudDownload from '~icons/mdi/cloud-download'
-  import MdRotateLeft from '~icons/mdi/rotate-left'
-  import MdRotateRight from '~icons/mdi/rotate-right'
   import Md3DRotation from '~icons/mdi/rotate-3d-variant'
   import MdVideocam from '~icons/mdi/video'
   import MdVideocamOff from '~icons/mdi/video-off'
@@ -39,7 +37,6 @@
   import MdChevronDown from '~icons/mdi/chevron-down'
   import MdChevronRight from '~icons/mdi/chevron-right'
   import MdClose from '~icons/mdi/close'
-  import MdFloorPlan from '~icons/mdi/floor-plan'
   import MdAccountGroup from '~icons/mdi/account-group'
   import MdTagMultiple from '~icons/mdi/tag-multiple'
   import MdTableEye from '~icons/mdi/table-eye'
@@ -284,7 +281,7 @@
   // Modal state - opens immediately for first-time visitors
   let isModalOpen = writable(false)
 
-  type RailTab = 'data' | 'people' | 'codes' | 'talk' | 'filters' | 'select' | 'view' | 'settings'
+  type RailTab = 'data' | 'people' | 'codes' | 'talk' | 'filters' | 'select' | 'settings'
   const RAIL_LABELS: Record<RailTab | 'help', string> = {
     data: 'Data',
     people: 'People',
@@ -292,7 +289,6 @@
     talk: 'Talk',
     filters: 'Filters',
     select: 'Select',
-    view: 'View',
     settings: 'Settings',
     help: 'Help',
   }
@@ -1090,46 +1086,16 @@
   </div>
 {/snippet}
 
-{#snippet viewPanel()}
+{#snippet settingsPanel()}
   <div class="flex flex-col gap-6 px-3 py-4">
-    {#snippet floorplanBody()}
-      <div class="flex flex-wrap gap-2">
-        <button
-          id="btn-rotate-left"
-          class="btn btn-sm gap-2"
-          onclick={() => {
-            p5Instance?.floorPlan.setRotateLeft()
-            p5Instance?.loop()
-          }}
-        >
-          {@render icon(MdRotateLeft)}
-          Rotate left
-        </button>
-        <button
-          id="btn-rotate-right"
-          class="btn btn-sm gap-2"
-          onclick={() => {
-            p5Instance?.floorPlan.setRotateRight()
-            p5Instance?.loop()
-          }}
-        >
-          {@render icon(MdRotateRight)}
-          Rotate right
-        </button>
-      </div>
-      <ul class="menu w-full p-0">
-        {@render toggleRow(
-          'Preserve aspect ratio',
-          currentConfig.preserveFloorplanAspectRatio,
-          () =>
-            handleConfigChange(
-              'preserveFloorplanAspectRatio',
-              !currentConfig.preserveFloorplanAspectRatio
-            )
-        )}
-      </ul>
-    {/snippet}
-    {@render panelSection('Floor plan', floorplanBody)}
+    <ul class="menu w-full p-0">
+      {@render toggleRow('Preserve aspect ratio', currentConfig.preserveFloorplanAspectRatio, () =>
+        handleConfigChange(
+          'preserveFloorplanAspectRatio',
+          !currentConfig.preserveFloorplanAspectRatio
+        )
+      )}
+    </ul>
 
     {#if $GPSStore.isGPSMode}
       {#snippet mapBody()}
@@ -1137,11 +1103,7 @@
       {/snippet}
       {@render panelSection('Map style', mapBody)}
     {/if}
-  </div>
-{/snippet}
 
-{#snippet settingsPanel()}
-  <div class="flex flex-col gap-6 px-3 py-4">
     {#snippet drawingBody()}
       {@render rangeRow(
         `Animation rate: ${currentConfig.animationRate}`,
@@ -1243,7 +1205,6 @@
 {#snippet talkIcon()}<MdChat />{/snippet}
 {#snippet filtersIcon()}<MdFilterList />{/snippet}
 {#snippet selectIcon()}<MdSelectAll />{/snippet}
-{#snippet viewIcon()}<MdFloorPlan />{/snippet}
 {#snippet settingsIcon()}<MdSettings />{/snippet}
 {#snippet helpIcon()}<MdHelpOutline />{/snippet}
 
@@ -1299,7 +1260,6 @@
             { id: 'talk', label: RAIL_LABELS.talk, icon: talkIcon },
             { id: 'filters', label: RAIL_LABELS.filters, icon: filtersIcon },
             ...(!is3DMode ? [{ id: 'select', label: RAIL_LABELS.select, icon: selectIcon }] : []),
-            { id: 'view', label: RAIL_LABELS.view, icon: viewIcon },
             { id: 'settings', label: RAIL_LABELS.settings, icon: settingsIcon },
             { id: 'help', label: RAIL_LABELS.help, icon: helpIcon },
           ]}
@@ -1335,8 +1295,6 @@
               {@render filtersPanel()}
             {:else if lastTab === 'select'}
               {@render selectPanel()}
-            {:else if lastTab === 'view'}
-              {@render viewPanel()}
             {:else if lastTab === 'settings'}
               {@render settingsPanel()}
             {/if}
