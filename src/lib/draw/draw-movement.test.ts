@@ -810,6 +810,7 @@ const makeBatchRecorder = () => {
       endShape: () => events.push({ kind: 'end' }),
       stroke: (color: string) => events.push({ kind: 'stroke', color }),
       strokeWeight: (weight: number) => events.push({ kind: 'weight', weight }),
+      strokeCap: () => {},
       vertex: (x: number) => events.push({ kind: 'vertex', index: x / SPACING }),
     } as unknown as IgsP5,
     {

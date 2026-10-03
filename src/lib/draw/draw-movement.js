@@ -431,6 +431,10 @@ export class DrawMovement {
   drawBatchedSegments(view, dataTrail, segments, isStopped, weight) {
     const perSegmentColor = drawState.config.isPathColorMode
     this.sk.strokeWeight(weight)
+    // A moving run is LINES pairs with every shared point duplicated, so p5 caps
+    // each turn twice instead of joining it; a round cap is a half-disc of
+    // radius weight/2, so the two together cover the disc a round join would.
+    this.sk.strokeCap(isStopped ? this.sk.SQUARE : this.sk.ROUND)
     // Set once for the batch when every segment shares a colour: sk.stroke()
     // parses its argument, and a path can hold hundreds of segments.
     if (!perSegmentColor) this.sk.stroke(this.shade)
