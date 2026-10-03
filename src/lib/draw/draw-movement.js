@@ -21,10 +21,6 @@ import { getPathLod, lowerBound } from './path-lod'
 export class DrawMovement {
   // Static constants
   static LARGEST_STOP_PIXEL_SIZE = 50
-  // Minimum pixel distance between rendered vertices (skip closer points)
-  // Higher values = fewer vertices = better performance, but less detail when zoomed in
-  // 8 pixels provides good balance - visually indistinguishable from full detail at typical zoom
-  static MIN_PIXEL_DISTANCE_SQ = 8 * 8 // Minimum pixel distance squared for decimation
 
   /**
    * @param {IgsP5} sketch
@@ -46,6 +42,15 @@ export class DrawMovement {
      * @type {Int32Array | null}
      */
     this.lod = null
+    /**
+     * Squared screen-pixel gap the decimator keeps between emitted vertices.
+     *
+     * Reads the pathSimplification budget, the same one the reduction measures
+     * deviation with — see emitVertexAt. Refreshed per user per frame in
+     * setData, and set here as well so a directly constructed instance starts
+     * from the configured budget.
+     */
+    this.minGapSq = drawState.config.pathSimplification ** 2
     // Running state for the screen-space decimator in emitVertexAt.
     this.runLastX = -Infinity
     this.runLastY = -Infinity
@@ -62,35 +67,51 @@ export class DrawMovement {
     this.sk.noFill()
     this.shade = user.color
     this.cacheEnabledCodes()
-    this.lod = getPathLod(user, this.sourceEpsilon())
+    this.minGapSq = drawState.config.pathSimplification ** 2
+    this.lod = getPathLod(user, drawState.config.pathSimplification, this.viewScales())
     this.setDraw(user.dataTrail)
     if (this.dot !== null) this.drawDot(this.dot)
   }
 
   /**
-   * Converts the pathSimplification screen-pixel budget into the trail's own
-   * coordinate units, which is what the reduction works in.
+   * Screen pixels per unit of each axis the trail is drawn against, which is
+   * what path-lod.ts measures its error budget in.
    *
-   * Scaling can be anisotropic — with "preserve aspect ratio" off, x and y are
-   * stretched independently — so dividing by the larger of the two factors keeps
-   * the screen-space bound conservative on both axes.
+   * Rotation is folded in here: getScaledXYPos sends data x down the screen's y
+   * axis at 90 and 270 degrees, so the effective dimension governing each data
+   * axis swaps with it. The map is diagonal or antidiagonal in every case, so a
+   * single scale per data axis is exact.
+   *
+   * The time scale is read off the projection by evaluating it twice rather than
+   * rebuilt from its parts: mapSelectTimeToPixelTime composes the timeline zoom,
+   * the view window and the 2D/3D switch, and is affine in time, so its slope
+   * comes out exactly and cannot fall out of step with the formula.
+   *
+   * @returns {import('./path-lod').ViewScales | null}
    */
-  sourceEpsilon() {
-    const budget = drawState.config.pathSimplification
-    if (budget <= 0) return 0
-
+  viewScales() {
     const source = this.sk.floorPlan.getSourceDimensions()
-    if (source === null) return 0
+    if (source === null) return null
 
     const effective = this.sk.floorPlan.getEffectiveDimensions(
       this.sk.gui.fpContainer.getContainer()
     )
-    const scale = Math.max(effective.width / source.width, effective.height / source.height)
-    if (scale <= 0) return 0
+    const swapped =
+      this.sk.floorPlan.curFloorPlanRotation === 1 || this.sk.floorPlan.curFloorPlanRotation === 3
+    const sx = (swapped ? effective.height : effective.width) / source.width
+    const sy = (swapped ? effective.width : effective.height) / source.height
 
-    // Quantized so that pixel-level container changes cannot invalidate the
-    // cached reduction, which is keyed on this value.
-    return Math.round((budget / scale) * 100) / 100
+    const state = timelineV2Store.getState()
+    const span = state.dataEnd - state.dataStart
+    const st =
+      span > 0
+        ? Math.abs(
+            this.sk.mapSelectTimeToPixelTime(timelineV2Store.timeToPixel(state.dataEnd)) -
+              this.sk.mapSelectTimeToPixelTime(timelineV2Store.timeToPixel(state.dataStart))
+          ) / span
+        : 0
+
+    return { sx, sy, st }
   }
 
   // Cache enabled codes once per frame for O(1) lookups during segment filtering
@@ -338,6 +359,11 @@ export class DrawMovement {
   /**
    * Draws an already-resolved, already-filtered segment list.
    *
+   * One path for both colour modes. They differ only in whether the stroke
+   * colour is set once per batch or once per segment, and p5's immediate mode
+   * takes a colour change inside a shape, so neither needs a shape of its own.
+   * See drawBatchedSegments.
+   *
    * Stop circles go through drawAllStopCircles for every filter combination, so
    * they are sorted largest-first and overlapping stops render as a bullseye
    * rather than a small stop hiding behind a larger one. Because every filter
@@ -347,54 +373,34 @@ export class DrawMovement {
    * @param {Segment[]} segments
    */
   drawSegments(dataTrail, segments) {
-    if (!drawState.config.isPathColorMode) {
-      // Single color mode: batch all segments by type
-      this.sk.stroke(this.shade)
+    // SPACETIME: moving segments, then stopped segments. Stopped last so the
+    // heavier stop stroke reads on top of the movement line it overlaps, which
+    // is the order single colour mode has always drawn in.
+    this.drawBatchedSegments(
+      this.sk.SPACETIME,
+      dataTrail,
+      segments,
+      false,
+      drawState.config.movementStrokeWeight
+    )
+    this.drawBatchedSegments(
+      this.sk.SPACETIME,
+      dataTrail,
+      segments,
+      true,
+      drawState.config.stopStrokeWeight
+    )
 
-      // Draw to SPACETIME: moving segments, then stopped segments
-      this.drawBatchedSegments(
-        this.sk.SPACETIME,
-        dataTrail,
-        segments,
-        false,
-        drawState.config.movementStrokeWeight
-      )
-      this.drawBatchedSegments(
-        this.sk.SPACETIME,
-        dataTrail,
-        segments,
-        true,
-        drawState.config.stopStrokeWeight
-      )
+    // PLAN: moving segments as lines, stopped segments as circles.
+    this.drawBatchedSegments(
+      this.sk.PLAN,
+      dataTrail,
+      segments,
+      false,
+      drawState.config.movementStrokeWeight
+    )
+    this.drawAllStopCircles(dataTrail, segments)
 
-      // Draw to PLAN: moving segments as lines, stopped segments as circles
-      this.drawBatchedSegments(
-        this.sk.PLAN,
-        dataTrail,
-        segments,
-        false,
-        drawState.config.movementStrokeWeight
-      )
-      this.drawAllStopCircles(dataTrail, segments)
-    } else {
-      // Path color mode: separate shapes per segment for different colors
-      // Pass 1: draw all spacetime segments + plan movement segments
-      for (const seg of segments) {
-        this.applySegmentStyle(dataTrail[seg.start].stopLength, seg.codes)
-        this.drawSegment(this.sk.SPACETIME, dataTrail, seg.start, seg.end)
-
-        if (!seg.isStopped) {
-          this.drawSegment(this.sk.PLAN, dataTrail, seg.start, seg.end)
-        }
-      }
-      // Pass 2: draw stop circles sorted largest-first for bullseye effect
-      for (const seg of this.getStoppedSegmentsByDuration(dataTrail, segments)) {
-        const aug = this.getAugmentedPoint(this.sk.PLAN, dataTrail[seg.start])
-        this.drawStopCircle(aug, this.getSegmentDuration(dataTrail, seg.start, seg.end))
-      }
-    }
-
-    // Draw connections to both views (shared by both modes)
     // Re-set stroke since drawStopCircle calls noStroke()
     if (!drawState.config.isPathColorMode) this.sk.stroke(this.shade)
     this.sk.strokeWeight(drawState.config.movementStrokeWeight)
@@ -404,8 +410,18 @@ export class DrawMovement {
     this.selectDot(dataTrail, segments)
   }
 
-  // Draw all segments matching isStopped in a single batched draw call
   /**
+   * Draws every segment matching isStopped in one shape.
+   *
+   * In path colour mode the stroke is set before each segment's vertices rather
+   * than once for the batch. p5's immediate mode reads the current stroke colour
+   * at each vertex() call and keeps it as a per-vertex attribute, so one shape
+   * holds many colours. Both vertices of a LINES pair go out under the same
+   * colour, which is what makes a segment solid rather than gradated.
+   *
+   * Stroke weight cannot ride along the same way — it is a draw-time uniform —
+   * which is why the moving and stopped passes stay separate in both modes.
+   *
    * @param {number} view
    * @param {DataPoint[]} dataTrail
    * @param {Segment[]} segments
@@ -413,10 +429,15 @@ export class DrawMovement {
    * @param {number} weight
    */
   drawBatchedSegments(view, dataTrail, segments, isStopped, weight) {
+    const perSegmentColor = drawState.config.isPathColorMode
     this.sk.strokeWeight(weight)
+    // Set once for the batch when every segment shares a colour: sk.stroke()
+    // parses its argument, and a path can hold hundreds of segments.
+    if (!perSegmentColor) this.sk.stroke(this.shade)
     this.sk.beginShape(this.sk.LINES)
     for (const seg of segments) {
       if (seg.isStopped === isStopped) {
+        if (perSegmentColor) this.sk.stroke(this.drawUtils.setCodeColor(seg.codes))
         this.drawSegmentVerticesAsLines(view, dataTrail, seg.start, seg.end)
       }
     }
@@ -460,8 +481,13 @@ export class DrawMovement {
     return seg1.end + 1 === seg2.start
   }
 
-  // Draw connecting lines between adjacent segments (prevents gaps at segment transitions)
   /**
+   * Draws the connecting line between each pair of adjacent segments, which is
+   * what stops a gap appearing where a segment boundary falls.
+   *
+   * Batched in both colour modes, for the reason given in drawBatchedSegments:
+   * the per-vertex stroke colour lets one shape carry a colour per connection.
+   *
    * @param {number} view
    * @param {DataPoint[]} dataTrail
    * @param {Segment[]} segments
@@ -469,26 +495,16 @@ export class DrawMovement {
   drawSegmentConnections(view, dataTrail, segments) {
     if (segments.length < 2) return
 
-    if (!drawState.config.isPathColorMode) {
-      // Single color mode: batch all connections in one draw call
-      this.sk.beginShape(this.sk.LINES)
-      for (let i = 0; i < segments.length - 1; i++) {
-        if (this.areSegmentsAdjacent(segments[i], segments[i + 1])) {
-          this.emitConnectionVertices(view, dataTrail, segments[i].end, segments[i + 1].start)
-        }
-      }
-      this.sk.endShape()
-    } else {
-      // Path color mode: separate draw call per connection for different colors
-      for (let i = 0; i < segments.length - 1; i++) {
-        if (this.areSegmentsAdjacent(segments[i], segments[i + 1])) {
-          this.setStroke(this.drawUtils.setCodeColor(segments[i].codes))
-          this.sk.beginShape(this.sk.LINES)
-          this.emitConnectionVertices(view, dataTrail, segments[i].end, segments[i + 1].start)
-          this.sk.endShape()
-        }
+    const perSegmentColor = drawState.config.isPathColorMode
+
+    this.sk.beginShape(this.sk.LINES)
+    for (let i = 0; i < segments.length - 1; i++) {
+      if (this.areSegmentsAdjacent(segments[i], segments[i + 1])) {
+        if (perSegmentColor) this.sk.stroke(this.drawUtils.setCodeColor(segments[i].codes))
+        this.emitConnectionVertices(view, dataTrail, segments[i].end, segments[i + 1].start)
       }
     }
+    this.sk.endShape()
   }
 
   // Emit vertex pair for a connection line (used within beginShape/endShape)
@@ -583,9 +599,12 @@ export class DrawMovement {
   // Low-level drawing operations for segments, vertices, and shapes.
   // ============================================================
 
-  // Draw segment vertices as LINES pairs (for batched drawing)
-  // LINES mode draws separate line segments between each pair of vertices
   /**
+   * Emits one segment's vertices as LINES pairs, for batched drawing.
+   *
+   * LINES mode draws a separate line between each pair of vertices, which is what
+   * lets many segments share one shape.
+   *
    * @param {number} view
    * @param {DataPoint[]} dataTrail
    * @param {number} start
@@ -628,10 +647,22 @@ export class DrawMovement {
   /**
    * Emits one point of a LINES run, applying screen-space decimation.
    *
-   * This composes with the index reduction rather than duplicating it:
-   * MIN_PIXEL_DISTANCE_SQ bounds the gap between vertices in *screen* pixels
-   * after zoom, while the reduction bounds the path's deviation in *source*
-   * units. Zooming out discards more; zooming in gets detail back.
+   * Two reductions meet here, bounding different things off the same
+   * pathSimplification budget. The one in path-lod.ts bounds *deviation* from
+   * the chord and is computed once per user, so it serves both views and keeps
+   * points only the space-time view needs. This one bounds the *gap* between
+   * emitted vertices and runs per view, so it can drop what this view has no use
+   * for. The two views therefore prune quite differently: zoomed to ten seconds
+   * on example-10/teacher.csv the floor plan discards about a tenth of the
+   * reduction's points while the space-time view keeps nearly all of them, the
+   * time axis having spread them out there. A reduction shared between views
+   * cannot make that call, which is why both exist — see "prunes each view
+   * independently" in draw-movement.test.ts.
+   *
+   * A dropped point does not advance runLast, so the gap is always measured from
+   * the last vertex actually *emitted*. That is what holds the drawn polyline
+   * within one budget of the trail, rather than letting it drift a budget per
+   * point dropped.
    *
    * @param {number} view
    * @param {DataPoint[]} dataTrail
@@ -648,7 +679,7 @@ export class DrawMovement {
       const dx = x - this.runLastX
       const dy = y - this.runLastY
       const dz = z - this.runLastZ
-      if (dx * dx + dy * dy + dz * dz < DrawMovement.MIN_PIXEL_DISTANCE_SQ) return
+      if (dx * dx + dy * dy + dz * dz < this.minGapSq) return
     }
 
     if (this.runHasPrev) {
@@ -662,18 +693,6 @@ export class DrawMovement {
     this.runLastX = x
     this.runLastY = y
     this.runLastZ = z
-  }
-
-  /**
-   * @param {number} view
-   * @param {DataPoint[]} dataTrail
-   * @param {number} start
-   * @param {number} end
-   */
-  drawSegment(view, dataTrail, start, end) {
-    this.sk.beginShape(this.sk.LINES)
-    this.drawSegmentVerticesAsLines(view, dataTrail, start, end)
-    this.sk.endShape()
   }
 
   /**
@@ -707,19 +726,6 @@ export class DrawMovement {
   // STYLING
   // Stroke and fill management for path color mode.
   // ============================================================
-
-  /**
-   * @param {number} stopLength
-   * @param {string[]} codes
-   */
-  applySegmentStyle(stopLength, codes) {
-    this.setStroke(this.drawUtils.setCodeColor(codes))
-    this.sk.strokeWeight(
-      this.drawUtils.isStopped(stopLength)
-        ? drawState.config.stopStrokeWeight
-        : drawState.config.movementStrokeWeight
-    )
-  }
 
   /** @param {string} color */
   setFill(color) {

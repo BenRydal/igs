@@ -1,7 +1,13 @@
-import { afterEach, describe, it, expect } from 'vitest'
+import { afterEach, beforeEach, describe, it, expect } from 'vitest'
 import { DrawMovement } from './draw-movement.js'
 import { DataPoint } from '../../models/dataPoint.js'
+import { readFileSync } from 'node:fs'
+import { buildPathLod, quantizeScales, type ViewScales } from './path-lod'
 import ConfigStore, { initialConfig } from '../../stores/configStore'
+import { resetGPS, setGPSMode } from '../../stores/gpsStore'
+import { timelineV2Store } from '../timeline/store'
+import { FloorPlan } from '../floorplan/floorplan'
+import { GPS_NORMALIZED_SIZE } from '../gps/gps-transformer'
 import type { DrawUtils } from './draw-utils.js'
 import type { IgsP5 } from '../p5/igs-p5'
 
@@ -575,7 +581,7 @@ describe('DrawMovement.activeMask', () => {
  * DrawMovement whose sketch records every vertex() call. Points are projected to
  * x = index * SPACING so a recorded x identifies which trail index was emitted.
  */
-const SPACING = 100 // comfortably past MIN_PIXEL_DISTANCE_SQ (8px)
+const SPACING = 100 // comfortably past the gap threshold at any slider setting
 
 const makeEmitter = () => {
   const vertices: number[] = []
@@ -688,32 +694,673 @@ describe('DrawMovement.drawSegmentVerticesAsLines with a reduction', () => {
 })
 
 describe('DrawMovement screen-space decimation', () => {
-  // The reduction bounds deviation in source units; MIN_PIXEL_DISTANCE_SQ bounds
-  // the gap between vertices in screen pixels after zoom. Both apply.
-  const tightTrail = (count: number) =>
-    Array.from({ length: count }, (_, i) => new DataPoint('', i, i, 0))
+  // The decimator bounds the *gap* between emitted vertices, in screen pixels,
+  // off the same pathSimplification budget the reduction measures *deviation*
+  // with. Because the gap is measured from the last vertex emitted rather than
+  // the last one considered, it is this step that fixes the drawn path's
+  // distance from the trail.
+  const tightTrail = (count: number, spacing = 1) =>
+    Array.from({ length: count }, (_, i) => new DataPoint('', i, i * spacing, 0))
 
-  it('drops interior points closer together than the pixel threshold', () => {
-    const { dm, vertices } = makeEmitter()
+  afterEach(() => {
+    ConfigStore.set({ ...initialConfig })
+  })
+
+  /**
+   * An emitter whose decimator runs at the given pixel budget.
+   *
+   * The budget is set on the store *before* construction and never assigned to
+   * the instance, so these tests cover the wiring from slider to threshold as
+   * well as the threshold's effect.
+   */
+  const atBudget = (budget: number) => {
+    ConfigStore.set({ ...initialConfig, pathSimplification: budget })
+    return makeEmitter()
+  }
+
+  // The link the rest of this block relies on: the gap rule reads the same
+  // budget the reduction does.
+  it('takes its threshold from the simplification budget', () => {
+    for (const budget of [0.5, 1, 4, 8]) {
+      expect(atBudget(budget).dm.minGapSq).toBeCloseTo(budget ** 2, 9)
+    }
+  })
+
+  it('drops interior points closer together than the budget', () => {
+    const { dm, vertices } = atBudget(8)
     dm.lod = null
-    // 1px apart, well under the 8px threshold.
     dm.drawSegmentVerticesAsLines(1, tightTrail(6), 0, 5)
     // Only the two forced endpoints survive.
     expect(vertices).toEqual([0, 5])
   })
 
   it('exempts the segment endpoints from the threshold', () => {
-    const { dm, vertices } = makeEmitter()
+    const { dm, vertices } = atBudget(8)
     dm.lod = new Int32Array([0, 1, 2, 3])
     dm.drawSegmentVerticesAsLines(1, tightTrail(4), 0, 3)
     expect(vertices).toEqual([0, 3])
   })
 
   it('keeps points once they clear the threshold', () => {
-    const { dm, vertices } = makeEmitter()
+    const { dm, vertices } = atBudget(8)
     dm.lod = null
     const trail = [0, 20, 40].map((x, i) => new DataPoint('', i, x, 0))
     dm.drawSegmentVerticesAsLines(1, trail, 0, 2)
     expect(vertices).toEqual([0, 20, 20, 40])
+  })
+
+  // A tighter budget has to keep detail a looser one discards.
+  it('keeps more detail at a tighter budget', () => {
+    const trail = tightTrail(40, 2)
+    const coarse = atBudget(8)
+    coarse.dm.lod = null
+    coarse.dm.drawSegmentVerticesAsLines(1, trail, 0, 39)
+
+    const fine = atBudget(1)
+    fine.dm.lod = null
+    fine.dm.drawSegmentVerticesAsLines(1, trail, 0, 39)
+
+    expect(fine.vertices.length).toBeGreaterThan(coarse.vertices.length)
+  })
+
+  // Every point dropped is within one budget of the last *emitted* vertex, not
+  // of its own predecessor — which is what makes the drawn polyline stay inside
+  // the budget rather than drifting a budget per dropped point.
+  it('measures the gap from the last emitted vertex, not the last candidate', () => {
+    const { dm, vertices } = atBudget(5)
+    dm.lod = null
+    // Steps of 3px: each is inside the budget on its own, but the second is 6px
+    // from the vertex actually emitted, so it must be kept.
+    const trail = [0, 3, 6, 9].map((x, i) => new DataPoint('', i, x, 0))
+    dm.drawSegmentVerticesAsLines(1, trail, 0, 3)
+    expect(vertices).toEqual([0, 6, 6, 9])
+  })
+})
+
+// ============================================================
+// Batched drawing: one shape per pass, whatever the colour mode
+// ============================================================
+
+/**
+ * DrawMovement whose sketch records the shape calls in order, so a test can
+ * assert that one shape wraps a whole pass and that the right colour was in
+ * force at each vertex.
+ *
+ * Separate from makeEmitter because this needs the shape and style surface that
+ * the vertex-level tests deliberately leave off the fake, and because it records
+ * an event stream rather than a bare vertex list.
+ *
+ * @see drawBatchedSegments for why a colour can change inside one shape.
+ */
+type ShapeEvent =
+  | { kind: 'begin' }
+  | { kind: 'end' }
+  | { kind: 'stroke'; color: string }
+  | { kind: 'weight'; weight: number }
+  | { kind: 'vertex'; index: number }
+
+const makeBatchRecorder = () => {
+  const events: ShapeEvent[] = []
+  const dm = new DrawMovement(
+    {
+      PLAN: 0,
+      SPACETIME: 1,
+      LINES: 'LINES',
+      beginShape: () => events.push({ kind: 'begin' }),
+      endShape: () => events.push({ kind: 'end' }),
+      stroke: (color: string) => events.push({ kind: 'stroke', color }),
+      strokeWeight: (weight: number) => events.push({ kind: 'weight', weight }),
+      vertex: (x: number) => events.push({ kind: 'vertex', index: x / SPACING }),
+    } as unknown as IgsP5,
+    {
+      // One colour per code, so an asserted colour names the segment it came from.
+      setCodeColor: (codes: string[]) => (codes.length ? `#${codes[0]}` : '#none'),
+      createAugmentPoint: (_view: number, point: DataPoint) => ({
+        point,
+        pos: { viewXPos: point.x ?? 0, floorPlanYPos: 0, zPos: 0 },
+      }),
+    } as unknown as DrawUtils
+  )
+  dm.shade = '#shade'
+  return { dm, events }
+}
+
+/** The colour in force at each emitted vertex, in emission order. */
+const colorsAtVertices = (events: ShapeEvent[]) => {
+  const colors: string[] = []
+  let current = ''
+  for (const event of events) {
+    if (event.kind === 'stroke') current = event.color
+    if (event.kind === 'vertex') colors.push(current)
+  }
+  return colors
+}
+
+const countOf = (events: ShapeEvent[], kind: ShapeEvent['kind']) =>
+  events.filter((e) => e.kind === kind).length
+
+/**
+ * Both methods below read the colour mode from the store, as the draw layer does.
+ *
+ * pathSimplification goes to zero with it so the decimator passes everything
+ * through: these tests are about which colour is in force at each vertex, not
+ * about which vertices survive.
+ */
+const setPathColorMode = (on: boolean) =>
+  ConfigStore.set({ ...initialConfig, isPathColorMode: on, pathSimplification: 0 })
+
+describe('DrawMovement.drawBatchedSegments', () => {
+  // Three one-link segments, each carrying its own code, laid out so a recorded
+  // vertex index names the trail index it came from.
+  const trail = spacedTrail(6)
+  const segments = [
+    { start: 0, end: 1, isStopped: false, codes: ['a'] },
+    { start: 2, end: 3, isStopped: false, codes: ['b'] },
+    { start: 4, end: 5, isStopped: false, codes: ['c'] },
+  ]
+
+  afterEach(() => {
+    ConfigStore.set({ ...initialConfig })
+  })
+
+  it('wraps the whole pass in a single shape', () => {
+    setPathColorMode(true)
+    const { dm, events } = makeBatchRecorder()
+    dm.lod = null
+    dm.drawBatchedSegments(1, trail, segments, false, 1)
+    expect(countOf(events, 'begin')).toBe(1)
+    expect(countOf(events, 'end')).toBe(1)
+  })
+
+  // p5 keeps the stroke colour per vertex in immediate mode, so one shape can
+  // carry a colour per segment — which is what lets a whole pass batch into a
+  // single draw call instead of one per segment.
+  it('gives each segment its own colour inside that one shape', () => {
+    setPathColorMode(true)
+    const { dm, events } = makeBatchRecorder()
+    dm.lod = null
+    dm.drawBatchedSegments(1, trail, segments, false, 1)
+    expect(colorsAtVertices(events)).toEqual(['#a', '#a', '#b', '#b', '#c', '#c'])
+  })
+
+  // Both vertices of a LINES pair must share a colour, or p5 interpolates
+  // between them and the segment comes out gradated rather than solid.
+  it('emits both ends of a link under the same colour', () => {
+    setPathColorMode(true)
+    const { dm, events } = makeBatchRecorder()
+    dm.lod = null
+    dm.drawBatchedSegments(1, trail, segments, false, 1)
+    const colors = colorsAtVertices(events)
+    for (let i = 0; i < colors.length; i += 2) expect(colors[i]).toBe(colors[i + 1])
+  })
+
+  // Single colour mode must not pay for a stroke() per segment: sk.stroke parses
+  // its argument, and a path can hold hundreds of segments.
+  it('sets the stroke once for the batch in single colour mode', () => {
+    setPathColorMode(false)
+    const { dm, events } = makeBatchRecorder()
+    dm.lod = null
+    dm.drawBatchedSegments(1, trail, segments, false, 1)
+    expect(events.filter((e) => e.kind === 'stroke')).toEqual([{ kind: 'stroke', color: '#shade' }])
+    expect(colorsAtVertices(events).every((c) => c === '#shade')).toBe(true)
+  })
+
+  it('draws only the segments matching the pass', () => {
+    setPathColorMode(true)
+    const { dm, events } = makeBatchRecorder()
+    dm.lod = null
+    const mixed = [
+      { start: 0, end: 1, isStopped: false, codes: ['a'] },
+      { start: 2, end: 3, isStopped: true, codes: ['b'] },
+    ]
+    dm.drawBatchedSegments(1, trail, mixed, true, 9)
+    expect(colorsAtVertices(events)).toEqual(['#b', '#b'])
+    expect(events.filter((e) => e.kind === 'weight')).toEqual([{ kind: 'weight', weight: 9 }])
+  })
+})
+
+describe('DrawMovement.drawSegmentConnections', () => {
+  const trail = spacedTrail(6)
+  // Adjacent in the trail, so each pair gets a connecting line; the third is
+  // detached, so the gap is left alone.
+  const segments = [
+    { start: 0, end: 1, isStopped: false, codes: ['a'] },
+    { start: 2, end: 3, isStopped: false, codes: ['b'] },
+    { start: 5, end: 5, isStopped: false, codes: ['c'] },
+  ]
+
+  afterEach(() => {
+    ConfigStore.set({ ...initialConfig })
+  })
+
+  it('batches every connection into one shape', () => {
+    setPathColorMode(true)
+    const { dm, events } = makeBatchRecorder()
+    dm.drawSegmentConnections(1, trail, segments)
+    expect(countOf(events, 'begin')).toBe(1)
+    expect(countOf(events, 'end')).toBe(1)
+  })
+
+  // A connection is coloured by the segment it leaves.
+  it('colours each connection by the segment it leaves', () => {
+    setPathColorMode(true)
+    const { dm, events } = makeBatchRecorder()
+    dm.drawSegmentConnections(1, trail, segments)
+    expect(colorsAtVertices(events)).toEqual(['#a', '#a'])
+  })
+
+  it('draws nothing between segments that are not adjacent', () => {
+    setPathColorMode(true)
+    const { dm, events } = makeBatchRecorder()
+    dm.drawSegmentConnections(1, trail, [segments[0], segments[2]])
+    expect(countOf(events, 'vertex')).toBe(0)
+  })
+
+  it('leaves the stroke alone in single colour mode', () => {
+    setPathColorMode(false)
+    const { dm, events } = makeBatchRecorder()
+    dm.drawSegmentConnections(1, trail, segments)
+    expect(countOf(events, 'stroke')).toBe(0)
+  })
+})
+
+// ============================================================
+// View scales: the input the reduction measures its budget in
+// ============================================================
+
+/**
+ * DrawMovement wired for viewScales: a real FloorPlan over a fake image, the
+ * real timeline store, and a sketch supplying only the time projection.
+ *
+ * The real FloorPlan is used rather than a stub because the rotation swap and
+ * the GPS-versus-image source dimensions are exactly what needs checking, and a
+ * stub would just restate the thing under test.
+ */
+const CANVAS_LEFT = 11
+const makeScaler = (img: { width: number; height: number } | null, rotation: number) => {
+  const floorPlan = new FloorPlan(null as unknown as IgsP5)
+  floorPlan.img = img as unknown as import('p5').Image
+  floorPlan.curFloorPlanRotation = rotation
+  const box = { width: 800, height: 600 }
+  const dm = new DrawMovement(
+    {
+      floorPlan,
+      gui: { fpContainer: { getContainer: () => box } },
+      // igsSketch's 2D branch: a timeline pixel through the view window, then
+      // shifted into canvas coordinates.
+      mapSelectTimeToPixelTime: (value: number) =>
+        timelineV2Store.viewPixelToPixel(value) - CANVAS_LEFT,
+    } as unknown as IgsP5,
+    {} as unknown as DrawUtils
+  )
+  return { dm, floorPlan, box }
+}
+
+describe('DrawMovement.viewScales', () => {
+  const img = { width: 1551, height: 1833 }
+
+  beforeEach(() => {
+    ConfigStore.set({ ...initialConfig })
+    resetGPS()
+    timelineV2Store.initialize(300, 0)
+    timelineV2Store.updateXPositions(40, 840)
+  })
+
+  afterEach(() => {
+    ConfigStore.set({ ...initialConfig })
+    resetGPS()
+  })
+
+  // Oracle: a scale is the screen displacement produced by one unit of data, so
+  // compare it against two evaluations of the projection the renderer uses.
+  // This is what catches the rotation swap, where data x drives screen y.
+  it('matches the projection it scales, at every rotation', () => {
+    for (const rotation of [0, 1, 2, 3]) {
+      const { dm, floorPlan, box } = makeScaler(img, rotation)
+      const scales = dm.viewScales() as { sx: number; sy: number; st: number }
+      const at = (x: number, y: number) => floorPlan.getScaledXYPos(x, y, box)
+      const [bx, by] = at(500, 700)
+      const [dxx, dxy] = at(501, 700)
+      const [dyx, dyy] = at(500, 701)
+      // One unit of data x moves the point by sx, along whichever screen axis
+      // this rotation sends it down; same for data y and sy.
+      expect(Math.hypot(dxx - bx, dxy - by)).toBeCloseTo(scales.sx, 9)
+      expect(Math.hypot(dyx - bx, dyy - by)).toBeCloseTo(scales.sy, 9)
+    }
+  })
+
+  // Quarter turns send data x down the screen's y axis, so the effective
+  // dimensions that govern each data axis swap over. Pinned directly because
+  // getting it backwards still produces plausible-looking numbers.
+  it('swaps which effective dimension governs which data axis on a quarter turn', () => {
+    const upright = makeScaler(img, 0).dm.viewScales() as { sx: number; sy: number }
+    const turned = makeScaler(img, 1).dm.viewScales() as { sx: number; sy: number }
+    expect(upright.sx).toBeCloseTo(800 / img.width, 9)
+    expect(upright.sy).toBeCloseTo(600 / img.height, 9)
+    expect(turned.sx).toBeCloseTo(600 / img.width, 9)
+    expect(turned.sy).toBeCloseTo(800 / img.height, 9)
+  })
+
+  // GPS coordinates are normalized into a square of their own rather than the
+  // image's pixel grid; getSourceDimensions hides that, and it must stay hidden.
+  it('scales against the normalized square in GPS mode', () => {
+    setGPSMode(true)
+    const { dm } = makeScaler(img, 0)
+    const scales = dm.viewScales() as { sx: number; sy: number }
+    expect(scales.sx).toBeCloseTo(800 / GPS_NORMALIZED_SIZE, 9)
+    expect(scales.sy).toBeCloseTo(600 / GPS_NORMALIZED_SIZE, 9)
+  })
+
+  // The time scale is fitted from two evaluations of the real projection rather
+  // than rederived, so the thing to check is that the fit reproduces it.
+  it('reports the true slope of the time projection, at every zoom', () => {
+    const { dm } = makeScaler(img, 0)
+    const project = (time: number) =>
+      timelineV2Store.viewPixelToPixel(timelineV2Store.timeToPixel(time)) - CANVAS_LEFT
+    for (const [start, end] of [
+      [0, 300],
+      [0, 60],
+      [120, 180],
+      [290, 300],
+    ]) {
+      timelineV2Store.setView(start, end)
+      const { st } = dm.viewScales() as { st: number }
+      expect(st).toBeCloseTo(Math.abs(project(10) - project(9)), 6)
+    }
+  })
+
+  // Zooming in stretches the time axis, which is the whole reason the reduction
+  // has to key on it.
+  it('grows the time scale as the timeline zooms in', () => {
+    const { dm } = makeScaler(img, 0)
+    timelineV2Store.setView(0, 300)
+    const full = (dm.viewScales() as { st: number }).st
+    timelineV2Store.setView(140, 160)
+    const zoomed = (dm.viewScales() as { st: number }).st
+    expect(zoomed).toBeGreaterThan(full * 5)
+  })
+
+  // Nothing to scale against before a floor plan loads, which getPathLod reads
+  // as "emit every point" rather than guessing a budget.
+  it('returns null with no floor plan loaded', () => {
+    expect(makeScaler(null, 0).dm.viewScales()).toBeNull()
+  })
+
+  // A zero-length recording leaves the time axis collapsed rather than dividing
+  // by zero.
+  it('collapses the time scale for a zero-length recording', () => {
+    timelineV2Store.initialize(0, 0)
+    timelineV2Store.updateXPositions(40, 840)
+    const { dm } = makeScaler(img, 0)
+    expect((dm.viewScales() as { st: number }).st).toBe(0)
+  })
+
+  // Every scale reaches a cache key, and NaN !== NaN would miss it every frame.
+  it('never reports a non-finite scale', () => {
+    for (const box of [
+      { width: 0, height: 0 },
+      { width: 800, height: 0 },
+    ]) {
+      for (const preserve of [false, true]) {
+        ConfigStore.set({ ...initialConfig, preserveFloorplanAspectRatio: preserve })
+        const floorPlan = new FloorPlan(null as unknown as IgsP5)
+        floorPlan.img = img as unknown as import('p5').Image
+        const dm = new DrawMovement(
+          {
+            floorPlan,
+            gui: { fpContainer: { getContainer: () => box } },
+            mapSelectTimeToPixelTime: (value: number) =>
+              timelineV2Store.viewPixelToPixel(value) - CANVAS_LEFT,
+          } as unknown as IgsP5,
+          {} as unknown as DrawUtils
+        )
+        const scales = dm.viewScales() as { sx: number; sy: number; st: number }
+        expect(Number.isFinite(scales.sx)).toBe(true)
+        expect(Number.isFinite(scales.sy)).toBe(true)
+        expect(Number.isFinite(scales.st)).toBe(true)
+      }
+    }
+  })
+})
+
+// ============================================================
+// The two reductions composed, on real data
+// ============================================================
+
+/**
+ * What the renderer actually puts on screen, measured against a bundled dataset.
+ *
+ * The figures quoted in path-lod.ts's header come from here, so they cannot go
+ * stale without this failing. It drives the real DrawMovement over a real
+ * reduction rather than a reimplementation of either, because the composition is
+ * the point: path-lod bounds deviation from the chord, emitVertexAt bounds the
+ * gap between emitted vertices, and only the two together describe the drawing.
+ */
+const BUNDLED_TRAIL = 'static/data/example-10/teacher.csv'
+/** example-10's floor plan is 1551x1833; 800x600 is a typical container. */
+const SOURCE = { width: 1551, height: 1833 }
+const SCREEN = { width: 800, height: 600 }
+
+const loadBundledTrail = (file: string) => {
+  const lines = readFileSync(file, 'utf8').trim().split(/\r?\n/)
+  const head = lines[0].split(',').map((h) => h.trim().toLowerCase())
+  const ti = head.indexOf('time')
+  const xi = head.indexOf('x')
+  const yi = head.indexOf('y')
+  const trail: DataPoint[] = []
+  for (let i = 1; i < lines.length; i++) {
+    const cells = lines[i].split(',')
+    const time = +cells[ti]
+    const x = +cells[xi]
+    const y = +cells[yi]
+    if (Number.isFinite(time) && Number.isFinite(x) && Number.isFinite(y)) {
+      trail.push(new DataPoint('', time, x, y))
+    }
+  }
+  trail.sort((a, b) => (a.time ?? 0) - (b.time ?? 0))
+  return trail
+}
+
+/** Distance from p to the segment a-b, clamped to the segment. */
+const toSegment = (p: number[], a: number[], b: number[]) => {
+  const dx = b[0] - a[0]
+  const dy = b[1] - a[1]
+  const lengthSq = dx * dx + dy * dy
+  let t = lengthSq < 1e-12 ? 0 : ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / lengthSq
+  t = Math.max(0, Math.min(1, t))
+  return Math.hypot(p[0] - (a[0] + t * dx), p[1] - (a[1] + t * dy))
+}
+
+/**
+ * The polyline the renderer actually draws for `view`, in screen pixels.
+ *
+ * Both measurements below read this, so they cannot drift apart over what counts
+ * as a drawn vertex. Consecutive duplicates collapse because emitVertexAt emits
+ * LINES pairs — each point arrives as the end of one pair and the start of the
+ * next. Repeats of a position visited *elsewhere* in the trail are kept: they
+ * are genuinely emitted vertices, and folding them together would understate
+ * the floor plan, where the subject crosses its own path, while leaving the
+ * space-time view untouched, where strictly increasing time makes a repeat
+ * impossible.
+ *
+ * `project` stands in for the view: the floor plan reads (x, y), the space-time
+ * view reads (time, y).
+ */
+const drawnPolyline = (
+  trail: DataPoint[],
+  lod: Int32Array | null,
+  budget: number,
+  project: (point: DataPoint) => [number, number]
+) => {
+  const drawn: [number, number][] = []
+  // Set before construction so the threshold comes from the budget by the same
+  // route production uses, rather than being assigned onto the instance.
+  ConfigStore.set({ ...initialConfig, pathSimplification: budget })
+  const dm = new DrawMovement(
+    {
+      PLAN: 0,
+      SPACETIME: 1,
+      vertex: (x: number, y: number) => {
+        const last = drawn[drawn.length - 1]
+        if (last === undefined || last[0] !== x || last[1] !== y) drawn.push([x, y])
+      },
+    } as unknown as IgsP5,
+    {
+      createAugmentPoint: (_view: number, point: DataPoint) => {
+        const [x, y] = project(point)
+        return { point, pos: { viewXPos: x, floorPlanYPos: y, zPos: 0 } }
+      },
+    } as unknown as DrawUtils
+  )
+  dm.lod = lod
+  dm.drawSegmentVerticesAsLines(1, trail, 0, trail.length - 1)
+  return drawn
+}
+
+/**
+ * Worst distance, in screen pixels, from any original point to the polyline the
+ * renderer actually draws for `view`.
+ *
+ * The walk is single-pass. Every drawn vertex is the projection of some trail
+ * point, produced by this same `project`, so an exact float comparison advances
+ * the drawn-polyline cursor in step with the trail — which keeps this O(points)
+ * rather than O(points x vertices) on a sixty-thousand-point trail. Measuring
+ * against the cursor's segment rather than the whole polyline can only
+ * overstate the distance, so the bound it reports is conservative.
+ */
+const renderedError = (
+  trail: DataPoint[],
+  lod: Int32Array | null,
+  budget: number,
+  project: (point: DataPoint) => [number, number]
+) => {
+  const drawn = drawnPolyline(trail, lod, budget, project)
+  if (drawn.length < 2) return Infinity
+
+  let worst = 0
+  let cursor = 0
+  for (const point of trail) {
+    const p = project(point)
+    const next = drawn[cursor + 1]
+    if (next !== undefined && p[0] === next[0] && p[1] === next[1] && cursor + 2 < drawn.length) {
+      cursor++
+    }
+    worst = Math.max(worst, toSegment(p, drawn[cursor], drawn[cursor + 1]))
+  }
+  return worst
+}
+
+/** How many vertices the renderer emits for `view`, after both reductions. */
+const drawnVertexCount = (
+  trail: DataPoint[],
+  lod: Int32Array | null,
+  budget: number,
+  project: (point: DataPoint) => [number, number]
+) => drawnPolyline(trail, lod, budget, project).length
+
+describe('the drawn path against a bundled dataset', () => {
+  const trail = loadBundledTrail(BUNDLED_TRAIL)
+
+  afterEach(() => {
+    ConfigStore.set({ ...initialConfig })
+  })
+
+  const sx = SCREEN.width / SOURCE.width
+  const sy = SCREEN.height / SOURCE.height
+
+  /** Screen scales for a given visible timeline window, in seconds. */
+  const scalesFor = (windowSeconds: number) =>
+    quantizeScales({ sx, sy, st: SCREEN.width / windowSeconds })
+
+  const planOf =
+    (s: ViewScales) =>
+    (p: DataPoint): [number, number] => [(p.x ?? 0) * s.sx, (p.y ?? 0) * s.sy]
+  const spacetimeOf =
+    (s: ViewScales) =>
+    (p: DataPoint): [number, number] => [(p.time ?? 0) * s.st, (p.y ?? 0) * s.sy]
+
+  const fullSpan = (trail[trail.length - 1].time ?? 0) - (trail[0].time ?? 0)
+
+  it('loaded the dataset the header quotes', () => {
+    expect(trail.length).toBe(60680)
+  })
+
+  /**
+   * The composed bound. Each stage is allowed the budget, so the pair can exceed
+   * it: a point can sit a budget from a chord whose own endpoints the gap rule
+   * then moved. Measured at about 1.7x across both views and both zoom levels,
+   * so 2x is the claim, with the measured figures in the header.
+   */
+  const COMPOSED = 2
+
+  it('keeps the drawn path within the composed bound, in both views, at both zooms', () => {
+    for (const windowSeconds of [fullSpan, 30]) {
+      const scales = scalesFor(windowSeconds)
+      for (const budget of [1, 4]) {
+        const lod = buildPathLod(trail, budget, scales)
+        expect(renderedError(trail, lod, budget, planOf(scales))).toBeLessThanOrEqual(
+          budget * COMPOSED
+        )
+        expect(renderedError(trail, lod, budget, spacetimeOf(scales))).toBeLessThanOrEqual(
+          budget * COMPOSED
+        )
+      }
+    }
+  })
+
+  // The time axis is what makes the bound survive timeline zoom, and this is the
+  // measurement that justifies its cost. At full view it is nearly collapsed and
+  // changes nothing; zoomed to thirty seconds, a reduction blind to it drifts an
+  // order of magnitude past the budget.
+  it('needs the time axis once the timeline is zoomed, and not before', () => {
+    const budget = 1
+    for (const [windowSeconds, timeBlindShouldExceed] of [
+      [fullSpan, false],
+      [30, true],
+    ] as const) {
+      const scales = scalesFor(windowSeconds)
+      const spacetime = spacetimeOf(scales)
+      const withTime = buildPathLod(trail, budget, scales)
+      const blind = buildPathLod(trail, budget, { ...scales, st: 0 })
+
+      expect(renderedError(trail, withTime, budget, spacetime)).toBeLessThanOrEqual(
+        budget * COMPOSED
+      )
+      const blindError = renderedError(trail, blind, budget, spacetime)
+      if (timeBlindShouldExceed) expect(blindError).toBeGreaterThan(10)
+      else expect(blindError).toBeLessThanOrEqual(budget * COMPOSED)
+    }
+  })
+
+  // The case for keeping a per-view gap rule at all: the shared reduction holds
+  // points that only the space-time view needs, and the floor plan can drop
+  // them. The effect grows with zoom, because that is when the reduction keeps
+  // most for the time axis.
+  // The case for a per-view gap rule at all. The shared reduction keeps points
+  // for whichever view needs them; each view then drops the ones it has no use
+  // for, and the two disagree sharply. Zoomed in, the time axis has spread the
+  // reduction's points across the space-time view, so nearly all of them earn
+  // their place there — while on the floor plan many sit on top of each other
+  // and an eighth go. A reduction shared between views cannot make that call.
+  it('prunes each view independently', () => {
+    const budget = 1
+    const scales = scalesFor(10)
+    const lod = buildPathLod(trail, budget, scales)
+    const planDropped = 1 - drawnVertexCount(trail, lod, budget, planOf(scales)) / lod.length
+    const spacetimeDropped =
+      1 - drawnVertexCount(trail, lod, budget, spacetimeOf(scales)) / lod.length
+    expect(planDropped).toBeGreaterThan(0.08)
+    expect(spacetimeDropped).toBeLessThan(0.02)
+  })
+
+  // The slider has to reach the output: a tighter budget must produce a
+  // measurably tighter drawn path, not just a tighter intermediate list.
+  it('narrows the drawn path as the budget narrows', () => {
+    const scales = scalesFor(fullSpan)
+    const plan = planOf(scales)
+    const fine = renderedError(trail, buildPathLod(trail, 1, scales), 1, plan)
+    const coarse = renderedError(trail, buildPathLod(trail, 4, scales), 4, plan)
+    expect(fine).toBeLessThan(2)
+    expect(coarse).toBeGreaterThan(4)
   })
 })

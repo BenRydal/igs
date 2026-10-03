@@ -237,9 +237,10 @@ export class FloorPlan {
    * image's own pixel grid, or the normalized square that GPS coordinates are
    * projected into. Null until an image is loaded.
    *
-   * Used to convert a screen-pixel budget into source units, which is why it
-   * lives here rather than in the draw layer — the GPS-mode distinction is
-   * already this module's concern.
+   * Read by the draw layer to scale source coordinates into screen pixels, which
+   * is the space the path reduction measures its error budget in. It lives here
+   * rather than there because the GPS-mode distinction is already this module's
+   * concern.
    *
    * @returns {ContainerSize | null}
    */
