@@ -24,8 +24,8 @@ export interface Collection {
 
 /** Display order in the picker. */
 export const COLLECTIONS: readonly Collection[] = [
-  { id: 'timss', label: 'TIMSS Video Study' },
-  { id: 'tau', label: 'TAU Project' },
+  { id: 'timss', label: 'TIMSS Math/Science Lessons' },
+  { id: 'tau', label: 'TAU Math Lessons' },
   { id: 'tours', label: 'Walking Tours' },
   { id: 'museums', label: 'Museum Visits' },
   { id: 'other', label: 'Other Examples' },
@@ -61,7 +61,7 @@ export const EXAMPLE_DATASETS: Record<string, ExampleDataset> = {
     featured: true,
   },
   'example-2': {
-    label: 'Museum: Single Gallery',
+    label: 'Single Gallery',
     collection: 'museums',
     files: ['adhir.csv', 'blake.csv', 'jeans.csv', 'lily.csv', 'mae.csv', 'conversation.csv'],
     videoId: 'pWJ3xNk1Zpg',
@@ -69,7 +69,7 @@ export const EXAMPLE_DATASETS: Record<string, ExampleDataset> = {
     hasTranscript: true,
   },
   'example-3': {
-    label: 'US: Weather',
+    label: 'U.S. Science: Weather',
     collection: 'timss',
     files: ['teacher.csv', 'lesson-graph.csv', 'conversation.csv'],
     videoId: 'Iu0rxb-xkMk',
@@ -78,7 +78,7 @@ export const EXAMPLE_DATASETS: Record<string, ExampleDataset> = {
     hasCodes: true,
   },
   'example-4': {
-    label: '3rd Grade: Odd & Even Numbers',
+    label: '3rd Grade Numbers Discussion',
     collection: 'other',
     files: [
       'cassandra.csv',
@@ -93,7 +93,7 @@ export const EXAMPLE_DATASETS: Record<string, ExampleDataset> = {
     hasTranscript: true,
   },
   'example-5': {
-    label: 'Czech Republic: Density',
+    label: 'Czech Republic Science: Density',
     collection: 'timss',
     files: ['teacher.csv', 'lesson-graph.csv', 'conversation.csv'],
     videoId: 'xrisdnH5GmQ',
@@ -102,7 +102,7 @@ export const EXAMPLE_DATASETS: Record<string, ExampleDataset> = {
     hasCodes: true,
   },
   'example-6': {
-    label: 'Japan: Angles',
+    label: 'Japan Math: Angles',
     collection: 'timss',
     files: ['teacher.csv', 'lesson-graph.csv', 'conversation.csv'],
     videoId: 'nLDXU2c0vLw',
@@ -111,7 +111,7 @@ export const EXAMPLE_DATASETS: Record<string, ExampleDataset> = {
     hasCodes: true,
   },
   'example-7': {
-    label: 'US: Linear Equations',
+    label: 'U.S. Math: Linear Equations',
     collection: 'timss',
     files: ['teacher.csv', 'lesson-graph.csv', 'conversation.csv'],
     videoId: '5Eg1fJ-ZpQs',
@@ -120,7 +120,7 @@ export const EXAMPLE_DATASETS: Record<string, ExampleDataset> = {
     hasCodes: true,
   },
   'example-8': {
-    label: 'US: Rocks',
+    label: 'U.S. Science: Rocks',
     collection: 'timss',
     files: ['teacher.csv', 'lesson-graph.csv', 'conversation.csv'],
     videoId: 'gPb_ST74bpg',
@@ -129,7 +129,7 @@ export const EXAMPLE_DATASETS: Record<string, ExampleDataset> = {
     hasCodes: true,
   },
   'example-9': {
-    label: 'Netherlands: Pythagorean Theorem',
+    label: 'Netherlands Math: Pythagorean Theorem',
     collection: 'timss',
     files: ['teacher.csv', 'lesson-graph.csv', 'conversation.csv'],
     videoId: 'P5Lxj2nfGzc',
@@ -138,20 +138,20 @@ export const EXAMPLE_DATASETS: Record<string, ExampleDataset> = {
     hasCodes: true,
   },
   'example-10': {
-    label: 'Clark Math Lesson',
+    label: 'Clark',
     collection: 'tau',
     files: ['teacher.csv', 'conversation.csv'],
     duration: '1h 35m',
     hasTranscript: true,
   },
   'example-11': {
-    label: 'Museum: Complete Visit',
+    label: 'Complete Visit',
     collection: 'museums',
     files: ['adhir.csv', 'blake.csv', 'jeans.csv', 'lily.csv', 'mae.csv'],
     duration: '47 min',
   },
   'example-12': {
-    label: 'Civil Rights Tour: Creating the Route',
+    label: 'Creating a Civil Rights Tour',
     collection: 'tours',
     files: ['Making Tour.csv', 'conversation.csv'],
     duration: '43 min',
@@ -159,7 +159,7 @@ export const EXAMPLE_DATASETS: Record<string, ExampleDataset> = {
     hasTranscript: true,
   },
   'example-13': {
-    label: 'Civil Rights Tour: Walking the Route',
+    label: 'Walking a Civil Rights Tour',
     collection: 'tours',
     files: ['Taking Tour.csv', 'conversation.csv'],
     duration: '50 min',
@@ -176,21 +176,21 @@ export const EXAMPLE_DATASETS: Record<string, ExampleDataset> = {
     hasCodes: true,
   },
   'example-17': {
-    label: 'Sandy Math Lesson 1',
+    label: 'Sandy 1',
     collection: 'tau',
     files: ['teacher.csv', 'blue.csv', 'green.csv', 'pink.csv', 'whiteboard.csv'],
     duration: '1h 27m',
     hasCodes: true,
   },
   'example-18': {
-    label: 'Sandy Math Lesson 2',
+    label: 'Sandy 2',
     collection: 'tau',
     files: ['teacher.csv', 'codes.csv'],
     duration: '1h 14m',
     hasCodes: true,
   },
   'example-19': {
-    label: 'Sofia Math Lesson',
+    label: 'Sofia',
     collection: 'tau',
     files: ['teacher.csv', 'lesson.csv', 'conversation.csv'],
     duration: '50 min',
@@ -198,7 +198,7 @@ export const EXAMPLE_DATASETS: Record<string, ExampleDataset> = {
     hasCodes: true,
   },
   'example-20': {
-    label: 'Vince Math Lesson',
+    label: 'Vince',
     collection: 'tau',
     files: ['teacher.csv', 'codes.csv'],
     duration: '1h 21m',

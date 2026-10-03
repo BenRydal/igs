@@ -13,17 +13,23 @@
 
   let { isModalOpen = writable(false) } = $props()
 
-  /** Titles and durations come from EXAMPLE_DATASETS; only the thumbnail is
-   *  specific to this modal. */
-  const examples = [
+  /** Durations come from EXAMPLE_DATASETS. Thumbnails are specific to this
+   *  modal, as is `title` where a dataset label reads as ambiguous without the
+   *  collection heading the example picker gives it. */
+  const cards: { id: string; image: string; title?: string }[] = [
     { id: 'example-1', image: '/images/1-example-jordan.webp' },
-    { id: 'example-2', image: '/images/2-example-museum.webp' },
-    { id: 'example-3', image: '/images/3-example-timss.webp' },
+    {
+      id: 'example-2',
+      image: '/images/2-example-museum.webp',
+      title: 'Museum Gallery Visit',
+    },
+    { id: 'example-3', image: '/images/3-example-timss.webp', title: '8th Grade Science Lesson' },
     { id: 'example-12', image: '/images/4-example-tour.webp' },
-  ].map(({ id, image }) => ({
+  ]
+  const examples = cards.map(({ id, image, title }) => ({
     id,
     image,
-    title: EXAMPLE_DATASETS[id]?.label ?? id,
+    title: title ?? EXAMPLE_DATASETS[id]?.label ?? id,
     duration: EXAMPLE_DATASETS[id]?.duration ?? '',
   }))
 
