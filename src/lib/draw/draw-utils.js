@@ -3,8 +3,6 @@
  */
 
 import { timelineV2Store } from '../timeline/store'
-import CodeStore from '../../stores/codeStore'
-import { get } from 'svelte/store'
 import { drawState } from './draw-state'
 
 /** @typedef {import('../p5/igs-p5').IgsP5} IgsP5 */
@@ -28,7 +26,7 @@ export class DrawUtils {
 
   /** @param {string[]} searchCodes */
   setCodeColor(searchCodes) {
-    const entries = get(CodeStore)
+    const entries = drawState.codes
 
     // Handle data points with no codes - look up the "no codes" entry color
     if (searchCodes.length === 0) {
@@ -51,7 +49,7 @@ export class DrawUtils {
 
   /** @param {string[]} codesArray */
   isShowingInCodeList(codesArray) {
-    const entries = get(CodeStore)
+    const entries = drawState.codes
     if (codesArray.length === 0) {
       // Handle data points with no codes
       const noCodesEntry = entries.find((entry) => entry.code === 'no codes')

@@ -41,7 +41,7 @@
   import MdTagMultiple from '~icons/mdi/tag-multiple'
   import MdTableEye from '~icons/mdi/table-eye'
 
-  import type { User } from '../models/user'
+  import { nextRevision, type User } from '../models/user'
   import UserStore from '../stores/userStore'
   import P5Store from '../stores/p5Store'
   import VideoStore, {
@@ -563,6 +563,7 @@
           dataPoint.speech = ''
           return dataPoint
         })
+        user.revision = nextRevision()
         return user
       })
     )
@@ -579,6 +580,7 @@
           dataPoint.codes = []
           return dataPoint
         })
+        user.revision = nextRevision()
         return user
       })
     )
@@ -1115,22 +1117,13 @@
         (e) => handleConfigChange('animationRate', parseFloat(e.currentTarget.value))
       )}
       {@render rangeRow(
-        `Sampling interval: ${currentConfig.samplingInterval} sec`,
-        'samplingInterval',
-        0.1,
-        5,
-        0.1,
-        currentConfig.samplingInterval,
-        (e) => handleConfigChange('samplingInterval', parseFloat(e.currentTarget.value))
-      )}
-      {@render rangeRow(
-        `Small data threshold: ${currentConfig.smallDataThreshold}`,
-        'smallDataThreshold',
-        500,
-        10000,
-        100,
-        currentConfig.smallDataThreshold,
-        (e) => handleConfigChange('smallDataThreshold', parseInt(e.currentTarget.value))
+        `Path simplification: ${currentConfig.pathSimplification}px`,
+        'pathSimplification',
+        0.5,
+        8,
+        0.5,
+        currentConfig.pathSimplification,
+        (e) => handleConfigChange('pathSimplification', parseFloat(e.currentTarget.value))
       )}
       {@render rangeRow(
         `Movement line weight: ${currentConfig.movementStrokeWeight}`,

@@ -1,5 +1,4 @@
-import ConfigStore from '../../stores/configStore'
-import { get } from 'svelte/store'
+import { drawState } from '../draw/draw-state'
 
 /** @typedef {import('../p5/igs-p5').IgsP5} IgsP5 */
 
@@ -13,14 +12,22 @@ export class FloorPlanContainer {
     this.sk = sketch
     this.width = start
     this.height = height
+    // Built once rather than per call: getContainer() is reached per data point,
+    // per view, per frame from getSharedPosValues, and every caller only reads
+    // width/height. The values are fixed for this container's lifetime — a
+    // resize constructs a new SketchGUI, and with it a new FloorPlanContainer.
+    this.container = { width: start, height: height }
   }
 
+  // Served by a plain property read off the draw-layer mirror, not a `get()` on
+  // ConfigStore: overCursor and overSlicer are reached from isVisible, which
+  // runs per point per frame whenever a spatial selection mode is active.
   getSelectorSize() {
-    return get(ConfigStore).selectorSize
+    return drawState.config.selectorSize
   }
 
   getSlicerSize() {
-    return get(ConfigStore).slicerSize
+    return drawState.config.slicerSize
   }
 
   drawRegionSelector() {
@@ -67,9 +74,6 @@ export class FloorPlanContainer {
   }
 
   getContainer() {
-    return {
-      width: this.width,
-      height: this.height,
-    }
+    return this.container
   }
 }

@@ -21,13 +21,13 @@ import type {
 } from './types.js'
 
 import { DataPoint } from '../../models/dataPoint.js'
-import { User } from '../../models/user.js'
+import { User, nextRevision } from '../../models/user.js'
 import { USER_COLORS } from '../constants/index.js'
 
 import UserStore from '../../stores/userStore'
 import CodeStore from '../../stores/codeStore.js'
 import { timelineV2Store } from '../timeline/store'
-import ConfigStore from '../../stores/configStore.js'
+import ConfigStore, { initialConfig } from '../../stores/configStore.js'
 import VideoStore, { loadVideo, reset as resetVideo } from '../../stores/videoStore'
 import { pause as pausePlayback } from '../../stores/playbackStore'
 import { toastStore } from '../../stores/toastStore'
@@ -38,6 +38,15 @@ import { validateGPSData } from '../gps/gps-validation'
 import { GPXParser } from '../gps/gpx-parser'
 import { KMLParser } from '../gps/kml-parser'
 import { SUPPORTED_EXTENSIONS } from '../validation/file-types'
+
+/**
+ * A recording at or under this length counts as short for the purpose of
+ * picking a default stop threshold. Set at a minute and a half: it comfortably
+ * covers the sub-minute datasets that need a low threshold, and the next
+ * shortest bundled recording is seven minutes, so the exact value is not
+ * load-bearing.
+ */
+const SHORT_RECORDING_SECONDS = 90
 
 export class Core {
   sketch: IgsP5
@@ -368,19 +377,16 @@ export class Core {
    * Adjusts stop slider value based on dataset size and reapplies conversation data if present
    * Called when new movement data is loaded to ensure all data is consistently processed
    *
-   * @remarks Sets stopSliderValue to 1 for small datasets, 5 for larger ones based on smallDataThreshold
+   * @remarks Resets stopSliderValue via defaultStopThreshold()
    */
   reProcessAllMovementData() {
-    const { smallDataThreshold } = get(ConfigStore)
-    const anySmallFile = this.movementData.some((file) => file.csvData.length <= smallDataThreshold)
-
     this.movementData.forEach((file) => {
       this.updateUsersForMovement(file.csvData, file.fileName)
     })
 
     ConfigStore.update((store) => ({
       ...store,
-      stopSliderValue: anySmallFile ? 1 : 5,
+      stopSliderValue: this.defaultStopThreshold(),
     }))
 
     if (this.conversationData) {
@@ -389,13 +395,36 @@ export class Core {
   }
 
   /**
+   * Initial stop threshold for a freshly loaded dataset, in seconds.
+   *
+   * Keyed on how long the recording is, because that is what decides whether a
+   * pause is meaningful: one second is a sixtieth of a one-minute clip and
+   * nothing at all in a ninety-minute lesson. A flat 5s default showed *zero*
+   * stop circles on the shortest bundled dataset.
+   *
+   * Deliberately two cases. Duration only avoids that worst case — it is a poor
+   * predictor of stop length in general, with example-2 and example-4 both
+   * running about seven minutes while their median stops are 0.0s and 9.0s. The
+   * slider is the real answer for any particular analysis, so there is nothing
+   * to be gained from a finer rule here.
+   */
+  private defaultStopThreshold(): number {
+    const durationSeconds = this.movementData.reduce((longest, file) => {
+      const last = file.csvData[file.csvData.length - 1]
+      return Math.max(longest, last?.time ?? 0)
+    }, 0)
+    if (durationSeconds <= 0) return initialConfig.stopSliderValue
+    return durationSeconds <= SHORT_RECORDING_SECONDS ? 1 : 5
+  }
+
+  /**
    * Processes movement CSV data and creates/updates user data trails
-   * Applies sampling for large datasets or includes all points for small datasets
+   * Keeps every valid row regardless of file size; the renderer reduces for
+   * drawing only (lib/draw/path-lod.ts)
    * Creates new user if not found, otherwise resets existing user's data trail
    *
    * @param csvData - Array of movement rows containing time, x, y coordinates
    * @param userName - Name identifier for the user (typically from filename)
-   * @remarks For datasets larger than smallDataThreshold, samples points based on samplingInterval
    * @example
    * ```typescript
    * const movementData: MovementRow[] = [
@@ -406,8 +435,6 @@ export class Core {
    * ```
    */
   updateUsersForMovement = (csvData: MovementRow[], userName: string): void => {
-    const { smallDataThreshold, samplingInterval } = get(ConfigStore)
-
     UserStore.update((currentUsers) => {
       let users = [...currentUsers]
       let user = users.find((user) => user.name === userName)
@@ -418,21 +445,13 @@ export class Core {
       } else user.dataTrail = [] // reset to overwrite user with new data if same user is loaded again
       user.movementIsLoaded = true
 
-      if (csvData.length <= smallDataThreshold) {
-        csvData.forEach((row) => {
-          if (!this.coreUtils.movementRowForType(row)) return
-          user.dataTrail.push(new DataPoint('', row.time, row.x, row.y))
-        })
-      } else {
-        let lastSampledTime = csvData[0]?.time
-        csvData.forEach((row) => {
-          if (!this.coreUtils.movementRowForType(row)) return
-          if (row.time - lastSampledTime >= samplingInterval) {
-            user.dataTrail.push(new DataPoint('', row.time, row.x, row.y))
-            lastSampledTime = row.time
-          }
-        })
-      }
+      // Every valid row is kept, at any file size. Reduction is a rendering
+      // concern (see lib/draw/path-lod.ts), so selection, stop durations, hover,
+      // the data table and export all read full-resolution truth.
+      csvData.forEach((row) => {
+        if (!this.coreUtils.movementRowForType(row)) return
+        user.dataTrail.push(new DataPoint('', row.time, row.x, row.y))
+      })
       return users
     })
     this.updateTimelineValues()
@@ -565,9 +584,14 @@ export class Core {
     UserStore.update((currentUsers) => {
       const users = [...currentUsers]
       users.forEach((user) => {
-        user.dataTrail.sort((a, b) => ((a.time ?? 0) > (b.time ?? 0) ? 1 : -1))
+        // Must stay a subtraction. `a > b ? 1 : -1` never returns 0, so it claims
+        // both orders for equal times, and an inconsistent comparator leaves ties
+        // in an unspecified order. The draw range, hover dot, code-range bounds
+        // and conversation insert all binary-search this array.
+        user.dataTrail.sort((a, b) => (a.time ?? 0) - (b.time ?? 0))
         this.updateStopValues(user.dataTrail)
         this.updateCodeValues(user.dataTrail)
+        user.revision = nextRevision() // invalidate derived-data caches
       })
       return users
     })
@@ -685,15 +709,37 @@ export class Core {
     this.addMissingCoordinates(newDataPoint, validPointsWithCoordinates)
 
     // Find the correct position to insert the new point to maintain time order
-    const newTime = newDataPoint.time ?? 0
-    const insertIndex = dataTrail.findIndex((point) => (point.time ?? 0) > newTime)
-    if (insertIndex === -1) {
+    const insertIndex = this.findInsertIndex(dataTrail, newDataPoint.time ?? 0)
+    if (insertIndex === dataTrail.length) {
       // If no point has a later time, append the new point to the end
       dataTrail.push(newDataPoint)
     } else {
       // Insert the new point at the correct index to maintain time order
       dataTrail.splice(insertIndex, 0, newDataPoint)
     }
+  }
+
+  /**
+   * Index of the first point later than `newTime`, or dataTrail.length if there
+   * is none — the upper bound, so equal times keep their existing order.
+   *
+   * Requires the trail to already be sorted by time.
+   *
+   * Note the caller still `splice`s each point into place, so a transcript
+   * import costs turns x points element copies. Removing that means collecting
+   * the new points against the untouched trail and merging the two sorted arrays
+   * once at the end; it is not a one-line change, because addMissingCoordinates
+   * binary-searches the very array being inserted into.
+   */
+  private findInsertIndex(dataTrail: DataPoint[], newTime: number): number {
+    let low = 0
+    let high = dataTrail.length
+    while (low < high) {
+      const mid = (low + high) >>> 1
+      if ((dataTrail[mid].time ?? 0) > newTime) high = mid
+      else low = mid + 1
+    }
+    return low
   }
 
   addMissingCoordinates(newDataPoint: DataPoint, validPointsWithCoordinates: DataPoint[]): void {
@@ -842,15 +888,12 @@ export class Core {
     startTime: number,
     endTime: number
   ) => {
-    // Find the first data point with time >= startTime
-    const startIndex = dataPoints.findIndex(
-      (dataPoint) => dataPoint.time !== null && dataPoint.time >= startTime
-    )
-
-    // Find the last data point with time <= endTime
-    const endIndex = dataPoints.findLastIndex(
-      (dataPoint) => dataPoint.time !== null && dataPoint.time <= endTime
-    )
+    // Both boundaries come from a binary search, so stamping the whole code list
+    // costs O(codes x log points) rather than a full trail scan per code entry.
+    // updateCodeValues runs from finalizeUserData, which sorts the trail first,
+    // so it is ordered here.
+    const startIndex = this.firstIndexAtOrAfter(dataPoints, startTime)
+    const endIndex = this.lastIndexAtOrBefore(dataPoints, endTime)
 
     if (startIndex === -1 || endIndex === -1) return
 
@@ -860,6 +903,40 @@ export class Core {
         dataPoints[i].codes.push(code)
       }
     }
+  }
+
+  /**
+   * First index whose time is at or after `time`, or -1 if there is none.
+   *
+   * The search runs on `time ?? 0`, matching how finalizeUserData sorts, then
+   * steps over any null-time points at the boundary so a null-time point is
+   * never the index returned. Finalized trails hold no null times, so that step
+   * is normally a no-op.
+   */
+  private firstIndexAtOrAfter(dataPoints: DataPoint[], time: number): number {
+    let low = 0
+    let high = dataPoints.length
+    while (low < high) {
+      const mid = (low + high) >>> 1
+      if ((dataPoints[mid].time ?? 0) >= time) high = mid
+      else low = mid + 1
+    }
+    while (low < dataPoints.length && dataPoints[low].time === null) low++
+    return low === dataPoints.length ? -1 : low
+  }
+
+  /** Last index whose time is at or before `time`, or -1 if there is none. */
+  private lastIndexAtOrBefore(dataPoints: DataPoint[], time: number): number {
+    let low = 0
+    let high = dataPoints.length
+    while (low < high) {
+      const mid = (low + high) >>> 1
+      if ((dataPoints[mid].time ?? 0) <= time) low = mid + 1
+      else high = mid
+    }
+    let index = low - 1
+    while (index >= 0 && dataPoints[index].time === null) index--
+    return index
   }
 
   updateCodeStore = (uniqueCodes: string[]) => {
