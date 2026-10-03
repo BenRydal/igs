@@ -15,14 +15,6 @@ function inPanel(tab: string, selector: string, fallback: string): () => Element
   }
 }
 
-/** Filters only exist in advanced mode; otherwise point at the toggle that reveals them. */
-function filterStep(): Element {
-  if (document.querySelector(railItem('Filters'))) {
-    return inPanel('filters', '#igs-side-panel', railItem('Filters'))()
-  }
-  return inPanel('settings', '#advanced-mode-toggle', railItem('Settings'))()
-}
-
 export const tourSteps: TourStep[] = [
   {
     element: '.navbar',
@@ -65,7 +57,7 @@ export const tourSteps: TourStep[] = [
     },
   },
   {
-    element: filterStep,
+    element: inPanel('filters', '#igs-side-panel', railItem('Filters')),
     popover: {
       title: 'Filter and Select Options',
       description:

@@ -131,25 +131,21 @@
     <span class="zoom-hint">Drag to zoom</span>
   {/if}
 
-  <!-- Activity gradient toggle (advanced mode only) -->
-  {#if $ConfigStore.advancedMode}
-    <button
-      class="flex items-center gap-1.5 px-1.5 py-0.5 rounded hover:bg-gray-200/50 transition-colors cursor-pointer"
-      class:opacity-50={!$ConfigStore.showActivityGradient}
-      title={$ConfigStore.showActivityGradient
-        ? 'Hide activity gradient'
-        : 'Show activity gradient'}
-      onclick={() =>
-        ConfigStore.update((c) => ({ ...c, showActivityGradient: !c.showActivityGradient }))}
-    >
-      <span class="text-[10px] text-gray-400">stopped</span>
-      <div
-        class="w-10 h-1.5 rounded-sm"
-        style="background: linear-gradient(to right, rgba(0,0,0,0.1), rgba(0,0,0,0.4))"
-      ></div>
-      <span class="text-[10px] text-gray-400">moving</span>
-    </button>
-  {/if}
+  <!-- Activity gradient toggle -->
+  <button
+    class="flex items-center gap-1.5 px-1.5 py-0.5 rounded hover:bg-gray-200/50 transition-colors cursor-pointer"
+    class:opacity-50={!$ConfigStore.showActivityGradient}
+    title={$ConfigStore.showActivityGradient ? 'Hide activity gradient' : 'Show activity gradient'}
+    onclick={() =>
+      ConfigStore.update((c) => ({ ...c, showActivityGradient: !c.showActivityGradient }))}
+  >
+    <span class="text-[10px] text-gray-400">stopped</span>
+    <div
+      class="w-10 h-1.5 rounded-sm"
+      style="background: linear-gradient(to right, rgba(0,0,0,0.1), rgba(0,0,0,0.4))"
+    ></div>
+    <span class="text-[10px] text-gray-400">moving</span>
+  </button>
 
   <!-- Time display -->
   <div class="flex items-center gap-1 ml-auto font-mono text-sm">
