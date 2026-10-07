@@ -1,11 +1,36 @@
 import GPSStore from '../../stores/gpsStore'
 import ConfigStore from '../../stores/configStore'
-import { get } from 'svelte/store'
 import { GPS_NORMALIZED_SIZE } from '../gps/gps-transformer'
 
 /** @typedef {import('../p5/igs-p5').IgsP5} IgsP5 */
 /** @typedef {{ width: number, height: number }} ContainerSize */
 /** @typedef {{ width: number, height: number, offsetX: number, offsetY: number }} EffectiveDims */
+/**
+ * @typedef {{ containerWidth: number, containerHeight: number, imgW: number,
+ *   imgH: number, rotation: number, preserve: boolean, result: EffectiveDims }} EffDimsMemo
+ */
+
+/**
+ * Mirrors of the only two store fields this module reads, following the same
+ * subscribe-once pattern as draw-state.ts.
+ *
+ * getScaledXYPos and getEffectiveDimensions run once per data point, per view,
+ * per frame — hundreds of thousands of times a second on a large dataset — and
+ * a `get(store)` call allocates and runs a subscriber every time. A writable
+ * notifies synchronously on set, so a mirror is exactly as current as a `get()`.
+ */
+const storeMirror = {
+  isGPSMode: false,
+  preserveFloorplanAspectRatio: false,
+}
+
+GPSStore.subscribe((gps) => {
+  storeMirror.isGPSMode = gps.isGPSMode
+})
+
+ConfigStore.subscribe((config) => {
+  storeMirror.preserveFloorplanAspectRatio = config.preserveFloorplanAspectRatio
+})
 
 export class FloorPlan {
   /** @param {IgsP5} sk */
@@ -14,6 +39,8 @@ export class FloorPlan {
     /** @type {import('p5').Image | null} */
     this.img = null
     this.curFloorPlanRotation = 1 // [0-3] 4 rotation modes none, 90, 180, 270
+    /** @type {EffDimsMemo | null} */
+    this.effDimsMemo = null
   }
 
   /**
@@ -24,9 +51,46 @@ export class FloorPlan {
    * @returns {EffectiveDims}
    */
   getEffectiveDimensions(container) {
-    const config = get(ConfigStore)
+    const preserve = storeMirror.preserveFloorplanAspectRatio
+    const imgW = this.img ? this.img.width : 0
+    const imgH = this.img ? this.img.height : 0
 
-    if (!config.preserveFloorplanAspectRatio || !this.img) {
+    // Memoized because this is called once per data point, per view, per frame
+    // via getScaledXYPos, yet depends on nothing that varies between points.
+    const memo = this.effDimsMemo
+    if (
+      memo !== null &&
+      memo.containerWidth === container.width &&
+      memo.containerHeight === container.height &&
+      memo.imgW === imgW &&
+      memo.imgH === imgH &&
+      memo.rotation === this.curFloorPlanRotation &&
+      memo.preserve === preserve
+    ) {
+      return memo.result
+    }
+
+    const result = this.computeEffectiveDimensions(container, preserve)
+    this.effDimsMemo = {
+      containerWidth: container.width,
+      containerHeight: container.height,
+      imgW,
+      imgH,
+      rotation: this.curFloorPlanRotation,
+      preserve,
+      result,
+    }
+    return result
+  }
+
+  /**
+   * Uncached body of getEffectiveDimensions.
+   * @param {ContainerSize} container
+   * @param {boolean} preserve
+   * @returns {EffectiveDims}
+   */
+  computeEffectiveDimensions(container, preserve) {
+    if (!preserve || !this.img) {
       return { width: container.width, height: container.height, offsetX: 0, offsetY: 0 }
     }
 
@@ -98,14 +162,12 @@ export class FloorPlan {
     // Callers only invoke this with a loaded floorplan (guarded via getImg());
     // the early return is defensive and satisfies null narrowing.
     if (!this.img) return [0, 0]
-    const gpsState = get(GPSStore)
+    const isGPSMode = storeMirror.isGPSMode
     const eff = this.getEffectiveDimensions(container)
 
     // Normalize coordinates to 0-1 range based on mode
-    const normX =
-      gpsState.isGPSMode && this.img ? xPos / GPS_NORMALIZED_SIZE : xPos / this.img.width
-    const normY =
-      gpsState.isGPSMode && this.img ? yPos / GPS_NORMALIZED_SIZE : yPos / this.img.height
+    const normX = isGPSMode ? xPos / GPS_NORMALIZED_SIZE : xPos / this.img.width
+    const normY = isGPSMode ? yPos / GPS_NORMALIZED_SIZE : yPos / this.img.height
 
     // Apply rotation and scale to effective dimensions, then add offset
     switch (this.curFloorPlanRotation) {
@@ -168,5 +230,25 @@ export class FloorPlan {
 
   getImg() {
     return this.img
+  }
+
+  /**
+   * Size of the coordinate space data points actually live in: the floorplan
+   * image's own pixel grid, or the normalized square that GPS coordinates are
+   * projected into. Null until an image is loaded.
+   *
+   * Read by the draw layer to scale source coordinates into screen pixels, which
+   * is the space the path reduction measures its error budget in. It lives here
+   * rather than there because the GPS-mode distinction is already this module's
+   * concern.
+   *
+   * @returns {ContainerSize | null}
+   */
+  getSourceDimensions() {
+    if (!this.img) return null
+    if (storeMirror.isGPSMode) {
+      return { width: GPS_NORMALIZED_SIZE, height: GPS_NORMALIZED_SIZE }
+    }
+    return { width: this.img.width, height: this.img.height }
   }
 }

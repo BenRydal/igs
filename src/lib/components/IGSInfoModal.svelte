@@ -10,6 +10,12 @@
   import MdFileDocument from '~icons/mdi/file-document-outline'
   import MdCompass from '~icons/mdi/compass-outline'
   import MdMessage from '~icons/mdi/message-outline'
+  import MdShieldLock from '~icons/mdi/shield-lock-outline'
+  import MdGithub from '~icons/mdi/github'
+  import MdCite from '~icons/mdi/school-outline'
+
+  const CITATION =
+    'Shapiro, B. R., Silvis, D., & Hall, R. (2025). Visualization as theory and experience: interactive qualitative data visualization for the learning sciences. Journal of the Learning Sciences, 34(5), 840–871.'
 
   let { isModalOpen = writable(false) } = $props()
 
@@ -150,22 +156,36 @@
       <!-- Footer -->
       <div class="text-sm text-gray-500">
         <div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
-          <span class="flex items-center gap-1">
-            <span class="inline-block w-2 h-2 rounded-full bg-green-500"></span>
-            100% private — runs in your browser
+          <span class="flex items-center gap-1.5" title="Your data never leaves your device">
+            <MdShieldLock class="text-base text-emerald-600" /> 100% private, runs in your browser
           </span>
-          <span>•</span>
-          <a href="https://github.com/BenRydal/igs" target="_blank" class="hover:underline"
-            >Open source (GPL v3)</a
+          <span aria-hidden="true">•</span>
+          <a
+            href="https://github.com/BenRydal/igs"
+            target="_blank"
+            title="GPL v3"
+            class="flex items-center gap-1.5 hover:underline"
           >
-          <span>•</span>
+            <MdGithub class="text-base" /> Open source
+          </a>
+          <span aria-hidden="true">•</span>
           <a
             href="https://doi.org/10.1080/10508406.2025.2537945"
             target="_blank"
-            class="text-emerald-600 hover:underline"
-            >Shapiro, Silvis, & Hall (2025). <em>Visualization as Theory and Experience</em></a
+            title={CITATION}
+            class="flex items-center gap-1.5 hover:underline"
           >
+            <MdCite class="text-base" /> Cite
+          </a>
         </div>
+        <p class="text-center text-gray-600 mt-3">
+          Designed by
+          <a href="https://www.benrydal.com" target="_blank" class="hover:underline"
+            >Ben Rydal Shapiro</a
+          >
+          and
+          <a href="https://www.edwinzhao.com" target="_blank" class="hover:underline">Edwin Zhao</a>
+        </p>
       </div>
     </div>
   </div>

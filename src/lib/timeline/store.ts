@@ -4,7 +4,7 @@
  * Svelte store for managing timeline state with zoom and pan.
  */
 
-import { writable, derived, get } from 'svelte/store'
+import { writable, derived } from 'svelte/store'
 import type { TimelineState, DragTarget } from './types'
 import { clamp, mapRange, zoomAtPoint, panView } from './utils'
 
@@ -36,6 +36,21 @@ const initialState: TimelineState = {
 
 function createTimelineStore() {
   const { subscribe, set, update } = writable<TimelineState>(initialState)
+
+  /**
+   * Synchronous mirror of the store's value.
+   *
+   * The coordinate-conversion methods below are called once per data point, per
+   * view, per frame by the draw layer, and `get({ subscribe })` both allocates a
+   * store-shaped object literal and runs a full subscribe/notify/unsubscribe
+   * cycle on every call — three times over for pixelToViewPixel and overAxis. A
+   * writable notifies its subscribers synchronously on set/update, so this
+   * mirror is always exactly as current as a `get()` would be.
+   */
+  let current: TimelineState = initialState
+  subscribe((s) => {
+    current = s
+  })
 
   // Configuration
   const minZoomDuration = 1 // 1 second minimum zoom
@@ -193,7 +208,7 @@ function createTimelineStore() {
      * Convert pixel position to time (full data range)
      */
     pixelToTime(pixel: number): number {
-      const s = get({ subscribe })
+      const s = current
       return mapRange(pixel, s.leftX, s.rightX, s.dataStart, s.dataEnd)
     },
 
@@ -201,7 +216,7 @@ function createTimelineStore() {
      * Convert time to pixel position (full data range)
      */
     timeToPixel(time: number): number {
-      const s = get({ subscribe })
+      const s = current
       return mapRange(time, s.dataStart, s.dataEnd, s.leftX, s.rightX)
     },
 
@@ -209,7 +224,7 @@ function createTimelineStore() {
      * Get view start pixel position
      */
     getViewStartPixel(): number {
-      const s = get({ subscribe })
+      const s = current
       return mapRange(s.viewStart, s.dataStart, s.dataEnd, s.leftX, s.rightX)
     },
 
@@ -217,7 +232,7 @@ function createTimelineStore() {
      * Get view end pixel position
      */
     getViewEndPixel(): number {
-      const s = get({ subscribe })
+      const s = current
       return mapRange(s.viewEnd, s.dataStart, s.dataEnd, s.leftX, s.rightX)
     },
 
@@ -225,7 +240,7 @@ function createTimelineStore() {
      * Convert timeline pixel to view-space pixel
      */
     pixelToViewPixel(pixel: number): number {
-      const s = get({ subscribe })
+      const s = current
       const viewStartPx = this.getViewStartPixel()
       const viewEndPx = this.getViewEndPixel()
       return mapRange(pixel, s.leftX, s.rightX, viewStartPx, viewEndPx)
@@ -235,7 +250,7 @@ function createTimelineStore() {
      * Convert view-space pixel to timeline pixel
      */
     viewPixelToPixel(pixel: number): number {
-      const s = get({ subscribe })
+      const s = current
       const viewStartPx = this.getViewStartPixel()
       const viewEndPx = this.getViewEndPixel()
       return mapRange(pixel, viewStartPx, viewEndPx, s.leftX, s.rightX)
@@ -256,7 +271,7 @@ function createTimelineStore() {
      * Get current state snapshot
      */
     getState(): TimelineState {
-      return get({ subscribe })
+      return current
     },
   }
 }

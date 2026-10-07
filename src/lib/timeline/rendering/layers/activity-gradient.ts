@@ -6,10 +6,17 @@
  *
  * Calculation:
  * 1. Divide timeline into NUM_BUCKETS time buckets
- * 2. For each movement segment, calculate speed (distance / time)
- * 3. Add that speed to all buckets the segment spans
- * 4. Average speeds per bucket, normalize using 95th percentile
+ * 2. For each movement segment, split its distance and its duration across the
+ *    buckets it overlaps, in proportion to how much of it falls in each
+ * 3. Each bucket's mean speed is its total distance over its total duration
+ * 4. Normalize using the 95th percentile
  * 5. Map normalized activity (0-1) to opacity (0.08-0.4)
+ *
+ * The duration weighting in step 2 is load-bearing. An unweighted mean of
+ * per-segment speeds is only the real mean speed when every segment spans the
+ * same amount of time, and they do not: sampling intervals vary within a file
+ * and across files. Because `distance` is an absolute value, positional jitter
+ * does not cancel either, so short segments would inflate the result.
  */
 
 import { get } from 'svelte/store';
@@ -37,8 +44,8 @@ const NO_DATA_COLOR = 'rgba(0, 0, 0, 0.03)';
 interface ActivityBucket {
 	startTime: number;
 	endTime: number;
-	totalSpeed: number; // Sum of speeds for proper averaging
-	count: number; // Number of samples for proper averaging
+	totalDistance: number; // Distance covered within this bucket
+	totalDuration: number; // Time spent within this bucket (the averaging weight)
 	activity: number; // 0-1 normalized activity level (computed after collection)
 }
 
@@ -61,9 +68,14 @@ export class ActivityGradientLayer implements RenderLayer {
 		const users = get(UserStore);
 		if (!users || users.length === 0) return;
 
-		// Create cache key from data bounds and enabled user count
+		// Keyed on data bounds plus the identity and revision of each enabled user.
+		// Naming the users rather than counting them distinguishes "A enabled, B
+		// disabled" from the reverse when both trails are the same length, and
+		// revision catches in-place trail edits that leave the length unchanged.
 		const enabledUsers = users.filter((u) => u.enabled && u.dataTrail?.length > 1);
-		const newCacheKey = `${state.dataStart}-${state.dataEnd}-${enabledUsers.length}-${enabledUsers.map((u) => u.dataTrail.length).join(',')}`;
+		const newCacheKey = `${state.dataStart}-${state.dataEnd}-${enabledUsers
+			.map((u) => `${u.name}:${u.revision}`)
+			.join(',')}`;
 
 		// Recompute if cache is invalid
 		if (this.cacheKey !== newCacheKey) {
@@ -88,7 +100,7 @@ export class ActivityGradientLayer implements RenderLayer {
 			if (drawWidth <= 0) continue;
 
 			// Get color based on activity level (smooth interpolation)
-			c.fillStyle = this.getActivityColor(bucket.activity, bucket.count > 0);
+			c.fillStyle = this.getActivityColor(bucket.activity, bucket.totalDuration > 0);
 			c.fillRect(drawX, barY, drawWidth + 1, BAR_HEIGHT); // +1 to avoid gaps
 		}
 	}
@@ -109,8 +121,8 @@ export class ActivityGradientLayer implements RenderLayer {
 			buckets.push({
 				startTime: dataStart + i * bucketDuration,
 				endTime: dataStart + (i + 1) * bucketDuration,
-				totalSpeed: 0,
-				count: 0,
+				totalDistance: 0,
+				totalDuration: 0,
 				activity: 0
 			});
 		}
@@ -149,12 +161,17 @@ export class ActivityGradientLayer implements RenderLayer {
 				const startBucket = Math.floor(((prev.time - dataStart) / duration) * NUM_BUCKETS);
 				const endBucket = Math.floor(((curr.time - dataStart) / duration) * NUM_BUCKETS);
 
-				// Add speed to all buckets the segment passes through
+				// Split the segment across the buckets it overlaps, weighting each by
+				// the share of the segment's duration that falls inside it.
 				const minBucket = Math.max(0, startBucket);
 				const maxBucket = Math.min(NUM_BUCKETS - 1, endBucket);
 				for (let b = minBucket; b <= maxBucket; b++) {
-					buckets[b].totalSpeed += speed;
-					buckets[b].count += 1;
+					const bucket = buckets[b];
+					const overlap =
+						Math.min(curr.time, bucket.endTime) - Math.max(prev.time, bucket.startTime);
+					if (overlap <= 0) continue;
+					bucket.totalDistance += speed * overlap;
+					bucket.totalDuration += overlap;
 				}
 			}
 		}
@@ -162,8 +179,8 @@ export class ActivityGradientLayer implements RenderLayer {
 		// Compute averages and collect for percentile calculation
 		const averages: number[] = [];
 		for (const bucket of buckets) {
-			if (bucket.count > 0) {
-				bucket.activity = bucket.totalSpeed / bucket.count;
+			if (bucket.totalDuration > 0) {
+				bucket.activity = bucket.totalDistance / bucket.totalDuration;
 				averages.push(bucket.activity);
 			}
 		}
@@ -176,7 +193,7 @@ export class ActivityGradientLayer implements RenderLayer {
 
 			if (p95Speed > 0) {
 				for (const bucket of buckets) {
-					if (bucket.count > 0) {
+					if (bucket.totalDuration > 0) {
 						bucket.activity = Math.min(1, bucket.activity / p95Speed);
 					}
 				}

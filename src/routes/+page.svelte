@@ -22,6 +22,8 @@
   import MdFilterList from '~icons/mdi/filter-variant'
   import MdSelectAll from '~icons/mdi/selection'
   import MdChat from '~icons/mdi/chat'
+  import MdComment from '~icons/mdi/comment'
+  import MdCommentOff from '~icons/mdi/comment-off'
   import MdFolder from '~icons/mdi/folder-open'
   import MdRoute from '~icons/mdi/routes'
   import MdMuseum from '~icons/mdi/bank'
@@ -41,7 +43,7 @@
   import MdTagMultiple from '~icons/mdi/tag-multiple'
   import MdTableEye from '~icons/mdi/table-eye'
 
-  import type { User } from '../models/user'
+  import { nextRevision, type User } from '../models/user'
   import UserStore from '../stores/userStore'
   import P5Store from '../stores/p5Store'
   import VideoStore, {
@@ -240,7 +242,7 @@
   let isVideoShowing = $state(false)
   let is3DMode = $state(true)
   let timelineEndTime = $state(0)
-  let isTranscriptVisible = $state(true)
+  let isTranscriptVisible = $state(false)
   let spaceTimeTooltip: SpaceTimeTooltip
 
   $effect(() => {
@@ -563,6 +565,7 @@
           dataPoint.speech = ''
           return dataPoint
         })
+        user.revision = nextRevision()
         return user
       })
     )
@@ -579,6 +582,7 @@
           dataPoint.codes = []
           return dataPoint
         })
+        user.revision = nextRevision()
         return user
       })
     )
@@ -964,11 +968,6 @@
   <div class="flex flex-col gap-6 px-3 py-4">
     {#snippet displayBody()}
       <ul class="menu w-full p-0">
-        {@render toggleRow(
-          'Transcript panel',
-          isTranscriptVisible,
-          () => (isTranscriptVisible = !isTranscriptVisible)
-        )}
         {@render toggleRow('Show speech bubbles', $ConfigStore.showConversationRects, () =>
           handleConfigChange('showConversationRects', !$ConfigStore.showConversationRects)
         )}
@@ -1115,22 +1114,13 @@
         (e) => handleConfigChange('animationRate', parseFloat(e.currentTarget.value))
       )}
       {@render rangeRow(
-        `Sampling interval: ${currentConfig.samplingInterval} sec`,
-        'samplingInterval',
-        0.1,
-        5,
-        0.1,
-        currentConfig.samplingInterval,
-        (e) => handleConfigChange('samplingInterval', parseFloat(e.currentTarget.value))
-      )}
-      {@render rangeRow(
-        `Small data threshold: ${currentConfig.smallDataThreshold}`,
-        'smallDataThreshold',
-        500,
-        10000,
-        100,
-        currentConfig.smallDataThreshold,
-        (e) => handleConfigChange('smallDataThreshold', parseInt(e.currentTarget.value))
+        `Path simplification: ${currentConfig.pathSimplification}px`,
+        'pathSimplification',
+        0.5,
+        8,
+        0.5,
+        currentConfig.pathSimplification,
+        (e) => handleConfigChange('pathSimplification', parseFloat(e.currentTarget.value))
       )}
       {@render rangeRow(
         `Movement line weight: ${currentConfig.movementStrokeWeight}`,
@@ -1230,6 +1220,7 @@
           <IconButton
             id="btn-toggle-3d"
             icon={Md3DRotation}
+            label="Space-time"
             tooltip="Toggle 2D/3D"
             onclick={() => {
               p5Instance?.handle3D.update()
@@ -1239,8 +1230,17 @@
           <IconButton
             id="btn-toggle-video"
             icon={isVideoShowing ? MdVideocam : MdVideocamOff}
+            label="Video"
             tooltip="Show/Hide Video"
             onclick={toggleVideo}
+          />
+          <IconButton
+            id="btn-toggle-transcript"
+            icon={isTranscriptVisible ? MdComment : MdCommentOff}
+            label="Transcript"
+            tooltip="Show/Hide Transcript"
+            active={isTranscriptVisible}
+            onclick={() => (isTranscriptVisible = !isTranscriptVisible)}
           />
         </div>
       </div>

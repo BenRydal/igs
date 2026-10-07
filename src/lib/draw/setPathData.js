@@ -11,6 +11,25 @@ import { DrawUtils } from './draw-utils.js'
 /** @typedef {import('../../models/user').User} User */
 /** @typedef {import('../../models/dataPoint').DataPoint} DataPoint */
 
+/**
+ * Cache key for the merged conversation data.
+ *
+ * Keyed on revision, not dataTrail.length: a transcript edit changes a point's
+ * time or text in place without changing the length, and the merge order depends
+ * on time. Colour is baked into the merged entries, so it belongs in the key too
+ * even though it never restamps revision.
+ *
+ * Correctness rests on revision stamps being globally unique; see nextRevision
+ * in models/user for why they have to be.
+ *
+ * Exported so the regression test exercises the real key rather than a copy.
+ *
+ * @param {User[]} conversationUsers
+ */
+export function conversationCacheKey(conversationUsers) {
+  return conversationUsers.map((u) => `${u.name}:${u.revision}:${u.color}`).join('|')
+}
+
 export class SetPathData {
   /** @param {IgsP5} sketch */
   constructor(sketch) {
@@ -34,7 +53,7 @@ export class SetPathData {
       (u) => u.conversation_enabled && u.conversationIsLoaded
     )
     if (conversationUsers.length) {
-      const cacheKey = conversationUsers.map((u) => `${u.name}:${u.dataTrail.length}`).join('|')
+      const cacheKey = conversationCacheKey(conversationUsers)
       if (this.cacheKey !== cacheKey) {
         this.mergedConversationCache = this.mergeConversationData(conversationUsers)
         this.cacheKey = cacheKey

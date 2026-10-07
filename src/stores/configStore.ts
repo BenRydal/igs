@@ -10,12 +10,23 @@ export interface ConfigStoreState {
   highlightToggle: boolean
   maxStopLength: number
   maxTurnLength: number
+  /**
+   * Seconds a subject must stay put before it counts as a stop. Drives the
+   * stopped/moving split, so it shapes stop circles, the segment partition, and
+   * the movement-only / stops-only views.
+   */
   stopSliderValue: number
   alignToggle: boolean
   wordToSearch: string
   animationRate: number
-  samplingInterval: number
-  smallDataThreshold: number
+  /**
+   * How much the drawn path may be simplified, as a screen-pixel error budget:
+   * the line never strays further than this from where the subject actually was,
+   * so a larger number means a coarser path. Applies at render time only: the
+   * imported trail keeps every row, so moving this slider restyles the drawing
+   * of a dataset already on screen (see lib/draw/path-lod.ts).
+   */
+  pathSimplification: number
   conversationRectWidth: number
   movementStrokeWeight: number
   stopStrokeWeight: number
@@ -46,8 +57,7 @@ export const initialConfig: ConfigStoreState = {
   alignToggle: true,
   wordToSearch: '',
   animationRate: 0.05,
-  samplingInterval: 0.5,
-  smallDataThreshold: 3000,
+  pathSimplification: 1,
   conversationRectWidth: 5,
   movementStrokeWeight: 1,
   stopStrokeWeight: 9,
