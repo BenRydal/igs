@@ -22,6 +22,8 @@
   import MdFilterList from '~icons/mdi/filter-variant'
   import MdSelectAll from '~icons/mdi/selection'
   import MdChat from '~icons/mdi/chat'
+  import MdComment from '~icons/mdi/comment'
+  import MdCommentOff from '~icons/mdi/comment-off'
   import MdFolder from '~icons/mdi/folder-open'
   import MdRoute from '~icons/mdi/routes'
   import MdMuseum from '~icons/mdi/bank'
@@ -240,7 +242,7 @@
   let isVideoShowing = $state(false)
   let is3DMode = $state(true)
   let timelineEndTime = $state(0)
-  let isTranscriptVisible = $state(true)
+  let isTranscriptVisible = $state(false)
   let spaceTimeTooltip: SpaceTimeTooltip
 
   $effect(() => {
@@ -966,11 +968,6 @@
   <div class="flex flex-col gap-6 px-3 py-4">
     {#snippet displayBody()}
       <ul class="menu w-full p-0">
-        {@render toggleRow(
-          'Transcript panel',
-          isTranscriptVisible,
-          () => (isTranscriptVisible = !isTranscriptVisible)
-        )}
         {@render toggleRow('Show speech bubbles', $ConfigStore.showConversationRects, () =>
           handleConfigChange('showConversationRects', !$ConfigStore.showConversationRects)
         )}
@@ -1223,6 +1220,7 @@
           <IconButton
             id="btn-toggle-3d"
             icon={Md3DRotation}
+            label="Space-time"
             tooltip="Toggle 2D/3D"
             onclick={() => {
               p5Instance?.handle3D.update()
@@ -1232,8 +1230,17 @@
           <IconButton
             id="btn-toggle-video"
             icon={isVideoShowing ? MdVideocam : MdVideocamOff}
+            label="Video"
             tooltip="Show/Hide Video"
             onclick={toggleVideo}
+          />
+          <IconButton
+            id="btn-toggle-transcript"
+            icon={isTranscriptVisible ? MdComment : MdCommentOff}
+            label="Transcript"
+            tooltip="Show/Hide Transcript"
+            active={isTranscriptVisible}
+            onclick={() => (isTranscriptVisible = !isTranscriptVisible)}
           />
         </div>
       </div>
