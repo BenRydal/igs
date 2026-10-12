@@ -14,6 +14,8 @@
   import MdKeyboard from '~icons/mdi/keyboard'
   import MdCloudDownload from '~icons/mdi/cloud-download'
   import Md3DRotation from '~icons/mdi/rotate-3d-variant'
+  import MdRotateLeft from '~icons/mdi/rotate-left'
+  import MdRotateRight from '~icons/mdi/rotate-right'
   import MdVideocam from '~icons/mdi/video'
   import MdVideocamOff from '~icons/mdi/video-off'
   import MdCheck from '~icons/mdi/check'
@@ -46,6 +48,7 @@
   import { nextRevision, type User } from '../models/user'
   import UserStore from '../stores/userStore'
   import P5Store from '../stores/p5Store'
+  import { rotateFloorplan } from '$lib/utils/p5'
   import VideoStore, {
     toggleVisibility,
     reset as resetVideo,
@@ -640,18 +643,6 @@
       }
     }
 
-    const handleRotateFloorplan = (event: Event) => {
-      const customEvent = event as CustomEvent<{ direction: 'left' | 'right' }>
-      if (p5Instance?.floorPlan) {
-        if (customEvent.detail.direction === 'left') {
-          p5Instance?.floorPlan.setRotateLeft()
-        } else {
-          p5Instance?.floorPlan.setRotateRight()
-        }
-        p5Instance?.loop()
-      }
-    }
-
     const handleDownloadCodes = () => {
       if (p5Instance) {
         p5Instance?.saveCodeFile()
@@ -684,7 +675,6 @@
 
     // Register event listeners
     window.addEventListener('igs:toggle-3d', handleToggle3D)
-    window.addEventListener('igs:rotate-floorplan', handleRotateFloorplan)
     window.addEventListener('igs:download-codes', handleDownloadCodes)
     window.addEventListener('igs:toggle-help', handleToggleHelp)
     window.addEventListener('igs:load-example', handleLoadExample)
@@ -700,7 +690,6 @@
     return () => {
       // Remove keyboard shortcut handlers
       window.removeEventListener('igs:toggle-3d', handleToggle3D)
-      window.removeEventListener('igs:rotate-floorplan', handleRotateFloorplan)
       window.removeEventListener('igs:download-codes', handleDownloadCodes)
       window.removeEventListener('igs:toggle-help', handleToggleHelp)
       window.removeEventListener('igs:load-example', handleLoadExample)
@@ -1348,6 +1337,24 @@
             <TranscriptPanel bind:isVisible={isTranscriptVisible} />
             <ConversationTooltip hideTooltip={isTranscriptVisible} />
             <SpaceTimeTooltip bind:this={spaceTimeTooltip} />
+            <div class="rotate-controls join" style="z-index: {Z_INDEX.FAB}">
+              <button
+                class="btn btn-sm btn-square btn-ghost join-item"
+                title="Rotate floor plan left (Shift+R)"
+                aria-label="Rotate floor plan left"
+                onclick={() => rotateFloorplan('left')}
+              >
+                <MdRotateLeft />
+              </button>
+              <button
+                class="btn btn-sm btn-square btn-ghost join-item"
+                title="Rotate floor plan right (R)"
+                aria-label="Rotate floor plan right"
+                onclick={() => rotateFloorplan('right')}
+              >
+                <MdRotateRight />
+              </button>
+            </div>
             {#if is3DMode}
               <AxesIndicator />
             {/if}
@@ -1562,6 +1569,16 @@
     width: 100%;
     height: 100%;
     overflow: hidden;
+  }
+
+  /* Top-left, over the floor plan they rotate. Translucent like the 3D axes
+     legend so both read as canvas overlays. */
+  .rotate-controls {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    background: rgb(255 255 255 / 0.85);
+    border: 1px solid rgb(0 0 0 / 0.1);
   }
 
   /* Stops the YouTube iframe swallowing the pointermove/pointerup SplitPane
