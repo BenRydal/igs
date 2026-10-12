@@ -5,10 +5,25 @@ import { historyStore } from '../../stores/historyStore'
 import { deepClone } from './deep-clone'
 
 /**
- * Clear all user data with undo
+ * Clear all user data with undo.
+ *
+ * The snapshot shares its User objects, and with them their dataTrails, rather
+ * than deep-cloning. That is sound because this action only replaces the store's
+ * array: no User and no DataPoint is touched, so putting the same objects back
+ * is an exact undo. It also matters — clearAllData is on the path of every
+ * dataset switch, and at full movement resolution a deep clone is tens of
+ * megabytes, held for up to history's 50 entries, with structuredClone blocking
+ * the main thread each time. The array itself is copied so the store's own array
+ * identity stays private.
+ *
+ * Known limit: operations that mutate DataPoints in place without going through
+ * history — clearConversationData, clearCodeData, transcript edits — are not
+ * captured by any snapshot, and with shared references they can also be observed
+ * through one. Reaching that needs an undo, then such a mutation, then a redo
+ * and a second undo.
  */
 export function clearUsers(): void {
-  const before = deepClone(get(UserStore))
+  const before = get(UserStore)
   if (before.length === 0) return
 
   UserStore.set([])
@@ -16,7 +31,7 @@ export function clearUsers(): void {
   historyStore.push({
     actionType: 'data.clear',
     actionLabel: 'Cleared movement data',
-    undo: () => UserStore.set(deepClone(before)),
+    undo: () => UserStore.set([...before]),
     redo: () => UserStore.set([]),
   })
 }
@@ -42,7 +57,9 @@ export function clearCodes(): void {
  * Clear all data with undo
  */
 export function clearAllData(): void {
-  const usersBefore = deepClone(get(UserStore))
+  // Users share structurally; see clearUsers. Codes are a handful of small
+  // plain objects, so they keep the deep clone.
+  const usersBefore = get(UserStore)
   const codesBefore = deepClone(get(CodeStore))
 
   if (usersBefore.length === 0 && codesBefore.length === 0) return
@@ -54,7 +71,7 @@ export function clearAllData(): void {
     actionType: 'data.clear',
     actionLabel: 'Cleared all data',
     undo: () => {
-      UserStore.set(deepClone(usersBefore))
+      UserStore.set([...usersBefore])
       CodeStore.set(deepClone(codesBefore))
     },
     redo: () => {

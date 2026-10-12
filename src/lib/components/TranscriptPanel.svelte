@@ -2,6 +2,7 @@
   import { onMount } from 'svelte'
   import { DraggableWindow } from 'svelte-p5-components'
   import UserStore from '../../stores/userStore'
+  import { nextRevision } from '../../models/user'
   import HoveredConversationStore from '../../stores/interactionStore'
   import ConfigStore from '../../stores/configStore'
   import { requestSeek, hasVideoSource } from '../../stores/videoStore'
@@ -65,27 +66,58 @@
   // Current time: hover takes priority, otherwise timeline
   let currentTime = $derived(hoveredConversation?.turns[0]?.time ?? timelineCurrTime)
 
-  // Build sorted transcript entries using flatMap
+  /**
+   * Memo for allEntries.
+   *
+   * $derived.by re-runs on every UserStore write, including ones that cannot
+   * change the transcript at all — toggling a user's visibility, renaming,
+   * dragging a colour picker. A rebuild walks every point of every trail and
+   * sorts the result, so the key below lets those unrelated writes return the
+   * previous array instead.
+   *
+   * Plain `let`, deliberately: this is a cache, not reactive state.
+   */
+  let entriesCache: { key: string; entries: TranscriptEntry[] } | null = null
+
   let allEntries = $derived.by(() => {
-    return $UserStore
-      .flatMap((user, userIndex) =>
-        user.conversationIsLoaded
-          ? user.dataTrail
-              .map((point, pointIndex) => ({
-                time: point.time,
-                speaker: user.name,
-                text: point.speech,
-                color: user.color,
-                userIndex,
-                pointIndex,
-              }))
-              .filter(
-                (entry): entry is TranscriptEntry =>
-                  entry.text != null && entry.text.trim() !== '' && entry.time != null
-              )
-          : []
-      )
-      .sort((a, b) => a.time - b.time)
+    const users = $UserStore
+
+    // Everything an entry embeds, plus the index it embeds, so a user being
+    // added or removed invalidates the stale userIndex values too. `revision`
+    // covers in-place edits that leave dataTrail.length unchanged.
+    let key = ''
+    for (let i = 0; i < users.length; i++) {
+      const user = users[i]
+      if (!user.conversationIsLoaded) continue
+      key += `${i}:${user.name}:${user.revision}:${user.color}|`
+    }
+    if (entriesCache !== null && entriesCache.key === key) return entriesCache.entries
+
+    // A loop rather than map().filter(): movement points outnumber speech points
+    // by orders of magnitude, and this allocates only for the ones it keeps.
+    const entries: TranscriptEntry[] = []
+    for (let userIndex = 0; userIndex < users.length; userIndex++) {
+      const user = users[userIndex]
+      if (!user.conversationIsLoaded) continue
+      const trail = user.dataTrail
+      for (let pointIndex = 0; pointIndex < trail.length; pointIndex++) {
+        const point = trail[pointIndex]
+        const text = point.speech
+        if (!text || text.trim() === '' || point.time == null) continue
+        entries.push({
+          time: point.time,
+          speaker: user.name,
+          text,
+          color: user.color,
+          userIndex,
+          pointIndex,
+        })
+      }
+    }
+    entries.sort((a, b) => a.time - b.time)
+
+    entriesCache = { key, entries }
+    return entries
   })
 
   // Filter entries based on search query (text only, matches visualization)
@@ -153,6 +185,7 @@
   function deleteEntry(entry: TranscriptEntry) {
     UserStore.update((users) => {
       users[entry.userIndex].dataTrail[entry.pointIndex].speech = ''
+      users[entry.userIndex].revision = nextRevision()
       return users
     })
     redrawCanvas()
@@ -174,9 +207,17 @@
     }
 
     UserStore.update((users) => {
-      const point = users[entry.userIndex].dataTrail[entry.pointIndex]
+      const user = users[entry.userIndex]
+      const point = user.dataTrail[entry.pointIndex]
       point.time = newTime
       point.speech = editText
+      // Retiming a turn can move it past its neighbours, and a trail is required
+      // to be sorted by time: the renderer binary-searches it for the draw range
+      // and the hover dot, and Core.addMissingCoordinates binary-searches it to
+      // place conversation points. Nothing else re-sorts after an edit, so this
+      // does. Same comparator as Core.finalizeUserData.
+      user.dataTrail.sort((a, b) => (a.time ?? 0) - (b.time ?? 0))
+      user.revision = nextRevision()
       return users
     })
 

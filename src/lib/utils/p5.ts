@@ -20,3 +20,12 @@ export function redrawCanvas(): void {
   const p5Instance = get(P5Store)
   p5Instance?.loop()
 }
+
+/** Rotate the floor plan a quarter turn and redraw. */
+export function rotateFloorplan(direction: 'left' | 'right'): void {
+  const p5Instance = get(P5Store)
+  if (!p5Instance?.floorPlan) return
+  if (direction === 'left') p5Instance.floorPlan.setRotateLeft()
+  else p5Instance.floorPlan.setRotateRight()
+  p5Instance.loop()
+}

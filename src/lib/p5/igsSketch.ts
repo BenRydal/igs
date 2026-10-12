@@ -27,6 +27,9 @@ isAnyModalOpen.subscribe((data) => {
 export const igsSketch: SketchFn<IgsSketchExt> = (p5) => {
   P5Store.set(p5)
 
+  /** Lazily created in visualizeData; see the comment there for why it persists. */
+  let setPathData: SetPathData | null = null
+
   p5.getContainerSize = () => {
     const container = document.getElementById('p5-canvas-container')
     if (container) {
@@ -117,7 +120,14 @@ export const igsSketch: SketchFn<IgsSketchExt> = (p5) => {
       const container = p5.gui.fpContainer.getContainer()
       p5.floorPlan.setFloorPlan(container)
       if (p5.arrayIsLoaded(users)) {
-        const setPathData = new SetPathData(p5)
+        // Must persist across frames: SetPathData owns the merged conversation
+        // cache, which only ever hits if the instance holding it outlives the
+        // frame — a fresh instance per frame would re-walk every point of every
+        // trail in the k-way merge. It only holds references to the sketch and
+        // reads p5.gui / p5.floorPlan at call time, so it survives a resize
+        // rebuild. The per-frame draw classes are still constructed fresh
+        // inside setMovementAndConversation.
+        setPathData ??= new SetPathData(p5)
         setPathData.setMovementAndConversation(users)
       }
     }

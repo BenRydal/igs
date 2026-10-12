@@ -13,6 +13,7 @@ import { togglePlayback, isPlaying } from '../../stores/playbackStore'
 import { timelineV2Store } from '../timeline/store'
 import { openModal } from '../../stores/modalStore'
 import { VISIBLE_EXAMPLES, COLLECTIONS } from '../core/example-datasets'
+import { rotateFloorplan } from '../utils/p5'
 
 // Import history-tracked action functions
 import {
@@ -165,10 +166,7 @@ const viewActions: AppAction[] = [
     icon: '↷',
     category: 'view',
     shortcut: { key: 'r' },
-    action: () =>
-      window.dispatchEvent(
-        new CustomEvent('igs:rotate-floorplan', { detail: { direction: 'right' } })
-      ),
+    action: () => rotateFloorplan('right'),
   },
   {
     id: 'rotate-left',
@@ -178,10 +176,7 @@ const viewActions: AppAction[] = [
     icon: '↶',
     category: 'view',
     shortcut: { key: 'R', modifiers: { shift: true } },
-    action: () =>
-      window.dispatchEvent(
-        new CustomEvent('igs:rotate-floorplan', { detail: { direction: 'left' } })
-      ),
+    action: () => rotateFloorplan('left'),
   },
   {
     id: 'toggle-video',

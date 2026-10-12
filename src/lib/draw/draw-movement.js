@@ -1,7 +1,6 @@
-import { get } from 'svelte/store'
 import { drawState } from './draw-state'
-import CodeStore from '../../stores/codeStore'
 import { timelineV2Store } from '../timeline/store'
+import { getPathLod, lowerBound } from './path-lod'
 
 /** @typedef {import('../p5/igs-p5').IgsP5} IgsP5 */
 /** @typedef {import('./draw-utils').DrawUtils} DrawUtils */
@@ -15,17 +14,13 @@ import { timelineV2Store } from '../timeline/store'
 /** @typedef {{ point: DataPoint, pos: MovementPos }} AugPoint */
 /**
  * Hover/playback indicator on the path.
- * @typedef {{ xPos: number, yPos: number, zPos: number, timePos: number, color: string, lengthToCompare: number | null }} Dot
+ * @typedef {{ xPos: number, yPos: number, zPos: number, timePos: number, color: string }} Dot
  */
 /** @typedef {import('../timeline/types').TimelineState} TimelineState */
 
 export class DrawMovement {
   // Static constants
   static LARGEST_STOP_PIXEL_SIZE = 50
-  // Minimum pixel distance between rendered vertices (skip closer points)
-  // Higher values = fewer vertices = better performance, but less detail when zoomed in
-  // 8 pixels provides good balance - visually indistinguishable from full detail at typical zoom
-  static MIN_PIXEL_DISTANCE_SQ = 8 * 8 // Minimum pixel distance squared for decimation
 
   /**
    * @param {IgsP5} sketch
@@ -41,6 +36,29 @@ export class DrawMovement {
     // Cached code visibility state (updated once per frame in setData)
     this.enabledCodes = new Set()
     this.noCodesEnabled = true
+    /**
+     * Indices of this user's trail worth emitting vertices for, or null for all
+     * of them. Set once per user per frame in setData.
+     * @type {Int32Array | null}
+     */
+    this.lod = null
+    /**
+     * Squared screen-pixel gap the decimator keeps between emitted vertices.
+     *
+     * Reads the pathSimplification budget, the same one the reduction measures
+     * deviation with — see emitVertexAt. Refreshed per user per frame in
+     * setData, and set here as well so a directly constructed instance starts
+     * from the configured budget.
+     */
+    this.minGapSq = drawState.config.pathSimplification ** 2
+    // Running state for the screen-space decimator in emitVertexAt.
+    this.runLastX = -Infinity
+    this.runLastY = -Infinity
+    this.runLastZ = -Infinity
+    this.runPrevX = 0
+    this.runPrevY = 0
+    this.runPrevZ = 0
+    this.runHasPrev = false
   }
 
   /** @param {User} user */
@@ -49,15 +67,58 @@ export class DrawMovement {
     this.sk.noFill()
     this.shade = user.color
     this.cacheEnabledCodes()
+    this.minGapSq = drawState.config.pathSimplification ** 2
+    this.lod = getPathLod(user, drawState.config.pathSimplification, this.viewScales())
     this.setDraw(user.dataTrail)
     if (this.dot !== null) this.drawDot(this.dot)
   }
 
+  /**
+   * Screen pixels per unit of each axis the trail is drawn against, which is
+   * what path-lod.ts measures its error budget in.
+   *
+   * Rotation is folded in here: getScaledXYPos sends data x down the screen's y
+   * axis at 90 and 270 degrees, so the effective dimension governing each data
+   * axis swaps with it. The map is diagonal or antidiagonal in every case, so a
+   * single scale per data axis is exact.
+   *
+   * The time scale is read off the projection by evaluating it twice rather than
+   * rebuilt from its parts: mapSelectTimeToPixelTime composes the timeline zoom,
+   * the view window and the 2D/3D switch, and is affine in time, so its slope
+   * comes out exactly and cannot fall out of step with the formula.
+   *
+   * @returns {import('./path-lod').ViewScales | null}
+   */
+  viewScales() {
+    const source = this.sk.floorPlan.getSourceDimensions()
+    if (source === null) return null
+
+    const effective = this.sk.floorPlan.getEffectiveDimensions(
+      this.sk.gui.fpContainer.getContainer()
+    )
+    const swapped =
+      this.sk.floorPlan.curFloorPlanRotation === 1 || this.sk.floorPlan.curFloorPlanRotation === 3
+    const sx = (swapped ? effective.height : effective.width) / source.width
+    const sy = (swapped ? effective.width : effective.height) / source.height
+
+    const state = timelineV2Store.getState()
+    const span = state.dataEnd - state.dataStart
+    const st =
+      span > 0
+        ? Math.abs(
+            this.sk.mapSelectTimeToPixelTime(timelineV2Store.timeToPixel(state.dataEnd)) -
+              this.sk.mapSelectTimeToPixelTime(timelineV2Store.timeToPixel(state.dataStart))
+          ) / span
+        : 0
+
+    return { sx, sy, st }
+  }
+
   // Cache enabled codes once per frame for O(1) lookups during segment filtering
   cacheEnabledCodes() {
-    const codes = get(CodeStore)
+    const codes = drawState.codes
     this.enabledCodes = new Set(codes.filter((c) => c.enabled).map((c) => c.code))
-    // Match original behavior: if no "no codes" entry exists, default to showing segments without codes
+    // With no "no codes" entry present, segments carrying no codes are shown
     const noCodesEntry = codes.find((c) => c.code === 'no codes')
     this.noCodesEnabled = noCodesEntry ? noCodesEntry.enabled : true
   }
@@ -69,32 +130,6 @@ export class DrawMovement {
       return this.noCodesEnabled
     }
     return segmentCodes.some((code) => this.enabledCodes.has(code))
-  }
-
-  // ============================================================
-  // PATH SELECTION
-  // Determines which rendering path to use based on current state.
-  // Fast path: no checks, Medium path: time filtering, Slow path: per-point visibility
-  // ============================================================
-
-  // Check if no spatial/type filters are active (allows batched drawing)
-  // Note: code filtering is handled at segment level in drawBatched(), not here
-  hasNoSpecialModes() {
-    return (
-      !drawState.config.circleToggle &&
-      !drawState.config.sliceToggle &&
-      !drawState.config.highlightToggle &&
-      !drawState.config.movementToggle &&
-      !drawState.config.stopsToggle
-    )
-  }
-
-  // Check if we can use fast path (skip ALL visibility checks)
-  /** @param {TimelineState} state */
-  canUseFastPath(state) {
-    const isFullTimeline = state.viewStart <= state.dataStart && state.viewEnd >= state.dataEnd
-    const notAnimating = drawState.playbackMode === 'stopped'
-    return isFullTimeline && notAnimating && this.hasNoSpecialModes()
   }
 
   // Binary search to find first index where time >= targetTime
@@ -146,131 +181,247 @@ export class DrawMovement {
 
   // ============================================================
   // MAIN DRAW FLOW
-  // Entry point that routes to fast/medium/slow rendering paths.
+  // Entry point that resolves the active filters into a segment list and draws it.
   // ============================================================
 
-  /** @param {DataPoint[]} dataTrail */
+  /**
+   * One render path for every combination of filters.
+   *
+   * The three predicates in DrawUtils.isVisible have different *shapes*, and
+   * exploiting that is what lets a single path serve all of them:
+   *
+   *  - Range: overAxis and isShowingInAnimation are both monotonic in time, so
+   *    they reduce to two binary searches for an index range. (overAxis(t) holds
+   *    exactly when t is inside [viewStart, viewEnd], because timeToPixel is
+   *    monotonic.)
+   *  - Segment: the code filter and movementToggle / stopsToggle depend only on
+   *    codes and stopped-state, and computeSegmentsInRange already splits on a
+   *    change in either, so one test per segment suffices.
+   *  - Mask: only circleToggle, sliceToggle and highlightToggle genuinely need
+   *    per-point geometry. These three are mutually exclusive with each other —
+   *    they share selectToggleOptions, so toggleSelection clears the other two —
+   *    but NOT with movementToggle / stopsToggle, which live in a separate
+   *    filterToggleOptions group and can be on at the same time.
+   *
+   * A segment filter and a selector compose: switching on both movement-only and
+   * the circle selector applies both, rather than one silently winning.
+   *
+   * The result is as cheap as the active filters allow, and a new interaction
+   * has to declare which kind it is.
+   *
+   * @param {DataPoint[]} dataTrail
+   */
   setDraw(dataTrail) {
     if (dataTrail.length === 0) return
 
     this.sk.strokeCap(this.sk.SQUARE)
 
-    // Get visible time range from timeline store
-    const state = timelineV2Store.getState()
+    const range = this.resolveDrawRange(dataTrail, timelineV2Store.getState())
+    if (range === null) return
 
-    if (this.canUseFastPath(state)) {
-      // FAST PATH: Draw everything, no visibility checks
-      this.drawBatched(dataTrail, 0, dataTrail.length - 1)
-    } else if (this.hasNoSpecialModes()) {
-      // MEDIUM PATH: Use binary search to find visible range, then batch
-      const { startTime, endTime } = this.getVisibleTimeRange(state)
-      const startIdx = this.findTimeIndex(dataTrail, startTime, true)
-      const endIdx = this.findTimeIndex(dataTrail, endTime, false)
+    let segments = this.computeSegmentsInRange(dataTrail, range.startIdx, range.endIdx).filter(
+      (segment) => this.isSegmentDrawn(segment)
+    )
 
-      if (startIdx <= endIdx && startIdx < dataTrail.length && endIdx >= 0) {
-        this.drawBatched(dataTrail, startIdx, endIdx)
-      }
-    } else {
-      // SLOW PATH: Per-point visibility checks (spatial modes active)
-      for (let i = 0; i < dataTrail.length; i++) {
-        const point = dataTrail[i]
-        const aug = this.getAugmentedPoint(this.sk.PLAN, point)
+    const mask = this.activeMask()
+    if (mask !== null) segments = this.subdivideByMask(dataTrail, segments, mask)
 
-        if (this.drawUtils.isVisible(aug.point, aug.pos, aug.point.stopLength)) {
-          const segmentEnd = this.findSegmentEnd(dataTrail, i)
-          this.applySegmentStyle(point.stopLength, point.codes)
-          this.drawSegment(this.sk.SPACETIME, dataTrail, i, segmentEnd)
-          if (this.drawUtils.isStopped(point.stopLength)) {
-            const segDuration = this.getSegmentDuration(dataTrail, i, segmentEnd)
-            this.drawStopCircle(aug, segDuration)
-          } else {
-            this.drawSegment(this.sk.PLAN, dataTrail, i, segmentEnd)
-          }
+    if (segments.length === 0) return
+    this.drawSegments(dataTrail, segments)
+  }
 
-          // Draw connecting line to next segment if next point is visible
-          this.drawConnectionIfVisible(this.sk.SPACETIME, dataTrail, segmentEnd, point.codes)
-          this.drawConnectionIfVisible(this.sk.PLAN, dataTrail, segmentEnd, point.codes)
+  /**
+   * Resolves the range predicates to an index range, or null if nothing is
+   * drawn. A full view with playback stopped needs no search at all.
+   *
+   * @param {DataPoint[]} dataTrail
+   * @param {TimelineState} state
+   * @returns {{ startIdx: number, endIdx: number } | null}
+   */
+  resolveDrawRange(dataTrail, state) {
+    const isFullView = state.viewStart <= state.dataStart && state.viewEnd >= state.dataEnd
+    if (isFullView && drawState.playbackMode === 'stopped') {
+      return { startIdx: 0, endIdx: dataTrail.length - 1 }
+    }
 
-          i = segmentEnd
+    const { startTime, endTime } = this.getVisibleTimeRange(state)
+    const startIdx = this.findTimeIndex(dataTrail, startTime, true)
+    const endIdx = this.findTimeIndex(dataTrail, endTime, false)
+    if (startIdx > endIdx || startIdx >= dataTrail.length || endIdx < 0) return null
+    return { startIdx, endIdx }
+  }
+
+  /**
+   * Segment-level filters: the code list, plus movement-only / stops-only.
+   * Constant across a segment, because segments split wherever codes or
+   * stopped-state change.
+   *
+   * @param {Segment} segment
+   */
+  isSegmentDrawn(segment) {
+    if (!this.isSegmentVisible(segment.codes)) return false
+    if (drawState.config.movementToggle) return !segment.isStopped
+    if (drawState.config.stopsToggle) return segment.isStopped
+    return true
+  }
+
+  /**
+   * The active per-point spatial predicate, or null when none is.
+   *
+   * Mirrors DrawUtils.selectMode's geometry, including its 3D behaviour: the
+   * circle and slice selectors are cursor-driven on the 2D floor plan and select
+   * everything in 3D, while the highlight rectangles handle 3D themselves. It
+   * deliberately does not reproduce selectMode's first-match-wins precedence
+   * over the segment filters; see setDraw.
+   *
+   * @returns {((pos: MovementPos) => boolean) | null}
+   */
+  activeMask() {
+    const is3D = this.sk.handle3D.getIs3DModeOrTransitioning()
+
+    if (drawState.config.circleToggle) {
+      if (is3D) return null
+      return (pos) =>
+        this.sk.gui.fpContainer.overCursor(
+          pos.floorPlanXPos,
+          pos.floorPlanYPos,
+          pos.selTimelineXPos
+        )
+    }
+
+    if (drawState.config.sliceToggle) {
+      if (is3D) return null
+      return (pos) => this.sk.gui.fpContainer.overSlicer(pos.floorPlanXPos, pos.selTimelineXPos)
+    }
+
+    if (drawState.config.highlightToggle) {
+      return (pos) =>
+        this.sk.gui.highlight.overHighlightArray(
+          pos.floorPlanXPos,
+          pos.floorPlanYPos,
+          pos.timelineXPos
+        )
+    }
+
+    return null
+  }
+
+  /**
+   * Splits each segment into the runs of consecutive points passing the mask.
+   *
+   * Index contiguity within a run is what lets areSegmentsAdjacent draw the
+   * connecting lines, and it is also why a run is emitted rather than a sparse
+   * list of indices.
+   *
+   * @param {DataPoint[]} dataTrail
+   * @param {Segment[]} segments
+   * @param {(pos: MovementPos) => boolean} mask
+   * @returns {Segment[]}
+   */
+  subdivideByMask(dataTrail, segments, mask) {
+    /** @type {Segment[]} */
+    const runs = []
+
+    for (const segment of segments) {
+      let runStart = -1
+      for (let i = segment.start; i <= segment.end; i++) {
+        // The mask only reads view-independent fields, so PLAN is arbitrary.
+        if (mask(this.getAugmentedPoint(this.sk.PLAN, dataTrail[i]).pos)) {
+          if (runStart === -1) runStart = i
+        } else if (runStart !== -1) {
+          runs.push({
+            start: runStart,
+            end: i - 1,
+            isStopped: segment.isStopped,
+            codes: segment.codes,
+          })
+          runStart = -1
         }
       }
+      if (runStart !== -1) {
+        runs.push({
+          start: runStart,
+          end: segment.end,
+          isStopped: segment.isStopped,
+          codes: segment.codes,
+        })
+      }
     }
+
+    return runs
   }
 
   // ============================================================
   // BATCHED DRAWING
-  // High-performance rendering for fast/medium paths.
   // Minimizes draw calls by batching segments of the same type.
   // ============================================================
 
-  // Batched drawing for fast and medium paths
   /**
+   * Draws an already-resolved, already-filtered segment list.
+   *
+   * One path for both colour modes. They differ only in whether the stroke
+   * colour is set once per batch or once per segment, and p5's immediate mode
+   * takes a colour change inside a shape, so neither needs a shape of its own.
+   * See drawBatchedSegments.
+   *
+   * Stop circles go through drawAllStopCircles for every filter combination, so
+   * they are sorted largest-first and overlapping stops render as a bullseye
+   * rather than a small stop hiding behind a larger one. Because every filter
+   * combination reaches here, the selection views match the normal view.
+   *
    * @param {DataPoint[]} dataTrail
-   * @param {number} startIdx
-   * @param {number} endIdx
+   * @param {Segment[]} segments
    */
-  drawBatched(dataTrail, startIdx, endIdx) {
-    const allSegments = this.computeSegmentsInRange(dataTrail, startIdx, endIdx)
-    // Filter segments by code visibility (O(1) check per segment using cached enabled codes)
-    const segments = allSegments.filter((seg) => this.isSegmentVisible(seg.codes))
+  drawSegments(dataTrail, segments) {
+    // SPACETIME: moving segments, then stopped segments. Stopped last so the
+    // heavier stop stroke reads on top of the movement line it overlaps, which
+    // is the order single colour mode has always drawn in.
+    this.drawBatchedSegments(
+      this.sk.SPACETIME,
+      dataTrail,
+      segments,
+      false,
+      drawState.config.movementStrokeWeight
+    )
+    this.drawBatchedSegments(
+      this.sk.SPACETIME,
+      dataTrail,
+      segments,
+      true,
+      drawState.config.stopStrokeWeight
+    )
 
-    if (!drawState.config.isPathColorMode) {
-      // Single color mode: batch all segments by type
-      this.sk.stroke(this.shade)
+    // PLAN: moving segments as lines, stopped segments as circles.
+    this.drawBatchedSegments(
+      this.sk.PLAN,
+      dataTrail,
+      segments,
+      false,
+      drawState.config.movementStrokeWeight
+    )
+    this.drawAllStopCircles(dataTrail, segments)
 
-      // Draw to SPACETIME: moving segments, then stopped segments
-      this.drawBatchedSegments(
-        this.sk.SPACETIME,
-        dataTrail,
-        segments,
-        false,
-        drawState.config.movementStrokeWeight
-      )
-      this.drawBatchedSegments(
-        this.sk.SPACETIME,
-        dataTrail,
-        segments,
-        true,
-        drawState.config.stopStrokeWeight
-      )
-
-      // Draw to PLAN: moving segments as lines, stopped segments as circles
-      this.drawBatchedSegments(
-        this.sk.PLAN,
-        dataTrail,
-        segments,
-        false,
-        drawState.config.movementStrokeWeight
-      )
-      this.drawAllStopCircles(dataTrail, segments)
-    } else {
-      // Path color mode: separate shapes per segment for different colors
-      // Pass 1: draw all spacetime segments + plan movement segments
-      for (const seg of segments) {
-        this.applySegmentStyle(dataTrail[seg.start].stopLength, seg.codes)
-        this.drawSegment(this.sk.SPACETIME, dataTrail, seg.start, seg.end)
-
-        if (!seg.isStopped) {
-          this.drawSegment(this.sk.PLAN, dataTrail, seg.start, seg.end)
-        }
-      }
-      // Pass 2: draw stop circles sorted largest-first for bullseye effect
-      for (const seg of this.getStoppedSegmentsByDuration(dataTrail, segments)) {
-        const aug = this.getAugmentedPoint(this.sk.PLAN, dataTrail[seg.start])
-        this.drawStopCircle(aug, this.getSegmentDuration(dataTrail, seg.start, seg.end))
-      }
-    }
-
-    // Draw connections to both views (shared by both modes)
     // Re-set stroke since drawStopCircle calls noStroke()
     if (!drawState.config.isPathColorMode) this.sk.stroke(this.shade)
     this.sk.strokeWeight(drawState.config.movementStrokeWeight)
     this.drawSegmentConnections(this.sk.SPACETIME, dataTrail, segments)
     this.drawSegmentConnections(this.sk.PLAN, dataTrail, segments)
+
+    this.selectDot(dataTrail, segments)
   }
 
-  // Draw all segments matching isStopped in a single batched draw call
   /**
+   * Draws every segment matching isStopped in one shape.
+   *
+   * In path colour mode the stroke is set before each segment's vertices rather
+   * than once for the batch. p5's immediate mode reads the current stroke colour
+   * at each vertex() call and keeps it as a per-vertex attribute, so one shape
+   * holds many colours. Both vertices of a LINES pair go out under the same
+   * colour, which is what makes a segment solid rather than gradated.
+   *
+   * Stroke weight cannot ride along the same way — it is a draw-time uniform —
+   * which is why the moving and stopped passes stay separate in both modes.
+   *
    * @param {number} view
    * @param {DataPoint[]} dataTrail
    * @param {Segment[]} segments
@@ -278,10 +429,19 @@ export class DrawMovement {
    * @param {number} weight
    */
   drawBatchedSegments(view, dataTrail, segments, isStopped, weight) {
+    const perSegmentColor = drawState.config.isPathColorMode
     this.sk.strokeWeight(weight)
+    // A moving run is LINES pairs with every shared point duplicated, so p5 caps
+    // each turn twice instead of joining it; a round cap is a half-disc of
+    // radius weight/2, so the two together cover the disc a round join would.
+    this.sk.strokeCap(isStopped ? this.sk.SQUARE : this.sk.ROUND)
+    // Set once for the batch when every segment shares a colour: sk.stroke()
+    // parses its argument, and a path can hold hundreds of segments.
+    if (!perSegmentColor) this.sk.stroke(this.shade)
     this.sk.beginShape(this.sk.LINES)
     for (const seg of segments) {
       if (seg.isStopped === isStopped) {
+        if (perSegmentColor) this.sk.stroke(this.drawUtils.setCodeColor(seg.codes))
         this.drawSegmentVerticesAsLines(view, dataTrail, seg.start, seg.end)
       }
     }
@@ -325,8 +485,13 @@ export class DrawMovement {
     return seg1.end + 1 === seg2.start
   }
 
-  // Draw connecting lines between adjacent segments (prevents gaps at segment transitions)
   /**
+   * Draws the connecting line between each pair of adjacent segments, which is
+   * what stops a gap appearing where a segment boundary falls.
+   *
+   * Batched in both colour modes, for the reason given in drawBatchedSegments:
+   * the per-vertex stroke colour lets one shape carry a colour per connection.
+   *
    * @param {number} view
    * @param {DataPoint[]} dataTrail
    * @param {Segment[]} segments
@@ -334,26 +499,16 @@ export class DrawMovement {
   drawSegmentConnections(view, dataTrail, segments) {
     if (segments.length < 2) return
 
-    if (!drawState.config.isPathColorMode) {
-      // Single color mode: batch all connections in one draw call
-      this.sk.beginShape(this.sk.LINES)
-      for (let i = 0; i < segments.length - 1; i++) {
-        if (this.areSegmentsAdjacent(segments[i], segments[i + 1])) {
-          this.emitConnectionVertices(view, dataTrail, segments[i].end, segments[i + 1].start)
-        }
-      }
-      this.sk.endShape()
-    } else {
-      // Path color mode: separate draw call per connection for different colors
-      for (let i = 0; i < segments.length - 1; i++) {
-        if (this.areSegmentsAdjacent(segments[i], segments[i + 1])) {
-          this.setStroke(this.drawUtils.setCodeColor(segments[i].codes))
-          this.sk.beginShape(this.sk.LINES)
-          this.emitConnectionVertices(view, dataTrail, segments[i].end, segments[i + 1].start)
-          this.sk.endShape()
-        }
+    const perSegmentColor = drawState.config.isPathColorMode
+
+    this.sk.beginShape(this.sk.LINES)
+    for (let i = 0; i < segments.length - 1; i++) {
+      if (this.areSegmentsAdjacent(segments[i], segments[i + 1])) {
+        if (perSegmentColor) this.sk.stroke(this.drawUtils.setCodeColor(segments[i].codes))
+        this.emitConnectionVertices(view, dataTrail, segments[i].end, segments[i + 1].start)
       }
     }
+    this.sk.endShape()
   }
 
   // Emit vertex pair for a connection line (used within beginShape/endShape)
@@ -368,27 +523,6 @@ export class DrawMovement {
     const toAug = this.getAugmentedPoint(view, dataTrail[toIdx])
     this.sk.vertex(fromAug.pos.viewXPos, fromAug.pos.floorPlanYPos, fromAug.pos.zPos)
     this.sk.vertex(toAug.pos.viewXPos, toAug.pos.floorPlanYPos, toAug.pos.zPos)
-  }
-
-  // Draw connection to next point if it exists and is visible (for slow path)
-  /**
-   * @param {number} view
-   * @param {DataPoint[]} dataTrail
-   * @param {number} segmentEnd
-   * @param {string[]} codes
-   */
-  drawConnectionIfVisible(view, dataTrail, segmentEnd, codes) {
-    if (segmentEnd + 1 >= dataTrail.length) return
-
-    const nextPoint = dataTrail[segmentEnd + 1]
-    const nextAug = this.getAugmentedPoint(this.sk.PLAN, nextPoint)
-    if (!this.drawUtils.isVisible(nextAug.point, nextAug.pos, nextAug.point.stopLength)) return
-
-    this.sk.strokeWeight(drawState.config.movementStrokeWeight)
-    this.setStroke(this.drawUtils.setCodeColor(codes))
-    this.sk.beginShape(this.sk.LINES)
-    this.emitConnectionVertices(view, dataTrail, segmentEnd, segmentEnd + 1)
-    this.sk.endShape()
   }
 
   // ============================================================
@@ -464,100 +598,105 @@ export class DrawMovement {
     return true
   }
 
-  // Find the end of the segment where stopLength, codes, or visibility changes
-  /**
-   * @param {DataPoint[]} dataTrail
-   * @param {number} start
-   */
-  findSegmentEnd(dataTrail, start) {
-    const startPoint = dataTrail[start]
-    const startStopped = this.drawUtils.isStopped(startPoint.stopLength)
-
-    for (let i = start + 1; i < dataTrail.length; i++) {
-      const currentPoint = dataTrail[i]
-      const augmentedPoint = this.getAugmentedPoint(this.sk.PLAN, currentPoint)
-
-      const stoppedChanged = this.drawUtils.isStopped(currentPoint.stopLength) !== startStopped
-      const codesChanged = !this.codesEqual(currentPoint.codes, startPoint.codes)
-      const notVisible = !this.drawUtils.isVisible(
-        augmentedPoint.point,
-        augmentedPoint.pos,
-        augmentedPoint.point.stopLength
-      )
-
-      if (stoppedChanged || codesChanged || notVisible) {
-        return i - 1
-      }
-    }
-    return dataTrail.length - 1
-  }
-
   // ============================================================
   // PRIMITIVE DRAWING
   // Low-level drawing operations for segments, vertices, and shapes.
   // ============================================================
 
-  // Draw segment vertices as LINES pairs (for batched drawing)
-  // LINES mode draws separate line segments between each pair of vertices
   /**
+   * Emits one segment's vertices as LINES pairs, for batched drawing.
+   *
+   * LINES mode draws a separate line between each pair of vertices, which is what
+   * lets many segments share one shape.
+   *
    * @param {number} view
    * @param {DataPoint[]} dataTrail
    * @param {number} start
    * @param {number} end
    */
   drawSegmentVerticesAsLines(view, dataTrail, start, end) {
-    let lastX = -Infinity,
-      lastY = -Infinity,
-      lastZ = -Infinity
-    let prevX = 0,
-      prevY = 0,
-      prevZ = 0
-    let hasPrev = false
+    this.resetVertexRun()
 
-    for (let i = start; i <= end; i++) {
-      const point = dataTrail[i]
-      const aug = this.getAugmentedPoint(view, point)
-      const x = aug.pos.viewXPos
-      const y = aug.pos.floorPlanYPos
-      const z = aug.pos.zPos
-
-      // Side effect: record dot position for hover/playback indicator
-      if (view === this.sk.SPACETIME) this.recordDot(aug)
-
-      // Apply decimation
-      const dx = x - lastX
-      const dy = y - lastY
-      const dz = z - lastZ
-      const distSq = dx * dx + dy * dy + dz * dz
-
-      const isFirstOrLast = i === start || i === end
-      if (isFirstOrLast || distSq >= DrawMovement.MIN_PIXEL_DISTANCE_SQ) {
-        if (hasPrev) {
-          // Output line segment from prev to current
-          this.sk.vertex(prevX, prevY, prevZ)
-          this.sk.vertex(x, y, z)
-        }
-        prevX = x
-        prevY = y
-        prevZ = z
-        hasPrev = true
-        lastX = x
-        lastY = y
-        lastZ = z
+    // Without a reduction every point in the range is a candidate.
+    if (this.lod === null) {
+      for (let i = start; i <= end; i++) {
+        this.emitVertexAt(view, dataTrail, i, i === start || i === end)
       }
+      return
     }
+
+    // A segment's own endpoints are always emitted, reduction or not, so
+    // neighbouring segments still meet and drawSegmentConnections has something
+    // to join. Between them only the reduction's indices are visited.
+    this.emitVertexAt(view, dataTrail, start, true)
+    for (let k = lowerBound(this.lod, start + 1); k < this.lod.length; k++) {
+      const index = this.lod[k]
+      if (index >= end) break
+      this.emitVertexAt(view, dataTrail, index, false)
+    }
+    if (end > start) this.emitVertexAt(view, dataTrail, end, true)
+  }
+
+  /** Clears the decimator state before a run of vertices. */
+  resetVertexRun() {
+    this.runLastX = -Infinity
+    this.runLastY = -Infinity
+    this.runLastZ = -Infinity
+    this.runPrevX = 0
+    this.runPrevY = 0
+    this.runPrevZ = 0
+    this.runHasPrev = false
   }
 
   /**
+   * Emits one point of a LINES run, applying screen-space decimation.
+   *
+   * Two reductions meet here, bounding different things off the same
+   * pathSimplification budget. The one in path-lod.ts bounds *deviation* from
+   * the chord and is computed once per user, so it serves both views and keeps
+   * points only the space-time view needs. This one bounds the *gap* between
+   * emitted vertices and runs per view, so it can drop what this view has no use
+   * for. The two views therefore prune quite differently: zoomed to ten seconds
+   * on example-10/teacher.csv the floor plan discards about a tenth of the
+   * reduction's points while the space-time view keeps nearly all of them, the
+   * time axis having spread them out there. A reduction shared between views
+   * cannot make that call, which is why both exist — see "prunes each view
+   * independently" in draw-movement.test.ts.
+   *
+   * A dropped point does not advance runLast, so the gap is always measured from
+   * the last vertex actually *emitted*. That is what holds the drawn polyline
+   * within one budget of the trail, rather than letting it drift a budget per
+   * point dropped.
+   *
    * @param {number} view
    * @param {DataPoint[]} dataTrail
-   * @param {number} start
-   * @param {number} end
+   * @param {number} index
+   * @param {boolean} force emit regardless of the decimation threshold
    */
-  drawSegment(view, dataTrail, start, end) {
-    this.sk.beginShape(this.sk.LINES)
-    this.drawSegmentVerticesAsLines(view, dataTrail, start, end)
-    this.sk.endShape()
+  emitVertexAt(view, dataTrail, index, force) {
+    const aug = this.getAugmentedPoint(view, dataTrail[index])
+    const x = aug.pos.viewXPos
+    const y = aug.pos.floorPlanYPos
+    const z = aug.pos.zPos
+
+    if (!force) {
+      const dx = x - this.runLastX
+      const dy = y - this.runLastY
+      const dz = z - this.runLastZ
+      if (dx * dx + dy * dy + dz * dz < this.minGapSq) return
+    }
+
+    if (this.runHasPrev) {
+      this.sk.vertex(this.runPrevX, this.runPrevY, this.runPrevZ)
+      this.sk.vertex(x, y, z)
+    }
+    this.runPrevX = x
+    this.runPrevY = y
+    this.runPrevZ = z
+    this.runHasPrev = true
+    this.runLastX = x
+    this.runLastY = y
+    this.runLastZ = z
   }
 
   /**
@@ -592,19 +731,6 @@ export class DrawMovement {
   // Stroke and fill management for path color mode.
   // ============================================================
 
-  /**
-   * @param {number} stopLength
-   * @param {string[]} codes
-   */
-  applySegmentStyle(stopLength, codes) {
-    this.setStroke(this.drawUtils.setCodeColor(codes))
-    this.sk.strokeWeight(
-      this.drawUtils.isStopped(stopLength)
-        ? drawState.config.stopStrokeWeight
-        : drawState.config.movementStrokeWeight
-    )
-  }
-
   /** @param {string} color */
   setFill(color) {
     if (!drawState.config.isPathColorMode) this.sk.fill(this.shade)
@@ -620,41 +746,133 @@ export class DrawMovement {
   // ============================================================
   // DOT RENDERING
   // Shows a dot on the path at the current playback position or mouse hover.
-  // Note: recordDot() is called as a side effect from drawSegmentVerticesAsLines()
+  // selectDot() is called once per user per frame, at the end of drawSegments,
+  // with the segments that were drawn to SPACETIME.
   // ============================================================
 
   /**
-   * @param {AugPoint} augmentedPoint
-   * @param {Dot | null} curDot
+   * Picks the hover/playback dot from the segments that were just drawn, in two
+   * binary searches rather than a scan.
+   *
+   * Searching on times rather than projected pixels is exact because
+   * `selTimelineXPos` is an affine,
+   * monotonically increasing function of time (a chain of mapRange calls, minus
+   * canvasLeft). Affine and increasing means order is preserved, so "latest in
+   * pixels" is "latest in time", and |f(a) - f(t)| = s * |a - t| for a positive
+   * slope s, so "nearest in pixels" is "nearest in time". That lets the search
+   * run on times, which are already sorted, instead of on projected pixels.
+   *
+   * @param {DataPoint[]} dataTrail
+   * @param {Segment[]} segments the segments actually drawn to SPACETIME
    */
-  getNewDot(augmentedPoint, curDot) {
-    const [xPos, yPos, zPos, timePos, map3DMouse, codeColor] = this.getDotValues(augmentedPoint)
+  selectDot(dataTrail, segments) {
+    if (segments.length === 0) return
 
-    // When playing, always show dot at current playback position (not mouse position)
+    // While animating the dot sits at the playhead, which is the final point of
+    // the final drawn segment: resolveDrawRange already caps the range at
+    // currentTime.
     if (drawState.playbackMode === 'playing-animation') {
-      return this.createDot(xPos, yPos, zPos, timePos, codeColor, null)
+      const aug = this.getAugmentedPoint(
+        this.sk.SPACETIME,
+        dataTrail[segments[segments.length - 1].end]
+      )
+      const [xPos, yPos, zPos, timePos, , codeColor] = this.getDotValues(aug)
+      this.dot = this.createDot(xPos, yPos, zPos, timePos, codeColor)
+      return
     }
-    if (drawState.playbackMode === 'playing-video') {
-      const videoSelectTime = this.getVideoSelectTime()
-      if (this.compareToCurDot(videoSelectTime, timePos, curDot)) {
-        return this.createDot(
-          xPos,
-          yPos,
-          zPos,
-          timePos,
-          codeColor,
-          Math.abs(videoSelectTime - timePos)
-        )
+
+    // Both remaining modes snap to the drawn point nearest a target time.
+    // Inverting the projection analytically avoids any pixel round-trip:
+    // for video, timePos === target reduces to point.time === videoCurrentTime;
+    // for hover it reduces to pixelToTime(pixelToViewPixel(winMouseX)).
+    const isVideo = drawState.playbackMode === 'playing-video'
+    if (!isVideo && !this.sk.isMouseOverTimeline()) return
+    const targetTime = isVideo
+      ? drawState.videoCurrentTime
+      : timelineV2Store.pixelToTime(timelineV2Store.pixelToViewPixel(this.sk.winMouseX))
+
+    const index = this.findNearestDrawnIndex(dataTrail, segments, targetTime)
+    if (index === -1) return
+
+    const aug = this.getAugmentedPoint(this.sk.SPACETIME, dataTrail[index])
+    const [xPos, yPos, zPos, timePos, map3DMouse, codeColor] = this.getDotValues(aug)
+    const target = isVideo ? this.getVideoSelectTime() : map3DMouse
+    const distance = Math.abs(target - timePos)
+
+    // No dot at all when even the nearest drawn point is more than sk.width
+    // pixels from the target.
+    if (distance > this.sk.width) return
+
+    // Video mode marks the point's own position; hover mode tracks the cursor.
+    this.dot = this.createDot(xPos, yPos, zPos, isVideo ? timePos : map3DMouse, codeColor)
+  }
+
+  /**
+   * Index of the drawn point nearest `targetTime`, or -1 if nothing is drawn.
+   *
+   * Segments are ordered by index and each one's points are sorted by time, but
+   * code filtering can leave gaps between them, so the nearest point may sit at
+   * the edge of an adjacent segment. Locating the segment is one binary search
+   * and the three-segment window around it covers every case.
+   *
+   * Ties go to the later index.
+   *
+   * @param {DataPoint[]} dataTrail
+   * @param {Segment[]} segments
+   * @param {number} targetTime
+   */
+  findNearestDrawnIndex(dataTrail, segments, targetTime) {
+    let low = 0
+    let high = segments.length - 1
+    let segIndex = 0
+    while (low <= high) {
+      const mid = (low + high) >>> 1
+      if ((dataTrail[segments[mid].start].time ?? 0) <= targetTime) {
+        segIndex = mid
+        low = mid + 1
+      } else {
+        high = mid - 1
       }
-      return null
     }
-    // When stopped, show dot at mouse position if hovering over timeline
-    const isOverTimeline =
-      this.sk.isMouseOverTimeline() && this.compareToCurDot(map3DMouse, timePos, curDot)
-    if (isOverTimeline) {
-      return this.createDot(xPos, yPos, zPos, map3DMouse, codeColor, Math.abs(map3DMouse - timePos))
+
+    let best = -1
+    let bestDistance = Infinity
+    const from = Math.max(0, segIndex - 1)
+    const to = Math.min(segments.length - 1, segIndex + 1)
+    for (let s = from; s <= to; s++) {
+      const candidate = this.nearestIndexInSegment(dataTrail, segments[s], targetTime)
+      const distance = Math.abs((dataTrail[candidate].time ?? 0) - targetTime)
+      if (distance <= bestDistance) {
+        bestDistance = distance
+        best = candidate
+      }
     }
-    return null
+    return best
+  }
+
+  /**
+   * Index within one segment whose time is nearest `targetTime`.
+   * @param {DataPoint[]} dataTrail
+   * @param {Segment} segment
+   * @param {number} targetTime
+   */
+  nearestIndexInSegment(dataTrail, segment, targetTime) {
+    let low = segment.start
+    let high = segment.end
+    while (low < high) {
+      const mid = (low + high) >>> 1
+      if ((dataTrail[mid].time ?? 0) < targetTime) low = mid + 1
+      else high = mid
+    }
+    // `low` is the first index at or after targetTime; its predecessor may be
+    // closer. A strict `<` keeps ties on the later index.
+    if (low > segment.start) {
+      const previous = low - 1
+      const previousDistance = Math.abs((dataTrail[previous].time ?? 0) - targetTime)
+      const lowDistance = Math.abs((dataTrail[low].time ?? 0) - targetTime)
+      if (previousDistance < lowDistance) return previous
+    }
+    return low
   }
 
   /**
@@ -678,28 +896,15 @@ export class DrawMovement {
   }
 
   /**
-   * @param {number} pixelStart
-   * @param {number} pixelEnd
-   * @param {Dot | null} curDot
-   */
-  compareToCurDot(pixelStart, pixelEnd, curDot) {
-    // lengthToCompare is null for playback dots; treat as exact-match range
-    // (mirrors the pre-typing arithmetic where null coerced to 0)
-    const range = curDot !== null ? (curDot.lengthToCompare ?? 0) : this.sk.width
-    return pixelStart >= pixelEnd - range && pixelStart <= pixelEnd + range
-  }
-
-  /**
    * @param {number} xPos
    * @param {number} yPos
    * @param {number} zPos
    * @param {number} timePos
    * @param {string} color
-   * @param {number | null} lengthToCompare
    * @returns {Dot}
    */
-  createDot(xPos, yPos, zPos, timePos, color, lengthToCompare) {
-    return { xPos, yPos, zPos, timePos, color, lengthToCompare }
+  createDot(xPos, yPos, zPos, timePos, color) {
+    return { xPos, yPos, zPos, timePos, color }
   }
 
   /** @param {Dot} curDot */
@@ -728,22 +933,5 @@ export class DrawMovement {
     this.sk.point(curDot.xPos, curDot.yPos, curDot.zPos)
     this.sk.strokeWeight(2)
     this.sk.line(curDot.xPos, curDot.yPos, 0, curDot.xPos, curDot.yPos, curDot.zPos)
-  }
-
-  /** @param {AugPoint} augmentPoint */
-  recordDot(augmentPoint) {
-    const newDot = this.getNewDot(augmentPoint, this.dot)
-    if (newDot !== null) {
-      // During animation, only update if this point is at or after current dot's time
-      // (needed because segments are drawn by type, not time order)
-      if (
-        drawState.playbackMode === 'playing-animation' &&
-        this.dot !== null &&
-        newDot.timePos < this.dot.timePos
-      ) {
-        return
-      }
-      this.dot = newDot
-    }
   }
 }
