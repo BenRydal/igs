@@ -571,20 +571,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@neodrag/core@npm:3.0.0-next.8":
-  version: 3.0.0-next.8
-  resolution: "@neodrag/core@npm:3.0.0-next.8"
-  checksum: 10c0/edf3ba77c7757a3b041b4f421b9c84cd844e0465cdad2cbe09572102845069596004dfb419dbeeca43b199157278f7322159dc1795fff60da4583b4068d31e57
+"@neodrag/core@npm:3.0.0-next.12":
+  version: 3.0.0-next.12
+  resolution: "@neodrag/core@npm:3.0.0-next.12"
+  checksum: 10c0/4536a3966be91da041374a62b023d347a7c07fd8cc299c00b86449c208b500aa6e43f3654cd8744f98d5a33e05d028e344477dd74c224520fe6ba901eeb85bcb
   languageName: node
   linkType: hard
 
-"@neodrag/svelte@npm:3.0.0-next.8":
-  version: 3.0.0-next.8
-  resolution: "@neodrag/svelte@npm:3.0.0-next.8"
+"@neodrag/svelte@npm:3.0.0-next.12":
+  version: 3.0.0-next.12
+  resolution: "@neodrag/svelte@npm:3.0.0-next.12"
   peerDependencies:
-    "@neodrag/core": 3.0.0-next.8
+    "@neodrag/core": 3.0.0-next.12
     svelte: ^3 || ^4 || ^5
-  checksum: 10c0/c64f85079f03cf2fa16a1bed6eb8b1115aae0b0308b7ca83d89152e41bac5766ffe8552eb8151c15bebaaad7d8bd6c214b4e567851491a51a43d7a9fd279a0b3
+  checksum: 10c0/bbc0426d74ef4e35798aaadde1488e59e38ac3c2c7f8bc2153533ab1a10e1539a2daffe2448baf5221e0be3a8116a19cfd1c9ddb0b4b7cbeb006ce84bd59244a
   languageName: node
   linkType: hard
 
@@ -2538,8 +2538,8 @@ __metadata:
     svelte: "npm:^5.0.0"
     svelte-check: "npm:^4.0.0"
     svelte-eslint-parser: "npm:^1.0.0"
-    svelte-p5: "npm:^1.0.0"
-    svelte-p5-components: "npm:^1.1.1"
+    svelte-p5: "npm:^1.1.0"
+    svelte-p5-components: "npm:^2.0.0"
     tailwindcss: "npm:^4.0.0"
     typescript: "npm:^5.9.3"
     unplugin-icons: "npm:^22.5.0"
@@ -4003,27 +4003,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"svelte-p5-components@npm:^1.1.1":
-  version: 1.1.1
-  resolution: "svelte-p5-components@npm:1.1.1"
+"svelte-p5-components@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "svelte-p5-components@npm:2.0.0"
   dependencies:
-    "@neodrag/core": "npm:3.0.0-next.8"
-    "@neodrag/svelte": "npm:3.0.0-next.8"
+    "@neodrag/core": "npm:3.0.0-next.12"
+    "@neodrag/svelte": "npm:3.0.0-next.12"
   peerDependencies:
     p5: ">=1.11.0 <3"
     svelte: ^5.0.0
     svelte-p5: ^1.0.0
-  checksum: 10c0/f94497efeb7898375becf6bbea45380d787061d32cd2679f55acecaf39e608545d99d7f870e29bfc21a60462cfe967127996b241f7f22f6335bc067b8757d1a3
+  checksum: 10c0/cdc58d0919a9da0acf5c212b3560550603e21295423b6a7e10667dc5a85128be993a80ce7bd53f840514d780e7373ce5371bf57bd5993399868abbcff87a34fe
   languageName: node
   linkType: hard
 
-"svelte-p5@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "svelte-p5@npm:1.0.0"
+"svelte-p5@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "svelte-p5@npm:1.1.0"
   peerDependencies:
     p5: ">=1.11.0 <3"
     svelte: ^5.0.0
-  checksum: 10c0/2d3c75959988cc78fb6503bd4defb75f3e0e0f78799308269e34e54f15daa95a43d5f1534022dbc1ef3f0474b955163efc8b7e540d855067376017a77a8bea1a
+  checksum: 10c0/a0b695a56f407cce2509ee7f26f126864a0fa5700056aa89660ea42d375235e049bda4b5e335732b645cbd5498d85ad8fc5f43e2c79181a8eceedfff86dc568c
   languageName: node
   linkType: hard
 
