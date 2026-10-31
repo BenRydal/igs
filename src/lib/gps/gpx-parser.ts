@@ -125,9 +125,7 @@ export class GPXParser {
    */
   static toGPSMovementRows(track: GPXTrack): GPSMovementRow[] {
     // Parse all timestamps once and find the minimum
-    const parsedTimes = track.points.map((p) =>
-      p.time ? TimeUtils.parseISO8601(p.time) : null
-    )
+    const parsedTimes = track.points.map((p) => (p.time ? TimeUtils.parseISO8601(p.time) : null))
     const firstTimestamp = parsedTimes.reduce<number | null>(
       (min, t) => (t !== null && (min === null || t < min) ? t : min),
       null

@@ -11,12 +11,7 @@ export interface GPSBounds {
 /**
  * Mapbox static map style options
  */
-export type MapboxStyle =
-  | 'streets-v12'
-  | 'outdoors-v12'
-  | 'satellite-v9'
-  | 'light-v11'
-  | 'dark-v11'
+export type MapboxStyle = 'streets-v12' | 'outdoors-v12' | 'satellite-v9' | 'light-v11' | 'dark-v11'
 
 /**
  * GPS state for the store

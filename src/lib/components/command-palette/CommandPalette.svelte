@@ -352,7 +352,8 @@
                     recentOffset +
                     groupedCommands
                       .slice(0, groupIndex)
-                      .reduce((acc, g) => acc + g.commands.length, 0) + cmdIndex}
+                      .reduce((acc, g) => acc + g.commands.length, 0) +
+                    cmdIndex}
                   <CommandButton
                     {command}
                     index={globalIndex}

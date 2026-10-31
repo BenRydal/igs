@@ -2,11 +2,7 @@
   import { onDestroy } from 'svelte'
   import { browser } from '$app/environment'
   import VideoStore, { setLoaded } from '../../stores/videoStore'
-  import {
-    createYouTubePlayer,
-    type VideoPlayer,
-    destroyPlayer,
-  } from '../video/video-service'
+  import { createYouTubePlayer, type VideoPlayer, destroyPlayer } from '../video/video-service'
 
   interface Props {
     onready?: (player: VideoPlayer, duration: number) => void

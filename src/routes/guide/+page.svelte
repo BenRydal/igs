@@ -40,7 +40,6 @@
 </svelte:head>
 
 <div class="min-h-screen bg-base-100">
-
   <!-- Content -->
   <main class="max-w-3xl mx-auto px-4 py-8">
     <!-- Hero -->
@@ -254,8 +253,8 @@
             <div class="alert mt-3">
               <div>
                 <p class="text-sm">
-                  <strong>Note:</strong> GPX and KML files must contain timestamps. Static routes or
-                  hand-drawn paths without time data are not supported.
+                  <strong>Note:</strong> GPX and KML files must contain timestamps. Static routes or hand-drawn
+                  paths without time data are not supported.
                 </p>
               </div>
             </div>
@@ -512,7 +511,8 @@
             </table>
           </div>
           <p class="text-sm text-base-content/60 mt-4">
-            Code file times should be relative to the start of your recording (not absolute timestamps).
+            Code file times should be relative to the start of your recording (not absolute
+            timestamps).
           </p>
         </div>
       </div>
