@@ -223,6 +223,16 @@ export function unmuteVideo(player: VideoPlayer): void {
   }
 }
 
+export function mountPlayerTarget(container: HTMLElement, id: string): void {
+  const target = document.createElement('div')
+  target.id = id
+  container.replaceChildren(target)
+}
+
+export function clearPlayerTarget(container: HTMLElement): void {
+  container.replaceChildren()
+}
+
 export function destroyPlayer(player: VideoPlayer): void {
   if (!player) return
   try {
