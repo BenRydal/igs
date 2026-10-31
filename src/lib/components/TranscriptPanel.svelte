@@ -134,10 +134,13 @@
   }
 
   // Highlight matching text in search results
-  function highlightMatch(text: string): string {
-    if (!searchQuery) return text
+  function highlightMatch(text: string): { text: string; match: boolean }[] {
+    if (!searchQuery) return [{ text, match: false }]
     const escaped = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-    return text.replace(new RegExp(`(${escaped})`, 'gi'), '<mark>$1</mark>')
+    return text
+      .split(new RegExp(`(${escaped})`, 'gi'))
+      .map((part, i) => ({ text: part, match: i % 2 === 1 }))
+      .filter((part) => part.text !== '')
   }
 
   // Find active entry (closest to current time, not exceeding it)
@@ -318,7 +321,11 @@
                       <MdPencil />
                     </button>
                   </div>
-                  <div class="entry-text">{@html highlightMatch(entry.text)}</div>
+                  <div class="entry-text">
+                    {#each highlightMatch(entry.text) as part, i (i)}
+                      {#if part.match}<mark>{part.text}</mark>{:else}{part.text}{/if}
+                    {/each}
+                  </div>
                 </div>
               {/if}
             {/each}

@@ -6,31 +6,57 @@
   import MdTag from '~icons/mdi/tag-outline'
   import MdClock from '~icons/mdi/clock-outline'
 
-  const faqItems = [
+  type Part = { text: string; tag?: 'strong' | 'code' | 'br' }
+
+  const faqItems: { question: string; answer: Part[] }[] = [
     {
       question: 'How do I save a spreadsheet as CSV?',
-      answer:
-        'In Excel or Google Sheets, go to <strong>File → Download → CSV</strong> (or Save As → CSV).',
+      answer: [
+        { text: 'In Excel or Google Sheets, go to ' },
+        { text: 'File → Download → CSV', tag: 'strong' },
+        { text: ' (or Save As → CSV).' },
+      ],
     },
     {
       question: "My movement doesn't line up with my floor plan",
-      answer:
-        "Make sure you're using the exact same floor plan image that was used when recording the x,y positions. The coordinates are pixel positions on that specific image.",
+      answer: [
+        {
+          text: "Make sure you're using the exact same floor plan image that was used when recording the x,y positions. The coordinates are pixel positions on that specific image.",
+        },
+      ],
     },
     {
       question: 'How do I track multiple people?',
-      answer:
-        "Create a separate movement file for each person. Name each file with the person's name (e.g., <code>Alice.csv</code>, <code>Bob.csv</code>). Import all files together.",
+      answer: [
+        {
+          text: "Create a separate movement file for each person. Name each file with the person's name (e.g., ",
+        },
+        { text: 'Alice.csv', tag: 'code' },
+        { text: ', ' },
+        { text: 'Bob.csv', tag: 'code' },
+        { text: '). Import all files together.' },
+      ],
     },
     {
       question: 'My GPS data looks wrong or has gaps',
-      answer:
-        'IGS automatically filters out GPS errors (like impossible speeds). If you see gaps, it might be due to poor GPS signal during recording. Large gaps will trigger a warning.',
+      answer: [
+        {
+          text: 'IGS automatically filters out GPS errors (like impossible speeds). If you see gaps, it might be due to poor GPS signal during recording. Large gaps will trigger a warning.',
+        },
+      ],
     },
     {
       question: "What's the difference between x,y and lat,lng?",
-      answer:
-        "<strong>x,y</strong> are pixel coordinates on your floor plan image (for indoor tracking).<br><br><strong>lat,lng</strong> are GPS coordinates (for outdoor tracking). IGS detects which type you're using based on the column names.",
+      answer: [
+        { text: 'x,y', tag: 'strong' },
+        { text: ' are pixel coordinates on your floor plan image (for indoor tracking).' },
+        { text: '', tag: 'br' },
+        { text: '', tag: 'br' },
+        { text: 'lat,lng', tag: 'strong' },
+        {
+          text: " are GPS coordinates (for outdoor tracking). IGS detects which type you're using based on the column names.",
+        },
+      ],
     },
   ]
 </script>
@@ -523,12 +549,18 @@
       <h2 class="text-xl font-bold mb-4">Common Questions</h2>
 
       <div class="space-y-3">
-        {#each faqItems as { question, answer }}
+        {#each faqItems as { question, answer } (question)}
           <div class="collapse collapse-arrow bg-base-200">
             <input type="checkbox" />
             <div class="collapse-title font-medium">{question}</div>
             <div class="collapse-content text-base-content/70">
-              <p>{@html answer}</p>
+              <p>
+                {#each answer as part, i (i)}
+                  {#if part.tag === 'strong'}<strong>{part.text}</strong
+                    >{:else if part.tag === 'code'}<code>{part.text}</code
+                    >{:else if part.tag === 'br'}<br />{:else}{part.text}{/if}
+                {/each}
+              </p>
             </div>
           </div>
         {/each}
