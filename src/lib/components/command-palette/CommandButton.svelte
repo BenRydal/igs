@@ -35,7 +35,7 @@
   <div class="flex-1 text-left">
     <div class="font-medium text-base-content">
       {#if labelSegments}
-        {#each labelSegments as segment}
+        {#each labelSegments as segment, i (i)}
           {#if segment.highlighted}
             <mark class="bg-primary text-primary-content px-0.5 rounded">{segment.text}</mark>
           {:else}

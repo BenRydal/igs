@@ -82,7 +82,7 @@
     <div class="tooltip-content">
       <div class="triangle"></div>
       <div class="turns-container">
-        {#each displayedTurns as turn}
+        {#each displayedTurns as turn, i (i)}
           <div class="turn" style="--speaker-color: {turn.color || DEFAULT_COLOR}">
             <div class="turn-header">
               <span class="turn-time">{formatTime(turn.time)}</span>

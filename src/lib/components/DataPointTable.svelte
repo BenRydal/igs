@@ -66,7 +66,7 @@
         </tr>
       </thead>
       <tbody>
-        {#each visible as dataPoint}
+        {#each visible as dataPoint, i (start + i)}
           <tr>
             <td>{dataPoint.time}</td>
             <td>{dataPoint.speech}</td>

@@ -1,8 +1,9 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte'
   import { get } from 'svelte/store'
+  import { SvelteMap } from 'svelte/reactivity'
   import { fade, slide } from 'svelte/transition'
-  import { closeModal, activeModal } from '../../../stores/modalStore'
+  import { closeModal } from '../../../stores/modalStore'
   import { Z_INDEX } from '$lib/styles/z-index'
   import type { Command, HighlightSegment } from './types'
   import { searchCommands, getHighlightSegments } from './fuzzy-search'
@@ -46,7 +47,7 @@
 
   // Helper to group commands by category
   function groupByCategory(commands: Command[]) {
-    const groups = new Map<string, Command[]>()
+    const groups = new SvelteMap<string, Command[]>()
     for (const command of commands) {
       const category = command.category
       const existing = groups.get(category) || []
@@ -207,12 +208,6 @@
     }
   })
 
-  // Update selected index when search query changes
-  $effect(() => {
-    searchQuery
-    selectedIndex = 0
-  })
-
   // Get highlighted label segments for search results
   function getLabelSegments(command: Command): HighlightSegment[] | undefined {
     if (!searchQuery.trim()) {
@@ -230,8 +225,6 @@
 
 {#if isOpen}
   <!-- Modal backdrop -->
-  <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-  <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
   <div
     class="fixed inset-0 bg-black/50 backdrop-blur-sm"
     style="z-index: {Z_INDEX.COMMAND_PALETTE}"
@@ -275,6 +268,7 @@
           <input
             bind:this={searchInputRef}
             bind:value={searchQuery}
+            oninput={() => (selectedIndex = 0)}
             type="text"
             placeholder="Search commands..."
             class="flex-1 bg-transparent outline-none text-base-content placeholder-base-content/50"
@@ -326,7 +320,7 @@
                 >
                   Recent
                 </div>
-                {#each recentCommands as command, index}
+                {#each recentCommands as command, index (command.id)}
                   <CommandButton
                     {command}
                     {index}
@@ -339,7 +333,7 @@
             {/if}
 
             <!-- Commands grouped by category -->
-            {#each groupedCommands as group, groupIndex}
+            {#each groupedCommands as group, groupIndex (group.category)}
               {@const recentOffset = !searchQuery.trim() ? recentCommands.length : 0}
               <div class="py-2">
                 <div
@@ -347,7 +341,7 @@
                 >
                   {group.label}
                 </div>
-                {#each group.commands as command, cmdIndex}
+                {#each group.commands as command, cmdIndex (command.id)}
                   {@const globalIndex =
                     recentOffset +
                     groupedCommands

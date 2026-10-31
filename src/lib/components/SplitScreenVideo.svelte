@@ -34,7 +34,7 @@
     syncMuteState(syncState, isMuted, isLoaded)
   })
 
-  function onPlayerReady(playerInstance: VideoPlayer, duration: number) {
+  function onPlayerReady(playerInstance: VideoPlayer) {
     handlePlayerReady(syncState, playerInstance, isPlaying, isMuted)
   }
 
