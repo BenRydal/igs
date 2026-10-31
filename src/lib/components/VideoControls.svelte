@@ -1,6 +1,10 @@
 <script lang="ts">
   import { onDestroy } from 'svelte'
-  import VideoStore, { toggleMute, toggleSplitScreen, setCurrentTime } from '../../stores/videoStore'
+  import VideoStore, {
+    toggleMute,
+    toggleSplitScreen,
+    setCurrentTime,
+  } from '../../stores/videoStore'
   import { isPlayingVideo } from '../../stores/playbackStore'
   import { getCurrentTime, type VideoPlayer } from '../video/video-service'
   import MdVolumeUp from '~icons/mdi/volume-high'

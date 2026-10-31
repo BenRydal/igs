@@ -6,6 +6,8 @@
     createYouTubePlayer,
     type VideoPlayer,
     destroyPlayer,
+    mountPlayerTarget,
+    clearPlayerTarget,
   } from '../video/video-service'
 
   interface Props {
@@ -41,7 +43,7 @@
       player = null
     }
     if (youtubeContainerEl) {
-      youtubeContainerEl.innerHTML = ''
+      clearPlayerTarget(youtubeContainerEl)
     }
 
     // Initialize new player if we have a YouTube source
@@ -55,13 +57,11 @@
     if (!youtubeContainerEl) return
 
     // Create a new div for the YouTube player inside our container
-    const playerDiv = document.createElement('div')
-    playerDiv.id = youtubeContainerId + '-' + Date.now()
-    youtubeContainerEl.innerHTML = ''
-    youtubeContainerEl.appendChild(playerDiv)
+    const playerId = youtubeContainerId + '-' + Date.now()
+    mountPlayerTarget(youtubeContainerEl, playerId)
 
     createYouTubePlayer(
-      playerDiv.id,
+      playerId,
       videoId,
       (ytPlayer, duration) => {
         player = ytPlayer

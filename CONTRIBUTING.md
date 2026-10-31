@@ -63,6 +63,7 @@ yarn build
 ### Code Style
 
 Before committing:
+
 - Run `yarn format` to ensure consistent formatting
 - Run `yarn check` to catch TypeScript errors
 - Run `yarn lint` to catch linting issues

@@ -24,7 +24,9 @@
     if (!hoveredData) return 100
     const numTurns = Math.min(hoveredData.turns.length, MAX_TURNS)
     const moreIndicator = hoveredData.turns.length > MAX_TURNS ? MORE_INDICATOR_HEIGHT : 0
-    return numTurns * TURN_HEIGHT + (numTurns - 1) * DIVIDER_HEIGHT + CONTAINER_PADDING + moreIndicator
+    return (
+      numTurns * TURN_HEIGHT + (numTurns - 1) * DIVIDER_HEIGHT + CONTAINER_PADDING + moreIndicator
+    )
   })
 
   // Calculate tooltip position
@@ -58,12 +60,15 @@
     y = Math.max(GAP, Math.min(y, viewportHeight - tooltipHeight - GAP))
 
     // Calculate triangle Y to point at mouse, clamped to tooltip bounds
-    const triangleMaxY = Math.max(TRIANGLE_MIN_Y, tooltipHeight - TRIANGLE_MIN_Y - TRIANGLE_BORDER * 2)
+    const triangleMaxY = Math.max(
+      TRIANGLE_MIN_Y,
+      tooltipHeight - TRIANGLE_MIN_Y - TRIANGLE_BORDER * 2
+    )
     const triangleY = Math.max(TRIANGLE_MIN_Y, Math.min(mouseY - y - TRIANGLE_BORDER, triangleMaxY))
 
     return {
       style: `left: ${x}px; top: ${y}px; --triangle-y: ${triangleY}px;`,
-      triangleClass
+      triangleClass,
     }
   })
 
@@ -77,7 +82,7 @@
     <div class="tooltip-content">
       <div class="triangle"></div>
       <div class="turns-container">
-        {#each displayedTurns as turn}
+        {#each displayedTurns as turn, i (i)}
           <div class="turn" style="--speaker-color: {turn.color || DEFAULT_COLOR}">
             <div class="turn-header">
               <span class="turn-time">{formatTime(turn.time)}</span>

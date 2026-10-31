@@ -396,7 +396,7 @@
           </div>
 
           <div class="space-y-2 max-h-48 overflow-y-auto">
-            {#each files as file, index}
+            {#each files as file, index (file.name)}
               {@const typeInfo = getFileTypeDisplay(file)}
               <div class="flex items-center justify-between p-3 bg-base-200 rounded-lg">
                 <div class="flex items-center gap-3 min-w-0">

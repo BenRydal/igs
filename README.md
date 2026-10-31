@@ -32,14 +32,14 @@ The **Interaction Geography Slicer (IGS)** is an open-source, browser-based tool
 
 ## Features
 
-| Feature | Description |
-|---------|-------------|
-| **Browser-based** | No installation required—runs entirely in your browser |
-| **2D/3D Visualizations** | Create dynamic space-time visualizations at different scales |
-| **Multi-modal Data** | Explore movement, conversation, and video data simultaneously |
-| **Interactive Animations** | Build dynamic animations to communicate your findings |
-| **Privacy-first** | All data processing happens locally on your device |
-| **Qualitative Code Support** | Annotate and analyze data with custom coding schemes |
+| Feature                      | Description                                                   |
+| ---------------------------- | ------------------------------------------------------------- |
+| **Browser-based**            | No installation required—runs entirely in your browser        |
+| **2D/3D Visualizations**     | Create dynamic space-time visualizations at different scales  |
+| **Multi-modal Data**         | Explore movement, conversation, and video data simultaneously |
+| **Interactive Animations**   | Build dynamic animations to communicate your findings         |
+| **Privacy-first**            | All data processing happens locally on your device            |
+| **Qualitative Code Support** | Annotate and analyze data with custom coding schemes          |
 
 ---
 
@@ -73,15 +73,16 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 
 IGS accepts CSV files with the following formats:
 
-| Data Type | Required Headers | Example |
-|-----------|-----------------|---------|
-| **Indoor Movement** | `time, x, y` | `0, 100, 200` |
-| **GPS Movement** | `time, lat, lng` | `0, 40.7128, -74.0060` |
-| **Conversation** | `time, speaker, talk` | `5, Alice, Hello everyone` |
-| **Codes (multi)** | `code, start, end` | `teaching, 0, 30` |
-| **Codes (single)** | `start, end` | `0, 30` (filename = code) |
+| Data Type           | Required Headers      | Example                    |
+| ------------------- | --------------------- | -------------------------- |
+| **Indoor Movement** | `time, x, y`          | `0, 100, 200`              |
+| **GPS Movement**    | `time, lat, lng`      | `0, 40.7128, -74.0060`     |
+| **Conversation**    | `time, speaker, talk` | `5, Alice, Hello everyone` |
+| **Codes (multi)**   | `code, start, end`    | `teaching, 0, 30`          |
+| **Codes (single)**  | `start, end`          | `0, 30` (filename = code)  |
 
 You can also load:
+
 - **GPX/KML files** for GPS tracks (must contain timestamps)
 - **Floorplan images** (PNG, JPG) as background for indoor data
 - **Video** (MP4, YouTube URL) synced to timeline
@@ -162,8 +163,8 @@ Found a bug or have a suggestion?
 
 ### Data Sources
 
-- Classroom discussion data from *Mathematics Teaching and Learning to Teach (MTLT)*, University of Michigan (2010)
-- Classroom science lesson data from *The Third International Mathematics and Science Study (TIMSS) 1999 Video Study*
+- Classroom discussion data from _Mathematics Teaching and Learning to Teach (MTLT)_, University of Michigan (2010)
+- Classroom science lesson data from _The Third International Mathematics and Science Study (TIMSS) 1999 Video Study_
 
 ---
 
@@ -171,7 +172,7 @@ Found a bug or have a suggestion?
 
 If you use IGS in your research, please cite:
 
-> Shapiro, B. R., Silvis, D., & Hall, R. (2025). Visualization as theory and experience: Interactive qualitative data visualization for the learning sciences. *Journal of the Learning Sciences, 34*(5), 840–871. https://doi.org/10.1080/10508406.2025.2537945
+> Shapiro, B. R., Silvis, D., & Hall, R. (2025). Visualization as theory and experience: Interactive qualitative data visualization for the learning sciences. _Journal of the Learning Sciences, 34_(5), 840–871. https://doi.org/10.1080/10508406.2025.2537945
 
 <details>
 <summary>BibTeX</summary>

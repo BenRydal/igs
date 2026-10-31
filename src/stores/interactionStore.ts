@@ -15,7 +15,11 @@ export interface HoveredConversation {
 
 const HoveredConversationStore = writable<HoveredConversation | null>(null)
 
-export function setHoveredConversation(turns: ConversationTurn[], mouseX: number, mouseY: number): void {
+export function setHoveredConversation(
+  turns: ConversationTurn[],
+  mouseX: number,
+  mouseY: number
+): void {
   HoveredConversationStore.set({ turns, mouseX, mouseY })
 }
 

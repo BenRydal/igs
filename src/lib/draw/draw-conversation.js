@@ -62,7 +62,11 @@ export class DrawConversation {
     const dataRange = state.dataEnd - state.dataStart
     const viewRange = state.viewEnd - state.viewStart
     const zoomLevel = dataRange > 0 ? viewRange / dataRange : 1
-    zoomLevel > 0.3 ? this.drawAggregated(mergedPoints) : this.drawDetailed(mergedPoints)
+    if (zoomLevel > 0.3) {
+      this.drawAggregated(mergedPoints)
+    } else {
+      this.drawDetailed(mergedPoints)
+    }
   }
 
   // --- Detailed view (zoomed in) ---

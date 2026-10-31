@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte'
   import { registry } from '$lib/keyboard'
-  import type { ShortcutCategory, KeyboardShortcut } from '$lib/keyboard'
+  import type { ShortcutCategory } from '$lib/keyboard'
   import { Z_INDEX } from '$lib/styles/z-index'
 
   interface Props {

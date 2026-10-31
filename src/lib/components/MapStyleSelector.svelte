@@ -7,11 +7,7 @@
   import { MAP_STYLES, type MapboxStyle } from '$lib/gps/gps-types'
   import { clickOutsideClose } from '$lib/actions/clickOutside'
 
-  let p5Instance = $state<any>(null)
-
-  $effect(() => {
-    p5Instance = $P5Store
-  })
+  let p5Instance = $derived($P5Store)
 
   async function handleStyleChange(style: MapboxStyle) {
     const gpsState = $GPSStore
@@ -40,7 +36,7 @@
       </svg>
     </summary>
     <ul class="menu dropdown-content rounded-box z-[1] w-44 p-2 shadow bg-base-100">
-      {#each MAP_STYLES as style}
+      {#each MAP_STYLES as style (style.value)}
         {@const isSelected = $GPSStore.mapStyle === style.value}
         <li>
           <button

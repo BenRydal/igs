@@ -8,14 +8,14 @@ get re-litigated from scratch.
 
 ## Why TimelineScrubber/TimelineTrack don't fit (yet)
 
-| IGS timeline feature | In the library? |
-| --- | --- |
-| Playhead + seek + hover time | Yes |
-| Selection window | Yes |
-| **Zoomable view window** (drag-to-zoom region, pan, zoom-to-fit, min duration) | No — the library track always spans the full duration |
-| **View window as the visualization's x-axis domain** (`viewPixelToPixel`, `getViewStart/EndPixel` consumed by the sketch every frame) | No — no view-window state, no pixel-bounds export |
-| Activity-gradient layer (data-density rendering) | No — `segments` are flat tinted bands; no custom render-layer API |
-| Custom canvas layers (background/hover/playhead/zoom-selection) with DPR handling | No — DOM-rendered |
+| IGS timeline feature                                                                                                                  | In the library?                                                   |
+| ------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| Playhead + seek + hover time                                                                                                          | Yes                                                               |
+| Selection window                                                                                                                      | Yes                                                               |
+| **Zoomable view window** (drag-to-zoom region, pan, zoom-to-fit, min duration)                                                        | No — the library track always spans the full duration             |
+| **View window as the visualization's x-axis domain** (`viewPixelToPixel`, `getViewStart/EndPixel` consumed by the sketch every frame) | No — no view-window state, no pixel-bounds export                 |
+| Activity-gradient layer (data-density rendering)                                                                                      | No — `segments` are flat tinted bands; no custom render-layer API |
+| Custom canvas layers (background/hover/playhead/zoom-selection) with DPR handling                                                     | No — DOM-rendered                                                 |
 
 The zoomable view window doubling as the space-time visualization's x-axis
 domain is IGS's core interaction; without a view-window/zoom-domain contract
