@@ -94,6 +94,31 @@ export default async function (ctx) {
   await fit.click()
   await page.waitForTimeout(500)
 
+  const outlined = () =>
+    page.evaluate(() =>
+      [...document.querySelectorAll('.timeline-track, .timeline-track__handle')]
+        .filter((el) => getComputedStyle(el).outlineStyle !== 'none')
+        .map((el) => el.className.split(' ')[0])
+    )
+  await page.getByRole('button', { name: 'Zoom in' }).click()
+  await page.waitForTimeout(500)
+  const handle = await page
+    .locator('.igs-timeline-overview .timeline-track__handle--end')
+    .boundingBox()
+  await page.mouse.move(handle.x + handle.width / 2, handle.y + handle.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(handle.x - 20, handle.y + handle.height / 2, { steps: 4 })
+  await page.mouse.up()
+  await page.keyboard.press('m')
+  await page.keyboard.press('m')
+  await page.mouse.move(700, 300)
+  ctx.check(
+    (await outlined()).length === 0,
+    `no focus outline sticks after a mouse drag and a shortcut key (${(await outlined()).join(', ') || 'none'})`
+  )
+  await fit.click()
+  await page.waitForTimeout(500)
+
   for (let i = 0; i < 6; i++) {
     await page.getByRole('button', { name: 'Playback speed' }).click()
     const now = await controlPositions()
