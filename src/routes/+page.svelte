@@ -760,7 +760,7 @@
       <span class="flex flex-col gap-0.5 min-w-0 flex-1">
         <span class="flex items-center gap-2 min-w-0">
           <span class="truncate flex-1 text-left">{entry.label}</span>
-          <span class="text-xs opacity-50 shrink-0 tabular-nums">{entry.duration}</span>
+          <span class="text-xs opacity-70 shrink-0 tabular-nums">{entry.duration}</span>
         </span>
         <span class="flex items-center gap-1.5 text-xs opacity-70">
           {#if featured}<span class="text-primary">Start here</span>{/if}
@@ -777,7 +777,7 @@
 
 {#snippet panelSection(title: string, body: Snippet)}
   <section class="flex flex-col gap-2">
-    <h3 class="text-xs font-semibold uppercase tracking-wide opacity-60">{title}</h3>
+    <h3 class="text-xs font-semibold uppercase tracking-wide opacity-70">{title}</h3>
     {@render body()}
   </section>
 {/snippet}
@@ -796,7 +796,7 @@
             >
               {@render icon(kind.icon)}
               <span class="flex-1 truncate">{kind.label}</span>
-              <span class="text-xs opacity-60 shrink-0">{loaded ? kind.detail : 'None'}</span>
+              <span class="text-xs opacity-70 shrink-0">{loaded ? kind.detail : 'None'}</span>
               <button
                 class="btn btn-ghost btn-xs btn-square shrink-0"
                 onclick={kind.clear}
@@ -810,7 +810,7 @@
           {/each}
         </ul>
       {:else}
-        <p class="text-xs opacity-60 px-2">
+        <p class="text-xs opacity-70 px-2">
           Nothing loaded yet — import your own files, or pick an example below.
         </p>
       {/if}
@@ -853,7 +853,7 @@
             {/each}
           </ul>
         {:else}
-          <p class="text-xs opacity-60 px-2 py-3">No examples match “{exampleFilter}”.</p>
+          <p class="text-xs opacity-70 px-2 py-3">No examples match “{exampleFilter}”.</p>
         {/if}
       {:else}
         {#if FEATURED_EXAMPLE}
@@ -875,7 +875,7 @@
                 {@render icon(isOpen ? MdChevronDown : MdChevronRight)}
                 {@render icon(collectionIcons[collection.id])}
                 <span class="flex-1 truncate text-left">{collection.label}</span>
-                <span class="text-xs opacity-50 shrink-0 tabular-nums">
+                <span class="text-xs opacity-70 shrink-0 tabular-nums">
                   {collection.items.length}
                 </span>
               </button>

@@ -86,7 +86,7 @@
           <div class="turn" style="--speaker-color: {turn.color || DEFAULT_COLOR}">
             <div class="turn-header">
               <span class="turn-time">{formatTime(turn.time)}</span>
-              <span class="turn-speaker" style="color: {turn.color || DEFAULT_COLOR}">
+              <span class="turn-speaker">
                 {turn.speaker}
               </span>
             </div>
@@ -201,7 +201,7 @@
 
   .turn-time {
     font-size: 10px;
-    color: #888;
+    color: #555;
     font-family: ui-monospace, 'SF Mono', Monaco, monospace;
     background: rgba(0, 0, 0, 0.05);
     padding: 2px 5px;
@@ -209,6 +209,7 @@
   }
 
   .turn-speaker {
+    color: #1f2937;
     font-size: 13px;
     font-weight: 600;
     letter-spacing: -0.01em;
@@ -222,7 +223,7 @@
 
   .more-indicator {
     font-size: 11px;
-    color: #888;
+    color: #595959;
     text-align: center;
     padding: 8px 0 2px;
     margin-top: 4px;

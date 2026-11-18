@@ -51,3 +51,8 @@
 .dropdown .menu {
   min-width: 12rem;
 }
+
+.label,
+.table thead th {
+  color: color-mix(in oklab, var(--color-base-content) 70%, transparent);
+}

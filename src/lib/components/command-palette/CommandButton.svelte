@@ -47,7 +47,7 @@
       {/if}
     </div>
     {#if command.description}
-      <div class="text-sm text-base-content/60">{command.description}</div>
+      <div class="text-sm text-base-content/70">{command.description}</div>
     {/if}
   </div>
 

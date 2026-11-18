@@ -35,7 +35,7 @@
     <div class="mt-4 flex items-center justify-between">
       <label class="flex items-center gap-2 cursor-pointer">
         <input type="checkbox" class="checkbox checkbox-sm" bind:checked={dontShowAgain} />
-        <span class="text-sm text-base-content/60">Don't show again</span>
+        <span class="text-sm text-base-content/70">Don't show again</span>
       </label>
       <button class="btn btn-primary btn-sm" onclick={dismiss}>Got it</button>
     </div>

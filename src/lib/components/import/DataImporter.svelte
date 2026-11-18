@@ -359,12 +359,12 @@
         <p class="text-lg font-medium mb-1">
           {isDragOver ? 'Drop files here' : 'Drag & drop files here'}
         </p>
-        <p class="text-sm text-base-content/60">or click to browse</p>
+        <p class="text-sm text-base-content/70">or click to browse</p>
       </div>
 
       <!-- YouTube URL Input -->
       <div class="mt-4">
-        <div class="divider text-sm text-base-content/60">OR</div>
+        <div class="divider text-sm text-base-content/70">OR</div>
         <div class="flex gap-2">
           <div class="flex-1">
             <input
@@ -403,7 +403,7 @@
                   <span class="text-xl flex-shrink-0">{typeInfo.icon}</span>
                   <div class="min-w-0">
                     <p class="font-medium truncate">{file.name}</p>
-                    <div class="flex items-center gap-2 text-sm text-base-content/60">
+                    <div class="flex items-center gap-2 text-sm text-base-content/70">
                       <span class="badge {typeInfo.color} badge-sm">{typeInfo.label}</span>
                       <span>{formatFileSize(file.size)}</span>
                     </div>

@@ -120,7 +120,7 @@
   </div>
   <span class="w-20 text-xs">
     {#if $isZoomed}
-      <span class="font-medium tabular-nums text-gray-500">{$zoomLevel.toFixed(1)}x</span>
+      <span class="font-medium tabular-nums text-gray-600">{$zoomLevel.toFixed(1)}x</span>
     {:else}
       <span class="zoom-hint">Drag to zoom</span>
     {/if}
@@ -129,35 +129,36 @@
   <!-- Activity gradient toggle -->
   <button
     class="flex items-center gap-1.5 px-1.5 py-0.5 rounded hover:bg-gray-200/50 transition-colors cursor-pointer"
-    class:opacity-50={!$ConfigStore.showActivityGradient}
+    aria-pressed={$ConfigStore.showActivityGradient}
     title={$ConfigStore.showActivityGradient ? 'Hide activity gradient' : 'Show activity gradient'}
     onclick={() =>
       ConfigStore.update((c) => ({ ...c, showActivityGradient: !c.showActivityGradient }))}
   >
-    <span class="text-[10px] text-gray-400">stopped</span>
+    <span class="text-[11px] text-gray-600">stopped</span>
     <div
       class="w-10 h-1.5 rounded-sm"
+      class:opacity-40={!$ConfigStore.showActivityGradient}
       style="background: linear-gradient(to right, rgba(0,0,0,0.1), rgba(0,0,0,0.4))"
     ></div>
-    <span class="text-[10px] text-gray-400">moving</span>
+    <span class="text-[11px] text-gray-600">moving</span>
   </button>
 
   <!-- Time display -->
   <div class="flex items-center gap-1 font-mono text-sm">
     <span
-      class="text-right font-semibold text-red-500"
+      class="text-right font-semibold text-red-700"
       style:min-width="{formatTime(duration).length}ch"
     >
       {formatTime(currentTime)}
     </span>
-    <span class="text-gray-400">/</span>
-    <span class="text-gray-500">{formatTime(duration)}</span>
+    <span class="text-gray-600">/</span>
+    <span class="text-gray-600">{formatTime(duration)}</span>
   </div>
 </div>
 
 <style>
   .zoom-hint {
-    color: #9ca3af;
+    color: #4b5563;
     animation: fade-out 15s forwards;
   }
 

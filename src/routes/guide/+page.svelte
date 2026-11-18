@@ -192,7 +192,7 @@
               </table>
             </div>
 
-            <div class="mt-4 space-y-2 text-sm text-base-content/60">
+            <div class="mt-4 space-y-2 text-sm text-base-content/70">
               <p><strong>time</strong> — When (in seconds, or see "Time Formats" below)</p>
               <p>
                 <strong>x</strong> — How far from the left edge of your floor plan image (in pixels)
@@ -227,10 +227,10 @@
             </p>
             <div class="flex flex-wrap gap-2 mt-3">
               <code class="badge badge-lg">Teacher.csv</code>
-              <span class="text-base-content/50">→</span>
+              <span class="text-base-content/70">→</span>
               <span class="badge badge-lg badge-primary">Teacher</span>
             </div>
-            <p class="text-sm text-base-content/60 mt-3">
+            <p class="text-sm text-base-content/70 mt-3">
               To track multiple people, create separate files for each person (e.g., <code
                 >Student1.csv</code
               >, <code>Student2.csv</code>).
@@ -273,7 +273,7 @@
               <span class="badge badge-outline">Google Earth</span>
               <span class="badge badge-outline">Google Maps Timeline</span>
             </div>
-            <p class="text-sm text-base-content/60 mt-3">
+            <p class="text-sm text-base-content/70 mt-3">
               Look for "Export GPX" or "Export KML" in your app's activity details.
             </p>
             <div class="alert mt-3">
@@ -312,7 +312,7 @@
               </table>
             </div>
 
-            <p class="text-sm text-base-content/60 mt-3">
+            <p class="text-sm text-base-content/70 mt-3">
               Use decimal coordinates (like <code>40.7128</code>), not degrees-minutes-seconds.
             </p>
           </div>
@@ -433,9 +433,9 @@
         <div class="card bg-base-200">
           <div class="card-body">
             <h3 class="font-semibold mb-2">Simple format (one code type per file)</h3>
-            <p class="text-sm text-base-content/60 mb-3">The filename becomes the code label.</p>
+            <p class="text-sm text-base-content/70 mb-3">The filename becomes the code label.</p>
 
-            <p class="text-xs text-base-content/50 mb-1">File: <code>Group Work.csv</code></p>
+            <p class="text-xs text-base-content/70 mb-1">File: <code>Group Work.csv</code></p>
             <div class="overflow-x-auto bg-base-100 rounded-lg">
               <table class="table table-sm">
                 <thead>
@@ -514,7 +514,7 @@
               </tbody>
             </table>
           </div>
-          <p class="text-sm text-base-content/60 mt-4">
+          <p class="text-sm text-base-content/70 mt-4">
             IGS automatically converts everything to relative time, starting from 0.
           </p>
           <p class="font-medium mt-4 mb-3">Code files support:</p>
@@ -536,7 +536,7 @@
               </tbody>
             </table>
           </div>
-          <p class="text-sm text-base-content/60 mt-4">
+          <p class="text-sm text-base-content/70 mt-4">
             Code file times should be relative to the start of your recording (not absolute
             timestamps).
           </p>

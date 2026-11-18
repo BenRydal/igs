@@ -213,7 +213,7 @@
             {#each categories as category (category.id)}
               <div class="flex flex-col space-y-3">
                 <!-- Category Header -->
-                <h4 class="text-sm font-bold tracking-wider opacity-60">
+                <h4 class="text-sm font-bold tracking-wider opacity-70">
                   {formatCategoryLabel(category)}
                 </h4>
 
@@ -232,7 +232,7 @@
             {/each}
           </div>
         {:else}
-          <div class="text-center py-8 text-base-content/60">
+          <div class="text-center py-8 text-base-content/70">
             <p>No keyboard shortcuts registered.</p>
           </div>
         {/if}
@@ -240,7 +240,7 @@
 
       <!-- Footer -->
       <div class="flex justify-center pt-4 border-t border-base-300 flex-shrink-0">
-        <p class="text-sm text-base-content/60">
+        <p class="text-sm text-base-content/70">
           Press <kbd class="kbd kbd-sm">?</kbd> anytime to show this dialog
         </p>
       </div>

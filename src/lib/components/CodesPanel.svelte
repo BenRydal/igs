@@ -18,7 +18,7 @@
 
 <div class="flex flex-col gap-6 px-3 py-4">
   <section class="flex flex-col gap-2">
-    <h3 class="text-xs font-semibold uppercase tracking-wide opacity-60">Display</h3>
+    <h3 class="text-xs font-semibold uppercase tracking-wide opacity-70">Display</h3>
     <label class="flex items-center gap-2 text-sm cursor-pointer">
       <input
         type="checkbox"
@@ -46,7 +46,7 @@
   </section>
 
   <section class="flex flex-col gap-2">
-    <h3 class="text-xs font-semibold uppercase tracking-wide opacity-60">Codes</h3>
+    <h3 class="text-xs font-semibold uppercase tracking-wide opacity-70">Codes</h3>
     <ul class="flex flex-col gap-1">
       {#each sortedCodes as code (code.code)}
         <li class="flex items-center gap-2 text-sm">

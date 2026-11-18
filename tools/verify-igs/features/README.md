@@ -17,6 +17,7 @@ feature file, before driving the app.
 | People and visibility        | [people.md](people.md)     | `people-toggle`              |
 | Space-time view              | [view.md](view.md)         | `view-2d-3d`                 |
 | Timeline and playback        | [timeline.md](timeline.md) | `timeline-playback`          |
+| Text contrast                | [contrast.md](contrast.md) | `contrast`                   |
 | Video                        | [video.md](video.md)       | `video-toggle`               |
 | Commands, shortcuts and undo | [commands.md](commands.md) | `command-palette-undo`       |
 

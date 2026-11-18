@@ -144,9 +144,9 @@
     position: absolute;
     top: 0;
     left: 3px;
-    font-size: 9px;
+    font-size: 10px;
     line-height: 1;
-    color: rgba(0, 0, 0, 0.5);
+    color: rgba(0, 0, 0, 0.7);
     white-space: nowrap;
   }
 </style>
