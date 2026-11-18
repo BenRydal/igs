@@ -75,6 +75,7 @@
     type ExampleEntry,
   } from '#lib/core/example-datasets.ts'
   import type { ExampleSelectEvent } from '#lib/core/types.ts'
+  import { sortFilesForImport } from '#lib/core/import-order.ts'
   import { igsSketch } from '#lib/p5/igsSketch.ts'
   import { writable } from 'svelte/store'
   import { onMount, tick, flushSync, type Component, type Snippet } from 'svelte'
@@ -369,114 +370,6 @@
     redrawCanvas()
   }
 
-  /**
-   * Detect CSV file type by reading headers
-   * Returns: 'movement' | 'conversation' | 'multicode' | 'singlecode' | 'unknown'
-   */
-  async function detectCsvFileType(file: File): Promise<string> {
-    return new Promise((resolve) => {
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        const content = e.target?.result as string
-        if (!content) {
-          resolve('unknown')
-          return
-        }
-
-        // Get first line (headers) and normalize
-        const firstLine = content.split('\n')[0] || ''
-        const headers = firstLine
-          .toLowerCase()
-          .split(',')
-          .map((h) => h.trim().replace(/"/g, ''))
-
-        // Check for GPS movement: time, lat, lng (or latitude, longitude)
-        if (
-          headers.includes('time') &&
-          (headers.includes('lat') || headers.includes('latitude')) &&
-          (headers.includes('lng') || headers.includes('longitude'))
-        ) {
-          resolve('movement')
-          return
-        }
-
-        // Check for movement: time, x, y
-        if (headers.includes('time') && headers.includes('x') && headers.includes('y')) {
-          resolve('movement')
-          return
-        }
-
-        // Check for conversation: time, speaker, talk
-        if (headers.includes('time') && headers.includes('speaker') && headers.includes('talk')) {
-          resolve('conversation')
-          return
-        }
-
-        // Check for multicode: code, start, end (must check before singlecode)
-        if (headers.includes('code') && headers.includes('start') && headers.includes('end')) {
-          resolve('multicode')
-          return
-        }
-
-        // Check for singlecode: start, end
-        if (headers.includes('start') && headers.includes('end')) {
-          resolve('singlecode')
-          return
-        }
-
-        resolve('unknown')
-      }
-      reader.onerror = () => resolve('unknown')
-      // Only read first 1KB to get headers
-      reader.readAsText(file.slice(0, 1024))
-    })
-  }
-
-  /**
-   * Sort files by processing priority:
-   * 1. Non-CSV files (images, videos) - process first
-   * 2. Movement CSV files
-   * 3. Conversation CSV files
-   * 4. Code CSV files (multicode and singlecode) - process last
-   */
-  async function sortFilesByProcessingOrder(files: File[]): Promise<File[]> {
-    const fileTypes: Array<{ file: File; type: string; priority: number }> = []
-
-    for (const file of files) {
-      const ext = file.name.toLowerCase().split('.').pop() || ''
-
-      if (ext !== 'csv') {
-        // Non-CSV files get highest priority (processed first)
-        fileTypes.push({ file, type: 'non-csv', priority: 0 })
-      } else {
-        const csvType = await detectCsvFileType(file)
-        let priority: number
-
-        switch (csvType) {
-          case 'movement':
-            priority = 1
-            break
-          case 'conversation':
-            priority = 2
-            break
-          case 'multicode':
-          case 'singlecode':
-            priority = 3 // Code files processed last
-            break
-          default:
-            priority = 4 // Unknown CSV files last
-        }
-
-        fileTypes.push({ file, type: csvType, priority })
-      }
-    }
-
-    // Sort by priority (ascending)
-    fileTypes.sort((a, b) => a.priority - b.priority)
-
-    return fileTypes.map((ft) => ft.file)
-  }
-
   async function handleImportFiles(files: File[], clearExisting: boolean) {
     // Clear existing data if requested
     if (clearExisting) {
@@ -485,7 +378,7 @@
 
     // Sort files to ensure correct processing order:
     // movement files first, conversation second, code files last
-    const sortedFiles = await sortFilesByProcessingOrder(files)
+    const sortedFiles = await sortFilesForImport(files)
 
     // Process each file SEQUENTIALLY using the async file handler
     // This ensures movement data is loaded before conversation,
