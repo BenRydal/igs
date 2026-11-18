@@ -79,6 +79,39 @@ export default async function (ctx) {
   await ctx.shot('drag-to-zoom')
   ctx.check(await fit.isEnabled(), 'dragging a region zooms the timeline')
 
+  await fit.click()
+  await page.waitForTimeout(500)
+  const top = box.y + box.height * 0.2
+  await page.mouse.click(box.x + box.width * 0.5, top)
+  await page.waitForTimeout(300)
+  const clicked = await currentSeconds(page)
+  await page.mouse.move(box.x + box.width * 0.5, top)
+  await page.mouse.down()
+  await page.mouse.move(box.x + box.width * 0.8, top, { steps: 8 })
+  await page.mouse.up()
+  await page.waitForTimeout(500)
+  ctx.check(
+    (await fit.isEnabled()) && (await currentSeconds(page)) === clicked,
+    `a drag that starts on the playhead line zooms and leaves the playhead at ${clicked}s`
+  )
+  await fit.click()
+  await page.waitForTimeout(500)
+  const knob = await page.locator('.igs-timeline-main .timeline-track__playhead-knob').boundingBox()
+  await page.mouse.move(knob.x + knob.width / 2, knob.y + knob.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(knob.x + knob.width / 2 + 120, knob.y + knob.height / 2, { steps: 8 })
+  await page.mouse.up()
+  await page.waitForTimeout(300)
+  ctx.check(
+    (await fit.isDisabled()) && (await currentSeconds(page)) > clicked,
+    `a drag that starts on the playhead knob scrubs (${clicked}s to ${await currentSeconds(page)}s) without zooming`
+  )
+  await page.mouse.move(box.x + box.width * 0.2, box.y + box.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(box.x + box.width * 0.6, box.y + box.height / 2, { steps: 8 })
+  await page.mouse.up()
+  await page.waitForTimeout(500)
+
   const win = await overviewWindow(page).boundingBox()
   await page.mouse.move(win.x + win.width / 2, win.y + win.height / 2)
   await page.mouse.down()

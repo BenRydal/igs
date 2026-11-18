@@ -102,6 +102,12 @@
   .igs-timeline-main > :global(.timeline-track .timeline-track__progress) {
     display: none;
   }
+  .igs-timeline-main > :global(.timeline-track .timeline-track__playhead) {
+    pointer-events: none;
+  }
+  .igs-timeline-main > :global(.timeline-track .timeline-track__playhead-knob) {
+    pointer-events: auto;
+  }
   .igs-timeline-overview {
     margin-top: 2px;
   }
