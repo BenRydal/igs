@@ -1374,7 +1374,7 @@
              floorplan collapses, then inverts past a ~50% split. -->
         <div
           id="timeline-controls"
-          class="flex min-w-0 flex-row justify-end items-center bg-[#f6f5f3] px-2 overflow-x-auto"
+          class="flex min-w-0 flex-row items-center bg-[#f6f5f3] px-2 overflow-x-auto"
           style={`flex: 0 1 calc(${railWidth}px + (100% - ${railWidth}px) * ${
             isSplitScreen ? 0.5 + splitSizes[0] / 200 : 0.5
           } + ${isSplitScreen ? SPLIT_DIVIDER_PX / 2 : 0}px)`}

@@ -5,6 +5,13 @@ export default async function (ctx) {
   await loadedExample(ctx)
   ctx.check((await currentSeconds(page)) === 0, 'starts at 0:00')
 
+  const controlPositions = async () => {
+    const left = async (name) =>
+      Math.round((await page.getByRole('button', { name, exact: true }).boundingBox()).x)
+    return `${await left('Reset')}/${await left('Zoom in')}/${await left('Playback speed')}`
+  }
+  const restingPositions = await controlPositions()
+
   await page.getByRole('button', { name: 'Play', exact: true }).click()
   await page.getByRole('button', { name: 'Pause', exact: true }).waitFor()
   await page.waitForFunction(
@@ -45,6 +52,10 @@ export default async function (ctx) {
   await ctx.shot('zoomed-in')
   ctx.check(await fit.isEnabled(), 'Zoom in enables Fit to view')
   ctx.check(
+    (await controlPositions()) === restingPositions,
+    `zooming does not move the controls (${restingPositions} then ${await controlPositions()})`
+  )
+  ctx.check(
     midZoom > settled + 2,
     `zoom eases in: overview window ${Math.round(midZoom)}px mid-way, ${Math.round(settled)}px settled`
   )
@@ -82,6 +93,30 @@ export default async function (ctx) {
 
   await fit.click()
   await page.waitForTimeout(500)
+
+  for (let i = 0; i < 6; i++) {
+    await page.getByRole('button', { name: 'Playback speed' }).click()
+    const now = await controlPositions()
+    if (now !== restingPositions) {
+      ctx.check(false, `changing speed moved the controls (${restingPositions} then ${now})`)
+    }
+  }
+  ctx.check(true, 'cycling through every playback speed does not move the controls')
+
+  await page.setViewportSize({ width: 640, height: 900 })
+  await page.waitForTimeout(300)
+  const bar = await page.locator('#timeline-controls').boundingBox()
+  const play = await page.getByRole('button', { name: 'Play', exact: true }).boundingBox()
+  const scrollable = await page
+    .locator('#timeline-controls')
+    .evaluate((el) => el.scrollLeft === 0 && el.scrollWidth >= el.clientWidth)
+  await ctx.shot('narrow-window')
+  ctx.check(
+    play.x >= bar.x && scrollable,
+    `Play stays reachable in a 640px window (button at ${Math.round(play.x)}px, bar from ${Math.round(bar.x)}px)`
+  )
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.waitForTimeout(300)
 
   await page.getByRole('button', { name: 'Reset', exact: true }).click()
   await page.waitForTimeout(300)

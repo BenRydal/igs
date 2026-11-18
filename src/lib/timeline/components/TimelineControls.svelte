@@ -54,7 +54,7 @@
   }
 </script>
 
-<div class="flex items-center gap-2 px-2 py-1 bg-[#f6f5f3]">
+<div class="ml-auto flex shrink-0 items-center gap-2 whitespace-nowrap px-2 py-1 bg-[#f6f5f3]">
   <!-- Playback controls -->
   <div
     class="flex items-center gap-0.5 bg-white border border-gray-200 rounded-full pl-0.5 pr-1 py-0.5"
@@ -81,7 +81,7 @@
     </button>
     <span class="w-px h-3 bg-gray-200"></span>
     <button
-      class="btn btn-ghost btn-xs px-1 font-mono text-xs font-semibold"
+      class="btn btn-ghost btn-xs w-10 px-1 font-mono text-xs font-semibold"
       onclick={cycleSpeed}
       title="Click to change speed (Shift+click for slower)"
       aria-label="Playback speed"
@@ -118,11 +118,13 @@
       <MdMagnifyPlus class="w-3.5 h-3.5" />
     </button>
   </div>
-  {#if $isZoomed}
-    <span class="text-xs text-gray-500 font-medium">{$zoomLevel.toFixed(1)}x</span>
-  {:else}
-    <span class="zoom-hint">Drag to zoom</span>
-  {/if}
+  <span class="w-20 text-xs">
+    {#if $isZoomed}
+      <span class="font-medium tabular-nums text-gray-500">{$zoomLevel.toFixed(1)}x</span>
+    {:else}
+      <span class="zoom-hint">Drag to zoom</span>
+    {/if}
+  </span>
 
   <!-- Activity gradient toggle -->
   <button
@@ -141,8 +143,13 @@
   </button>
 
   <!-- Time display -->
-  <div class="flex items-center gap-1 ml-auto font-mono text-sm">
-    <span class="font-semibold text-red-500">{formatTime(currentTime)}</span>
+  <div class="flex items-center gap-1 font-mono text-sm">
+    <span
+      class="text-right font-semibold text-red-500"
+      style:min-width="{formatTime(duration).length}ch"
+    >
+      {formatTime(currentTime)}
+    </span>
     <span class="text-gray-400">/</span>
     <span class="text-gray-500">{formatTime(duration)}</span>
   </div>
@@ -150,7 +157,6 @@
 
 <style>
   .zoom-hint {
-    font-size: 0.75rem;
     color: #9ca3af;
     animation: fade-out 15s forwards;
   }
