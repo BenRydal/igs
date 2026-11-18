@@ -14,7 +14,7 @@
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "lint": "prettier --check . && eslint .",
-    "knip": "knip",
+    "knip": "svelte-kit sync && knip",
     "loc": "node tools/loc.mjs",
     "format": "prettier --write .",
     "test": "svelte-kit sync && vitest run",
