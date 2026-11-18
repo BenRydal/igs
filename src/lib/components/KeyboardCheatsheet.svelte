@@ -219,13 +219,11 @@
 
                 <!-- Shortcuts List -->
                 <div class="flex flex-col space-y-2">
-                  {#each category.shortcuts as shortcut (shortcut.id)}
-                    {#if shortcut.enabled !== false}
-                      <div class="flex justify-between items-center gap-4">
-                        <span class="text-sm">{shortcut.label}</span>
-                        <kbd class="kbd kbd-sm">{formatKey(shortcut.key, shortcut.modifiers)}</kbd>
-                      </div>
-                    {/if}
+                  {#each category.shortcuts as { id, label, shortcut } (id)}
+                    <div class="flex justify-between items-center gap-4">
+                      <span class="text-sm">{label}</span>
+                      <kbd class="kbd kbd-sm">{formatKey(shortcut.key, shortcut.modifiers)}</kbd>
+                    </div>
                   {/each}
                 </div>
               </div>

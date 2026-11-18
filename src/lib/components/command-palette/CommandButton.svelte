@@ -1,12 +1,13 @@
 <script lang="ts">
-  import type { Command, HighlightSegment } from './types'
+  import { formatShortcutDisplay, type AppAction } from '#lib/app-actions/types.ts'
+  import type { HighlightSegment } from './types'
 
   interface Props {
-    command: Command
+    command: AppAction
     index: number
     selectedIndex: number
     labelSegments?: HighlightSegment[]
-    onExecute: (command: Command) => void
+    onExecute: (command: AppAction) => void
     onSelect: (index: number) => void
   }
 
@@ -58,6 +59,6 @@
 
   <!-- Shortcut -->
   {#if command.shortcut}
-    <kbd class="kbd kbd-sm">{command.shortcut}</kbd>
+    <kbd class="kbd kbd-sm">{formatShortcutDisplay(command.shortcut)}</kbd>
   {/if}
 </button>

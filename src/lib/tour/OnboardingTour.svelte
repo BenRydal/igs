@@ -5,6 +5,7 @@
   import './tour.css'
   import { tourSteps } from './steps'
   import { setTourCompleted, resetTourState } from './storage'
+  import { openPanel } from '#lib/workspace/workspace.svelte.ts'
 
   let driverInstance = $state<Driver | null>(null)
 
@@ -28,7 +29,7 @@
       steps: tourSteps,
       onDestroyStarted: () => {
         setTourCompleted()
-        window.dispatchEvent(new CustomEvent('igs:open-panel', { detail: { tab: null } }))
+        openPanel(null)
         driverInstance?.destroy()
       },
     })

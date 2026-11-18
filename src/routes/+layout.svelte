@@ -7,9 +7,9 @@
   import { registerAllShortcuts, attachKeyboardHandler } from '#lib/keyboard/index.ts'
   import { registerUndoRedoShortcuts } from '#lib/history/keyboard.ts'
   import { setupModalListeners } from '../stores/modalStore'
+  import { workspace } from '#lib/workspace/workspace.svelte.ts'
 
   // State for modals
-  let showCheatsheet = $state(false)
   let showCommandPalette = $state(false)
 
   onMount(() => {
@@ -21,21 +21,14 @@
     registerUndoRedoShortcuts()
 
     // Set up modal listeners (escape key handling, etc.)
-    const cleanupModalListeners = setupModalListeners()
-
-    // Listen for custom events dispatched by shortcuts
-    const handleCheatsheet = () => (showCheatsheet = true)
-
-    window.addEventListener('igs:open-cheatsheet', handleCheatsheet)
-
-    return () => {
-      window.removeEventListener('igs:open-cheatsheet', handleCheatsheet)
-      cleanupModalListeners()
-    }
+    return setupModalListeners()
   })
 </script>
 
 <ToastContainer />
 <CommandPalette bind:isOpen={showCommandPalette} />
-<KeyboardCheatsheet isOpen={showCheatsheet} onClose={() => (showCheatsheet = false)} />
+<KeyboardCheatsheet
+  isOpen={workspace.cheatsheetOpen}
+  onClose={() => (workspace.cheatsheetOpen = false)}
+/>
 <slot />

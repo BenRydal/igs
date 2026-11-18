@@ -1,17 +1,32 @@
-import type { KeyboardShortcut, ShortcutCategory } from './types'
+import type { ActionCategory, BoundAction } from '#lib/app-actions/types.ts'
+
+export interface ShortcutCategory {
+  id: string
+  label: string
+  shortcuts: BoundAction[]
+}
+
+const CHEATSHEET_GROUPS: { id: string; label: string; categories: ActionCategory[] }[] = [
+  { id: 'playback', label: 'Playback', categories: ['playback'] },
+  { id: 'view', label: 'View', categories: ['view'] },
+  { id: 'selection', label: 'Selection', categories: ['selection'] },
+  { id: 'navigation', label: 'Navigation', categories: ['history', 'examples'] },
+  { id: 'data', label: 'Data', categories: ['filter', 'clear'] },
+  { id: 'modal', label: 'Modal', categories: ['settings'] },
+]
 
 /**
  * Global keyboard shortcut registry
  */
 class ShortcutRegistry {
-  private shortcuts: Map<string, KeyboardShortcut> = new Map()
+  private shortcuts: Map<string, BoundAction> = new Map()
 
   /**
    * Register a new keyboard shortcut
    * @param shortcut The shortcut configuration to register
    * @throws Error if shortcut with same ID already exists
    */
-  register(shortcut: KeyboardShortcut): void {
+  register(shortcut: BoundAction): void {
     if (this.shortcuts.has(shortcut.id)) {
       throw new Error(`Shortcut with id "${shortcut.id}" is already registered`)
     }
@@ -28,17 +43,14 @@ class ShortcutRegistry {
       )
     }
 
-    this.shortcuts.set(shortcut.id, {
-      ...shortcut,
-      enabled: shortcut.enabled !== false, // Default to true
-    })
+    this.shortcuts.set(shortcut.id, shortcut)
   }
 
   /**
    * Register multiple shortcuts at once
    * @param shortcuts Array of shortcut configurations
    */
-  registerMany(shortcuts: KeyboardShortcut[]): void {
+  registerMany(shortcuts: BoundAction[]): void {
     shortcuts.forEach((shortcut) => this.register(shortcut))
   }
 
@@ -46,7 +58,7 @@ class ShortcutRegistry {
    * Get all registered shortcuts
    * @returns Array of all shortcuts
    */
-  getAll(): KeyboardShortcut[] {
+  getAll(): BoundAction[] {
     return Array.from(this.shortcuts.values())
   }
 
@@ -55,22 +67,12 @@ class ShortcutRegistry {
    * @returns Array of category objects with their shortcuts
    */
   getCategories(): ShortcutCategory[] {
-    const categories: Record<string, ShortcutCategory> = {
-      playback: { id: 'playback', label: 'Playback', shortcuts: [] },
-      view: { id: 'view', label: 'View', shortcuts: [] },
-      selection: { id: 'selection', label: 'Selection', shortcuts: [] },
-      navigation: { id: 'navigation', label: 'Navigation', shortcuts: [] },
-      data: { id: 'data', label: 'Data', shortcuts: [] },
-      modal: { id: 'modal', label: 'Modal', shortcuts: [] },
-    }
-
-    this.shortcuts.forEach((shortcut) => {
-      if (categories[shortcut.category]) {
-        categories[shortcut.category].shortcuts.push(shortcut)
-      }
-    })
-
-    return Object.values(categories).filter((cat) => cat.shortcuts.length > 0)
+    const all = this.getAll()
+    return CHEATSHEET_GROUPS.map(({ id, label, categories }) => ({
+      id,
+      label,
+      shortcuts: all.filter((shortcut) => categories.includes(shortcut.category)),
+    })).filter((cat) => cat.shortcuts.length > 0)
   }
 
   /**
@@ -78,8 +80,8 @@ class ShortcutRegistry {
    * @param shortcut The shortcut to check for conflicts
    * @returns Array of conflicting shortcuts
    */
-  getConflicts(shortcut: KeyboardShortcut): KeyboardShortcut[] {
-    const conflicts: KeyboardShortcut[] = []
+  getConflicts(shortcut: BoundAction): BoundAction[] {
+    const conflicts: BoundAction[] = []
 
     this.shortcuts.forEach((existing) => {
       if (existing.id === shortcut.id) return
@@ -98,11 +100,11 @@ class ShortcutRegistry {
    * @param b Second shortcut
    * @returns true if key combinations match
    */
-  private isSameKeyCombination(a: KeyboardShortcut, b: KeyboardShortcut): boolean {
-    if (a.key !== b.key) return false
+  private isSameKeyCombination(a: BoundAction, b: BoundAction): boolean {
+    if (a.shortcut.key !== b.shortcut.key) return false
 
-    const aModifiers = a.modifiers || {}
-    const bModifiers = b.modifiers || {}
+    const aModifiers = a.shortcut.modifiers || {}
+    const bModifiers = b.shortcut.modifiers || {}
 
     return (
       !!aModifiers.ctrl === !!bModifiers.ctrl &&

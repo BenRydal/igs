@@ -14,6 +14,17 @@ import { timelineV2Store } from '../timeline/store'
 import { openModal } from '../../stores/modalStore'
 import { VISIBLE_EXAMPLES, COLLECTIONS } from '../core/example-datasets'
 import { rotateFloorplan } from '../utils/p5'
+import {
+  toggle3D,
+  downloadCodes,
+  toggleHelp,
+  openCheatsheet,
+  loadExample,
+  clearMovement,
+  clearConversation,
+  clearCodes,
+  clearAll,
+} from '#lib/workspace/workspace.svelte.ts'
 
 // Import history-tracked action functions
 import {
@@ -156,7 +167,7 @@ const viewActions: AppAction[] = [
     icon: '🔄',
     category: 'view',
     shortcut: { key: 'd' },
-    action: () => window.dispatchEvent(new CustomEvent('igs:toggle-3d')),
+    action: toggle3D,
   },
   {
     id: 'rotate-right',
@@ -296,7 +307,7 @@ const clearActions: AppAction[] = [
     keywords: ['clear', 'remove', 'movement', 'trails', 'delete'],
     icon: '🗑️',
     category: 'clear',
-    action: () => window.dispatchEvent(new CustomEvent('igs:clear-movement')),
+    action: clearMovement,
   },
   {
     id: 'clear-conversation',
@@ -305,7 +316,7 @@ const clearActions: AppAction[] = [
     keywords: ['clear', 'remove', 'conversation', 'chat', 'talk', 'delete'],
     icon: '🗑️',
     category: 'clear',
-    action: () => window.dispatchEvent(new CustomEvent('igs:clear-conversation')),
+    action: clearConversation,
   },
   {
     id: 'clear-codes',
@@ -314,7 +325,7 @@ const clearActions: AppAction[] = [
     keywords: ['clear', 'remove', 'codes', 'annotations', 'delete'],
     icon: '🗑️',
     category: 'clear',
-    action: () => window.dispatchEvent(new CustomEvent('igs:clear-codes')),
+    action: clearCodes,
   },
   {
     id: 'clear-all',
@@ -323,7 +334,7 @@ const clearActions: AppAction[] = [
     keywords: ['clear', 'remove', 'all', 'reset', 'delete'],
     icon: '🗑️',
     category: 'clear',
-    action: () => window.dispatchEvent(new CustomEvent('igs:clear-all')),
+    action: clearAll,
   },
 ]
 
@@ -367,8 +378,7 @@ const exampleActions: AppAction[] = VISIBLE_EXAMPLES.map((entry) => {
     ],
     icon: extras?.icon ?? '📁',
     category: 'examples',
-    action: () =>
-      window.dispatchEvent(new CustomEvent('igs:load-example', { detail: { value: entry.id } })),
+    action: () => loadExample(entry.id),
   }
 })
 
@@ -401,7 +411,7 @@ const settingsActions: AppAction[] = [
     icon: '❓',
     category: 'settings',
     shortcut: { key: 'h' },
-    action: () => window.dispatchEvent(new CustomEvent('igs:toggle-help')),
+    action: toggleHelp,
   },
   {
     id: 'show-shortcuts',
@@ -411,7 +421,7 @@ const settingsActions: AppAction[] = [
     icon: '⌨️',
     category: 'settings',
     shortcut: { key: '?', modifiers: { shift: true } },
-    action: () => window.dispatchEvent(new CustomEvent('igs:open-cheatsheet')),
+    action: openCheatsheet,
   },
   {
     id: 'open-file',
@@ -434,7 +444,7 @@ const settingsActions: AppAction[] = [
     icon: '💾',
     category: 'settings',
     shortcut: { key: 'S', modifiers: { shift: true, meta: true }, preventDefault: true },
-    action: () => window.dispatchEvent(new CustomEvent('igs:download-codes')),
+    action: downloadCodes,
   },
 ]
 
@@ -443,7 +453,7 @@ const settingsActions: AppAction[] = [
 /**
  * All app actions in a single array
  */
-const allActions: AppAction[] = [
+export const appActions: AppAction[] = [
   ...filterActions,
   ...selectionActions,
   ...viewActions,
@@ -454,17 +464,10 @@ const allActions: AppAction[] = [
 ]
 
 /**
- * Get all actions
- */
-export function getAllActions(): AppAction[] {
-  return allActions
-}
-
-/**
  * Find an action by ID
  */
 export function findActionById(id: string): AppAction | undefined {
-  return allActions.find((action) => action.id === id)
+  return appActions.find((action) => action.id === id)
 }
 
 /**
@@ -479,6 +482,7 @@ export function getCategoryLabel(category: AppAction['category']): string {
     clear: 'Clear Data',
     examples: 'Example Datasets',
     settings: 'Settings',
+    history: 'History',
   }
   return labels[category] || category
 }

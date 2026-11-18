@@ -9,7 +9,6 @@
     type Entity,
   } from 'svelte-p5-components'
 
-  import type { IgsP5 } from '#lib/p5/igs-p5.ts'
   import MdHelpOutline from '~icons/mdi/help-circle-outline'
   import MdKeyboard from '~icons/mdi/keyboard'
   import MdCloudDownload from '~icons/mdi/cloud-download'
@@ -45,16 +44,16 @@
   import MdTagMultiple from '~icons/mdi/tag-multiple'
   import MdTableEye from '~icons/mdi/table-eye'
 
-  import { nextRevision, type User } from '../models/user'
+  import type { User } from '../models/user'
   import UserStore from '../stores/userStore'
   import P5Store from '../stores/p5Store'
-  import { redrawCanvas, rotateFloorplan, withRedrawSuspended } from '#lib/utils/p5.ts'
+  import { redrawCanvas, rotateFloorplan } from '#lib/utils/p5.ts'
   import VideoStore, {
     toggleVisibility,
     reset as resetVideo,
     hasVideoSource,
   } from '../stores/videoStore'
-  import GPSStore, { resetGPS } from '../stores/gpsStore'
+  import GPSStore from '../stores/gpsStore'
   import { onVideoVisibilityChange } from '../stores/playbackStore'
   import VideoContainer from '#lib/components/VideoContainer.svelte'
   import SplitScreenVideo from '#lib/components/SplitScreenVideo.svelte'
@@ -63,9 +62,7 @@
   import SpaceTimeTooltip from '#lib/components/SpaceTimeTooltip.svelte'
   import AxesIndicator from '#lib/components/AxesIndicator.svelte'
 
-  import { Core } from '#lib'
   import {
-    EXAMPLE_DATASETS,
     EXAMPLE_COLLECTIONS,
     COLLECTIONS,
     VISIBLE_EXAMPLES,
@@ -74,12 +71,8 @@
     type CollectionId,
     type ExampleEntry,
   } from '#lib/core/example-datasets.ts'
-  import type { ExampleSelectEvent } from '#lib/core/types.ts'
-  import { sortFilesForImport } from '#lib/core/import-order.ts'
   import { igsSketch } from '#lib/p5/igsSketch.ts'
-  import { writable } from 'svelte/store'
-  import { onMount, tick, flushSync, type Component, type Snippet } from 'svelte'
-  import { SvelteSet } from 'svelte/reactivity'
+  import { onMount, type Component, type Snippet } from 'svelte'
   import IconButton from '#lib/components/IconButton.svelte'
   import IgsInfoModal from '#lib/components/IGSInfoModal.svelte'
   import { Timeline } from '#lib/timeline/index.ts'
@@ -107,10 +100,23 @@
     createUserColorDrag,
   } from '#lib/history/user-actions.ts'
   import {
-    clearUsers,
+    workspace,
+    expandedCollections,
+    onDataLoaded,
+    toggle3D,
+    downloadCodes,
+    openCheatsheet,
+    selectRailItem,
+    closePanel,
+    closeUnavailablePanel,
+    loadExample,
+    importFiles,
+    clearAll,
+    clearMovement,
+    clearConversation,
     clearCodes,
-    clearAllData as clearAllDataWithHistory,
-  } from '#lib/history/data-actions.ts'
+  } from '#lib/workspace/workspace.svelte.ts'
+  import { RAIL_LABELS } from '#lib/workspace/rail.ts'
 
   // Boolean config keys: what the toggle handlers may flip
   type ToggleKey = {
@@ -120,10 +126,7 @@
   const filterToggleOptions = ['movementToggle', 'stopsToggle'] as const
   const selectToggleOptions = ['circleToggle', 'sliceToggle', 'highlightToggle'] as const
   const conversationToggleOptions = ['alignToggle'] as const
-  /** Id of the currently loaded example, or '' for none/imported data. Keyed on
-   *  id rather than label so selection cannot be confused by name changes. */
-  let selectedExampleId = $state('')
-  const selectedExampleLabel = $derived(getExampleLabel(selectedExampleId))
+  const selectedExampleLabel = $derived(getExampleLabel(workspace.selectedExampleId))
 
   /** Collection icons live here, not in the dataset module, so core data stays
    *  free of UI imports. */
@@ -152,29 +155,12 @@
       : []
   )
 
-  /** Collections start collapsed: the resting state is a short overview rather
-   *  than every dataset at once. Loading an example opens its collection. */
-  const expandedCollections = new SvelteSet<CollectionId>()
-
   function toggleCollection(id: CollectionId) {
     if (expandedCollections.has(id)) {
       expandedCollections.delete(id)
     } else {
       expandedCollections.add(id)
     }
-  }
-
-  /** Records the selection and reveals it in the tree. Call after every load so
-   *  the sidebar, the command palette and the welcome modal stay in agreement. */
-  function markExampleSelected(id: string) {
-    selectedExampleId = id
-    const collection = EXAMPLE_DATASETS[id]?.collection
-    if (collection) expandedCollections.add(collection)
-  }
-
-  function loadExample(id: string) {
-    updateExampleDataDropDown({ target: { value: id } })
-    markExampleSelected(id)
   }
 
   function collectionLabel(id: CollectionId) {
@@ -206,21 +192,21 @@
         label: isGPS ? 'Movement (GPS)' : 'Movement',
         icon: MdRoute,
         detail: users.length ? `${users.length} ${users.length === 1 ? 'person' : 'people'}` : '',
-        clear: clearMovementData,
+        clear: clearMovement,
       },
       {
         key: 'conversation',
         label: 'Conversation',
         icon: MdMessageText,
         detail: speakers ? `${speakers} ${speakers === 1 ? 'speaker' : 'speakers'}` : '',
-        clear: clearConversationData,
+        clear: clearConversation,
       },
       {
         key: 'codes',
         label: 'Codes',
         icon: MdTagOutline,
         detail: codes ? `${codes} ${codes === 1 ? 'code' : 'codes'}` : '',
-        clear: clearCodeData,
+        clear: clearCodes,
       },
       {
         key: 'video',
@@ -241,10 +227,7 @@
    *  place, ahead of the handler, and break undo. */
   const currentConfig = $derived($ConfigStore)
 
-  let p5Instance = $state<IgsP5 | null>(null)
-  let core: Core
   let isVideoShowing = $state(false)
-  let is3DMode = $state(true)
   let timelineEndTime = $state(0)
   let isTranscriptVisible = $state(false)
   let spaceTimeTooltip: SpaceTimeTooltip
@@ -263,13 +246,6 @@
   const SPLIT_DIVIDER_PX = 8
   /** Drives `pane-inert` and defers the sketch rebuild until the drag ends. */
   let isDraggingSplit = $state(false)
-  /**
-   * Bumping this remounts <Sketch> via {#key}, destroying and recreating the
-   * WEBGL canvas. Used after clearing large datasets (Safari degrades when a
-   * long-lived GL context accumulates big uploads). See svelte-p5's WEBGL
-   * recipe: the old context is released explicitly before the remount.
-   */
-  let canvasEpoch = $state(0)
 
   $effect(() => {
     const videoState = $VideoStore
@@ -277,56 +253,11 @@
     isSplitScreen = videoState.isSplitScreen
   })
 
-  $effect(() => {
-    p5Instance = $P5Store
-    if (p5Instance) {
-      core = new Core(p5Instance)
-    }
-  })
-
-  // Modal state - opens immediately for first-time visitors
-  let isModalOpen = writable(false)
-
-  type RailTab = 'data' | 'people' | 'codes' | 'talk' | 'filters' | 'select' | 'settings'
-  const RAIL_LABELS: Record<RailTab | 'help', string> = {
-    data: 'Data',
-    people: 'People',
-    codes: 'Codes',
-    talk: 'Talk',
-    filters: 'Filters',
-    select: 'Select',
-    settings: 'Settings',
-    help: 'Help',
-  }
-  let activeTab = $state<RailTab | null>(null)
-  // The panel keeps rendering this while it slides closed, so it never blanks mid-exit.
-  let lastTab = $state<RailTab>('data')
   let panelWidth = $state(300)
   /** Rail plus open panel: how far the canvas is pushed right. */
   let railWidth = $state(0)
-  /** Set when the tour opens a panel, so its highlight lands on the final layout. */
-  let instantPanel = $state(false)
 
-  function handleRailSelect(id: string) {
-    if (id === 'help') {
-      $isModalOpen = !$isModalOpen
-      return
-    }
-    const tab = id as RailTab
-    instantPanel = false
-    activeTab = activeTab === tab ? null : tab
-    if (activeTab) lastTab = activeTab
-  }
-
-  function isTabAvailable(tab: RailTab): boolean {
-    if (tab === 'select') return !is3DMode
-    if (tab === 'codes') return $ConfigStore.dataHasCodes
-    return true
-  }
-
-  $effect(() => {
-    if (activeTab && !isTabAvailable(activeTab)) activeTab = null
-  })
+  $effect(() => closeUnavailablePanel($ConfigStore.dataHasCodes))
 
   let formattedStopLength = $derived($ConfigStore.stopSliderValue.toFixed(0))
 
@@ -370,129 +301,6 @@
     redrawCanvas()
   }
 
-  async function handleImportFiles(files: File[], clearExisting: boolean) {
-    // Clear existing data if requested
-    if (clearExisting) {
-      await clearAllDataLocal()
-    }
-
-    // Sort files to ensure correct processing order:
-    // movement files first, conversation second, code files last
-    const sortedFiles = await sortFilesForImport(files)
-
-    // Process each file SEQUENTIALLY using the async file handler
-    // This ensures movement data is loaded before conversation,
-    // and conversation is loaded before codes
-    await withRedrawSuspended(async () => {
-      for (const file of sortedFiles) {
-        await core.testFileTypeForProcessingAsync(file)
-      }
-    })
-
-    // Trigger redraw
-    redrawCanvas()
-    spaceTimeTooltip?.trigger()
-  }
-
-  async function updateExampleDataDropDown(event: ExampleSelectEvent) {
-    await clearAllDataLocal()
-    await core.handleExampleDropdown(event)
-    redrawCanvas()
-    spaceTimeTooltip?.trigger()
-  }
-
-  /** Resolves once the {#key}-remounted canvas has published a fresh instance. */
-  function waitForCanvasRemount(prev: IgsP5 | null): Promise<IgsP5> {
-    return new Promise((resolve) => {
-      const unsub = P5Store.subscribe((inst) => {
-        if (inst && inst !== prev) {
-          queueMicrotask(() => unsub())
-          resolve(inst)
-        }
-      })
-    })
-  }
-
-  // Local version that handles UI cleanup and non-store data.
-  // Async because the canvas remount it triggers is async: callers that load
-  // data afterwards must await it so they talk to the fresh instance/Core.
-  async function clearAllDataLocal() {
-    resetVideo()
-
-    // Use history-tracked function for store clearing
-    clearAllDataWithHistory()
-
-    core.codeData = []
-    core.movementData = []
-    core.conversationData = []
-    resetGPS()
-    core.gpsMovementData = []
-
-    ConfigStore.update((config) => ({
-      ...config,
-      dataHasCodes: false,
-      isPathColorMode: false,
-      maxStopLength: 0,
-    }))
-
-    // Remount the canvas for a fresh WebGL context (helps Safari performance).
-    // Release the old GL context explicitly first — browsers cap live contexts
-    // and remove() alone leaves the release to GC.
-    const prev = p5Instance
-    ;(prev?.drawingContext as WebGL2RenderingContext | undefined)
-      ?.getExtension('WEBGL_lose_context')
-      ?.loseContext()
-    canvasEpoch += 1
-    await waitForCanvasRemount(prev)
-    await tick() // let the P5Store $effect rebuild `core` for the new instance
-  }
-
-  function clearMovementData() {
-    clearUsers()
-    core.movementData = []
-    core.gpsMovementData = []
-    resetGPS()
-    redrawCanvas()
-  }
-
-  function clearConversationData() {
-    UserStore.update((users) =>
-      users.map((user) => {
-        user.conversationIsLoaded = false
-        user.dataTrail = user.dataTrail.map((dataPoint) => {
-          dataPoint.speech = ''
-          return dataPoint
-        })
-        user.revision = nextRevision()
-        return user
-      })
-    )
-    core.conversationData = []
-    redrawCanvas()
-  }
-
-  function clearCodeData() {
-    clearCodes()
-    core.codeData = []
-    UserStore.update((users) =>
-      users.map((user) => {
-        user.dataTrail = user.dataTrail.map((dataPoint) => {
-          dataPoint.codes = []
-          return dataPoint
-        })
-        user.revision = nextRevision()
-        return user
-      })
-    )
-
-    ConfigStore.update((currentConfig) => ({
-      ...currentConfig,
-      dataHasCodes: false,
-      isPathColorMode: false,
-    }))
-    redrawCanvas()
-  }
-
   /**
    * Check if a user is visible (either movement or talk enabled)
    */
@@ -528,74 +336,9 @@
     redrawCanvas()
   }
 
-  // Add event handlers for dropdowns
   onMount(() => {
-    // Keyboard shortcut event handlers
-    const handleToggle3D = () => {
-      if (p5Instance?.handle3D) {
-        p5Instance?.handle3D.update()
-        is3DMode = p5Instance?.handle3D.getIs3DMode() ?? is3DMode
-      }
-    }
-
-    const handleDownloadCodes = () => {
-      if (p5Instance) {
-        p5Instance?.saveCodeFile()
-      }
-    }
-
-    const handleToggleHelp = () => {
-      isModalOpen.update((value) => !value)
-    }
-
-    const handleLoadExample = (event: Event) => {
-      const customEvent = event as CustomEvent<{ value: string }>
-      if (customEvent.detail?.value) {
-        loadExample(customEvent.detail.value)
-      }
-    }
-
-    const handleOpenPanel = (event: Event) => {
-      const tab = (event as CustomEvent<{ tab: RailTab | null }>).detail?.tab ?? null
-      instantPanel = true
-      activeTab = tab && isTabAvailable(tab) ? tab : null
-      if (activeTab) lastTab = activeTab
-      flushSync()
-    }
-
-    // Show welcome modal immediately for first-time visitors
-    if (shouldShowTour()) {
-      isModalOpen.set(true)
-    }
-
-    // Register event listeners
-    window.addEventListener('igs:toggle-3d', handleToggle3D)
-    window.addEventListener('igs:download-codes', handleDownloadCodes)
-    window.addEventListener('igs:toggle-help', handleToggleHelp)
-    window.addEventListener('igs:load-example', handleLoadExample)
-    window.addEventListener('igs:open-panel', handleOpenPanel)
-
-    // Clear data event listeners (for command palette)
-    window.addEventListener('igs:clear-movement', clearMovementData)
-    window.addEventListener('igs:clear-conversation', clearConversationData)
-    window.addEventListener('igs:clear-codes', clearCodeData)
-    window.addEventListener('igs:clear-all', clearAllDataLocal)
-
-    // Cleanup function
-    return () => {
-      // Remove keyboard shortcut handlers
-      window.removeEventListener('igs:toggle-3d', handleToggle3D)
-      window.removeEventListener('igs:download-codes', handleDownloadCodes)
-      window.removeEventListener('igs:toggle-help', handleToggleHelp)
-      window.removeEventListener('igs:load-example', handleLoadExample)
-      window.removeEventListener('igs:open-panel', handleOpenPanel)
-
-      // Remove clear data event listeners
-      window.removeEventListener('igs:clear-movement', clearMovementData)
-      window.removeEventListener('igs:clear-conversation', clearConversationData)
-      window.removeEventListener('igs:clear-codes', clearCodeData)
-      window.removeEventListener('igs:clear-all', clearAllDataLocal)
-    }
+    if (shouldShowTour()) workspace.helpOpen = true
+    return onDataLoaded(() => spaceTimeTooltip?.trigger())
   })
 </script>
 
@@ -638,7 +381,7 @@
 {/snippet}
 
 {#snippet exampleRow(entry: ExampleEntry, showCollection: boolean, featured = false)}
-  {@const isSelected = selectedExampleId === entry.id}
+  {@const isSelected = workspace.selectedExampleId === entry.id}
   <li>
     <button
       onclick={() => loadExample(entry.id)}
@@ -718,9 +461,7 @@
           Import files
         </button>
         {#if hasAnyData}
-          <button class="btn btn-sm btn-ghost text-error" onclick={clearAllDataLocal}>
-            Clear all
-          </button>
+          <button class="btn btn-sm btn-ghost text-error" onclick={clearAll}> Clear all </button>
         {/if}
       </div>
     {/snippet}
@@ -1050,16 +791,13 @@
           </button>
         </li>
         <li>
-          <button onclick={() => p5Instance?.saveCodeFile()} class="flex items-center gap-2">
+          <button onclick={downloadCodes} class="flex items-center gap-2">
             {@render icon(MdCloudDownload)}
             Download codes
           </button>
         </li>
         <li>
-          <button
-            onclick={() => window.dispatchEvent(new CustomEvent('igs:open-cheatsheet'))}
-            class="flex items-center gap-2"
-          >
+          <button onclick={openCheatsheet} class="flex items-center gap-2">
             {@render icon(MdKeyboard)}
             Keyboard shortcuts
           </button>
@@ -1106,10 +844,7 @@
             icon={Md3DRotation}
             label="Space-time"
             tooltip="Toggle 2D/3D"
-            onclick={() => {
-              p5Instance?.handle3D.update()
-              is3DMode = p5Instance?.handle3D.getIs3DMode() ?? is3DMode
-            }}
+            onclick={toggle3D}
           />
           <IconButton
             id="btn-toggle-video"
@@ -1133,8 +868,8 @@
     {#snippet leftRail()}
       <nav class="igs-left-rail" aria-label="Sidebar navigation" bind:clientWidth={railWidth}>
         <ActivityBar
-          activeId={activeTab ?? undefined}
-          onSelect={handleRailSelect}
+          activeId={workspace.activeTab ?? undefined}
+          onSelect={selectRailItem}
           items={[
             { id: 'data', label: RAIL_LABELS.data, icon: dataIcon },
             { id: 'people', label: RAIL_LABELS.people, icon: peopleIcon },
@@ -1143,7 +878,9 @@
               : []),
             { id: 'talk', label: RAIL_LABELS.talk, icon: talkIcon },
             { id: 'filters', label: RAIL_LABELS.filters, icon: filtersIcon },
-            ...(!is3DMode ? [{ id: 'select', label: RAIL_LABELS.select, icon: selectIcon }] : []),
+            ...(!workspace.is3DMode
+              ? [{ id: 'select', label: RAIL_LABELS.select, icon: selectIcon }]
+              : []),
             { id: 'settings', label: RAIL_LABELS.settings, icon: settingsIcon },
             { id: 'help', label: RAIL_LABELS.help, icon: helpIcon },
           ]}
@@ -1153,33 +890,33 @@
         <div
           id="igs-side-panel"
           role="tabpanel"
-          aria-label={`${RAIL_LABELS[lastTab]} panel`}
+          aria-label={`${RAIL_LABELS[workspace.lastTab]} panel`}
           class="igs-sidepanel-shell"
-          class:igs-sidepanel-shell--open={activeTab !== null}
-          class:igs-sidepanel-shell--instant={instantPanel}
-          style:width={`${activeTab ? panelWidth : 0}px`}
+          class:igs-sidepanel-shell--open={workspace.activeTab !== null}
+          class:igs-sidepanel-shell--instant={workspace.instantPanel}
+          style:width={`${workspace.activeTab ? panelWidth : 0}px`}
           style:--igs-drawer-z={Z_INDEX.DRAWER}
-          inert={activeTab === null}
+          inert={workspace.activeTab === null}
         >
           <SidePanel
             open={true}
-            title={RAIL_LABELS[lastTab]}
+            title={RAIL_LABELS[workspace.lastTab]}
             bind:width={panelWidth}
-            onClose={() => (activeTab = null)}
+            onClose={closePanel}
           >
-            {#if lastTab === 'data'}
+            {#if workspace.lastTab === 'data'}
               {@render dataPanel()}
-            {:else if lastTab === 'people'}
+            {:else if workspace.lastTab === 'people'}
               {@render peoplePanel()}
-            {:else if lastTab === 'codes'}
+            {:else if workspace.lastTab === 'codes'}
               <CodesPanel />
-            {:else if lastTab === 'talk'}
+            {:else if workspace.lastTab === 'talk'}
               {@render talkPanel()}
-            {:else if lastTab === 'filters'}
+            {:else if workspace.lastTab === 'filters'}
               {@render filtersPanel()}
-            {:else if lastTab === 'select'}
+            {:else if workspace.lastTab === 'select'}
               {@render selectPanel()}
-            {:else if lastTab === 'settings'}
+            {:else if workspace.lastTab === 'settings'}
               {@render settingsPanel()}
             {/if}
           </SidePanel>
@@ -1198,7 +935,7 @@
         ondragstart={() => (isDraggingSplit = true)}
         ondragend={() => {
           isDraggingSplit = false
-          p5Instance?.rebuildAfterResize()
+          $P5Store?.rebuildAfterResize()
         }}
       >
         {#snippet first()}
@@ -1217,7 +954,7 @@
             class:cursor-crosshair={currentConfig.highlightToggle}
             class:pane-inert={isDraggingSplit}
           >
-            {#key canvasEpoch}
+            {#key workspace.canvasEpoch}
               <Sketch
                 sketch={igsSketch}
                 onResize={(p) => {
@@ -1250,7 +987,7 @@
                 <MdRotateRight />
               </button>
             </div>
-            {#if is3DMode}
+            {#if workspace.is3DMode}
               <AxesIndicator />
             {/if}
           </div>
@@ -1369,7 +1106,7 @@
   </div>
 {/if}
 
-<IgsInfoModal {isModalOpen} />
+<IgsInfoModal />
 
 <OnboardingTour />
 
@@ -1378,7 +1115,7 @@
 <DataImporter
   isOpen={showImportDialog}
   onClose={() => (showImportDialog = false)}
-  onImport={handleImportFiles}
+  onImport={importFiles}
 />
 
 <style>

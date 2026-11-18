@@ -1,5 +1,5 @@
 import { registry } from '#lib/keyboard/index.ts'
-import type { KeyboardShortcut } from '#lib/keyboard/index.ts'
+import type { BoundAction } from '#lib/app-actions/types.ts'
 import { historyStore } from '../../stores/historyStore'
 
 /**
@@ -40,35 +40,35 @@ function isMac(): boolean {
 export function registerUndoRedoShortcuts(): void {
   const useMeta = isMac()
 
-  const shortcuts: KeyboardShortcut[] = [
+  const shortcuts: BoundAction[] = [
     // Undo: Cmd+Z (Mac) or Ctrl+Z (Windows/Linux)
     {
       id: 'undo',
-      key: 'z',
-      modifiers: useMeta ? { meta: true } : { ctrl: true },
+      shortcut: { key: 'z', modifiers: useMeta ? { meta: true } : { ctrl: true } },
       label: 'Undo',
       description: 'Undo last action',
-      category: 'navigation',
+      category: 'history',
       action: undoAction,
     },
     // Redo: Cmd+Shift+Z (Mac) or Ctrl+Shift+Z (Windows/Linux)
     {
       id: 'redo',
-      key: 'z',
-      modifiers: useMeta ? { meta: true, shift: true } : { ctrl: true, shift: true },
+      shortcut: {
+        key: 'z',
+        modifiers: useMeta ? { meta: true, shift: true } : { ctrl: true, shift: true },
+      },
       label: 'Redo',
       description: 'Redo last undone action',
-      category: 'navigation',
+      category: 'history',
       action: redoAction,
     },
     // Alternative redo: Cmd+Y (Mac) or Ctrl+Y (Windows/Linux)
     {
       id: 'redo-y',
-      key: 'y',
-      modifiers: useMeta ? { meta: true } : { ctrl: true },
+      shortcut: { key: 'y', modifiers: useMeta ? { meta: true } : { ctrl: true } },
       label: 'Redo (Alt)',
       description: 'Redo last undone action',
-      category: 'navigation',
+      category: 'history',
       action: redoAction,
     },
   ]

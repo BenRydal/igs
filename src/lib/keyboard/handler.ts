@@ -1,4 +1,4 @@
-import type { KeyboardShortcut } from './types'
+import type { BoundAction } from '#lib/app-actions/types.ts'
 import { registry } from './registry'
 import { redrawCanvas } from '../utils/p5'
 
@@ -34,7 +34,7 @@ function shouldIgnoreEvent(): boolean {
  * @param shortcut The shortcut to match against
  * @returns true if the event matches the shortcut
  */
-function matchesShortcut(event: KeyboardEvent, shortcut: KeyboardShortcut): boolean {
+function matchesShortcut(event: KeyboardEvent, { shortcut }: BoundAction): boolean {
   // Check key match
   if (event.key !== shortcut.key) return false
 
@@ -64,20 +64,10 @@ function handleKeyboardEvent(event: KeyboardEvent): boolean {
   const shortcuts = registry.getAll()
 
   for (const shortcut of shortcuts) {
-    // Skip if shortcut is disabled
-    if (shortcut.enabled === false) {
-      continue
-    }
-
-    // Skip if "when" condition is not met
-    if (shortcut.when && !shortcut.when()) {
-      continue
-    }
-
     // Check if event matches this shortcut
     if (matchesShortcut(event, shortcut)) {
       // Prevent default browser behavior unless explicitly disabled
-      if (shortcut.preventDefault !== false) {
+      if (shortcut.shortcut.preventDefault !== false) {
         event.preventDefault()
         event.stopPropagation()
       }
