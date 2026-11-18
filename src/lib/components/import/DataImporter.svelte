@@ -389,9 +389,9 @@
       {#if files.length > 0}
         <div class="mt-4">
           <div class="flex justify-between items-center mb-2">
-            <span class="font-medium"
-              >{files.length} file{files.length !== 1 ? 's' : ''} selected</span
-            >
+            <span class="font-medium">
+              {files.length} file{files.length !== 1 ? 's' : ''} selected
+            </span>
             <button class="btn btn-ghost btn-xs" onclick={clearFiles}>Clear all</button>
           </div>
 

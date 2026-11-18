@@ -93,8 +93,10 @@
             </p>
             <p class="text-sm text-base-content/70 italic">
               Data from sensor tracking systems or manually created with <span
-                class="font-bold underline">Mondrian Transcription</span
+                class="font-bold underline"
               >
+                Mondrian Transcription
+              </span>
             </p>
           </div>
         </a>
@@ -210,9 +212,11 @@
                   <a
                     href="https://github.com/BenRydal/mondrian"
                     target="_blank"
-                    class="link font-bold underline">Mondrian Transcription</a
-                  > — a free tool that lets you click on your floor plan to record positions while watching
-                  video.
+                    class="link font-bold underline"
+                  >
+                    Mondrian Transcription
+                  </a> — a free tool that lets you click on your floor plan to record positions while
+                  watching video.
                 </p>
               </div>
             </div>
@@ -231,9 +235,9 @@
               <span class="badge badge-lg badge-primary">Teacher</span>
             </div>
             <p class="text-sm text-base-content/70 mt-3">
-              To track multiple people, create separate files for each person (e.g., <code
-                >Student1.csv</code
-              >, <code>Student2.csv</code>).
+              To track multiple people, create separate files for each person (e.g., <code>
+                Student1.csv
+              </code>, <code>Student2.csv</code>).
             </p>
           </div>
         </div>
@@ -376,9 +380,9 @@
             <div>
               <p class="font-medium">Linking speech to movement paths</p>
               <p class="text-sm mt-1">
-                To connect a speaker's words to their movement path, make sure the <strong
-                  >speaker</strong
-                >
+                To connect a speaker's words to their movement path, make sure the <strong>
+                  speaker
+                </strong>
                 name matches the <strong>filename</strong> of their movement file.
               </p>
               <p class="text-sm mt-2">
@@ -556,9 +560,11 @@
             <div class="collapse-content text-base-content/70">
               <p>
                 {#each answer as part, i (i)}
-                  {#if part.tag === 'strong'}<strong>{part.text}</strong
-                    >{:else if part.tag === 'code'}<code>{part.text}</code
-                    >{:else if part.tag === 'br'}<br />{:else}{part.text}{/if}
+                  {#if part.tag === 'strong'}<strong>
+                      {part.text}
+                    </strong>{:else if part.tag === 'code'}<code>
+                      {part.text}
+                    </code>{:else if part.tag === 'br'}<br />{:else}{part.text}{/if}
                 {/each}
               </p>
             </div>
@@ -575,11 +581,13 @@
         <a
           href="https://www.youtube.com/watch?v=smoxv9AspHA"
           target="_blank"
-          class="btn btn-outline">Watch Demo</a
+          class="btn btn-outline"
         >
-        <a href="https://forms.gle/M1gvdgSvdH9yXAABA" target="_blank" class="btn btn-outline"
-          >Ask a Question</a
-        >
+          Watch Demo
+        </a>
+        <a href="https://forms.gle/M1gvdgSvdH9yXAABA" target="_blank" class="btn btn-outline">
+          Ask a Question
+        </a>
       </div>
     </section>
   </main>

@@ -74,8 +74,10 @@
       <button
         onclick={closeModal}
         class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl leading-none cursor-pointer"
-        aria-label="Close">&times;</button
+        aria-label="Close"
       >
+        &times;
+      </button>
 
       <!-- Header -->
       <div class="text-center mb-8">
@@ -180,9 +182,9 @@
         </div>
         <p class="text-center text-gray-600 mt-3">
           Designed by
-          <a href="https://www.benrydal.com" target="_blank" class="hover:underline"
-            >Ben Rydal Shapiro</a
-          >
+          <a href="https://www.benrydal.com" target="_blank" class="hover:underline">
+            Ben Rydal Shapiro
+          </a>
           and
           <a href="https://www.edwinzhao.com" target="_blank" class="hover:underline">Edwin Zhao</a>
         </p>

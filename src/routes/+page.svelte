@@ -1198,13 +1198,13 @@
     {#snippet top()}
       <div class="navbar min-h-16 bg-[#ffffff] relative">
         <div class="flex-1 min-w-0 px-2 flex items-center gap-4">
-          <a class="text-2xl font-bold text-black italic" href="https://interactiongeography.org"
-            >IGS</a
-          >
+          <a class="text-2xl font-bold text-black italic" href="https://interactiongeography.org">
+            IGS
+          </a>
           {#if selectedExampleLabel}
-            <span class="truncate text-sm opacity-70" title={selectedExampleLabel}
-              >{selectedExampleLabel}</span
-            >
+            <span class="truncate text-sm opacity-70" title={selectedExampleLabel}>
+              {selectedExampleLabel}
+            </span>
           {/if}
         </div>
         <div class="flex-none flex items-center gap-1 px-2">
