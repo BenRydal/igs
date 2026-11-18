@@ -134,7 +134,7 @@
       onclick={() => loadExample(entry.id)}
       aria-current={isSelected ? 'true' : undefined}
       class="flex items-start gap-2 w-full cursor-pointer {isSelected
-        ? 'bg-primary/20 font-medium'
+        ? 'bg-primary/20 text-base-content font-medium'
         : ''}"
     >
       {#if featured}
