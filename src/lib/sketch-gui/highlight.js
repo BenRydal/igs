@@ -42,7 +42,7 @@ export class Highlight {
    */
   handleMouseRelease() {
     if (this.overBounds()) {
-      if (!(this.sk.keyIsPressed && this.sk.keyCode === this.sk.OPTION)) this.resetHighlightArray()
+      if (!this.sk.keyIsDown(this.sk.OPTION)) this.resetHighlightArray()
       if (this.isHighlighting()) this.highlightArray.push(this.createHighlightRect())
     }
     this.resetCurHighlight()
