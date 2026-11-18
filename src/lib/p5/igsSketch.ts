@@ -74,6 +74,7 @@ export const igsSketch: SketchFn<IgsSketchExt> = (p5) => {
 
   p5.draw = () => {
     p5.updateCanvasOffset() // one rect read per frame; keeps viewport→canvas mapping current
+    p5.resetMatrix()
     p5.background(255)
     p5.translate(-p5.width / 2, -p5.height / 2, 0) // recenter canvas to top left when using WEBGL renderer
 

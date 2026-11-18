@@ -6,6 +6,8 @@ floating window or split-screen.
 ## Sub-features
 
 - `video-show-hide` shows and hides the player for the loaded dataset.
+- `video-split-view` keeps the 3D view drawn after entering and leaving split screen
+  (`video-toggle` compares canvas ink before and after).
 - `video-file-sync` keeps a local video file in step with the timeline: play, pause, seek,
   mute, and position, play state and mute across a split-screen remount.
 
