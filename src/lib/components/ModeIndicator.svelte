@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte'
   import ConfigStore, { type ConfigStoreType } from '../../stores/configStore'
-  import { Z_INDEX } from '$lib/styles/z-index'
+  import { Z_INDEX } from '#lib/styles/z-index.ts'
   import MdCircleOutline from '~icons/mdi/circle-outline'
   import MdChartPie from '~icons/mdi/chart-pie'
   import MdFormatColorHighlight from '~icons/mdi/format-color-highlight'

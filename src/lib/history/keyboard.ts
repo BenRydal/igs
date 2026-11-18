@@ -1,5 +1,5 @@
-import { registry } from '$lib/keyboard'
-import type { KeyboardShortcut } from '$lib/keyboard'
+import { registry } from '#lib/keyboard/index.ts'
+import type { KeyboardShortcut } from '#lib/keyboard/index.ts'
 import { historyStore } from '../../stores/historyStore'
 
 /**

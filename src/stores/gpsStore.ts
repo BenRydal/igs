@@ -1,5 +1,5 @@
 import { writable, get } from 'svelte/store'
-import type { GPSState, GPSBounds, MapboxStyle } from '$lib/gps/gps-types'
+import type { GPSState, GPSBounds, MapboxStyle } from '#lib/gps/gps-types.ts'
 
 const initialState: GPSState = {
   isGPSMode: false,

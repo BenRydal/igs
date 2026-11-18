@@ -1,8 +1,8 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte'
-  import { registry } from '$lib/keyboard'
-  import type { ShortcutCategory } from '$lib/keyboard'
-  import { Z_INDEX } from '$lib/styles/z-index'
+  import { registry } from '#lib/keyboard/index.ts'
+  import type { ShortcutCategory } from '#lib/keyboard/index.ts'
+  import { Z_INDEX } from '#lib/styles/z-index.ts'
 
   interface Props {
     isOpen: boolean

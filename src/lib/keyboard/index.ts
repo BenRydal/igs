@@ -5,7 +5,7 @@
  *
  * @example
  * ```typescript
- * import { registry, attachKeyboardHandler } from '$lib/keyboard';
+ * import { registry, attachKeyboardHandler } from '#lib/keyboard/index.ts';
  *
  * // Register a shortcut
  * registry.register({

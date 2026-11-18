@@ -1,9 +1,9 @@
 <script lang="ts">
   import CodeStore from '../../stores/codeStore'
   import ConfigStore from '../../stores/configStore'
-  import { redrawCanvas } from '$lib/utils/p5'
-  import { toggleColorMode } from '$lib/history/config-actions'
-  import { setCodeEnabled, toggleAllCodes, setCodeColor } from '$lib/history/data-actions'
+  import { redrawCanvas } from '#lib/utils/p5.ts'
+  import { toggleColorMode } from '#lib/history/config-actions.ts'
+  import { setCodeEnabled, toggleAllCodes, setCodeColor } from '#lib/history/data-actions.ts'
 
   const sortedCodes = $derived(
     [...$CodeStore].sort((a, b) => {

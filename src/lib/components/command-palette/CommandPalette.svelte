@@ -3,12 +3,12 @@
   import { SvelteMap } from 'svelte/reactivity'
   import { fade, slide } from 'svelte/transition'
   import { closeModal } from '../../../stores/modalStore'
-  import { Z_INDEX } from '$lib/styles/z-index'
+  import { Z_INDEX } from '#lib/styles/z-index.ts'
   import type { Command, HighlightSegment } from './types'
   import { searchCommands, getHighlightSegments } from './fuzzy-search'
-  import { getCommands, getCategoryLabel } from '$lib/app-actions'
+  import { getCommands, getCategoryLabel } from '#lib/app-actions/index.ts'
   import { getRecentCommands, addRecentCommand, type RecentCommandEntry } from './recent-commands'
-  import { redrawCanvas } from '$lib/utils/p5'
+  import { redrawCanvas } from '#lib/utils/p5.ts'
   import CommandButton from './CommandButton.svelte'
 
   // Props

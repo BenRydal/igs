@@ -1,6 +1,6 @@
 <script lang="ts">
   import { writable } from 'svelte/store'
-  import { EXAMPLE_DATASETS } from '$lib/core/example-datasets'
+  import { EXAMPLE_DATASETS } from '#lib/core/example-datasets.ts'
   import { onMount, onDestroy } from 'svelte'
   import MdRoute from '~icons/mdi/routes'
   import MdChat from '~icons/mdi/chat-outline'

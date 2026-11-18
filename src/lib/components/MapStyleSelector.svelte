@@ -3,9 +3,9 @@
   import MdCheck from '~icons/mdi/check'
   import GPSStore, { setMapStyle } from '../../stores/gpsStore'
   import P5Store from '../../stores/p5Store'
-  import { loadMapAsFloorPlan } from '$lib/gps/mapbox-service'
-  import { MAP_STYLES, type MapboxStyle } from '$lib/gps/gps-types'
-  import { clickOutsideClose } from '$lib/actions/clickOutside'
+  import { loadMapAsFloorPlan } from '#lib/gps/mapbox-service.ts'
+  import { MAP_STYLES, type MapboxStyle } from '#lib/gps/gps-types.ts'
+  import { clickOutsideClose } from '#lib/actions/clickOutside.ts'
 
   let p5Instance = $derived($P5Store)
 

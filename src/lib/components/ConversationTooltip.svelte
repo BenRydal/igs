@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { browser } from '$app/environment'
+  import { browser } from '$app/env'
   import HoveredConversationStore from '../../stores/interactionStore'
   import { formatTime } from '../utils/format'
 
@@ -7,6 +7,7 @@
 
   // Constants
   const MAX_TURNS = 5
+
   const GAP = 15
   const TOOLTIP_WIDTH = 320 // Match max-width in CSS
   const TRIANGLE_BORDER = 10
@@ -16,14 +17,15 @@
   const CONTAINER_PADDING = 24
   const MORE_INDICATOR_HEIGHT = 35
   const DEFAULT_COLOR = '#666'
-
   let hoveredData = $derived($HoveredConversationStore)
 
   // Estimate tooltip height based on number of turns
   let estimatedHeight = $derived.by(() => {
     if (!hoveredData) return 100
+
     const numTurns = Math.min(hoveredData.turns.length, MAX_TURNS)
     const moreIndicator = hoveredData.turns.length > MAX_TURNS ? MORE_INDICATOR_HEIGHT : 0
+
     return (
       numTurns * TURN_HEIGHT + (numTurns - 1) * DIVIDER_HEIGHT + CONTAINER_PADDING + moreIndicator
     )
@@ -35,11 +37,9 @@
 
     const mouseX = hoveredData.mouseX
     const mouseY = hoveredData.mouseY
-
     const viewportWidth = window.innerWidth
     const viewportHeight = window.innerHeight
     const tooltipHeight = estimatedHeight
-
     let x: number
     let y: number
     let triangleClass: string
@@ -56,6 +56,7 @@
 
     // Vertical: position so triangle points at mouse
     const idealTriangleY = 30
+
     y = mouseY - idealTriangleY - TRIANGLE_BORDER
     y = Math.max(GAP, Math.min(y, viewportHeight - tooltipHeight - GAP))
 
@@ -64,6 +65,7 @@
       TRIANGLE_MIN_Y,
       tooltipHeight - TRIANGLE_MIN_Y - TRIANGLE_BORDER * 2
     )
+
     const triangleY = Math.max(TRIANGLE_MIN_Y, Math.min(mouseY - y - TRIANGLE_BORDER, triangleMaxY))
 
     return {

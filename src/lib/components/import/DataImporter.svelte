@@ -1,18 +1,18 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte'
-  import { Z_INDEX } from '$lib/styles/z-index'
-  import { formatFileSize, getFileSizeLimit } from '$lib/validation/rules'
+  import { Z_INDEX } from '#lib/styles/z-index.ts'
+  import { formatFileSize, getFileSizeLimit } from '#lib/validation/rules.ts'
   import {
     SUPPORTED_EXTENSIONS,
     ACCEPT_STRING,
     getFileTypeInfo,
     getFileExtension,
-  } from '$lib/validation/file-types'
+  } from '#lib/validation/file-types.ts'
   import { toastStore } from '../../../stores/toastStore'
   import { openModal, closeModal } from '../../../stores/modalStore'
   import { loadVideo, reset as resetVideo } from '../../../stores/videoStore'
   import { pause as pausePlayback } from '../../../stores/playbackStore'
-  import { parseYouTubeUrl } from '$lib/video/video-service'
+  import { parseYouTubeUrl } from '#lib/video/video-service.ts'
 
   interface Props {
     /** Whether the dialog is open */

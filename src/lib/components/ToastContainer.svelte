@@ -2,7 +2,7 @@
   import { fly, fade } from 'svelte/transition'
   import { flip } from 'svelte/animate'
   import { toastStore, type Toast } from '../../stores/toastStore'
-  import { Z_INDEX } from '$lib/styles/z-index'
+  import { Z_INDEX } from '#lib/styles/z-index.ts'
 
   // Toast type to DaisyUI alert class mapping
   const alertClass: Record<Toast['type'], string> = {

@@ -8,7 +8,7 @@
   import VideoStore, { requestSeek } from '../../../stores/videoStore'
   import UserStore from '../../../stores/userStore'
   import ConfigStore from '../../../stores/configStore'
-  import { redrawCanvas } from '$lib/utils/p5'
+  import { redrawCanvas } from '#lib/utils/p5.ts'
 
   const MAX_TICK_LABELS = 8
 

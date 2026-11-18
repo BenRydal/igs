@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte'
-  import { browser } from '$app/environment'
+  import { browser } from '$app/env'
   import { DraggableWindow } from 'svelte-p5-components'
   import VideoStore from '../../stores/videoStore'
   import { isPlayingVideo } from '../../stores/playbackStore'
@@ -12,6 +12,7 @@
     syncMuteState,
     handlePlayerReady,
   } from '../video/useVideoSync'
+
   import VideoPlayerComponent from './VideoPlayer.svelte'
   import VideoControls from './VideoControls.svelte'
 
@@ -19,9 +20,7 @@
   const DEFAULT_WIDTH = 480
   const ASPECT_RATIO = 16 / 9
   const CHROME_HEIGHT = 30 // DraggableWindow titlebar
-
   const syncState = createVideoSyncState()
-
   let isPlaying = $derived($isPlayingVideo)
   let isMuted = $derived($VideoStore.isMuted)
   let isVisible = $derived($VideoStore.isVisible)
@@ -70,7 +69,9 @@
         raf = requestAnimationFrame(measure)
       }
     }
+
     measure()
+
     return () => cancelAnimationFrame(raf)
   })
 
@@ -78,8 +79,8 @@
   // window at 16:9. DraggableWindow's native `resize: both` is disabled in CSS
   // so the two can't fight over the element's inline size.
   let width = $state(DEFAULT_WIDTH)
-  let height = $derived(width / ASPECT_RATIO + CHROME_HEIGHT)
 
+  let height = $derived(width / ASPECT_RATIO + CHROME_HEIGHT)
   let resizeStartX = 0
   let resizeStartWidth = 0
   let maxWidth = Infinity

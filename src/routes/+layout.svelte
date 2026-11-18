@@ -1,11 +1,11 @@
 <script lang="ts">
   import '../app.css'
   import { onMount } from 'svelte'
-  import ToastContainer from '$lib/components/ToastContainer.svelte'
-  import { CommandPalette } from '$lib/components/command-palette'
-  import KeyboardCheatsheet from '$lib/components/KeyboardCheatsheet.svelte'
-  import { registerAllShortcuts, attachKeyboardHandler } from '$lib/keyboard'
-  import { registerUndoRedoShortcuts } from '$lib/history/keyboard'
+  import ToastContainer from '#lib/components/ToastContainer.svelte'
+  import { CommandPalette } from '#lib/components/command-palette/index.ts'
+  import KeyboardCheatsheet from '#lib/components/KeyboardCheatsheet.svelte'
+  import { registerAllShortcuts, attachKeyboardHandler } from '#lib/keyboard/index.ts'
+  import { registerUndoRedoShortcuts } from '#lib/history/keyboard.ts'
   import { setupModalListeners } from '../stores/modalStore'
 
   // State for modals

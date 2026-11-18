@@ -12,7 +12,7 @@
   loaded font file to draw any.
 -->
 <script lang="ts">
-  import { Z_INDEX } from '$lib/styles/z-index'
+  import { Z_INDEX } from '#lib/styles/z-index.ts'
 
   interface Props {
     class?: string

@@ -26,7 +26,7 @@
  *
  * @example
  * ```typescript
- * import { Z_INDEX } from '$lib/styles/z-index';
+ * import { Z_INDEX } from '#lib/styles/z-index.ts';
  *
  * // In Svelte component
  * <div style="z-index: {Z_INDEX.DROPDOWN}">Dropdown</div>

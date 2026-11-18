@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onDestroy } from 'svelte'
-  import { browser } from '$app/environment'
+  import { browser } from '$app/env'
   import VideoStore, { setLoaded } from '../../stores/videoStore'
   import {
     createYouTubePlayer,
@@ -16,12 +16,10 @@
   }
 
   let { onready, onerror }: Props = $props()
-
   let containerEl = $state<HTMLDivElement>()
   let youtubeContainerEl = $state<HTMLDivElement>()
   let videoEl = $state<HTMLVideoElement>()
   let player = $state<VideoPlayer | null>(null)
-
   const youtubeContainerId = 'youtube-player-container'
 
   // Track source changes as a single string
@@ -34,7 +32,9 @@
     if (!browser || !containerEl) return
 
     const sourceKey = source.type ? `${source.type}:${source.videoId || source.fileUrl}` : null
+
     if (sourceKey === prevSourceKey) return
+
     prevSourceKey = sourceKey
 
     // Cleanup existing player
@@ -58,6 +58,7 @@
 
     // Create a new div for the YouTube player inside our container
     const playerId = youtubeContainerId + '-' + Date.now()
+
     mountPlayerTarget(youtubeContainerEl, playerId)
 
     createYouTubePlayer(

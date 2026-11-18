@@ -9,7 +9,7 @@
     type Entity,
   } from 'svelte-p5-components'
 
-  import type { IgsP5 } from '$lib/p5/igs-p5'
+  import type { IgsP5 } from '#lib/p5/igs-p5.ts'
   import MdHelpOutline from '~icons/mdi/help-circle-outline'
   import MdKeyboard from '~icons/mdi/keyboard'
   import MdCloudDownload from '~icons/mdi/cloud-download'
@@ -48,7 +48,7 @@
   import { nextRevision, type User } from '../models/user'
   import UserStore from '../stores/userStore'
   import P5Store from '../stores/p5Store'
-  import { redrawCanvas, rotateFloorplan, withRedrawSuspended } from '$lib/utils/p5'
+  import { redrawCanvas, rotateFloorplan, withRedrawSuspended } from '#lib/utils/p5.ts'
   import VideoStore, {
     toggleVisibility,
     reset as resetVideo,
@@ -56,14 +56,14 @@
   } from '../stores/videoStore'
   import GPSStore, { resetGPS } from '../stores/gpsStore'
   import { onVideoVisibilityChange } from '../stores/playbackStore'
-  import VideoContainer from '$lib/components/VideoContainer.svelte'
-  import SplitScreenVideo from '$lib/components/SplitScreenVideo.svelte'
-  import TranscriptPanel from '$lib/components/TranscriptPanel.svelte'
-  import ConversationTooltip from '$lib/components/ConversationTooltip.svelte'
-  import SpaceTimeTooltip from '$lib/components/SpaceTimeTooltip.svelte'
-  import AxesIndicator from '$lib/components/AxesIndicator.svelte'
+  import VideoContainer from '#lib/components/VideoContainer.svelte'
+  import SplitScreenVideo from '#lib/components/SplitScreenVideo.svelte'
+  import TranscriptPanel from '#lib/components/TranscriptPanel.svelte'
+  import ConversationTooltip from '#lib/components/ConversationTooltip.svelte'
+  import SpaceTimeTooltip from '#lib/components/SpaceTimeTooltip.svelte'
+  import AxesIndicator from '#lib/components/AxesIndicator.svelte'
 
-  import { Core } from '$lib'
+  import { Core } from '#lib'
   import {
     EXAMPLE_DATASETS,
     EXAMPLE_COLLECTIONS,
@@ -73,43 +73,43 @@
     getExampleLabel,
     type CollectionId,
     type ExampleEntry,
-  } from '$lib/core/example-datasets'
-  import type { ExampleSelectEvent } from '$lib/core/types'
-  import { igsSketch } from '$lib/p5/igsSketch'
+  } from '#lib/core/example-datasets.ts'
+  import type { ExampleSelectEvent } from '#lib/core/types.ts'
+  import { igsSketch } from '#lib/p5/igsSketch.ts'
   import { writable } from 'svelte/store'
   import { onMount, tick, flushSync, type Component, type Snippet } from 'svelte'
   import { SvelteSet } from 'svelte/reactivity'
-  import IconButton from '$lib/components/IconButton.svelte'
-  import IgsInfoModal from '$lib/components/IGSInfoModal.svelte'
-  import { Timeline } from '$lib/timeline'
-  import DataPointTable from '$lib/components/DataPointTable.svelte'
-  import ModeIndicator from '$lib/components/ModeIndicator.svelte'
-  import { OnboardingTour, shouldShowTour } from '$lib/tour'
-  import DataImporter from '$lib/components/import/DataImporter.svelte'
-  import MapStyleSelector from '$lib/components/MapStyleSelector.svelte'
-  import CodesPanel from '$lib/components/CodesPanel.svelte'
-  import TimelineControls from '$lib/timeline/components/TimelineControls.svelte'
-  import { capitalizeFirstLetter, capitalizeEachWord } from '$lib/utils/string'
-  import { Z_INDEX } from '$lib/styles/z-index'
+  import IconButton from '#lib/components/IconButton.svelte'
+  import IgsInfoModal from '#lib/components/IGSInfoModal.svelte'
+  import { Timeline } from '#lib/timeline/index.ts'
+  import DataPointTable from '#lib/components/DataPointTable.svelte'
+  import ModeIndicator from '#lib/components/ModeIndicator.svelte'
+  import { OnboardingTour, shouldShowTour } from '#lib/tour/index.ts'
+  import DataImporter from '#lib/components/import/DataImporter.svelte'
+  import MapStyleSelector from '#lib/components/MapStyleSelector.svelte'
+  import CodesPanel from '#lib/components/CodesPanel.svelte'
+  import TimelineControls from '#lib/timeline/components/TimelineControls.svelte'
+  import { capitalizeFirstLetter, capitalizeEachWord } from '#lib/utils/string.ts'
+  import { Z_INDEX } from '#lib/styles/z-index.ts'
 
   import CodeStore from '../stores/codeStore'
   import ConfigStore from '../stores/configStore'
   import type { ConfigStoreType } from '../stores/configStore'
-  import { timelineV2Store } from '$lib/timeline/store'
+  import { timelineV2Store } from '#lib/timeline/store.ts'
   import { initialConfig } from '../stores/configStore'
-  import { setSelectorSize, setSlicerSize } from '$lib/history/config-actions'
+  import { setSelectorSize, setSlicerSize } from '#lib/history/config-actions.ts'
   import {
     toggleUserVisibility as toggleUserVisibilityAction,
     toggleUserEnabled,
     toggleUserConversationEnabled,
     setUserName,
     createUserColorDrag,
-  } from '$lib/history/user-actions'
+  } from '#lib/history/user-actions.ts'
   import {
     clearUsers,
     clearCodes,
     clearAllData as clearAllDataWithHistory,
-  } from '$lib/history/data-actions'
+  } from '#lib/history/data-actions.ts'
 
   // Boolean config keys: what the toggle handlers may flip
   type ToggleKey = {

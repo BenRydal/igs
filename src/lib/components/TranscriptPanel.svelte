@@ -7,7 +7,7 @@
   import ConfigStore from '../../stores/configStore'
   import { requestSeek, hasVideoSource } from '../../stores/videoStore'
   import { timelineV2Store } from '../timeline/store'
-  import { redrawCanvas } from '$lib/utils/p5'
+  import { redrawCanvas } from '#lib/utils/p5.ts'
   import { formatTime, parseTime } from '../utils/format'
   import MdClose from '~icons/mdi/close'
   import MdPencil from '~icons/mdi/pencil'
