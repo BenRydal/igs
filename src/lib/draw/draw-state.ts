@@ -1,5 +1,4 @@
 import ConfigStore, { initialConfig, type ConfigStoreType } from '../../stores/configStore'
-import VideoStore from '../../stores/videoStore'
 import PlaybackStore, { type PlaybackMode } from '../../stores/playbackStore'
 import CodeStore, { type CodeStoreState } from '../../stores/codeStore'
 
@@ -34,10 +33,6 @@ ConfigStore.subscribe((config) => {
   drawState.searchRegex = config.wordToSearch
     ? new RegExp(config.wordToSearch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i')
     : null
-})
-
-VideoStore.subscribe((video) => {
-  drawState.videoCurrentTime = video.currentTime
 })
 
 PlaybackStore.subscribe((playback) => {

@@ -1,5 +1,6 @@
 import { writable, derived, get } from 'svelte/store'
-import VideoStore, { requestSeek } from './videoStore'
+import VideoStore from './videoStore'
+import { seekVideo } from '../lib/video/player'
 import { timelineV2Store } from '../lib/timeline/store'
 import { redrawCanvas } from '../lib/utils/p5'
 
@@ -47,7 +48,7 @@ function play(): void {
   // If starting video playback, seek to current timeline position
   if (mode === 'playing-video') {
     const state = timelineV2Store.getState()
-    requestSeek(state.currentTime)
+    seekVideo(state.currentTime)
   }
 
   setMode(mode)
@@ -92,7 +93,7 @@ export function onVideoVisibilityChange(isVisible: boolean): void {
   if (isVisible && videoState.isLoaded) {
     // Showing video while playing - switch to video mode
     const state = timelineV2Store.getState()
-    requestSeek(state.currentTime)
+    seekVideo(state.currentTime)
     setMode('playing-video')
   } else if (!isVisible && currentMode === 'playing-video') {
     // Hiding video while in video mode - switch to animation mode
@@ -115,7 +116,7 @@ export function onAnimationEnd(): void {
   // Seek video to start if visible
   const videoState = get(VideoStore)
   if (videoState.isVisible) {
-    requestSeek(state.viewStart)
+    seekVideo(state.viewStart)
   }
 }
 

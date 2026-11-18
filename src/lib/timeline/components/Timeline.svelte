@@ -5,7 +5,8 @@
   import { generateGridLines } from '../utils'
   import { activityGradientCss, computeActivityBuckets } from '../activity-gradient'
   import { goToView, MIN_VIEW_SECONDS } from '../view-animation'
-  import VideoStore, { requestSeek } from '../../../stores/videoStore'
+  import VideoStore from '../../../stores/videoStore'
+  import { seekVideo } from '../../video/player'
   import UserStore from '../../../stores/userStore'
   import ConfigStore from '../../../stores/configStore'
   import { redrawCanvas } from '#lib/utils/p5.ts'
@@ -23,7 +24,7 @@
 
   function seek(time: number) {
     timelineV2Store.setCurrentTime(time)
-    if (get(VideoStore).isVisible) requestSeek(time)
+    if (get(VideoStore).isVisible) seekVideo(time)
     redrawCanvas()
   }
 </script>

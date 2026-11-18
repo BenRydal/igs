@@ -1,117 +1,103 @@
 <script lang="ts">
-  import { onDestroy } from 'svelte'
-  import { browser } from '$app/env'
-  import VideoStore, { setLoaded } from '../../stores/videoStore'
+  import { htmlMediaPort, type MediaPort } from 'svelte-p5-components'
   import {
     createYouTubePlayer,
-    type VideoPlayer,
-    destroyPlayer,
-    mountPlayerTarget,
-    clearPlayerTarget,
-  } from '../video/video-service'
+    youTubePort,
+    type YouTubePlayerLike,
+  } from 'svelte-p5-components/youtube'
+  import VideoStore, { setLoaded } from '../../stores/videoStore'
+  import { isPlayingVideo } from '../../stores/playbackStore'
+  import { timelineV2Store } from '../timeline/store'
+  import { attachVideo } from '../video/player'
 
-  interface Props {
-    onready?: (player: VideoPlayer, duration: number) => void
-    onerror?: (message: string) => void
-  }
-
-  let { onready, onerror }: Props = $props()
-  let containerEl = $state<HTMLDivElement>()
-  let youtubeContainerEl = $state<HTMLDivElement>()
-  let videoEl = $state<HTMLVideoElement>()
-  let player = $state<VideoPlayer | null>(null)
-  const youtubeContainerId = 'youtube-player-container'
-
-  // Track source changes as a single string
-  let prevSourceKey: string | null = null
+  let port = $state.raw<MediaPort | null>(null)
+  let wasPlaying = false
 
   let source = $derived($VideoStore.source)
+  let videoId = $derived(source.type === 'youtube' ? source.videoId : undefined)
 
-  // Watch for source changes and initialize player
+  function ready(next: MediaPort) {
+    const time = timelineV2Store.getState().currentTime
+    if (time > 0) next.seek(time)
+    wasPlaying = false
+    port = next
+    setLoaded(next.duration)
+  }
+
+  function youtubePlayer(container: HTMLElement) {
+    if (!videoId) return
+    const target = document.createElement('div')
+    container.replaceChildren(target)
+    let player: YouTubePlayerLike | null = null
+    let cancelled = false
+    createYouTubePlayer(target, {
+      videoId,
+      playerVars: {
+        controls: 0,
+        disablekb: 1,
+        playsinline: 1,
+        modestbranding: 1,
+        rel: 0,
+        autoplay: 0,
+      },
+    }).then(
+      (created) => {
+        if (cancelled) {
+          created.destroy()
+          return
+        }
+        player = created
+        ready(youTubePort(created))
+      },
+      (error: unknown) => console.error('Video player error:', error)
+    )
+    return () => {
+      cancelled = true
+      port = null
+      player?.destroy()
+      target.remove()
+    }
+  }
+
+  function filePlayer(video: HTMLVideoElement) {
+    const loaded = () => ready(htmlMediaPort(video))
+    const failed = () => console.error('Video player error: Error loading video file')
+    video.addEventListener('loadedmetadata', loaded)
+    video.addEventListener('error', failed)
+    return () => {
+      video.removeEventListener('loadedmetadata', loaded)
+      video.removeEventListener('error', failed)
+      port = null
+    }
+  }
+
   $effect(() => {
-    if (!browser || !containerEl) return
-
-    const sourceKey = source.type ? `${source.type}:${source.videoId || source.fileUrl}` : null
-
-    if (sourceKey === prevSourceKey) return
-
-    prevSourceKey = sourceKey
-
-    // Cleanup existing player
-    if (player) {
-      destroyPlayer(player)
-      player = null
-    }
-    if (youtubeContainerEl) {
-      clearPlayerTarget(youtubeContainerEl)
-    }
-
-    // Initialize new player if we have a YouTube source
-    // (HTML5 video is initialized via element binding)
-    if (source.type === 'youtube' && source.videoId) {
-      setTimeout(() => initYouTubePlayer(source.videoId!), 50)
-    }
+    if (!port) return
+    return attachVideo(port)
   })
 
-  function initYouTubePlayer(videoId: string) {
-    if (!youtubeContainerEl) return
+  $effect(() => {
+    const playing = $isPlayingVideo
+    if (!port) return
+    if (playing) port.play()
+    else if (wasPlaying) port.pause()
+    wasPlaying = playing
+  })
 
-    // Create a new div for the YouTube player inside our container
-    const playerId = youtubeContainerId + '-' + Date.now()
-
-    mountPlayerTarget(youtubeContainerEl, playerId)
-
-    createYouTubePlayer(
-      playerId,
-      videoId,
-      (ytPlayer, duration) => {
-        player = ytPlayer
-        setLoaded(duration)
-        onready?.(player, duration)
-      },
-      (error) => {
-        onerror?.(`YouTube error: ${error}`)
-      }
-    )
-  }
-
-  function handleVideoLoaded() {
-    if (videoEl) {
-      player = videoEl
-      const duration = videoEl.duration
-      setLoaded(duration)
-      onready?.(player, duration)
-    }
-  }
-
-  function handleVideoError() {
-    onerror?.('Error loading video file')
-  }
-
-  onDestroy(() => {
-    if (player) {
-      destroyPlayer(player)
-      player = null
-    }
+  $effect(() => {
+    port?.setMuted?.($VideoStore.isMuted)
   })
 </script>
 
-<div class="video-player" bind:this={containerEl}>
-  <!-- Always render both containers, hide with CSS -->
+<div class="video-player">
   <div
-    bind:this={youtubeContainerEl}
+    {@attach youtubePlayer}
     class="youtube-container"
     class:hidden={source.type !== 'youtube'}
   ></div>
 
   {#if source.type === 'file' && source.fileUrl}
-    <video
-      bind:this={videoEl}
-      src={source.fileUrl}
-      onloadedmetadata={handleVideoLoaded}
-      onerror={handleVideoError}
-      playsinline
-    >
+    <video {@attach filePlayer} src={source.fileUrl} playsinline>
       <track kind="captions" />
     </video>
   {/if}

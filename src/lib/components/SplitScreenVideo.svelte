@@ -1,55 +1,15 @@
 <script lang="ts">
-  import VideoStore from '../../stores/videoStore'
-  import { isPlayingVideo } from '../../stores/playbackStore'
-  import { type VideoPlayer } from '../video/video-service'
-  import {
-    createVideoSyncState,
-    handleSeekRequest,
-    syncPlaybackState,
-    syncMuteState,
-    handlePlayerReady,
-  } from '../video/useVideoSync'
   import VideoPlayerComponent from './VideoPlayer.svelte'
   import VideoControls from './VideoControls.svelte'
-
-  const syncState = createVideoSyncState()
-
-  let isPlaying = $derived($isPlayingVideo)
-  let isMuted = $derived($VideoStore.isMuted)
-  let isLoaded = $derived($VideoStore.isLoaded)
-  let seekRequest = $derived($VideoStore.seekRequest)
-
-  // Handle seek requests
-  $effect(() => {
-    handleSeekRequest(syncState, seekRequest, isPlaying)
-  })
-
-  // Sync playback state with player
-  $effect(() => {
-    syncPlaybackState(syncState, isPlaying, isLoaded)
-  })
-
-  // Sync mute state with player
-  $effect(() => {
-    syncMuteState(syncState, isMuted, isLoaded)
-  })
-
-  function onPlayerReady(playerInstance: VideoPlayer) {
-    handlePlayerReady(syncState, playerInstance, isPlaying, isMuted)
-  }
-
-  function onPlayerError(message: string) {
-    console.error('Video player error:', message)
-  }
 </script>
 
 <div class="split-video-container">
   <div class="video-area">
-    <VideoPlayerComponent onready={onPlayerReady} onerror={onPlayerError} />
+    <VideoPlayerComponent />
   </div>
 
   <div class="controls-bar">
-    <VideoControls player={syncState.player} />
+    <VideoControls />
   </div>
 </div>
 

@@ -5,7 +5,8 @@
   import { nextRevision } from '../../models/user'
   import HoveredConversationStore from '../../stores/interactionStore'
   import ConfigStore from '../../stores/configStore'
-  import { requestSeek, hasVideoSource } from '../../stores/videoStore'
+  import { hasVideoSource } from '../../stores/videoStore'
+  import { seekVideo } from '../video/player'
   import { timelineV2Store } from '../timeline/store'
   import { redrawCanvas } from '#lib/utils/p5.ts'
   import { formatTime, parseTime } from '../utils/format'
@@ -172,7 +173,7 @@
     timelineV2Store.setCurrentTime(entry.time)
 
     if (hasVideoSource()) {
-      requestSeek(entry.time)
+      seekVideo(entry.time)
     }
 
     redrawCanvas()

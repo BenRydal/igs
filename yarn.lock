@@ -2180,7 +2180,7 @@ __metadata:
     svelte-check: "npm:^4.7.5"
     svelte-eslint-parser: "npm:^1.10.1"
     svelte-p5: "npm:^1.3.0"
-    svelte-p5-components: "npm:^2.3.1"
+    svelte-p5-components: "npm:^2.4.0"
     tailwindcss: "npm:^4.0.0"
     typescript: "npm:^6.0.0"
     unplugin-icons: "npm:^24.0.0"
@@ -3256,9 +3256,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"svelte-p5-components@npm:^2.3.1":
-  version: 2.3.1
-  resolution: "svelte-p5-components@npm:2.3.1"
+"svelte-p5-components@npm:^2.4.0":
+  version: 2.4.0
+  resolution: "svelte-p5-components@npm:2.4.0"
   dependencies:
     "@neodrag/core": "npm:3.0.0-next.12"
     "@neodrag/svelte": "npm:3.0.0-next.12"
@@ -3266,7 +3266,7 @@ __metadata:
     p5: ">=1.11.0 <3"
     svelte: ^5.0.0
     svelte-p5: ^1.0.0
-  checksum: 10c0/df689916ba58df51e4005ced7b0fc7f0ab207381203e98ba1309375bbb477c8efe16a149d9184b8fa1a398630794ed97f3d8b515b9637f577166685dff3aba1a
+  checksum: 10c0/a529c766ccd051be78560f5d5db0f06cb90ca87a405d16f7ea54e7e0050dd4e5c1a21dd1bc3a3222f75121aade82d0892cf4b8ea00b4087afe91f92a0e032aad
   languageName: node
   linkType: hard
 

@@ -3,52 +3,16 @@
   import { browser } from '$app/env'
   import { DraggableWindow } from 'svelte-p5-components'
   import VideoStore from '../../stores/videoStore'
-  import { isPlayingVideo } from '../../stores/playbackStore'
-  import { type VideoPlayer } from '../video/video-service'
-  import {
-    createVideoSyncState,
-    handleSeekRequest,
-    syncPlaybackState,
-    syncMuteState,
-    handlePlayerReady,
-  } from '../video/useVideoSync'
 
   import VideoPlayerComponent from './VideoPlayer.svelte'
   import VideoControls from './VideoControls.svelte'
+
+  let isVisible = $derived($VideoStore.isVisible)
 
   const MIN_WIDTH = 160
   const DEFAULT_WIDTH = 480
   const ASPECT_RATIO = 16 / 9
   const CHROME_HEIGHT = 30 // DraggableWindow titlebar
-  const syncState = createVideoSyncState()
-  let isPlaying = $derived($isPlayingVideo)
-  let isMuted = $derived($VideoStore.isMuted)
-  let isVisible = $derived($VideoStore.isVisible)
-  let isLoaded = $derived($VideoStore.isLoaded)
-  let seekRequest = $derived($VideoStore.seekRequest)
-
-  // Handle seek requests
-  $effect(() => {
-    handleSeekRequest(syncState, seekRequest, isPlaying)
-  })
-
-  // Sync playback state with player
-  $effect(() => {
-    syncPlaybackState(syncState, isPlaying, isLoaded)
-  })
-
-  // Sync mute state with player
-  $effect(() => {
-    syncMuteState(syncState, isMuted, isLoaded)
-  })
-
-  function onPlayerReady(playerInstance: VideoPlayer) {
-    handlePlayerReady(syncState, playerInstance, isPlaying, isMuted)
-  }
-
-  function onPlayerError(message: string) {
-    console.error('Video player error:', message)
-  }
 
   // Initial position: top-right of the canvas container. DraggableWindow owns
   // position from then on (user drag). Mounting is deferred until the canvas
@@ -125,14 +89,14 @@
       constrained="parent"
     >
       <div class="video-area">
-        <VideoPlayerComponent onready={onPlayerReady} onerror={onPlayerError} />
+        <VideoPlayerComponent />
 
         <!-- Click shield for YouTube -->
         <div class="click-shield"></div>
 
         <!-- Controls bar at bottom -->
         <div class="controls-bar">
-          <VideoControls player={syncState.player} />
+          <VideoControls />
         </div>
 
         <!-- Pointer capture keeps the drag alive over the YouTube iframe. -->

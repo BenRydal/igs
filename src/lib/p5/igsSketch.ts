@@ -1,9 +1,8 @@
-import { get } from 'svelte/store'
 import { hitTest, type SketchFn } from 'svelte-p5'
 import P5Store from '../../stores/p5Store'
 import UserStore from '../../stores/userStore'
 import { timelineV2Store } from '../timeline/store'
-import VideoStore from '../../stores/videoStore'
+import { videoTime } from '../video/player'
 import { onAnimationEnd } from '../../stores/playbackStore'
 import { isAnyModalOpen } from '../../stores/modalStore'
 import { toastStore } from '../../stores/toastStore'
@@ -224,8 +223,8 @@ export const igsSketch: SketchFn<IgsSketchExt> = (p5) => {
     let timeToSet: number
 
     if (drawState.playbackMode === 'playing-video') {
-      // Video is driving - use video's current time
-      timeToSet = get(VideoStore).currentTime
+      timeToSet = videoTime() ?? state.currentTime
+      drawState.videoCurrentTime = timeToSet
     } else {
       // Animation is driving - use frame-based increment
       timeToSet = state.currentTime + drawState.config.animationRate
