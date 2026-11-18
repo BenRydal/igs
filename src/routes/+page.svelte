@@ -81,7 +81,7 @@
   import { SvelteSet } from 'svelte/reactivity'
   import IconButton from '$lib/components/IconButton.svelte'
   import IgsInfoModal from '$lib/components/IGSInfoModal.svelte'
-  import { TimelineContainer } from '$lib/timeline'
+  import { Timeline } from '$lib/timeline'
   import DataPointTable from '$lib/components/DataPointTable.svelte'
   import ModeIndicator from '$lib/components/ModeIndicator.svelte'
   import { OnboardingTour, shouldShowTour } from '$lib/tour'
@@ -1391,10 +1391,10 @@
         <!-- Right side: the track, which doubles as the 2D view's time axis -->
         <div
           id="timeline-panel"
-          class="flex flex-1 items-center bg-[#f6f5f3] overflow-visible py-0.5 px-2 lg:px-4"
+          class="flex flex-1 items-center bg-[#f6f5f3] overflow-visible py-0.5 lg:px-1"
           style="min-width: 200px;"
         >
-          <TimelineContainer height={52} showControls={false} embedded={true} />
+          <Timeline />
         </div>
       </div>
     {/snippet}

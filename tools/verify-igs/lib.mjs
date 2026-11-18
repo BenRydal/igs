@@ -99,7 +99,9 @@ export const currentSeconds = async (page) => {
   return m * 60 + s
 }
 export const clock = async (page) => (await timeText(page).innerText()).replace(/\s+/g, ' ').trim()
-export const timelineCanvas = (page) => page.locator('canvas.touch-none')
+export const timelineTrack = (page) => page.locator('.igs-timeline-main .timeline-track')
+export const overviewWindow = (page) =>
+  page.locator('.igs-timeline-overview .timeline-track__selection')
 
 export async function loadedExample(ctx) {
   await ctx.open('/')

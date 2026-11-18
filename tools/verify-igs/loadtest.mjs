@@ -242,7 +242,7 @@ async function runOnce(browser, dataset, testCase) {
       return Date.now() - t0
     }
     if (PROFILE) await cdp.send('Profiler.start')
-    const track = await page.locator('canvas.touch-none').boundingBox()
+    const track = await page.locator('.igs-timeline-main .timeline-track').boundingBox()
     result.seekRedrawMs = await timed(() =>
       page.mouse.click(track.x + track.width * 0.9, track.y + track.height / 2)
     )

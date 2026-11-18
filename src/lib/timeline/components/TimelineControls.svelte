@@ -3,7 +3,7 @@
   import { formatTime } from '../utils'
   import { isPlaying, togglePlayback, pause as pausePlayback } from '../../../stores/playbackStore'
   import ConfigStore from '../../../stores/configStore'
-  import { redrawCanvas } from '$lib/utils/p5'
+  import { zoomBy, zoomToFit } from '../view-animation'
 
   // MDI Icons
   import MdPlayArrow from '~icons/mdi/play-arrow'
@@ -19,7 +19,7 @@
   const DEFAULT_SPEED_INDEX = 1 // 1x
 
   let currentTime = $derived($timelineV2Store.currentTime)
-  let duration = $derived($timelineV2Store.viewEnd - $timelineV2Store.viewStart)
+  let duration = $derived($timelineV2Store.dataEnd - $timelineV2Store.dataStart)
   let speedIndex = $derived.by(() => {
     const idx = SPEED_PRESETS.indexOf($ConfigStore.animationRate)
     return idx >= 0 ? idx : DEFAULT_SPEED_INDEX
@@ -46,18 +46,11 @@
   }
 
   function zoomIn() {
-    timelineV2Store.zoom(0.7)
-    redrawCanvas()
+    zoomBy(0.7)
   }
 
   function zoomOut() {
-    timelineV2Store.zoom(1.4)
-    redrawCanvas()
-  }
-
-  function zoomToFit() {
-    timelineV2Store.zoomToFit()
-    redrawCanvas()
+    zoomBy(1.4)
   }
 </script>
 

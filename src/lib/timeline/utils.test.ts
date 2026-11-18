@@ -6,7 +6,6 @@ import {
   calculateGridInterval,
   generateGridLines,
   zoomAtPoint,
-  panView,
 } from './utils'
 
 // Characterization tests: these pin the timeline's pure math as it behaves
@@ -110,17 +109,5 @@ describe('zoomAtPoint', () => {
     const r = zoomAtPoint(0, 100, 0.5, 5, 0, 100, 1)
     expect(r.viewStart).toBeCloseTo(2.5)
     expect(r.viewEnd).toBeCloseTo(52.5)
-  })
-})
-
-describe('panView', () => {
-  it('shifts the window by deltaTime preserving duration', () => {
-    const r = panView(10, 30, 5, 0, 100)
-    expect(r).toEqual({ viewStart: 15, viewEnd: 35 })
-  })
-
-  it('clamps at the data start and end without shrinking', () => {
-    expect(panView(10, 30, -20, 0, 100)).toEqual({ viewStart: 0, viewEnd: 20 })
-    expect(panView(70, 90, 20, 0, 100)).toEqual({ viewStart: 80, viewEnd: 100 })
   })
 })

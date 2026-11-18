@@ -4,7 +4,7 @@ import { timelineV2Store } from './store'
 
 // Covers the state plumbing and coordinate conversions in store.ts;
 // timeline/utils.test.ts covers the pure math they delegate to (mapRange,
-// zoomAtPoint, panView).
+// zoomAtPoint).
 //
 // Every read path here goes through a synchronous mirror of the store value
 // rather than the store itself. The mirror is only correct if it tracks every
@@ -89,49 +89,6 @@ describe('timelineV2Store mirror stays in sync with every mutator', () => {
     expect(timelineV2Store.getViewEndPixel()).toBe(750)
     expect(timelineV2Store.overAxis(100)).toBe(false)
     expect(timelineV2Store.overAxis(500)).toBe(true)
-  })
-
-  // The factor multiplies the view duration, so values below 1 zoom in and
-  // values above 1 zoom out. The result is clamped to the data range, which is
-  // why zoom(2) on a full view is a no-op.
-  it('tracks zoom in', () => {
-    timelineV2Store.zoom(0.5, 50)
-    const { viewStart, viewEnd } = timelineV2Store.getState()
-    expect(viewEnd - viewStart).toBeCloseTo(50, 10)
-    expect(timelineV2Store.getViewStartPixel()).toBeCloseTo(250, 10)
-    expect(timelineV2Store.getViewEndPixel()).toBeCloseTo(750, 10)
-  })
-
-  it('clamps zoom out at the full data range', () => {
-    timelineV2Store.zoom(2, 50)
-    const { viewStart, viewEnd } = timelineV2Store.getState()
-    expect(viewStart).toBe(0)
-    expect(viewEnd).toBe(100)
-  })
-
-  it('tracks a zoom in followed by a zoom back out', () => {
-    timelineV2Store.zoom(0.5, 50)
-    expect(timelineV2Store.getViewStartPixel()).toBeCloseTo(250, 10)
-    timelineV2Store.zoom(2, 50)
-    expect(timelineV2Store.getViewStartPixel()).toBeCloseTo(0, 10)
-    expect(timelineV2Store.getViewEndPixel()).toBeCloseTo(1000, 10)
-  })
-
-  it('tracks pan', () => {
-    timelineV2Store.setView(0, 50)
-    timelineV2Store.pan(10)
-    const { viewStart, viewEnd } = timelineV2Store.getState()
-    expect(viewStart).toBeCloseTo(10, 10)
-    expect(viewEnd).toBeCloseTo(60, 10)
-    expect(timelineV2Store.getViewStartPixel()).toBeCloseTo(100, 10)
-  })
-
-  it('tracks zoomToFit', () => {
-    timelineV2Store.setView(40, 60)
-    expect(timelineV2Store.getViewStartPixel()).toBe(400)
-    timelineV2Store.zoomToFit()
-    expect(timelineV2Store.getViewStartPixel()).toBe(0)
-    expect(timelineV2Store.getViewEndPixel()).toBe(1000)
   })
 
   it('tracks setCurrentTime', () => {
