@@ -8,6 +8,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   check-test-build:
     runs-on: ubuntu-latest
@@ -27,6 +31,9 @@ jobs:
 
       - name: Lint
         run: yarn lint
+
+      - name: Unused code
+        run: yarn knip
 
       - name: Type check
         run: yarn check

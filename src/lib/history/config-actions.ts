@@ -1,12 +1,11 @@
 import { get } from 'svelte/store'
-import ConfigStore, { type ConfigStoreType, initialConfig } from '../../stores/configStore'
+import ConfigStore, { type ConfigStoreType } from '../../stores/configStore'
 import { historyStore } from '../../stores/historyStore'
-import { deepClone } from './deep-clone'
 
 /**
  * Toggle a boolean config value with undo support
  */
-export function toggleConfig(key: keyof ConfigStoreType, label: string): void {
+function toggleConfig(key: keyof ConfigStoreType, label: string): void {
   const before = get(ConfigStore)
   const beforeValue = before[key]
 
@@ -33,7 +32,7 @@ let sliderDebounceTimer: ReturnType<typeof setTimeout> | null = null
 let sliderInitialValue: number | null = null
 let sliderKey: string | null = null
 
-export function setConfigNumber(
+function setConfigNumber(
   key: keyof ConfigStoreType,
   value: number,
   label: string,
@@ -68,30 +67,6 @@ export function setConfigNumber(
     sliderKey = null
     sliderDebounceTimer = null
   }, debounce)
-}
-
-/**
- * Set a string config value with undo support
- */
-export function setConfigString(key: keyof ConfigStoreType, value: string, label: string): void {
-  const before = get(ConfigStore)
-  const beforeValue = before[key]
-
-  if (typeof beforeValue !== 'string') {
-    console.warn(`setConfigString: ${key} is not a string`)
-    return
-  }
-
-  if (beforeValue === value) return
-
-  ConfigStore.update((c) => ({ ...c, [key]: value }))
-
-  historyStore.push({
-    actionType: 'config.text',
-    actionLabel: `Changed ${label}`,
-    undo: () => ConfigStore.update((c) => ({ ...c, [key]: beforeValue })),
-    redo: () => ConfigStore.update((c) => ({ ...c, [key]: value })),
-  })
 }
 
 // Specific toggle helpers for common operations

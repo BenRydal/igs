@@ -443,7 +443,7 @@ const settingsActions: AppAction[] = [
 /**
  * All app actions in a single array
  */
-export const allActions: AppAction[] = [
+const allActions: AppAction[] = [
   ...filterActions,
   ...selectionActions,
   ...viewActions,

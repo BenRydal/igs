@@ -1,7 +1,6 @@
 import { get } from 'svelte/store'
 import UserStore from '../../stores/userStore'
 import { historyStore } from '../../stores/historyStore'
-import { deepClone } from './deep-clone'
 
 /**
  * Toggle user visibility with undo
@@ -99,7 +98,7 @@ export function setUserColor(userId: string, color: string): void {
  * Change user color with undo, from an explicit previous color
  * (the store may already hold `color` after a live picker drag)
  */
-export function commitUserColor(userId: string, oldColor: string, color: string): void {
+function commitUserColor(userId: string, oldColor: string, color: string): void {
   if (oldColor === color) return
 
   UserStore.update((list) => list.map((u) => (u.name === userId ? { ...u, color } : u)))

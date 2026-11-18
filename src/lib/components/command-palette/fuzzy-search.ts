@@ -13,7 +13,7 @@ import type { Command, FuzzyMatch, CommandSearchResult, HighlightSegment } from 
  * @param target - Target string to match against
  * @returns FuzzyMatch result or null if no match
  */
-export function fuzzyMatch(query: string, target: string): FuzzyMatch | null {
+function fuzzyMatch(query: string, target: string): FuzzyMatch | null {
   if (!query || !target) return null
 
   const queryLower = query.toLowerCase()

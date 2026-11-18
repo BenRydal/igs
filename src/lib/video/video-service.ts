@@ -27,7 +27,7 @@ const youtubeApiCallbacks: (() => void)[] = []
 /**
  * Load YouTube IFrame API script dynamically
  */
-export function loadYouTubeApi(): Promise<void> {
+function loadYouTubeApi(): Promise<void> {
   return new Promise((resolve) => {
     if (youtubeApiLoaded) {
       resolve()

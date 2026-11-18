@@ -1,6 +1,6 @@
-import { writable, get } from 'svelte/store'
+import { writable } from 'svelte/store'
 
-export type UndoableAction =
+type UndoableAction =
   | 'config.toggle'
   | 'config.slider'
   | 'config.text'
@@ -11,7 +11,7 @@ export type UndoableAction =
   | 'code.color'
   | 'data.clear'
 
-export interface HistoryEntry {
+interface HistoryEntry {
   id: string
   timestamp: number
   actionType: UndoableAction | string
@@ -21,9 +21,9 @@ export interface HistoryEntry {
 }
 
 // Legacy type alias for backwards compatibility
-export type HistoryAction = Omit<HistoryEntry, 'id' | 'timestamp'>
+type HistoryAction = Omit<HistoryEntry, 'id' | 'timestamp'>
 
-export interface HistoryState {
+interface HistoryState {
   past: HistoryEntry[]
   future: HistoryEntry[]
   isUndoing: boolean
@@ -38,7 +38,7 @@ const initialState: HistoryState = {
 }
 
 function createHistoryStore() {
-  const { subscribe, set, update } = writable<HistoryState>(initialState)
+  const { subscribe, update } = writable<HistoryState>(initialState)
 
   return {
     subscribe,

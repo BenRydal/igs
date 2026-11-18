@@ -24,7 +24,7 @@ function getMapboxToken(): string | null {
  * @param height - Image height in pixels (max 1280)
  * @returns URL string for the static map image
  */
-export function buildStaticMapUrl(
+function buildStaticMapUrl(
   bounds: GPSBounds,
   style: MapboxStyle,
   width: number,

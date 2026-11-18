@@ -6,7 +6,7 @@ export interface VideoSource {
   fileUrl?: string
 }
 
-export interface VideoState {
+interface VideoState {
   // Source
   source: VideoSource
 
@@ -57,14 +57,14 @@ export function setLoaded(duration: number): void {
   }))
 }
 
-export function showVideo(): void {
+function showVideo(): void {
   VideoStore.update((state) => ({
     ...state,
     isVisible: true,
   }))
 }
 
-export function hideVideo(): void {
+function hideVideo(): void {
   VideoStore.update((state) => ({
     ...state,
     isVisible: false,
@@ -99,7 +99,7 @@ export function requestSeek(time: number): void {
   }))
 }
 
-export function setMuted(muted: boolean): void {
+function setMuted(muted: boolean): void {
   VideoStore.update((state) => ({
     ...state,
     isMuted: muted,

@@ -3,7 +3,7 @@ import { writable } from 'svelte/store'
 /**
  * Toast notification types
  */
-export type ToastType = 'info' | 'success' | 'warning' | 'error'
+type ToastType = 'info' | 'success' | 'warning' | 'error'
 
 /**
  * Toast notification interface
@@ -29,7 +29,7 @@ export interface Toast {
 /**
  * Options for creating a toast
  */
-export interface ToastOptions {
+interface ToastOptions {
   /** Duration in milliseconds (0 = persistent, default 3000) */
   duration?: number
   /** Optional action button */
@@ -39,7 +39,7 @@ export interface ToastOptions {
 const MAX_TOASTS = 5
 const DEFAULT_DURATION = 3000
 
-export type ToastStoreState = Toast[]
+type ToastStoreState = Toast[]
 
 /**
  * Create a toast notification store

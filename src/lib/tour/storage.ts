@@ -6,7 +6,7 @@ const TOUR_VERSION = '1.0'
 /**
  * Get the current tour state from localStorage
  */
-export function getTourState(): TourState | null {
+function getTourState(): TourState | null {
   if (typeof window === 'undefined') return null
 
   try {

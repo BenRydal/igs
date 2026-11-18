@@ -77,7 +77,7 @@ function buildAllShortcuts(): KeyboardShortcut[] {
 /**
  * All shortcuts combined
  */
-export const allShortcuts: KeyboardShortcut[] = buildAllShortcuts()
+const allShortcuts: KeyboardShortcut[] = buildAllShortcuts()
 
 /**
  * Register all IGS keyboard shortcuts with the global registry

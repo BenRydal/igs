@@ -35,7 +35,7 @@ const initialState: TimelineState = {
 }
 
 function createTimelineStore() {
-  const { subscribe, set, update } = writable<TimelineState>(initialState)
+  const { subscribe, update } = writable<TimelineState>(initialState)
 
   /**
    * Synchronous mirror of the store's value.
@@ -282,10 +282,10 @@ export const timelineV2Store = createTimelineStore()
 // ==================== Derived Stores ====================
 
 /** Current view duration */
-export const viewDuration = derived(timelineV2Store, ($t) => $t.viewEnd - $t.viewStart)
+const viewDuration = derived(timelineV2Store, ($t) => $t.viewEnd - $t.viewStart)
 
 /** Total data duration */
-export const dataDuration = derived(timelineV2Store, ($t) => $t.dataEnd - $t.dataStart)
+const dataDuration = derived(timelineV2Store, ($t) => $t.dataEnd - $t.dataStart)
 
 /** Current zoom level (1 = no zoom, >1 = zoomed in) */
 export const zoomLevel = derived([dataDuration, viewDuration], ([$data, $view]) =>

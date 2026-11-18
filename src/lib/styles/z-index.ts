@@ -181,13 +181,3 @@ export const Z_INDEX = {
    */
   DEBUG_OVERLAY: 9999,
 } as const
-
-/**
- * Type representing all available z-index layer names
- */
-export type ZIndexLayer = keyof typeof Z_INDEX
-
-/**
- * Type representing all possible z-index values
- */
-export type ZIndexValue = (typeof Z_INDEX)[ZIndexLayer]

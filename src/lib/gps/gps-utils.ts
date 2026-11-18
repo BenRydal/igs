@@ -14,7 +14,7 @@ function toRadians(degrees: number): number {
 /**
  * Calculate the Haversine distance between two GPS points in kilometers
  */
-export function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
+function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const dLat = toRadians(lat2 - lat1)
   const dLng = toRadians(lng2 - lng1)
 

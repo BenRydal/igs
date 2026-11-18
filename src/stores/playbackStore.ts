@@ -24,14 +24,14 @@ export const isPlayingVideo = derived(PlaybackStore, ($store) => $store.mode ===
 /**
  * Get current playback mode
  */
-export function getMode(): PlaybackMode {
+function getMode(): PlaybackMode {
   return get(PlaybackStore).mode
 }
 
 /**
  * Set playback mode
  */
-export function setMode(mode: PlaybackMode): void {
+function setMode(mode: PlaybackMode): void {
   PlaybackStore.update((state) => ({ ...state, mode }))
   redrawCanvas()
 }
@@ -39,7 +39,7 @@ export function setMode(mode: PlaybackMode): void {
 /**
  * Start playback - automatically picks video or animation mode based on video state
  */
-export function play(): void {
+function play(): void {
   const videoState = get(VideoStore)
   const mode: PlaybackMode =
     videoState.isVisible && videoState.isLoaded ? 'playing-video' : 'playing-animation'
