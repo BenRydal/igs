@@ -103,6 +103,16 @@ export const timelineTrack = (page) => page.locator('.igs-timeline-main .timelin
 export const overviewWindow = (page) =>
   page.locator('.igs-timeline-overview .timeline-track__selection')
 
+export async function runCommand(page, query, name) {
+  await page.keyboard.press('Control+k')
+  const dialog = page.getByRole('dialog')
+  const search = dialog.getByRole('combobox', { name: 'Search commands...' })
+  await search.waitFor()
+  await search.fill(query)
+  await dialog.getByRole('option', { name }).first().click()
+  await search.waitFor({ state: 'hidden' })
+}
+
 export async function loadedExample(ctx) {
   await ctx.open('/')
   await ctx.loadExample(EXAMPLE)

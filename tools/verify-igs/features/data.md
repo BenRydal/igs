@@ -25,6 +25,11 @@ loaded in the Data panel, and can clear it.
   speaker with no movement file).
 - **Clear.** The last step of `example-load` chooses `Clear all` and waits for
   `Nothing loaded yet`.
+- **Clear each kind.** `node $V/verify.mjs run clear-data`. `Clear conversation`, `Clear codes`
+  and `Clear movement` in the Data panel each remove their count (the Codes tab leaves with
+  the codes, canvas ink drops by more than 20 percent). Then the palette loads the example
+  (`Load: Michael Jordan's Last Shot`), clears each kind, reloads, and `Clear All Data`
+  restores `Nothing loaded yet`.
 
 ## Gotchas
 
@@ -32,5 +37,5 @@ loaded in the Data panel, and can clear it.
   `Import` and disabled.
 - Escape does not close the Import Data dialog on `main` at `13a0489`; use `Cancel`.
 - Imported movement without a floor plan image still lists the person; do not assert ink.
-- Not covered: GPX, KML, floor plan images, MP4, the YouTube URL box, clear-per-kind
-  buttons, `Clear existing data before import`.
+- Not covered: GPX, KML, floor plan images, MP4, the YouTube URL box, the video clear button,
+  `Clear existing data before import`.

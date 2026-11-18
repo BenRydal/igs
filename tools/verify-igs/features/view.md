@@ -5,7 +5,7 @@ vertical axis (3D, the default).
 
 ## Sub-features
 
-- `view-toggle` switches 3D and 2D from the header and from the `D` key.
+- `view-toggle` switches 3D and 2D from the header, the `D` key and the command palette.
 
 ## How to get to it (user POV)
 
@@ -15,6 +15,7 @@ vertical axis (3D, the default).
 
 - **Toggle.** `node $V/verify.mjs run view-2d-3d`. Ink changes by more than 10 percent
   going to 2D and returns to within 10 percent of the 3D value after `D`.
+- **Palette.** The first steps of `workspace-actions` toggle through `Toggle 2D/3D View`.
 
 ## Gotchas
 

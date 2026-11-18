@@ -11,21 +11,21 @@ feature file, before driving the app.
 
 ## Features
 
-| Feature                      | File                       | Journeys                     |
-| ---------------------------- | -------------------------- | ---------------------------- |
-| Load and clear data          | [data.md](data.md)         | `example-load`, `import-csv` |
-| People and visibility        | [people.md](people.md)     | `people-toggle`              |
-| Space-time view              | [view.md](view.md)         | `view-2d-3d`                 |
-| Timeline and playback        | [timeline.md](timeline.md) | `timeline-playback`          |
-| Text contrast                | [contrast.md](contrast.md) | `contrast`                   |
-| Video                        | [video.md](video.md)       | `video-toggle`               |
-| Commands, shortcuts and undo | [commands.md](commands.md) | `command-palette-undo`       |
+| Feature                      | File                       | Journeys                                                  |
+| ---------------------------- | -------------------------- | --------------------------------------------------------- |
+| Load and clear data          | [data.md](data.md)         | `example-load`, `import-csv`, `clear-data`                |
+| People and visibility        | [people.md](people.md)     | `people-toggle`                                           |
+| Space-time view              | [view.md](view.md)         | `view-2d-3d`, `workspace-actions`                         |
+| Timeline and playback        | [timeline.md](timeline.md) | `timeline-playback`                                       |
+| Text contrast                | [contrast.md](contrast.md) | `contrast`                                                |
+| Video                        | [video.md](video.md)       | `video-toggle`                                            |
+| Commands, shortcuts and undo | [commands.md](commands.md) | `command-palette-undo`, `workspace-actions`, `clear-data` |
 
 ## Not yet mapped
 
 Codes panel, Talk panel, selection tools (circle, slice, highlight), transcript window,
 split-screen video, GPS examples and map styles, floor plan rotation, data explorer,
-keyboard cheatsheet, onboarding tour, rename and recolor a person, settings sliders, the
+rename and recolor a person, settings sliders, the
 `/guide` page. A change to any of these needs a new journey and a new file here first.
 
 ## Proof and skip reporting
