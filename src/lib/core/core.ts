@@ -38,6 +38,7 @@ import { validateGPSData } from '../gps/gps-validation'
 import { GPXParser } from '../gps/gpx-parser'
 import { KMLParser } from '../gps/kml-parser'
 import { SUPPORTED_EXTENSIONS } from '../validation/file-types'
+import { redrawCanvas, withRedrawSuspended } from '../utils/p5'
 
 /**
  * A recording at or under this length counts as short for the purpose of
@@ -158,9 +159,11 @@ export class Core {
       if (!isGPS) {
         await this.loadFloorplanImage(`/data/${selectedValue}/floorplan.png`)
       }
-      for (const file of files) {
-        await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, file)
-      }
+      await withRedrawSuspended(async () => {
+        for (const file of files) {
+          await this.loadLocalExampleDataFile(`/data/${selectedValue}/`, file)
+        }
+      })
       if (videoId) {
         loadVideo({ type: 'youtube', videoId })
       }
@@ -208,7 +211,7 @@ export class Core {
 
           // Await processing to ensure GPS data loads before conversation data
           await this.processResultsData(results, this.coreUtils.cleanFileName(parsedFile.name))
-          this.sketch.loop()
+          redrawCanvas()
           resolve()
         },
       })
@@ -269,7 +272,7 @@ export class Core {
         await this.processGPSMovementData(GPXParser.toGPSMovementRows(track), track.name)
       }
 
-      this.sketch.loop()
+      redrawCanvas()
     } catch (error) {
       console.error('Error loading GPX file:', error)
       toastStore.error('Error reading GPX file. Please check the file format.')
@@ -301,7 +304,7 @@ export class Core {
         await this.processGPSMovementData(KMLParser.toGPSMovementRows(track), track.name)
       }
 
-      this.sketch.loop()
+      redrawCanvas()
     } catch (error) {
       console.error('Error loading KML file:', error)
       toastStore.error('Error reading KML file. Please check the file format.')
@@ -311,7 +314,7 @@ export class Core {
   loadFloorplanImage = (path: string) => {
     this.sketch.loadImage(path, (img) => {
       this.sketch.floorPlan.img = img
-      this.sketch.loop()
+      redrawCanvas()
     })
   }
 

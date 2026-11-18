@@ -48,7 +48,7 @@
   import { nextRevision, type User } from '../models/user'
   import UserStore from '../stores/userStore'
   import P5Store from '../stores/p5Store'
-  import { rotateFloorplan } from '$lib/utils/p5'
+  import { redrawCanvas, rotateFloorplan, withRedrawSuspended } from '$lib/utils/p5'
   import VideoStore, {
     toggleVisibility,
     reset as resetVideo,
@@ -339,13 +339,13 @@
 
   function resetSettings() {
     ConfigStore.update(() => ({ ...initialConfig }))
-    p5Instance?.loop()
+    redrawCanvas()
   }
 
   function handleConfigChangeFromInput(e: Event, key: keyof ConfigStoreType) {
     const target = e.target as HTMLInputElement
     ConfigStore.update((value) => ({ ...value, [key]: parseFloat(target.value) }))
-    p5Instance?.loop() // Trigger redraw
+    redrawCanvas()
   }
 
   function handleConfigChange(
@@ -353,7 +353,7 @@
     value: ConfigStoreType[keyof ConfigStoreType]
   ) {
     ConfigStore.update((store) => ({ ...store, [key]: value }))
-    p5Instance?.loop()
+    redrawCanvas()
   }
 
   function toggleSelection(selection: ToggleKey, toggleOptions: readonly ToggleKey[]) {
@@ -366,7 +366,7 @@
       })
       return updatedStore
     })
-    p5Instance?.loop()
+    redrawCanvas()
   }
 
   /**
@@ -490,19 +490,21 @@
     // Process each file SEQUENTIALLY using the async file handler
     // This ensures movement data is loaded before conversation,
     // and conversation is loaded before codes
-    for (const file of sortedFiles) {
-      await core.testFileTypeForProcessingAsync(file)
-    }
+    await withRedrawSuspended(async () => {
+      for (const file of sortedFiles) {
+        await core.testFileTypeForProcessingAsync(file)
+      }
+    })
 
     // Trigger redraw
-    p5Instance?.loop()
+    redrawCanvas()
     spaceTimeTooltip?.trigger()
   }
 
   async function updateExampleDataDropDown(event: ExampleSelectEvent) {
     await clearAllDataLocal()
     await core.handleExampleDropdown(event)
-    p5Instance?.loop()
+    redrawCanvas()
     spaceTimeTooltip?.trigger()
   }
 
@@ -557,7 +559,7 @@
     core.movementData = []
     core.gpsMovementData = []
     resetGPS()
-    p5Instance?.loop()
+    redrawCanvas()
   }
 
   function clearConversationData() {
@@ -573,7 +575,7 @@
       })
     )
     core.conversationData = []
-    p5Instance?.loop()
+    redrawCanvas()
   }
 
   function clearCodeData() {
@@ -595,7 +597,7 @@
       dataHasCodes: false,
       isPathColorMode: false,
     }))
-    p5Instance?.loop()
+    redrawCanvas()
   }
 
   /**
@@ -610,7 +612,7 @@
    */
   function toggleUserVisibility(user: User) {
     toggleUserVisibilityAction(user.name, isUserVisible(user))
-    p5Instance?.loop()
+    redrawCanvas()
   }
 
   const userEntities = $derived<Entity[]>(
@@ -630,7 +632,7 @@
 
   function handleUserColorInput(id: string, color: string) {
     userColorDrag.input(id, color)
-    p5Instance?.loop()
+    redrawCanvas()
   }
 
   // Add event handlers for dropdowns
@@ -904,7 +906,7 @@
         title="Movement"
         onclick={() => {
           toggleUserEnabled(user.name)
-          p5Instance?.loop()
+          redrawCanvas()
         }}
       >
         {@render icon(MdWalk)}
@@ -917,7 +919,7 @@
         title="Talk"
         onclick={() => {
           toggleUserConversationEnabled(user.name)
-          p5Instance?.loop()
+          redrawCanvas()
         }}
       >
         {@render icon(MdChat)}
@@ -944,7 +946,7 @@
         onColorChange={handleUserColorInput}
         onRename={(id, next) => {
           setUserName(id, next)
-          p5Instance?.loop()
+          redrawCanvas()
         }}
         controls={userControls}
         class="igs-people"
@@ -1299,7 +1301,7 @@
         minSize={200}
         collapsed={!isSplitScreen}
         collapsedPanel="first"
-        onresize={() => p5Instance?.loop()}
+        onresize={() => redrawCanvas()}
         ondragstart={() => (isDraggingSplit = true)}
         ondragend={() => {
           isDraggingSplit = false
@@ -1326,7 +1328,7 @@
               <Sketch
                 sketch={igsSketch}
                 onResize={(p) => {
-                  if (isDraggingSplit) p.loop()
+                  if (isDraggingSplit) redrawCanvas()
                   else p.rebuildAfterResize()
                 }}
               />

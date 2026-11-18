@@ -12,6 +12,7 @@ import { FloorPlan, SketchGUI, Handle3D, SetPathData } from '..'
 import { drawState } from '../draw/draw-state'
 import { generateCodeCSV, downloadFile } from '../utils/download'
 import type { IgsSketchExt } from './igs-p5'
+import { redrawCanvas } from '../utils/p5'
 
 let users: User[] = []
 let isModalOpen = false
@@ -107,7 +108,7 @@ export const igsSketch: SketchFn<IgsSketchExt> = (p5) => {
     // Don't trigger expensive redraws when a modal is open
     // This prevents UI freezing during drag-and-drop operations
     if (!isModalOpen) {
-      p5.loop()
+      redrawCanvas()
     }
   }
 
@@ -158,7 +159,7 @@ export const igsSketch: SketchFn<IgsSketchExt> = (p5) => {
     p5.gui.highlight.highlightArray = prevHighlight
     p5.handle3D = new Handle3D(p5, p5.handle3D.getIs3DMode())
     applyStyles()
-    p5.loop()
+    redrawCanvas()
   }
 
   /**
@@ -177,13 +178,13 @@ export const igsSketch: SketchFn<IgsSketchExt> = (p5) => {
   p5.mousePressed = () => {
     if (drawState.config.highlightToggle && !p5.handle3D.getIs3DModeOrTransitioning())
       p5.gui.highlight.handleMousePressed()
-    p5.loop()
+    redrawCanvas()
   }
 
   p5.mouseReleased = () => {
     if (drawState.config.highlightToggle && !p5.handle3D.getIs3DModeOrTransitioning())
       p5.gui.highlight.handleMouseRelease()
-    p5.loop()
+    redrawCanvas()
   }
 
   p5.saveCodeFile = () => {

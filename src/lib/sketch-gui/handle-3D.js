@@ -3,6 +3,8 @@
  */
 /** @typedef {import('../p5/igs-p5').IgsP5} IgsP5 */
 
+import { redrawCanvas } from '../utils/p5'
+
 export class Handle3D {
   /**
    * @param {IgsP5} sketch
@@ -29,7 +31,7 @@ export class Handle3D {
   update() {
     this.toggleIs3D()
     this.setIsTransitioning(true)
-    this.sk.loop()
+    redrawCanvas()
   }
 
   update3DTranslation() {

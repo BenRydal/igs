@@ -1,6 +1,5 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte'
-  import { get } from 'svelte/store'
   import { SvelteMap } from 'svelte/reactivity'
   import { fade, slide } from 'svelte/transition'
   import { closeModal } from '../../../stores/modalStore'
@@ -9,7 +8,7 @@
   import { searchCommands, getHighlightSegments } from './fuzzy-search'
   import { getCommands, getCategoryLabel } from '$lib/app-actions'
   import { getRecentCommands, addRecentCommand, type RecentCommandEntry } from './recent-commands'
-  import P5Store from '../../../stores/p5Store'
+  import { redrawCanvas } from '$lib/utils/p5'
   import CommandButton from './CommandButton.svelte'
 
   // Props
@@ -164,7 +163,7 @@
       command.action()
 
       // Trigger p5 redraw
-      get(P5Store)?.loop()
+      redrawCanvas()
 
       // Add to recent commands
       addRecentCommand(command.id)

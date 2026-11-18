@@ -4,6 +4,7 @@ import type { IgsP5 } from '../p5/igs-p5'
 import { setLoading } from '../../stores/gpsStore'
 import { toastStore } from '../../stores/toastStore'
 import { GPSTransformer } from './gps-transformer'
+import { redrawCanvas } from '../utils/p5'
 
 const MAPBOX_API_URL = 'https://api.mapbox.com/styles/v1/mapbox'
 
@@ -115,7 +116,7 @@ export async function loadMapAsFloorPlan(
         (img: any) => {
           sketch.floorPlan.img = img
           setLoading(false)
-          sketch.loop()
+          redrawCanvas()
           resolve()
         },
         (err: any) => {
