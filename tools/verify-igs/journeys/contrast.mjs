@@ -52,7 +52,11 @@ export default async function (ctx) {
 
   await ctx.openPanel('Data')
   await page.getByRole('button', { name: 'Import files' }).click()
-  await page.getByRole('dialog', { name: 'Import Data' }).waitFor()
+  const dialog = page.getByRole('dialog', { name: 'Import Data' })
+  await dialog.waitFor()
+  await dialog.evaluate((el) =>
+    Promise.all(el.getAnimations({ subtree: true }).map((animation) => animation.finished))
+  )
   await scan('import dialog')
   await page.keyboard.press('Escape')
 
