@@ -1,12 +1,7 @@
 import { writable, derived } from 'svelte/store'
 
 export type ModalId =
-  | 'settings'
-  | 'dataExplorer'
-  | 'help'
-  | 'commandPalette'
-  | 'fileImport'
-  | 'shortcuts'
+  'settings' | 'dataExplorer' | 'help' | 'commandPalette' | 'fileImport' | 'shortcuts'
 
 interface ModalState {
   id: ModalId
