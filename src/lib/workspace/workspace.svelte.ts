@@ -26,8 +26,11 @@ interface WorkspaceState {
   instantPanel: boolean
   helpOpen: boolean
   cheatsheetOpen: boolean
+  importOpen: boolean
+  dataExplorerOpen: boolean
   canvasEpoch: number
   selectedExampleId: string
+  exampleFilter: string
 }
 
 export const workspace = $state<WorkspaceState>({
@@ -37,8 +40,11 @@ export const workspace = $state<WorkspaceState>({
   instantPanel: false,
   helpOpen: false,
   cheatsheetOpen: false,
+  importOpen: false,
+  dataExplorerOpen: false,
   canvasEpoch: 0,
   selectedExampleId: '',
+  exampleFilter: '',
 })
 
 export const expandedCollections = new SvelteSet<CollectionId>()

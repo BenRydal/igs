@@ -1,59 +1,27 @@
 <script lang="ts">
-  import {
-    Sketch,
-    CanvasFrame,
-    SplitPane,
-    ActivityBar,
-    SidePanel,
-    EntityToggleList,
-    type Entity,
-  } from 'svelte-p5-components'
+  import { Sketch, CanvasFrame, SplitPane, ActivityBar, SidePanel } from 'svelte-p5-components'
 
   import MdHelpOutline from '~icons/mdi/help-circle-outline'
-  import MdKeyboard from '~icons/mdi/keyboard'
-  import MdCloudDownload from '~icons/mdi/cloud-download'
   import Md3DRotation from '~icons/mdi/rotate-3d-variant'
   import MdRotateLeft from '~icons/mdi/rotate-left'
   import MdRotateRight from '~icons/mdi/rotate-right'
   import MdVideocam from '~icons/mdi/video'
   import MdVideocamOff from '~icons/mdi/video-off'
-  import MdCheck from '~icons/mdi/check'
   import MdSettings from '~icons/mdi/cog'
-  import MdFileUploadOutline from '~icons/mdi/file-upload-outline'
   import MdFilterList from '~icons/mdi/filter-variant'
   import MdSelectAll from '~icons/mdi/selection'
   import MdChat from '~icons/mdi/chat'
   import MdComment from '~icons/mdi/comment'
   import MdCommentOff from '~icons/mdi/comment-off'
   import MdFolder from '~icons/mdi/folder-open'
-  import MdRoute from '~icons/mdi/routes'
-  import MdMuseum from '~icons/mdi/bank'
-  import MdTeacher from '~icons/mdi/human-male-board'
-  import MdWalk from '~icons/mdi/walk'
-  import MdVideo from '~icons/mdi/video-vintage'
-  import MdShapeOutline from '~icons/mdi/shape-outline'
-  import MdMagnify from '~icons/mdi/magnify'
-  import MdMapMarkerPath from '~icons/mdi/map-marker-path'
-  import MdMessageText from '~icons/mdi/message-text-outline'
-  import MdTagOutline from '~icons/mdi/tag-outline'
-  import MdStar from '~icons/mdi/star-outline'
-  import MdChevronDown from '~icons/mdi/chevron-down'
-  import MdChevronRight from '~icons/mdi/chevron-right'
   import MdClose from '~icons/mdi/close'
   import MdAccountGroup from '~icons/mdi/account-group'
   import MdTagMultiple from '~icons/mdi/tag-multiple'
-  import MdTableEye from '~icons/mdi/table-eye'
 
-  import type { User } from '../models/user'
   import UserStore from '../stores/userStore'
   import P5Store from '../stores/p5Store'
   import { redrawCanvas, rotateFloorplan } from '#lib/utils/p5.ts'
-  import VideoStore, {
-    toggleVisibility,
-    reset as resetVideo,
-    hasVideoSource,
-  } from '../stores/videoStore'
-  import GPSStore from '../stores/gpsStore'
+  import VideoStore, { toggleVisibility, hasVideoSource } from '../stores/videoStore'
   import { onVideoVisibilityChange } from '../stores/playbackStore'
   import VideoContainer from '#lib/components/VideoContainer.svelte'
   import SplitScreenVideo from '#lib/components/SplitScreenVideo.svelte'
@@ -62,17 +30,9 @@
   import SpaceTimeTooltip from '#lib/components/SpaceTimeTooltip.svelte'
   import AxesIndicator from '#lib/components/AxesIndicator.svelte'
 
-  import {
-    EXAMPLE_COLLECTIONS,
-    COLLECTIONS,
-    VISIBLE_EXAMPLES,
-    FEATURED_EXAMPLE,
-    getExampleLabel,
-    type CollectionId,
-    type ExampleEntry,
-  } from '#lib/core/example-datasets.ts'
+  import { getExampleLabel } from '#lib/core/example-datasets.ts'
   import { igsSketch } from '#lib/p5/igsSketch.ts'
-  import { onMount, type Component, type Snippet } from 'svelte'
+  import { onMount } from 'svelte'
   import IconButton from '#lib/components/IconButton.svelte'
   import IgsInfoModal from '#lib/components/IGSInfoModal.svelte'
   import { Timeline } from '#lib/timeline/index.ts'
@@ -80,164 +40,35 @@
   import ModeIndicator from '#lib/components/ModeIndicator.svelte'
   import { OnboardingTour, shouldShowTour } from '#lib/tour/index.ts'
   import DataImporter from '#lib/components/import/DataImporter.svelte'
-  import MapStyleSelector from '#lib/components/MapStyleSelector.svelte'
   import CodesPanel from '#lib/components/CodesPanel.svelte'
+  import DataPanel from '#lib/components/panels/DataPanel.svelte'
+  import PeoplePanel from '#lib/components/panels/PeoplePanel.svelte'
+  import TalkPanel from '#lib/components/panels/TalkPanel.svelte'
+  import FiltersPanel from '#lib/components/panels/FiltersPanel.svelte'
+  import SelectPanel from '#lib/components/panels/SelectPanel.svelte'
+  import SettingsPanel from '#lib/components/panels/SettingsPanel.svelte'
   import TimelineControls from '#lib/timeline/components/TimelineControls.svelte'
-  import { capitalizeFirstLetter, capitalizeEachWord } from '#lib/utils/string.ts'
+  import { capitalizeEachWord } from '#lib/utils/string.ts'
   import { Z_INDEX } from '#lib/styles/z-index.ts'
 
   import CodeStore from '../stores/codeStore'
   import ConfigStore from '../stores/configStore'
-  import type { ConfigStoreType } from '../stores/configStore'
-  import { timelineV2Store } from '#lib/timeline/store.ts'
-  import { initialConfig } from '../stores/configStore'
-  import { setSelectorSize, setSlicerSize } from '#lib/history/config-actions.ts'
-  import {
-    toggleUserVisibility as toggleUserVisibilityAction,
-    toggleUserEnabled,
-    toggleUserConversationEnabled,
-    setUserName,
-    createUserColorDrag,
-  } from '#lib/history/user-actions.ts'
   import {
     workspace,
-    expandedCollections,
     onDataLoaded,
     toggle3D,
-    downloadCodes,
-    openCheatsheet,
     selectRailItem,
     closePanel,
     closeUnavailablePanel,
-    loadExample,
     importFiles,
-    clearAll,
-    clearMovement,
-    clearConversation,
-    clearCodes,
   } from '#lib/workspace/workspace.svelte.ts'
   import { RAIL_LABELS } from '#lib/workspace/rail.ts'
 
-  // Boolean config keys: what the toggle handlers may flip
-  type ToggleKey = {
-    [K in keyof ConfigStoreType]: ConfigStoreType[K] extends boolean ? K : never
-  }[keyof ConfigStoreType]
-
-  const filterToggleOptions = ['movementToggle', 'stopsToggle'] as const
-  const selectToggleOptions = ['circleToggle', 'sliceToggle', 'highlightToggle'] as const
-  const conversationToggleOptions = ['alignToggle'] as const
   const selectedExampleLabel = $derived(getExampleLabel(workspace.selectedExampleId))
 
-  /** Collection icons live here, not in the dataset module, so core data stays
-   *  free of UI imports. */
-  const collectionIcons: Record<CollectionId, Component> = {
-    timss: MdVideo,
-    tau: MdTeacher,
-    tours: MdWalk,
-    museums: MdMuseum,
-    other: MdShapeOutline,
-  }
-
-  let exampleFilter = $state('')
-  const normalizedFilter = $derived(exampleFilter.trim().toLowerCase())
-
-  /** Flat match list, used only while filtering. Matches on dataset name and on
-   *  collection name, so typing "tau" or "tour" narrows to that collection. */
-  const filteredExamples = $derived(
-    normalizedFilter
-      ? VISIBLE_EXAMPLES.filter((entry) => {
-          const collection = COLLECTIONS.find((c) => c.id === entry.collection)
-          return (
-            entry.label.toLowerCase().includes(normalizedFilter) ||
-            (collection?.label.toLowerCase().includes(normalizedFilter) ?? false)
-          )
-        })
-      : []
-  )
-
-  function toggleCollection(id: CollectionId) {
-    if (expandedCollections.has(id)) {
-      expandedCollections.delete(id)
-    } else {
-      expandedCollections.add(id)
-    }
-  }
-
-  function collectionLabel(id: CollectionId) {
-    return COLLECTIONS.find((c) => c.id === id)?.label ?? ''
-  }
-
-  /** What is loaded right now, for the "Your data" inventory. Every count is
-   *  O(users) — deliberately not walking dataTrail, which runs to tens of
-   *  thousands of points on the longer datasets. */
-  type DataKind = {
-    key: string
-    label: string
-    icon: Component
-    /** Human-readable summary of what is loaded, or '' when nothing is. */
-    detail: string
-    clear: () => void
-  }
-
-  const loadedData = $derived.by<DataKind[]>(() => {
-    const users = $UserStore
-    const speakers = users.filter((u) => u.conversationIsLoaded).length
-    const codes = $CodeStore.length
-    const videoType = $VideoStore.source.type
-    const isGPS = $GPSStore.isGPSMode
-
-    return [
-      {
-        key: 'movement',
-        label: isGPS ? 'Movement (GPS)' : 'Movement',
-        icon: MdRoute,
-        detail: users.length ? `${users.length} ${users.length === 1 ? 'person' : 'people'}` : '',
-        clear: clearMovement,
-      },
-      {
-        key: 'conversation',
-        label: 'Conversation',
-        icon: MdMessageText,
-        detail: speakers ? `${speakers} ${speakers === 1 ? 'speaker' : 'speakers'}` : '',
-        clear: clearConversation,
-      },
-      {
-        key: 'codes',
-        label: 'Codes',
-        icon: MdTagOutline,
-        detail: codes ? `${codes} ${codes === 1 ? 'code' : 'codes'}` : '',
-        clear: clearCodes,
-      },
-      {
-        key: 'video',
-        label: 'Video',
-        icon: MdVideocam,
-        detail: videoType === 'youtube' ? 'YouTube' : videoType === 'file' ? 'File' : '',
-        clear: resetVideo,
-      },
-    ]
-  })
-
-  const hasAnyData = $derived(loadedData.some((d) => d.detail !== ''))
-
-  let showDataPopup = $state(false)
-  let showImportDialog = $state(false)
-  /** Read-only view of the store. Sliders bind one-way and write via their
-   *  `oninput` handlers — `bind:value` here would mutate the store's object in
-   *  place, ahead of the handler, and break undo. */
-  const currentConfig = $derived($ConfigStore)
-
   let isVideoShowing = $state(false)
-  let timelineEndTime = $state(0)
   let isTranscriptVisible = $state(false)
   let spaceTimeTooltip: SpaceTimeTooltip
-
-  $effect(() => {
-    const unsubscribe = timelineV2Store.subscribe((state) => {
-      timelineEndTime = state.dataEnd
-    })
-    return unsubscribe
-  })
 
   let isSplitScreen = $state(false)
   /** SplitPane sizes as percentages: [video, canvas] */
@@ -259,8 +90,6 @@
 
   $effect(() => closeUnavailablePanel($ConfigStore.dataHasCodes))
 
-  let formattedStopLength = $derived($ConfigStore.stopSliderValue.toFixed(0))
-
   function toggleVideo() {
     if (!hasVideoSource()) return
 
@@ -269,547 +98,11 @@
     onVideoVisibilityChange(willBeVisible)
   }
 
-  function resetSettings() {
-    ConfigStore.update(() => ({ ...initialConfig }))
-    redrawCanvas()
-  }
-
-  function handleConfigChangeFromInput(e: Event, key: keyof ConfigStoreType) {
-    const target = e.target as HTMLInputElement
-    ConfigStore.update((value) => ({ ...value, [key]: parseFloat(target.value) }))
-    redrawCanvas()
-  }
-
-  function handleConfigChange(
-    key: keyof ConfigStoreType,
-    value: ConfigStoreType[keyof ConfigStoreType]
-  ) {
-    ConfigStore.update((store) => ({ ...store, [key]: value }))
-    redrawCanvas()
-  }
-
-  function toggleSelection(selection: ToggleKey, toggleOptions: readonly ToggleKey[]) {
-    ConfigStore.update((store: ConfigStoreType) => {
-      const updatedStore = { ...store }
-      toggleOptions.forEach((key) => {
-        if (key.endsWith('Toggle')) {
-          updatedStore[key] = key === selection ? !updatedStore[key] : false
-        }
-      })
-      return updatedStore
-    })
-    redrawCanvas()
-  }
-
-  /**
-   * Check if a user is visible (either movement or talk enabled)
-   */
-  function isUserVisible(user: User): boolean {
-    return user.enabled || user.conversation_enabled
-  }
-
-  /**
-   * Toggle both movement and talk visibility for a user
-   */
-  function toggleUserVisibility(user: User) {
-    toggleUserVisibilityAction(user.name, isUserVisible(user))
-    redrawCanvas()
-  }
-
-  const userEntities = $derived<Entity[]>(
-    $UserStore.map((user) => ({
-      id: user.name,
-      label: user.name,
-      color: user.color,
-      visible: isUserVisible(user),
-    }))
-  )
-
-  function findUser(id: string): User | undefined {
-    return $UserStore.find((u) => u.name === id)
-  }
-
-  const userColorDrag = createUserColorDrag()
-
-  function handleUserColorInput(id: string, color: string) {
-    userColorDrag.input(id, color)
-    redrawCanvas()
-  }
-
   onMount(() => {
     if (shouldShowTour()) workspace.helpOpen = true
     return onDataLoaded(() => spaceTimeTooltip?.trigger())
   })
 </script>
-
-{#snippet icon(Icon: Component)}
-  <div class="w-4 h-4"><Icon /></div>
-{/snippet}
-
-{#snippet check(condition: boolean)}
-  <div class="w-4 h-4 mr-2">
-    {#if condition}<MdCheck />{/if}
-  </div>
-{/snippet}
-
-{#snippet toggleRow(label: string, on: boolean, onclick: () => void)}
-  <li>
-    <button {onclick} class="w-full text-left flex items-center" aria-pressed={on}>
-      {@render check(on)}
-      {label}
-    </button>
-  </li>
-{/snippet}
-
-{#snippet rangeRow(
-  label: string,
-  id: string,
-  min: number,
-  max: number,
-  step: number,
-  value: number,
-  oninput: (e: Event & { currentTarget: HTMLInputElement }) => void
-)}
-  <div class="flex flex-col gap-1">
-    <label for={id} class="text-xs">{label}</label>
-    <input {id} type="range" {min} {max} {step} {value} class="range range-xs" {oninput} />
-  </div>
-{/snippet}
-
-{#snippet capability(Icon: Component, title: string)}
-  <span class="w-3.5 h-3.5 opacity-45 shrink-0" {title} aria-hidden="true"><Icon /></span>
-{/snippet}
-
-{#snippet exampleRow(entry: ExampleEntry, showCollection: boolean, featured = false)}
-  {@const isSelected = workspace.selectedExampleId === entry.id}
-  <li>
-    <button
-      onclick={() => loadExample(entry.id)}
-      aria-current={isSelected ? 'true' : undefined}
-      class="flex items-start gap-2 w-full cursor-pointer {isSelected
-        ? 'bg-primary/20 font-medium'
-        : ''}"
-    >
-      {#if featured}
-        <span class="w-4 h-4 mt-0.5 text-primary shrink-0"><MdStar /></span>
-      {/if}
-      <span class="flex flex-col gap-0.5 min-w-0 flex-1">
-        <span class="flex items-center gap-2 min-w-0">
-          <span class="truncate flex-1 text-left">{entry.label}</span>
-          <span class="text-xs opacity-70 shrink-0 tabular-nums">{entry.duration}</span>
-        </span>
-        <span class="flex items-center gap-1.5 text-xs opacity-70">
-          {#if featured}<span class="text-primary">Start here</span>{/if}
-          {#if showCollection}<span class="truncate">{collectionLabel(entry.collection)}</span>{/if}
-          {#if entry.videoId}{@render capability(MdVideocam, 'Has video')}{/if}
-          {#if entry.isGPS}{@render capability(MdMapMarkerPath, 'GPS data')}{/if}
-          {#if entry.hasTranscript}{@render capability(MdMessageText, 'Has transcript')}{/if}
-          {#if entry.hasCodes}{@render capability(MdTagOutline, 'Has codes')}{/if}
-        </span>
-      </span>
-    </button>
-  </li>
-{/snippet}
-
-{#snippet panelSection(title: string, body: Snippet)}
-  <section class="flex flex-col gap-2">
-    <h3 class="text-xs font-semibold uppercase tracking-wide opacity-70">{title}</h3>
-    {@render body()}
-  </section>
-{/snippet}
-
-{#snippet dataPanel()}
-  <div class="flex flex-col gap-6 px-3 py-4">
-    {#snippet yourDataBody()}
-      {#if hasAnyData}
-        <ul class="flex flex-col gap-0.5">
-          {#each loadedData as kind (kind.key)}
-            {@const loaded = kind.detail !== ''}
-            <li
-              class="flex items-center gap-2 rounded-lg px-2 py-1 text-sm {loaded
-                ? ''
-                : 'opacity-40'}"
-            >
-              {@render icon(kind.icon)}
-              <span class="flex-1 truncate">{kind.label}</span>
-              <span class="text-xs opacity-70 shrink-0">{loaded ? kind.detail : 'None'}</span>
-              <button
-                class="btn btn-ghost btn-xs btn-square shrink-0"
-                onclick={kind.clear}
-                disabled={!loaded}
-                aria-label="Clear {kind.label.toLowerCase()}"
-                title="Clear {kind.label.toLowerCase()}"
-              >
-                {@render icon(MdClose)}
-              </button>
-            </li>
-          {/each}
-        </ul>
-      {:else}
-        <p class="text-xs opacity-70 px-2">
-          Nothing loaded yet — import your own files, or pick an example below.
-        </p>
-      {/if}
-
-      <div class="flex items-center gap-2">
-        <button
-          id="btn-import-files"
-          class="btn btn-sm btn-primary gap-2 flex-1"
-          onclick={() => (showImportDialog = true)}
-        >
-          {@render icon(MdFileUploadOutline)}
-          Import files
-        </button>
-        {#if hasAnyData}
-          <button class="btn btn-sm btn-ghost text-error" onclick={clearAll}> Clear all </button>
-        {/if}
-      </div>
-    {/snippet}
-    {@render panelSection('Your data', yourDataBody)}
-
-    {#snippet examplesBody()}
-      <label class="input input-sm input-bordered flex items-center gap-2 w-full">
-        {@render icon(MdMagnify)}
-        <input
-          type="search"
-          class="grow min-w-0"
-          placeholder="Filter examples"
-          aria-label="Filter examples"
-          bind:value={exampleFilter}
-        />
-      </label>
-
-      {#if normalizedFilter}
-        {#if filteredExamples.length}
-          <ul class="menu w-full p-0">
-            {#each filteredExamples as entry (entry.id)}
-              {@render exampleRow(entry, true)}
-            {/each}
-          </ul>
-        {:else}
-          <p class="text-xs opacity-70 px-2 py-3">No examples match “{exampleFilter}”.</p>
-        {/if}
-      {:else}
-        {#if FEATURED_EXAMPLE}
-          <ul class="menu w-full p-0">
-            {@render exampleRow(FEATURED_EXAMPLE, false, true)}
-          </ul>
-        {/if}
-
-        <ul class="menu w-full p-0">
-          {#each EXAMPLE_COLLECTIONS as collection (collection.id)}
-            {@const isOpen = expandedCollections.has(collection.id)}
-            <li>
-              <button
-                class="flex items-center gap-2 w-full cursor-pointer"
-                onclick={() => toggleCollection(collection.id)}
-                aria-expanded={isOpen}
-                aria-controls="collection-{collection.id}"
-              >
-                {@render icon(isOpen ? MdChevronDown : MdChevronRight)}
-                {@render icon(collectionIcons[collection.id])}
-                <span class="flex-1 truncate text-left">{collection.label}</span>
-                <span class="text-xs opacity-70 shrink-0 tabular-nums">
-                  {collection.items.length}
-                </span>
-              </button>
-
-              <ul id="collection-{collection.id}" class="pl-2" hidden={!isOpen}>
-                {#each collection.items as entry (entry.id)}
-                  {@render exampleRow(entry, false)}
-                {/each}
-              </ul>
-            </li>
-          {/each}
-        </ul>
-      {/if}
-    {/snippet}
-    <div id="examples-list">{@render panelSection('Examples', examplesBody)}</div>
-  </div>
-{/snippet}
-
-{#snippet userControls(entity: Entity)}
-  {@const user = findUser(entity.id)}
-  {#if user}
-    <div class="flex items-center gap-1">
-      <button
-        class="btn btn-ghost btn-xs btn-square"
-        class:opacity-40={!user.enabled}
-        aria-pressed={user.enabled}
-        aria-label="{user.enabled ? 'Hide' : 'Show'} movement for {user.name}"
-        title="Movement"
-        onclick={() => {
-          toggleUserEnabled(user.name)
-          redrawCanvas()
-        }}
-      >
-        {@render icon(MdWalk)}
-      </button>
-      <button
-        class="btn btn-ghost btn-xs btn-square"
-        class:opacity-40={!user.conversation_enabled}
-        aria-pressed={user.conversation_enabled}
-        aria-label="{user.conversation_enabled ? 'Hide' : 'Show'} talk for {user.name}"
-        title="Talk"
-        onclick={() => {
-          toggleUserConversationEnabled(user.name)
-          redrawCanvas()
-        }}
-      >
-        {@render icon(MdChat)}
-      </button>
-    </div>
-  {/if}
-{/snippet}
-
-{#snippet peoplePanel()}
-  <div class="flex flex-col gap-6 px-3 py-4">
-    {#if userEntities.length === 0}
-      <p class="text-sm opacity-70">Load an example or import data to see people here.</p>
-    {:else}
-      <p class="text-xs opacity-70">
-        Click a name to show or hide everything for that person. The icons toggle movement and talk
-        separately.
-      </p>
-      <EntityToggleList
-        entities={userEntities}
-        onToggle={(id) => {
-          const user = findUser(id)
-          if (user) toggleUserVisibility(user)
-        }}
-        onColorChange={handleUserColorInput}
-        onRename={(id, next) => {
-          setUserName(id, next)
-          redrawCanvas()
-        }}
-        controls={userControls}
-        class="igs-people"
-      />
-    {/if}
-  </div>
-{/snippet}
-
-{#snippet talkPanel()}
-  <div class="flex flex-col gap-6 px-3 py-4">
-    {#snippet displayBody()}
-      <ul class="menu w-full p-0">
-        {@render toggleRow('Show speech bubbles', $ConfigStore.showConversationRects, () =>
-          handleConfigChange('showConversationRects', !$ConfigStore.showConversationRects)
-        )}
-        {@render toggleRow('Align to side', $ConfigStore.alignToggle, () =>
-          toggleSelection('alignToggle', conversationToggleOptions)
-        )}
-      </ul>
-    {/snippet}
-    {@render panelSection('Display', displayBody)}
-
-    {#snippet groupedBody()}
-      <ul class="menu w-full p-0">
-        {@render toggleRow('Combine speakers', $ConfigStore.showSpeakerStripes, () =>
-          handleConfigChange('showSpeakerStripes', !$ConfigStore.showSpeakerStripes)
-        )}
-      </ul>
-      {@render rangeRow(
-        `Group within ${$ConfigStore.clusterTimeThreshold} seconds`,
-        'clusterTimeRange',
-        1,
-        60,
-        1,
-        $ConfigStore.clusterTimeThreshold,
-        (e) => handleConfigChangeFromInput(e, 'clusterTimeThreshold')
-      )}
-      {@render rangeRow(
-        `Group within ${$ConfigStore.clusterSpaceThreshold}px distance`,
-        'clusterSpaceRange',
-        0,
-        200,
-        1,
-        $ConfigStore.clusterSpaceThreshold,
-        (e) => handleConfigChangeFromInput(e, 'clusterSpaceThreshold')
-      )}
-    {/snippet}
-    {@render panelSection('Grouped turns', groupedBody)}
-
-    {#snippet individualBody()}
-      {@render rangeRow(
-        `Turn width: ${$ConfigStore.conversationRectWidth}px`,
-        'rectWidthRange',
-        1,
-        30,
-        1,
-        $ConfigStore.conversationRectWidth,
-        (e) => handleConfigChangeFromInput(e, 'conversationRectWidth')
-      )}
-    {/snippet}
-    {@render panelSection('Individual turns', individualBody)}
-  </div>
-{/snippet}
-
-{#snippet filtersPanel()}
-  <div class="flex flex-col gap-6 px-3 py-4">
-    {#snippet movementBody()}
-      <ul class="menu w-full p-0">
-        {#each filterToggleOptions as toggle (toggle)}
-          {@render toggleRow(
-            capitalizeFirstLetter(toggle.replace('Toggle', '')),
-            $ConfigStore[toggle],
-            () => toggleSelection(toggle, filterToggleOptions)
-          )}
-        {/each}
-      </ul>
-      {@render rangeRow(
-        `Stop length: ${formattedStopLength} sec`,
-        'stopLengthRange',
-        1,
-        $ConfigStore.maxStopLength,
-        1,
-        $ConfigStore.stopSliderValue,
-        (e) => handleConfigChangeFromInput(e, 'stopSliderValue')
-      )}
-    {/snippet}
-    {@render panelSection('Movement', movementBody)}
-  </div>
-{/snippet}
-
-{#snippet selectPanel()}
-  <div class="flex flex-col gap-6 px-3 py-4">
-    {#snippet modeBody()}
-      <ul class="menu w-full p-0">
-        {#each selectToggleOptions as toggle (toggle)}
-          {@render toggleRow(
-            capitalizeFirstLetter(toggle.replace('Toggle', '')),
-            $ConfigStore[toggle],
-            () => toggleSelection(toggle, selectToggleOptions)
-          )}
-        {/each}
-      </ul>
-    {/snippet}
-    {@render panelSection('Mode', modeBody)}
-
-    {#snippet sizeBody()}
-      {@render rangeRow(
-        `Circle size: ${currentConfig.selectorSize}px`,
-        'selectorSizeRange',
-        20,
-        300,
-        10,
-        currentConfig.selectorSize,
-        (e) => setSelectorSize(parseFloat(e.currentTarget.value))
-      )}
-      {@render rangeRow(
-        `Slicer width: ${currentConfig.slicerSize}px`,
-        'slicerSizeRange',
-        5,
-        100,
-        5,
-        currentConfig.slicerSize,
-        (e) => setSlicerSize(parseFloat(e.currentTarget.value))
-      )}
-    {/snippet}
-    {@render panelSection('Size', sizeBody)}
-  </div>
-{/snippet}
-
-{#snippet settingsPanel()}
-  <div class="flex flex-col gap-6 px-3 py-4">
-    <ul class="menu w-full p-0">
-      {@render toggleRow('Preserve aspect ratio', currentConfig.preserveFloorplanAspectRatio, () =>
-        handleConfigChange(
-          'preserveFloorplanAspectRatio',
-          !currentConfig.preserveFloorplanAspectRatio
-        )
-      )}
-    </ul>
-
-    {#if $GPSStore.isGPSMode}
-      {#snippet mapBody()}
-        <MapStyleSelector />
-      {/snippet}
-      {@render panelSection('Map style', mapBody)}
-    {/if}
-
-    {#snippet drawingBody()}
-      {@render rangeRow(
-        `Animation rate: ${currentConfig.animationRate}`,
-        'animationRate',
-        0.01,
-        1,
-        0.01,
-        currentConfig.animationRate,
-        (e) => handleConfigChange('animationRate', parseFloat(e.currentTarget.value))
-      )}
-      {@render rangeRow(
-        `Path simplification: ${currentConfig.pathSimplification}px`,
-        'pathSimplification',
-        0.5,
-        8,
-        0.5,
-        currentConfig.pathSimplification,
-        (e) => handleConfigChange('pathSimplification', parseFloat(e.currentTarget.value))
-      )}
-      {@render rangeRow(
-        `Movement line weight: ${currentConfig.movementStrokeWeight}`,
-        'movementStrokeWeight',
-        1,
-        20,
-        1,
-        currentConfig.movementStrokeWeight,
-        (e) => handleConfigChange('movementStrokeWeight', parseInt(e.currentTarget.value))
-      )}
-      {@render rangeRow(
-        `Stop line weight: ${currentConfig.stopStrokeWeight}`,
-        'stopStrokeWeight',
-        1,
-        20,
-        1,
-        currentConfig.stopStrokeWeight,
-        (e) => handleConfigChange('stopStrokeWeight', parseInt(e.currentTarget.value))
-      )}
-      <div class="flex flex-col gap-1">
-        <label for="inputSeconds" class="text-xs">End time (seconds)</label>
-        <input
-          id="inputSeconds"
-          type="text"
-          inputmode="numeric"
-          bind:value={timelineEndTime}
-          oninput={(e) => {
-            let value = parseInt(e.currentTarget.value.replace(/\D/g, '')) || 0
-            timelineV2Store.initialize(value, 0)
-          }}
-          class="input input-bordered input-sm"
-        />
-      </div>
-    {/snippet}
-    {@render panelSection('Drawing', drawingBody)}
-
-    {#snippet toolsBody()}
-      <ul class="menu w-full p-0">
-        <li>
-          <button onclick={() => (showDataPopup = true)} class="flex items-center gap-2">
-            {@render icon(MdTableEye)}
-            Data explorer
-          </button>
-        </li>
-        <li>
-          <button onclick={downloadCodes} class="flex items-center gap-2">
-            {@render icon(MdCloudDownload)}
-            Download codes
-          </button>
-        </li>
-        <li>
-          <button onclick={openCheatsheet} class="flex items-center gap-2">
-            {@render icon(MdKeyboard)}
-            Keyboard shortcuts
-          </button>
-        </li>
-      </ul>
-      <button class="btn btn-sm btn-warning self-start" onclick={resetSettings}>
-        Reset settings
-      </button>
-    {/snippet}
-    {@render panelSection('Tools', toolsBody)}
-  </div>
-{/snippet}
 
 {#snippet dataIcon()}<MdFolder />{/snippet}
 {#snippet peopleIcon()}<MdAccountGroup />{/snippet}
@@ -905,19 +198,19 @@
             onClose={closePanel}
           >
             {#if workspace.lastTab === 'data'}
-              {@render dataPanel()}
+              <DataPanel />
             {:else if workspace.lastTab === 'people'}
-              {@render peoplePanel()}
+              <PeoplePanel />
             {:else if workspace.lastTab === 'codes'}
               <CodesPanel />
             {:else if workspace.lastTab === 'talk'}
-              {@render talkPanel()}
+              <TalkPanel />
             {:else if workspace.lastTab === 'filters'}
-              {@render filtersPanel()}
+              <FiltersPanel />
             {:else if workspace.lastTab === 'select'}
-              {@render selectPanel()}
+              <SelectPanel />
             {:else if workspace.lastTab === 'settings'}
-              {@render settingsPanel()}
+              <SettingsPanel />
             {/if}
           </SidePanel>
         </div>
@@ -951,7 +244,7 @@
         {#snippet second()}
           <div
             id="p5-canvas-container"
-            class:cursor-crosshair={currentConfig.highlightToggle}
+            class:cursor-crosshair={$ConfigStore.highlightToggle}
             class:pane-inert={isDraggingSplit}
           >
             {#key workspace.canvasEpoch}
@@ -1031,14 +324,14 @@
   </CanvasFrame>
 </div>
 
-{#if showDataPopup}
+{#if workspace.dataExplorerOpen}
   <div
     class="modal modal-open"
     onclick={(e) => {
-      if (e.target === e.currentTarget) showDataPopup = false
+      if (e.target === e.currentTarget) workspace.dataExplorerOpen = false
     }}
     onkeydown={(e) => {
-      if (e.key === 'Escape') showDataPopup = false
+      if (e.key === 'Escape') workspace.dataExplorerOpen = false
     }}
   >
     <div class="modal-box w-11/12 max-w-5xl">
@@ -1048,7 +341,7 @@
           <p>Here you will find detailed information on the data that you have uploaded.</p>
         </div>
 
-        <button class="btn btn-circle btn-sm" onclick={() => (showDataPopup = false)}>
+        <button class="btn btn-circle btn-sm" onclick={() => (workspace.dataExplorerOpen = false)}>
           <MdClose class="h-5 w-5" />
         </button>
       </div>
@@ -1100,7 +393,7 @@
         </div>
       </div>
       <div class="modal-action">
-        <button class="btn" onclick={() => (showDataPopup = false)}>Close</button>
+        <button class="btn" onclick={() => (workspace.dataExplorerOpen = false)}>Close</button>
       </div>
     </div>
   </div>
@@ -1113,8 +406,8 @@
 <ModeIndicator />
 
 <DataImporter
-  isOpen={showImportDialog}
-  onClose={() => (showImportDialog = false)}
+  isOpen={workspace.importOpen}
+  onClose={() => (workspace.importOpen = false)}
   onImport={importFiles}
 />
 
@@ -1179,15 +472,6 @@
 
   .igs-sidepanel-shell--instant {
     transition: none;
-  }
-
-  :global(.igs-people .entity-toggle-list__item) {
-    flex: 1 1 100%;
-  }
-
-  :global(.igs-people .entity-toggle-list__label) {
-    flex: 1 1 auto;
-    min-width: 0;
   }
 
   .split-video-pane {
