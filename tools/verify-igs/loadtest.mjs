@@ -13,6 +13,7 @@ const PORT = Number(process.env.IGS_LOADTEST_PORT ?? 5198)
 const BASE = `http://127.0.0.1:${PORT}`
 const RUNS = Number(process.env.IGS_LOADTEST_RUNS ?? 3)
 const IMPORT_TIMEOUT_MS = 240_000
+const STEP_TIMEOUT_MS = Number(process.env.IGS_LOADTEST_STEP_TIMEOUT_MS ?? 30_000)
 const FLOORPLAN = {
   path: join(REPO, 'static/data/example-1/floorplan.png'),
   width: 1534,
@@ -175,6 +176,7 @@ async function runOnce(browser, dataset, testCase) {
     )
   )
   const page = await context.newPage()
+  page.setDefaultTimeout(STEP_TIMEOUT_MS)
   const cdp = await context.newCDPSession(page)
   const errors = []
   page.on('pageerror', (e) => errors.push(String(e)))
