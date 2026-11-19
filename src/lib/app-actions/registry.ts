@@ -1,17 +1,11 @@
-/**
- * Unified action registry
- *
- * Single source of truth for all app actions.
- * Both keyboard shortcuts and command palette derive from this.
- */
-
 import { get } from 'svelte/store'
-import type { AppAction } from './types'
+import { createActionRegistry, type Action, type ActionSection } from 'svelte-p5-components/actions'
 import ConfigStore from '../../stores/configStore'
 import { toggleVisibility } from '../../stores/videoStore'
 import { togglePlayback, isPlaying } from '../../stores/playbackStore'
 import { timelineV2Store } from '../timeline/store'
 import { openModal } from '../../stores/modalStore'
+import { historyStore } from '../../stores/historyStore'
 import { VISIBLE_EXAMPLES, COLLECTIONS } from '../core/example-datasets'
 import { rotateFloorplan } from '../utils/p5'
 import {
@@ -26,7 +20,6 @@ import {
   clearAll,
 } from '#lib/workspace/workspace.svelte.ts'
 
-// Import history-tracked action functions
 import {
   toggleMovement,
   toggleStops,
@@ -38,19 +31,17 @@ import {
   setAnimationRate,
 } from '../history/config-actions'
 
-// ==================== FILTER ACTIONS ====================
-
-const filterActions: AppAction[] = [
+const filterActions: Action[] = [
   {
     id: 'toggle-movement',
     label: 'Toggle Movement Trails',
     description: 'Show or hide movement paths',
     keywords: ['trails', 'paths', 'lines', 'movement'],
     icon: '🚶',
-    category: 'filter',
-    shortcut: { key: 'm' },
-    action: toggleMovement,
-    isActive: () => get(ConfigStore).movementToggle,
+    group: 'filter',
+    keys: { key: 'm' },
+    run: toggleMovement,
+    checked: () => get(ConfigStore).movementToggle,
   },
   {
     id: 'toggle-stops',
@@ -58,10 +49,10 @@ const filterActions: AppAction[] = [
     description: 'Show or hide stop points',
     keywords: ['stops', 'points', 'pause', 'stationary'],
     icon: '⏸️',
-    category: 'filter',
-    shortcut: { key: 's' },
-    action: toggleStops,
-    isActive: () => get(ConfigStore).stopsToggle,
+    group: 'filter',
+    keys: { key: 's' },
+    run: toggleStops,
+    checked: () => get(ConfigStore).stopsToggle,
   },
   {
     id: 'toggle-conversation-alignment',
@@ -69,10 +60,10 @@ const filterActions: AppAction[] = [
     description: 'Align conversation data with timeline',
     keywords: ['align', 'conversation', 'sync', 'timeline', 'talk'],
     icon: '💬',
-    category: 'filter',
-    shortcut: { key: 'a' },
-    action: toggleAlign,
-    isActive: () => get(ConfigStore).alignToggle,
+    group: 'filter',
+    keys: { key: 'a' },
+    run: toggleAlign,
+    checked: () => get(ConfigStore).alignToggle,
   },
   {
     id: 'toggle-path-color-mode',
@@ -80,32 +71,29 @@ const filterActions: AppAction[] = [
     description: 'Switch between user colors and code colors',
     keywords: ['color', 'mode', 'path', 'theme', 'codes'],
     icon: '🎨',
-    category: 'filter',
-    shortcut: { key: 'c' },
-    action: toggleColorMode,
-    isActive: () => get(ConfigStore).isPathColorMode,
+    group: 'filter',
+    keys: { key: 'c' },
+    run: toggleColorMode,
+    checked: () => get(ConfigStore).isPathColorMode,
   },
 ]
 
-// ==================== SELECTION ACTIONS ====================
-
-const selectionActions: AppAction[] = [
+const selectionActions: Action[] = [
   {
     id: 'select-circle',
     label: 'Circle Selection Tool',
     description: 'Select data with a circular area',
     keywords: ['circle', 'select', 'tool', 'area'],
     icon: '⭕',
-    category: 'selection',
-    shortcut: { key: '1' },
-    action: () => {
+    group: 'selection',
+    keys: { key: '1' },
+    run: () => {
       const config = get(ConfigStore)
-      // Toggle circle, disable others
       if (!config.circleToggle) toggleCircle()
       if (config.sliceToggle) toggleSlice()
       if (config.highlightToggle) toggleHighlight()
     },
-    isActive: () => get(ConfigStore).circleToggle,
+    checked: () => get(ConfigStore).circleToggle,
   },
   {
     id: 'select-slice',
@@ -113,15 +101,15 @@ const selectionActions: AppAction[] = [
     description: 'Select data with a slice/wedge area',
     keywords: ['slice', 'wedge', 'select', 'tool', 'area'],
     icon: '🍕',
-    category: 'selection',
-    shortcut: { key: '2' },
-    action: () => {
+    group: 'selection',
+    keys: { key: '2' },
+    run: () => {
       const config = get(ConfigStore)
       if (config.circleToggle) toggleCircle()
       if (!config.sliceToggle) toggleSlice()
       if (config.highlightToggle) toggleHighlight()
     },
-    isActive: () => get(ConfigStore).sliceToggle,
+    checked: () => get(ConfigStore).sliceToggle,
   },
   {
     id: 'select-highlight',
@@ -129,15 +117,15 @@ const selectionActions: AppAction[] = [
     description: 'Highlight selected data',
     keywords: ['highlight', 'select', 'tool', 'focus'],
     icon: '🔦',
-    category: 'selection',
-    shortcut: { key: '3' },
-    action: () => {
+    group: 'selection',
+    keys: { key: '3' },
+    run: () => {
       const config = get(ConfigStore)
       if (config.circleToggle) toggleCircle()
       if (config.sliceToggle) toggleSlice()
       if (!config.highlightToggle) toggleHighlight()
     },
-    isActive: () => get(ConfigStore).highlightToggle,
+    checked: () => get(ConfigStore).highlightToggle,
   },
   {
     id: 'select-clear-all',
@@ -145,9 +133,9 @@ const selectionActions: AppAction[] = [
     description: 'Deactivate all selection tools',
     keywords: ['clear', 'deselect', 'none', 'reset'],
     icon: '❌',
-    category: 'selection',
-    shortcut: { key: 'Escape' },
-    action: () => {
+    group: 'selection',
+    keys: { key: 'Escape' },
+    run: () => {
       const config = get(ConfigStore)
       if (config.circleToggle) toggleCircle()
       if (config.sliceToggle) toggleSlice()
@@ -156,18 +144,16 @@ const selectionActions: AppAction[] = [
   },
 ]
 
-// ==================== VIEW ACTIONS ====================
-
-const viewActions: AppAction[] = [
+const viewActions: Action[] = [
   {
     id: 'toggle-3d',
     label: 'Toggle 2D/3D View',
     description: 'Switch between 2D and 3D visualization',
     keywords: ['3d', '2d', 'dimension', 'view', 'toggle'],
     icon: '🔄',
-    category: 'view',
-    shortcut: { key: 'd' },
-    action: toggle3D,
+    group: 'view',
+    keys: { key: 'd' },
+    run: toggle3D,
   },
   {
     id: 'rotate-right',
@@ -175,9 +161,9 @@ const viewActions: AppAction[] = [
     description: 'Rotate the floor plan clockwise',
     keywords: ['rotate', 'right', 'cw', 'view', 'clockwise'],
     icon: '↷',
-    category: 'view',
-    shortcut: { key: 'r' },
-    action: () => rotateFloorplan('right'),
+    group: 'view',
+    keys: { key: 'r' },
+    run: () => rotateFloorplan('right'),
   },
   {
     id: 'rotate-left',
@@ -185,9 +171,9 @@ const viewActions: AppAction[] = [
     description: 'Rotate the floor plan counter-clockwise',
     keywords: ['rotate', 'left', 'ccw', 'view', 'counter-clockwise'],
     icon: '↶',
-    category: 'view',
-    shortcut: { key: 'R', modifiers: { shift: true } },
-    action: () => rotateFloorplan('left'),
+    group: 'view',
+    keys: { key: 'r', shift: true },
+    run: () => rotateFloorplan('left'),
   },
   {
     id: 'toggle-video',
@@ -195,25 +181,23 @@ const viewActions: AppAction[] = [
     description: 'Show or hide the video player',
     keywords: ['video', 'player', 'toggle', 'show', 'hide'],
     icon: '🎥',
-    category: 'view',
-    shortcut: { key: 'v' },
-    action: toggleVisibility,
+    group: 'view',
+    keys: { key: 'v' },
+    run: toggleVisibility,
   },
 ]
 
-// ==================== PLAYBACK ACTIONS ====================
-
-const playbackActions: AppAction[] = [
+const playbackActions: Action[] = [
   {
     id: 'playback-toggle',
     label: 'Play/Pause Animation',
     description: 'Toggle animation playback',
     keywords: ['play', 'pause', 'animation', 'timeline'],
     icon: '⏯️',
-    category: 'playback',
-    shortcut: { key: ' ' }, // Space
-    action: togglePlayback,
-    isActive: () => get(isPlaying),
+    group: 'playback',
+    keys: { key: ' ' },
+    run: togglePlayback,
+    checked: () => get(isPlaying),
   },
   {
     id: 'playback-seek-backward',
@@ -221,9 +205,9 @@ const playbackActions: AppAction[] = [
     description: 'Jump backward 5 seconds',
     keywords: ['seek', 'backward', 'rewind', 'back'],
     icon: '⏪',
-    category: 'playback',
-    shortcut: { key: 'ArrowLeft' },
-    action: () => {
+    group: 'playback',
+    keys: { key: 'ArrowLeft' },
+    run: () => {
       const state = timelineV2Store.getState()
       const newTime = Math.max(state.viewStart, state.currentTime - 5)
       timelineV2Store.setCurrentTime(newTime)
@@ -235,9 +219,9 @@ const playbackActions: AppAction[] = [
     description: 'Jump forward 5 seconds',
     keywords: ['seek', 'forward', 'skip', 'ahead'],
     icon: '⏩',
-    category: 'playback',
-    shortcut: { key: 'ArrowRight' },
-    action: () => {
+    group: 'playback',
+    keys: { key: 'ArrowRight' },
+    run: () => {
       const state = timelineV2Store.getState()
       const newTime = Math.min(state.viewEnd, state.currentTime + 5)
       timelineV2Store.setCurrentTime(newTime)
@@ -249,9 +233,9 @@ const playbackActions: AppAction[] = [
     description: 'Jump to the beginning of the view',
     keywords: ['start', 'beginning', 'home', 'reset'],
     icon: '⏮️',
-    category: 'playback',
-    shortcut: { key: 'Home' },
-    action: () => {
+    group: 'playback',
+    keys: { key: 'Home' },
+    run: () => {
       const state = timelineV2Store.getState()
       timelineV2Store.setCurrentTime(state.viewStart)
     },
@@ -262,9 +246,9 @@ const playbackActions: AppAction[] = [
     description: 'Jump to the end of the view',
     keywords: ['end', 'finish', 'last'],
     icon: '⏭️',
-    category: 'playback',
-    shortcut: { key: 'End' },
-    action: () => {
+    group: 'playback',
+    keys: { key: 'End' },
+    run: () => {
       const state = timelineV2Store.getState()
       timelineV2Store.setCurrentTime(state.viewEnd)
     },
@@ -275,9 +259,9 @@ const playbackActions: AppAction[] = [
     description: 'Make animation play faster',
     keywords: ['speed', 'faster', 'animation', 'rate', 'increase'],
     icon: '⏩',
-    category: 'playback',
-    shortcut: { key: '=' }, // = or + key
-    action: () => {
+    group: 'playback',
+    keys: [{ key: '=' }, { key: '+' }],
+    run: () => {
       const config = get(ConfigStore)
       setAnimationRate(Math.min(1.0, config.animationRate + 0.01))
     },
@@ -288,26 +272,24 @@ const playbackActions: AppAction[] = [
     description: 'Make animation play slower',
     keywords: ['speed', 'slower', 'animation', 'rate', 'decrease'],
     icon: '⏪',
-    category: 'playback',
-    shortcut: { key: '-' },
-    action: () => {
+    group: 'playback',
+    keys: { key: '-' },
+    run: () => {
       const config = get(ConfigStore)
       setAnimationRate(Math.max(0.01, config.animationRate - 0.01))
     },
   },
 ]
 
-// ==================== CLEAR ACTIONS ====================
-
-const clearActions: AppAction[] = [
+const clearActions: Action[] = [
   {
     id: 'clear-movement',
     label: 'Clear Movement Data',
     description: 'Remove all movement trails',
     keywords: ['clear', 'remove', 'movement', 'trails', 'delete'],
     icon: '🗑️',
-    category: 'clear',
-    action: clearMovement,
+    group: 'clear',
+    run: clearMovement,
   },
   {
     id: 'clear-conversation',
@@ -315,8 +297,8 @@ const clearActions: AppAction[] = [
     description: 'Remove all conversation data',
     keywords: ['clear', 'remove', 'conversation', 'chat', 'talk', 'delete'],
     icon: '🗑️',
-    category: 'clear',
-    action: clearConversation,
+    group: 'clear',
+    run: clearConversation,
   },
   {
     id: 'clear-codes',
@@ -324,8 +306,8 @@ const clearActions: AppAction[] = [
     description: 'Remove all code annotations',
     keywords: ['clear', 'remove', 'codes', 'annotations', 'delete'],
     icon: '🗑️',
-    category: 'clear',
-    action: clearCodes,
+    group: 'clear',
+    run: clearCodes,
   },
   {
     id: 'clear-all',
@@ -333,16 +315,11 @@ const clearActions: AppAction[] = [
     description: 'Remove all loaded data',
     keywords: ['clear', 'remove', 'all', 'reset', 'delete'],
     icon: '🗑️',
-    category: 'clear',
-    action: clearAll,
+    group: 'clear',
+    run: clearAll,
   },
 ]
 
-// ==================== EXAMPLE ACTIONS ====================
-
-/** Palette-only trimmings, keyed by dataset id. Names and grouping are NOT
- *  repeated here — they come from EXAMPLE_DATASETS so the palette can never
- *  drift from the sidebar. */
 const exampleExtras: Record<string, { icon: string; keywords: string[] }> = {
   'example-1': { icon: '🏀', keywords: ['sports', 'basketball', 'jordan'] },
   'example-2': { icon: '🖼️', keywords: ['museum', 'gallery', 'family'] },
@@ -364,7 +341,7 @@ const exampleExtras: Record<string, { icon: string; keywords: string[] }> = {
   'example-20': { icon: '📐', keywords: ['math', 'vince', 'classroom'] },
 }
 
-const exampleActions: AppAction[] = VISIBLE_EXAMPLES.map((entry) => {
+const exampleActions: Action[] = VISIBLE_EXAMPLES.map((entry) => {
   const extras = exampleExtras[entry.id]
   const collection = COLLECTIONS.find((c) => c.id === entry.collection)
   return {
@@ -377,22 +354,20 @@ const exampleActions: AppAction[] = VISIBLE_EXAMPLES.map((entry) => {
       ...(extras?.keywords ?? []),
     ],
     icon: extras?.icon ?? '📁',
-    category: 'examples',
-    action: () => loadExample(entry.id),
+    group: 'examples',
+    run: () => loadExample(entry.id),
   }
 })
 
-// ==================== SETTINGS ACTIONS ====================
-
-const settingsActions: AppAction[] = [
+const settingsActions: Action[] = [
   {
     id: 'open-settings',
     label: 'Open Settings',
     description: 'Open the settings modal',
     keywords: ['settings', 'preferences', 'config', 'options'],
     icon: '⚙️',
-    category: 'settings',
-    action: () => openModal('settings'),
+    group: 'settings',
+    run: () => openModal('settings'),
   },
   {
     id: 'open-data-explorer',
@@ -400,8 +375,8 @@ const settingsActions: AppAction[] = [
     description: 'View and explore loaded data',
     keywords: ['data', 'explorer', 'table', 'view'],
     icon: '📊',
-    category: 'settings',
-    action: () => openModal('dataExplorer'),
+    group: 'settings',
+    run: () => openModal('dataExplorer'),
   },
   {
     id: 'open-help',
@@ -409,9 +384,9 @@ const settingsActions: AppAction[] = [
     description: 'View help and documentation',
     keywords: ['help', 'docs', 'documentation', 'guide'],
     icon: '❓',
-    category: 'settings',
-    shortcut: { key: 'h' },
-    action: toggleHelp,
+    group: 'settings',
+    keys: { key: 'h' },
+    run: toggleHelp,
   },
   {
     id: 'show-shortcuts',
@@ -419,9 +394,9 @@ const settingsActions: AppAction[] = [
     description: 'Display keyboard shortcuts cheatsheet',
     keywords: ['shortcuts', 'keyboard', 'keys', 'cheatsheet', 'hotkeys'],
     icon: '⌨️',
-    category: 'settings',
-    shortcut: { key: '?', modifiers: { shift: true } },
-    action: openCheatsheet,
+    group: 'settings',
+    keys: { key: '?' },
+    run: openCheatsheet,
   },
   {
     id: 'open-file',
@@ -429,9 +404,9 @@ const settingsActions: AppAction[] = [
     description: 'Open file selection dialog',
     keywords: ['open', 'file', 'import', 'load', 'upload'],
     icon: '📁',
-    category: 'settings',
-    shortcut: { key: 'o' },
-    action: () => {
+    group: 'settings',
+    keys: { key: 'o' },
+    run: () => {
       const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
       fileInput?.click()
     },
@@ -442,47 +417,68 @@ const settingsActions: AppAction[] = [
     description: 'Download the current code data file',
     keywords: ['download', 'export', 'codes', 'save'],
     icon: '💾',
-    category: 'settings',
-    shortcut: { key: 'S', modifiers: { shift: true, meta: true }, preventDefault: true },
-    action: downloadCodes,
+    group: 'settings',
+    keys: { key: 's', mod: true, shift: true },
+    run: downloadCodes,
   },
 ]
 
-// ==================== ALL ACTIONS ====================
-
-/**
- * All app actions in a single array
- */
-export const appActions: AppAction[] = [
-  ...filterActions,
-  ...selectionActions,
-  ...viewActions,
-  ...playbackActions,
-  ...clearActions,
-  ...exampleActions,
-  ...settingsActions,
+const historyActions: Action[] = [
+  {
+    id: 'undo',
+    label: 'Undo',
+    group: 'history',
+    keys: { key: 'z', mod: true },
+    hidden: true,
+    run: () => {
+      historyStore.undo()
+    },
+  },
+  {
+    id: 'redo',
+    label: 'Redo',
+    group: 'history',
+    keys: [
+      { key: 'z', mod: true, shift: true },
+      { key: 'y', mod: true },
+    ],
+    hidden: true,
+    run: () => {
+      historyStore.redo()
+    },
+  },
 ]
 
-/**
- * Find an action by ID
- */
-export function findActionById(id: string): AppAction | undefined {
-  return appActions.find((action) => action.id === id)
-}
-
-/**
- * Get category display label
- */
-export function getCategoryLabel(category: AppAction['category']): string {
-  const labels: Record<AppAction['category'], string> = {
-    filter: 'Filter',
-    selection: 'Selection',
-    view: 'View',
-    playback: 'Playback',
-    clear: 'Clear Data',
-    examples: 'Example Datasets',
-    settings: 'Settings',
-    history: 'History',
+export const registry = createActionRegistry(
+  [
+    ...filterActions,
+    ...selectionActions,
+    ...viewActions,
+    ...playbackActions,
+    ...clearActions,
+    ...exampleActions,
+    ...settingsActions,
+    ...historyActions,
+  ],
+  {
+    groupLabels: {
+      filter: 'Filter',
+      selection: 'Selection',
+      view: 'View',
+      playback: 'Playback',
+      clear: 'Clear Data',
+      examples: 'Example Datasets',
+      settings: 'Settings',
+      history: 'History',
+    },
   }
-  return labels[category] || category
-}
+)
+
+export const cheatsheetSections: ActionSection[] = [
+  { id: 'playback', label: 'Playback' },
+  { id: 'view', label: 'View' },
+  { id: 'selection', label: 'Selection' },
+  { id: 'navigation', label: 'Navigation', groups: ['history', 'examples'] },
+  { id: 'data', label: 'Data', groups: ['filter', 'clear'] },
+  { id: 'modal', label: 'Modal', groups: ['settings'] },
+]

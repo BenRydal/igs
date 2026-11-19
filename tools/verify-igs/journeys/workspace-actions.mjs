@@ -55,13 +55,33 @@ export default async function (ctx) {
   const sheet = page.getByRole('dialog', { name: 'Keyboard Shortcuts' })
   await sheet.waitFor()
   await ctx.shot('cheatsheet')
-  for (const text of ['PLAYBACK', 'VIEW', 'SELECTION', 'NAVIGATION', 'DATA', 'MODAL']) {
-    ctx.check(await sheet.getByText(text, { exact: true }).isVisible(), `group ${text} listed`)
+  for (const text of ['Playback', 'View', 'Selection', 'Navigation', 'Data', 'Modal']) {
+    ctx.check(
+      await sheet.getByRole('heading', { name: text, exact: true }).isVisible(),
+      `group ${text} listed`
+    )
   }
-  for (const text of ['Undo', 'Speed Up', 'Toggle 2D/3D View', 'Download Codes']) {
+  for (const text of ['Undo', 'Increase Animation Speed', 'Toggle 2D/3D View', 'Download Codes']) {
     ctx.check(await sheet.getByText(text, { exact: true }).first().isVisible(), `"${text}" listed`)
   }
+  const speedRow = sheet.getByRole('listitem').filter({ hasText: 'Increase Animation Speed' })
+  ctx.check(
+    (await speedRow.locator('kbd').allInnerTexts()).join(' ') === '= +',
+    'Increase Animation Speed lists both = and +'
+  )
   await sheet.getByRole('button', { name: 'Close keyboard shortcuts' }).click()
   await sheet.waitFor({ state: 'hidden' })
+
+  const rate = page.getByText(/^Animation rate: /)
+  const before = await rate.innerText()
+  await page.keyboard.press('Shift+Equal')
+  await page.waitForFunction((text) => !document.body.innerText.includes(text), before, {
+    timeout: 5000,
+  })
+  const after = await rate.innerText()
+  ctx.check(
+    Number(after.split(': ')[1]) > Number(before.split(': ')[1]),
+    `Shift+= (key +) raised the rate (${before} -> ${after})`
+  )
   ctx.noPageErrors()
 }
