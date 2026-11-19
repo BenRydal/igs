@@ -31,7 +31,7 @@ export default async function (ctx) {
     `undo restored the trails (ink ${before} -> ${undone})`
   )
 
-  await page.keyboard.press('Control+Shift+z')
+  await page.keyboard.press('Control+Shift+KeyZ')
   await page.waitForTimeout(500)
   const redone = await ctx.canvasInk()
   await ctx.shot('redo')

@@ -1,34 +1,54 @@
 <script lang="ts">
   import '../app.css'
   import { onMount } from 'svelte'
+  import { attachActionKeys, type Action } from 'svelte-p5-components/actions'
+  import { CommandPalette, ShortcutCheatsheet } from 'svelte-p5-components/actions/ui'
   import ToastContainer from '#lib/components/ToastContainer.svelte'
-  import { CommandPalette } from '#lib/components/command-palette/index.ts'
-  import KeyboardCheatsheet from '#lib/components/KeyboardCheatsheet.svelte'
-  import { registerAllShortcuts, attachKeyboardHandler } from '#lib/keyboard/index.ts'
-  import { registerUndoRedoShortcuts } from '#lib/history/keyboard.ts'
+  import { registry, cheatsheetSections } from '#lib/app-actions/registry.ts'
+  import { Z_INDEX } from '#lib/styles/z-index.ts'
+  import { redrawCanvas } from '#lib/utils/p5.ts'
   import { setupModalListeners } from '../stores/modalStore'
   import { workspace } from '#lib/workspace/workspace.svelte.ts'
 
-  // State for modals
+  function logActionError(error: unknown, action: Action) {
+    console.error(`Error executing action "${action.id}":`, error)
+  }
+
   let showCommandPalette = $state(false)
 
   onMount(() => {
-    // Register all keyboard shortcuts
-    registerAllShortcuts()
-    attachKeyboardHandler()
-
-    // Register undo/redo shortcuts (Cmd+Z, Cmd+Shift+Z)
-    registerUndoRedoShortcuts()
-
-    // Set up modal listeners (escape key handling, etc.)
-    return setupModalListeners()
+    const detachKeys = attachActionKeys(registry, { onRun: redrawCanvas, onError: logActionError })
+    const detachModals = setupModalListeners()
+    return () => {
+      detachKeys()
+      detachModals()
+    }
   })
 </script>
 
 <ToastContainer />
-<CommandPalette bind:isOpen={showCommandPalette} />
-<KeyboardCheatsheet
-  isOpen={workspace.cheatsheetOpen}
-  onClose={() => (workspace.cheatsheetOpen = false)}
-/>
+<div
+  class="contents"
+  style:--command-palette-z-index={Z_INDEX.COMMAND_PALETTE}
+  style:--shortcut-cheatsheet-z-index={Z_INDEX.MODAL}
+>
+  <CommandPalette
+    {registry}
+    bind:open={showCommandPalette}
+    recentKey="igs-recent-commands"
+    onRun={redrawCanvas}
+    onError={logActionError}
+  />
+  <ShortcutCheatsheet
+    {registry}
+    bind:open={workspace.cheatsheetOpen}
+    sections={cheatsheetSections}
+    title="Keyboard Shortcuts"
+    closeLabel="Close keyboard shortcuts"
+  >
+    {#snippet footer()}
+      Press <kbd>?</kbd> anytime to show this dialog
+    {/snippet}
+  </ShortcutCheatsheet>
+</div>
 <slot />

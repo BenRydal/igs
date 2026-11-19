@@ -56,3 +56,34 @@
 .table thead th {
   color: color-mix(in oklab, var(--color-base-content) 70%, transparent);
 }
+
+:root {
+  --command-palette-bg: color-mix(in oklab, var(--color-base-200) 95%, transparent);
+  --command-palette-fg: var(--color-base-content);
+  --command-palette-muted-fg: color-mix(in oklab, var(--color-base-content) 70%, transparent);
+  --command-palette-border: var(--color-base-300);
+  --command-palette-radius: var(--radius-box);
+  --command-palette-accent: var(--color-primary);
+  --command-palette-accent-fg: var(--color-primary-content);
+  --command-palette-item-hover-bg: var(--color-base-300);
+  --command-palette-item-selected-bg: var(--color-base-300);
+  --command-palette-kbd-bg: var(--color-base-200);
+  --command-palette-kbd-fg: var(--color-base-content);
+  --command-palette-kbd-border: color-mix(in oklab, var(--color-base-content) 20%, transparent);
+  --command-palette-backdrop: color-mix(in oklab, black 50%, transparent);
+  --command-palette-backdrop-filter: blur(4px);
+  --command-palette-width: 42rem;
+
+  --shortcut-cheatsheet-bg: var(--color-base-100);
+  --shortcut-cheatsheet-fg: var(--color-base-content);
+  --shortcut-cheatsheet-muted-fg: color-mix(in oklab, var(--color-base-content) 70%, transparent);
+  --shortcut-cheatsheet-border: var(--color-base-300);
+  --shortcut-cheatsheet-radius: var(--radius-box);
+  --shortcut-cheatsheet-accent: var(--color-primary);
+  --shortcut-cheatsheet-item-hover-bg: var(--color-base-200);
+  --shortcut-cheatsheet-kbd-bg: var(--color-base-200);
+  --shortcut-cheatsheet-kbd-fg: var(--color-base-content);
+  --shortcut-cheatsheet-kbd-border: color-mix(in oklab, var(--color-base-content) 20%, transparent);
+  --shortcut-cheatsheet-backdrop: color-mix(in oklab, black 40%, transparent);
+  --shortcut-cheatsheet-width: 48rem;
+}
