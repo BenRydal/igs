@@ -36,7 +36,7 @@ export class FloorPlan {
   /** @param {IgsP5} sk */
   constructor(sk) {
     this.sk = sk
-    /** @type {import('p5').Image | null} */
+    /** @type {import('p5').default.Image | null} */
     this.img = null
     this.curFloorPlanRotation = 1 // [0-3] 4 rotation modes none, 90, 180, 270
     /** @type {EffDimsMemo | null} */

@@ -17,7 +17,7 @@ type ImgStub = { width: number; height: number }
 /** FloorPlan with no sketch and a fake image of the given size. */
 const makeFloorPlan = (img: ImgStub | null, rotation: number) => {
   const floorPlan = new FloorPlan(null as unknown as IgsP5)
-  floorPlan.img = img as unknown as import('p5').Image
+  floorPlan.img = img as unknown as import('p5').default.Image
   floorPlan.curFloorPlanRotation = rotation
   return floorPlan
 }
@@ -270,7 +270,7 @@ describe('FloorPlan.getEffectiveDimensions memoization', () => {
     const fp = makeFloorPlan({ width: 1000, height: 500 }, 0)
     expect(fp.getEffectiveDimensions(container(800, 800)).height).toBe(400)
     // A Mapbox style change swaps in a new image, possibly a different size.
-    fp.img = { width: 500, height: 1000 } as unknown as import('p5').Image
+    fp.img = { width: 500, height: 1000 } as unknown as import('p5').default.Image
     expect(fp.getEffectiveDimensions(container(800, 800))).toEqual({
       width: 400,
       height: 800,

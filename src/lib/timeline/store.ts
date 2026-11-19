@@ -5,8 +5,8 @@
  */
 
 import { writable, derived } from 'svelte/store'
-import type { TimelineState, DragTarget } from './types'
-import { clamp, mapRange, zoomAtPoint, panView } from './utils'
+import type { TimelineState } from './types'
+import { clamp, mapRange } from './utils'
 
 /** Initial empty state */
 const initialState: TimelineState = {
@@ -24,18 +24,10 @@ const initialState: TimelineState = {
   // Pixel bounds
   leftX: 0,
   rightX: 0,
-
-  // UI
-  hoveredTime: null,
-  isDragging: null,
-
-  // Zoom selection
-  zoomSelectionStart: null,
-  zoomSelectionEnd: null,
 }
 
 function createTimelineStore() {
-  const { subscribe, set, update } = writable<TimelineState>(initialState)
+  const { subscribe, update } = writable<TimelineState>(initialState)
 
   /**
    * Synchronous mirror of the store's value.
@@ -53,7 +45,6 @@ function createTimelineStore() {
   })
 
   // Configuration
-  const minZoomDuration = 1 // 1 second minimum zoom
 
   return {
     subscribe,
@@ -97,101 +88,7 @@ function createTimelineStore() {
       }))
     },
 
-    /**
-     * Zoom in/out centered on a time point
-     */
-    zoom(factor: number, centerTime?: number) {
-      update((s) => {
-        const center = centerTime ?? (s.viewStart + s.viewEnd) / 2
-        const { viewStart, viewEnd } = zoomAtPoint(
-          s.viewStart,
-          s.viewEnd,
-          factor,
-          center,
-          s.dataStart,
-          s.dataEnd,
-          minZoomDuration
-        )
-        return { ...s, viewStart, viewEnd }
-      })
-    },
-
-    /**
-     * Reset view to show all data
-     */
-    zoomToFit() {
-      update((s) => ({
-        ...s,
-        viewStart: s.dataStart,
-        viewEnd: s.dataEnd,
-      }))
-    },
-
-    /**
-     * Pan view by time delta
-     */
-    pan(deltaTime: number) {
-      update((s) => {
-        const { viewStart, viewEnd } = panView(
-          s.viewStart,
-          s.viewEnd,
-          deltaTime,
-          s.dataStart,
-          s.dataEnd
-        )
-        return { ...s, viewStart, viewEnd }
-      })
-    },
-
     // ==================== UI State ====================
-
-    /**
-     * Set hover state
-     */
-    setHover(time: number | null) {
-      update((s) => ({
-        ...s,
-        hoveredTime: time,
-      }))
-    },
-
-    /**
-     * Set drag state
-     */
-    setDragging(target: DragTarget) {
-      update((s) => ({ ...s, isDragging: target }))
-    },
-
-    /**
-     * Set zoom selection range (for drag-to-zoom)
-     */
-    setZoomSelection(start: number | null, end: number | null) {
-      update((s) => ({ ...s, zoomSelectionStart: start, zoomSelectionEnd: end }))
-    },
-
-    /**
-     * Apply zoom selection and clear it
-     */
-    applyZoomSelection() {
-      update((s) => {
-        if (s.zoomSelectionStart !== null && s.zoomSelectionEnd !== null) {
-          const start = Math.min(s.zoomSelectionStart, s.zoomSelectionEnd)
-          const end = Math.max(s.zoomSelectionStart, s.zoomSelectionEnd)
-          // Only zoom if selection is meaningful (> 0.5 seconds)
-          if (end - start > 0.5) {
-            return {
-              ...s,
-              viewStart: clamp(start, s.dataStart, s.dataEnd),
-              viewEnd: clamp(end, s.dataStart, s.dataEnd),
-              zoomSelectionStart: null,
-              zoomSelectionEnd: null,
-              isDragging: null,
-            }
-          }
-        }
-        return { ...s, zoomSelectionStart: null, zoomSelectionEnd: null, isDragging: null }
-      })
-    },
 
     // ==================== Pixel Bounds ====================
 
@@ -282,10 +179,10 @@ export const timelineV2Store = createTimelineStore()
 // ==================== Derived Stores ====================
 
 /** Current view duration */
-export const viewDuration = derived(timelineV2Store, ($t) => $t.viewEnd - $t.viewStart)
+const viewDuration = derived(timelineV2Store, ($t) => $t.viewEnd - $t.viewStart)
 
 /** Total data duration */
-export const dataDuration = derived(timelineV2Store, ($t) => $t.dataEnd - $t.dataStart)
+const dataDuration = derived(timelineV2Store, ($t) => $t.dataEnd - $t.dataStart)
 
 /** Current zoom level (1 = no zoom, >1 = zoomed in) */
 export const zoomLevel = derived([dataDuration, viewDuration], ([$data, $view]) =>

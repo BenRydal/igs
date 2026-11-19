@@ -6,31 +6,27 @@
  * are added here.
  */
 
-import type { KeyboardShortcut } from './types'
+import type { BoundAction } from '#lib/app-actions/types.ts'
 import { registry } from './registry'
-import { getKeyboardShortcuts, findActionById } from '../app-actions'
+import { appActions, findActionById } from '#lib/app-actions/index.ts'
 
 /**
  * Create cross-platform shortcuts for both Ctrl and Meta modifiers
  * This creates both variants from a single action that uses meta
  */
-function addCtrlVariant(shortcut: KeyboardShortcut): KeyboardShortcut[] {
+function addCtrlVariant(bound: BoundAction): BoundAction[] {
+  const { shortcut } = bound
   if (!shortcut.modifiers?.meta) {
-    return [shortcut]
+    return [bound]
   }
 
   // Return both meta and ctrl variants
   return [
-    shortcut,
+    bound,
     {
-      ...shortcut,
-      id: `${shortcut.id}-ctrl`,
-      modifiers: {
-        ...shortcut.modifiers,
-        meta: false,
-        ctrl: true,
-      },
-      description: shortcut.description,
+      ...bound,
+      id: `${bound.id}-ctrl`,
+      shortcut: { ...shortcut, modifiers: { ...shortcut.modifiers, meta: false, ctrl: true } },
     },
   ]
 }
@@ -39,15 +35,15 @@ function addCtrlVariant(shortcut: KeyboardShortcut): KeyboardShortcut[] {
  * Additional shortcuts that aren't in the registry
  * (alternative keys, platform variants, etc.)
  */
-function getAdditionalShortcuts(): KeyboardShortcut[] {
-  const additional: KeyboardShortcut[] = []
+function getAdditionalShortcuts(): BoundAction[] {
+  const additional: BoundAction[] = []
 
   // Add '+' as alternative key for speed up (in addition to '=')
   const speedUpAction = findActionById('playback-speed-up')
   if (speedUpAction) {
     additional.push({
       id: 'playback-speed-up-plus',
-      key: '+',
+      shortcut: { key: '+' },
       label: 'Speed Up',
       description: 'Increase animation playback speed (alternative key)',
       category: 'playback',
@@ -61,9 +57,11 @@ function getAdditionalShortcuts(): KeyboardShortcut[] {
 /**
  * Get all shortcuts from the action registry plus additional variants
  */
-function buildAllShortcuts(): KeyboardShortcut[] {
+function buildAllShortcuts(): BoundAction[] {
   // Get shortcuts from action registry
-  const registryShortcuts = getKeyboardShortcuts()
+  const registryShortcuts = appActions.filter(
+    (action): action is BoundAction => action.shortcut !== undefined
+  )
 
   // Add Ctrl variants for shortcuts that have Meta modifier
   const withCtrlVariants = registryShortcuts.flatMap(addCtrlVariant)
@@ -77,7 +75,7 @@ function buildAllShortcuts(): KeyboardShortcut[] {
 /**
  * All shortcuts combined
  */
-export const allShortcuts: KeyboardShortcut[] = buildAllShortcuts()
+const allShortcuts: BoundAction[] = buildAllShortcuts()
 
 /**
  * Register all IGS keyboard shortcuts with the global registry

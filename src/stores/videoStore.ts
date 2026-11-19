@@ -6,13 +6,12 @@ export interface VideoSource {
   fileUrl?: string
 }
 
-export interface VideoState {
+interface VideoState {
   // Source
   source: VideoSource
 
   // Video state
   isLoaded: boolean
-  currentTime: number
   duration: number
   isMuted: boolean
 
@@ -21,18 +20,15 @@ export interface VideoState {
   isSplitScreen: boolean
 
   // Seek request (for external components to request seek)
-  seekRequest: { time: number; id: number } | null
 }
 
 const initialState: VideoState = {
   source: { type: null },
   isLoaded: false,
-  currentTime: 0,
   duration: 0,
   isMuted: false,
   isVisible: false,
   isSplitScreen: false,
-  seekRequest: null,
 }
 
 const VideoStore = writable<VideoState>(initialState)
@@ -43,7 +39,6 @@ export function loadVideo(source: VideoSource): void {
     ...state,
     source,
     isLoaded: false,
-    currentTime: 0,
     duration: 0,
     isVisible: false,
   }))
@@ -57,14 +52,14 @@ export function setLoaded(duration: number): void {
   }))
 }
 
-export function showVideo(): void {
+function showVideo(): void {
   VideoStore.update((state) => ({
     ...state,
     isVisible: true,
   }))
 }
 
-export function hideVideo(): void {
+function hideVideo(): void {
   VideoStore.update((state) => ({
     ...state,
     isVisible: false,
@@ -82,24 +77,7 @@ export function toggleVisibility(): void {
   }
 }
 
-export function setCurrentTime(time: number): void {
-  VideoStore.update((state) => ({
-    ...state,
-    currentTime: time,
-  }))
-}
-
-let seekRequestId = 0
-/** Latch, not a queue: consumers dedupe on `id` and it stands until superseded. */
-export function requestSeek(time: number): void {
-  seekRequestId++
-  VideoStore.update((state) => ({
-    ...state,
-    seekRequest: { time, id: seekRequestId },
-  }))
-}
-
-export function setMuted(muted: boolean): void {
+function setMuted(muted: boolean): void {
   VideoStore.update((state) => ({
     ...state,
     isMuted: muted,

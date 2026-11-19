@@ -1,4 +1,5 @@
-import type { Command, FuzzyMatch, CommandSearchResult, HighlightSegment } from './types'
+import type { AppAction } from '#lib/app-actions/types.ts'
+import type { FuzzyMatch, CommandSearchResult, HighlightSegment } from './types'
 
 /**
  * Perform fuzzy matching on a target string
@@ -13,7 +14,7 @@ import type { Command, FuzzyMatch, CommandSearchResult, HighlightSegment } from 
  * @param target - Target string to match against
  * @returns FuzzyMatch result or null if no match
  */
-export function fuzzyMatch(query: string, target: string): FuzzyMatch | null {
+function fuzzyMatch(query: string, target: string): FuzzyMatch | null {
   if (!query || !target) return null
 
   const queryLower = query.toLowerCase()
@@ -81,7 +82,7 @@ export function fuzzyMatch(query: string, target: string): FuzzyMatch | null {
  * @param commands - Array of commands to search
  * @returns Sorted array of command search results (highest score first)
  */
-export function searchCommands(query: string, commands: Command[]): CommandSearchResult[] {
+export function searchCommands(query: string, commands: AppAction[]): CommandSearchResult[] {
   if (!query.trim()) {
     return []
   }

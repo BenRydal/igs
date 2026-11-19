@@ -3,7 +3,7 @@
   import { formatTime } from '../utils'
   import { isPlaying, togglePlayback, pause as pausePlayback } from '../../../stores/playbackStore'
   import ConfigStore from '../../../stores/configStore'
-  import { redrawCanvas } from '$lib/utils/p5'
+  import { zoomBy, zoomToFit } from '../view-animation'
 
   // MDI Icons
   import MdPlayArrow from '~icons/mdi/play-arrow'
@@ -19,7 +19,7 @@
   const DEFAULT_SPEED_INDEX = 1 // 1x
 
   let currentTime = $derived($timelineV2Store.currentTime)
-  let duration = $derived($timelineV2Store.viewEnd - $timelineV2Store.viewStart)
+  let duration = $derived($timelineV2Store.dataEnd - $timelineV2Store.dataStart)
   let speedIndex = $derived.by(() => {
     const idx = SPEED_PRESETS.indexOf($ConfigStore.animationRate)
     return idx >= 0 ? idx : DEFAULT_SPEED_INDEX
@@ -46,22 +46,15 @@
   }
 
   function zoomIn() {
-    timelineV2Store.zoom(0.7)
-    redrawCanvas()
+    zoomBy(0.7)
   }
 
   function zoomOut() {
-    timelineV2Store.zoom(1.4)
-    redrawCanvas()
-  }
-
-  function zoomToFit() {
-    timelineV2Store.zoomToFit()
-    redrawCanvas()
+    zoomBy(1.4)
   }
 </script>
 
-<div class="flex items-center gap-2 px-2 py-1 bg-[#f6f5f3]">
+<div class="ml-auto flex shrink-0 items-center gap-2 whitespace-nowrap px-2 py-1 bg-[#f6f5f3]">
   <!-- Playback controls -->
   <div
     class="flex items-center gap-0.5 bg-white border border-gray-200 rounded-full pl-0.5 pr-1 py-0.5"
@@ -88,7 +81,7 @@
     </button>
     <span class="w-px h-3 bg-gray-200"></span>
     <button
-      class="btn btn-ghost btn-xs px-1 font-mono text-xs font-semibold"
+      class="btn btn-ghost btn-xs w-10 px-1 font-mono text-xs font-semibold"
       onclick={cycleSpeed}
       title="Click to change speed (Shift+click for slower)"
       aria-label="Playback speed"
@@ -125,40 +118,47 @@
       <MdMagnifyPlus class="w-3.5 h-3.5" />
     </button>
   </div>
-  {#if $isZoomed}
-    <span class="text-xs text-gray-500 font-medium">{$zoomLevel.toFixed(1)}x</span>
-  {:else}
-    <span class="zoom-hint">Drag to zoom</span>
-  {/if}
+  <span class="w-20 text-xs">
+    {#if $isZoomed}
+      <span class="font-medium tabular-nums text-gray-600">{$zoomLevel.toFixed(1)}x</span>
+    {:else}
+      <span class="zoom-hint">Drag to zoom</span>
+    {/if}
+  </span>
 
   <!-- Activity gradient toggle -->
   <button
     class="flex items-center gap-1.5 px-1.5 py-0.5 rounded hover:bg-gray-200/50 transition-colors cursor-pointer"
-    class:opacity-50={!$ConfigStore.showActivityGradient}
+    aria-pressed={$ConfigStore.showActivityGradient}
     title={$ConfigStore.showActivityGradient ? 'Hide activity gradient' : 'Show activity gradient'}
     onclick={() =>
       ConfigStore.update((c) => ({ ...c, showActivityGradient: !c.showActivityGradient }))}
   >
-    <span class="text-[10px] text-gray-400">stopped</span>
+    <span class="text-[11px] text-gray-600">stopped</span>
     <div
       class="w-10 h-1.5 rounded-sm"
+      class:opacity-40={!$ConfigStore.showActivityGradient}
       style="background: linear-gradient(to right, rgba(0,0,0,0.1), rgba(0,0,0,0.4))"
     ></div>
-    <span class="text-[10px] text-gray-400">moving</span>
+    <span class="text-[11px] text-gray-600">moving</span>
   </button>
 
   <!-- Time display -->
-  <div class="flex items-center gap-1 ml-auto font-mono text-sm">
-    <span class="font-semibold text-red-500">{formatTime(currentTime)}</span>
-    <span class="text-gray-400">/</span>
-    <span class="text-gray-500">{formatTime(duration)}</span>
+  <div class="flex items-center gap-1 font-mono text-sm">
+    <span
+      class="text-right font-semibold text-red-700"
+      style:min-width="{formatTime(duration).length}ch"
+    >
+      {formatTime(currentTime)}
+    </span>
+    <span class="text-gray-600">/</span>
+    <span class="text-gray-600">{formatTime(duration)}</span>
   </div>
 </div>
 
 <style>
   .zoom-hint {
-    font-size: 0.75rem;
-    color: #9ca3af;
+    color: #4b5563;
     animation: fade-out 15s forwards;
   }
 

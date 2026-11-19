@@ -5,12 +5,12 @@
  *
  * @example
  * ```typescript
- * import { registry, attachKeyboardHandler } from '$lib/keyboard';
+ * import { registry, attachKeyboardHandler } from '#lib/keyboard/index.ts';
  *
  * // Register a shortcut
  * registry.register({
  *   id: 'play-pause',
- *   key: ' ',
+ *   shortcut: { key: ' ' },
  *   label: 'Play/Pause',
  *   description: 'Toggle animation playback',
  *   category: 'playback',
@@ -24,5 +24,5 @@
 
 export { registry } from './registry'
 export { attachKeyboardHandler } from './handler'
-export type { KeyboardShortcut, ShortcutCategory } from './types'
+export type { ShortcutCategory } from './registry'
 export { registerAllShortcuts } from './shortcuts'

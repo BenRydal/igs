@@ -980,7 +980,7 @@ describe('DrawMovement.drawSegmentConnections', () => {
 const CANVAS_LEFT = 11
 const makeScaler = (img: { width: number; height: number } | null, rotation: number) => {
   const floorPlan = new FloorPlan(null as unknown as IgsP5)
-  floorPlan.img = img as unknown as import('p5').Image
+  floorPlan.img = img as unknown as import('p5').default.Image
   floorPlan.curFloorPlanRotation = rotation
   const box = { width: 800, height: 600 }
   const dm = new DrawMovement(
@@ -1105,7 +1105,7 @@ describe('DrawMovement.viewScales', () => {
       for (const preserve of [false, true]) {
         ConfigStore.set({ ...initialConfig, preserveFloorplanAspectRatio: preserve })
         const floorPlan = new FloorPlan(null as unknown as IgsP5)
-        floorPlan.img = img as unknown as import('p5').Image
+        floorPlan.img = img as unknown as import('p5').default.Image
         const dm = new DrawMovement(
           {
             floorPlan,

@@ -1,54 +1,4 @@
-/**
- * Command definition for the command palette
- */
-export interface Command {
-  /**
-   * Unique identifier for the command
-   */
-  id: string
-
-  /**
-   * Display label for the command
-   */
-  label: string
-
-  /**
-   * Optional description shown below the label
-   */
-  description?: string
-
-  /**
-   * Keywords for fuzzy search matching
-   * e.g., ['trail', 'path', 'line'] for movement toggle
-   */
-  keywords?: string[]
-
-  /**
-   * Optional icon (can be emoji or icon class)
-   */
-  icon?: string
-
-  /**
-   * Category for grouping commands
-   */
-  category: 'filter' | 'selection' | 'view' | 'clear' | 'examples' | 'playback' | 'settings'
-
-  /**
-   * Optional keyboard shortcut display (e.g., "Space", "Cmd+K")
-   */
-  shortcut?: string
-
-  /**
-   * Action to execute when command is selected
-   */
-  action: () => void
-
-  /**
-   * Optional function to check if command is currently active/enabled
-   * Used to show active state indicators
-   */
-  isActive?: () => boolean
-}
+import type { AppAction } from '#lib/app-actions/types.ts'
 
 /**
  * Fuzzy search match result
@@ -69,7 +19,7 @@ export interface FuzzyMatch {
  * Command search result with score
  */
 export interface CommandSearchResult {
-  command: Command
+  command: AppAction
   match: FuzzyMatch
 }
 

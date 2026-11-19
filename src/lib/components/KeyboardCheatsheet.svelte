@@ -1,8 +1,8 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte'
-  import { registry } from '$lib/keyboard'
-  import type { ShortcutCategory } from '$lib/keyboard'
-  import { Z_INDEX } from '$lib/styles/z-index'
+  import { registry } from '#lib/keyboard/index.ts'
+  import type { ShortcutCategory } from '#lib/keyboard/index.ts'
+  import { Z_INDEX } from '#lib/styles/z-index.ts'
 
   interface Props {
     isOpen: boolean
@@ -213,26 +213,24 @@
             {#each categories as category (category.id)}
               <div class="flex flex-col space-y-3">
                 <!-- Category Header -->
-                <h4 class="text-sm font-bold tracking-wider opacity-60">
+                <h4 class="text-sm font-bold tracking-wider opacity-70">
                   {formatCategoryLabel(category)}
                 </h4>
 
                 <!-- Shortcuts List -->
                 <div class="flex flex-col space-y-2">
-                  {#each category.shortcuts as shortcut (shortcut.id)}
-                    {#if shortcut.enabled !== false}
-                      <div class="flex justify-between items-center gap-4">
-                        <span class="text-sm">{shortcut.label}</span>
-                        <kbd class="kbd kbd-sm">{formatKey(shortcut.key, shortcut.modifiers)}</kbd>
-                      </div>
-                    {/if}
+                  {#each category.shortcuts as { id, label, shortcut } (id)}
+                    <div class="flex justify-between items-center gap-4">
+                      <span class="text-sm">{label}</span>
+                      <kbd class="kbd kbd-sm">{formatKey(shortcut.key, shortcut.modifiers)}</kbd>
+                    </div>
                   {/each}
                 </div>
               </div>
             {/each}
           </div>
         {:else}
-          <div class="text-center py-8 text-base-content/60">
+          <div class="text-center py-8 text-base-content/70">
             <p>No keyboard shortcuts registered.</p>
           </div>
         {/if}
@@ -240,7 +238,7 @@
 
       <!-- Footer -->
       <div class="flex justify-center pt-4 border-t border-base-300 flex-shrink-0">
-        <p class="text-sm text-base-content/60">
+        <p class="text-sm text-base-content/70">
           Press <kbd class="kbd kbd-sm">?</kbd> anytime to show this dialog
         </p>
       </div>

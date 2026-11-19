@@ -1,0 +1,9 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "ignore": ["tools/verify-igs/**"],
+  "ignoreDependencies": ["@iconify-json/mdi", "@sveltejs/adapter-vercel"],
+  "ignoreUnresolved": ["^~icons/"],
+  "ignoreIssues": {
+    "tsconfig.json": ["unlisted"]
+  }
+}

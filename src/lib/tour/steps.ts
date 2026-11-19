@@ -1,11 +1,13 @@
 import type { TourStep } from './types'
+import { openPanel } from '#lib/workspace/workspace.svelte.ts'
+import type { RailTab } from '#lib/workspace/rail.ts'
 
 const railItem = (label: string) => `.activity-bar__item[aria-label="${label}"]`
 
 /** Opens a left-bar panel, then resolves an element inside it (or the fallback). */
-function inPanel(tab: string, selector: string, fallback: string): () => Element {
+function inPanel(tab: RailTab, selector: string, fallback: string): () => Element {
   return () => {
-    window.dispatchEvent(new CustomEvent('igs:open-panel', { detail: { tab } }))
+    openPanel(tab)
     return (
       document.querySelector(selector) ??
       document.querySelector(fallback) ??

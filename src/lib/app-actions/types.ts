@@ -16,6 +16,7 @@ export type ActionCategory =
   | 'clear' // Clear data actions
   | 'examples' // Load example datasets
   | 'settings' // Settings, help, modals
+  | 'history'
 
 /**
  * Keyboard shortcut configuration
@@ -97,19 +98,9 @@ export interface AppAction {
    * Used to show active state indicators in UI
    */
   isActive?: () => boolean
-
-  /**
-   * Conditional function to determine if action should be available
-   * @returns true if action should be available
-   */
-  when?: () => boolean
-
-  /**
-   * If true, action is only shown in command palette (no keyboard shortcut even if shortcut is defined)
-   * Useful for actions that have shortcuts defined but shouldn't be registered globally
-   */
-  commandPaletteOnly?: boolean
 }
+
+export type BoundAction = AppAction & { shortcut: ShortcutConfig }
 
 /**
  * Format a shortcut config as a display string

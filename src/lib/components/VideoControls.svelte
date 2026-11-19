@@ -1,48 +1,12 @@
 <script lang="ts">
-  import { onDestroy } from 'svelte'
-  import VideoStore, {
-    toggleMute,
-    toggleSplitScreen,
-    setCurrentTime,
-  } from '../../stores/videoStore'
-  import { isPlayingVideo } from '../../stores/playbackStore'
-  import { getCurrentTime, type VideoPlayer } from '../video/video-service'
+  import VideoStore, { toggleMute, toggleSplitScreen } from '../../stores/videoStore'
   import MdVolumeUp from '~icons/mdi/volume-high'
   import MdVolumeOff from '~icons/mdi/volume-off'
   import MdArrowExpandHorizontal from '~icons/mdi/arrow-expand-horizontal'
   import MdArrowCollapseHorizontal from '~icons/mdi/arrow-collapse-horizontal'
 
-  interface Props {
-    player: VideoPlayer | null
-  }
-
-  let { player }: Props = $props()
-
-  let animationFrameId: number | null = null
-
-  let isPlaying = $derived($isPlayingVideo)
   let isMuted = $derived($VideoStore.isMuted)
   let isSplitScreen = $derived($VideoStore.isSplitScreen)
-
-  // Update current time from player (needed for visualization dot tracking)
-  function updateTime() {
-    if (player) {
-      const time = getCurrentTime(player)
-      setCurrentTime(time)
-    }
-    if (isPlaying) {
-      animationFrameId = requestAnimationFrame(updateTime)
-    } else {
-      animationFrameId = null
-    }
-  }
-
-  // Start/stop time updates when play state changes
-  $effect(() => {
-    if (isPlaying && !animationFrameId) {
-      animationFrameId = requestAnimationFrame(updateTime)
-    }
-  })
 
   function handleMute(e: MouseEvent) {
     e.stopPropagation()
@@ -53,12 +17,6 @@
     e.stopPropagation()
     toggleSplitScreen()
   }
-
-  onDestroy(() => {
-    if (animationFrameId !== null) {
-      cancelAnimationFrame(animationFrameId)
-    }
-  })
 </script>
 
 <div

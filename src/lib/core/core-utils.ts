@@ -1,11 +1,4 @@
-import type {
-  PapaParseResult,
-  MovementRow,
-  ConversationRow,
-  SingleCodeRow,
-  MultiCodeRow,
-  CsvRow,
-} from './types'
+import type { PapaParseResult, CsvRow } from './types'
 import { GPSTransformer } from '../gps/gps-transformer'
 
 export type RowValidator<T> = (row: T) => boolean

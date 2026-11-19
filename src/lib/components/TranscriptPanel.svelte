@@ -5,9 +5,10 @@
   import { nextRevision } from '../../models/user'
   import HoveredConversationStore from '../../stores/interactionStore'
   import ConfigStore from '../../stores/configStore'
-  import { requestSeek, hasVideoSource } from '../../stores/videoStore'
+  import { hasVideoSource } from '../../stores/videoStore'
+  import { seekVideo } from '../video/player'
   import { timelineV2Store } from '../timeline/store'
-  import { redrawCanvas } from '$lib/utils/p5'
+  import { redrawCanvas } from '#lib/utils/p5.ts'
   import { formatTime, parseTime } from '../utils/format'
   import MdClose from '~icons/mdi/close'
   import MdPencil from '~icons/mdi/pencil'
@@ -172,7 +173,7 @@
     timelineV2Store.setCurrentTime(entry.time)
 
     if (hasVideoSource()) {
-      requestSeek(entry.time)
+      seekVideo(entry.time)
     }
 
     redrawCanvas()
@@ -288,9 +289,7 @@
                         <span class="time-error">{editTimeError}</span>
                       {/if}
                     </div>
-                    <span class="edit-speaker-label" style="color: {entry.color}"
-                      >{entry.speaker}</span
-                    >
+                    <span class="edit-speaker-label">{entry.speaker}</span>
                   </div>
                   <textarea class="edit-text" bind:value={editText} rows="3"></textarea>
                   <div class="edit-actions">
@@ -312,7 +311,7 @@
                 >
                   <div class="entry-header">
                     <span class="entry-time">{formatTime(entry.time)}</span>
-                    <span class="entry-speaker" style="color: {entry.color}">{entry.speaker}</span>
+                    <span class="entry-speaker">{entry.speaker}</span>
                     <button
                       class="icon-btn edit-btn"
                       onclick={(e) => startEditing(entry, index, e)}
@@ -408,7 +407,7 @@
 
   .search-count {
     font-size: 11px;
-    color: #888;
+    color: #595959;
     white-space: nowrap;
   }
 
@@ -419,7 +418,7 @@
   }
 
   .empty-state {
-    color: #999;
+    color: #595959;
     font-size: 13px;
     text-align: center;
     padding: 20px;
@@ -460,7 +459,7 @@
 
   .entry-time {
     font-size: 10px;
-    color: #888;
+    color: #555;
     font-family: ui-monospace, 'SF Mono', Monaco, monospace;
     background: rgba(0, 0, 0, 0.05);
     padding: 2px 5px;
@@ -468,6 +467,7 @@
   }
 
   .entry-speaker {
+    color: #1f2937;
     font-size: 13px;
     font-weight: 600;
     letter-spacing: -0.01em;

@@ -1,15 +1,15 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte'
-  import { get } from 'svelte/store'
   import { SvelteMap } from 'svelte/reactivity'
   import { fade, slide } from 'svelte/transition'
   import { closeModal } from '../../../stores/modalStore'
-  import { Z_INDEX } from '$lib/styles/z-index'
-  import type { Command, HighlightSegment } from './types'
+  import { Z_INDEX } from '#lib/styles/z-index.ts'
+  import type { HighlightSegment } from './types'
+  import type { ActionCategory, AppAction } from '#lib/app-actions/types.ts'
   import { searchCommands, getHighlightSegments } from './fuzzy-search'
-  import { getCommands, getCategoryLabel } from '$lib/app-actions'
+  import { appActions, getCategoryLabel } from '#lib/app-actions/index.ts'
   import { getRecentCommands, addRecentCommand, type RecentCommandEntry } from './recent-commands'
-  import P5Store from '../../../stores/p5Store'
+  import { redrawCanvas } from '#lib/utils/p5.ts'
   import CommandButton from './CommandButton.svelte'
 
   // Props
@@ -27,7 +27,7 @@
   let previouslyFocusedElement: HTMLElement | null = null
 
   // Get all commands
-  const allCommands = getCommands()
+  const allCommands = appActions
 
   // Derived state for search results
   let searchResults = $derived.by(() => {
@@ -42,12 +42,12 @@
   let recentCommands = $derived.by(() => {
     return recentCommandEntries
       .map((entry) => allCommands.find((cmd) => cmd.id === entry.id))
-      .filter((cmd): cmd is Command => cmd !== undefined)
+      .filter((cmd): cmd is AppAction => cmd !== undefined)
   })
 
   // Helper to group commands by category
-  function groupByCategory(commands: Command[]) {
-    const groups = new SvelteMap<string, Command[]>()
+  function groupByCategory(commands: AppAction[]) {
+    const groups = new SvelteMap<ActionCategory, AppAction[]>()
     for (const command of commands) {
       const category = command.category
       const existing = groups.get(category) || []
@@ -56,7 +56,7 @@
     }
     return Array.from(groups.entries()).map(([category, cmds]) => ({
       category,
-      label: getCategoryLabel(category as Command['category']),
+      label: getCategoryLabel(category),
       commands: cmds,
     }))
   }
@@ -158,13 +158,13 @@
   }
 
   // Execute a command
-  function executeCommand(command: Command) {
+  function executeCommand(command: AppAction) {
     try {
       // Execute the command action
       command.action()
 
       // Trigger p5 redraw
-      get(P5Store)?.loop()
+      redrawCanvas()
 
       // Add to recent commands
       addRecentCommand(command.id)
@@ -209,7 +209,7 @@
   })
 
   // Get highlighted label segments for search results
-  function getLabelSegments(command: Command): HighlightSegment[] | undefined {
+  function getLabelSegments(command: AppAction): HighlightSegment[] | undefined {
     if (!searchQuery.trim()) {
       return undefined
     }
@@ -251,7 +251,7 @@
         <div class="flex items-center gap-3 px-4 py-3 border-b border-base-300">
           <!-- Search icon -->
           <svg
-            class="w-5 h-5 text-base-content/50"
+            class="w-5 h-5 text-base-content/70"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -295,7 +295,7 @@
         >
           {#if searchQuery.trim() && groupedCommands.length === 0}
             <!-- No results -->
-            <div class="px-4 py-8 text-center text-base-content/60">
+            <div class="px-4 py-8 text-center text-base-content/70">
               <svg
                 class="w-12 h-12 mx-auto mb-2 opacity-50"
                 fill="none"
@@ -316,7 +316,7 @@
             {#if !searchQuery.trim() && recentCommands.length > 0}
               <div class="py-2">
                 <div
-                  class="px-4 py-2 text-xs font-semibold text-base-content/60 uppercase tracking-wide"
+                  class="px-4 py-2 text-xs font-semibold text-base-content/70 uppercase tracking-wide"
                 >
                   Recent
                 </div>
@@ -337,7 +337,7 @@
               {@const recentOffset = !searchQuery.trim() ? recentCommands.length : 0}
               <div class="py-2">
                 <div
-                  class="px-4 py-2 text-xs font-semibold text-base-content/60 uppercase tracking-wide"
+                  class="px-4 py-2 text-xs font-semibold text-base-content/70 uppercase tracking-wide"
                 >
                   {group.label}
                 </div>
@@ -364,7 +364,7 @@
 
         <!-- Footer -->
         <div
-          class="px-4 py-2 border-t border-base-300 bg-base-300/50 text-xs text-base-content/60 flex items-center justify-center gap-4"
+          class="px-4 py-2 border-t border-base-300 bg-base-300/50 text-xs text-base-content/70 flex items-center justify-center gap-4"
         >
           <span class="flex items-center gap-1">
             <kbd class="kbd kbd-xs">↑↓</kbd> Navigate

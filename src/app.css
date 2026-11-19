@@ -11,7 +11,7 @@
   --color-base-300: #e2e8f0;
   --color-base-content: #1f2c33;
   --color-primary: #40d173;
-  --color-primary-content: #ffffff;
+  --color-primary-content: #1f2c33;
   --color-secondary: #6136c4;
   --color-secondary-content: #ffffff;
   --color-accent: #ef9475;
@@ -24,7 +24,7 @@
   --color-success-content: #1f2c33;
   --color-warning: #f9d42f;
   --color-warning-content: #1f2c33;
-  --color-error: #eb245f;
+  --color-error: #d91a52;
   --color-error-content: #ffffff;
 }
 
@@ -50,4 +50,9 @@
 /* Dropdown menu consistent styling */
 .dropdown .menu {
   min-width: 12rem;
+}
+
+.label,
+.table thead th {
+  color: color-mix(in oklab, var(--color-base-content) 70%, transparent);
 }

@@ -1,18 +1,18 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte'
-  import { Z_INDEX } from '$lib/styles/z-index'
-  import { formatFileSize, getFileSizeLimit } from '$lib/validation/rules'
+  import { Z_INDEX } from '#lib/styles/z-index.ts'
+  import { formatFileSize, getFileSizeLimit } from '#lib/validation/rules.ts'
   import {
     SUPPORTED_EXTENSIONS,
     ACCEPT_STRING,
     getFileTypeInfo,
     getFileExtension,
-  } from '$lib/validation/file-types'
+  } from '#lib/validation/file-types.ts'
   import { toastStore } from '../../../stores/toastStore'
   import { openModal, closeModal } from '../../../stores/modalStore'
   import { loadVideo, reset as resetVideo } from '../../../stores/videoStore'
   import { pause as pausePlayback } from '../../../stores/playbackStore'
-  import { parseYouTubeUrl } from '$lib/video/video-service'
+  import { parseYouTubeUrl } from '#lib/video/video-service.ts'
 
   interface Props {
     /** Whether the dialog is open */
@@ -359,12 +359,12 @@
         <p class="text-lg font-medium mb-1">
           {isDragOver ? 'Drop files here' : 'Drag & drop files here'}
         </p>
-        <p class="text-sm text-base-content/60">or click to browse</p>
+        <p class="text-sm text-base-content/70">or click to browse</p>
       </div>
 
       <!-- YouTube URL Input -->
       <div class="mt-4">
-        <div class="divider text-sm text-base-content/60">OR</div>
+        <div class="divider text-sm text-base-content/70">OR</div>
         <div class="flex gap-2">
           <div class="flex-1">
             <input
@@ -389,9 +389,9 @@
       {#if files.length > 0}
         <div class="mt-4">
           <div class="flex justify-between items-center mb-2">
-            <span class="font-medium"
-              >{files.length} file{files.length !== 1 ? 's' : ''} selected</span
-            >
+            <span class="font-medium">
+              {files.length} file{files.length !== 1 ? 's' : ''} selected
+            </span>
             <button class="btn btn-ghost btn-xs" onclick={clearFiles}>Clear all</button>
           </div>
 
@@ -403,7 +403,7 @@
                   <span class="text-xl flex-shrink-0">{typeInfo.icon}</span>
                   <div class="min-w-0">
                     <p class="font-medium truncate">{file.name}</p>
-                    <div class="flex items-center gap-2 text-sm text-base-content/60">
+                    <div class="flex items-center gap-2 text-sm text-base-content/70">
                       <span class="badge {typeInfo.color} badge-sm">{typeInfo.label}</span>
                       <span>{formatFileSize(file.size)}</span>
                     </div>

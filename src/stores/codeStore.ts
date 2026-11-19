@@ -1,6 +1,6 @@
 import { writable } from 'svelte/store'
 
-export interface CodeEntry {
+interface CodeEntry {
   enabled: boolean
   code: string
   color: string

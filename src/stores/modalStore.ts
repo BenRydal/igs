@@ -1,14 +1,9 @@
 import { writable, derived } from 'svelte/store'
 
 export type ModalId =
-  | 'settings'
-  | 'dataExplorer'
-  | 'help'
-  | 'commandPalette'
-  | 'fileImport'
-  | 'shortcuts'
+  'settings' | 'dataExplorer' | 'help' | 'commandPalette' | 'fileImport' | 'shortcuts'
 
-export interface ModalState {
+interface ModalState {
   id: ModalId
   isOpen: boolean
   props?: Record<string, unknown>
@@ -32,11 +27,6 @@ const initialState: ModalStackState = {
 }
 
 const modalStackStore = writable<ModalStackState>(initialState)
-
-export const activeModal = derived(modalStackStore, ($store) => {
-  if ($store.stack.length === 0) return null
-  return $store.stack[$store.stack.length - 1]
-})
 
 // Derived store to check if any modal is open (for p5 loop prevention)
 export const isAnyModalOpen = derived(modalStackStore, ($store) => {

@@ -1,9 +1,8 @@
-import { get } from 'svelte/store'
 import { hitTest, type SketchFn } from 'svelte-p5'
 import P5Store from '../../stores/p5Store'
 import UserStore from '../../stores/userStore'
 import { timelineV2Store } from '../timeline/store'
-import VideoStore from '../../stores/videoStore'
+import { videoTime } from '../video/player'
 import { onAnimationEnd } from '../../stores/playbackStore'
 import { isAnyModalOpen } from '../../stores/modalStore'
 import { toastStore } from '../../stores/toastStore'
@@ -12,6 +11,7 @@ import { FloorPlan, SketchGUI, Handle3D, SetPathData } from '..'
 import { drawState } from '../draw/draw-state'
 import { generateCodeCSV, downloadFile } from '../utils/download'
 import type { IgsSketchExt } from './igs-p5'
+import { redrawCanvas } from '../utils/p5'
 
 let users: User[] = []
 let isModalOpen = false
@@ -74,6 +74,7 @@ export const igsSketch: SketchFn<IgsSketchExt> = (p5) => {
 
   p5.draw = () => {
     p5.updateCanvasOffset() // one rect read per frame; keeps viewport→canvas mapping current
+    p5.resetMatrix()
     p5.background(255)
     p5.translate(-p5.width / 2, -p5.height / 2, 0) // recenter canvas to top left when using WEBGL renderer
 
@@ -107,7 +108,7 @@ export const igsSketch: SketchFn<IgsSketchExt> = (p5) => {
     // Don't trigger expensive redraws when a modal is open
     // This prevents UI freezing during drag-and-drop operations
     if (!isModalOpen) {
-      p5.loop()
+      redrawCanvas()
     }
   }
 
@@ -158,7 +159,7 @@ export const igsSketch: SketchFn<IgsSketchExt> = (p5) => {
     p5.gui.highlight.highlightArray = prevHighlight
     p5.handle3D = new Handle3D(p5, p5.handle3D.getIs3DMode())
     applyStyles()
-    p5.loop()
+    redrawCanvas()
   }
 
   /**
@@ -177,13 +178,13 @@ export const igsSketch: SketchFn<IgsSketchExt> = (p5) => {
   p5.mousePressed = () => {
     if (drawState.config.highlightToggle && !p5.handle3D.getIs3DModeOrTransitioning())
       p5.gui.highlight.handleMousePressed()
-    p5.loop()
+    redrawCanvas()
   }
 
   p5.mouseReleased = () => {
     if (drawState.config.highlightToggle && !p5.handle3D.getIs3DModeOrTransitioning())
       p5.gui.highlight.handleMouseRelease()
-    p5.loop()
+    redrawCanvas()
   }
 
   p5.saveCodeFile = () => {
@@ -223,8 +224,8 @@ export const igsSketch: SketchFn<IgsSketchExt> = (p5) => {
     let timeToSet: number
 
     if (drawState.playbackMode === 'playing-video') {
-      // Video is driving - use video's current time
-      timeToSet = get(VideoStore).currentTime
+      timeToSet = videoTime() ?? state.currentTime
+      drawState.videoCurrentTime = timeToSet
     } else {
       // Animation is driving - use frame-based increment
       timeToSet = state.currentTime + drawState.config.animationRate

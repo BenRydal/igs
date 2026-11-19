@@ -1,6 +1,9 @@
 <script lang="ts">
-  import { writable } from 'svelte/store'
-  import { EXAMPLE_DATASETS } from '$lib/core/example-datasets'
+  import { EXAMPLE_DATASETS } from '#lib/core/example-datasets.ts'
+  import {
+    workspace,
+    loadExample as loadWorkspaceExample,
+  } from '#lib/workspace/workspace.svelte.ts'
   import { onMount, onDestroy } from 'svelte'
   import MdRoute from '~icons/mdi/routes'
   import MdChat from '~icons/mdi/chat-outline'
@@ -16,8 +19,6 @@
 
   const CITATION =
     'Shapiro, B. R., Silvis, D., & Hall, R. (2025). Visualization as theory and experience: interactive qualitative data visualization for the learning sciences. Journal of the Learning Sciences, 34(5), 840–871.'
-
-  let { isModalOpen = writable(false) } = $props()
 
   /** Durations come from EXAMPLE_DATASETS. Thumbnails are specific to this
    *  modal, as is `title` where a dataset label reads as ambiguous without the
@@ -41,15 +42,15 @@
 
   function loadExample(exampleId: string) {
     closeModal()
-    window.dispatchEvent(new CustomEvent('igs:load-example', { detail: { value: exampleId } }))
+    loadWorkspaceExample(exampleId)
   }
 
   function closeModal() {
-    $isModalOpen = false
+    workspace.helpOpen = false
   }
 
   function handleKeyDown(e: KeyboardEvent) {
-    if (e.key === 'Escape' && $isModalOpen) {
+    if (e.key === 'Escape' && workspace.helpOpen) {
       e.preventDefault()
       e.stopPropagation()
       closeModal()
@@ -67,15 +68,17 @@
   })
 </script>
 
-{#if $isModalOpen}
+{#if workspace.helpOpen}
   <div class="modal modal-open">
     <div class="modal-box max-w-5xl p-10 relative">
       <!-- Close button -->
       <button
         onclick={closeModal}
         class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl leading-none cursor-pointer"
-        aria-label="Close">&times;</button
+        aria-label="Close"
       >
+        &times;
+      </button>
 
       <!-- Header -->
       <div class="text-center mb-8">
@@ -180,9 +183,9 @@
         </div>
         <p class="text-center text-gray-600 mt-3">
           Designed by
-          <a href="https://www.benrydal.com" target="_blank" class="hover:underline"
-            >Ben Rydal Shapiro</a
-          >
+          <a href="https://www.benrydal.com" target="_blank" class="hover:underline">
+            Ben Rydal Shapiro
+          </a>
           and
           <a href="https://www.edwinzhao.com" target="_blank" class="hover:underline">Edwin Zhao</a>
         </p>

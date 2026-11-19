@@ -1,40 +1,24 @@
-# Timeline: evaluation vs svelte-p5-components (July 2026)
+# Timeline
 
-As part of the svelte-p5 migration, this custom native-canvas timeline was
-evaluated against the library's `TimelineScrubber`/`TimelineTrack` and the
-`createMediaSync`/`createMediaPlayback` helpers. **Decision: keep the custom
-timeline and the custom video sync.** Rationale below so the question doesn't
-get re-litigated from scratch.
+The timeline is `svelte-p5-components`' `TimelineTrack`, skinned for IGS in
+`components/Timeline.svelte`. The library owns the interaction: seek, playhead
+drag, drag-to-zoom, wheel zoom and pan, keyboard, and hover time. IGS owns what
+the track means.
 
-## Why TimelineScrubber/TimelineTrack don't fit (yet)
+| Piece                       | Where                        | What it does                                                                                                                                        |
+| --------------------------- | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| View and playhead state     | `store.ts`                   | Single source of truth. The sketch reads `leftX`/`rightX` and the view window from it every frame, so the track doubles as the 2D view's time axis. |
+| Animated zoom               | `view-animation.ts`          | Large view changes (zoom buttons, a dragged region, fit) ease over 280 ms. Small ones (wheel, pan) apply at once. Honors reduced-motion.            |
+| Activity gradient           | `activity-gradient.ts`       | Buckets movement speed across the recording and returns a CSS gradient drawn under the track.                                                       |
+| Tick labels and time format | `utils.ts`                   | Grid interval and label math.                                                                                                                       |
+| Overview strip              | `components/Timeline.svelte` | A second, thin track that always spans the whole recording. When zoomed, its window shows where the view sits and can be dragged.                   |
 
-| IGS timeline feature                                                                                                                  | In the library?                                                   |
-| ------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| Playhead + seek + hover time                                                                                                          | Yes                                                               |
-| Selection window                                                                                                                      | Yes                                                               |
-| **Zoomable view window** (drag-to-zoom region, pan, zoom-to-fit, min duration)                                                        | No — the library track always spans the full duration             |
-| **View window as the visualization's x-axis domain** (`viewPixelToPixel`, `getViewStart/EndPixel` consumed by the sketch every frame) | No — no view-window state, no pixel-bounds export                 |
-| Activity-gradient layer (data-density rendering)                                                                                      | No — `segments` are flat tinted bands; no custom render-layer API |
-| Custom canvas layers (background/hover/playhead/zoom-selection) with DPR handling                                                     | No — DOM-rendered                                                 |
+## History
 
-The zoomable view window doubling as the space-time visualization's x-axis
-domain is IGS's core interaction; without a view-window/zoom-domain contract
-in the library there is nothing to migrate onto. That gap is filed upstream
-in svelte-p5's `docs/proposals/igs-port-roadmap.md` (item 2); revisit this
-decision if the library ships it.
-
-## Why createMediaSync/createMediaPlayback don't fit
-
-The library helpers attach to an `HTMLMediaElement`. IGS's video backend is
-`VideoPlayer = YTPlayer | HTMLVideoElement` (`src/lib/video/video-service.ts`)
-— every example dataset uses the YouTube iframe API, which is not a media
-element. Adopting the helpers would cover only local-file video and leave a
-second, parallel sync path for YouTube; that's more code, not less.
-
-## What the timeline does share with the migration
-
-- The sketch reads this store's viewport-pixel bounds (`leftX`/`rightX`) and
-  converts to canvas coordinates via `p5.canvasLeft` — see the coordinate
-  notes in `src/lib/p5/igsSketch.ts`.
-- The pure math in `utils.ts` (zoom/pan/time↔pixel/grid) is pinned by
-  characterization tests in `utils.test.ts`.
+Before January 2026 the timeline was a range slider. It was replaced by a custom
+canvas timeline (#134) for zoom, hover and a robust playhead. In July 2026 the
+library's track was evaluated and rejected because it had no zoomable view
+window, no pixel-bounds export and no custom layer under the track. The library
+has since gained all three (`viewStart`/`viewEnd`/`zoomable`, `onBoundsChange`,
+the `underlay` snippet), so the canvas renderer and its layers were removed in
+November 2026.

@@ -7,7 +7,7 @@ export interface ConversationTurn {
   color?: string
 }
 
-export interface HoveredConversation {
+interface HoveredConversation {
   turns: ConversationTurn[]
   mouseX: number
   mouseY: number

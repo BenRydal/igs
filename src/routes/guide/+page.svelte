@@ -93,8 +93,10 @@
             </p>
             <p class="text-sm text-base-content/70 italic">
               Data from sensor tracking systems or manually created with <span
-                class="font-bold underline">Mondrian Transcription</span
+                class="font-bold underline"
               >
+                Mondrian Transcription
+              </span>
             </p>
           </div>
         </a>
@@ -192,7 +194,7 @@
               </table>
             </div>
 
-            <div class="mt-4 space-y-2 text-sm text-base-content/60">
+            <div class="mt-4 space-y-2 text-sm text-base-content/70">
               <p><strong>time</strong> — When (in seconds, or see "Time Formats" below)</p>
               <p>
                 <strong>x</strong> — How far from the left edge of your floor plan image (in pixels)
@@ -210,9 +212,11 @@
                   <a
                     href="https://github.com/BenRydal/mondrian"
                     target="_blank"
-                    class="link font-bold underline">Mondrian Transcription</a
-                  > — a free tool that lets you click on your floor plan to record positions while watching
-                  video.
+                    class="link font-bold underline"
+                  >
+                    Mondrian Transcription
+                  </a> — a free tool that lets you click on your floor plan to record positions while
+                  watching video.
                 </p>
               </div>
             </div>
@@ -227,13 +231,13 @@
             </p>
             <div class="flex flex-wrap gap-2 mt-3">
               <code class="badge badge-lg">Teacher.csv</code>
-              <span class="text-base-content/50">→</span>
+              <span class="text-base-content/70">→</span>
               <span class="badge badge-lg badge-primary">Teacher</span>
             </div>
-            <p class="text-sm text-base-content/60 mt-3">
-              To track multiple people, create separate files for each person (e.g., <code
-                >Student1.csv</code
-              >, <code>Student2.csv</code>).
+            <p class="text-sm text-base-content/70 mt-3">
+              To track multiple people, create separate files for each person (e.g., <code>
+                Student1.csv
+              </code>, <code>Student2.csv</code>).
             </p>
           </div>
         </div>
@@ -273,7 +277,7 @@
               <span class="badge badge-outline">Google Earth</span>
               <span class="badge badge-outline">Google Maps Timeline</span>
             </div>
-            <p class="text-sm text-base-content/60 mt-3">
+            <p class="text-sm text-base-content/70 mt-3">
               Look for "Export GPX" or "Export KML" in your app's activity details.
             </p>
             <div class="alert mt-3">
@@ -312,7 +316,7 @@
               </table>
             </div>
 
-            <p class="text-sm text-base-content/60 mt-3">
+            <p class="text-sm text-base-content/70 mt-3">
               Use decimal coordinates (like <code>40.7128</code>), not degrees-minutes-seconds.
             </p>
           </div>
@@ -376,9 +380,9 @@
             <div>
               <p class="font-medium">Linking speech to movement paths</p>
               <p class="text-sm mt-1">
-                To connect a speaker's words to their movement path, make sure the <strong
-                  >speaker</strong
-                >
+                To connect a speaker's words to their movement path, make sure the <strong>
+                  speaker
+                </strong>
                 name matches the <strong>filename</strong> of their movement file.
               </p>
               <p class="text-sm mt-2">
@@ -433,9 +437,9 @@
         <div class="card bg-base-200">
           <div class="card-body">
             <h3 class="font-semibold mb-2">Simple format (one code type per file)</h3>
-            <p class="text-sm text-base-content/60 mb-3">The filename becomes the code label.</p>
+            <p class="text-sm text-base-content/70 mb-3">The filename becomes the code label.</p>
 
-            <p class="text-xs text-base-content/50 mb-1">File: <code>Group Work.csv</code></p>
+            <p class="text-xs text-base-content/70 mb-1">File: <code>Group Work.csv</code></p>
             <div class="overflow-x-auto bg-base-100 rounded-lg">
               <table class="table table-sm">
                 <thead>
@@ -514,7 +518,7 @@
               </tbody>
             </table>
           </div>
-          <p class="text-sm text-base-content/60 mt-4">
+          <p class="text-sm text-base-content/70 mt-4">
             IGS automatically converts everything to relative time, starting from 0.
           </p>
           <p class="font-medium mt-4 mb-3">Code files support:</p>
@@ -536,7 +540,7 @@
               </tbody>
             </table>
           </div>
-          <p class="text-sm text-base-content/60 mt-4">
+          <p class="text-sm text-base-content/70 mt-4">
             Code file times should be relative to the start of your recording (not absolute
             timestamps).
           </p>
@@ -556,9 +560,11 @@
             <div class="collapse-content text-base-content/70">
               <p>
                 {#each answer as part, i (i)}
-                  {#if part.tag === 'strong'}<strong>{part.text}</strong
-                    >{:else if part.tag === 'code'}<code>{part.text}</code
-                    >{:else if part.tag === 'br'}<br />{:else}{part.text}{/if}
+                  {#if part.tag === 'strong'}<strong>
+                      {part.text}
+                    </strong>{:else if part.tag === 'code'}<code>
+                      {part.text}
+                    </code>{:else if part.tag === 'br'}<br />{:else}{part.text}{/if}
                 {/each}
               </p>
             </div>
@@ -575,11 +581,13 @@
         <a
           href="https://www.youtube.com/watch?v=smoxv9AspHA"
           target="_blank"
-          class="btn btn-outline">Watch Demo</a
+          class="btn btn-outline"
         >
-        <a href="https://forms.gle/M1gvdgSvdH9yXAABA" target="_blank" class="btn btn-outline"
-          >Ask a Question</a
-        >
+          Watch Demo
+        </a>
+        <a href="https://forms.gle/M1gvdgSvdH9yXAABA" target="_blank" class="btn btn-outline">
+          Ask a Question
+        </a>
       </div>
     </section>
   </main>

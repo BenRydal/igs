@@ -1,259 +1,74 @@
 <script lang="ts">
-  import {
-    Sketch,
-    CanvasFrame,
-    SplitPane,
-    ActivityBar,
-    SidePanel,
-    EntityToggleList,
-    type Entity,
-  } from 'svelte-p5-components'
+  import { Sketch, CanvasFrame, SplitPane, ActivityBar, SidePanel } from 'svelte-p5-components'
 
-  import type { IgsP5 } from '$lib/p5/igs-p5'
   import MdHelpOutline from '~icons/mdi/help-circle-outline'
-  import MdKeyboard from '~icons/mdi/keyboard'
-  import MdCloudDownload from '~icons/mdi/cloud-download'
   import Md3DRotation from '~icons/mdi/rotate-3d-variant'
   import MdRotateLeft from '~icons/mdi/rotate-left'
   import MdRotateRight from '~icons/mdi/rotate-right'
   import MdVideocam from '~icons/mdi/video'
   import MdVideocamOff from '~icons/mdi/video-off'
-  import MdCheck from '~icons/mdi/check'
   import MdSettings from '~icons/mdi/cog'
-  import MdFileUploadOutline from '~icons/mdi/file-upload-outline'
   import MdFilterList from '~icons/mdi/filter-variant'
   import MdSelectAll from '~icons/mdi/selection'
   import MdChat from '~icons/mdi/chat'
   import MdComment from '~icons/mdi/comment'
   import MdCommentOff from '~icons/mdi/comment-off'
   import MdFolder from '~icons/mdi/folder-open'
-  import MdRoute from '~icons/mdi/routes'
-  import MdMuseum from '~icons/mdi/bank'
-  import MdTeacher from '~icons/mdi/human-male-board'
-  import MdWalk from '~icons/mdi/walk'
-  import MdVideo from '~icons/mdi/video-vintage'
-  import MdShapeOutline from '~icons/mdi/shape-outline'
-  import MdMagnify from '~icons/mdi/magnify'
-  import MdMapMarkerPath from '~icons/mdi/map-marker-path'
-  import MdMessageText from '~icons/mdi/message-text-outline'
-  import MdTagOutline from '~icons/mdi/tag-outline'
-  import MdStar from '~icons/mdi/star-outline'
-  import MdChevronDown from '~icons/mdi/chevron-down'
-  import MdChevronRight from '~icons/mdi/chevron-right'
   import MdClose from '~icons/mdi/close'
   import MdAccountGroup from '~icons/mdi/account-group'
   import MdTagMultiple from '~icons/mdi/tag-multiple'
-  import MdTableEye from '~icons/mdi/table-eye'
 
-  import { nextRevision, type User } from '../models/user'
   import UserStore from '../stores/userStore'
   import P5Store from '../stores/p5Store'
-  import { rotateFloorplan } from '$lib/utils/p5'
-  import VideoStore, {
-    toggleVisibility,
-    reset as resetVideo,
-    hasVideoSource,
-  } from '../stores/videoStore'
-  import GPSStore, { resetGPS } from '../stores/gpsStore'
+  import { redrawCanvas, rotateFloorplan } from '#lib/utils/p5.ts'
+  import VideoStore, { toggleVisibility, hasVideoSource } from '../stores/videoStore'
   import { onVideoVisibilityChange } from '../stores/playbackStore'
-  import VideoContainer from '$lib/components/VideoContainer.svelte'
-  import SplitScreenVideo from '$lib/components/SplitScreenVideo.svelte'
-  import TranscriptPanel from '$lib/components/TranscriptPanel.svelte'
-  import ConversationTooltip from '$lib/components/ConversationTooltip.svelte'
-  import SpaceTimeTooltip from '$lib/components/SpaceTimeTooltip.svelte'
-  import AxesIndicator from '$lib/components/AxesIndicator.svelte'
+  import VideoContainer from '#lib/components/VideoContainer.svelte'
+  import SplitScreenVideo from '#lib/components/SplitScreenVideo.svelte'
+  import TranscriptPanel from '#lib/components/TranscriptPanel.svelte'
+  import ConversationTooltip from '#lib/components/ConversationTooltip.svelte'
+  import SpaceTimeTooltip from '#lib/components/SpaceTimeTooltip.svelte'
+  import AxesIndicator from '#lib/components/AxesIndicator.svelte'
 
-  import { Core } from '$lib'
-  import {
-    EXAMPLE_DATASETS,
-    EXAMPLE_COLLECTIONS,
-    COLLECTIONS,
-    VISIBLE_EXAMPLES,
-    FEATURED_EXAMPLE,
-    getExampleLabel,
-    type CollectionId,
-    type ExampleEntry,
-  } from '$lib/core/example-datasets'
-  import type { ExampleSelectEvent } from '$lib/core/types'
-  import { igsSketch } from '$lib/p5/igsSketch'
-  import { writable } from 'svelte/store'
-  import { onMount, tick, flushSync, type Component, type Snippet } from 'svelte'
-  import { SvelteSet } from 'svelte/reactivity'
-  import IconButton from '$lib/components/IconButton.svelte'
-  import IgsInfoModal from '$lib/components/IGSInfoModal.svelte'
-  import { TimelineContainer } from '$lib/timeline'
-  import DataPointTable from '$lib/components/DataPointTable.svelte'
-  import ModeIndicator from '$lib/components/ModeIndicator.svelte'
-  import { OnboardingTour, shouldShowTour } from '$lib/tour'
-  import DataImporter from '$lib/components/import/DataImporter.svelte'
-  import MapStyleSelector from '$lib/components/MapStyleSelector.svelte'
-  import CodesPanel from '$lib/components/CodesPanel.svelte'
-  import TimelineControls from '$lib/timeline/components/TimelineControls.svelte'
-  import { capitalizeFirstLetter, capitalizeEachWord } from '$lib/utils/string'
-  import { Z_INDEX } from '$lib/styles/z-index'
+  import { getExampleLabel } from '#lib/core/example-datasets.ts'
+  import { igsSketch } from '#lib/p5/igsSketch.ts'
+  import { onMount } from 'svelte'
+  import IconButton from '#lib/components/IconButton.svelte'
+  import IgsInfoModal from '#lib/components/IGSInfoModal.svelte'
+  import { Timeline } from '#lib/timeline/index.ts'
+  import DataPointTable from '#lib/components/DataPointTable.svelte'
+  import ModeIndicator from '#lib/components/ModeIndicator.svelte'
+  import { OnboardingTour, shouldShowTour } from '#lib/tour/index.ts'
+  import DataImporter from '#lib/components/import/DataImporter.svelte'
+  import CodesPanel from '#lib/components/CodesPanel.svelte'
+  import DataPanel from '#lib/components/panels/DataPanel.svelte'
+  import PeoplePanel from '#lib/components/panels/PeoplePanel.svelte'
+  import TalkPanel from '#lib/components/panels/TalkPanel.svelte'
+  import FiltersPanel from '#lib/components/panels/FiltersPanel.svelte'
+  import SelectPanel from '#lib/components/panels/SelectPanel.svelte'
+  import SettingsPanel from '#lib/components/panels/SettingsPanel.svelte'
+  import TimelineControls from '#lib/timeline/components/TimelineControls.svelte'
+  import { capitalizeEachWord } from '#lib/utils/string.ts'
+  import { Z_INDEX } from '#lib/styles/z-index.ts'
 
   import CodeStore from '../stores/codeStore'
   import ConfigStore from '../stores/configStore'
-  import type { ConfigStoreType } from '../stores/configStore'
-  import { timelineV2Store } from '$lib/timeline/store'
-  import { initialConfig } from '../stores/configStore'
-  import { setSelectorSize, setSlicerSize } from '$lib/history/config-actions'
   import {
-    toggleUserVisibility as toggleUserVisibilityAction,
-    toggleUserEnabled,
-    toggleUserConversationEnabled,
-    setUserName,
-    createUserColorDrag,
-  } from '$lib/history/user-actions'
-  import {
-    clearUsers,
-    clearCodes,
-    clearAllData as clearAllDataWithHistory,
-  } from '$lib/history/data-actions'
+    workspace,
+    onDataLoaded,
+    toggle3D,
+    selectRailItem,
+    closePanel,
+    closeUnavailablePanel,
+    importFiles,
+  } from '#lib/workspace/workspace.svelte.ts'
+  import { RAIL_LABELS } from '#lib/workspace/rail.ts'
 
-  // Boolean config keys: what the toggle handlers may flip
-  type ToggleKey = {
-    [K in keyof ConfigStoreType]: ConfigStoreType[K] extends boolean ? K : never
-  }[keyof ConfigStoreType]
+  const selectedExampleLabel = $derived(getExampleLabel(workspace.selectedExampleId))
 
-  const filterToggleOptions = ['movementToggle', 'stopsToggle'] as const
-  const selectToggleOptions = ['circleToggle', 'sliceToggle', 'highlightToggle'] as const
-  const conversationToggleOptions = ['alignToggle'] as const
-  /** Id of the currently loaded example, or '' for none/imported data. Keyed on
-   *  id rather than label so selection cannot be confused by name changes. */
-  let selectedExampleId = $state('')
-  const selectedExampleLabel = $derived(getExampleLabel(selectedExampleId))
-
-  /** Collection icons live here, not in the dataset module, so core data stays
-   *  free of UI imports. */
-  const collectionIcons: Record<CollectionId, Component> = {
-    timss: MdVideo,
-    tau: MdTeacher,
-    tours: MdWalk,
-    museums: MdMuseum,
-    other: MdShapeOutline,
-  }
-
-  let exampleFilter = $state('')
-  const normalizedFilter = $derived(exampleFilter.trim().toLowerCase())
-
-  /** Flat match list, used only while filtering. Matches on dataset name and on
-   *  collection name, so typing "tau" or "tour" narrows to that collection. */
-  const filteredExamples = $derived(
-    normalizedFilter
-      ? VISIBLE_EXAMPLES.filter((entry) => {
-          const collection = COLLECTIONS.find((c) => c.id === entry.collection)
-          return (
-            entry.label.toLowerCase().includes(normalizedFilter) ||
-            (collection?.label.toLowerCase().includes(normalizedFilter) ?? false)
-          )
-        })
-      : []
-  )
-
-  /** Collections start collapsed: the resting state is a short overview rather
-   *  than every dataset at once. Loading an example opens its collection. */
-  const expandedCollections = new SvelteSet<CollectionId>()
-
-  function toggleCollection(id: CollectionId) {
-    if (expandedCollections.has(id)) {
-      expandedCollections.delete(id)
-    } else {
-      expandedCollections.add(id)
-    }
-  }
-
-  /** Records the selection and reveals it in the tree. Call after every load so
-   *  the sidebar, the command palette and the welcome modal stay in agreement. */
-  function markExampleSelected(id: string) {
-    selectedExampleId = id
-    const collection = EXAMPLE_DATASETS[id]?.collection
-    if (collection) expandedCollections.add(collection)
-  }
-
-  function loadExample(id: string) {
-    updateExampleDataDropDown({ target: { value: id } })
-    markExampleSelected(id)
-  }
-
-  function collectionLabel(id: CollectionId) {
-    return COLLECTIONS.find((c) => c.id === id)?.label ?? ''
-  }
-
-  /** What is loaded right now, for the "Your data" inventory. Every count is
-   *  O(users) — deliberately not walking dataTrail, which runs to tens of
-   *  thousands of points on the longer datasets. */
-  type DataKind = {
-    key: string
-    label: string
-    icon: Component
-    /** Human-readable summary of what is loaded, or '' when nothing is. */
-    detail: string
-    clear: () => void
-  }
-
-  const loadedData = $derived.by<DataKind[]>(() => {
-    const users = $UserStore
-    const speakers = users.filter((u) => u.conversationIsLoaded).length
-    const codes = $CodeStore.length
-    const videoType = $VideoStore.source.type
-    const isGPS = $GPSStore.isGPSMode
-
-    return [
-      {
-        key: 'movement',
-        label: isGPS ? 'Movement (GPS)' : 'Movement',
-        icon: MdRoute,
-        detail: users.length ? `${users.length} ${users.length === 1 ? 'person' : 'people'}` : '',
-        clear: clearMovementData,
-      },
-      {
-        key: 'conversation',
-        label: 'Conversation',
-        icon: MdMessageText,
-        detail: speakers ? `${speakers} ${speakers === 1 ? 'speaker' : 'speakers'}` : '',
-        clear: clearConversationData,
-      },
-      {
-        key: 'codes',
-        label: 'Codes',
-        icon: MdTagOutline,
-        detail: codes ? `${codes} ${codes === 1 ? 'code' : 'codes'}` : '',
-        clear: clearCodeData,
-      },
-      {
-        key: 'video',
-        label: 'Video',
-        icon: MdVideocam,
-        detail: videoType === 'youtube' ? 'YouTube' : videoType === 'file' ? 'File' : '',
-        clear: resetVideo,
-      },
-    ]
-  })
-
-  const hasAnyData = $derived(loadedData.some((d) => d.detail !== ''))
-
-  let showDataPopup = $state(false)
-  let showImportDialog = $state(false)
-  /** Read-only view of the store. Sliders bind one-way and write via their
-   *  `oninput` handlers — `bind:value` here would mutate the store's object in
-   *  place, ahead of the handler, and break undo. */
-  const currentConfig = $derived($ConfigStore)
-
-  let p5Instance = $state<IgsP5 | null>(null)
-  let core: Core
   let isVideoShowing = $state(false)
-  let is3DMode = $state(true)
-  let timelineEndTime = $state(0)
   let isTranscriptVisible = $state(false)
   let spaceTimeTooltip: SpaceTimeTooltip
-
-  $effect(() => {
-    const unsubscribe = timelineV2Store.subscribe((state) => {
-      timelineEndTime = state.dataEnd
-    })
-    return unsubscribe
-  })
 
   let isSplitScreen = $state(false)
   /** SplitPane sizes as percentages: [video, canvas] */
@@ -262,13 +77,6 @@
   const SPLIT_DIVIDER_PX = 8
   /** Drives `pane-inert` and defers the sketch rebuild until the drag ends. */
   let isDraggingSplit = $state(false)
-  /**
-   * Bumping this remounts <Sketch> via {#key}, destroying and recreating the
-   * WEBGL canvas. Used after clearing large datasets (Safari degrades when a
-   * long-lived GL context accumulates big uploads). See svelte-p5's WEBGL
-   * recipe: the old context is released explicitly before the remount.
-   */
-  let canvasEpoch = $state(0)
 
   $effect(() => {
     const videoState = $VideoStore
@@ -276,58 +84,11 @@
     isSplitScreen = videoState.isSplitScreen
   })
 
-  $effect(() => {
-    p5Instance = $P5Store
-    if (p5Instance) {
-      core = new Core(p5Instance)
-    }
-  })
-
-  // Modal state - opens immediately for first-time visitors
-  let isModalOpen = writable(false)
-
-  type RailTab = 'data' | 'people' | 'codes' | 'talk' | 'filters' | 'select' | 'settings'
-  const RAIL_LABELS: Record<RailTab | 'help', string> = {
-    data: 'Data',
-    people: 'People',
-    codes: 'Codes',
-    talk: 'Talk',
-    filters: 'Filters',
-    select: 'Select',
-    settings: 'Settings',
-    help: 'Help',
-  }
-  let activeTab = $state<RailTab | null>(null)
-  // The panel keeps rendering this while it slides closed, so it never blanks mid-exit.
-  let lastTab = $state<RailTab>('data')
   let panelWidth = $state(300)
   /** Rail plus open panel: how far the canvas is pushed right. */
   let railWidth = $state(0)
-  /** Set when the tour opens a panel, so its highlight lands on the final layout. */
-  let instantPanel = $state(false)
 
-  function handleRailSelect(id: string) {
-    if (id === 'help') {
-      $isModalOpen = !$isModalOpen
-      return
-    }
-    const tab = id as RailTab
-    instantPanel = false
-    activeTab = activeTab === tab ? null : tab
-    if (activeTab) lastTab = activeTab
-  }
-
-  function isTabAvailable(tab: RailTab): boolean {
-    if (tab === 'select') return !is3DMode
-    if (tab === 'codes') return $ConfigStore.dataHasCodes
-    return true
-  }
-
-  $effect(() => {
-    if (activeTab && !isTabAvailable(activeTab)) activeTab = null
-  })
-
-  let formattedStopLength = $derived($ConfigStore.stopSliderValue.toFixed(0))
+  $effect(() => closeUnavailablePanel($ConfigStore.dataHasCodes))
 
   function toggleVideo() {
     if (!hasVideoSource()) return
@@ -337,846 +98,11 @@
     onVideoVisibilityChange(willBeVisible)
   }
 
-  function resetSettings() {
-    ConfigStore.update(() => ({ ...initialConfig }))
-    p5Instance?.loop()
-  }
-
-  function handleConfigChangeFromInput(e: Event, key: keyof ConfigStoreType) {
-    const target = e.target as HTMLInputElement
-    ConfigStore.update((value) => ({ ...value, [key]: parseFloat(target.value) }))
-    p5Instance?.loop() // Trigger redraw
-  }
-
-  function handleConfigChange(
-    key: keyof ConfigStoreType,
-    value: ConfigStoreType[keyof ConfigStoreType]
-  ) {
-    ConfigStore.update((store) => ({ ...store, [key]: value }))
-    p5Instance?.loop()
-  }
-
-  function toggleSelection(selection: ToggleKey, toggleOptions: readonly ToggleKey[]) {
-    ConfigStore.update((store: ConfigStoreType) => {
-      const updatedStore = { ...store }
-      toggleOptions.forEach((key) => {
-        if (key.endsWith('Toggle')) {
-          updatedStore[key] = key === selection ? !updatedStore[key] : false
-        }
-      })
-      return updatedStore
-    })
-    p5Instance?.loop()
-  }
-
-  /**
-   * Detect CSV file type by reading headers
-   * Returns: 'movement' | 'conversation' | 'multicode' | 'singlecode' | 'unknown'
-   */
-  async function detectCsvFileType(file: File): Promise<string> {
-    return new Promise((resolve) => {
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        const content = e.target?.result as string
-        if (!content) {
-          resolve('unknown')
-          return
-        }
-
-        // Get first line (headers) and normalize
-        const firstLine = content.split('\n')[0] || ''
-        const headers = firstLine
-          .toLowerCase()
-          .split(',')
-          .map((h) => h.trim().replace(/"/g, ''))
-
-        // Check for GPS movement: time, lat, lng (or latitude, longitude)
-        if (
-          headers.includes('time') &&
-          (headers.includes('lat') || headers.includes('latitude')) &&
-          (headers.includes('lng') || headers.includes('longitude'))
-        ) {
-          resolve('movement')
-          return
-        }
-
-        // Check for movement: time, x, y
-        if (headers.includes('time') && headers.includes('x') && headers.includes('y')) {
-          resolve('movement')
-          return
-        }
-
-        // Check for conversation: time, speaker, talk
-        if (headers.includes('time') && headers.includes('speaker') && headers.includes('talk')) {
-          resolve('conversation')
-          return
-        }
-
-        // Check for multicode: code, start, end (must check before singlecode)
-        if (headers.includes('code') && headers.includes('start') && headers.includes('end')) {
-          resolve('multicode')
-          return
-        }
-
-        // Check for singlecode: start, end
-        if (headers.includes('start') && headers.includes('end')) {
-          resolve('singlecode')
-          return
-        }
-
-        resolve('unknown')
-      }
-      reader.onerror = () => resolve('unknown')
-      // Only read first 1KB to get headers
-      reader.readAsText(file.slice(0, 1024))
-    })
-  }
-
-  /**
-   * Sort files by processing priority:
-   * 1. Non-CSV files (images, videos) - process first
-   * 2. Movement CSV files
-   * 3. Conversation CSV files
-   * 4. Code CSV files (multicode and singlecode) - process last
-   */
-  async function sortFilesByProcessingOrder(files: File[]): Promise<File[]> {
-    const fileTypes: Array<{ file: File; type: string; priority: number }> = []
-
-    for (const file of files) {
-      const ext = file.name.toLowerCase().split('.').pop() || ''
-
-      if (ext !== 'csv') {
-        // Non-CSV files get highest priority (processed first)
-        fileTypes.push({ file, type: 'non-csv', priority: 0 })
-      } else {
-        const csvType = await detectCsvFileType(file)
-        let priority: number
-
-        switch (csvType) {
-          case 'movement':
-            priority = 1
-            break
-          case 'conversation':
-            priority = 2
-            break
-          case 'multicode':
-          case 'singlecode':
-            priority = 3 // Code files processed last
-            break
-          default:
-            priority = 4 // Unknown CSV files last
-        }
-
-        fileTypes.push({ file, type: csvType, priority })
-      }
-    }
-
-    // Sort by priority (ascending)
-    fileTypes.sort((a, b) => a.priority - b.priority)
-
-    return fileTypes.map((ft) => ft.file)
-  }
-
-  async function handleImportFiles(files: File[], clearExisting: boolean) {
-    // Clear existing data if requested
-    if (clearExisting) {
-      await clearAllDataLocal()
-    }
-
-    // Sort files to ensure correct processing order:
-    // movement files first, conversation second, code files last
-    const sortedFiles = await sortFilesByProcessingOrder(files)
-
-    // Process each file SEQUENTIALLY using the async file handler
-    // This ensures movement data is loaded before conversation,
-    // and conversation is loaded before codes
-    for (const file of sortedFiles) {
-      await core.testFileTypeForProcessingAsync(file)
-    }
-
-    // Trigger redraw
-    p5Instance?.loop()
-    spaceTimeTooltip?.trigger()
-  }
-
-  async function updateExampleDataDropDown(event: ExampleSelectEvent) {
-    await clearAllDataLocal()
-    await core.handleExampleDropdown(event)
-    p5Instance?.loop()
-    spaceTimeTooltip?.trigger()
-  }
-
-  /** Resolves once the {#key}-remounted canvas has published a fresh instance. */
-  function waitForCanvasRemount(prev: IgsP5 | null): Promise<IgsP5> {
-    return new Promise((resolve) => {
-      const unsub = P5Store.subscribe((inst) => {
-        if (inst && inst !== prev) {
-          queueMicrotask(() => unsub())
-          resolve(inst)
-        }
-      })
-    })
-  }
-
-  // Local version that handles UI cleanup and non-store data.
-  // Async because the canvas remount it triggers is async: callers that load
-  // data afterwards must await it so they talk to the fresh instance/Core.
-  async function clearAllDataLocal() {
-    resetVideo()
-
-    // Use history-tracked function for store clearing
-    clearAllDataWithHistory()
-
-    core.codeData = []
-    core.movementData = []
-    core.conversationData = []
-    resetGPS()
-    core.gpsMovementData = []
-
-    ConfigStore.update((config) => ({
-      ...config,
-      dataHasCodes: false,
-      isPathColorMode: false,
-      maxStopLength: 0,
-    }))
-
-    // Remount the canvas for a fresh WebGL context (helps Safari performance).
-    // Release the old GL context explicitly first — browsers cap live contexts
-    // and remove() alone leaves the release to GC.
-    const prev = p5Instance
-    ;(prev?.drawingContext as WebGL2RenderingContext | undefined)
-      ?.getExtension('WEBGL_lose_context')
-      ?.loseContext()
-    canvasEpoch += 1
-    await waitForCanvasRemount(prev)
-    await tick() // let the P5Store $effect rebuild `core` for the new instance
-  }
-
-  function clearMovementData() {
-    clearUsers()
-    core.movementData = []
-    core.gpsMovementData = []
-    resetGPS()
-    p5Instance?.loop()
-  }
-
-  function clearConversationData() {
-    UserStore.update((users) =>
-      users.map((user) => {
-        user.conversationIsLoaded = false
-        user.dataTrail = user.dataTrail.map((dataPoint) => {
-          dataPoint.speech = ''
-          return dataPoint
-        })
-        user.revision = nextRevision()
-        return user
-      })
-    )
-    core.conversationData = []
-    p5Instance?.loop()
-  }
-
-  function clearCodeData() {
-    clearCodes()
-    core.codeData = []
-    UserStore.update((users) =>
-      users.map((user) => {
-        user.dataTrail = user.dataTrail.map((dataPoint) => {
-          dataPoint.codes = []
-          return dataPoint
-        })
-        user.revision = nextRevision()
-        return user
-      })
-    )
-
-    ConfigStore.update((currentConfig) => ({
-      ...currentConfig,
-      dataHasCodes: false,
-      isPathColorMode: false,
-    }))
-    p5Instance?.loop()
-  }
-
-  /**
-   * Check if a user is visible (either movement or talk enabled)
-   */
-  function isUserVisible(user: User): boolean {
-    return user.enabled || user.conversation_enabled
-  }
-
-  /**
-   * Toggle both movement and talk visibility for a user
-   */
-  function toggleUserVisibility(user: User) {
-    toggleUserVisibilityAction(user.name, isUserVisible(user))
-    p5Instance?.loop()
-  }
-
-  const userEntities = $derived<Entity[]>(
-    $UserStore.map((user) => ({
-      id: user.name,
-      label: user.name,
-      color: user.color,
-      visible: isUserVisible(user),
-    }))
-  )
-
-  function findUser(id: string): User | undefined {
-    return $UserStore.find((u) => u.name === id)
-  }
-
-  const userColorDrag = createUserColorDrag()
-
-  function handleUserColorInput(id: string, color: string) {
-    userColorDrag.input(id, color)
-    p5Instance?.loop()
-  }
-
-  // Add event handlers for dropdowns
   onMount(() => {
-    // Keyboard shortcut event handlers
-    const handleToggle3D = () => {
-      if (p5Instance?.handle3D) {
-        p5Instance?.handle3D.update()
-        is3DMode = p5Instance?.handle3D.getIs3DMode() ?? is3DMode
-      }
-    }
-
-    const handleDownloadCodes = () => {
-      if (p5Instance) {
-        p5Instance?.saveCodeFile()
-      }
-    }
-
-    const handleToggleHelp = () => {
-      isModalOpen.update((value) => !value)
-    }
-
-    const handleLoadExample = (event: Event) => {
-      const customEvent = event as CustomEvent<{ value: string }>
-      if (customEvent.detail?.value) {
-        loadExample(customEvent.detail.value)
-      }
-    }
-
-    const handleOpenPanel = (event: Event) => {
-      const tab = (event as CustomEvent<{ tab: RailTab | null }>).detail?.tab ?? null
-      instantPanel = true
-      activeTab = tab && isTabAvailable(tab) ? tab : null
-      if (activeTab) lastTab = activeTab
-      flushSync()
-    }
-
-    // Show welcome modal immediately for first-time visitors
-    if (shouldShowTour()) {
-      isModalOpen.set(true)
-    }
-
-    // Register event listeners
-    window.addEventListener('igs:toggle-3d', handleToggle3D)
-    window.addEventListener('igs:download-codes', handleDownloadCodes)
-    window.addEventListener('igs:toggle-help', handleToggleHelp)
-    window.addEventListener('igs:load-example', handleLoadExample)
-    window.addEventListener('igs:open-panel', handleOpenPanel)
-
-    // Clear data event listeners (for command palette)
-    window.addEventListener('igs:clear-movement', clearMovementData)
-    window.addEventListener('igs:clear-conversation', clearConversationData)
-    window.addEventListener('igs:clear-codes', clearCodeData)
-    window.addEventListener('igs:clear-all', clearAllDataLocal)
-
-    // Cleanup function
-    return () => {
-      // Remove keyboard shortcut handlers
-      window.removeEventListener('igs:toggle-3d', handleToggle3D)
-      window.removeEventListener('igs:download-codes', handleDownloadCodes)
-      window.removeEventListener('igs:toggle-help', handleToggleHelp)
-      window.removeEventListener('igs:load-example', handleLoadExample)
-      window.removeEventListener('igs:open-panel', handleOpenPanel)
-
-      // Remove clear data event listeners
-      window.removeEventListener('igs:clear-movement', clearMovementData)
-      window.removeEventListener('igs:clear-conversation', clearConversationData)
-      window.removeEventListener('igs:clear-codes', clearCodeData)
-      window.removeEventListener('igs:clear-all', clearAllDataLocal)
-    }
+    if (shouldShowTour()) workspace.helpOpen = true
+    return onDataLoaded(() => spaceTimeTooltip?.trigger())
   })
 </script>
-
-{#snippet icon(Icon: Component)}
-  <div class="w-4 h-4"><Icon /></div>
-{/snippet}
-
-{#snippet check(condition: boolean)}
-  <div class="w-4 h-4 mr-2">
-    {#if condition}<MdCheck />{/if}
-  </div>
-{/snippet}
-
-{#snippet toggleRow(label: string, on: boolean, onclick: () => void)}
-  <li>
-    <button {onclick} class="w-full text-left flex items-center" aria-pressed={on}>
-      {@render check(on)}
-      {label}
-    </button>
-  </li>
-{/snippet}
-
-{#snippet rangeRow(
-  label: string,
-  id: string,
-  min: number,
-  max: number,
-  step: number,
-  value: number,
-  oninput: (e: Event & { currentTarget: HTMLInputElement }) => void
-)}
-  <div class="flex flex-col gap-1">
-    <label for={id} class="text-xs">{label}</label>
-    <input {id} type="range" {min} {max} {step} {value} class="range range-xs" {oninput} />
-  </div>
-{/snippet}
-
-{#snippet capability(Icon: Component, title: string)}
-  <span class="w-3.5 h-3.5 opacity-45 shrink-0" {title} aria-hidden="true"><Icon /></span>
-{/snippet}
-
-{#snippet exampleRow(entry: ExampleEntry, showCollection: boolean, featured = false)}
-  {@const isSelected = selectedExampleId === entry.id}
-  <li>
-    <button
-      onclick={() => loadExample(entry.id)}
-      aria-current={isSelected ? 'true' : undefined}
-      class="flex items-start gap-2 w-full cursor-pointer {isSelected
-        ? 'bg-primary/20 font-medium'
-        : ''}"
-    >
-      {#if featured}
-        <span class="w-4 h-4 mt-0.5 text-primary shrink-0"><MdStar /></span>
-      {/if}
-      <span class="flex flex-col gap-0.5 min-w-0 flex-1">
-        <span class="flex items-center gap-2 min-w-0">
-          <span class="truncate flex-1 text-left">{entry.label}</span>
-          <span class="text-xs opacity-50 shrink-0 tabular-nums">{entry.duration}</span>
-        </span>
-        <span class="flex items-center gap-1.5 text-xs opacity-70">
-          {#if featured}<span class="text-primary">Start here</span>{/if}
-          {#if showCollection}<span class="truncate">{collectionLabel(entry.collection)}</span>{/if}
-          {#if entry.videoId}{@render capability(MdVideocam, 'Has video')}{/if}
-          {#if entry.isGPS}{@render capability(MdMapMarkerPath, 'GPS data')}{/if}
-          {#if entry.hasTranscript}{@render capability(MdMessageText, 'Has transcript')}{/if}
-          {#if entry.hasCodes}{@render capability(MdTagOutline, 'Has codes')}{/if}
-        </span>
-      </span>
-    </button>
-  </li>
-{/snippet}
-
-{#snippet panelSection(title: string, body: Snippet)}
-  <section class="flex flex-col gap-2">
-    <h3 class="text-xs font-semibold uppercase tracking-wide opacity-60">{title}</h3>
-    {@render body()}
-  </section>
-{/snippet}
-
-{#snippet dataPanel()}
-  <div class="flex flex-col gap-6 px-3 py-4">
-    {#snippet yourDataBody()}
-      {#if hasAnyData}
-        <ul class="flex flex-col gap-0.5">
-          {#each loadedData as kind (kind.key)}
-            {@const loaded = kind.detail !== ''}
-            <li
-              class="flex items-center gap-2 rounded-lg px-2 py-1 text-sm {loaded
-                ? ''
-                : 'opacity-40'}"
-            >
-              {@render icon(kind.icon)}
-              <span class="flex-1 truncate">{kind.label}</span>
-              <span class="text-xs opacity-60 shrink-0">{loaded ? kind.detail : 'None'}</span>
-              <button
-                class="btn btn-ghost btn-xs btn-square shrink-0"
-                onclick={kind.clear}
-                disabled={!loaded}
-                aria-label="Clear {kind.label.toLowerCase()}"
-                title="Clear {kind.label.toLowerCase()}"
-              >
-                {@render icon(MdClose)}
-              </button>
-            </li>
-          {/each}
-        </ul>
-      {:else}
-        <p class="text-xs opacity-60 px-2">
-          Nothing loaded yet — import your own files, or pick an example below.
-        </p>
-      {/if}
-
-      <div class="flex items-center gap-2">
-        <button
-          id="btn-import-files"
-          class="btn btn-sm btn-primary gap-2 flex-1"
-          onclick={() => (showImportDialog = true)}
-        >
-          {@render icon(MdFileUploadOutline)}
-          Import files
-        </button>
-        {#if hasAnyData}
-          <button class="btn btn-sm btn-ghost text-error" onclick={clearAllDataLocal}>
-            Clear all
-          </button>
-        {/if}
-      </div>
-    {/snippet}
-    {@render panelSection('Your data', yourDataBody)}
-
-    {#snippet examplesBody()}
-      <label class="input input-sm input-bordered flex items-center gap-2 w-full">
-        {@render icon(MdMagnify)}
-        <input
-          type="search"
-          class="grow min-w-0"
-          placeholder="Filter examples"
-          aria-label="Filter examples"
-          bind:value={exampleFilter}
-        />
-      </label>
-
-      {#if normalizedFilter}
-        {#if filteredExamples.length}
-          <ul class="menu w-full p-0">
-            {#each filteredExamples as entry (entry.id)}
-              {@render exampleRow(entry, true)}
-            {/each}
-          </ul>
-        {:else}
-          <p class="text-xs opacity-60 px-2 py-3">No examples match “{exampleFilter}”.</p>
-        {/if}
-      {:else}
-        {#if FEATURED_EXAMPLE}
-          <ul class="menu w-full p-0">
-            {@render exampleRow(FEATURED_EXAMPLE, false, true)}
-          </ul>
-        {/if}
-
-        <ul class="menu w-full p-0">
-          {#each EXAMPLE_COLLECTIONS as collection (collection.id)}
-            {@const isOpen = expandedCollections.has(collection.id)}
-            <li>
-              <button
-                class="flex items-center gap-2 w-full cursor-pointer"
-                onclick={() => toggleCollection(collection.id)}
-                aria-expanded={isOpen}
-                aria-controls="collection-{collection.id}"
-              >
-                {@render icon(isOpen ? MdChevronDown : MdChevronRight)}
-                {@render icon(collectionIcons[collection.id])}
-                <span class="flex-1 truncate text-left">{collection.label}</span>
-                <span class="text-xs opacity-50 shrink-0 tabular-nums">
-                  {collection.items.length}
-                </span>
-              </button>
-
-              <ul id="collection-{collection.id}" class="pl-2" hidden={!isOpen}>
-                {#each collection.items as entry (entry.id)}
-                  {@render exampleRow(entry, false)}
-                {/each}
-              </ul>
-            </li>
-          {/each}
-        </ul>
-      {/if}
-    {/snippet}
-    <div id="examples-list">{@render panelSection('Examples', examplesBody)}</div>
-  </div>
-{/snippet}
-
-{#snippet userControls(entity: Entity)}
-  {@const user = findUser(entity.id)}
-  {#if user}
-    <div class="flex items-center gap-1">
-      <button
-        class="btn btn-ghost btn-xs btn-square"
-        class:opacity-40={!user.enabled}
-        aria-pressed={user.enabled}
-        aria-label="{user.enabled ? 'Hide' : 'Show'} movement for {user.name}"
-        title="Movement"
-        onclick={() => {
-          toggleUserEnabled(user.name)
-          p5Instance?.loop()
-        }}
-      >
-        {@render icon(MdWalk)}
-      </button>
-      <button
-        class="btn btn-ghost btn-xs btn-square"
-        class:opacity-40={!user.conversation_enabled}
-        aria-pressed={user.conversation_enabled}
-        aria-label="{user.conversation_enabled ? 'Hide' : 'Show'} talk for {user.name}"
-        title="Talk"
-        onclick={() => {
-          toggleUserConversationEnabled(user.name)
-          p5Instance?.loop()
-        }}
-      >
-        {@render icon(MdChat)}
-      </button>
-    </div>
-  {/if}
-{/snippet}
-
-{#snippet peoplePanel()}
-  <div class="flex flex-col gap-6 px-3 py-4">
-    {#if userEntities.length === 0}
-      <p class="text-sm opacity-70">Load an example or import data to see people here.</p>
-    {:else}
-      <p class="text-xs opacity-70">
-        Click a name to show or hide everything for that person. The icons toggle movement and talk
-        separately.
-      </p>
-      <EntityToggleList
-        entities={userEntities}
-        onToggle={(id) => {
-          const user = findUser(id)
-          if (user) toggleUserVisibility(user)
-        }}
-        onColorChange={handleUserColorInput}
-        onRename={(id, next) => {
-          setUserName(id, next)
-          p5Instance?.loop()
-        }}
-        controls={userControls}
-        class="igs-people"
-      />
-    {/if}
-  </div>
-{/snippet}
-
-{#snippet talkPanel()}
-  <div class="flex flex-col gap-6 px-3 py-4">
-    {#snippet displayBody()}
-      <ul class="menu w-full p-0">
-        {@render toggleRow('Show speech bubbles', $ConfigStore.showConversationRects, () =>
-          handleConfigChange('showConversationRects', !$ConfigStore.showConversationRects)
-        )}
-        {@render toggleRow('Align to side', $ConfigStore.alignToggle, () =>
-          toggleSelection('alignToggle', conversationToggleOptions)
-        )}
-      </ul>
-    {/snippet}
-    {@render panelSection('Display', displayBody)}
-
-    {#snippet groupedBody()}
-      <ul class="menu w-full p-0">
-        {@render toggleRow('Combine speakers', $ConfigStore.showSpeakerStripes, () =>
-          handleConfigChange('showSpeakerStripes', !$ConfigStore.showSpeakerStripes)
-        )}
-      </ul>
-      {@render rangeRow(
-        `Group within ${$ConfigStore.clusterTimeThreshold} seconds`,
-        'clusterTimeRange',
-        1,
-        60,
-        1,
-        $ConfigStore.clusterTimeThreshold,
-        (e) => handleConfigChangeFromInput(e, 'clusterTimeThreshold')
-      )}
-      {@render rangeRow(
-        `Group within ${$ConfigStore.clusterSpaceThreshold}px distance`,
-        'clusterSpaceRange',
-        0,
-        200,
-        1,
-        $ConfigStore.clusterSpaceThreshold,
-        (e) => handleConfigChangeFromInput(e, 'clusterSpaceThreshold')
-      )}
-    {/snippet}
-    {@render panelSection('Grouped turns', groupedBody)}
-
-    {#snippet individualBody()}
-      {@render rangeRow(
-        `Turn width: ${$ConfigStore.conversationRectWidth}px`,
-        'rectWidthRange',
-        1,
-        30,
-        1,
-        $ConfigStore.conversationRectWidth,
-        (e) => handleConfigChangeFromInput(e, 'conversationRectWidth')
-      )}
-    {/snippet}
-    {@render panelSection('Individual turns', individualBody)}
-  </div>
-{/snippet}
-
-{#snippet filtersPanel()}
-  <div class="flex flex-col gap-6 px-3 py-4">
-    {#snippet movementBody()}
-      <ul class="menu w-full p-0">
-        {#each filterToggleOptions as toggle (toggle)}
-          {@render toggleRow(
-            capitalizeFirstLetter(toggle.replace('Toggle', '')),
-            $ConfigStore[toggle],
-            () => toggleSelection(toggle, filterToggleOptions)
-          )}
-        {/each}
-      </ul>
-      {@render rangeRow(
-        `Stop length: ${formattedStopLength} sec`,
-        'stopLengthRange',
-        1,
-        $ConfigStore.maxStopLength,
-        1,
-        $ConfigStore.stopSliderValue,
-        (e) => handleConfigChangeFromInput(e, 'stopSliderValue')
-      )}
-    {/snippet}
-    {@render panelSection('Movement', movementBody)}
-  </div>
-{/snippet}
-
-{#snippet selectPanel()}
-  <div class="flex flex-col gap-6 px-3 py-4">
-    {#snippet modeBody()}
-      <ul class="menu w-full p-0">
-        {#each selectToggleOptions as toggle (toggle)}
-          {@render toggleRow(
-            capitalizeFirstLetter(toggle.replace('Toggle', '')),
-            $ConfigStore[toggle],
-            () => toggleSelection(toggle, selectToggleOptions)
-          )}
-        {/each}
-      </ul>
-    {/snippet}
-    {@render panelSection('Mode', modeBody)}
-
-    {#snippet sizeBody()}
-      {@render rangeRow(
-        `Circle size: ${currentConfig.selectorSize}px`,
-        'selectorSizeRange',
-        20,
-        300,
-        10,
-        currentConfig.selectorSize,
-        (e) => setSelectorSize(parseFloat(e.currentTarget.value))
-      )}
-      {@render rangeRow(
-        `Slicer width: ${currentConfig.slicerSize}px`,
-        'slicerSizeRange',
-        5,
-        100,
-        5,
-        currentConfig.slicerSize,
-        (e) => setSlicerSize(parseFloat(e.currentTarget.value))
-      )}
-    {/snippet}
-    {@render panelSection('Size', sizeBody)}
-  </div>
-{/snippet}
-
-{#snippet settingsPanel()}
-  <div class="flex flex-col gap-6 px-3 py-4">
-    <ul class="menu w-full p-0">
-      {@render toggleRow('Preserve aspect ratio', currentConfig.preserveFloorplanAspectRatio, () =>
-        handleConfigChange(
-          'preserveFloorplanAspectRatio',
-          !currentConfig.preserveFloorplanAspectRatio
-        )
-      )}
-    </ul>
-
-    {#if $GPSStore.isGPSMode}
-      {#snippet mapBody()}
-        <MapStyleSelector />
-      {/snippet}
-      {@render panelSection('Map style', mapBody)}
-    {/if}
-
-    {#snippet drawingBody()}
-      {@render rangeRow(
-        `Animation rate: ${currentConfig.animationRate}`,
-        'animationRate',
-        0.01,
-        1,
-        0.01,
-        currentConfig.animationRate,
-        (e) => handleConfigChange('animationRate', parseFloat(e.currentTarget.value))
-      )}
-      {@render rangeRow(
-        `Path simplification: ${currentConfig.pathSimplification}px`,
-        'pathSimplification',
-        0.5,
-        8,
-        0.5,
-        currentConfig.pathSimplification,
-        (e) => handleConfigChange('pathSimplification', parseFloat(e.currentTarget.value))
-      )}
-      {@render rangeRow(
-        `Movement line weight: ${currentConfig.movementStrokeWeight}`,
-        'movementStrokeWeight',
-        1,
-        20,
-        1,
-        currentConfig.movementStrokeWeight,
-        (e) => handleConfigChange('movementStrokeWeight', parseInt(e.currentTarget.value))
-      )}
-      {@render rangeRow(
-        `Stop line weight: ${currentConfig.stopStrokeWeight}`,
-        'stopStrokeWeight',
-        1,
-        20,
-        1,
-        currentConfig.stopStrokeWeight,
-        (e) => handleConfigChange('stopStrokeWeight', parseInt(e.currentTarget.value))
-      )}
-      <div class="flex flex-col gap-1">
-        <label for="inputSeconds" class="text-xs">End time (seconds)</label>
-        <input
-          id="inputSeconds"
-          type="text"
-          inputmode="numeric"
-          bind:value={timelineEndTime}
-          oninput={(e) => {
-            let value = parseInt(e.currentTarget.value.replace(/\D/g, '')) || 0
-            timelineV2Store.initialize(value, 0)
-          }}
-          class="input input-bordered input-sm"
-        />
-      </div>
-    {/snippet}
-    {@render panelSection('Drawing', drawingBody)}
-
-    {#snippet toolsBody()}
-      <ul class="menu w-full p-0">
-        <li>
-          <button onclick={() => (showDataPopup = true)} class="flex items-center gap-2">
-            {@render icon(MdTableEye)}
-            Data explorer
-          </button>
-        </li>
-        <li>
-          <button onclick={() => p5Instance?.saveCodeFile()} class="flex items-center gap-2">
-            {@render icon(MdCloudDownload)}
-            Download codes
-          </button>
-        </li>
-        <li>
-          <button
-            onclick={() => window.dispatchEvent(new CustomEvent('igs:open-cheatsheet'))}
-            class="flex items-center gap-2"
-          >
-            {@render icon(MdKeyboard)}
-            Keyboard shortcuts
-          </button>
-        </li>
-      </ul>
-      <button class="btn btn-sm btn-warning self-start" onclick={resetSettings}>
-        Reset settings
-      </button>
-    {/snippet}
-    {@render panelSection('Tools', toolsBody)}
-  </div>
-{/snippet}
 
 {#snippet dataIcon()}<MdFolder />{/snippet}
 {#snippet peopleIcon()}<MdAccountGroup />{/snippet}
@@ -1196,13 +122,13 @@
     {#snippet top()}
       <div class="navbar min-h-16 bg-[#ffffff] relative">
         <div class="flex-1 min-w-0 px-2 flex items-center gap-4">
-          <a class="text-2xl font-bold text-black italic" href="https://interactiongeography.org"
-            >IGS</a
-          >
+          <a class="text-2xl font-bold text-black italic" href="https://interactiongeography.org">
+            IGS
+          </a>
           {#if selectedExampleLabel}
-            <span class="truncate text-sm opacity-70" title={selectedExampleLabel}
-              >{selectedExampleLabel}</span
-            >
+            <span class="truncate text-sm opacity-70" title={selectedExampleLabel}>
+              {selectedExampleLabel}
+            </span>
           {/if}
         </div>
         <div class="flex-none flex items-center gap-1 px-2">
@@ -1211,10 +137,7 @@
             icon={Md3DRotation}
             label="Space-time"
             tooltip="Toggle 2D/3D"
-            onclick={() => {
-              p5Instance?.handle3D.update()
-              is3DMode = p5Instance?.handle3D.getIs3DMode() ?? is3DMode
-            }}
+            onclick={toggle3D}
           />
           <IconButton
             id="btn-toggle-video"
@@ -1238,8 +161,8 @@
     {#snippet leftRail()}
       <nav class="igs-left-rail" aria-label="Sidebar navigation" bind:clientWidth={railWidth}>
         <ActivityBar
-          activeId={activeTab ?? undefined}
-          onSelect={handleRailSelect}
+          activeId={workspace.activeTab ?? undefined}
+          onSelect={selectRailItem}
           items={[
             { id: 'data', label: RAIL_LABELS.data, icon: dataIcon },
             { id: 'people', label: RAIL_LABELS.people, icon: peopleIcon },
@@ -1248,7 +171,9 @@
               : []),
             { id: 'talk', label: RAIL_LABELS.talk, icon: talkIcon },
             { id: 'filters', label: RAIL_LABELS.filters, icon: filtersIcon },
-            ...(!is3DMode ? [{ id: 'select', label: RAIL_LABELS.select, icon: selectIcon }] : []),
+            ...(!workspace.is3DMode
+              ? [{ id: 'select', label: RAIL_LABELS.select, icon: selectIcon }]
+              : []),
             { id: 'settings', label: RAIL_LABELS.settings, icon: settingsIcon },
             { id: 'help', label: RAIL_LABELS.help, icon: helpIcon },
           ]}
@@ -1258,34 +183,34 @@
         <div
           id="igs-side-panel"
           role="tabpanel"
-          aria-label={`${RAIL_LABELS[lastTab]} panel`}
+          aria-label={`${RAIL_LABELS[workspace.lastTab]} panel`}
           class="igs-sidepanel-shell"
-          class:igs-sidepanel-shell--open={activeTab !== null}
-          class:igs-sidepanel-shell--instant={instantPanel}
-          style:width={`${activeTab ? panelWidth : 0}px`}
+          class:igs-sidepanel-shell--open={workspace.activeTab !== null}
+          class:igs-sidepanel-shell--instant={workspace.instantPanel}
+          style:width={`${workspace.activeTab ? panelWidth : 0}px`}
           style:--igs-drawer-z={Z_INDEX.DRAWER}
-          inert={activeTab === null}
+          inert={workspace.activeTab === null}
         >
           <SidePanel
             open={true}
-            title={RAIL_LABELS[lastTab]}
+            title={RAIL_LABELS[workspace.lastTab]}
             bind:width={panelWidth}
-            onClose={() => (activeTab = null)}
+            onClose={closePanel}
           >
-            {#if lastTab === 'data'}
-              {@render dataPanel()}
-            {:else if lastTab === 'people'}
-              {@render peoplePanel()}
-            {:else if lastTab === 'codes'}
+            {#if workspace.lastTab === 'data'}
+              <DataPanel />
+            {:else if workspace.lastTab === 'people'}
+              <PeoplePanel />
+            {:else if workspace.lastTab === 'codes'}
               <CodesPanel />
-            {:else if lastTab === 'talk'}
-              {@render talkPanel()}
-            {:else if lastTab === 'filters'}
-              {@render filtersPanel()}
-            {:else if lastTab === 'select'}
-              {@render selectPanel()}
-            {:else if lastTab === 'settings'}
-              {@render settingsPanel()}
+            {:else if workspace.lastTab === 'talk'}
+              <TalkPanel />
+            {:else if workspace.lastTab === 'filters'}
+              <FiltersPanel />
+            {:else if workspace.lastTab === 'select'}
+              <SelectPanel />
+            {:else if workspace.lastTab === 'settings'}
+              <SettingsPanel />
             {/if}
           </SidePanel>
         </div>
@@ -1299,11 +224,11 @@
         minSize={200}
         collapsed={!isSplitScreen}
         collapsedPanel="first"
-        onresize={() => p5Instance?.loop()}
+        onresize={() => redrawCanvas()}
         ondragstart={() => (isDraggingSplit = true)}
         ondragend={() => {
           isDraggingSplit = false
-          p5Instance?.rebuildAfterResize()
+          $P5Store?.rebuildAfterResize()
         }}
       >
         {#snippet first()}
@@ -1319,14 +244,14 @@
         {#snippet second()}
           <div
             id="p5-canvas-container"
-            class:cursor-crosshair={currentConfig.highlightToggle}
+            class:cursor-crosshair={$ConfigStore.highlightToggle}
             class:pane-inert={isDraggingSplit}
           >
-            {#key canvasEpoch}
+            {#key workspace.canvasEpoch}
               <Sketch
                 sketch={igsSketch}
                 onResize={(p) => {
-                  if (isDraggingSplit) p.loop()
+                  if (isDraggingSplit) redrawCanvas()
                   else p.rebuildAfterResize()
                 }}
               />
@@ -1355,7 +280,7 @@
                 <MdRotateRight />
               </button>
             </div>
-            {#if is3DMode}
+            {#if workspace.is3DMode}
               <AxesIndicator />
             {/if}
           </div>
@@ -1372,7 +297,7 @@
              floorplan collapses, then inverts past a ~50% split. -->
         <div
           id="timeline-controls"
-          class="flex min-w-0 flex-row justify-end items-center bg-[#f6f5f3] px-2 overflow-x-auto"
+          class="flex min-w-0 flex-row items-center bg-[#f6f5f3] px-2 overflow-x-auto"
           style={`flex: 0 1 calc(${railWidth}px + (100% - ${railWidth}px) * ${
             isSplitScreen ? 0.5 + splitSizes[0] / 200 : 0.5
           } + ${isSplitScreen ? SPLIT_DIVIDER_PX / 2 : 0}px)`}
@@ -1389,24 +314,24 @@
         <!-- Right side: the track, which doubles as the 2D view's time axis -->
         <div
           id="timeline-panel"
-          class="flex flex-1 items-center bg-[#f6f5f3] overflow-visible py-0.5 px-2 lg:px-4"
+          class="flex flex-1 items-center bg-[#f6f5f3] overflow-visible py-0.5 lg:px-1"
           style="min-width: 200px;"
         >
-          <TimelineContainer height={52} showControls={false} embedded={true} />
+          <Timeline />
         </div>
       </div>
     {/snippet}
   </CanvasFrame>
 </div>
 
-{#if showDataPopup}
+{#if workspace.dataExplorerOpen}
   <div
     class="modal modal-open"
     onclick={(e) => {
-      if (e.target === e.currentTarget) showDataPopup = false
+      if (e.target === e.currentTarget) workspace.dataExplorerOpen = false
     }}
     onkeydown={(e) => {
-      if (e.key === 'Escape') showDataPopup = false
+      if (e.key === 'Escape') workspace.dataExplorerOpen = false
     }}
   >
     <div class="modal-box w-11/12 max-w-5xl">
@@ -1416,7 +341,7 @@
           <p>Here you will find detailed information on the data that you have uploaded.</p>
         </div>
 
-        <button class="btn btn-circle btn-sm" onclick={() => (showDataPopup = false)}>
+        <button class="btn btn-circle btn-sm" onclick={() => (workspace.dataExplorerOpen = false)}>
           <MdClose class="h-5 w-5" />
         </button>
       </div>
@@ -1468,22 +393,22 @@
         </div>
       </div>
       <div class="modal-action">
-        <button class="btn" onclick={() => (showDataPopup = false)}>Close</button>
+        <button class="btn" onclick={() => (workspace.dataExplorerOpen = false)}>Close</button>
       </div>
     </div>
   </div>
 {/if}
 
-<IgsInfoModal {isModalOpen} />
+<IgsInfoModal />
 
 <OnboardingTour />
 
 <ModeIndicator />
 
 <DataImporter
-  isOpen={showImportDialog}
-  onClose={() => (showImportDialog = false)}
-  onImport={handleImportFiles}
+  isOpen={workspace.importOpen}
+  onClose={() => (workspace.importOpen = false)}
+  onImport={importFiles}
 />
 
 <style>
@@ -1547,15 +472,6 @@
 
   .igs-sidepanel-shell--instant {
     transition: none;
-  }
-
-  :global(.igs-people .entity-toggle-list__item) {
-    flex: 1 1 100%;
-  }
-
-  :global(.igs-people .entity-toggle-list__label) {
-    flex: 1 1 auto;
-    min-width: 0;
   }
 
   .split-video-pane {
