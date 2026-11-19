@@ -23,6 +23,7 @@
   )
 
   function seek(time: number) {
+    if (time === timelineV2Store.getState().currentTime) return
     timelineV2Store.setCurrentTime(time)
     if (get(VideoStore).isVisible) seekVideo(time)
     redrawCanvas()
